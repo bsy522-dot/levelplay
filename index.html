@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LevelPlay - 배우고, 올리고, 증명하라</title>
+<meta name="description" content="LevelPlay 레벨플레이 - 성취욕 기반 교육+엔터테인먼트 통합 플랫폼">
+<meta name="theme-color" content="#0a0a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0a0a1a;--bg2:#12122a;--bg3:#1a1a3a;--bg4:#22224a;
+--purple:#8b5cf6;--cyan:#06d6a0;--gold:#fbbf24;--pink:#ec4899;
+--red:#ef4444;--blue:#3b82f6;--green:#22c55e;
+--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+--grad1:linear-gradient(135deg,#8b5cf6,#06d6a0);
+--grad2:linear-gradient(135deg,#ec4899,#8b5cf6);
+--grad3:linear-gradient(135deg,#fbbf24,#ef4444);
+--grad4:linear-gradient(135deg,#06d6a0,#3b82f6);
+--radius:16px;--radius2:12px;--radius3:8px;
+--nav-h:70px;--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text)}
+body{display:flex;flex-direction:column}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--purple);border-radius:4px}
+
+/* Main content */
+#app{flex:1;overflow:hidden;position:relative}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:16px 16px calc(var(--nav-h) + var(--safe-bottom) + 16px);opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity .35s,transform .35s}
+.page.active{opacity:1;transform:translateY(0);pointer-events:auto}
+
+/* Bottom Nav */
+#bottomNav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(10,10,26,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(139,92,246,.2);display:flex;align-items:center;justify-content:space-around;z-index:1000}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;cursor:pointer;transition:all .2s;position:relative;border:none;background:none;color:var(--text3);font-family:inherit;font-size:10px;min-width:56px}
+.nav-item.active{color:var(--cyan)}
+.nav-item .nav-icon{font-size:22px;transition:transform .2s}
+.nav-item.active .nav-icon{transform:scale(1.15)}
+.nav-item.active::after{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:30px;height:3px;background:var(--grad1);border-radius:0 0 4px 4px}
+.nav-item.profile-btn{margin-top:-20px}
+.nav-item.profile-btn .nav-icon{width:48px;height:48px;background:var(--grad1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 20px rgba(139,92,246,.4);border:3px solid var(--bg)}
+
+/* Cards */
+.card{background:var(--bg2);border:1px solid rgba(139,92,246,.15);border-radius:var(--radius);padding:16px;margin-bottom:12px;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(139,92,246,.15)}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:600px){.card-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.card-grid{grid-template-columns:repeat(4,1fr)}}
+
+/* Section headers */
+.section-title{font-size:18px;font-weight:700;margin:20px 0 12px;display:flex;align-items:center;gap:8px}
+.section-title:first-child{margin-top:8px}
+.badge-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+
+/* Hero page */
+#heroPage{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:40px}
+.hero-logo{font-size:48px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;letter-spacing:-1px}
+.hero-sub{font-size:14px;color:var(--text2);margin-bottom:6px}
+.hero-tagline{font-size:20px;font-weight:700;color:var(--gold);margin-bottom:24px}
+.hero-preview{width:100%;max-width:340px;margin-bottom:28px;position:relative}
+.hero-level-card{background:var(--bg3);border:2px solid rgba(139,92,246,.3);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.hero-level-card::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(139,92,246,.1),transparent);pointer-events:none}
+.hero-lv{font-size:40px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-name{font-size:16px;color:var(--text2);margin-bottom:12px}
+.hero-canvas-wrap{margin:0 auto;width:200px;height:200px}
+.hero-start-btn{display:inline-flex;align-items:center;gap:8px;padding:16px 48px;font-size:18px;font-weight:700;color:#fff;background:var(--grad1);border:none;border-radius:50px;cursor:pointer;transition:all .3s;box-shadow:0 4px 25px rgba(139,92,246,.4);font-family:inherit;margin-bottom:32px}
+.hero-start-btn:hover{transform:scale(1.05);box-shadow:0 6px 35px rgba(139,92,246,.5)}
+.hero-start-btn:active{transform:scale(.97)}
+.hero-stats{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.hero-stat{text-align:center}
+.hero-stat-num{font-size:32px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-stat-label{font-size:12px;color:var(--text3)}
+
+/* Tab pills */
+.tab-pills{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tab-pills::-webkit-scrollbar{display:none}
+.tab-pill{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;border:1px solid rgba(139,92,246,.3);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap}
+.tab-pill.active{background:var(--grad1);color:#fff;border-color:transparent}
+
+/* Content cards */
+.content-card{background:var(--bg3);border-radius:var(--radius2);overflow:hidden;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.content-card:hover{border-color:rgba(139,92,246,.3);transform:translateY(-3px)}
+.content-thumb{width:100%;aspect-ratio:16/10;position:relative;overflow:hidden}
+.content-thumb-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px}
+.content-card-body{padding:10px}
+.content-card-title{font-size:13px;font-weight:600;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.content-card-meta{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.xp-tag{font-size:10px;font-weight:700;color:var(--gold);background:rgba(251,191,36,.15);padding:2px 8px;border-radius:10px}
+
+/* Profile */
+.profile-header{text-align:center;padding:20px 0}
+.profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--grad1);display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 12px;border:4px solid var(--bg);box-shadow:0 0 30px rgba(139,92,246,.3)}
+.profile-name{font-size:22px;font-weight:700}
+.profile-title{font-size:13px;color:var(--text3)}
+.level-section{background:var(--bg2);border-radius:var(--radius);padding:16px;margin:12px 0}
+.level-bar-wrap{background:var(--bg);border-radius:20px;height:24px;position:relative;overflow:hidden;margin:8px 0}
+.level-bar{height:100%;background:var(--grad1);border-radius:20px;transition:width 1.5s ease}
+.level-bar-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.stat-canvas-wrap{margin:0 auto;width:260px;height:260px}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.badge-item{aspect-ratio:1;border-radius:var(--radius2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:28px;position:relative;transition:transform .2s;cursor:pointer}
+.badge-item.earned{background:var(--bg3);border:1px solid rgba(139,92,246,.3)}
+.badge-item.locked{background:var(--bg2);border:1px solid rgba(100,116,139,.2);opacity:.45;filter:grayscale(1)}
+.badge-item:hover{transform:scale(1.08)}
+.badge-label{font-size:9px;color:var(--text3);text-align:center}
+.timeline-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(139,92,246,.08)}
+.timeline-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.timeline-text{font-size:13px}
+.timeline-time{font-size:11px;color:var(--text3)}
+
+/* Community */
+.community-tabs{display:flex;border-bottom:1px solid rgba(139,92,246,.15);margin-bottom:12px}
+.community-tab{flex:1;text-align:center;padding:12px;font-size:14px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.community-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.post-item{padding:14px 0;border-bottom:1px solid rgba(139,92,246,.08);cursor:pointer;transition:background .2s}
+.post-item:hover{background:rgba(139,92,246,.05);margin:0 -16px;padding-left:16px;padding-right:16px}
+.post-category{font-size:11px;font-weight:600;color:var(--purple);margin-bottom:2px}
+.post-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.post-meta{font-size:11px;color:var(--text3);display:flex;gap:12px}
+.fab{position:fixed;bottom:calc(var(--nav-h) + var(--safe-bottom) + 20px);right:20px;width:56px;height:56px;border-radius:50%;background:var(--grad1);border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(139,92,246,.4);transition:transform .2s;z-index:500;display:none}
+.fab:hover{transform:scale(1.1)}
+.fab.show{display:flex;align-items:center;justify-content:center}
+
+/* Services */
+.service-card{display:flex;gap:14px;background:var(--bg2);border:1px solid rgba(139,92,246,.15);border-radius:var(--radius);padding:16px;margin-bottom:12px;text-decoration:none;color:inherit;transition:all .2s}
+.service-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 8px 30px rgba(139,92,246,.15)}
+.service-icon{width:56px;height:56px;border-radius:var(--radius2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.service-info{flex:1}
+.service-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.service-desc{font-size:12px;color:var(--text3);margin-bottom:6px}
+.service-link{font-size:11px;color:var(--cyan);font-weight:500}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--bg3);border:1px solid rgba(139,92,246,.3);border-radius:var(--radius2);padding:12px 24px;font-size:13px;font-weight:500;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Splash */
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .6s}
+#splash.hide{opacity:0;pointer-events:none}
+#splash .logo{font-size:56px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:pulse 1.5s ease-in-out infinite}
+#splash .loader{width:120px;height:3px;background:var(--bg3);border-radius:3px;margin-top:20px;overflow:hidden}
+#splash .loader-bar{height:100%;width:0;background:var(--grad1);border-radius:3px;transition:width .5s}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:5000;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:flex-end;justify-content:center}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal-content{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:500px;max-height:80vh;overflow-y:auto;padding:24px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.modal-overlay.show .modal-content{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;background:var(--text3);border-radius:4px;margin:0 auto 16px}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+
+/* Write Post Modal */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text2)}
+.form-input{width:100%;padding:12px;background:var(--bg);border:1px solid rgba(139,92,246,.2);border-radius:var(--radius3);color:var(--text);font-size:14px;font-family:inherit;resize:vertical}
+.form-input:focus{outline:none;border-color:var(--purple)}
+.form-btn{padding:12px 24px;border:none;border-radius:var(--radius3);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.form-btn.primary{background:var(--grad1);color:#fff}
+.form-btn.secondary{background:var(--bg3);color:var(--text2)}
+
+/* Animations */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes countUp{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.anim-in{animation:fadeInUp .5s ease forwards}
+.anim-delay-1{animation-delay:.1s;opacity:0}
+.anim-delay-2{animation-delay:.2s;opacity:0}
+.anim-delay-3{animation-delay:.3s;opacity:0}
+.anim-delay-4{animation-delay:.4s;opacity:0}
+
+/* Responsive */
+@media(min-width:768px){
+  .page{padding:24px 32px calc(var(--nav-h) + 24px)}
+  .hero-logo{font-size:64px}
+  .hero-tagline{font-size:26px}
+  .card-grid{gap:16px}
+}
+@media(min-width:1024px){
+  #bottomNav{left:50%;transform:translateX(-50%);max-width:600px;border-radius:var(--radius) var(--radius) 0 0}
+}
+</style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash">
+  <div class="logo">LevelPlay</div>
+  <div style="color:var(--text3);font-size:14px;margin-top:8px">배우고, 올리고, 증명하라</div>
+  <div class="loader"><div class="loader-bar" id="splashBar"></div></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+<!-- App -->
+<div id="app">
+
+  <!-- Hero Page -->
+  <div class="page active" id="heroPage">
+    <div class="hero-logo anim-in">LevelPlay</div>
+    <div class="hero-sub anim-in anim-delay-1">레벨플레이</div>
+    <div class="hero-tagline anim-in anim-delay-2">🔥 배우고, 올리고, 증명하라</div>
+
+    <div class="hero-preview anim-in anim-delay-3">
+      <div class="hero-level-card">
+        <div class="hero-lv">Lv.37</div>
+        <div class="hero-name">모험가 병석님의 스탯</div>
+        <div class="hero-canvas-wrap">
+          <canvas id="heroStatCanvas" width="200" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <button class="hero-start-btn anim-in anim-delay-4" onclick="switchTab(0)">
+      🚀 시작하기
+    </button>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="5">0</div>
+        <div class="hero-stat-label">5대 기둥</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="100">0</div>
+        <div class="hero-stat-label">최대 레벨</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num" data-count="1000">0</div>
+        <div class="hero-stat-label">콘텐츠</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <div class="section-title">🔗 연결된 서비스</div>
+      <a class="service-card" href="https://bsy522-dot.github.io/culture-center-finder/" target="_blank">
+        <div class="service-icon" style="background:rgba(236,72,153,.15)">🏫</div>
+        <div class="service-info">
+          <div class="service-name">문센 강좌 파인더</div>
+          <div class="service-desc">4,862개 문화센터 강좌 검색 · 홈플러스 실시간 크롤링</div>
+          <div class="service-link">바로가기 →</div>
+        </div>
+      </a>
+      <a class="service-card" href="https://bsy522-dot.github.io/smartgolf/" target="_blank">
+        <div class="service-icon" style="background:rgba(34,197,94,.15)">⛳</div>
+        <div class="service-info">
+          <div class="service-name">SmartGolf 골프장 파인더</div>
+          <div class="service-desc">전국 590개 골프장 · 이동시간 · 그린피 정보</div>
+          <div class="service-link">바로가기 →</div>
+        </div>
+      </a>
+      <a class="service-card" href="https://bsy522-dot.github.io/ai-knowledge/" target="_blank">
+        <div class="service-icon" style="background:rgba(139,92,246,.15)">🧠</div>
+        <div class="service-info">
+          <div class="service-name">AI 지식정리</div>
+          <div class="service-desc">ChatGPT + Gemini 대화 4,928개 분석 뷰어</div>
+          <div class="service-link">바로가기 →</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Edutoon Page -->
+  <div class="page" id="edutoonPage">
+    <div class="section-title">📚 에듀툰</div>
+    <div class="tab-pills">
+      <button class="tab-pill active" onclick="filterContent(this,'all','edutoon')">전체</button>
+      <button class="tab-pill" onclick="filterContent(this,'science','edutoon')">과학</button>
+      <button class="tab-pill" onclick="filterContent(this,'history','edutoon')">역사</button>
+      <button class="tab-pill" onclick="filterContent(this,'math','edutoon')">수학</button>
+      <button class="tab-pill" onclick="filterContent(this,'language','edutoon')">언어</button>
+      <button class="tab-pill" onclick="filterContent(this,'art','edutoon')">예술</button>
+    </div>
+    <div class="card-grid" id="edutoonGrid"></div>
+  </div>
+
+  <!-- Educast Page -->
+  <div class="page" id="educastPage">
+    <div class="section-title">🎬 에듀캐스트</div>
+    <div class="tab-pills">
+      <button class="tab-pill active" onclick="filterContent(this,'all','educast')">전체</button>
+      <button class="tab-pill" onclick="filterContent(this,'trending','educast')">🔥 인기</button>
+      <button class="tab-pill" onclick="filterContent(this,'new','educast')">🆕 최신</button>
+      <button class="tab-pill" onclick="filterContent(this,'short','educast')">⚡ 숏폼</button>
+      <button class="tab-pill" onclick="filterContent(this,'series','educast')">📺 시리즈</button>
+    </div>
+    <div class="card-grid" id="educastGrid"></div>
+  </div>
+
+  <!-- Eduplay Page -->
+  <div class="page" id="eduplayPage">
+    <div class="section-title">🎮 에듀플레이</div>
+    <div class="tab-pills">
+      <button class="tab-pill active" onclick="filterContent(this,'all','eduplay')">전체</button>
+      <button class="tab-pill" onclick="filterContent(this,'action','eduplay')">⚔️ 액션</button>
+      <button class="tab-pill" onclick="filterContent(this,'puzzle','eduplay')">🧩 퍼즐</button>
+      <button class="tab-pill" onclick="filterContent(this,'rpg','eduplay')">🗡️ RPG</button>
+      <button class="tab-pill" onclick="filterContent(this,'edu','eduplay')">📖 교육</button>
+    </div>
+    <div class="card-grid" id="eduplayGrid"></div>
+  </div>
+
+  <!-- Creator Page -->
+  <div class="page" id="creatorPage">
+    <div class="section-title">✏️ 크리에이터</div>
+    <div class="tab-pills">
+      <button class="tab-pill active" onclick="switchCreatorTab('upload')">📤 업로드</button>
+      <button class="tab-pill" onclick="switchCreatorTab('ranking')">🏆 랭킹</button>
+    </div>
+    <div id="creatorUpload">
+      <div class="card" style="text-align:center;padding:40px 20px;border:2px dashed rgba(139,92,246,.3);cursor:pointer" onclick="showUploadModal()">
+        <div style="font-size:48px;margin-bottom:12px">📤</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:4px">콘텐츠 업로드</div>
+        <div style="font-size:13px;color:var(--text3)">에듀툰, 영상, 게임을 공유하고 XP를 획득하세요!</div>
+      </div>
+      <div class="section-title" style="font-size:15px">📌 내 콘텐츠</div>
+      <div id="myContentList"></div>
+    </div>
+    <div id="creatorRanking" style="display:none">
+      <div id="rankingList"></div>
+    </div>
+  </div>
+
+  <!-- Eduphysical Page -->
+  <div class="page" id="physicalPage">
+    <div class="section-title">🏃 에듀피지컬</div>
+    <div class="tab-pills">
+      <button class="tab-pill active" onclick="filterContent(this,'all','physical')">전체</button>
+      <button class="tab-pill" onclick="filterContent(this,'challenge','physical')">🏆 챌린지</button>
+      <button class="tab-pill" onclick="filterContent(this,'record','physical')">📊 기록</button>
+      <button class="tab-pill" onclick="filterContent(this,'wifi','physical')">📡 WiFi CSI</button>
+    </div>
+    <div id="physicalContent"></div>
+  </div>
+
+  <!-- Profile Page -->
+  <div class="page" id="profilePage">
+    <div class="profile-header">
+      <div class="profile-avatar">🧑‍🚀</div>
+      <div class="profile-name">모험가 병석</div>
+      <div class="profile-title">📍 서초역 · LevelPlay 탐험가</div>
+    </div>
+
+    <div class="level-section">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:24px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="profileLevel">37</span></span>
+        <span style="font-size:13px;color:var(--text3)">다음 레벨까지 <span id="xpRemain">340</span> XP</span>
+      </div>
+      <div class="level-bar-wrap">
+        <div class="level-bar" id="levelBar" style="width:0%"></div>
+        <div class="level-bar-text"><span id="xpCurrent">660</span> / 1000 XP</div>
+      </div>
+    </div>
+
+    <div class="section-title">📊 능력치</div>
+    <div class="stat-canvas-wrap">
+      <canvas id="profileStatCanvas" width="260" height="260"></canvas>
+    </div>
+
+    <div class="section-title">🏅 뱃지 컬렉션 <span class="badge-pill" style="background:rgba(251,191,36,.15);color:var(--gold)">8/16</span></div>
+    <div class="badge-grid" id="badgeGrid"></div>
+
+    <div class="section-title" style="margin-top:24px">📜 최근 활동</div>
+    <div id="timeline"></div>
+
+    <div style="margin-top:24px;text-align:center">
+      <button class="form-btn secondary" onclick="resetProgress()" style="font-size:12px">🔄 진행도 초기화</button>
+    </div>
+  </div>
+
+  <!-- Community Page -->
+  <div class="page" id="communityPage">
+    <div class="section-title">💬 커뮤니티</div>
+    <div class="community-tabs">
+      <button class="community-tab active" onclick="switchCommunity(this,'popular')">🔥 인기글</button>
+      <button class="community-tab" onclick="switchCommunity(this,'recent')">🕐 최신글</button>
+      <button class="community-tab" onclick="switchCommunity(this,'my')">👤 내글</button>
+    </div>
+    <div id="communityList"></div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="showWriteModal()">✏️</button>
+
+<!-- Bottom Navigation -->
+<nav id="bottomNav">
+  <button class="nav-item" data-tab="0" onclick="switchTab(0)">
+    <span class="nav-icon">📚</span>
+    <span>에듀툰</span>
+  </button>
+  <button class="nav-item" data-tab="1" onclick="switchTab(1)">
+    <span class="nav-icon">🎬</span>
+    <span>에듀캐스트</span>
+  </button>
+  <button class="nav-item profile-btn" data-tab="5" onclick="switchTab(5)">
+    <span class="nav-icon">👤</span>
+  </button>
+  <button class="nav-item" data-tab="2" onclick="switchTab(2)">
+    <span class="nav-icon">🎮</span>
+    <span>에듀플레이</span>
+  </button>
+  <button class="nav-item" data-tab="6" onclick="switchTab(6)">
+    <span class="nav-icon">💬</span>
+    <span>커뮤니티</span>
+  </button>
+</nav>
+
+<script>
+// ========== DATA ==========
+const userData = JSON.parse(localStorage.getItem('lp_user') || 'null') || {
+  level: 37, xp: 660, xpMax: 1000,
+  stats: { knowledge: 72, stamina: 58, creativity: 85, communication: 63, leadership: 45, tech: 90 },
+  badges: [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+  activities: [],
+  myPosts: [],
+  myContent: []
+};
+function saveUser(){ localStorage.setItem('lp_user', JSON.stringify(userData)); }
+
+const BADGES = [
+  { icon:'🎓', name:'첫 수료' },{ icon:'🔥', name:'3일 연속' },{ icon:'📚', name:'에듀툰 10' },
+  { icon:'🎬', name:'에듀캐스트 10' },{ icon:'🎮', name:'게임 클리어' },{ icon:'✏️', name:'첫 창작' },
+  { icon:'🏃', name:'체력왕' },{ icon:'⭐', name:'Lv.30' },{ icon:'👑', name:'Lv.50' },
+  { icon:'💎', name:'Lv.100' },{ icon:'🌟', name:'올라운더' },{ icon:'🏆', name:'랭킹 TOP10' },
+  { icon:'💬', name:'소통왕' },{ icon:'🎨', name:'아트 마스터' },{ icon:'🧪', name:'과학 마스터' },
+  { icon:'🌍', name:'탐험가' }
+];
+
+const EDUTOON_DATA = [
+  { title:'우주의 비밀: 블랙홀 편', genre:'science', emoji:'🌌', xp:30, views:'2.3만' },
+  { title:'조선왕조 500년 ①', genre:'history', emoji:'🏯', xp:25, views:'1.8만' },
+  { title:'수학 천재의 하루', genre:'math', emoji:'🔢', xp:20, views:'1.2만' },
+  { title:'영어로 세계여행', genre:'language', emoji:'✈️', xp:15, views:'3.1만' },
+  { title:'미켈란젤로의 비밀', genre:'art', emoji:'🎨', xp:35, views:'0.9만' },
+  { title:'화학 원소의 모험', genre:'science', emoji:'⚗️', xp:25, views:'1.5만' },
+  { title:'삼국지 영웅전', genre:'history', emoji:'⚔️', xp:30, views:'4.2만' },
+  { title:'확률의 마법사', genre:'math', emoji:'🎲', xp:20, views:'0.8만' },
+  { title:'일본어 첫걸음', genre:'language', emoji:'🇯🇵', xp:15, views:'2.0만' },
+  { title:'반 고흐의 별밤', genre:'art', emoji:'🌃', xp:30, views:'1.1만' },
+  { title:'DNA의 세계', genre:'science', emoji:'🧬', xp:35, views:'1.7만' },
+  { title:'이집트 피라미드 탐험', genre:'history', emoji:'🏛️', xp:25, views:'2.5만' },
+];
+
+const EDUCAST_DATA = [
+  { title:'AI가 바꿀 미래 직업 TOP 10', tag:'trending', emoji:'🤖', xp:40, views:'12만', dur:'15:30' },
+  { title:'5분 과학: 양자역학 쉽게!', tag:'short', emoji:'⚛️', xp:15, views:'8.3만', dur:'5:00' },
+  { title:'역사 다큐: 고려의 멸망', tag:'series', emoji:'📜', xp:35, views:'3.2만', dur:'42:10' },
+  { title:'코딩 입문 EP.1 - 변수란?', tag:'series', emoji:'💻', xp:30, views:'5.1만', dur:'18:20' },
+  { title:'1분 영어: 원어민 발음 팁', tag:'short', emoji:'🗣️', xp:10, views:'15만', dur:'1:00' },
+  { title:'수학의 아름다움: 황금비', tag:'new', emoji:'📐', xp:25, views:'1.2만', dur:'22:00' },
+  { title:'운동 과학: 근육의 원리', tag:'trending', emoji:'💪', xp:30, views:'7.8만', dur:'12:40' },
+  { title:'우주 다큐 시즌2 EP.3', tag:'series', emoji:'🚀', xp:45, views:'9.5만', dur:'55:00' },
+  { title:'30초 상식퀴즈 모음', tag:'short', emoji:'❓', xp:10, views:'20만', dur:'0:30' },
+  { title:'심리학: 왜 미루는가?', tag:'new', emoji:'🧠', xp:25, views:'4.7만', dur:'16:50' },
+];
+
+const EDUPLAY_DATA = [
+  { title:'🌈 사랑의 하츄핑 대모험', genre:'action', emoji:'💖', xp:50, players:'2.1만', link:'hatcuping-game.html', hot:true },
+  { title:'⚔️ 하츄핑 RPG 퀘스트', genre:'rpg', emoji:'🗡️', xp:60, players:'1.8만', link:'hatcuping-rpg.html', hot:true },
+  { title:'🧩 수학 퍼즐 마스터', genre:'puzzle', emoji:'🔢', xp:25, players:'3.5만' },
+  { title:'🌍 세계 지리 퀴즈', genre:'edu', emoji:'🗺️', xp:20, players:'2.8만' },
+  { title:'🧪 화학 실험실', genre:'edu', emoji:'⚗️', xp:30, players:'1.2만' },
+  { title:'🏰 역사 타워 디펜스', genre:'action', emoji:'🏰', xp:40, players:'4.1만' },
+  { title:'🎵 리듬 영어 단어', genre:'edu', emoji:'🎶', xp:15, players:'5.3만' },
+  { title:'🐉 한자 드래곤 RPG', genre:'rpg', emoji:'🐉', xp:45, players:'1.5만' },
+  { title:'🔬 바이러스 퇴치 퍼즐', genre:'puzzle', emoji:'🦠', xp:25, players:'0.9만' },
+  { title:'📊 경제 시뮬레이터', genre:'edu', emoji:'📈', xp:35, players:'0.7만' },
+];
+
+const CREATOR_RANKING = [
+  { name:'김교육', avatar:'👨‍🏫', level:89, xp:'1.2M', works:234, fans:'15.3만' },
+  { name:'사이언스걸', avatar:'👩‍🔬', level:76, xp:'890K', works:156, fans:'12.1만' },
+  { name:'역사탐험가', avatar:'🧙‍♂️', level:71, xp:'780K', works:189, fans:'9.8만' },
+  { name:'코딩마스터', avatar:'👨‍💻', level:68, xp:'650K', works:98, fans:'8.5만' },
+  { name:'아트퀸', avatar:'👩‍🎨', level:65, xp:'590K', works:312, fans:'7.2만' },
+  { name:'수학천재', avatar:'🧑‍🏫', level:61, xp:'520K', works:145, fans:'6.4만' },
+  { name:'체육대장', avatar:'🏋️', level:58, xp:'480K', works:87, fans:'5.9만' },
+  { name:'음악요정', avatar:'🧚', level:55, xp:'430K', works:201, fans:'5.1만' },
+];
+
+const PHYSICAL_CHALLENGES = [
+  { title:'🏃 30일 달리기 챌린지', type:'challenge', progress:12, total:30, xp:100, participants:'5,230' },
+  { title:'💪 팔굽혀펴기 100개 달성', type:'challenge', progress:67, total:100, xp:50, participants:'3,120' },
+  { title:'🧘 매일 스트레칭 21일', type:'challenge', progress:8, total:21, xp:70, participants:'8,450' },
+  { title:'🏊 수영 1km 기록 도전', type:'challenge', progress:0, total:1, xp:80, participants:'1,890' },
+];
+
+const PHYSICAL_RECORDS = [
+  { title:'오늘의 운동 기록', icon:'📊', desc:'달리기 3.2km · 23분 14초 · 칼로리 280kcal', time:'2시간 전' },
+  { title:'주간 리포트', icon:'📈', desc:'이번 주 활동량 +15% · 연속 5일 달성', time:'어제' },
+  { title:'WiFi CSI 동작 분석', icon:'📡', desc:'스쿼트 정확도 92% · 런지 87% · 플랭크 95%', time:'3시간 전' },
+];
+
+const COMMUNITY_POSTS_POPULAR = [
+  { cat:'에듀툰', title:'블랙홀 편 진짜 소름... 이게 무료??', author:'우주덕후', likes:342, comments:89, time:'3시간 전' },
+  { cat:'에듀플레이', title:'하츄핑 RPG 숨겨진 보스 찾음 ㅋㅋ', author:'게임고수', likes:256, comments:134, time:'5시간 전' },
+  { cat:'에듀캐스트', title:'AI 미래직업 영상 보고 진로 바꿈', author:'고3학생', likes:189, comments:67, time:'8시간 전' },
+  { cat:'크리에이터', title:'첫 에듀툰 올렸는데 반응이...', author:'신입작가', likes:167, comments:45, time:'12시간 전' },
+  { cat:'에듀피지컬', title:'WiFi CSI로 운동 측정되는거 실화?', author:'IT덕후', likes:145, comments:56, time:'1일 전' },
+  { cat:'자유', title:'레벨 50 달성! 인증합니다', author:'노력왕', likes:234, comments:78, time:'1일 전' },
+  { cat:'에듀툰', title:'삼국지 영웅전 다음화 언제???', author:'삼국지팬', likes:123, comments:34, time:'2일 전' },
+  { cat:'질문', title:'레벨업 빨리 하는 꿀팁 있나요?', author:'뉴비', likes:98, comments:112, time:'2일 전' },
+];
+
+const COMMUNITY_POSTS_RECENT = [
+  { cat:'자유', title:'오늘 처음 가입했어요 반갑습니다!', author:'새싹', likes:12, comments:8, time:'5분 전' },
+  { cat:'에듀플레이', title:'수학 퍼즐 스테이지 50 공략', author:'퍼즐러', likes:34, comments:15, time:'15분 전' },
+  { cat:'에듀캐스트', title:'코딩 입문 시리즈 진짜 좋다', author:'예비개발자', likes:56, comments:23, time:'30분 전' },
+  { cat:'크리에이터', title:'에듀캐스트 편집 어떤 툴 쓰세요?', author:'편집초보', likes:28, comments:31, time:'1시간 전' },
+  { cat:'에듀피지컬', title:'달리기 챌린지 12일차 인증', author:'런닝맨', likes:45, comments:12, time:'2시간 전' },
+  { cat:'자유', title:'Lv.30 달성 기념 꿀팁 공유', author:'중급자', likes:67, comments:29, time:'3시간 전' },
+];
+
+const GENRE_COLORS = {
+  science:'rgba(6,214,160,.15)', history:'rgba(251,191,36,.15)', math:'rgba(59,130,246,.15)',
+  language:'rgba(236,72,153,.15)', art:'rgba(139,92,246,.15)', action:'rgba(239,68,68,.15)',
+  puzzle:'rgba(6,214,160,.15)', rpg:'rgba(251,191,36,.15)', edu:'rgba(59,130,246,.15)',
+  trending:'rgba(239,68,68,.15)', new:'rgba(6,214,160,.15)', short:'rgba(251,191,36,.15)', series:'rgba(139,92,246,.15)',
+  challenge:'rgba(236,72,153,.15)', record:'rgba(59,130,246,.15)', wifi:'rgba(6,214,160,.15)'
+};
+
+// ========== PAGES & NAV ==========
+const pages = ['edutoonPage','educastPage','eduplayPage','creatorPage','physicalPage','profilePage','communityPage'];
+let currentTab = -1; // -1 = hero
+
+function switchTab(idx) {
+  document.getElementById('heroPage').classList.remove('active');
+  pages.forEach((p,i) => {
+    const el = document.getElementById(p);
+    if(i === idx){ el.classList.add('active'); } else { el.classList.remove('active'); }
+  });
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', parseInt(n.dataset.tab) === idx);
+  });
+  currentTab = idx;
+  // FAB for community
+  document.getElementById('fab').classList.toggle('show', idx === 6);
+  // Scroll to top
+  const activeP = document.querySelector('.page.active');
+  if(activeP) activeP.scrollTop = 0;
+}
+
+function goHero(){
+  pages.forEach(p => document.getElementById(p).classList.remove('active'));
+  document.getElementById('heroPage').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  currentTab = -1;
+  document.getElementById('fab').classList.remove('show');
+}
+
+// ========== HEXAGON CHART ==========
+function drawHexStat(canvasId, stats, size, labels) {
+  const c = document.getElementById(canvasId);
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const w = c.width, h = c.height;
+  const cx = w/2, cy = h/2;
+  const r = size || Math.min(w,h)*0.38;
+  const keys = Object.keys(stats);
+  const n = keys.length;
+  const labelNames = labels || ['지식','체력','창의력','소통','리더십','기술'];
+
+  ctx.clearRect(0,0,w,h);
+
+  // Background hexagons
+  for(let ring = 5; ring >= 1; ring--) {
+    ctx.beginPath();
+    for(let i = 0; i < n; i++) {
+      const angle = (Math.PI*2/n)*i - Math.PI/2;
+      const x = cx + Math.cos(angle)*r*(ring/5);
+      const y = cy + Math.sin(angle)*r*(ring/5);
+      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(139,92,246,'+(0.08+ring*0.04)+')';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Axes
+  for(let i = 0; i < n; i++) {
+    const angle = (Math.PI*2/n)*i - Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(angle)*r, cy+Math.sin(angle)*r);
+    ctx.strokeStyle = 'rgba(139,92,246,.15)';
+    ctx.stroke();
+  }
+
+  // Data
+  ctx.beginPath();
+  const vals = Object.values(stats);
+  for(let i = 0; i < n; i++) {
+    const angle = (Math.PI*2/n)*i - Math.PI/2;
+    const v = vals[i]/100;
+    const x = cx + Math.cos(angle)*r*v;
+    const y = cy + Math.sin(angle)*r*v;
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
+  grad.addColorStop(0,'rgba(139,92,246,.3)');
+  grad.addColorStop(1,'rgba(6,214,160,.3)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(139,92,246,.8)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Points
+  for(let i = 0; i < n; i++) {
+    const angle = (Math.PI*2/n)*i - Math.PI/2;
+    const v = vals[i]/100;
+    const x = cx + Math.cos(angle)*r*v;
+    const y = cy + Math.sin(angle)*r*v;
+    ctx.beginPath();
+    ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle = '#8b5cf6';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // Labels
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = (size && size < 80 ? '10' : '11') + 'px Noto Sans KR';
+  ctx.textAlign = 'center';
+  for(let i = 0; i < n; i++) {
+    const angle = (Math.PI*2/n)*i - Math.PI/2;
+    const lx = cx + Math.cos(angle)*(r+18);
+    const ly = cy + Math.sin(angle)*(r+18);
+    ctx.fillText(labelNames[i]+' '+vals[i], lx, ly+4);
+  }
+}
+
+// ========== RENDER FUNCTIONS ==========
+function renderEdutoon() {
+  const grid = document.getElementById('edutoonGrid');
+  grid.innerHTML = EDUTOON_DATA.map((d,i) => `
+    <div class="content-card" data-genre="${d.genre}" onclick="earnXP(${d.xp},'에듀툰: ${d.title}')">
+      <div class="content-thumb" style="background:${GENRE_COLORS[d.genre]||'var(--bg4)'}">
+        <div class="content-thumb-inner">${d.emoji}</div>
+      </div>
+      <div class="content-card-body">
+        <div class="content-card-title">${d.title}</div>
+        <div class="content-card-meta">
+          <span class="xp-tag">+${d.xp} XP</span>
+          <span>👁️ ${d.views}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderEducast() {
+  const grid = document.getElementById('educastGrid');
+  grid.innerHTML = EDUCAST_DATA.map(d => `
+    <div class="content-card" data-genre="${d.tag}" onclick="earnXP(${d.xp},'에듀캐스트: ${d.title}')">
+      <div class="content-thumb" style="background:${GENRE_COLORS[d.tag]||'var(--bg4)'}">
+        <div class="content-thumb-inner">${d.emoji}</div>
+        <div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.8);padding:2px 8px;border-radius:4px;font-size:11px">${d.dur}</div>
+      </div>
+      <div class="content-card-body">
+        <div class="content-card-title">${d.title}</div>
+        <div class="content-card-meta">
+          <span class="xp-tag">+${d.xp} XP</span>
+          <span>👁️ ${d.views}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderEduplay() {
+  const grid = document.getElementById('eduplayGrid');
+  grid.innerHTML = EDUPLAY_DATA.map(d => `
+    <div class="content-card" data-genre="${d.genre}" ${d.link ? `onclick="window.open('${d.link}','_blank');earnXP(${d.xp},'에듀플레이: ${d.title}')"` : `onclick="earnXP(${d.xp},'에듀플레이: ${d.title}')"`}>
+      <div class="content-thumb" style="background:${GENRE_COLORS[d.genre]||'var(--bg4)'}">
+        <div class="content-thumb-inner">${d.emoji}</div>
+        ${d.hot ? '<div style="position:absolute;top:6px;right:6px;background:var(--grad3);padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700">🔥 HOT</div>' : ''}
+      </div>
+      <div class="content-card-body">
+        <div class="content-card-title">${d.title}</div>
+        <div class="content-card-meta">
+          <span class="xp-tag">+${d.xp} XP</span>
+          <span>🎮 ${d.players}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCreator() {
+  // My content
+  const list = document.getElementById('myContentList');
+  if(userData.myContent.length === 0) {
+    list.innerHTML = '<div class="card" style="text-align:center;color:var(--text3);padding:30px">아직 업로드한 콘텐츠가 없습니다</div>';
+  } else {
+    list.innerHTML = userData.myContent.map(c => `
+      <div class="card" style="display:flex;gap:12px;align-items:center">
+        <div style="font-size:28px">${c.emoji}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">${c.title}</div>
+          <div style="font-size:11px;color:var(--text3)">${c.type} · ${c.date}</div>
+        </div>
+        <span class="xp-tag">+${c.xp} XP</span>
+      </div>
+    `).join('');
+  }
+  // Ranking
+  const rk = document.getElementById('rankingList');
+  rk.innerHTML = CREATOR_RANKING.map((c,i) => `
+    <div class="card" style="display:flex;gap:14px;align-items:center">
+      <div style="font-size:20px;font-weight:900;width:30px;text-align:center;color:${i<3?'var(--gold)':'var(--text3)'}">${i<3?['🥇','🥈','🥉'][i]:(i+1)}</div>
+      <div style="font-size:32px">${c.avatar}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${c.name} <span style="font-size:11px;color:var(--purple)">Lv.${c.level}</span></div>
+        <div style="font-size:11px;color:var(--text3)">작품 ${c.works}개 · 팬 ${c.fans}</div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--cyan)">${c.xp} XP</div>
+    </div>
+  `).join('');
+}
+
+function switchCreatorTab(tab) {
+  document.getElementById('creatorUpload').style.display = tab==='upload'?'block':'none';
+  document.getElementById('creatorRanking').style.display = tab==='ranking'?'block':'none';
+  const pills = document.querySelector('#creatorPage .tab-pills').querySelectorAll('.tab-pill');
+  pills.forEach(p => p.classList.toggle('active', (tab==='upload' && p.textContent.includes('업로드')) || (tab==='ranking' && p.textContent.includes('랭킹'))));
+}
+
+function renderPhysical() {
+  const content = document.getElementById('physicalContent');
+  let html = '<div class="section-title" style="font-size:15px">🏆 진행 중인 챌린지</div>';
+  html += PHYSICAL_CHALLENGES.map(c => {
+    const pct = Math.round(c.progress/c.total*100);
+    return `
+    <div class="card" data-genre="challenge" onclick="earnXP(10,'챌린지 참여: ${c.title}')">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:600">${c.title}</div>
+        <span class="xp-tag">+${c.xp} XP</span>
+      </div>
+      <div class="level-bar-wrap" style="height:16px;margin:4px 0">
+        <div class="level-bar" style="width:${pct}%"></div>
+        <div class="level-bar-text" style="font-size:10px">${c.progress}/${c.total} (${pct}%)</div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">👥 ${c.participants}명 참여중</div>
+    </div>`;
+  }).join('');
+
+  html += '<div class="section-title" style="font-size:15px">📊 활동 기록</div>';
+  html += PHYSICAL_RECORDS.map(r => `
+    <div class="card" data-genre="${r.icon==='📡'?'wifi':'record'}" style="display:flex;gap:12px;align-items:flex-start">
+      <div style="font-size:28px">${r.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600">${r.title}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${r.desc}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${r.time}</div>
+      </div>
+    </div>
+  `).join('');
+
+  html += `
+    <div class="section-title" style="font-size:15px">📡 WiFi CSI 실시간 스코어</div>
+    <div class="card" style="text-align:center;padding:20px">
+      <div style="font-size:14px;color:var(--text2);margin-bottom:8px">현재 동작: 스쿼트</div>
+      <div style="font-size:48px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">92<span style="font-size:20px">점</span></div>
+      <div style="display:flex;justify-content:center;gap:20px;margin-top:12px">
+        <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--cyan)">15</div><div style="font-size:11px;color:var(--text3)">횟수</div></div>
+        <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--gold)">87%</div><div style="font-size:11px;color:var(--text3)">정확도</div></div>
+        <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--pink)">142</div><div style="font-size:11px;color:var(--text3)">칼로리</div></div>
+      </div>
+    </div>`;
+
+  content.innerHTML = html;
+}
+
+function renderProfile() {
+  document.getElementById('profileLevel').textContent = userData.level;
+  document.getElementById('xpCurrent').textContent = userData.xp;
+  document.getElementById('xpRemain').textContent = userData.xpMax - userData.xp;
+  setTimeout(() => {
+    document.getElementById('levelBar').style.width = (userData.xp/userData.xpMax*100)+'%';
+  }, 100);
+
+  drawHexStat('profileStatCanvas', userData.stats, 95);
+
+  // Badges
+  const bg = document.getElementById('badgeGrid');
+  bg.innerHTML = BADGES.map((b,i) => `
+    <div class="badge-item ${userData.badges[i]?'earned':'locked'}">
+      <span style="font-size:28px">${b.icon}</span>
+      <span class="badge-label">${b.name}</span>
+    </div>
+  `).join('');
+
+  // Timeline
+  const tl = document.getElementById('timeline');
+  const activities = userData.activities.length > 0 ? userData.activities.slice(-8).reverse() : [
+    { text:'에듀툰 "우주의 비밀" 수료', xp:30, time:'방금 전', color:'var(--purple)' },
+    { text:'Lv.37 달성!', xp:0, time:'2시간 전', color:'var(--gold)' },
+    { text:'에듀플레이 "하츄핑 대모험" 클리어', xp:50, time:'5시간 전', color:'var(--pink)' },
+    { text:'달리기 챌린지 12일차 완료', xp:10, time:'어제', color:'var(--cyan)' },
+    { text:'뱃지 획득: ⭐ Lv.30', xp:0, time:'3일 전', color:'var(--gold)' },
+  ];
+  tl.innerHTML = activities.map(a => `
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:${a.color||'var(--purple)'}"></div>
+      <div style="flex:1">
+        <div class="timeline-text">${a.text} ${a.xp?'<span class="xp-tag">+'+a.xp+' XP</span>':''}</div>
+        <div class="timeline-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCommunity(type) {
+  const list = document.getElementById('communityList');
+  const posts = type === 'recent' ? COMMUNITY_POSTS_RECENT :
+                type === 'my' ? userData.myPosts : COMMUNITY_POSTS_POPULAR;
+
+  if(posts.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3)">아직 작성한 글이 없습니다</div>';
+    return;
+  }
+  list.innerHTML = posts.map(p => `
+    <div class="post-item" onclick="showToast('💬 게시글을 열었습니다')">
+      <div class="post-category">[${p.cat}]</div>
+      <div class="post-title">${p.title}</div>
+      <div class="post-meta">
+        <span>👤 ${p.author}</span>
+        <span>❤️ ${p.likes}</span>
+        <span>💬 ${p.comments}</span>
+        <span>${p.time}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function switchCommunity(el, type) {
+  el.parentElement.querySelectorAll('.community-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderCommunity(type);
+}
+
+// ========== FILTER ==========
+function filterContent(btn, genre, section) {
+  btn.parentElement.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  let container;
+  if(section==='edutoon') container = document.getElementById('edutoonGrid');
+  else if(section==='educast') container = document.getElementById('educastGrid');
+  else if(section==='eduplay') container = document.getElementById('eduplayGrid');
+  else if(section==='physical') {
+    // Filter physical content cards
+    const cards = document.querySelectorAll('#physicalContent .card[data-genre]');
+    cards.forEach(c => {
+      c.style.display = (genre==='all' || c.dataset.genre===genre) ? '' : 'none';
+    });
+    return;
+  }
+  if(!container) return;
+  container.querySelectorAll('.content-card').forEach(c => {
+    c.style.display = (genre==='all' || c.dataset.genre===genre) ? '' : 'none';
+  });
+}
+
+// ========== XP / LEVEL ==========
+function earnXP(amount, activity) {
+  userData.xp += amount;
+  userData.activities.push({
+    text: activity, xp: amount, time: '방금 전', color: 'var(--cyan)'
+  });
+
+  while(userData.xp >= userData.xpMax) {
+    userData.xp -= userData.xpMax;
+    userData.level++;
+    userData.xpMax = Math.floor(userData.xpMax * 1.1);
+    showToast(`🎉 레벨 UP! Lv.${userData.level} 달성!`);
+    // Random stat boost
+    const statKeys = Object.keys(userData.stats);
+    const rk = statKeys[Math.floor(Math.random()*statKeys.length)];
+    userData.stats[rk] = Math.min(100, userData.stats[rk] + Math.floor(Math.random()*3)+1);
+  }
+
+  saveUser();
+  showToast(`✨ +${amount} XP 획득!`);
+  renderProfile();
+  drawHexStat('heroStatCanvas', userData.stats, 70);
+}
+
+function resetProgress() {
+  if(confirm('정말 진행도를 초기화하시겠습니까?')) {
+    localStorage.removeItem('lp_user');
+    location.reload();
+  }
+}
+
+// ========== MODALS ==========
+function openModal(html) {
+  document.getElementById('modalContent').innerHTML = '<div class="modal-handle"></div>' + html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function showUploadModal() {
+  openModal(`
+    <div class="modal-title">📤 콘텐츠 업로드</div>
+    <div class="form-group">
+      <label>콘텐츠 유형</label>
+      <select class="form-input" id="uploadType">
+        <option value="에듀툰">📚 에듀툰</option>
+        <option value="에듀캐스트">🎬 에듀캐스트</option>
+        <option value="에듀플레이">🎮 에듀플레이</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>제목</label>
+      <input class="form-input" id="uploadTitle" placeholder="콘텐츠 제목을 입력하세요">
+    </div>
+    <div class="form-group">
+      <label>설명</label>
+      <textarea class="form-input" id="uploadDesc" rows="3" placeholder="콘텐츠 설명을 입력하세요"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="form-btn secondary" onclick="closeModal()">취소</button>
+      <button class="form-btn primary" onclick="submitUpload()">업로드</button>
+    </div>
+  `);
+}
+
+function submitUpload() {
+  const title = document.getElementById('uploadTitle').value.trim();
+  const type = document.getElementById('uploadType').value;
+  if(!title) { showToast('⚠️ 제목을 입력해주세요'); return; }
+  const emojis = {'에듀툰':'📚','에듀캐스트':'🎬','에듀플레이':'🎮'};
+  userData.myContent.push({
+    title, type, emoji: emojis[type], xp: 50,
+    date: new Date().toLocaleDateString('ko-KR')
+  });
+  earnXP(50, '콘텐츠 업로드: ' + title);
+  closeModal();
+  renderCreator();
+  showToast('🎉 콘텐츠가 업로드되었습니다!');
+}
+
+function showWriteModal() {
+  openModal(`
+    <div class="modal-title">✏️ 글쓰기</div>
+    <div class="form-group">
+      <label>카테고리</label>
+      <select class="form-input" id="postCategory">
+        <option>자유</option><option>에듀툰</option><option>에듀캐스트</option>
+        <option>에듀플레이</option><option>크리에이터</option><option>에듀피지컬</option><option>질문</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>제목</label>
+      <input class="form-input" id="postTitle" placeholder="글 제목을 입력하세요">
+    </div>
+    <div class="form-group">
+      <label>내용</label>
+      <textarea class="form-input" id="postContent" rows="5" placeholder="내용을 작성하세요"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="form-btn secondary" onclick="closeModal()">취소</button>
+      <button class="form-btn primary" onclick="submitPost()">등록</button>
+    </div>
+  `);
+}
+
+function submitPost() {
+  const title = document.getElementById('postTitle').value.trim();
+  const cat = document.getElementById('postCategory').value;
+  if(!title) { showToast('⚠️ 제목을 입력해주세요'); return; }
+  userData.myPosts.unshift({
+    cat, title, author:'나', likes:0, comments:0, time:'방금 전'
+  });
+  earnXP(15, '커뮤니티 글작성: ' + title);
+  closeModal();
+  renderCommunity('my');
+  showToast('🎉 글이 등록되었습니다!');
+}
+
+// ========== TOAST ==========
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ========== COUNT UP ANIMATION ==========
+function animateCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count);
+    const suffix = target >= 1000 ? '+' : '';
+    let current = 0;
+    const step = Math.max(1, Math.floor(target / 40));
+    const interval = setInterval(() => {
+      current += step;
+      if(current >= target) {
+        current = target;
+        clearInterval(interval);
+      }
+      el.textContent = current.toLocaleString() + suffix;
+    }, 30);
+  });
+}
+
+// ========== SPLASH ==========
+function initSplash() {
+  const bar = document.getElementById('splashBar');
+  setTimeout(() => bar.style.width = '40%', 100);
+  setTimeout(() => bar.style.width = '70%', 400);
+  setTimeout(() => bar.style.width = '100%', 700);
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    animateCounters();
+    drawHexStat('heroStatCanvas', userData.stats, 70);
+  }, 1200);
+}
+
+// ========== INIT ==========
+function init() {
+  initSplash();
+  renderEdutoon();
+  renderEducast();
+  renderEduplay();
+  renderCreator();
+  renderPhysical();
+  renderProfile();
+  renderCommunity('popular');
+
+  // Service worker
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
