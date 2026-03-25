@@ -1,8 +1,10 @@
-const CACHE_NAME = 'levelplay-v1';
+const CACHE_NAME = 'levelplay-v2';
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './games/hatcuping-game.html',
+  './games/hatcuping-rpg.html'
 ];
 
 self.addEventListener('install', event => {
