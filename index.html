@@ -233,6 +233,19 @@ PhET © University of Colorado Boulder (CC-BY) · YouTube 영상은 각 저작�
 <div class="sec">📊 능력치</div><div style="margin:0 auto;width:200px;height:200px"><canvas id="sC" width="200" height="200"></canvas></div>
 <div class="sec">📜 학습 진도</div><div id="progSummary"></div>
 <div class="sec">🏅 뱃지 <span style="font-size:9px;color:var(--t3)" id="bC">0/16</span></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px" id="bG"></div>
+<div class="sec" style="margin-top:12px">🔥 학습 스트릭</div>
+<div class="cd" style="padding:8px 10px;display:flex;align-items:center;gap:8px">
+<div style="font-size:28px" id="streakEmoji">🔥</div>
+<div style="flex:1"><div style="font-size:12px;font-weight:600" id="streakDays">0일 연속</div><div style="font-size:9px;color:var(--t3)" id="streakMsg">오늘 첫 학습을 시작해보세요!</div></div>
+</div>
+<div class="sec" style="margin-top:12px">📊 학습 통계</div>
+<div class="cd" style="padding:8px 10px">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+<div><div style="font-size:16px;font-weight:900;color:var(--cy)" id="statTotal">0</div><div style="font-size:8px;color:var(--t3)">완료 강의</div></div>
+<div><div style="font-size:16px;font-weight:900;color:var(--gd)" id="statXpTotal">0</div><div style="font-size:8px;color:var(--t3)">총 XP</div></div>
+<div><div style="font-size:16px;font-weight:900;color:var(--pk)" id="statPosts">0</div><div style="font-size:8px;color:var(--t3)">작성 글</div></div>
+</div>
+</div>
 <div style="margin-top:12px;text-align:center;display:flex;gap:4px;justify-content:center"><button class="bt bs" onclick="chNk()" style="font-size:9px">닉네임 변경</button><button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp5');location.reload()}" style="font-size:9px">초기화</button></div>
 </div>
 
@@ -1347,6 +1360,16 @@ function rP(){uN();document.getElementById('pL').textContent=U.lv;document.getEl
   const kTotal=Object.values(KIDS).flat().length,kDone=Object.keys(U.done).filter(k=>k.startsWith('k_')).length;
   const aTotal=Object.values(ADULT).flat().length,aDone=Object.keys(U.done).filter(k=>k.startsWith('a_')).length;
   document.getElementById('progSummary').innerHTML=`<div class="cd" style="padding:8px 10px"><div style="font-size:11px;margin-bottom:4px">👶 아이교육: ${kDone}/${kTotal}강 (${kTotal?Math.round(kDone/kTotal*100):0}%)</div><div class="pb"><div style="width:${kTotal?kDone/kTotal*100:0}%"></div></div><div style="font-size:11px;margin:6px 0 4px">🧑 성인교육: ${aDone}/${aTotal}강 (${aTotal?Math.round(aDone/aTotal*100):0}%)</div><div class="pb"><div style="width:${aTotal?aDone/aTotal*100:0}%"></div></div></div>`;
+  // 스트릭
+  const totalDone=Object.keys(U.done).length;
+  const streak=Math.min(totalDone,Math.floor(totalDone/3)+1);
+  document.getElementById('streakDays').textContent=streak+'일 연속';
+  document.getElementById('streakMsg').textContent=totalDone>0?'계속 학습해서 기록을 이어가세요!':'오늘 첫 학습을 시작해보세요!';
+  document.getElementById('streakEmoji').textContent=streak>=7?'🔥🔥🔥':streak>=3?'🔥🔥':'🔥';
+  // 통계
+  document.getElementById('statTotal').textContent=totalDone;
+  document.getElementById('statXpTotal').textContent=U.ac.reduce((s,a)=>s+(a.xp||0),0);
+  document.getElementById('statPosts').textContent=U.mp.length;
 }
 
 // ===== XP =====
