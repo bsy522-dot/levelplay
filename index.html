@@ -92,7 +92,7 @@ nav button span:first-child{font-size:20px}
 <div class="sec">💬 커뮤니티</div><div id="calcR"></div>
 <div style="margin-top:16px;font-size:8px;color:var(--t3);text-align:center">LevelPlay · PhET Interactive Simulations, University of Colorado Boulder (CC-BY 4.0) · YouTube 영상은 각 저작권자 귀속</div>
 </div>
-<div class="pg" id="p1"><div class="sec">📺 전체 영상</div><div id="allV"></div></div>
+<div class="pg" id="p1"><div class="sec">📺 영상</div><div class="row" id="vFilter" style="gap:5px;padding-bottom:6px"></div><div id="allV"></div></div>
 <div class="pg" id="p2"><div class="sec">🔬 과학 실험</div><div class="g2" id="allS"></div><div class="sec">📝 퀴즈</div><div id="allQ"></div><div class="sec">🛠️ 도구</div><div class="g2" id="allU"></div></div>
 <div class="pg" id="p3"><div class="sec">💬 커뮤니티</div><div id="allP"></div></div>
 <div class="pg" id="p4"><div style="text-align:center;padding:10px 0"><div style="width:56px;height:56px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 6px">🧑‍🚀</div><div style="font-size:16px;font-weight:700" id="pN">탐험가</div><div style="font-size:10px;color:var(--t3)" id="pTi"></div></div><div style="background:var(--c1);border-radius:var(--r);padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><span style="font-size:16px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="pL">1</span></span><span style="font-size:9px;color:var(--t3)"><span id="xC">0</span>/<span id="xM">500</span> XP</span></div><div class="lv-w" style="margin:4px 0"><div class="lv-b" id="lB"></div></div></div><div class="sec">📊 능력치</div><div style="width:200px;height:200px;margin:0 auto"><canvas id="sC" width="200" height="200"></canvas></div><div class="sec">📜 활동</div><div id="tl"></div><div style="margin-top:12px;text-align:center"><button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp6');location.reload()}" style="font-size:9px">초기화</button></div></div>
@@ -106,7 +106,7 @@ nav button span:first-child{font-size:20px}
 <button onclick="go(4)"><span>👤</span>나</button>
 </nav>
 <script>
-const U=JSON.parse(localStorage.getItem('lp6')||'null')||{nk:'',lv:1,xp:0,xm:500,st:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},ac:[],mp:[]};
+const U=JSON.parse(localStorage.getItem('lp6')||'null')||{nk:'',lv:1,xp:0,xm:500,st:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},ac:[],mp:[],seen:{}};
 const sv=()=>localStorage.setItem('lp6',JSON.stringify(U));
 function tA(m){if(m<1)return'방금';if(m<60)return m+'분전';if(m<1440)return(m/60|0)+'시간전';return(m/1440|0)+'일전';}
 
@@ -305,7 +305,7 @@ function setNk(){const n=document.getElementById('nkI').value.trim();if(!n)retur
 function uN(){document.getElementById('hLv').textContent='Lv.'+U.lv+' '+(U.nk||'탐험가');document.getElementById('pN').textContent=U.nk||'탐험가';document.getElementById('pTi').textContent='Lv.'+U.lv;}
 
 function vc(v){return'<div class="vc" onclick="playVid(\''+v.id+'\',\''+v.t+'\')"><div style="position:relative"><img src="https://img.youtube.com/vi/'+v.id+'/mqdefault.jpg" loading="lazy"><div class="play"><div>▶</div></div></div><div class="vt">'+v.t+'</div><div class="vs">'+v.c+'</div></div>';}
-function playVid(id,t){document.getElementById('moB').innerHTML='<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1" style="width:100%;aspect-ratio:16/9;border:none;border-radius:8px" allow="autoplay;fullscreen" allowfullscreen></iframe><div style="font-size:12px;font-weight:600;margin-top:8px">'+t+'</div>';document.getElementById('mo').classList.add('sh');xp(10,'영상');}
+function playVid(id,t){document.getElementById('moB').innerHTML='<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1" style="width:100%;aspect-ratio:16/9;border:none;border-radius:8px" allow="autoplay;fullscreen" allowfullscreen></iframe><div style="font-size:12px;font-weight:600;margin-top:8px">'+t+'</div>';document.getElementById('mo').classList.add('sh');if(!U.seen)U.seen={};if(!U.seen[id]){U.seen[id]=1;xp(10,'영상: '+t);sv();}}
 function sc(s){return'<div class="gc" onclick="playSim(\''+s.u+'\',\''+s.nm+'\')"><div class="gi">'+s.ic+'</div><div class="gn">'+s.nm+'</div><div class="gd">'+s.d+'</div></div>';}
 function playSim(u,n){document.getElementById('moB').innerHTML='<iframe src="'+u+'" style="width:100%;height:450px;border:none;border-radius:8px"></iframe><div style="font-size:12px;font-weight:600;margin-top:6px">'+n+'</div>';document.getElementById('mo').classList.add('sh');xp(10,'실험');}
 function oG(u,n){document.getElementById('gT').textContent=n;document.getElementById('gF').src=u;document.getElementById('gO').classList.add('sh');xp(15,'게임');}
@@ -336,6 +336,8 @@ function dH(){const c=document.getElementById('sC');if(!c)return;const x=c.getCo
 function rProf(){document.getElementById('pL').textContent=U.lv;document.getElementById('xC').textContent=U.xp;document.getElementById('xM').textContent=U.xm;setTimeout(()=>document.getElementById('lB').style.width=(U.xp/U.xm*100)+'%',80);dH();const ac=U.ac.length?U.ac.slice(-5).reverse():[{t:'가입!',xp:0,m:0}];document.getElementById('tl').innerHTML=ac.map(a=>'<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(139,92,246,.04)"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);margin-top:4px;flex-shrink:0"></div><div style="font-size:11px">'+a.t+(a.xp?' <span style="color:var(--gd)">+'+a.xp+'</span>':'')+'</div></div>').join('');}
 let tt;function toast(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('sh');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('sh'),1800);}
 
+function filterVids(cat){document.querySelectorAll('[data-vcat]').forEach(el=>{el.style.display=(!cat||el.dataset.vcat===cat)?'':'none';});}
+
 function rAll(){
   // 홈: 과목별 영상 행 (넷플릭스 스타일)
   const cats=[...new Set(V.map(v=>v.c))];
@@ -351,8 +353,10 @@ function rAll(){
   renderQuiz(document.getElementById('qR'),QUIZ);
   document.getElementById('hU').innerHTML=UTS.map(u=>'<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+u.ic+'</div><div class="gn">'+u.nm+'</div></div>').join('');
   document.getElementById('calcR').innerHTML=[...P,...U.mp].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
+  // 영상 탭: 카테고리 필터 + 목록
   const cats2=[...new Set(V.map(v=>v.c))];
-  document.getElementById('allV').innerHTML=cats2.map(c=>'<div class="sec" style="font-size:13px">'+(c)+'</div><div class="row">'+V.filter(v=>v.c===c).map(vc).join('')+'</div>').join('');
+  document.getElementById('vFilter').innerHTML='<button class="bt bp" onclick="filterVids(null)" style="font-size:10px;padding:4px 10px;flex-shrink:0">전체</button>'+cats2.map(c=>'<button class="bt bs" onclick="filterVids(\''+c+'\')" style="font-size:10px;padding:4px 10px;flex-shrink:0">'+c+'</button>').join('');
+  document.getElementById('allV').innerHTML=cats2.map(c=>'<div class="sec" style="font-size:13px" data-vcat="'+c+'">'+c+' ('+V.filter(v=>v.c===c).length+')</div><div class="row" data-vcat="'+c+'">'+V.filter(v=>v.c===c).map(vc).join('')+'</div>').join('');
   document.getElementById('allS').innerHTML=SIMS.map(sc).join('');
   renderQuiz(document.getElementById('allQ'),QUIZ);
   renderUtils(document.getElementById('allU'));
