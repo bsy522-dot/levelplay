@@ -164,7 +164,7 @@ nav button span:first-child{font-size:17px}
 <div style="font-size:10px;color:var(--t3)" id="hLv">Lv.1</div>
 </div>
 
-<div class="banner"><span class="tag">NEW</span> 하츄핑 게임 2종 추가! 에듀플레이에서 바로 플레이하세요 🎮</div>
+<div class="banner"><span class="tag">NEW</span> 별빛친구 게임 2종 추가! 에듀플레이에서 바로 플레이하세요 🎮</div>
 
 <div class="sec">🔥 실시간 인기</div>
 <div id="hotP"></div>
@@ -294,8 +294,8 @@ const GAL=[
 
 // ===== GAMES =====
 const GMS=[
-{nm:'사랑의 하츄핑 대모험',em:'💖',ds:'22개 스프라이트, 보스배틀, Web Audio',tg:'플랫포머',u:'games/hatcuping-game.html',ak:'apk/hatcuping-platformer.apk',p:1},
-{nm:'하츄핑 RPG 대모험',em:'🗡️',ds:'6챕터, NPC대화, 타일맵 탐험',tg:'RPG',u:'games/hatcuping-rpg.html',ak:'apk/hatcuping-rpg.apk',p:1},
+{nm:'사랑의 별빛친구 대모험',em:'💖',ds:'22개 스프라이트, 보스배틀, Web Audio',tg:'플랫포머',u:'games/hatcuping-game.html',ak:'apk/hatcuping-platformer.apk',p:1},
+{nm:'별빛친구 RPG 대모험',em:'🗡️',ds:'6챕터, NPC대화, 타일맵 탐험',tg:'RPG',u:'games/hatcuping-rpg.html',ak:'apk/hatcuping-rpg.apk',p:1},
 {nm:'2048 퍼즐',em:'🔢',ds:'숫자 합치기 중독성 퍼즐',tg:'퍼즐',eu:'https://play2048.co/',p:1},
 {nm:'Wordle 영어단어',em:'📝',ds:'5글자 영단어 맞추기',tg:'교육',eu:'https://wordlewebsite.com/',p:1},
 {nm:'GeoGuessr',em:'🌍',ds:'구글 스트리트뷰로 위치 추측',tg:'퀴즈',eu:'https://www.geoguessr.com/'},
@@ -399,7 +399,7 @@ const PRGS=[
 // ===== POSTS =====
 const P=[
 {id:1,g:'ai',t:'Claude Code로 웹앱 만든 후기 (진짜 코드 한줄도 안침)',b:'터미널에서 "골프장 검색앱 만들어줘" 쳤더니\nLeaflet 지도 연동, OSRM 경로계산, 필터링까지 다 해줌\n\n근데 프롬프트를 구체적으로 써야됨\n"Leaflet.js 지도에 마커 찍고 OSRM으로 이동시간 계산" 이런식\n\n막연하게 쓰면 퀄 떨어짐',a:'코딩입문자',l:487,c:[{a:'개발K',t:'프롬프트 엔지니어링이 핵심 ㅋ',m:120},{a:'뉴비',t:'와 이거 보고 도전해봐야겠다',m:60}],m:45},
-{id:2,g:'game',t:'하츄핑 RPG 도서관 챕터 공략',b:'낡은 책 NPC 앞에서 멈추는거 버그 아님\n아이템 먼저 찾아야됨\n숲 챕터 오른쪽 끝에 있음\n\nAPK로 모바일에서 하는게 더 편함\n터치컨트롤 의외로 잘됨',a:'게임러',l:156,c:[{a:'하츄맘',t:'우리애도 30분 헤맴ㅋㅋ',m:300}],m:120},
+{id:2,g:'game',t:'별빛친구 RPG 도서관 챕터 공략',b:'낡은 책 NPC 앞에서 멈추는거 버그 아님\n아이템 먼저 찾아야됨\n숲 챕터 오른쪽 끝에 있음\n\nAPK로 모바일에서 하는게 더 편함\n터치컨트롤 의외로 잘됨',a:'게임러',l:156,c:[{a:'게임맘',t:'우리애도 30분 헤맴ㅋㅋ',m:300}],m:120},
 {id:3,g:'ai',t:'Claude vs GPT vs Gemini 코딩 실전비교',b:'같은 프롬프트로 투두앱 만들어봄\n\nClaude: 코드 깔끔, 에러처리 좋음\nGPT-4o: 기능은 되는데 좀 지저분\nGemini: 최신 API 잘 알고있음\n\n코딩은 Claude > GPT > Gemini\n일반질문은 Gemini가 편함\n검색은 Perplexity가 넘사',a:'AI양다리',l:312,c:[{a:'로컬러',t:'Ollama도 괜찮음',m:500},{a:'GPT파',t:'o1으로 하면 얘기 달라짐',m:360}],m:240},
 {id:4,g:'dev',t:'Playwright로 크롤링하는법 (BS4 비교)',b:'요즘 사이트 대부분 SPA라 BS4로 한계\n\nPlaywright: JS렌더링 후 긁어서 확실\nBS4: 정적 HTML만 가능, 대신 10배 빠름\n\npip install playwright\npython -m playwright install\n이 두줄이면 끝\n\n근데 일부 사이트는 봇 차단해서 안됨 ㅋ',a:'크롤러',l:189,c:[{a:'신입',t:'정리 감사합니다',m:180},{a:'데이터맨',t:'Selenium이랑 비교하면?',m:120},{a:'크롤러',t:'모든면에서 Playwright 나음',m:60}],m:300},
 {id:5,g:'prog',t:'GitHub Pages 무료 배포 완전정복',b:'1. GitHub 레포 만들기\n2. index.html push\n3. Settings > Pages > main 선택\n4. 끝. https://유저명.github.io/레포명/\n\nPWA 만들려면 manifest.json + sw.js 추가\n모바일에서 앱처럼 설치됨\n서버비 0원',a:'무료파',l:267,c:[{a:'웹초보',t:'커스텀 도메인도 됨?',m:600},{a:'무료파',t:'CNAME 파일 + DNS 설정',m:540}],m:480},
