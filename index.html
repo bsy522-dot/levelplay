@@ -135,27 +135,29 @@ nav button span:first-child{font-size:16px}
 </div>
 <div style="position:relative;margin-bottom:8px"><input style="width:100%;padding:8px 32px 8px 10px;background:var(--c1);border:1px solid rgba(139,92,246,.1);border-radius:18px;color:var(--tx);font:11px 'Noto Sans KR';outline:none" placeholder="검색..." id="gSr" onkeydown="if(event.key==='Enter'&&this.value.trim())window.open('https://www.google.com/search?q='+encodeURIComponent(this.value),'_blank')"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:12px">🔍</span></div>
 
-<!-- Mini profile -->
-<div class="cd" style="display:flex;align-items:center;gap:8px;padding:8px 10px">
-<div style="width:32px;height:32px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:16px">🧑‍🚀</div>
-<div style="flex:1"><div style="font-size:11px;font-weight:600" id="hNk">탐험가</div><div class="lv-w" style="height:10px;margin:2px 0"><div class="lv-b" id="hBar"></div><div class="lv-t" style="font-size:7px" id="hXp">0/500</div></div></div>
-<div style="font-size:14px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="hLv">Lv.1</div>
-</div>
+<!-- 바로 시작: 오늘의 추천 학습 -->
+<div class="sec">🎯 오늘의 추천 학습</div>
+<div id="todayLearn"></div>
 
-<!-- Banner -->
-<div style="background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(6,214,160,.06));border:1px solid rgba(139,92,246,.12);border-radius:var(--r);padding:10px;margin-bottom:8px;cursor:pointer" onclick="go(1)">
-<div style="font-size:8px;color:var(--rd);font-weight:700">NEW</div>
-<div style="font-size:12px;font-weight:700;margin:2px 0">체계적 커리큘럼 학습 오픈! 아이·성인 교육 시작하기</div>
-<div style="font-size:9px;color:var(--t3)">10개 과목 · 수준별 학습 경로 · 진도 추적</div>
-</div>
+<!-- 바로 보기: 인기 교육 콘텐츠 카드 -->
+<div class="sec">📚 지금 바로 배우기</div>
+<div class="g2" id="learnNow"></div>
 
-<!-- Quick access -->
+<!-- 게임 바로 플레이 -->
+<div class="sec">🎮 바로 플레이</div>
+<div style="display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none" id="quickPlay"></div>
+
+<!-- 과학 실험 바로 하기 -->
+<div class="sec">🔬 과학 실험 시작</div>
+<div class="g2" id="quickSim"></div>
+
+<!-- 커뮤니티 인기글 -->
+<div class="sec">🔥 커뮤니티 인기</div>
+<div id="hotP"></div>
+
+<!-- 카테고리 바로가기 -->
+<div class="sec">📂 과목별 탐색</div>
 <div style="display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none" id="qGal"></div>
-<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px" id="tTags"></div>
-
-<div class="sec">🔥 인기글</div><div id="hotP"></div>
-<div class="sec">📚 추천 리소스</div><div class="g3" id="resG"></div>
-<div class="sec">🕐 최신글</div><div id="newP"></div>
 
 <div style="margin-top:16px;padding:10px;border-top:1px solid rgba(139,92,246,.04);font-size:8px;color:var(--t3);text-align:center;line-height:1.5">
 LevelPlay · 교육 정보 공유 커뮤니티<br>
@@ -904,11 +906,44 @@ function uN(){const n=U.nk||'탐험가';document.getElementById('hNk').textConte
 
 // ===== HOME =====
 function rHome(){
-  document.getElementById('hotP').innerHTML=[...P].sort((a,b)=>b.l-a.l).slice(0,5).map(pH).join('');
-  document.getElementById('newP').innerHTML=[...P].sort((a,b)=>a.m-b.m).slice(0,4).map(pH).join('');
-  document.getElementById('resG').innerHTML=RES.map(r=>`<a class="gi" href="${r.u}" target="_blank" style="text-decoration:none;color:inherit"><div class="ic">${r.ic}</div><div class="nm">${r.nm}</div></a>`).join('');
-  document.getElementById('qGal').innerHTML=[...SUBJECTS.slice(0,6),...GAL.slice(0,4)].map(g=>`<div class="qg" onclick="${g.id&&SUBJECTS.find(s=>s.id===g.id)?`go(1)`:g.id?`go(2);setTimeout(()=>oGal('${g.id}'),50)`:''}""><div class="qi">${g.ic}</div><div class="qn">${g.nm||g.nm}</div></div>`).join('');
-  document.getElementById('tTags').innerHTML=['#PhET','#칸아카데미','#Claude','#Playwright','#Python','#Scratch'].map(t=>`<span class="tt">${t}</span>`).join('');
+  // 오늘의 추천: 미완료 콘텐츠 중 YouTube URL이 있는 것 우선
+  const allItems=[];
+  SUBJECTS.forEach(s=>{
+    (KIDS[s.id]||[]).forEach((it,i)=>{if(!U.done['k_'+s.id+'_'+i])allItems.push({...it,sub:s.nm,ic:s.ic,sk:'k_'+s.id+'_'+i,lv:it.l});});
+    (ADULT[s.id]||[]).forEach((it,i)=>{if(!U.done['a_'+s.id+'_'+i])allItems.push({...it,sub:s.nm,ic:s.ic,sk:'a_'+s.id+'_'+i,lv:it.l});});
+  });
+  const ytItems=allItems.filter(i=>i.u&&i.u.includes('youtube.com/watch'));
+  const recItems=(ytItems.length>3?ytItems:allItems).sort(()=>Math.random()-.5).slice(0,3);
+  document.getElementById('todayLearn').innerHTML=recItems.map(r=>{
+    const vid=(r.u||'').match(/v=([a-zA-Z0-9_-]{11})/);
+    return `<div class="cd" style="cursor:pointer;padding:10px" onclick="markDone('${r.sk}',${r.lv});${vid?`oMo('<div style=font-size:13px;font-weight:700;margin-bottom:6px>${r.ic} ${r.sub}: ${r.t}</div><iframe src=https://www.youtube.com/embed/${vid[1]} style=width:100%;aspect-ratio:16/9;border:none;border-radius:8px allowfullscreen></iframe><div style=margin-top:6px><button class=bt.bp onclick=cMo()>닫기</button></div>')`:`window.open('${r.u}','_blank')`}">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="font-size:24px">${r.ic}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.t}</div>
+          <div style="font-size:9px;color:var(--t3)">${r.sub} · ${r.s} · L${r.lv}</div>
+        </div>
+        <div style="font-size:18px">${vid?'▶️':'↗️'}</div>
+      </div>
+      ${r.d?'<div style="font-size:10px;color:var(--t2);margin-top:4px">'+r.d+'</div>':''}
+    </div>`;
+  }).join('');
+
+  // 바로 배우기: 과목별 인기 콘텐츠 카드 (랜덤 8개)
+  const learnCards=allItems.sort(()=>Math.random()-.5).slice(0,8);
+  document.getElementById('learnNow').innerHTML=learnCards.map(r=>`<div class="gi" onclick="${r.u.includes('youtube')?`oMo('<iframe src=https://www.youtube.com/embed/'+'${(r.u.match(/v=([^&]+)/)||['',''])[1]}'+' style=width:100%;aspect-ratio:16/9;border:none;border-radius:8px allowfullscreen></iframe>')`:r.u.includes('phet.colorado')?`window.open('${r.u}','_blank')`:`window.open('${r.u}','_blank')`};markDone('${r.sk}',${r.lv})"><div class="ic">${r.ic}</div><div class="nm" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.t}</div><div class="ct">${r.sub}</div></div>`).join('');
+
+  // 바로 플레이: 게임
+  document.getElementById('quickPlay').innerHTML=GMS.map(g=>`<div style="flex-shrink:0;width:80px;text-align:center;cursor:pointer" onclick="${g.u?`oG('${g.u}','${g.nm}','${g.ak||''}')`:(g.eu?`window.open('${g.eu}','_blank')`:'')}"><div style="font-size:28px;margin-bottom:4px">${g.em}</div><div style="font-size:9px;font-weight:600">${g.nm}</div><div style="font-size:8px;color:var(--t3)">${g.tg}</div></div>`).join('');
+
+  // 과학실험 바로하기: PhET 4개
+  document.getElementById('quickSim').innerHTML=SIMS.slice(0,4).map(s=>`<a class="gi" href="${s.u}" target="_blank" style="text-decoration:none;color:inherit"><div class="ic">${s.ic}</div><div class="nm" style="font-size:10px">${s.nm}</div><div class="ct">PhET 실험</div></a>`).join('');
+
+  // 커뮤니티 인기
+  document.getElementById('hotP').innerHTML=[...P].sort((a,b)=>b.l-a.l).slice(0,4).map(pH).join('');
+
+  // 과목 바로가기
+  document.getElementById('qGal').innerHTML=SUBJECTS.map(s=>`<div class="qg" onclick="go(1);setTimeout(()=>openSub('kids','${s.id}'),100)"><div class="qi">${s.ic}</div><div class="qn">${s.nm}</div></div>`).join('');
   uN();
 }
 function pH(p){const g=GAL.find(x=>x.id===p.g);return`<div class="po" onclick='sPost(${JSON.stringify(p).replace(/'/g,"&#39;")})'><div class="po-c">[${g?g.nm:p.g}]</div><div class="po-t">${p.t}</div><div class="po-m"><span>👤${p.a}</span><span>❤️${p.l}</span><span>💬${(p.c||[]).length}</span><span>${tA(p.m)}</span></div></div>`;}
