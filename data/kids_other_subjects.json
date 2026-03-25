@@ -1,0 +1,738 @@
+[
+  {
+    "subject": "음악",
+    "level": "바로크",
+    "order": 1,
+    "title": "바흐 - 토카타와 푸가 시각화",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=ho9rZjlsyYY",
+    "videoId": "ho9rZjlsyYY",
+    "description": "바흐의 토카타와 푸가 D단조를 색깔 애니메이션으로 시각화한 교육 영상"
+  },
+  {
+    "subject": "음악",
+    "level": "바로크",
+    "order": 2,
+    "title": "바흐 - 첼로 모음곡 1번 시각화",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=mGQLXRTl3Z0",
+    "videoId": "mGQLXRTl3Z0",
+    "description": "바흐 첼로 모음곡 1번 프렐류드를 그래픽 악보로 감상"
+  },
+  {
+    "subject": "음악",
+    "level": "바로크",
+    "order": 3,
+    "title": "비발디 - 사계 '봄' 시각화",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=GRxofEmo3HA",
+    "videoId": "GRxofEmo3HA",
+    "description": "비발디 사계 중 봄을 컬러풀한 그래픽 악보로 감상"
+  },
+  {
+    "subject": "음악",
+    "level": "고전",
+    "order": 4,
+    "title": "모차르트 - 작은 별 변주곡 시각화",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=NO-ecxHEPqI",
+    "videoId": "NO-ecxHEPqI",
+    "description": "모차르트의 '반짝반짝 작은별' 변주곡 - 아이들에게 친숙한 곡"
+  },
+  {
+    "subject": "음악",
+    "level": "고전",
+    "order": 5,
+    "title": "모차르트 - 아이네 클라이네 나흐트무지크",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=o1FSN8_pp_o",
+    "videoId": "o1FSN8_pp_o",
+    "description": "모차르트의 대표 세레나데를 시각적으로 감상"
+  },
+  {
+    "subject": "음악",
+    "level": "고전",
+    "order": 6,
+    "title": "모차르트 - 터키 행진곡 시각화",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=quxTnEEETbo",
+    "videoId": "quxTnEEETbo",
+    "description": "모차르트 터키 행진곡(론도 알라 투르카) 그래픽 악보"
+  },
+  {
+    "subject": "음악",
+    "level": "낭만",
+    "order": 7,
+    "title": "베토벤 - 엘리제를 위하여 시각화",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=yAsDGNjn8F8",
+    "videoId": "yAsDGNjn8F8",
+    "description": "베토벤의 엘리제를 위하여를 색깔 음표로 감상"
+  },
+  {
+    "subject": "음악",
+    "level": "낭만",
+    "order": 8,
+    "title": "베토벤 - 운명 교향곡 시각화",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=rRgXUFnfKIY",
+    "videoId": "rRgXUFnfKIY",
+    "description": "베토벤 교향곡 5번 '운명' 1악장 그래픽 악보 감상"
+  },
+  {
+    "subject": "음악",
+    "level": "낭만",
+    "order": 9,
+    "title": "차이콥스키 - 호두까기 인형 모음곡",
+    "source": "smalin (Music Animation Machine)",
+    "url": "https://www.youtube.com/watch?v=Sh_uAX0u_XE",
+    "videoId": "Sh_uAX0u_XE",
+    "description": "차이콥스키의 호두까기 인형 - 꽃의 왈츠 시각화"
+  },
+  {
+    "subject": "음악",
+    "level": "악기별",
+    "order": 10,
+    "title": "핑크퐁 악기 동요 모음",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=clKAejFAML4",
+    "videoId": "clKAejFAML4",
+    "description": "핑크퐁과 함께하는 악기 소개 동요 모음집"
+  },
+  {
+    "subject": "음악",
+    "level": "악기별",
+    "order": 11,
+    "title": "뽀로로 이상한 악기",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=ykYUk67IEVE",
+    "videoId": "ykYUk67IEVE",
+    "description": "뽀로로 9기 - 다양한 악기를 소개하는 에피소드"
+  },
+  {
+    "subject": "음악",
+    "level": "현대",
+    "order": 12,
+    "title": "EBS 야옹! 클래식 - 이 곡이 클래식이었어?",
+    "source": "EBS Kids",
+    "url": "https://primary.ebs.co.kr/CPG/course/view?courseId=10200890",
+    "videoId": null,
+    "description": "EBS 클래식 교육 프로그램 - 친숙한 곡들의 클래식 원곡 소개"
+  },
+
+  {
+    "subject": "스포츠",
+    "level": "체조/요가",
+    "order": 1,
+    "title": "호기와 함께 율동 운동",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=RzrAZNviGWQ",
+    "videoId": "RzrAZNviGWQ",
+    "description": "호기의 봄/소풍 동요와 율동 모음 - 따라하며 운동"
+  },
+  {
+    "subject": "스포츠",
+    "level": "체조/요가",
+    "order": 2,
+    "title": "호기 색깔놀이 체조",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=NwY-COjRfKw",
+    "videoId": "NwY-COjRfKw",
+    "description": "호기와 색깔놀이하며 몸 움직이기"
+  },
+  {
+    "subject": "스포츠",
+    "level": "체조/요가",
+    "order": 3,
+    "title": "핑크퐁 체조 동요",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=o17WrC9v-Ew",
+    "videoId": "o17WrC9v-Ew",
+    "description": "핑크퐁과 함께하는 체조 율동 동요 모음"
+  },
+  {
+    "subject": "스포츠",
+    "level": "수상/모험",
+    "order": 4,
+    "title": "아기상어와 바다 수영",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=FNsP9ChbdMc",
+    "videoId": "FNsP9ChbdMc",
+    "description": "아기상어와 함께 바다에서 수영하기 - 수상 안전"
+  },
+  {
+    "subject": "스포츠",
+    "level": "격투/무도",
+    "order": 5,
+    "title": "태권도 기본 동작 배우기",
+    "source": "학교체육포털",
+    "url": "https://www.cspep.or.kr/",
+    "videoId": null,
+    "description": "태권도 3가지 막기동작 & 태극 1장 배우기 (학교체육포탈)"
+  },
+  {
+    "subject": "스포츠",
+    "level": "구기/볼",
+    "order": 6,
+    "title": "뽀로로와 축구 놀이",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=mYYIH1VWPGo",
+    "videoId": "mYYIH1VWPGo",
+    "description": "뽀로로레인저스 - 스포츠 액션 에피소드"
+  },
+  {
+    "subject": "스포츠",
+    "level": "신체발달",
+    "order": 7,
+    "title": "호기 징글 운동놀이",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=5RWu87y8fpw",
+    "videoId": "5RWu87y8fpw",
+    "description": "용암과 징글놀이 - 재미있게 몸 움직이기"
+  },
+  {
+    "subject": "스포츠",
+    "level": "신체발달",
+    "order": 8,
+    "title": "호기 상어와 도망치기 운동",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=yZIrknhpTjA",
+    "videoId": "yZIrknhpTjA",
+    "description": "대왕 상어에게 도망치며 신체 활동하기"
+  },
+
+  {
+    "subject": "관찰탐구",
+    "level": "곤충",
+    "order": 1,
+    "title": "에그박사 - 나비의 비밀: 밑면과 윗면",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=bRYyQGKpYfI",
+    "videoId": "bRYyQGKpYfI",
+    "description": "나비의 밑면과 윗면이 다른 이유 - 신비한 나비의 세계"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "곤충",
+    "order": 2,
+    "title": "에그박사 - 왕나비 애벌레의 비밀",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=ZPwgmxp99WI",
+    "videoId": "ZPwgmxp99WI",
+    "description": "독이 있는 식물을 먹는 왕나비 애벌레 관찰"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "곤충",
+    "order": 3,
+    "title": "에그박사 - 라오스 곤충과 거미 관찰",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=FnGcCOtx9P4",
+    "videoId": "FnGcCOtx9P4",
+    "description": "한국에 없는 라오스의 특이한 곤충과 거미 관찰"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "곤충",
+    "order": 4,
+    "title": "에그박사 - 라오스 장수말벌 독침",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=yfsEWSv2vaw",
+    "videoId": "yfsEWSv2vaw",
+    "description": "라오스 장수말벌의 무시무시한 독침 관찰"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "곤충",
+    "order": 5,
+    "title": "에그박사 - 나뭇잎인가 나비인가?",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=RRXm4TDP49A",
+    "videoId": "RRXm4TDP49A",
+    "description": "나뭇잎처럼 보이는 나비 - 자연의 위장술 탐구"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "식물",
+    "order": 6,
+    "title": "에그박사 - 빈 새둥지의 생물",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=TGrwT8qaTCs",
+    "videoId": "TGrwT8qaTCs",
+    "description": "빈 새둥지에서 발견되는 다양한 생물 관찰"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "동물",
+    "order": 7,
+    "title": "에그박사 - 저빌 대형 미로 탐험",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=Xw2DcN2H8fE",
+    "videoId": "Xw2DcN2H8fE",
+    "description": "저빌에게 15M 대형 미로를 만들어주기"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "동물",
+    "order": 8,
+    "title": "에그박사 - 민물 복어 발견",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=VPUuvpqvgAY",
+    "videoId": "VPUuvpqvgAY",
+    "description": "메콩강에서 투망으로 잡은 귀여운 민물 복어 관찰"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "동물",
+    "order": 9,
+    "title": "에그박사 - 공벌레 레고집 만들기",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=X_yNl0F2Cxw",
+    "videoId": "X_yNl0F2Cxw",
+    "description": "외국 공벌레에게 레고로 집 만들어주기"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "바다생물",
+    "order": 10,
+    "title": "에그박사 - 성게를 먹는 늑대장어",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=sV-Bt-oOlVY",
+    "videoId": "sV-Bt-oOlVY",
+    "description": "성게를 부숴먹는 늑대장어 관찰"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "바다생물",
+    "order": 11,
+    "title": "에그박사 - 바다생물 구출작전",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=E38DEdJAabM",
+    "videoId": "E38DEdJAabM",
+    "description": "수산물시장에서 바다생물 구출하기"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "실험",
+    "order": 12,
+    "title": "핑크퐁 바다 청소 대작전",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=qEPE-FmlOKE",
+    "videoId": "qEPE-FmlOKE",
+    "description": "바다 환경 보호 - 뮤지컬 동물 동화"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "별자리",
+    "order": 13,
+    "title": "PhET 중력과 궤도 시뮬레이션",
+    "source": "PhET Colorado",
+    "url": "https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_all.html",
+    "videoId": null,
+    "description": "행성 궤도와 중력을 직접 실험하는 인터랙티브 시뮬레이션"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "실험",
+    "order": 14,
+    "title": "PhET 물질의 상태 시뮬레이션",
+    "source": "PhET Colorado",
+    "url": "https://phet.colorado.edu/sims/html/states-of-matter/latest/states-of-matter_all.html",
+    "videoId": null,
+    "description": "고체, 액체, 기체의 분자 운동을 직접 관찰하는 시뮬레이션"
+  },
+  {
+    "subject": "관찰탐구",
+    "level": "날씨",
+    "order": 15,
+    "title": "뽀로로 에디의 캠핑 소동",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=Tzl-tzfBDHU",
+    "videoId": "Tzl-tzfBDHU",
+    "description": "뽀로로 9기 - 자연 속에서 날씨 체험하기"
+  },
+
+  {
+    "subject": "언어두뇌발달",
+    "level": "한글",
+    "order": 1,
+    "title": "핑크퐁 색깔 놀이 한글",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=zWGDMO-KI2g",
+    "videoId": "zWGDMO-KI2g",
+    "description": "알록달록 색깔을 잡아라! 색깔 이름 한글 학습"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "한글",
+    "order": 2,
+    "title": "핑크퐁 도둑 수수께끼",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=QUgO7Nn_sNI",
+    "videoId": "QUgO7Nn_sNI",
+    "description": "정글의 왕 호랑이 수수께끼 - 사고력과 어휘력 발달"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "한글",
+    "order": 3,
+    "title": "핑크퐁 색깔 도둑을 잡아라",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=vaADZZGXAZE",
+    "videoId": "vaADZZGXAZE",
+    "description": "색깔이 사라졌어요! 색깔 도둑 잡기 게임"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "영어기초",
+    "order": 4,
+    "title": "호기 ABC 영어 배우기",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=LvDd1yQKMxc",
+    "videoId": "LvDd1yQKMxc",
+    "description": "호기와 함께 ABC 알파벳 영어 배우기"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "영어기초",
+    "order": 5,
+    "title": "핑크퐁 니니모 영어",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=iuuesnGQvWI",
+    "videoId": "iuuesnGQvWI",
+    "description": "영어 천재 니니모와 알파벳 버스 타기"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "영어기초",
+    "order": 6,
+    "title": "호기 티라노와 색깔놀이 영어",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=63xpk1DmmDw",
+    "videoId": "63xpk1DmmDw",
+    "description": "티라노사우르스와 색깔 영어 단어 배우기"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "논리",
+    "order": 7,
+    "title": "뽀로로 신비한 연못 - 추리",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=Hxuz5b-mmnw",
+    "videoId": "Hxuz5b-mmnw",
+    "description": "뽀로로 9기 - 신비한 연못의 비밀을 추리하기"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "논리",
+    "order": 8,
+    "title": "호기 수수께끼 고양이 니니모",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=Zdzs6o37iE8",
+    "videoId": "Zdzs6o37iE8",
+    "description": "수수께끼 고양이 니니모와 논리 퀴즈 풀기"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "독서",
+    "order": 9,
+    "title": "핑크퐁 뮤지컬 동물 동화 모음",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=vPWg9TIgemM",
+    "videoId": "vPWg9TIgemM",
+    "description": "뮤지컬 동물 동화 이어보기 - 동물의 왕은 누구?"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "코딩논리",
+    "order": 10,
+    "title": "Scratch 코딩 에디터",
+    "source": "Scratch (MIT)",
+    "url": "https://scratch.mit.edu/projects/editor/",
+    "videoId": null,
+    "description": "Scratch 블록 코딩으로 논리적 사고력 기르기"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "코딩논리",
+    "order": 11,
+    "title": "Scratch 수학 퀴즈 게임",
+    "source": "Scratch (MIT)",
+    "url": "https://scratch.mit.edu/projects/12115110/embed",
+    "videoId": null,
+    "description": "곱셈 연습 수학 퀴즈 - Scratch로 만든 교육 게임"
+  },
+  {
+    "subject": "언어두뇌발달",
+    "level": "코딩논리",
+    "order": 12,
+    "title": "EBS 엔트리 코딩 교육",
+    "source": "EBS",
+    "url": "https://primary.ebs.co.kr/CPG/course/view?courseId=10026770",
+    "videoId": null,
+    "description": "헬로! EBS 소프트웨어 - 엔트리로 배우는 코딩"
+  },
+
+  {
+    "subject": "건강",
+    "level": "영양",
+    "order": 1,
+    "title": "핑크퐁 간식 시간 동요",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=bzue_7hIonI",
+    "videoId": "bzue_7hIonI",
+    "description": "핑크퐁 가방에 뭐가 들었을까? 건강한 간식 ASMR"
+  },
+  {
+    "subject": "건강",
+    "level": "위생",
+    "order": 2,
+    "title": "핑크퐁 바다 청소 위생",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=qEPE-FmlOKE",
+    "videoId": "qEPE-FmlOKE",
+    "description": "뽀득뽀득 바다 청소 대작전 - 깨끗이 하는 습관"
+  },
+  {
+    "subject": "건강",
+    "level": "위생",
+    "order": 3,
+    "title": "호기 모기에게 물렸어요",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=r3AEvAPOsdQ",
+    "videoId": "r3AEvAPOsdQ",
+    "description": "모기에게 물렸을 때 대처법 - 건강 위생 교육"
+  },
+  {
+    "subject": "건강",
+    "level": "운동습관",
+    "order": 4,
+    "title": "뽀로로와 체조 시간",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=TvYld5bmT6Y",
+    "videoId": "TvYld5bmT6Y",
+    "description": "뽀로로와 함께 즐겁게 노는 운동 습관 만들기"
+  },
+  {
+    "subject": "건강",
+    "level": "안전",
+    "order": 5,
+    "title": "국민안전교육 - 어린이 안전",
+    "source": "국민안전교육플랫폼",
+    "url": "https://kasem.safekorea.go.kr/",
+    "videoId": null,
+    "description": "행정안전부 국민안전교육플랫폼 - 생애주기별 안전교육"
+  },
+  {
+    "subject": "건강",
+    "level": "안전",
+    "order": 6,
+    "title": "교통안전 교육센터",
+    "source": "도로교통공단",
+    "url": "https://trafficedu.koroad.or.kr/",
+    "videoId": null,
+    "description": "어린이 교통안전 교육 영상 및 자료"
+  },
+  {
+    "subject": "건강",
+    "level": "안전",
+    "order": 7,
+    "title": "어린이 재난안전 교육",
+    "source": "한국화재보험협회",
+    "url": "https://www.kfpa.or.kr/?menucode=30600&tmenu=edu",
+    "videoId": null,
+    "description": "화재, 지진, 태풍 등 재난 대처 방법 교육 동영상"
+  },
+  {
+    "subject": "건강",
+    "level": "안전",
+    "order": 8,
+    "title": "행정안전부 안전한TV",
+    "source": "행정안전부",
+    "url": "https://www.safetv.go.kr/",
+    "videoId": null,
+    "description": "안전 교육 동영상 - 재난 예방, 생활안전, 교통안전"
+  },
+
+  {
+    "subject": "사회감성",
+    "level": "감정조절",
+    "order": 1,
+    "title": "뽀로로 아기가 된 뽀로로",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=zJdly0IzNHw",
+    "videoId": "zJdly0IzNHw",
+    "description": "뽀로로 9기 - 아기가 되어 감정 이해하기"
+  },
+  {
+    "subject": "사회감성",
+    "level": "감정조절",
+    "order": 2,
+    "title": "호기 니니모가 다쳤어요",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=3v1dQlW35Bs",
+    "videoId": "3v1dQlW35Bs",
+    "description": "친구가 다쳤을 때 어떻게 해야 할까? 감정 교육"
+  },
+  {
+    "subject": "사회감성",
+    "level": "친구/협동",
+    "order": 3,
+    "title": "뽀로로 9기 연속 재생",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=mlntTQ--rnU",
+    "videoId": "mlntTQ--rnU",
+    "description": "뽀로로와 친구들의 우정과 협동 이야기 모음"
+  },
+  {
+    "subject": "사회감성",
+    "level": "친구/협동",
+    "order": 4,
+    "title": "뽀로로와 패티의 펭귄 허그",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=mlSLqSRZD7I",
+    "videoId": "mlSLqSRZD7I",
+    "description": "뽀로로와 패티의 따뜻한 우정 이야기"
+  },
+  {
+    "subject": "사회감성",
+    "level": "예절",
+    "order": 5,
+    "title": "핑크퐁 생일 축하 노래",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=o17WrC9v-Ew",
+    "videoId": "o17WrC9v-Ew",
+    "description": "생일 축하 예절 - 인기 생일 축하 노래 모음"
+  },
+  {
+    "subject": "사회감성",
+    "level": "예절",
+    "order": 6,
+    "title": "핑크퐁 유치원 등원 동요",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=xMNeGmZfrj0",
+    "videoId": "xMNeGmZfrj0",
+    "description": "유치원 등원하며 인사하기 - 사회생활 예절"
+  },
+  {
+    "subject": "사회감성",
+    "level": "감정조절",
+    "order": 7,
+    "title": "호기와 키키팝팝 노래",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=3BYx7Jbgoeo",
+    "videoId": "3BYx7Jbgoeo",
+    "description": "친구와 함께 노래하며 감정 표현하기"
+  },
+  {
+    "subject": "사회감성",
+    "level": "예절",
+    "order": 8,
+    "title": "육영재단 어린이 예절교육",
+    "source": "육영재단 어린이회관",
+    "url": "https://www.yookyoung.org/site/education/page/mannerLesson.jsp",
+    "videoId": null,
+    "description": "인의예지 기본 예절 교육 - 계절별 체험학습"
+  },
+
+  {
+    "subject": "특별활동",
+    "level": "미술",
+    "order": 1,
+    "title": "핑크퐁 알록달록 변신 미술",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=Wg_0hZqXa_I",
+    "videoId": "Wg_0hZqXa_I",
+    "description": "알록달록 핑크퐁으로 변신! 색깔 미술 놀이"
+  },
+  {
+    "subject": "특별활동",
+    "level": "미술",
+    "order": 2,
+    "title": "핑크퐁 대형 풍선 만들기",
+    "source": "핑크퐁 (인기 동요·동화)",
+    "url": "https://www.youtube.com/watch?v=EuGWAusZSDc",
+    "videoId": "EuGWAusZSDc",
+    "description": "아기상어 대형 풍선 만들기 - 미술 창작 활동"
+  },
+  {
+    "subject": "특별활동",
+    "level": "공예",
+    "order": 3,
+    "title": "에그박사 - 레고로 생물 집 만들기",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=X_yNl0F2Cxw",
+    "videoId": "X_yNl0F2Cxw",
+    "description": "공벌레에게 레고로 집 만들어주기 - 공예와 자연 관찰"
+  },
+  {
+    "subject": "특별활동",
+    "level": "캠핑",
+    "order": 4,
+    "title": "뽀로로 에디의 캠핑 소동",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=Xttu7GL6Uy8",
+    "videoId": "Xttu7GL6Uy8",
+    "description": "뽀로로 9기 - 에디의 캠핑 체험과 자연 탐구"
+  },
+  {
+    "subject": "특별활동",
+    "level": "캠핑",
+    "order": 5,
+    "title": "에그박사 - 잎꾼개미굴 탐험",
+    "source": "에그박사 Egg&Bugs",
+    "url": "https://www.youtube.com/watch?v=ue-Eo-bd1RA",
+    "videoId": "ue-Eo-bd1RA",
+    "description": "잎꾼개미굴에 갇힌 에그박사 - 야외 탐험 특별활동"
+  },
+  {
+    "subject": "특별활동",
+    "level": "코딩",
+    "order": 6,
+    "title": "Scratch 블록 코딩 체험",
+    "source": "Scratch (MIT)",
+    "url": "https://scratch.mit.edu/projects/editor/",
+    "videoId": null,
+    "description": "Scratch 에디터에서 직접 코딩 체험하기"
+  },
+  {
+    "subject": "특별활동",
+    "level": "코딩",
+    "order": 7,
+    "title": "EBS 엔트리 소프트웨어 교육",
+    "source": "EBS",
+    "url": "https://primary.ebs.co.kr/CPG/course/view?courseId=10026770",
+    "videoId": null,
+    "description": "엔트리로 배우는 코딩 - 블록 프로그래밍 입문"
+  },
+  {
+    "subject": "특별활동",
+    "level": "요리",
+    "order": 8,
+    "title": "뽀로로 로디 GPT 요리",
+    "source": "뽀로로",
+    "url": "https://www.youtube.com/watch?v=Dn6wo9rrdgs",
+    "videoId": "Dn6wo9rrdgs",
+    "description": "로디 GPT에게 물어보는 요리 이야기"
+  },
+  {
+    "subject": "특별활동",
+    "level": "요리",
+    "order": 9,
+    "title": "호기 냠냠 간식 만들기",
+    "source": "호기! 놀이친구 (핑크퐁)",
+    "url": "https://www.youtube.com/watch?v=AG0mo6MskaM",
+    "videoId": "AG0mo6MskaM",
+    "description": "멈출 수 없는 냠냠 - 간식 만들기 놀이"
+  },
+  {
+    "subject": "특별활동",
+    "level": "미술",
+    "order": 10,
+    "title": "GeoGebra 기하학 그리기",
+    "source": "GeoGebra",
+    "url": "https://www.geogebra.org/geometry",
+    "videoId": null,
+    "description": "GeoGebra로 도형 그리기 - 수학과 미술의 결합"
+  }
+]

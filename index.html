@@ -89,8 +89,8 @@ nav button span:first-child{font-size:20px}
 <div class="sec">📝 퀴즈 도전</div><div id="qR"></div>
 <div class="sec">🔬 더 많은 실험</div><div class="g2" id="sR2"></div>
 <div class="sec">🛠️ 도구</div><div class="g2" id="hU"></div>
-<div class="sec">💬 커뮤니티</div><div id="cR"></div>
-<div style="margin-top:16px;font-size:8px;color:var(--t3);text-align:center">LevelPlay · PhET CC-BY · YouTube 영상은 각 저작권자 귀속</div>
+<div class="sec">💬 커뮤니티</div><div id="calcR"></div>
+<div style="margin-top:16px;font-size:8px;color:var(--t3);text-align:center">LevelPlay · PhET Interactive Simulations, University of Colorado Boulder (CC-BY 4.0) · YouTube 영상은 각 저작권자 귀속</div>
 </div>
 <div class="pg" id="p1"><div class="sec">📺 전체 영상</div><div id="allV"></div></div>
 <div class="pg" id="p2"><div class="sec">🔬 과학 실험</div><div class="g2" id="allS"></div><div class="sec">📝 퀴즈</div><div id="allQ"></div><div class="sec">🛠️ 도구</div><div class="g2" id="allU"></div></div>
@@ -195,7 +195,57 @@ const QUIZ=[
 {q:'Cat을 한국어로?',a:['고양이','강아지','토끼','거북이'],c:0,cat:'영어'},
 {q:'Thank you를 한국어로?',a:['감사합니다','안녕하세요','미안합니다','실례합니다'],c:0,cat:'영어'},
 {q:'뼈를 튼튼하게 하는 영양소는?',a:['칼슘','철분','비타민C','단백질'],c:0,cat:'건강'},
-];
+,
+{q:'7 × 8 = ?',a:['56','54','48','63'],c:0,cat:'구구단'},
+{q:'6 × 9 = ?',a:['54','56','48','63'],c:0,cat:'구구단'},
+{q:'8 × 4 = ?',a:['32','36','28','24'],c:0,cat:'구구단'},
+{q:'9 × 7 = ?',a:['63','56','72','54'],c:0,cat:'구구단'},
+{q:'5 × 6 = ?',a:['30','35','25','36'],c:0,cat:'구구단'},
+{q:'3 × 9 = ?',a:['27','24','21','36'],c:0,cat:'구구단'},
+{q:'4 × 7 = ?',a:['28','32','24','35'],c:0,cat:'구구단'},
+{q:'8 × 6 = ?',a:['48','42','54','36'],c:0,cat:'구구단'},
+{q:'9 × 9 = ?',a:['81','72','90','63'],c:0,cat:'구구단'},
+{q:'2 × 8 = ?',a:['16','18','14','12'],c:0,cat:'구구단'},
+{q:'사과를 영어로 하면?',a:['Apple','Banana','Orange','Grape'],c:0,cat:'영어단어'},
+{q:'고양이를 영어로 하면?',a:['Cat','Dog','Bird','Fish'],c:0,cat:'영어단어'},
+{q:'학교를 영어로 하면?',a:['School','House','Park','Library'],c:0,cat:'영어단어'},
+{q:'영어 단어 Happy의 뜻은?',a:['행복한','슬픈','화난','졸린'],c:0,cat:'영어단어'},
+{q:'영어 단어 Run의 뜻은?',a:['달리다','걷다','앉다','자다'],c:0,cat:'영어단어'},
+{q:'물을 영어로 하면?',a:['Water','Fire','Wind','Earth'],c:0,cat:'영어단어'},
+{q:'영어 단어 Beautiful의 뜻은?',a:['아름다운','못생긴','무서운','작은'],c:0,cat:'영어단어'},
+{q:'친구를 영어로 하면?',a:['Friend','Family','Teacher','Brother'],c:0,cat:'영어단어'},
+{q:'영어 단어 Big의 반대말은?',a:['Small','Tall','Long','Wide'],c:0,cat:'영어단어'},
+{q:'책을 영어로 하면?',a:['Book','Desk','Pen','Note'],c:0,cat:'영어단어'},
+{q:'태양계에서 가장 큰 행성은?',a:['목성','토성','해왕성','천왕성'],c:0,cat:'과학상식'},
+{q:'식물이 광합성을 할 때 필요한 기체는?',a:['이산화탄소','산소','질소','수소'],c:0,cat:'과학상식'},
+{q:'사람의 뼈는 약 몇 개일까요?',a:['206개','106개','306개','150개'],c:0,cat:'과학상식'},
+{q:'지구에서 달까지 빛이 도달하는 시간은 약?',a:['1.3초','8분','1분','10초'],c:0,cat:'과학상식'},
+{q:'포유류가 아닌 동물은?',a:['상어','고래','박쥐','돌고래'],c:0,cat:'과학상식'},
+{q:'식물의 뿌리가 하는 주요 역할은?',a:['물과 양분 흡수','광합성','꽃가루 생산','씨앗 보호'],c:0,cat:'과학상식'},
+{q:'혈액 속에서 산소를 운반하는 것은?',a:['적혈구','백혈구','혈소판','혈장'],c:0,cat:'과학상식'},
+{q:'태양계에서 지구와 가장 가까운 행성은?',a:['금성','화성','수성','목성'],c:0,cat:'과학상식'},
+{q:'나비의 성장 순서로 맞는 것은?',a:['알→애벌레→번데기→나비','알→번데기→애벌레→나비','애벌레→알→번데기→나비','알→나비→애벌레→번데기'],c:0,cat:'과학상식'},
+{q:'소리가 전달되지 않는 곳은?',a:['우주 진공','물속','공기 중','땅속'],c:0,cat:'과학상식'},
+{q:'고구려를 세운 사람은?',a:['주몽','온조','박혁거세','김수로'],c:0,cat:'한국사'},
+{q:'한글을 만든 왕은?',a:['세종대왕','태종','성종','영조'],c:0,cat:'한국사'},
+{q:'임진왜란 때 거북선을 만든 장군은?',a:['이순신','권율','곽재우','김시민'],c:0,cat:'한국사'},
+{q:'삼국 중 가장 먼저 멸망한 나라는?',a:['백제','고구려','신라','가야'],c:0,cat:'한국사'},
+{q:'조선의 마지막 왕은?',a:['순종','고종','철종','헌종'],c:0,cat:'한국사'},
+{q:'고려를 세운 사람은?',a:['왕건','궁예','견훤','최충헌'],c:0,cat:'한국사'},
+{q:'3.1 운동이 일어난 해는?',a:['1919년','1910년','1945년','1920년'],c:0,cat:'한국사'},
+{q:'신라의 수도는 어디였을까요?',a:['경주','부여','공주','서울'],c:0,cat:'한국사'},
+{q:'대한민국 정부가 수립된 해는?',a:['1948년','1945년','1950년','1953년'],c:0,cat:'한국사'},
+{q:'조선시대 과거 시험에서 가장 높은 등급은?',a:['장원급제','을과','병과','생원'],c:0,cat:'한국사'},
+{q:'피라미드를 만든 고대 문명은?',a:['이집트','그리스','로마','메소포타미아'],c:0,cat:'세계사'},
+{q:'고대 그리스에서 시작된 스포츠 대회는?',a:['올림픽','월드컵','아시안게임','유로컵'],c:0,cat:'세계사'},
+{q:'로마의 원형 경기장 이름은?',a:['콜로세움','파르테논','판테온','아크로폴리스'],c:0,cat:'세계사'},
+{q:'중세 유럽에서 흑사병이 크게 유행한 세기는?',a:['14세기','12세기','16세기','10세기'],c:0,cat:'세계사'},
+{q:'아메리카 대륙에 처음 도착한 유럽 탐험가는?',a:['콜럼버스','마젤란','바스코 다 가마','쿡 선장'],c:0,cat:'세계사'},
+{q:'피아노의 건반은 총 몇 개일까요?',a:['88개','76개','64개','100개'],c:0,cat:'음악'},
+{q:'교향곡의 아버지라 불리는 작곡가는?',a:['하이든','모차르트','베토벤','바흐'],c:0,cat:'음악'},
+{q:'바이올린의 줄은 몇 개일까요?',a:['4개','5개','6개','3개'],c:0,cat:'음악'},
+{q:'엘리제를 위하여를 작곡한 사람은?',a:['베토벤','모차르트','쇼팽','슈베르트'],c:0,cat:'음악'},
+{q:'관악기가 아닌 것은?',a:['첼로','트럼펫','플루트','클라리넷'],c:0,cat:'음악'}];
 
 const P=[
 {id:1,g:'자유',t:'여기 레벨시스템 중독성 있네ㅋㅋ',b:'퀴즈 풀고 영상 보면 XP 올라감\n능력치 올리는 재미가 있음',a:'레벨충',l:178,c:[{a:'뉴비',t:'나도 해봐야지',m:60}],m:180},
@@ -225,7 +275,7 @@ function chkA(b,ok){if(b.parentElement.querySelector('.correct,.wrong'))return;i
 
 function renderUtils(el){el.innerHTML=UTS.map(u=>'<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+u.ic+'</div><div class="gn">'+u.nm+'</div></div>').join('');}
 function openU(id){let h='';
-if(id==='calc')h='<b>🧮 계산기</b><input class="fi" id="cV" placeholder="수식" style="margin:6px 0"><button class="bt bp" onclick="try{document.getElementById(\'cR\').textContent=\'= \'+Function(\'return \'+document.getElementById(\'cV\').value)()}catch(e){document.getElementById(\'cR\').textContent=\'오류\'}">계산</button><div style="margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;color:var(--cy);font-size:14px" id="cR"></div>';
+if(id==='calc')h='<b>🧮 계산기</b><input class="fi" id="cV" placeholder="수식" style="margin:6px 0"><button class="bt bp" onclick="try{document.getElementById(\'cR\').textContent=\'= \'+Function(\'return \'+document.getElementById(\'cV\').value)()}catch(e){document.getElementById(\'cR\').textContent=\'오류\'}">계산</button><div style="margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;color:var(--cy);font-size:14px" id="calcR"></div>';
 else if(id==='unit')h='<b>📏 단위변환</b><select class="fi" id="uT" style="margin:4px 0"><option value="l">길이</option><option value="w">무게</option><option value="t">온도</option></select><input class="fi" type="number" id="uV" placeholder="값" oninput="uCv()"><div style="margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;color:var(--cy)" id="uR"></div>';
 else if(id==='timer')h='<b>⏱️ 스톱워치</b><div id="tmD" style="font-size:32px;font-weight:900;text-align:center;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:12px 0">00:00.0</div><div style="display:flex;gap:6px;justify-content:center"><button class="bt bp" onclick="tTg()">시작/중지</button><button class="bt bs" onclick="tRs()">리셋</button></div>';
 else if(id==='dday')h='<b>📅 D-Day</b><input type="date" class="fi" style="margin:6px 0" onchange="const d=new Date(this.value),t=new Date();t.setHours(0,0,0,0);const df=Math.ceil((d-t)/864e5);document.getElementById(\'ddR\').textContent=df===0?\'D-Day!\':df>0?\'D-\'+df:\'D+\'+Math.abs(df)"><div style="padding:12px;background:var(--bg);border-radius:6px;font-size:24px;text-align:center;font-weight:900;color:var(--cy)" id="ddR"></div>';
@@ -259,7 +309,7 @@ function rAll(){
   document.getElementById('gR').innerHTML=GMS.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>').join('');
   renderQuiz(document.getElementById('qR'),QUIZ);
   document.getElementById('hU').innerHTML=UTS.map(u=>'<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+u.ic+'</div><div class="gn">'+u.nm+'</div></div>').join('');
-  document.getElementById('cR').innerHTML=[...P,...U.mp].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
+  document.getElementById('calcR').innerHTML=[...P,...U.mp].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
   const cats2=[...new Set(V.map(v=>v.c))];
   document.getElementById('allV').innerHTML=cats2.map(c=>'<div class="sec" style="font-size:13px">'+(c)+'</div><div class="row">'+V.filter(v=>v.c===c).map(vc).join('')+'</div>').join('');
   document.getElementById('allS').innerHTML=SIMS.map(sc).join('');

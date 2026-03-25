@@ -1,0 +1,72 @@
+[
+  {
+    "level": 1,
+    "title": "골프 그립의 기본 - 올바른 클럽 잡는 법",
+    "source": "임진한클라스",
+    "url": "https://www.youtube.com/@limjinhan",
+    "description": "오버래핑, 인터로킹, 베이스볼 그립의 차이와 자신에게 맞는 그립 선택법. 손목 힘 빼기와 클럽헤드 무게 느끼기의 핵심을 임진한 프로가 알려준다."
+  },
+  {
+    "level": 1,
+    "title": "골프 기본 스윙 - 어드레스부터 피니시까지",
+    "source": "박하림프로",
+    "url": "https://www.youtube.com/@parkharim",
+    "description": "어드레스 자세, 백스윙, 다운스윙, 임팩트, 팔로스루, 피니시까지 스윙의 6단계를 초보 눈높이에서 차근차근 설명하는 골프 입문 레슨."
+  },
+  {
+    "level": 2,
+    "title": "드라이버 비거리 늘리기 - 티샷의 정석",
+    "source": "임진한클라스",
+    "url": "https://www.youtube.com/@limjinhan",
+    "description": "드라이버 티 높이, 볼 위치, 체중이동의 핵심. 힘이 아니라 효율적인 회전으로 비거리를 늘리는 임진한 프로의 드라이버 레슨."
+  },
+  {
+    "level": 2,
+    "title": "아이언샷 정확도 높이기 - 방향과 거리 조절",
+    "source": "박하림프로",
+    "url": "https://www.youtube.com/@parkharim",
+    "description": "7번 아이언 기준 올바른 볼 위치와 다운블로 임팩트 방법. 뒤땅과 토핑을 방지하고 정확한 아이언샷을 만드는 핵심 포인트."
+  },
+  {
+    "level": 3,
+    "title": "퍼팅 마스터하기 - 스코어를 줄이는 최고의 무기",
+    "source": "임진한클라스",
+    "url": "https://www.youtube.com/@limjinhan",
+    "description": "퍼팅 그립, 스트로크 궤도, 거리감 연습법. 그린 경사 읽기와 라인 설정까지, 스코어의 40%를 차지하는 퍼팅을 완성한다."
+  },
+  {
+    "level": 1,
+    "title": "복싱 기본 스탠스 - 올바른 자세 만들기",
+    "source": "Tony Jeffries",
+    "url": "https://www.youtube.com/@tonyjeffries",
+    "description": "발 너비, 무게 중심, 가드 위치까지 복싱의 모든 것은 스탠스에서 시작한다. 올림픽 메달리스트 토니 제프리스의 기초 자세 강의."
+  },
+  {
+    "level": 1,
+    "title": "잽 - 복싱의 가장 중요한 펀치",
+    "source": "Tony Jeffries",
+    "url": "https://www.tonyjeffries.com/watch/",
+    "description": "잽은 공격과 수비의 시작이자 끝. 어깨 회전, 팔 펴기, 리턴까지 빠르고 정확한 잽을 던지는 방법을 단계별로 배운다."
+  },
+  {
+    "level": 2,
+    "title": "스트레이트 - 파워 펀치의 기본",
+    "source": "Tony Jeffries",
+    "url": "https://www.youtube.com/@tonyjeffries",
+    "description": "뒷손으로 체중을 실어 정면을 꿰뚫는 스트레이트. 골반 회전과 체중이동을 활용한 파워 펀치의 메커니즘을 익힌다."
+  },
+  {
+    "level": 2,
+    "title": "훅 - 근거리 파괴력의 핵심",
+    "source": "Tony Jeffries",
+    "url": "https://sanabulsports.com/blogs/techniques/boxing-basics-how-to-throw-a-hook-punch-by-tony-jeffries",
+    "description": "팔꿈치 각도 90도, 수평 회전으로 상대의 측면을 가격하는 훅. 리드 훅과 리어 훅의 차이점과 실전 활용법을 배운다."
+  },
+  {
+    "level": 3,
+    "title": "콤비네이션 - 잽-스트레이트-훅 연결하기",
+    "source": "Tony Jeffries",
+    "url": "https://www.youtube.com/@tonyjeffries",
+    "description": "1-2(잽-스트레이트), 1-2-3(잽-스트레이트-훅) 등 기본 콤비네이션 연습. 펀치 연결의 리듬과 타이밍을 익히는 실전 복싱 훈련."
+  }
+]

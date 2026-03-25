@@ -1,0 +1,107 @@
+[
+  {
+    "level": 1,
+    "title": "고조선과 단군신화 - 우리 역사의 시작",
+    "source": "EBS 초등 스토리 한국사",
+    "url": "https://primary.ebs.co.kr/course/view?courseId=10016271",
+    "description": "곰과 호랑이 이야기로 배우는 고조선 건국신화. 환웅과 웅녀, 단군왕검의 탄생을 애니메이션으로 재미있게 풀어낸 초등 눈높이 역사 강의."
+  },
+  {
+    "level": 1,
+    "title": "고조선의 8조법과 생활 모습",
+    "source": "최태성 초등TV",
+    "url": "https://www.youtube.com/@choisuperstar",
+    "description": "고조선 사람들은 어떻게 살았을까? 8조법 중 남아있는 3가지 법을 통해 고조선의 사회 모습을 알아보는 큰별쌤의 초등 역사 수업."
+  },
+  {
+    "level": 1,
+    "title": "삼국시대 - 고구려 광개토대왕의 대모험",
+    "source": "최태성 1TV",
+    "url": "https://www.youtube.com/@Choisuperstar1TV",
+    "description": "만주벌판을 달리던 고구려 광개토대왕! 광개토대왕릉비에 새겨진 정복의 역사를 통해 삼국시대 고구려의 전성기를 배운다."
+  },
+  {
+    "level": 1,
+    "title": "삼국시대 - 백제와 신라의 경쟁",
+    "source": "EBS 역사채널e",
+    "url": "https://home.ebs.co.kr/historye/main",
+    "description": "근초고왕의 백제 전성기와 진흥왕의 신라 성장기. 한강을 둘러싼 세 나라의 치열한 경쟁을 생생한 영상으로 만난다."
+  },
+  {
+    "level": 2,
+    "title": "고려시대 - 태조 왕건과 후삼국 통일",
+    "source": "EBS 초등 스토리 한국사",
+    "url": "https://primary.ebs.co.kr/course/view?courseId=10016272",
+    "description": "후고구려, 후백제, 신라의 혼란 속에서 왕건이 고려를 세우고 후삼국을 통일하는 과정. 훈요십조와 고려의 건국 이념을 쉽게 풀어낸다."
+  },
+  {
+    "level": 2,
+    "title": "고려시대 - 팔만대장경과 몽골 침입",
+    "source": "최태성 초등TV",
+    "url": "https://www.youtube.com/@choisuperstar",
+    "description": "몽골의 침략에 맞서 고려 사람들이 만든 팔만대장경! 나라를 지키려는 백성들의 마음과 고려의 문화유산을 알아본다."
+  },
+  {
+    "level": 2,
+    "title": "조선시대 - 세종대왕과 한글 창제",
+    "source": "EBS 역사채널e",
+    "url": "https://home.ebs.co.kr/historye/main",
+    "description": "백성을 사랑한 세종대왕이 훈민정음을 만든 이유와 과정. 집현전 학자들과의 이야기, 그리고 한글의 과학적 원리를 배운다."
+  },
+  {
+    "level": 2,
+    "title": "조선시대 - 이순신 장군과 임진왜란",
+    "source": "최태성 1TV",
+    "url": "https://www.youtube.com/@Choisuperstar1TV",
+    "description": "거북선을 이끌고 왜군과 싸운 이순신 장군! 한산도 대첩, 명량해전 등 임진왜란의 주요 전투와 이순신의 리더십을 생생하게 전달한다."
+  },
+  {
+    "level": 3,
+    "title": "근현대사 - 일제강점기와 독립운동",
+    "source": "EBS 초등 스토리 한국사",
+    "url": "https://primary.ebs.co.kr/course/view?courseId=10016272",
+    "description": "일본에 나라를 빼앗긴 슬픈 역사와 이를 되찾기 위해 싸운 독립운동가들의 이야기. 안중근, 유관순, 윤봉길 의사의 활동을 배운다."
+  },
+  {
+    "level": 3,
+    "title": "근현대사 - 6.25 전쟁과 대한민국의 발전",
+    "source": "최태성 1TV",
+    "url": "https://www.youtube.com/@Choisuperstar1TV",
+    "description": "한국전쟁의 발발과 휴전, 그리고 전쟁 후 대한민국이 경제 성장을 이루는 과정까지. 우리나라의 현대사를 이해하는 중요한 수업."
+  },
+  {
+    "level": 1,
+    "title": "고대 이집트 - 피라미드와 파라오의 세계",
+    "source": "TED-Ed",
+    "url": "https://ed.ted.com/on/MDPxVMuY",
+    "description": "고대 이집트의 피라미드는 어떻게 만들었을까? 파라오, 미라, 상형문자 등 신비로운 이집트 문명을 애니메이션으로 탐험한다."
+  },
+  {
+    "level": 2,
+    "title": "고대 그리스 - 민주주의의 탄생",
+    "source": "CrashCourse World History",
+    "url": "https://www.youtube.com/@crashcourse",
+    "description": "올림픽과 민주주의가 시작된 고대 그리스! 아테네와 스파르타, 페르시아 전쟁을 통해 서양 문명의 뿌리를 배운다."
+  },
+  {
+    "level": 2,
+    "title": "고대 로마 - 공화정에서 제국까지",
+    "source": "CrashCourse World History",
+    "url": "https://www.youtube.com/@crashcourse",
+    "description": "줄리어스 시저와 로마 제국의 흥망성쇠. 공화정은 왜 무너졌고 제국은 어떻게 세계를 지배했는지 존 그린이 쉽게 설명한다."
+  },
+  {
+    "level": 2,
+    "title": "중세 유럽 - 기사와 성의 시대",
+    "source": "TED-Ed",
+    "url": "https://ed.ted.com/on/FNmsYZiu",
+    "description": "중세 유럽의 봉건제도, 기사도, 십자군 전쟁을 3분 반에 정리! 중세 시대에 대한 6가지 오해도 함께 바로잡는다."
+  },
+  {
+    "level": 3,
+    "title": "르네상스 - 레오나르도 다빈치와 문화의 부활",
+    "source": "TED-Ed",
+    "url": "https://ed.ted.com/on/XvUcTM2y",
+    "description": "르네상스는 정말 일어난 것일까? 다빈치의 비트루비우스 인체도, 미켈란젤로의 다비드상을 통해 인간 중심 문화의 부활을 탐구한다."
+  }
+]

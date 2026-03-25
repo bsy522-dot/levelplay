@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "generated": "2026-03-25",
+    "description": "아이 교육용(5~12세) 역사/수학/과학 커리큘럼 콘텐츠",
+    "total_count": 150,
+    "subjects": ["history", "math", "science"]
+  },
+  "contents": [
+
+    {"subject":"history","level":"한국-고조선","order":1,"title":"한국사 시간여행 - 고조선의 탄생","source":"EBS 애니키즈","url":"https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150","videoId":"","description":"고조선부터 현대까지 시간여행하는 애니메이션. 대한이와 어리의 모험으로 한국사를 쉽게 이해","country":"한국"},
+    {"subject":"history","level":"한국-고조선","order":2,"title":"초등 스토리 한국사 - 선사시대와 고조선","source":"EBS 초등","url":"https://primary.ebs.co.kr/course/view?courseId=10016271","videoId":"","description":"이야기로 배우는 한국사. 614,856명 학습, 99% 만족도. 고조선의 건국부터 시작","country":"한국"},
+    {"subject":"history","level":"한국-고조선","order":3,"title":"설민석의 한국사 대모험 - 고조선 편","source":"설민석","url":"https://www.youtube.com/@설민석","videoId":"","description":"어린이용 한국사 학습만화 기반. 2024년 TV 애니메이션 방영. 고조선~근현대 커버","country":"한국"},
+    {"subject":"history","level":"한국-고조선","order":4,"title":"최태성 초등TV - 고조선 이야기","source":"최태성","url":"https://www.youtube.com/@최태성초등TV","videoId":"","description":"큰별쌤 최태성의 초등학생 대상 한국사 강의. 쉽고 재미있는 스토리텔링","country":"한국"},
+
+    {"subject":"history","level":"한국-삼국","order":5,"title":"한국사 시간여행 - 고구려, 백제, 신라","source":"EBS 애니키즈","url":"https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150","videoId":"","description":"삼국의 건국과 발전, 문화를 애니메이션으로 탐험","country":"한국"},
+    {"subject":"history","level":"한국-삼국","order":6,"title":"설민석의 한국사 대모험 11권 - 고구려 편","source":"설민석","url":"https://www.youtube.com/@설민석","videoId":"","description":"부마 온달의 이야기를 통해 배우는 고구려의 역사와 문화","country":"한국"},
+    {"subject":"history","level":"한국-삼국","order":7,"title":"벌거벗은 한국사 - 삼국시대 특집","source":"tvN Story/최태성","url":"https://www.youtube.com/@tvNStory","videoId":"","description":"최태성 선생님의 스토리텔링 한국사쇼. 삼국시대 핵심 사건과 인물","country":"한국"},
+
+    {"subject":"history","level":"한국-통일신라/발해","order":8,"title":"초등 스토리 한국사 - 삼국통일과 발해","source":"EBS 초등","url":"https://primary.ebs.co.kr/course/view?courseId=10016271","videoId":"","description":"삼국통일의 과정과 발해의 건국을 이야기로 학습","country":"한국"},
+
+    {"subject":"history","level":"한국-고려","order":9,"title":"설민석의 한국사 대모험 20권 - 고려의 발전","source":"설민석","url":"https://www.youtube.com/@설민석","videoId":"","description":"서희와 거란의 한판 대결! 고려시대의 외교와 문화 발전","country":"한국"},
+    {"subject":"history","level":"한국-고려","order":10,"title":"한국사 시간여행 - 고려시대","source":"EBS 애니키즈","url":"https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150","videoId":"","description":"고려의 건국, 불교문화, 몽골침입 등을 애니메이션으로 학습","country":"한국"},
+
+    {"subject":"history","level":"한국-조선","order":11,"title":"초등 스토리 한국사 - 조선의 건국과 문화","source":"EBS 초등","url":"https://primary.ebs.co.kr/course/view?courseId=10016271","videoId":"","description":"조선 건국, 세종대왕, 임진왜란 등 조선사의 핵심을 이야기로 전달","country":"한국"},
+    {"subject":"history","level":"한국-조선","order":12,"title":"벌거벗은 한국사 - 조선왕조 특집","source":"tvN Story/최태성","url":"https://www.youtube.com/@tvNStory","videoId":"","description":"조선시대 왕들의 이야기, 사건, 문화를 깊이 있게 풀어냄","country":"한국"},
+    {"subject":"history","level":"한국-조선","order":13,"title":"설민석의 한국사 대모험 - 조선 발명품 편","source":"설민석","url":"https://www.youtube.com/@설민석","videoId":"","description":"조선시대의 위대한 발명품들을 만화로 재미있게 학습","country":"한국"},
+
+    {"subject":"history","level":"한국-근현대","order":14,"title":"초등 스토리 한국사 - 근현대사","source":"EBS 초등","url":"https://primary.ebs.co.kr/course/view?courseId=10016271","videoId":"","description":"개항기, 일제강점기, 광복, 대한민국의 발전까지 이야기로 학습","country":"한국"},
+    {"subject":"history","level":"한국-근현대","order":15,"title":"한국사 시간여행 - 근현대","source":"EBS 애니키즈","url":"https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150","videoId":"","description":"일제강점기부터 현대까지 시간여행으로 배우는 근현대사","country":"한국"},
+
+    {"subject":"history","level":"중국-황하문명","order":16,"title":"별별역사 - 정사 초한지 시리즈","source":"별별역사","url":"https://www.youtube.com/channel/UCYuiS1EYw54dEJVzseQSYXw","videoId":"","description":"중국 고대 초나라와 한나라의 역사를 만화풍 애니메이션으로 설명","country":"중국"},
+    {"subject":"history","level":"중국-진한","order":17,"title":"별별역사 - 알렉산더 대왕과 동방 정복","source":"별별역사","url":"https://www.youtube.com/channel/UCYuiS1EYw54dEJVzseQSYXw","videoId":"","description":"알렉산더의 동방원정과 헬레니즘 문화의 전파. 중국까지의 영향","country":"중국"},
+    {"subject":"history","level":"중국-당송","order":18,"title":"TED-Ed - 중국 실크로드의 역사","source":"TED-Ed","url":"https://ed.ted.com/","videoId":"","description":"중국 당나라와 송나라 시대의 실크로드 교역과 문화 교류 애니메이션","country":"중국"},
+    {"subject":"history","level":"중국-명청","order":19,"title":"세계사 만화 - 명나라와 청나라","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=명나라+청나라+역사+어린이","videoId":"","description":"명나라의 건국부터 청나라의 멸망까지. 만리장성, 자금성 등 문화유산","country":"중국"},
+    {"subject":"history","level":"중국-근현대","order":20,"title":"중국 근현대사 - 아편전쟁에서 현대까지","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=중국+근현대사+어린이","videoId":"","description":"아편전쟁, 신해혁명, 중화인민공화국 수립 등 근현대사 핵심 사건","country":"중국"},
+
+    {"subject":"history","level":"일본-야마토","order":21,"title":"일본 역사 - 야마토 시대와 고대 일본","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=일본+역사+야마토+고대+어린이","videoId":"","description":"일본 고대 야마토 정권의 형성과 불교 전래, 나라시대","country":"일본"},
+    {"subject":"history","level":"일본-전국시대","order":22,"title":"일본 전국시대 - 사무라이의 시대","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=일본+전국시대+역사+어린이","videoId":"","description":"오다 노부나가, 도요토미 히데요시, 도쿠가와 이에야스의 전국통일","country":"일본"},
+    {"subject":"history","level":"일본-에도","order":23,"title":"일본 에도시대 - 250년의 평화","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=일본+에도시대+역사+어린이","videoId":"","description":"도쿠가와 막부의 쇄국정치, 사무라이 문화, 우키요에 예술","country":"일본"},
+    {"subject":"history","level":"일본-메이지","order":24,"title":"일본 메이지유신 - 근대화의 시작","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=일본+메이지유신+역사+어린이","videoId":"","description":"메이지유신으로 시작된 일본의 근대화와 제국주의 확장","country":"일본"},
+
+    {"subject":"history","level":"유럽-그리스","order":25,"title":"TED-Ed - 고대 그리스의 민주주의","source":"TED-Ed","url":"https://ed.ted.com/search?utf8=%E2%9C%93&qs=ancient+greece","videoId":"","description":"고대 아테네의 민주주의 탄생과 발전. 소크라테스, 플라톤 등 철학자","country":"그리스"},
+    {"subject":"history","level":"유럽-그리스","order":26,"title":"올림포스 가디언 - 그리스 신화 애니메이션","source":"SBS/올림포스 가디언","url":"https://www.youtube.com/results?search_query=올림포스+가디언+그리스+신화","videoId":"","description":"그리스 로마 신화를 애니메이션으로. 제우스, 헤라클레스 등 신들의 이야기","country":"그리스"},
+    {"subject":"history","level":"유럽-그리스","order":27,"title":"CrashCourse - 고대 그리스","source":"CrashCourse","url":"https://www.youtube.com/@crashcourse","videoId":"","description":"고대 그리스 문명의 핵심을 빠르고 재미있게 설명하는 영어 교육 영상","country":"그리스"},
+
+    {"subject":"history","level":"유럽-로마","order":28,"title":"TED-Ed - 로마 군인의 하루","source":"TED-Ed","url":"https://ed.ted.com/","videoId":"","description":"로마 군인이 전투 준비와 책임에 대해 설명하는 A Day in the Life 시리즈","country":"로마"},
+    {"subject":"history","level":"유럽-로마","order":29,"title":"CrashCourse - 로마 제국","source":"CrashCourse","url":"https://www.youtube.com/@crashcourse","videoId":"","description":"로마 공화정에서 제국으로의 변화, 팍스 로마나, 로마의 멸망","country":"로마"},
+
+    {"subject":"history","level":"유럽-중세","order":30,"title":"TED-Ed - 중세 유럽의 생활","source":"TED-Ed","url":"https://ed.ted.com/","videoId":"","description":"중세 봉건제도, 기사, 흑사병, 십자군전쟁 등을 애니메이션으로 설명","country":"유럽"},
+    {"subject":"history","level":"유럽-중세","order":31,"title":"별별역사 - 몽골 제국의 유럽 침략","source":"별별역사","url":"https://www.youtube.com/channel/UCYuiS1EYw54dEJVzseQSYXw","videoId":"","description":"몽골 제국의 유럽 침략사 시리즈. 칭기즈칸부터 동유럽 침공까지","country":"유럽"},
+
+    {"subject":"history","level":"유럽-르네상스","order":32,"title":"TED-Ed - 르네상스란 무엇인가","source":"TED-Ed","url":"https://ed.ted.com/","videoId":"","description":"이탈리아에서 시작된 르네상스 운동. 레오나르도 다빈치, 미켈란젤로","country":"유럽"},
+    {"subject":"history","level":"유럽-르네상스","order":33,"title":"별별역사 - 대항해시대 시리즈","source":"별별역사","url":"https://www.youtube.com/channel/UCYuiS1EYw54dEJVzseQSYXw","videoId":"","description":"콜럼버스, 바스코 다가마 등 대항해시대의 탐험가들과 세계 변화","country":"유럽"},
+
+    {"subject":"history","level":"유럽-근대","order":34,"title":"별별역사 - 미국 워터게이트 사건","source":"별별역사","url":"https://www.youtube.com/channel/UCYuiS1EYw54dEJVzseQSYXw","videoId":"","description":"미국 정치사의 핵심 사건. 닉슨 대통령의 워터게이트 스캔들","country":"미국"},
+    {"subject":"history","level":"유럽-근대","order":35,"title":"별별역사 - 핵개발의 역사","source":"별별역사","url":"https://www.youtube.com/channel/UCYuiS1EYw54dEJVzseQSYXw","videoId":"","description":"맨해튼 프로젝트부터 냉전까지 전세계 핵개발의 역사","country":"세계"},
+    {"subject":"history","level":"유럽-근대","order":36,"title":"CrashCourse - 산업혁명","source":"CrashCourse","url":"https://www.youtube.com/@crashcourse","videoId":"","description":"영국에서 시작된 산업혁명이 세계를 어떻게 변화시켰는지 설명","country":"유럽"},
+
+    {"subject":"history","level":"이집트","order":37,"title":"TED-Ed - 고대 이집트 의사의 하루","source":"TED-Ed","url":"https://ed.ted.com/search?utf8=%E2%9C%93&qs=ancient+egypt","videoId":"","description":"고대 이집트 의사의 하루를 통해 배우는 이집트 문명과 의학","country":"이집트"},
+    {"subject":"history","level":"이집트","order":38,"title":"Why? 나라별 세계사 - 이집트","source":"Why? 시리즈","url":"https://www.youtube.com/results?search_query=Why+세계사+이집트+어린이","videoId":"","description":"이집트의 역사, 경제, 정치, 문화를 만화로 쉽게 풀어냄","country":"이집트"},
+
+    {"subject":"history","level":"메소포타미아","order":39,"title":"TED-Ed - 메소포타미아 문명","source":"TED-Ed","url":"https://ed.ted.com/","videoId":"","description":"인류 최초의 문명 메소포타미아. 수메르, 바빌론, 아시리아의 역사","country":"이라크"},
+    {"subject":"history","level":"메소포타미아","order":40,"title":"CrashCourse - 메소포타미아","source":"CrashCourse","url":"https://www.youtube.com/@crashcourse","videoId":"","description":"유프라테스강과 티그리스강 사이의 문명. 쐐기문자, 함무라비 법전","country":"이라크"},
+
+    {"subject":"history","level":"인도","order":41,"title":"TED-Ed - 고대 인도 문명","source":"TED-Ed","url":"https://ed.ted.com/","videoId":"","description":"인더스 문명, 마우리아 왕조, 불교와 힌두교의 탄생","country":"인도"},
+    {"subject":"history","level":"인도","order":42,"title":"CrashCourse - 인더스 문명","source":"CrashCourse","url":"https://www.youtube.com/@crashcourse","videoId":"","description":"모헨조다로, 하라파 등 인더스 문명의 도시와 문화","country":"인도"},
+
+
+    {"subject":"math","level":"L1","order":1,"title":"칸아카데미 - 초등 1학년 1학기: 덧셈과 뺄셈","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/kor-1st-1/x22720cd23d5246e1:1-1-3","videoId":"","description":"수 세기부터 시작하는 가장 기초적인 덧셈과 뺄셈. 무료 연습문제 포함","country":""},
+    {"subject":"math","level":"L1","order":2,"title":"칸아카데미 - 초등 1학년 2학기: 덧셈과 뺄셈(1)","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/kor-1st-2/xdffa2afcc11cd098:1-2-2","videoId":"","description":"한 자리 수의 덧셈과 뺄셈 심화. 받아올림, 받아내림 개념 도입","country":""},
+    {"subject":"math","level":"L1","order":3,"title":"칸아카데미 - 덧셈의 기초 (동영상)","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/arithmetic/arith-review-add-subtract/arith-review-basic-add-subtract/v/basic-addition","videoId":"","description":"살 에셈이 가장 처음 배우는 기본 덧셈 동영상 강의","country":""},
+    {"subject":"math","level":"L1","order":4,"title":"칸아카데미 - 미국 1학년: 덧셈과 뺄셈","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/cc-1st-grade-math/cc-1st-add-subtract","videoId":"","description":"미국 커리큘럼 기준 1학년 수학. 한국어 번역 제공","country":""},
+    {"subject":"math","level":"L1","order":5,"title":"수학의 역사 - 고대인의 수 세기","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=수학의+역사+수+세기+고대+어린이","videoId":"","description":"고대 문명에서 숫자가 어떻게 탄생했는지. 이집트/바빌론의 수 체계","country":""},
+
+    {"subject":"math","level":"L2","order":6,"title":"칸아카데미 - 초등 2학년: 곱셈의 기초","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/kor-2nd-1","videoId":"","description":"구구단의 기초, 곱셈과 나눗셈의 관계를 이해하는 단계","country":""},
+    {"subject":"math","level":"L2","order":7,"title":"칸아카데미 - 초등 3학년 1학기: 덧셈과 뺄셈 심화","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/kor-3rd-1/xf61be49f9afc04f2:3-1-1","videoId":"","description":"세 자리 수의 덧셈과 뺄셈. 곱셈구구 마스터","country":""},
+    {"subject":"math","level":"L2","order":8,"title":"칸아카데미 - 초등 4학년 2학기: 분수의 덧셈과 뺄셈","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/kor-4th-2/xd36dca6960632825:4-2-1","videoId":"","description":"분수의 개념 이해, 같은 분모의 분수 덧셈과 뺄셈","country":""},
+    {"subject":"math","level":"L2","order":9,"title":"칸아카데미 - 초등 5학년 1학기: 분수의 덧셈과 뺄셈","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/kor-5th-1/x82bde1dffd172801:5-1-5","videoId":"","description":"다른 분모의 분수 덧셈과 뺄셈. 통분 개념 학습","country":""},
+    {"subject":"math","level":"L2","order":10,"title":"칸아카데미 - 미국 5학년: 분수의 덧셈과 뺄셈","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/cc-fifth-grade-math/imp-fractions-3","videoId":"","description":"미국 커리큘럼 기준 5학년 분수 심화. 대분수, 가분수 변환","country":""},
+    {"subject":"math","level":"L2","order":11,"title":"수학의 역사 - 피타고라스와 수의 비밀","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=피타고라스+수학+역사+어린이","videoId":"","description":"피타고라스 학파의 수 이론. 음악과 수학의 관계. 무리수의 발견","country":""},
+
+    {"subject":"math","level":"L3","order":12,"title":"칸아카데미 - 기하학 기초: 도형과 각도","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/geometry","videoId":"","description":"삼각형, 사각형, 원 등 기본 도형의 성질과 넓이/둘레 계산","country":""},
+    {"subject":"math","level":"L3","order":13,"title":"GeoGebra - 도형 탐구 시뮬레이션","source":"GeoGebra","url":"https://www.geogebra.org/geometry","videoId":"","description":"인터랙티브 기하학 도구. 도형을 직접 만들고 변형하며 학습. 무료","country":""},
+    {"subject":"math","level":"L3","order":14,"title":"3Blue1Brown - 기하학의 아름다움","source":"3Blue1Brown","url":"https://www.youtube.com/@3blue1brown","videoId":"","description":"수학 시각화의 최고봉. 유클리드 기하학의 원리를 아름다운 애니메이션으로","country":""},
+    {"subject":"math","level":"L3","order":15,"title":"수학의 역사 - 유클리드와 기하학 원론","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=유클리드+기하학+원론+역사+수학","videoId":"","description":"기원전 300년 유클리드의 《원론》. 2300년간 수학의 교과서로 사용된 명저","country":""},
+    {"subject":"math","level":"L3","order":16,"title":"Desmos - 도형과 좌표 탐구","source":"Desmos","url":"https://www.desmos.com/geometry","videoId":"","description":"온라인 기하학 도구. 좌표평면 위에서 도형을 그리고 탐구. 무료","country":""},
+
+    {"subject":"math","level":"L4","order":17,"title":"칸아카데미 - 대수학 기초: 방정식","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/algebra-basics","videoId":"","description":"미지수 x, 일차방정식, 연립방정식 등 대수학의 기초","country":""},
+    {"subject":"math","level":"L4","order":18,"title":"수학의 역사 - 알콰리즈미와 대수학","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=알콰리즈미+대수학+역사+수학","videoId":"","description":"9세기 이슬람 수학자 알콰리즈미. algebra의 어원. 방정식 풀기의 체계화","country":""},
+    {"subject":"math","level":"L4","order":19,"title":"3Blue1Brown - 선형대수의 본질","source":"3Blue1Brown","url":"https://www.youtube.com/@3blue1brown","videoId":"","description":"벡터, 행렬, 선형변환 등 선형대수를 직관적으로 이해하는 시각화 시리즈","country":""},
+
+    {"subject":"math","level":"L5","order":20,"title":"칸아카데미 - 좌표와 함수","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math/algebra","videoId":"","description":"좌표평면, 일차함수, 이차함수, 그래프 해석 등 함수의 세계","country":""},
+    {"subject":"math","level":"L5","order":21,"title":"Desmos - 함수 그래프 탐구","source":"Desmos","url":"https://www.desmos.com/calculator","videoId":"","description":"온라인 그래핑 계산기. 다양한 함수를 입력하고 그래프를 시각적으로 탐구. 무료","country":""},
+    {"subject":"math","level":"L5","order":22,"title":"3Blue1Brown - 미적분의 본질","source":"3Blue1Brown","url":"https://www.youtube.com/@3blue1brown","videoId":"","description":"미분과 적분의 핵심 개념을 아름다운 시각화로 직관적으로 이해","country":""},
+    {"subject":"math","level":"L5","order":23,"title":"수학의 역사 - 뉴턴과 라이프니츠의 미적분","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=뉴턴+라이프니츠+미적분+역사","videoId":"","description":"17세기 뉴턴과 라이프니츠가 독립적으로 발견한 미적분. 과학혁명의 핵심 도구","country":""},
+    {"subject":"math","level":"L5","order":24,"title":"Wolfram Alpha - 수학 계산기","source":"Wolfram Alpha","url":"https://www.wolframalpha.com/","videoId":"","description":"방정식, 그래프, 미적분 등 수학 문제를 입력하면 풀이와 시각화 제공. 무료","country":""},
+
+    {"subject":"math","level":"도구","order":25,"title":"칸아카데미 - 전체 수학 커리큘럼","source":"Khan Academy 한국어","url":"https://ko.khanacademy.org/math","videoId":"","description":"유치원~대학 수준까지 체계적인 무료 수학 강의. 한국 교육과정 맞춤 제공","country":""},
+    {"subject":"math","level":"도구","order":26,"title":"GeoGebra - 수학 시뮬레이션 통합","source":"GeoGebra","url":"https://www.geogebra.org/","videoId":"","description":"기하, 대수, 통계, 미적분 시각화. 무료. 한국어 지원. 교실 활동 포함","country":""},
+    {"subject":"math","level":"도구","order":27,"title":"Brilliant - 인터랙티브 수학 퍼즐","source":"Brilliant","url":"https://brilliant.org/","videoId":"","description":"문제 풀기 중심 수학 학습. 논리, 기하, 확률 등. 일부 무료","country":""},
+
+
+    {"subject":"science","level":"L1","order":1,"title":"LG사이언스랜드 - 자연관찰 실험","source":"LG사이언스랜드 유튜브","url":"https://www.youtube.com/@LGScienceLand","videoId":"","description":"어린이를 위한 과학 실험 영상. 자연현상 관찰, 식물/동물 탐구. 서비스 종료 후 유튜브로 이관","country":""},
+    {"subject":"science","level":"L1","order":2,"title":"EBS 애니키즈 - 과학 탐험","source":"EBS 애니키즈","url":"https://anikids.ebs.co.kr/anikids/allvods","videoId":"","description":"EBS 어린이 과학 애니메이션 모음. 자연, 동물, 식물 등 관찰 탐구","country":""},
+    {"subject":"science","level":"L1","order":3,"title":"팝콘플래닛 - 어린이과학동아","source":"동아사이언스","url":"https://www.popcornplanet.co.kr","videoId":"","description":"어린이과학동아+어린이수학동아 운영 플랫폼. 과학 만화, 실험, 퀴즈","country":""},
+    {"subject":"science","level":"L1","order":4,"title":"PhET - 물질의 상태: 기초편","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/states-of-matter-basics","videoId":"","description":"고체, 액체, 기체의 상태 변화를 시뮬레이션으로 직접 탐구. 한국어","country":""},
+    {"subject":"science","level":"L1","order":5,"title":"자바실험실 - 자연과학 시뮬레이션","source":"JavaLab","url":"https://javalab.org/","videoId":"","description":"한국어 과학 시뮬레이션. 빛, 소리, 물, 자석 등 기초 자연현상 실험","country":""},
+    {"subject":"science","level":"L1","order":6,"title":"Google Earth - 지구 탐험","source":"Google","url":"https://earth.google.com/","videoId":"","description":"3D로 지구 탐색. 화산, 바다, 산맥 등 자연지형 관찰. Voyager 교육 스토리","country":""},
+    {"subject":"science","level":"L1","order":7,"title":"Stellarium - 밤하늘 관찰","source":"Stellarium","url":"https://stellarium-web.org/","videoId":"","description":"웹 기반 천문 시뮬레이터. 별자리, 행성, 달 관찰. 무료. 실제 밤하늘 재현","country":""},
+
+    {"subject":"science","level":"L2","order":8,"title":"PhET - 힘과 운동: 기초","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/forces-and-motion-basics","videoId":"","description":"밀기/당기기, 마찰력, 가속도 등 힘과 운동의 기초를 시뮬레이션으로 체험","country":""},
+    {"subject":"science","level":"L2","order":9,"title":"PhET - 에너지 스케이트 공원: 기초","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/energy-skate-park-basics","videoId":"","description":"위치에너지와 운동에너지의 변환을 스케이트 공원 시뮬레이션으로 학습","country":""},
+    {"subject":"science","level":"L2","order":10,"title":"1분과학 - 뉴턴의 운동법칙","source":"1분과학","url":"https://www.youtube.com/@1분과학","videoId":"","description":"뉴턴의 3가지 운동법칙을 1분 내외의 짧은 영상으로 간결하게 설명","country":""},
+    {"subject":"science","level":"L2","order":11,"title":"과학쿠키 - 중력이란 무엇인가","source":"과학쿠키","url":"https://www.youtube.com/@과학쿠키","videoId":"","description":"뉴턴의 만유인력부터 아인슈타인의 일반상대성이론까지. 중력의 본질 탐구","country":""},
+    {"subject":"science","level":"L2","order":12,"title":"PhET - 중력과 궤도","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/gravity-and-orbits","videoId":"","description":"태양, 지구, 달의 중력 상호작용과 궤도 운동 시뮬레이션","country":""},
+    {"subject":"science","level":"L2","order":13,"title":"자바실험실 - 물리: 힘과 운동","source":"JavaLab","url":"https://javalab.org/category/physics/","videoId":"","description":"한국어 물리 시뮬레이션. 뉴턴의 법칙, 진자, 파동 등 인터랙티브 실험","country":""},
+    {"subject":"science","level":"L2","order":14,"title":"과학의 역사 - 갈릴레오와 역학의 탄생","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=갈릴레오+역학+과학+역사+어린이","videoId":"","description":"갈릴레오의 낙체 실험, 망원경 관측. 과학적 방법론의 시작","country":""},
+
+    {"subject":"science","level":"L3","order":15,"title":"PhET - 원자 모형 만들기","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/build-an-atom","videoId":"","description":"양성자, 중성자, 전자를 조합하여 원자를 직접 만들어보는 시뮬레이션","country":""},
+    {"subject":"science","level":"L3","order":16,"title":"PhET - 반응물, 생성물과 잔류물","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/reactants-products-and-leftovers","videoId":"","description":"화학 반응에서 반응물과 생성물의 관계를 시각적으로 이해","country":""},
+    {"subject":"science","level":"L3","order":17,"title":"RSC 인터랙티브 주기율표","source":"Royal Society of Chemistry","url":"https://www.rsc.org/periodic-table","videoId":"","description":"각 원소의 상세 정보, 발견 역사, 용도를 탐색할 수 있는 인터랙티브 주기율표","country":""},
+    {"subject":"science","level":"L3","order":18,"title":"1분과학 - 원소와 주기율표","source":"1분과학","url":"https://www.youtube.com/@1분과학","videoId":"","description":"멘델레예프의 주기율표부터 현대 화학까지. 원소의 세계를 간결하게 설명","country":""},
+    {"subject":"science","level":"L3","order":19,"title":"ChemCollective - 가상 화학 실험실","source":"카네기멜론대학","url":"https://chemcollective.org/","videoId":"","description":"온라인에서 화학 실험을 수행할 수 있는 가상 실험실. 무료","country":""},
+    {"subject":"science","level":"L3","order":20,"title":"과학의 역사 - 라부아지에와 근대 화학","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=라부아지에+근대+화학+역사","videoId":"","description":"근대 화학의 아버지 라부아지에. 질량보존의 법칙과 원소 분류의 시작","country":""},
+    {"subject":"science","level":"L3","order":21,"title":"PhET - 산과 염기 용액","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/acid-base-solutions","videoId":"","description":"산과 염기의 성질을 시뮬레이션으로 탐구. pH, 중화반응 이해","country":""},
+
+    {"subject":"science","level":"L4","order":22,"title":"PhET - 자연선택","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/natural-selection","videoId":"","description":"다윈의 자연선택 이론을 토끼 개체군 시뮬레이션으로 직접 관찰","country":""},
+    {"subject":"science","level":"L4","order":23,"title":"1분과학 - 세포의 구조","source":"1분과학","url":"https://www.youtube.com/@1분과학","videoId":"","description":"세포의 기본 구조, 핵, 미토콘드리아 등 세포 소기관을 간결하게 설명","country":""},
+    {"subject":"science","level":"L4","order":24,"title":"안될과학 - 진화론의 모든 것","source":"안될과학","url":"https://www.youtube.com/@안될과학","videoId":"","description":"다윈의 진화론부터 현대 진화생물학까지. 박사급 출연진의 깊이 있는 설명","country":""},
+    {"subject":"science","level":"L4","order":25,"title":"과학쿠키 - DNA와 유전의 비밀","source":"과학쿠키","url":"https://www.youtube.com/@과학쿠키","videoId":"","description":"DNA의 구조, 유전자, 멘델의 유전법칙을 쉽게 풀어냄","country":""},
+    {"subject":"science","level":"L4","order":26,"title":"TED-Ed - 세포는 어떻게 분열하는가","source":"TED-Ed","url":"https://ed.ted.com/","videoId":"","description":"유사분열과 감수분열의 과정을 애니메이션으로 시각적으로 설명","country":""},
+    {"subject":"science","level":"L4","order":27,"title":"과학의 역사 - 다윈과 진화론","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=다윈+진화론+역사+어린이","videoId":"","description":"비글호 항해, 갈라파고스 제도, 자연선택 이론의 탄생 이야기","country":""},
+    {"subject":"science","level":"L4","order":28,"title":"PhET - 유전자 발현의 기초","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/gene-expression-essentials","videoId":"","description":"DNA에서 단백질까지. 전사와 번역 과정을 시뮬레이션으로 학습","country":""},
+
+    {"subject":"science","level":"L5","order":29,"title":"안될과학 - 상대성이론 쉽게 이해하기","source":"안될과학","url":"https://www.youtube.com/@안될과학","videoId":"","description":"아인슈타인의 특수/일반 상대성이론을 일상 비유로 쉽게 설명","country":""},
+    {"subject":"science","level":"L5","order":30,"title":"과학쿠키 - 양자역학이란 무엇인가","source":"과학쿠키","url":"https://www.youtube.com/@과학쿠키","videoId":"","description":"양자역학의 기본 개념. 불확정성 원리, 슈뢰딩거의 고양이 등","country":""},
+    {"subject":"science","level":"L5","order":31,"title":"1분과학 - 블랙홀의 비밀","source":"1분과학","url":"https://www.youtube.com/@1분과학","videoId":"","description":"블랙홀의 형성, 사건의 지평선, 호킹 복사 등 현대 천체물리학","country":""},
+    {"subject":"science","level":"L5","order":32,"title":"PhET - 우리의 태양계","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/my-solar-system","videoId":"","description":"태양계의 행성 궤도를 시뮬레이션. 중력, 질량, 속도의 관계 탐구","country":""},
+    {"subject":"science","level":"L5","order":33,"title":"과학의 역사 - 아인슈타인과 현대물리학","source":"교육콘텐츠","url":"https://www.youtube.com/results?search_query=아인슈타인+상대성이론+역사+어린이","videoId":"","description":"E=mc², 시공간의 휘어짐, 현대물리학의 두 기둥: 상대성이론과 양자역학","country":""},
+    {"subject":"science","level":"L5","order":34,"title":"Kurzgesagt - 양자역학 시각화","source":"Kurzgesagt","url":"https://www.youtube.com/@kurzgesagt","videoId":"","description":"세계적 과학 채널의 양자역학 애니메이션. 한국어 자막/더빙 제공","country":""},
+    {"subject":"science","level":"L5","order":35,"title":"PhET - 양자 파동 간섭","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/quantum-wave-interference","videoId":"","description":"빛의 이중슬릿 실험, 광전효과 등 양자역학 핵심 실험 시뮬레이션","country":""},
+    {"subject":"science","level":"L5","order":36,"title":"PhET - 전자기파 시뮬레이션","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/radio-waves","videoId":"","description":"전자기파의 발생과 전파를 시각적으로 이해하는 시뮬레이션","country":""},
+
+    {"subject":"science","level":"도구","order":37,"title":"PhET - 전체 시뮬레이션 라이브러리","source":"PhET","url":"https://phet.colorado.edu/ko/simulations/browse","videoId":"","description":"물리/화학/생물/지구과학/수학 전 분야 무료 시뮬레이션. 한국어 지원","country":""},
+    {"subject":"science","level":"도구","order":38,"title":"자바실험실 - 전체 과학 시뮬레이션","source":"JavaLab","url":"https://javalab.org/","videoId":"","description":"한국어 과학 시뮬레이션 모음. 물리/화학/생물/지구과학/코딩 실험","country":""},
+    {"subject":"science","level":"도구","order":39,"title":"사이언스올 - 과학 교육 포털","source":"한국과학창의재단","url":"https://www.scienceall.com/","videoId":"","description":"과학 뉴스, 용어사전, 교육 콘텐츠. 한국과학창의재단 운영. 무료","country":""},
+    {"subject":"science","level":"도구","order":40,"title":"동아사이언스 - 과학 뉴스","source":"동아사이언스","url":"https://www.dongascience.com/","videoId":"","description":"한국 대표 과학 미디어. 최신 과학 뉴스, 과학동아 콘텐츠","country":""},
+    {"subject":"science","level":"도구","order":41,"title":"NASA STEM Resources","source":"NASA","url":"https://www.nasa.gov/stem/","videoId":"","description":"NASA 공식 STEM 교육 자료. 우주과학, 로켓, 천문학 등 무료 콘텐츠","country":""}
+  ]
+}

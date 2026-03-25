@@ -1,0 +1,538 @@
+[
+  {
+    "subject": "music",
+    "level": 1,
+    "order": 1,
+    "title": "EBS 클래스e - 클래식 뮤직 드라마 (바흐/헨델)",
+    "source": "EBS",
+    "url": "https://classe.ebs.co.kr/",
+    "videoId": "",
+    "description": "바로크 시대 음악의 아버지 바흐와 헨델. 같은 해 같은 나라 출생 두 천재의 음악 이야기"
+  },
+  {
+    "subject": "music",
+    "level": 1,
+    "order": 2,
+    "title": "EBS 서양음악기행 (6부작)",
+    "source": "EBS",
+    "url": "https://home.ebs.co.kr/art/replay/8/list",
+    "videoId": "",
+    "description": "바로크→고전→낭만→현대 서양 클래식 음악사를 여행하는 6부작 다큐멘터리"
+  },
+  {
+    "subject": "music",
+    "level": 2,
+    "order": 3,
+    "title": "EBS 정경의 클래식클래식",
+    "source": "EBS",
+    "url": "https://home.ebs.co.kr/classic2/main",
+    "videoId": "",
+    "description": "클래식 음악 감상과 스토리텔링. 모차르트, 베토벤, 쇼팽, 차이코프스키 등 작곡가별 해설"
+  },
+  {
+    "subject": "music",
+    "level": 2,
+    "order": 4,
+    "title": "이승열의 세계 음악 기행",
+    "source": "EBS",
+    "url": "https://home.ebs.co.kr/musictravel/main",
+    "videoId": "",
+    "description": "세계 각국의 음악 문화 탐방. 국가별 음악 역사와 특색 소개"
+  },
+  {
+    "subject": "music",
+    "level": 2,
+    "order": 5,
+    "title": "서울대 음대 레슨노트",
+    "source": "EBS",
+    "url": "https://home.ebs.co.kr/snumusic/main",
+    "videoId": "",
+    "description": "서울대 음대 교수진의 악기별 레슨. 피아노, 바이올린, 성악 등 전문 강의"
+  },
+  {
+    "subject": "music",
+    "level": 3,
+    "order": 6,
+    "title": "CrashCourse - History of Music (한글자막)",
+    "source": "CrashCourse",
+    "url": "https://www.youtube.com/@crashcourse",
+    "videoId": "",
+    "description": "서양 음악사 체계적 정리. 바로크→고전→낭만→현대→재즈→록. 한글자막 지원"
+  },
+  {
+    "subject": "music",
+    "level": 3,
+    "order": 7,
+    "title": "재즈의 역사 - 뉴올리언스에서 현대까지",
+    "source": "YouTube 다큐",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "재즈 탄생(뉴올리언스)→스윙→비밥→쿨재즈→프리재즈→퓨전 역사 흐름"
+  },
+  {
+    "subject": "music",
+    "level": 3,
+    "order": 8,
+    "title": "록 음악의 역사 다큐",
+    "source": "YouTube 다큐",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "블루스→로큰롤→브리티시 인베이전→사이키델릭→펑크→얼터너티브→인디 역사"
+  },
+  {
+    "subject": "music",
+    "level": 1,
+    "order": 9,
+    "title": "KOCW 음악의 이해 대학강의",
+    "source": "KOCW",
+    "url": "https://www.kocw.net/",
+    "videoId": "",
+    "description": "대학 교양 수준의 음악 이해 강의. 서양음악사, 악기론, 음악 감상법"
+  },
+
+  {
+    "subject": "sports",
+    "level": 1,
+    "order": 1,
+    "title": "KBS 스포츠 다큐멘터리",
+    "source": "KBS",
+    "url": "https://www.youtube.com/@KBSSports",
+    "videoId": "",
+    "description": "올림픽, 축구, 야구, 농구 등 주요 스포츠 다큐. KBS N SPORTS 제작"
+  },
+  {
+    "subject": "sports",
+    "level": 2,
+    "order": 2,
+    "title": "피지컬갤러리 - 운동과학/체형교정",
+    "source": "피지컬갤러리",
+    "url": "https://www.youtube.com/@physicalgallery",
+    "videoId": "",
+    "description": "물리치료사 기반 운동과학 채널. 체형교정, 재활, 트레이닝 과학. 논문 기반 감수"
+  },
+  {
+    "subject": "sports",
+    "level": 1,
+    "order": 3,
+    "title": "Netflix - 더 라스트 댄스 (마이클 조던)",
+    "source": "Netflix",
+    "url": "https://www.netflix.com/title/80203144",
+    "videoId": "",
+    "description": "마이클 조던과 1990년대 시카고 불스 다큐. 구기 스포츠(농구) 역사 명작"
+  },
+  {
+    "subject": "sports",
+    "level": 2,
+    "order": 4,
+    "title": "Netflix - Formula 1: Drive to Survive",
+    "source": "Netflix",
+    "url": "https://www.netflix.com/title/80204890",
+    "videoId": "",
+    "description": "F1 레이싱 드라이버들의 시즌 이야기. 모터스포츠 다큐멘터리 시리즈"
+  },
+  {
+    "subject": "sports",
+    "level": 2,
+    "order": 5,
+    "title": "격투기 다큐 - UFC/복싱/유도",
+    "source": "YouTube 다큐",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "격투기 종류별(복싱, 유도, 태권도, MMA) 역사와 전설적 선수 이야기"
+  },
+  {
+    "subject": "sports",
+    "level": 3,
+    "order": 6,
+    "title": "동계 스포츠 다큐 - 올림픽 특집",
+    "source": "KBS/EBS",
+    "url": "https://www.youtube.com/@KBSSports",
+    "videoId": "",
+    "description": "피겨스케이팅, 스키, 스노보드, 쇼트트랙 등 동계 올림픽 종목 다큐"
+  },
+  {
+    "subject": "sports",
+    "level": 2,
+    "order": 7,
+    "title": "핏블리 - 홈트레이닝/운동과학",
+    "source": "핏블리",
+    "url": "https://www.youtube.com/@FitVely",
+    "videoId": "",
+    "description": "전문 트레이너의 홈트레이닝 가이드. 근력/유산소/스트레칭 과학적 접근"
+  },
+  {
+    "subject": "sports",
+    "level": 1,
+    "order": 8,
+    "title": "수상 스포츠 다큐 - 수영/서핑/다이빙",
+    "source": "YouTube 다큐",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "수영, 서핑, 다이빙, 수구 등 수상 스포츠 역사와 트레이닝 과학"
+  },
+
+  {
+    "subject": "nature_explore",
+    "level": 1,
+    "order": 1,
+    "title": "EBS 자연 다큐 특집",
+    "source": "EBS",
+    "url": "https://home.ebs.co.kr/docun/main",
+    "videoId": "",
+    "description": "한국 자연생태 다큐. 호랑이, 여우, 개미, 오소리, 날다람쥐, 표범 등 국내 야생동물"
+  },
+  {
+    "subject": "nature_explore",
+    "level": 2,
+    "order": 2,
+    "title": "BBC 살아있는 지구 (Planet Earth) 한글더빙",
+    "source": "BBC",
+    "url": "https://tv.kakao.com/channel/3052905",
+    "videoId": "",
+    "description": "BBC+NHK 5년 제작 11부작. 데이비드 애튼버러 내레이션. HD 자연 다큐의 정석"
+  },
+  {
+    "subject": "nature_explore",
+    "level": 2,
+    "order": 3,
+    "title": "Netflix - 우리의 지구 (Our Planet)",
+    "source": "Netflix",
+    "url": "https://www.netflix.com/kr/title/80049832",
+    "videoId": "",
+    "description": "데이비드 애튼버러 내레이션. 지구 생태계와 기후변화 다큐. 한국어 더빙"
+  },
+  {
+    "subject": "nature_explore",
+    "level": 1,
+    "order": 4,
+    "title": "BBC 위대한 자연",
+    "source": "국회방송",
+    "url": "https://www.natv.go.kr/natv/program/programInfo.do?programId=1074",
+    "videoId": "",
+    "description": "BBC 명품 자연 다큐멘터리 한국어 더빙 시리즈"
+  },
+  {
+    "subject": "nature_explore",
+    "level": 3,
+    "order": 5,
+    "title": "Kurzgesagt - 자연/생태 시리즈 (한글자막)",
+    "source": "Kurzgesagt",
+    "url": "https://www.youtube.com/@kurzgesagt",
+    "videoId": "",
+    "description": "개미 전쟁, 면역체계, 바이러스 등 자연과학 애니메이션. 한글자막 지원"
+  },
+  {
+    "subject": "nature_explore",
+    "level": 2,
+    "order": 6,
+    "title": "EBS 다큐프라임 - 자연/생태 시리즈",
+    "source": "EBS",
+    "url": "https://docuprime.ebs.co.kr/docuprime/newReplay?courseId=BP0PAPB0000000005",
+    "videoId": "",
+    "description": "EBS 다큐프라임 자연/생태 카테고리. 국내외 자연 다큐 다수 보유"
+  },
+  {
+    "subject": "nature_explore",
+    "level": 3,
+    "order": 7,
+    "title": "과학실험 채널 - 과학쿠키/안될과학",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/@sciencecookie",
+    "videoId": "",
+    "description": "과학 실험과 탐구 영상. 물리/화학/생물 실험 시각적 설명"
+  },
+
+  {
+    "subject": "language_brain",
+    "level": 1,
+    "order": 1,
+    "title": "EBS 다큐프라임 - 뇌로 보는 인간 (5부작)",
+    "source": "EBS",
+    "url": "https://www.ebs.co.kr/tv/show?prodId=348&lectId=20256665",
+    "videoId": "",
+    "description": "뇌과학으로 본 인간의 본성. 돈, 폭력, 예술, 섹스, 종교. 정재승 교수 참여"
+  },
+  {
+    "subject": "language_brain",
+    "level": 2,
+    "order": 2,
+    "title": "TED Talks - 뇌과학/학습 (한국어 자막)",
+    "source": "TED",
+    "url": "https://www.ted.com/talks?language=ko",
+    "videoId": "",
+    "description": "뇌과학, 학습법, 기억력 관련 TED 강연. 111개 언어 자막. 한국어 기본 지원"
+  },
+  {
+    "subject": "language_brain",
+    "level": 1,
+    "order": 3,
+    "title": "뇌과학 외국어 학습 혁명 - 관련 강연",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "흥미와 감정을 활용한 외국어 학습법. 뇌가 즐겁고 감정이 움직이는 표현을 더 오래 기억"
+  },
+  {
+    "subject": "language_brain",
+    "level": 2,
+    "order": 4,
+    "title": "CrashCourse Psychology (한글자막)",
+    "source": "CrashCourse",
+    "url": "https://www.youtube.com/@crashcourse",
+    "videoId": "",
+    "description": "40편 심리학 시리즈. 의식, 기억, 인지, 성격 등. AP Psychology 커리큘럼 기반"
+  },
+  {
+    "subject": "language_brain",
+    "level": 3,
+    "order": 5,
+    "title": "KOCW 심리학개론 - 중앙대 박준성",
+    "source": "KOCW",
+    "url": "http://kocw.net/home/cview.do?mty=p&kemId=1178447",
+    "videoId": "",
+    "description": "인간행동 기초, 감각/지각, 학습, 기억, 사고, 발달 등 심리학 전반 소개"
+  },
+  {
+    "subject": "language_brain",
+    "level": 2,
+    "order": 6,
+    "title": "독서법/학습법 - 자기계발 유튜브 채널",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "효율적 독서법, 속독, 정독, 메모법, 학습전략 등 한국어 자기계발 콘텐츠"
+  },
+
+  {
+    "subject": "health",
+    "level": 1,
+    "order": 1,
+    "title": "닥터프렌즈 - 의학/건강 채널",
+    "source": "닥터프렌즈",
+    "url": "https://www.youtube.com/@doctorfriends",
+    "videoId": "",
+    "description": "이비인후과/내과/정신건강의학과 전문의 3인 채널. 수면, 영양, 정신건강 등 의학 정보"
+  },
+  {
+    "subject": "health",
+    "level": 2,
+    "order": 2,
+    "title": "EBS 다큐프라임 - 인체/의학 시리즈",
+    "source": "EBS",
+    "url": "https://docuprime.ebs.co.kr/docuprime/newReplay?courseId=BP0PAPB0000000005",
+    "videoId": "",
+    "description": "EBS 다큐프라임 의학 카테고리. 수면, 식습관, 운동, 스트레스 등 건강 다큐"
+  },
+  {
+    "subject": "health",
+    "level": 2,
+    "order": 3,
+    "title": "피지컬갤러리 - 영양/운동과학",
+    "source": "피지컬갤러리",
+    "url": "https://www.youtube.com/@physicalgallery",
+    "videoId": "",
+    "description": "스포츠 영양사, 의사, 물리치료사 감수. 영양학, 운동과학 논문 기반 콘텐츠"
+  },
+  {
+    "subject": "health",
+    "level": 1,
+    "order": 4,
+    "title": "TED - 수면/영양/정신건강 강연 (한국어 자막)",
+    "source": "TED",
+    "url": "https://www.ted.com/talks?language=ko",
+    "videoId": "",
+    "description": "수면의 과학, 영양학 최신 연구, 정신건강 관련 TED 강연 모음. 한글자막"
+  },
+  {
+    "subject": "health",
+    "level": 3,
+    "order": 5,
+    "title": "Kurzgesagt - 건강/면역 시리즈 (한글자막)",
+    "source": "Kurzgesagt",
+    "url": "https://www.youtube.com/@kurzgesagt",
+    "videoId": "",
+    "description": "면역체계, 백신, 바이러스, 암 등 건강 관련 과학 애니메이션. 한글자막"
+  },
+  {
+    "subject": "health",
+    "level": 2,
+    "order": 6,
+    "title": "핏블리 - 운동/다이어트 과학",
+    "source": "핏블리",
+    "url": "https://www.youtube.com/@FitVely",
+    "videoId": "",
+    "description": "운동과학 기반 트레이닝, 다이어트, 체중관리 가이드"
+  },
+  {
+    "subject": "health",
+    "level": 3,
+    "order": 7,
+    "title": "KOCW 영양학/운동생리학 대학강의",
+    "source": "KOCW",
+    "url": "https://www.kocw.net/",
+    "videoId": "",
+    "description": "KOCW에서 '영양학', '운동생리학', '보건학' 검색. 대학 수준 건강과학 강의"
+  },
+
+  {
+    "subject": "social_emotional",
+    "level": 1,
+    "order": 1,
+    "title": "놀면서 배우는 심리학 (놀심)",
+    "source": "놀면서 배우는 심리학",
+    "url": "https://www.youtube.com/@nolsim",
+    "videoId": "",
+    "description": "국내 심리학 분야 구독자 1위 채널 (86만+). 자존감, 관계, 성격, 마음 관리"
+  },
+  {
+    "subject": "social_emotional",
+    "level": 2,
+    "order": 2,
+    "title": "CrashCourse Philosophy (한글자막)",
+    "source": "CrashCourse",
+    "url": "https://www.youtube.com/@crashcourse",
+    "videoId": "",
+    "description": "46편 서양철학 입문. 소크라테스→칸트→실존주의→현대철학. 대학 입문 수준"
+  },
+  {
+    "subject": "social_emotional",
+    "level": 2,
+    "order": 3,
+    "title": "CrashCourse Psychology (한글자막)",
+    "source": "CrashCourse",
+    "url": "https://www.youtube.com/@crashcourse",
+    "videoId": "",
+    "description": "40편 심리학 시리즈. 의식, 기억, 인지, 성격, 사회심리학 등"
+  },
+  {
+    "subject": "social_emotional",
+    "level": 3,
+    "order": 4,
+    "title": "KOCW 심리학개론 - 중앙대 박준성",
+    "source": "KOCW",
+    "url": "http://kocw.net/home/cview.do?mty=p&kemId=1178447",
+    "videoId": "",
+    "description": "인간행동 기초, 감각/지각, 학습, 기억, 사고, 발달 심리학 대학 강의"
+  },
+  {
+    "subject": "social_emotional",
+    "level": 2,
+    "order": 5,
+    "title": "TED - 리더십/소통/동기부여 (한국어 자막)",
+    "source": "TED",
+    "url": "https://www.ted.com/talks?language=ko",
+    "videoId": "",
+    "description": "리더십, 커뮤니케이션, 동기부여, 창의성 관련 TED 강연. 한글자막 지원"
+  },
+  {
+    "subject": "social_emotional",
+    "level": 3,
+    "order": 6,
+    "title": "KOCW 철학개론 대학강의",
+    "source": "KOCW",
+    "url": "https://www.kocw.net/",
+    "videoId": "",
+    "description": "KOCW에서 '철학개론', '윤리학', '논리학' 검색. 서양/동양 철학 대학강의"
+  },
+  {
+    "subject": "social_emotional",
+    "level": 1,
+    "order": 7,
+    "title": "Vsauce - Mind Field (한글자막)",
+    "source": "Vsauce",
+    "url": "https://www.youtube.com/@Vsauce",
+    "videoId": "",
+    "description": "인간 마음과 행동 실험. 플라시보 효과, 암시의 힘, 도덕적 선택 등 심리학 실험"
+  },
+  {
+    "subject": "social_emotional",
+    "level": 2,
+    "order": 8,
+    "title": "EBS 다큐프라임 - 인문/사회 시리즈",
+    "source": "EBS",
+    "url": "https://docuprime.ebs.co.kr/docuprime/newReplay?courseId=BP0PAPB0000000005",
+    "videoId": "",
+    "description": "EBS 다큐프라임 인문/정치/사회 카테고리. 소통, 관계, 사회심리 등 다큐"
+  },
+
+  {
+    "subject": "special_activity",
+    "level": 1,
+    "order": 1,
+    "title": "사진 촬영 기초 - DSLR/미러리스 입문",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "DSLR/미러리스 카메라 기초. 조리개, 셔터스피드, ISO, 구도, 빛 활용법"
+  },
+  {
+    "subject": "special_activity",
+    "level": 2,
+    "order": 2,
+    "title": "풍경/인물 사진 고급 테크닉",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "풍경, 인물, 야경 사진 촬영 고급 테크닉과 후보정(라이트룸/포토샵)"
+  },
+  {
+    "subject": "special_activity",
+    "level": 1,
+    "order": 3,
+    "title": "백종원 - 한식 기초 레시피",
+    "source": "백종원",
+    "url": "https://www.youtube.com/@paaborngag",
+    "videoId": "",
+    "description": "백종원의 한식 기초 레시피. 2019년 세계 3위 성장 채널. 대용량/가정식 레시피"
+  },
+  {
+    "subject": "special_activity",
+    "level": 2,
+    "order": 4,
+    "title": "요리 채널 - 세계 요리/베이킹",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "한식 외 세계 요리, 베이킹, 디저트 등 다양한 요리 채널"
+  },
+  {
+    "subject": "special_activity",
+    "level": 1,
+    "order": 5,
+    "title": "목공 기초 - 쑤니르/나무와늘보",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "목공 기초부터 가구 제작까지. 서랍, 상자, 문짝 만들기. 초보자 친화적"
+  },
+  {
+    "subject": "special_activity",
+    "level": 2,
+    "order": 6,
+    "title": "셀프 인테리어 - 집꾸미기",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "셀프 인테리어 가이드. 예산별 인테리어, 공간 활용, 가구 배치 등 30만 구독자"
+  },
+  {
+    "subject": "special_activity",
+    "level": 2,
+    "order": 7,
+    "title": "아웃도어/캠핑 - 백패킹/노지캠핑",
+    "source": "YouTube",
+    "url": "https://www.youtube.com/",
+    "videoId": "",
+    "description": "캠핑 장비 리뷰, 요리, DIY 장비 제작, 백패킹 가이드 등 아웃도어 채널"
+  },
+  {
+    "subject": "special_activity",
+    "level": 1,
+    "order": 8,
+    "title": "EBS 취미/생활 강좌",
+    "source": "EBS",
+    "url": "https://classe.ebs.co.kr/",
+    "videoId": "",
+    "description": "EBS 클래스e 취미/생활 카테고리. 사진, 요리, 공예, 원예 등 다양한 취미 강좌"
+  }
+]

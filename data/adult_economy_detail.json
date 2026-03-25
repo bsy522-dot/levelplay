@@ -1,0 +1,107 @@
+[
+  {
+    "level": 1,
+    "title": "수요와 공급의 법칙 - 경제학의 출발점",
+    "source": "Khan Academy",
+    "url": "https://www.khanacademy.org/economics-finance-domain/microeconomics",
+    "description": "왜 가격이 오르면 수요가 줄까? 수요곡선과 공급곡선, 균형가격의 원리를 시각적으로 이해하는 미시경제학 기초 강의."
+  },
+  {
+    "level": 1,
+    "title": "시장경제의 원리 - 보이지 않는 손",
+    "source": "슈카월드",
+    "url": "https://www.youtube.com/@syukaworld",
+    "description": "아담 스미스의 보이지 않는 손부터 시장 실패까지. 펀드매니저 출신 슈카가 쉽게 풀어주는 시장경제의 핵심 원리."
+  },
+  {
+    "level": 1,
+    "title": "GDP와 경제성장 - 나라의 성적표 읽기",
+    "source": "슈카월드",
+    "url": "https://www.youtube.com/@syukaworld",
+    "description": "GDP가 뭔지, 명목GDP와 실질GDP의 차이, 경제성장률은 어떻게 계산하는지. 뉴스에 나오는 경제지표를 이해하는 첫걸음."
+  },
+  {
+    "level": 1,
+    "title": "인플레이션과 금리 - 돈의 가치가 변하는 이유",
+    "source": "삼프로TV",
+    "url": "https://www.youtube.com/@3protv",
+    "description": "물가는 왜 오르고, 중앙은행은 왜 금리를 올리는 걸까? 인플레이션의 원인과 금리 정책의 관계를 실생활 사례로 설명한다."
+  },
+  {
+    "level": 1,
+    "title": "거시경제학 입문 - 경기순환과 실업",
+    "source": "KOCW (건국대학교)",
+    "url": "http://www.kocw.net/home/cview.do?mty=p&kemId=865370",
+    "description": "대학 수준의 거시경제학 기초. 경기순환, 실업률, 소비와 투자의 관계를 체계적으로 배우는 공개강의."
+  },
+  {
+    "level": 2,
+    "title": "주식투자 기초 - PER, PBR, ROE 완벽 이해",
+    "source": "삼프로TV",
+    "url": "https://www.youtube.com/@3protv",
+    "description": "주식 가치평가의 3대 지표 PER(주가수익비율), PBR(주가순자산비율), ROE(자기자본이익률)를 실제 종목으로 분석하며 배운다."
+  },
+  {
+    "level": 2,
+    "title": "사경인의 재무제표 읽기 - 기업의 건강상태 파악",
+    "source": "삼프로TV",
+    "url": "https://apps.3protv.com/lecture/view/68",
+    "description": "재무제표 3대 표(재무상태표, 손익계산서, 현금흐름표)를 통해 기업의 건강상태를 진단하는 방법. 투자 전 반드시 알아야 할 핵심."
+  },
+  {
+    "level": 2,
+    "title": "ETF 투자 완전정복 - 분산투자의 정석",
+    "source": "삼프로TV",
+    "url": "https://www.youtube.com/@3protv",
+    "description": "ETF란 무엇이고 어떻게 고르는가? 인덱스 ETF, 섹터 ETF, 해외 ETF의 차이와 장기투자 전략을 ETF 일타강사가 알려준다."
+  },
+  {
+    "level": 2,
+    "title": "부동산 투자의 기초 - 입지 분석과 시세 흐름",
+    "source": "신사임당",
+    "url": "https://www.youtube.com/@shinsaimdang",
+    "description": "부동산 투자에서 가장 중요한 입지 분석 방법. 교통, 학군, 개발호재를 종합적으로 판단하는 실전 부동산 투자 노하우."
+  },
+  {
+    "level": 2,
+    "title": "미시경제학 심화 - 탄력성과 시장구조",
+    "source": "Khan Academy",
+    "url": "https://www.khanacademy.org/economics-finance-domain/microeconomics",
+    "description": "가격탄력성, 소득탄력성의 개념과 완전경쟁, 독점, 과점 등 다양한 시장구조의 특성을 분석하는 심화 경제학 강의."
+  },
+  {
+    "level": 3,
+    "title": "재무설계 로드맵 - 생애주기별 자산관리",
+    "source": "슈카월드",
+    "url": "https://www.youtube.com/@syukaworld",
+    "description": "20대 종잣돈 모으기부터 40대 자산증식, 60대 자산보전까지. 생애주기에 맞춘 재무설계 전략과 포트폴리오 구성법."
+  },
+  {
+    "level": 3,
+    "title": "은퇴설계와 연금 전략 - 노후 준비의 정석",
+    "source": "삼프로TV",
+    "url": "https://www.youtube.com/@3protv",
+    "description": "국민연금, 퇴직연금(DB/DC/IRP), 개인연금의 차이와 활용법. 연금저축 세액공제 전략까지 은퇴 준비의 모든 것."
+  },
+  {
+    "level": 3,
+    "title": "세금의 모든 것 - 절세 전략과 세금 신고",
+    "source": "신사임당",
+    "url": "https://www.youtube.com/@shinsaimdang",
+    "description": "종합소득세, 양도소득세, 증여세의 기본 구조와 합법적 절세 방법. 직장인과 사업자 각각의 세금 전략을 실전 사례로 안내한다."
+  },
+  {
+    "level": 3,
+    "title": "경제학원론 종합 - 미시+거시 통합 정리",
+    "source": "KOCW (충북대학교)",
+    "url": "http://www.kocw.net/home/cview.do?cid=d667e221f4467336",
+    "description": "미시경제와 거시경제를 아우르는 대학 수준의 경제학원론 전 과정. 수요공급부터 국제무역, 환율까지 체계적으로 정리한다."
+  },
+  {
+    "level": 3,
+    "title": "글로벌 경제 읽기 - 환율, 무역, 국제금융",
+    "source": "슈카월드",
+    "url": "https://www.youtube.com/@syukaworld",
+    "description": "환율은 왜 변하고, 무역전쟁은 경제에 어떤 영향을 미치나? 글로벌 경제 흐름을 읽는 눈을 키우는 국제경제 입문 강의."
+  }
+]
