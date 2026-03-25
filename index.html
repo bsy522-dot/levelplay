@@ -111,16 +111,35 @@ nav button span:first-child{font-size:20px}
 <div class="sec">💬 커뮤니티</div><div id="calcR"></div>
 <div style="margin-top:16px;font-size:8px;color:var(--t3);text-align:center">LevelPlay · PhET Interactive Simulations, University of Colorado Boulder (CC-BY 4.0) · YouTube 영상은 각 저작권자 귀속</div>
 </div>
-<div class="pg" id="p1"><div class="sec">📺 영상</div><div class="row" id="vFilter" style="gap:5px;padding-bottom:6px"></div><div id="allV"></div></div>
-<div class="pg" id="p2"><div class="sec">🔬 과학 실험</div><div class="g2" id="allS"></div><div class="sec">📝 퀴즈</div><div id="allQ"></div><div class="sec">🛠️ 도구</div><div class="g2" id="allU"></div></div>
+<div class="pg" id="p1">
+<div id="learnMain">
+<div class="sec">📖 과목 선택</div>
+<div class="g2" id="subjectGrid"></div>
+</div>
+<div id="learnUnit" style="display:none">
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><button class="bt bs" onclick="backToSubjects()" style="font-size:10px;padding:4px 8px">← 과목</button><div style="font-size:14px;font-weight:700;flex:1" id="unitTitle"></div></div>
+<div id="unitList"></div>
+</div>
+<div id="learnLesson" style="display:none">
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><button class="bt bs" onclick="backToUnits()" style="font-size:10px;padding:4px 8px">← 단원</button><div style="font-size:14px;font-weight:700;flex:1" id="lessonTitle"></div></div>
+<div id="lessonContent"></div>
+</div>
+</div>
+<div class="pg" id="p2">
+<div class="sec">🎮 게임</div><div class="g2" id="allGm"></div>
+<div class="sec">📺 영상</div><div class="row" id="allVr" style="gap:5px;padding-bottom:4px"></div><div id="allVids"></div>
+<div class="sec">🔬 과학 실험</div><div class="g2" id="allS"></div>
+<div class="sec">📝 퀴즈</div><div id="allQ"></div>
+<div class="sec">🛠️ 도구</div><div class="g2" id="allU"></div>
+</div>
 <div class="pg" id="p3"><div class="sec">💬 커뮤니티</div><div id="allP"></div></div>
 <div class="pg" id="p4"><div style="text-align:center;padding:10px 0"><div style="width:56px;height:56px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 6px">🧑‍🚀</div><div style="font-size:16px;font-weight:700" id="pN">탐험가</div><div style="font-size:10px;color:var(--t3)" id="pTi"></div></div><div style="background:var(--c1);border-radius:var(--r);padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><span style="font-size:16px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="pL">1</span></span><span style="font-size:9px;color:var(--t3)"><span id="xC">0</span>/<span id="xM">500</span> XP</span></div><div class="lv-w" style="margin:4px 0"><div class="lv-b" id="lB"></div></div></div><div class="sec">📊 능력치</div><div style="width:200px;height:200px;margin:0 auto"><canvas id="sC" width="200" height="200"></canvas></div><div class="sec">📜 활동</div><div id="tl"></div><div style="margin-top:12px;text-align:center"><button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp6');location.reload()}" style="font-size:9px">초기화</button></div></div>
 </div>
 <button class="fab" id="fab" onclick="shW()">✏️</button>
 <nav>
 <button class="on" onclick="go(0)"><span>🏠</span>홈</button>
-<button onclick="go(1)"><span>📺</span>영상</button>
-<button onclick="go(2)"><span>🔬</span>실험</button>
+<button onclick="go(1)"><span>📖</span>학습</button>
+<button onclick="go(2)"><span>🎮</span>놀이</button>
 <button onclick="go(3)"><span>💬</span>커뮤</button>
 <button onclick="go(4)"><span>👤</span>나</button>
 </nav>
@@ -395,6 +414,91 @@ function dH(){const c=document.getElementById('sC');if(!c)return;const x=c.getCo
 function rProf(){document.getElementById('pL').textContent=U.lv;document.getElementById('xC').textContent=U.xp;document.getElementById('xM').textContent=U.xm;setTimeout(()=>document.getElementById('lB').style.width=(U.xp/U.xm*100)+'%',80);dH();const ac=U.ac.length?U.ac.slice(-5).reverse():[{t:'가입!',xp:0,m:0}];document.getElementById('tl').innerHTML=ac.map(a=>'<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(139,92,246,.04)"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);margin-top:4px;flex-shrink:0"></div><div style="font-size:11px">'+a.t+(a.xp?' <span style="color:var(--gd)">+'+a.xp+'</span>':'')+'</div></div>').join('');}
 let tt;function toast(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('sh');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('sh'),1800);}
 
+// ===== 학습 커리큘럼 =====
+const CURRICULUM={
+math:{nm:'수학',ic:'🔢',units:[
+{nm:'① 수와 연산',lessons:[
+{t:'자연수와 덧셈뺄셈',lv:1,content:'<h3>자연수란?</h3><p>1, 2, 3, 4, 5... 처럼 물건을 셀 때 쓰는 수를 <b>자연수</b>라고 해요.</p><h3>덧셈</h3><p>두 수를 합치는 것이에요. 사과 3개와 2개를 합치면?</p><p style="font-size:20px;text-align:center;color:var(--cy)">3 + 2 = 5</p><h3>뺄셈</h3><p>큰 수에서 작은 수를 빼는 것이에요. 사과 5개에서 2개를 먹으면?</p><p style="font-size:20px;text-align:center;color:var(--gd)">5 - 2 = 3</p><h3>연습해봐요!</h3><p>7 + 8 = ? → 15</p><p>12 - 5 = ? → 7</p>',quiz:[{q:'3+4는?',a:['7','6','8','5'],c:0},{q:'10-3은?',a:['7','8','6','9'],c:0}]},
+{t:'곱셈과 나눗셈',lv:1,content:'<h3>곱셈이란?</h3><p>같은 수를 여러 번 더하는 것을 짧게 쓴 거예요.</p><p>3+3+3+3 = 3 x 4 = <b>12</b></p><h3>구구단</h3><p>2단: 2x1=2, 2x2=4, 2x3=6, 2x4=8, 2x5=10...</p><p>3단: 3x1=3, 3x2=6, 3x3=9, 3x4=12...</p><h3>나눗셈</h3><p>똑같이 나누는 것이에요. 사탕 12개를 3명에게 나누면?</p><p style="font-size:20px;text-align:center;color:var(--cy)">12 / 3 = 4</p>',quiz:[{q:'4x5는?',a:['20','25','15','16'],c:0},{q:'15/3은?',a:['5','4','6','3'],c:0}]},
+{t:'분수와 소수',lv:2,content:'<h3>분수란?</h3><p>전체를 똑같이 나눈 것 중 일부를 나타내요.</p><p>피자 한 판을 4조각으로 나눠서 1조각 먹으면 → <b>1/4</b></p><h3>소수란?</h3><p>1보다 작은 수를 나타내는 또 다른 방법이에요.</p><p>1/2 = 0.5, 1/4 = 0.25, 3/4 = 0.75</p><h3>분수의 덧셈</h3><p>1/4 + 2/4 = 3/4 (분모가 같으면 분자끼리 더해요)</p>',quiz:[{q:'1/2 + 1/4 = ?',a:['3/4','2/4','1/6','2/6'],c:0}]}
+]},
+{nm:'② 도형과 측정',lessons:[
+{t:'삼각형',lv:1,content:'<h3>삼각형이란?</h3><p>세 개의 변과 세 개의 꼭짓점으로 이루어진 도형이에요.</p><h3>삼각형의 종류</h3><p>• <b>정삼각형</b>: 세 변의 길이가 모두 같아요</p><p>• <b>이등변삼각형</b>: 두 변의 길이가 같아요</p><p>• <b>직각삼각형</b>: 한 각이 90도예요</p><h3>넓이 구하기</h3><p style="font-size:18px;text-align:center;color:var(--cy)">넓이 = 밑변 x 높이 / 2</p><p>밑변 6cm, 높이 4cm → 6 x 4 / 2 = <b>12cm2</b></p>',quiz:[{q:'삼각형의 내각의 합은?',a:['180도','360도','90도','270도'],c:0}]},
+{t:'사각형과 원',lv:1,content:'<h3>사각형</h3><p>네 개의 변과 네 개의 꼭짓점을 가진 도형</p><p>• <b>정사각형</b>: 네 변이 같고 네 각이 90도</p><p>• <b>직사각형</b>: 네 각이 90도, 마주보는 변이 같음</p><p>정사각형 넓이 = 한변 x 한변</p><p>직사각형 넓이 = 가로 x 세로</p><h3>원</h3><p>한 점에서 같은 거리에 있는 점들의 모임</p><p>• 반지름(r): 중심에서 원까지의 거리</p><p>• 지름: 반지름의 2배</p><p style="font-size:18px;text-align:center;color:var(--cy)">원의 넓이 = π x r x r</p>',quiz:[{q:'원주율 파이의 값은?',a:['3.14...','2.71...','1.41...','1.61...'],c:0}]}
+]},
+{nm:'③ 대수와 식',lessons:[
+{t:'일차방정식',lv:2,content:'<h3>방정식이란?</h3><p>모르는 수(x)가 있는 등식이에요.</p><p>x + 3 = 7 → x는 뭘까?</p><p style="font-size:20px;text-align:center;color:var(--cy)">x = 7 - 3 = 4</p><h3>풀이 방법</h3><p>1. 양변에 같은 수를 더하거나 빼기</p><p>2. 양변에 같은 수를 곱하거나 나누기</p><h3>예제</h3><p>2x + 1 = 9</p><p>2x = 9 - 1 = 8</p><p>x = 8 / 2 = <b>4</b></p>',quiz:[{q:'x+5=12, x는?',a:['7','5','8','6'],c:0}]}
+]},
+{nm:'④ 함수',lessons:[
+{t:'함수의 개념',lv:2,content:'<h3>함수란?</h3><p>입력(x)을 넣으면 출력(y)이 나오는 기계예요!</p><p>자판기: 동전(입력) → 음료수(출력)</p><h3>일차함수</h3><p style="font-size:18px;text-align:center;color:var(--cy)">y = ax + b</p><p>a는 기울기(얼마나 가파른지), b는 y절편(시작점)</p><p>예: y = 2x + 1</p><p>x=0 → y=1, x=1 → y=3, x=2 → y=5</p>',quiz:[{q:'y=3x+2에서 x=2일때 y는?',a:['8','7','6','9'],c:0}]}
+]},
+{nm:'⑤ 확률과 통계',lessons:[
+{t:'확률의 기초',lv:2,content:'<h3>확률이란?</h3><p>어떤 일이 일어날 가능성을 수로 나타낸 것이에요.</p><p style="font-size:18px;text-align:center;color:var(--cy)">확률 = 원하는 경우의 수 / 전체 경우의 수</p><h3>예제</h3><p>주사위를 던질 때 3이 나올 확률은?</p><p>원하는 경우: 1가지(3), 전체: 6가지</p><p>확률 = 1/6 ≈ 16.7%</p><h3>동전 던지기</h3><p>앞면이 나올 확률 = 1/2 = 50%</p>',quiz:[{q:'주사위에서 짝수가 나올 확률은?',a:['1/2','1/3','1/6','2/3'],c:0}]}
+]},
+{nm:'⑥ 기하와 벡터',lessons:[
+{t:'삼각비 (sin, cos, tan)',lv:3,content:'<h3>삼각비란?</h3><p>직각삼각형에서 각도와 변의 길이의 관계예요.</p><p style="text-align:center;color:var(--cy)"><b>sin</b> = 대변/빗변 | <b>cos</b> = 밑변/빗변 | <b>tan</b> = 대변/밑변</p><h3>30도의 삼각비</h3><p>sin30° = 1/2, cos30° = √3/2, tan30° = 1/√3</p><h3>45도의 삼각비</h3><p>sin45° = √2/2, cos45° = √2/2, tan45° = 1</p><h3>왜 중요할까?</h3><p>건물 높이 측정, 네비게이션, 게임 물리엔진 등에 사용!</p>',quiz:[{q:'sin30도는?',a:['1/2','1/3','√2/2','√3/2'],c:0}]}
+]}
+]},
+science:{nm:'과학',ic:'🔬',units:[
+{nm:'1. 역학',lessons:[
+{t:'뉴턴의 운동법칙',lv:1,content:'<h3>제1법칙: 관성의 법칙</h3><p>가만히 있는 물체는 계속 가만히 있고, 움직이는 물체는 계속 움직이려 해요.</p><p>버스가 급정거하면 몸이 앞으로 쏠리는 것!</p><h3>제2법칙: 가속도의 법칙</h3><p style="font-size:20px;text-align:center;color:var(--cy)">F = m × a</p><p>힘(F) = 질량(m) × 가속도(a)</p><p>무거운 물체를 밀려면 더 큰 힘이 필요해요.</p><h3>제3법칙: 작용반작용</h3><p>로켓이 가스를 아래로 뿜으면 로켓은 위로 올라가요!</p>',quiz:[{q:'F=ma에서 F는?',a:['힘','질량','가속도','속도'],c:0}]}
+]},
+{nm:'2. 전자기학',lessons:[
+{t:'전기와 자기',lv:2,content:'<h3>전기란?</h3><p>전자의 흐름이에요. 건전지의 (+)에서 (-)로 흘러요.</p><h3>옴의 법칙</h3><p style="font-size:20px;text-align:center;color:var(--cy)">V = I × R</p><p>전압(V) = 전류(I) × 저항(R)</p><h3>자기란?</h3><p>자석 주위에 보이지 않는 힘이 작용하는 영역이에요.</p><p>N극과 S극은 끌어당기고, 같은 극끼리는 밀어내요.</p><h3>전자기 유도</h3><p>자석을 코일 안에서 움직이면 전기가 만들어져요 → 발전기!</p>',quiz:[{q:'V=IR에서 V는?',a:['전압','전류','저항','전력'],c:0}]}
+]},
+{nm:'6. 세포와 생물',lessons:[
+{t:'세포의 구조',lv:1,content:'<h3>세포란?</h3><p>모든 생물의 기본 단위예요. 우리 몸에는 약 37조 개의 세포가 있어요!</p><h3>세포의 구성</h3><p>• <b>세포막</b>: 세포를 감싸는 얇은 막</p><p>• <b>핵</b>: DNA가 들어있는 사령부</p><p>• <b>미토콘드리아</b>: 에너지를 만드는 발전소</p><p>• <b>리보솜</b>: 단백질을 만드는 공장</p><h3>동물세포 vs 식물세포</h3><p>식물세포에만 있는 것: 세포벽, 엽록체(광합성!)</p>',quiz:[{q:'세포에서 에너지를 만드는 것은?',a:['미토콘드리아','핵','리보솜','세포막'],c:0}]}
+]},
+{nm:'9. 천문학',lessons:[
+{t:'태양계',lv:1,content:'<h3>태양계란?</h3><p>태양을 중심으로 8개의 행성이 도는 체계예요.</p><h3>행성 순서 (태양에서 가까운 순)</h3><p style="color:var(--cy)">수금지화목토천해</p><p>수성 → 금성 → <b>지구</b> → 화성 → 목성 → 토성 → 천왕성 → 해왕성</p><h3>재미있는 사실</h3><p>• 목성은 지구의 1,300배 크기!</p><p>• 토성의 고리는 얼음 조각으로 이루어져 있어요</p><p>• 태양빛이 지구까지 오는데 약 8분 걸려요</p>',quiz:[{q:'태양에서 가장 가까운 행성은?',a:['수성','금성','지구','화성'],c:0}]}
+]}
+]},
+history:{nm:'역사',ic:'🏛️',units:[
+{nm:'한국사',lessons:[
+{t:'고조선과 단군신화',lv:1,content:'<h3>우리나라 최초의 국가: 고조선</h3><p>기원전 2333년, 단군왕검이 세운 나라예요.</p><h3>단군신화</h3><p>하늘의 신 환인의 아들 환웅이 인간 세상에 내려왔어요. 곰과 호랑이가 사람이 되고 싶어했는데, 100일 동안 쑥과 마늘만 먹기로 했어요.</p><p>곰은 참아서 여자(웅녀)가 되었고, 환웅과 결혼하여 단군왕검을 낳았어요.</p><h3>고조선의 법</h3><p>• 사람을 죽이면 사형</p><p>• 남을 다치게 하면 곡식으로 배상</p><p>• 도둑질하면 노비가 됨</p><p>→ 생명과 재산을 중시한 사회였어요!</p>',quiz:[{q:'고조선의 건국연도는?',a:['BC 2333','BC 1000','BC 500','AD 1'],c:0}]},
+{t:'삼국시대',lv:1,content:'<h3>삼국시대 (BC 57 ~ AD 668)</h3><p>한반도에 세 나라가 있었어요.</p><h3>고구려 (BC 37~)</h3><p>• 건국: 주몽이 세움</p><p>• 특징: 강력한 군사력, 광활한 영토</p><p>• 광개토대왕: 영토를 크게 넓힘</p><h3>백제 (BC 18~)</h3><p>• 건국: 온조가 세움</p><p>• 특징: 문화와 예술이 발달, 일본에 문화 전파</p><h3>신라 (BC 57~)</h3><p>• 건국: 박혁거세가 세움</p><p>• 특징: 화랑도, 불국사, 석굴암</p><p>• 삼국통일(676년): 당나라와 협력하여 삼국 통일</p>',quiz:[{q:'광개토대왕은 어느 나라?',a:['고구려','백제','신라','가야'],c:0}]}
+]},
+{nm:'세계사',lessons:[
+{t:'고대 이집트 문명',lv:1,content:'<h3>나일강의 선물</h3><p>이집트는 나일강 주변에서 발전했어요. 매년 나일강이 범람하면 비옥한 흙이 쌓여서 농사가 잘 됐어요.</p><h3>피라미드</h3><p>파라오(왕)의 무덤이에요. 가장 큰 쿠푸왕의 피라미드는 높이 146m!</p><p>약 230만 개의 돌블록으로 만들었고, 20년 걸렸대요.</p><h3>상형문자 (히에로글리프)</h3><p>그림으로 글을 써요. 새, 눈, 물결 등의 그림이 글자예요.</p><p>로제타석 발견으로 해독에 성공!</p>',quiz:[{q:'피라미드는 누구의 무덤?',a:['파라오','기사','학자','농부'],c:0}]},
+{t:'고대 그리스',lv:1,content:'<h3>민주주의의 탄생</h3><p>아테네에서 세계 최초로 시민이 직접 정치에 참여하는 민주주의가 시작됐어요.</p><h3>철학의 시작</h3><p>• <b>소크라테스</b>: 너 자신을 알라!</p><p>• <b>플라톤</b>: 이상적인 국가를 꿈꿨어요</p><p>• <b>아리스토텔레스</b>: 모든 학문의 아버지</p><h3>올림픽의 기원</h3><p>BC 776년 올림피아에서 시작. 4년마다 개최. 전쟁 중에도 올림픽 기간에는 휴전!</p><h3>알렉산더 대왕</h3><p>20세에 왕이 되어 이집트부터 인도까지 정복. 동서양 문화를 융합!</p>',quiz:[{q:'민주주의가 시작된 도시는?',a:['아테네','스파르타','로마','바빌론'],c:0}]}
+]}
+]}
+};
+let curSubj='',curUnit='';
+function renderSubjects(){
+  document.getElementById('subjectGrid').innerHTML=Object.entries(CURRICULUM).map(([k,v])=>
+    '<div class="gc" onclick="openSubject(\''+k+'\')"><div class="gi">'+v.ic+'</div><div class="gn">'+v.nm+'</div><div class="gd">'+v.units.length+'단원 '+v.units.reduce((s,u)=>s+u.lessons.length,0)+'레슨</div></div>'
+  ).join('');
+}
+function openSubject(key){
+  curSubj=key;const s=CURRICULUM[key];
+  document.getElementById('learnMain').style.display='none';
+  document.getElementById('learnUnit').style.display='';
+  document.getElementById('unitTitle').textContent=s.ic+' '+s.nm;
+  document.getElementById('unitList').innerHTML=s.units.map((u,ui)=>
+    '<div class="sec" style="font-size:13px">'+u.nm+'</div>'+
+    u.lessons.map((l,li)=>'<div class="gc" style="text-align:left;padding:12px;margin-bottom:6px" onclick="openLesson('+ui+','+li+')"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">📄</span><div><div style="font-size:12px;font-weight:600">'+l.t+'</div><div style="font-size:9px;color:var(--t3)">Lv.'+l.lv+'</div></div></div></div>').join('')
+  ).join('');
+}
+function openLesson(ui,li){
+  const s=CURRICULUM[curSubj],u=s.units[ui],l=u.lessons[li];
+  document.getElementById('learnUnit').style.display='none';
+  document.getElementById('learnLesson').style.display='';
+  document.getElementById('lessonTitle').textContent=l.t;
+  let html='<div style="background:var(--c1);border-radius:var(--r);padding:14px;margin-bottom:8px;font-size:13px;line-height:1.8;color:var(--t2)">'+l.content+'</div>';
+  if(l.quiz&&l.quiz.length){
+    html+='<div class="sec" style="font-size:13px">확인 퀴즈</div>';
+    l.quiz.forEach(q=>{
+      const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).sort(()=>Math.random()-.5);
+      html+='<div class="qz"><div class="qz-q">'+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';
+    });
+  }
+  html+='<button class="bt bp" style="width:100%;margin-top:8px" onclick="xp(20,\'레슨완료: '+l.t.replace(/'/g,'')+'\');toast(\'+20XP 레슨 완료!\');backToUnits()">레슨 완료 (+20XP)</button>';
+  document.getElementById('lessonContent').innerHTML=html;
+}
+function backToSubjects(){document.getElementById('learnMain').style.display='';document.getElementById('learnUnit').style.display='none';}
+function backToUnits(){document.getElementById('learnUnit').style.display='';document.getElementById('learnLesson').style.display='none';}
+
 // 영어 단어 게임
 const ENG_WORDS=[{e:'🍎',w:'Apple',k:'사과'},{e:'🐱',w:'Cat',k:'고양이'},{e:'🐶',w:'Dog',k:'강아지'},{e:'🏠',w:'House',k:'집'},{e:'📚',w:'Book',k:'책'},{e:'🌙',w:'Moon',k:'달'},{e:'⭐',w:'Star',k:'별'},{e:'🌊',w:'Ocean',k:'바다'},{e:'🌈',w:'Rainbow',k:'무지개'},{e:'🎵',w:'Music',k:'음악'},{e:'🌸',w:'Flower',k:'꽃'},{e:'🦋',w:'Butterfly',k:'나비'},{e:'🐘',w:'Elephant',k:'코끼리'},{e:'🚗',w:'Car',k:'자동차'},{e:'✈️',w:'Airplane',k:'비행기'},{e:'🍕',w:'Pizza',k:'피자'},{e:'🎂',w:'Cake',k:'케이크'},{e:'👨‍👩‍👧‍👦',w:'Family',k:'가족'},{e:'🏫',w:'School',k:'학교'},{e:'💧',w:'Water',k:'물'}];
 let engPts=0,engIdx=0;
@@ -424,11 +528,14 @@ function rAll(){
   nextEng();
   renderQuiz(document.getElementById('qR'),QUIZ);
   document.getElementById('hU').innerHTML=UTS.map(u=>'<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+u.ic+'</div><div class="gn">'+u.nm+'</div></div>').join('');
-  document.getElementById('calcR').innerHTML=[...P,...U.mp].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
-  // 영상 탭: 카테고리 필터 + 목록
+  document.getElementById('cR').innerHTML=[...P,...U.mp].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
+  // 학습 탭
+  renderSubjects();
+  // 놀이 탭
+  document.getElementById('allGm').innerHTML=GMS.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>').join('');
   const cats2=[...new Set(V.map(v=>v.c))];
-  document.getElementById('vFilter').innerHTML='<button class="bt bp" onclick="filterVids(null)" style="font-size:10px;padding:4px 10px;flex-shrink:0">전체</button>'+cats2.map(c=>'<button class="bt bs" onclick="filterVids(\''+c+'\')" style="font-size:10px;padding:4px 10px;flex-shrink:0">'+c+'</button>').join('');
-  document.getElementById('allV').innerHTML=cats2.map(c=>'<div class="sec" style="font-size:13px" data-vcat="'+c+'">'+c+' ('+V.filter(v=>v.c===c).length+')</div><div class="row" data-vcat="'+c+'">'+V.filter(v=>v.c===c).map(vc).join('')+'</div>').join('');
+  document.getElementById('allVr').innerHTML='<button class="bt bp" onclick="filterVids(null)" style="font-size:9px;padding:3px 8px;flex-shrink:0">전체</button>'+cats2.map(c=>'<button class="bt bs" onclick="filterVids(\''+c+'\')" style="font-size:9px;padding:3px 8px;flex-shrink:0">'+c+'</button>').join('');
+  document.getElementById('allVids').innerHTML=cats2.map(c=>'<div class="sec" style="font-size:12px" data-vcat="'+c+'">'+c+'</div><div class="row" data-vcat="'+c+'">'+V.filter(v=>v.c===c).map(vc).join('')+'</div>').join('');
   document.getElementById('allS').innerHTML=SIMS.map(sc).join('');
   renderQuiz(document.getElementById('allQ'),QUIZ);
   renderUtils(document.getElementById('allU'));
