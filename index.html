@@ -972,15 +972,27 @@ function renderSubItems(items,lv){
   document.getElementById('subItems').innerHTML=filtered.map((it,idx)=>{
     const realIdx=items.indexOf(it);
     const isDone=U.done[prefix+realIdx];
-    return`<a class="ci${isDone?' done':''}" href="${it.u}" target="_blank" onclick="markDone('${prefix+realIdx}',${it.l})">
+    const ue=it.u.replace(/'/g,"\\'");const te=it.t.replace(/'/g,"\\'");
+    return`<div class="ci${isDone?' done':''}" onclick="markDone('${prefix+realIdx}',${it.l});if(!playInApp('${ue}','${te}'))window.open('${ue}','_blank')">
       <div><span class="lbg l${it.l}">L${it.l}</span><div class="cn">${it.s}</div></div>
       <div style="flex:1;min-width:0"><div class="ct2">${it.t}</div><div class="cd2">${it.d}</div>${isDone?'<div style="font-size:9px;color:var(--gn);margin-top:2px">✅ 완료</div>':''}</div>
-    </a>`;
+    </div>`;
   }).join('');
 }
 function filterLv(b,lv){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');const items=curMode==='kids'?KIDS[curSub]||[]:ADULT[curSub]||[];renderSubItems(items,lv);}
 function filterField(b,field){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');const items=(curMode==='kids'?KIDS[curSub]||[]:ADULT[curSub]||[]).filter(i=>i.f===field);renderSubItems(items,0);}
 function bkEdu(){document.getElementById('eduMain').style.display='';document.getElementById('eduSub').style.display='none';rEduSubs();}
+// YouTube 임베드 플레이어
+function playInApp(url,title){
+  // YouTube URL에서 video ID 추출
+  const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if(m){
+    oMo(`<div style="font-size:13px;font-weight:700;margin-bottom:6px">${title}</div><iframe src="https://www.youtube.com/embed/${m[1]}" style="width:100%;aspect-ratio:16/9;border:none;border-radius:8px" allowfullscreen></iframe><div style="margin-top:6px;display:flex;gap:4px"><button class="bt bp" onclick="cMo()" style="font-size:10px">닫기</button><a href="${url}" target="_blank" class="bt bs" style="font-size:10px;text-decoration:none">YouTube에서 보기</a></div>`);
+    return true;
+  }
+  return false;
+}
+
 function markDone(key,lv){
   if(!U.done[key]){U.done[key]=1;const statMap={1:'knowledge',2:'knowledge',3:'tech',4:'creativity',5:'tech'};const sk=statMap[lv]||'knowledge';if(U.st[sk]<100)U.st[sk]=Math.min(100,U.st[sk]+1);xp(10+(lv*5),'학습 완료');const doneCount=Object.keys(U.done).length;if(doneCount>=1&&!U.bg[0])U.bg[0]=1;if(doneCount>=10&&!U.bg[2])U.bg[2]=1;if(doneCount>=20&&!U.bg[3])U.bg[3]=1;}
 }
