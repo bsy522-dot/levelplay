@@ -4,1065 +4,268 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LevelPlay - 배우고, 올리고, 증명하라</title>
-<meta name="description" content="체계적 커리큘럼 기반 교육 플랫폼">
 <meta name="theme-color" content="#0a0a1a">
 <link rel="manifest" href="manifest.json">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0a0a1a;--c1:#111127;--c2:#181838;--c3:#222250;--p:#8b5cf6;--cy:#06d6a0;--gd:#fbbf24;--pk:#ec4899;--rd:#ef4444;--bl:#3b82f6;--gn:#22c55e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--g1:linear-gradient(135deg,#8b5cf6,#06d6a0);--r:12px;--nv:52px}
+:root{--bg:#0a0a1a;--c1:#111127;--c2:#181838;--p:#8b5cf6;--cy:#06d6a0;--gd:#fbbf24;--rd:#ef4444;--gn:#22c55e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--g1:linear-gradient(135deg,#8b5cf6,#06d6a0);--r:12px;--nv:52px}
 html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
 body{display:flex;flex-direction:column}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--p);border-radius:3px}
-a{color:var(--cy);text-decoration:none}
-
 #app{flex:1;overflow:hidden;position:relative}
 .pg{position:absolute;inset:0;overflow-y:auto;padding:10px 10px calc(var(--nv)+14px);opacity:0;pointer-events:none;transition:opacity .2s}
 .pg.on{opacity:1;pointer-events:auto}
-
 nav{position:fixed;bottom:0;left:0;right:0;height:var(--nv);background:rgba(10,10,26,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(139,92,246,.1);display:flex;z-index:999;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:none;border:none;color:var(--t3);font:9px 'Noto Sans KR';cursor:pointer;position:relative}
 nav button.on{color:var(--cy)}
 nav button.on::before{content:'';position:absolute;top:0;width:20px;height:2px;background:var(--g1);border-radius:0 0 2px 2px}
 nav button span:first-child{font-size:16px}
-
-.cd{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:12px;margin-bottom:8px}
-.sec{font-size:15px;font-weight:700;margin:14px 0 8px;display:flex;align-items:center;gap:5px}
-.sec:first-child{margin-top:2px}
+.sec{font-size:14px;font-weight:700;margin:14px 0 8px;display:flex;align-items:center;gap:5px}
+.sec:first-child{margin-top:4px}
+.row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.row::-webkit-scrollbar{display:none}
 .g2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-@media(min-width:480px){.g2{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:repeat(4,1fr)}}
-@media(min-width:768px){.g2{grid-template-columns:repeat(4,1fr)}}
-
-.gi{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:12px 8px;text-align:center;cursor:pointer;transition:.15s}
-.gi:hover{border-color:var(--p);transform:translateY(-1px)}
-.gi .ic{font-size:24px;margin-bottom:4px}
-.gi .nm{font-size:11px;font-weight:600}
-.gi .ct{font-size:9px;color:var(--t3);margin-top:2px}
-
-/* Curriculum item */
-.ci{display:flex;gap:10px;padding:10px;background:var(--c1);border:1px solid rgba(139,92,246,.06);border-radius:var(--r);margin-bottom:6px;cursor:pointer;transition:.15s;text-decoration:none;color:inherit}
-.ci:hover{border-color:var(--cy);transform:translateY(-1px);text-decoration:none}
-.ci.done{opacity:.6;border-left:3px solid var(--gn)}
-.ci .cn{font-size:8px;color:var(--t3);background:var(--c2);padding:1px 6px;border-radius:4px;flex-shrink:0;margin-top:2px}
-.ci .ct2{font-size:12px;font-weight:600}
-.ci .cd2{font-size:10px;color:var(--t2);margin-top:2px}
-.ci .cs{font-size:9px;color:var(--cy);margin-top:2px}
-
-/* Level badge */
-.lbg{display:inline-block;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;margin-right:4px}
-.lbg.l1{background:rgba(34,197,94,.15);color:var(--gn)}
-.lbg.l2{background:rgba(59,130,246,.15);color:var(--bl)}
-.lbg.l3{background:rgba(251,191,36,.15);color:var(--gd)}
-.lbg.l4{background:rgba(236,72,153,.15);color:var(--pk)}
-.lbg.l5{background:rgba(239,68,68,.15);color:var(--rd)}
-
-/* Progress bar */
-.pb{height:4px;background:var(--c2);border-radius:2px;margin-top:6px;overflow:hidden}
-.pb div{height:100%;background:var(--g1);border-radius:2px;transition:width .5s}
-
-/* Post */
+@media(min-width:480px){.g2{grid-template-columns:repeat(3,1fr)}}
+.vc{flex-shrink:0;width:200px;cursor:pointer;transition:.15s}
+.vc:hover{transform:scale(1.02)}
+.vc img{width:100%;border-radius:8px;display:block}
+.vc .vt{font-size:11px;font-weight:600;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vc .vs{font-size:9px;color:var(--t3)}
+.vc .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.vc .play div{width:32px;height:32px;background:rgba(255,0,0,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.gc{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;transition:.15s}
+.gc:hover{border-color:var(--cy);transform:translateY(-2px)}
+.gc .gi{font-size:28px;margin-bottom:6px}
+.gc .gn{font-size:11px;font-weight:600}
+.gc .gd{font-size:9px;color:var(--t3);margin-top:2px}
+.qz{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:14px;margin-bottom:8px}
+.qz-q{font-size:13px;font-weight:600;margin-bottom:8px}
+.qz-a{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qz-a button{padding:10px;border:1px solid rgba(139,92,246,.15);border-radius:8px;background:var(--c2);color:var(--tx);font:12px 'Noto Sans KR';cursor:pointer;transition:.15s}
+.qz-a button:hover{border-color:var(--cy)}
+.qz-a button.correct{background:rgba(34,197,94,.2);border-color:var(--gn);color:var(--gn)}
+.qz-a button.wrong{background:rgba(239,68,68,.2);border-color:var(--rd);color:var(--rd)}
 .po{padding:10px 0;border-bottom:1px solid rgba(139,92,246,.05);cursor:pointer}
 .po:hover{background:rgba(139,92,246,.02);margin:0 -10px;padding-left:10px;padding-right:10px}
-.po-c{font-size:10px;font-weight:600;color:var(--p)}
-.po-t{font-size:13px;font-weight:600;margin:1px 0}
+.po-t{font-size:13px;font-weight:600}
 .po-m{font-size:10px;color:var(--t3);display:flex;gap:8px}
-.po-b{font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap;margin:8px 0}
-
-.tabs{display:flex;gap:5px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tb{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:11px;font-weight:500;border:1px solid rgba(139,92,246,.15);background:none;color:var(--t2);cursor:pointer;font-family:inherit}
-.tb.on{background:var(--p);color:#fff;border-color:transparent}
-
-.rc{display:flex;gap:10px;padding:10px;background:var(--c1);border:1px solid rgba(139,92,246,.06);border-radius:var(--r);margin-bottom:6px;text-decoration:none;color:inherit;transition:.15s}
-.rc:hover{border-color:var(--cy);text-decoration:none}
-.rc .ri{font-size:24px;flex-shrink:0;width:36px;text-align:center}
-
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:5000;opacity:0;pointer-events:none;transition:.2s;display:flex;align-items:flex-end;justify-content:center}
-.mo.sh{opacity:1;pointer-events:auto}
-.mc{background:var(--c1);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:460px;max-height:82vh;overflow-y:auto;padding:16px;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
-.mo.sh .mc{transform:translateY(0)}
-
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:5000;display:none;align-items:center;justify-content:center;padding:10px}
+.mo.sh{display:flex}
+.mc{background:var(--c1);border-radius:var(--r);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:14px;position:relative}
+.mc .x{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1}
 .go{position:fixed;inset:0;z-index:6000;background:#000;display:none;flex-direction:column}
 .go.sh{display:flex}
-.go-b{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--bg);flex-shrink:0}
+.go-b{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--bg)}
+.go-b span{font-size:11px;font-weight:700}
 .go iframe{flex:1;border:none;width:100%}
-
 .nk{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px}
-.nk-c{background:var(--c1);border:2px solid rgba(139,92,246,.3);border-radius:var(--r);padding:24px;max-width:320px;width:100%;text-align:center}
+.nk-c{background:var(--c1);border:2px solid rgba(139,92,246,.3);border-radius:var(--r);padding:24px;max-width:300px;width:100%;text-align:center}
 .nk-i{width:100%;padding:10px;background:var(--bg);border:2px solid rgba(139,92,246,.3);border-radius:6px;color:var(--tx);font-size:16px;font-family:inherit;text-align:center;margin:12px 0;outline:none}
-
-.fi{width:100%;padding:8px;background:var(--bg);border:1px solid rgba(139,92,246,.15);border-radius:6px;color:var(--tx);font-size:12px;font-family:inherit;resize:vertical}
-.fi:focus{outline:none;border-color:var(--p)}
-.bt{padding:8px 16px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
-.bp{background:var(--g1);color:#fff}.bs{background:var(--c2);color:var(--t2)}
-
-.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--c2);border:1px solid rgba(139,92,246,.2);border-radius:var(--r);padding:8px 18px;font-size:11px;z-index:9999;transition:transform .25s;box-shadow:0 6px 24px rgba(0,0,0,.4)}
-.toast.sh{transform:translateX(-50%) translateY(0)}
-#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .4s}
-#splash.h{opacity:0;pointer-events:none}
+.bt{padding:8px 16px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}.bp{background:var(--g1);color:#fff}.bs{background:var(--c2);color:var(--t2)}
+.fi{width:100%;padding:8px;background:var(--bg);border:1px solid rgba(139,92,246,.15);border-radius:6px;color:var(--tx);font-size:12px;font-family:inherit;resize:vertical}.fi:focus{outline:none;border-color:var(--p)}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--c2);border:1px solid rgba(139,92,246,.2);border-radius:var(--r);padding:8px 18px;font-size:11px;z-index:9999;transition:transform .25s}.toast.sh{transform:translateX(-50%) translateY(0)}
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .4s}#splash.h{opacity:0;pointer-events:none}
 #splash h1{font-size:36px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sb{width:80px;height:2px;background:var(--c2);border-radius:2px;margin-top:12px;overflow:hidden}
-.sb div{height:100%;width:0;background:var(--g1);transition:width .3s}
-.fab{position:fixed;bottom:calc(var(--nv)+14px);right:12px;width:44px;height:44px;border-radius:50%;background:var(--g1);border:none;color:#fff;font-size:18px;cursor:pointer;box-shadow:0 3px 12px rgba(139,92,246,.3);z-index:500;display:none;align-items:center;justify-content:center}
-.fab.sh{display:flex}
-@keyframes pls{0%,100%{opacity:1}50%{opacity:.3}}
-.qg{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;width:50px;cursor:pointer}
-.qg .qi{width:38px;height:38px;border-radius:50%;background:var(--c1);display:flex;align-items:center;justify-content:center;font-size:16px;border:1.5px solid rgba(139,92,246,.1)}
-.qg .qn{font-size:8px;color:var(--t2);white-space:nowrap}
-.tt{padding:2px 7px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.1);border-radius:10px;font-size:9px;color:var(--p);cursor:pointer}
-.lv-w{background:var(--bg);border-radius:12px;height:14px;position:relative;overflow:hidden}
-.lv-b{height:100%;background:var(--g1);border-radius:12px;transition:width .8s}
-.lv-t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700}
-@media(min-width:768px){.pg{padding:14px 20px calc(var(--nv)+14px)}}
+.fab{position:fixed;bottom:calc(var(--nv)+14px);right:12px;width:44px;height:44px;border-radius:50%;background:var(--g1);border:none;color:#fff;font-size:18px;cursor:pointer;box-shadow:0 3px 12px rgba(139,92,246,.3);z-index:500;display:none;align-items:center;justify-content:center}.fab.sh{display:flex}
+.lv-w{background:var(--bg);border-radius:12px;height:14px;position:relative;overflow:hidden}.lv-b{height:100%;background:var(--g1);border-radius:12px;transition:width .8s}.lv-t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700}
+@media(min-width:768px){.pg{padding:14px 20px calc(var(--nv)+14px)}.vc{width:220px}}
 @media(min-width:1024px){nav{left:50%;transform:translateX(-50%);max-width:520px;border-radius:var(--r) var(--r) 0 0}}
 </style>
 </head>
 <body>
-<div id="splash"><h1>LevelPlay</h1><p style="color:var(--t3);font-size:11px;margin-top:4px">배우고, 올리고, 증명하라</p><div class="sb"><div id="sB"></div></div></div>
+<div id="splash"><h1>LevelPlay</h1><p style="color:var(--t3);font-size:11px;margin-top:4px">배우고, 올리고, 증명하라</p></div>
 <div class="toast" id="tst"></div>
-<div class="nk" id="nkM" style="display:none"><div class="nk-c"><div style="font-size:36px;margin-bottom:6px">🧑‍🚀</div><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">LevelPlay</div><div style="font-size:12px;color:var(--t2);margin-top:4px">닉네임을 정해주세요</div><input class="nk-i" id="nkI" placeholder="닉네임" maxlength="12"><button class="bt bp" style="width:100%;padding:10px" onclick="setNk()">시작</button></div></div>
-<div class="mo" id="mo" onclick="if(event.target===this)cMo()"><div class="mc" id="moC"></div></div>
-<div class="go" id="gO"><div class="go-b"><span id="gT" style="font-size:11px;font-weight:700"></span><div style="display:flex;gap:4px"><a id="gA" class="bt" style="background:rgba(6,214,160,.15);color:var(--cy);font-size:9px;padding:3px 8px" download>APK</a><button class="bt" style="background:rgba(239,68,68,.15);color:var(--rd);font-size:9px;padding:3px 8px" onclick="cG()">닫기</button></div></div><iframe id="gF" allow="autoplay" sandbox="allow-scripts allow-same-origin"></iframe></div>
+<div class="nk" id="nkM" style="display:none"><div class="nk-c"><div style="font-size:36px">🧑‍🚀</div><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:6px 0">LevelPlay</div><input class="nk-i" id="nkI" placeholder="닉네임" maxlength="12"><button class="bt bp" style="width:100%" onclick="setNk()">시작</button></div></div>
+<div class="mo" id="mo" onclick="if(event.target===this)cMo()"><div class="mc" id="moC"><button class="x" onclick="cMo()">✕</button><div id="moB"></div></div></div>
+<div class="go" id="gO"><div class="go-b"><span id="gT"></span><button class="bt bs" onclick="cG()" style="font-size:10px;padding:4px 10px">닫기</button></div><iframe id="gF" allow="autoplay" sandbox="allow-scripts allow-same-origin"></iframe></div>
 
 <div id="app">
-
-<!-- HOME -->
 <div class="pg on" id="p0">
-<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-<div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">LevelPlay</div>
-<div style="font-size:9px;color:var(--t3);display:flex;align-items:center;gap:3px"><span style="width:4px;height:4px;border-radius:50%;background:var(--gn);display:inline-block;animation:pls 2s infinite"></span><span id="onC"></span></div>
+<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">LevelPlay</div><div style="font-size:10px;color:var(--t3)" id="hLv">Lv.1</div></div>
+<div class="sec">▶️ 영상 수업</div><div class="row" id="vR1"></div>
+<div class="sec">🔬 과학 실험</div><div class="g2" id="sR"></div>
+<div class="sec">🎮 게임</div><div class="g2" id="gR"></div>
+<div class="sec">📝 퀴즈</div><div id="qR"></div>
+<div class="sec">▶️ 더 많은 영상</div><div class="row" id="vR2"></div>
+<div class="sec">🔬 더 많은 실험</div><div class="g2" id="sR2"></div>
+<div class="sec">💬 커뮤니티</div><div id="cR"></div>
+<div style="margin-top:16px;font-size:8px;color:var(--t3);text-align:center">LevelPlay · PhET CC-BY · YouTube 영상은 각 저작권자 귀속</div>
 </div>
-<div style="position:relative;margin-bottom:8px"><input style="width:100%;padding:8px 32px 8px 10px;background:var(--c1);border:1px solid rgba(139,92,246,.1);border-radius:18px;color:var(--tx);font:11px 'Noto Sans KR';outline:none" placeholder="검색..." id="gSr" onkeydown="if(event.key==='Enter'&&this.value.trim())window.open('https://www.google.com/search?q='+encodeURIComponent(this.value),'_blank')"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:12px">🔍</span></div>
-
-<!-- 영상 바로 보기 -->
-<div class="sec">▶️ 영상 수업</div>
-<div id="vidRow1"></div>
-<div id="vidRow2"></div>
-
-<!-- 과학 실험 바로 하기 -->
-<div class="sec">🔬 실험 해보기</div>
-<div class="g2" id="simRow"></div>
-
-<!-- 게임 바로 플레이 -->
-<div class="sec">🎮 게임</div>
-<div class="g2" id="gameRow"></div>
-
-<!-- 더 많은 영상 -->
-<div class="sec">📚 더 보기</div>
-<div id="vidRow3"></div>
-
-<!-- 커뮤니티 -->
-<div class="sec">💬 커뮤니티</div>
-<div id="hotP"></div>
-
-<!-- 과목 -->
-<div class="sec">📂 과목별</div>
-<div style="display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none" id="qGal"></div>
-
-<div style="margin-top:16px;padding:10px;border-top:1px solid rgba(139,92,246,.04);font-size:8px;color:var(--t3);text-align:center;line-height:1.5">
-LevelPlay · 교육 정보 공유 커뮤니티<br>
-PhET © University of Colorado Boulder (CC-BY) · YouTube 영상은 각 저작권자 귀속<br>
-<a href="#" onclick="event.preventDefault();oMo('<div style=font-size:13px;font-weight:700;margin-bottom:6px>이용약관</div><div style=font-size:10px;color:var(--t2);line-height:1.7>1. 교육 목적 정보 공유 커뮤니티입니다.<br>2. 사용자 콘텐츠 저작권은 작성자에게 있습니다.<br>3. 개인정보는 브라우저 localStorage에만 저장됩니다.<br>4. PhET 시뮬레이션은 CC-BY 라이선스입니다.</div>')">이용약관</a> · <a href="#" onclick="event.preventDefault();oMo('<div style=font-size:13px;font-weight:700;margin-bottom:6px>개인정보처리방침</div><div style=font-size:10px;color:var(--t2);line-height:1.7>개인정보를 수집하지 않습니다. 모든 데이터는 localStorage에만 저장되며 서버 전송 없습니다.</div>')">개인정보처리방침</a>
-</div>
-</div>
-
-<!-- EDUCATION (아이/성인 통합) -->
-<div class="pg" id="p1">
-<div id="eduMain">
-<div class="sec">📖 교육</div>
-<!-- 바로 보이는 추천 학습 -->
-<div class="sec" style="font-size:12px;color:var(--cy)">🎯 지금 시작하기</div>
-<div id="eduQuickStart"></div>
-<div class="tabs" style="margin-bottom:4px">
-<button class="tb on" onclick="sEdu(this,'kids')">👶 아이 교육</button>
-<button class="tb" onclick="sEdu(this,'adult')">🧑 성인 교육</button>
-</div>
-<div id="eduKids"><div class="g3" id="kSubG"></div></div>
-<div id="eduAdult" style="display:none"><div class="g3" id="aSubG"></div></div>
-</div>
-<div id="eduSub" style="display:none">
-<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-<button class="bt bs" onclick="bkEdu()" style="padding:3px 8px;font-size:10px">← 과목</button>
-<div style="font-size:13px;font-weight:700;flex:1" id="subT"></div>
-</div>
-<div id="subProg"></div>
-<div class="tabs" id="subLvs"></div>
-<div id="subItems"></div>
-</div>
-</div>
-
-<!-- COMMUNITY -->
-<div class="pg" id="p2">
-<div class="sec">💬 커뮤니티</div>
-<!-- 바로 보이는 인기글 -->
-<div id="comQuickPosts"></div>
-<div class="sec" style="font-size:12px">📂 갤러리</div>
-<div class="g2" id="galG" style="margin-bottom:10px"></div>
-<div id="galV" style="display:none">
-<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><button class="bt bs" onclick="bkGal()" style="padding:3px 8px;font-size:10px">← 목록</button><div style="font-size:13px;font-weight:700;flex:1" id="galT"></div></div>
-<div id="galP"></div>
-</div>
-</div>
-
-<!-- PLAY -->
-<div class="pg" id="p3">
-<div class="sec">🎮 플레이존</div>
-<div class="tabs">
-<button class="tb on" onclick="sP(this,'gm')">게임</button>
-<button class="tb" onclick="sP(this,'ut')">유틸리티</button>
-<button class="tb" onclick="sP(this,'sr')">웹서치</button>
-<button class="tb" onclick="sP(this,'sim')">과학실험</button>
-</div>
-<div id="vGm"><div class="g2" id="gmG"></div></div>
-<div id="vUt" style="display:none"><div class="g3" id="utG"></div><div id="utE"></div></div>
-<div id="vSr" style="display:none"><div style="background:var(--bg);border-radius:var(--r);padding:12px"><div style="font-weight:600;font-size:12px;margin-bottom:6px">🔍 통합 검색</div><input class="fi" id="srI" placeholder="검색..." onkeydown="if(event.key==='Enter')doSr()"><div style="display:flex;gap:3px;margin-top:4px;flex-wrap:wrap"><button class="bt bp" onclick="doSr()" style="font-size:9px;padding:5px 10px">검색</button><button class="bt bs" onclick="doSr('google')" style="font-size:9px;padding:5px 10px">Google</button><button class="bt bs" onclick="doSr('naver')" style="font-size:9px;padding:5px 10px">Naver</button><button class="bt bs" onclick="doSr('youtube')" style="font-size:9px;padding:5px 10px">YouTube</button><button class="bt bs" onclick="doSr('github')" style="font-size:9px;padding:5px 10px">GitHub</button><button class="bt bs" onclick="doSr('namu')" style="font-size:9px;padding:5px 10px">나무위키</button></div></div></div>
-<div id="vSim" style="display:none"><div id="simL"></div></div>
-</div>
-
-<!-- PROFILE -->
-<div class="pg" id="p4">
-<div style="text-align:center;padding:10px 0"><div style="width:56px;height:56px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 6px;box-shadow:0 0 14px rgba(139,92,246,.25)">🧑‍🚀</div><div style="font-size:16px;font-weight:700" id="pN">탐험가</div><div style="font-size:10px;color:var(--t3)" id="pTi"></div></div>
-<div class="cd"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:16px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="pL">1</span></span><span style="font-size:9px;color:var(--t3)">다음 <span id="xR">500</span>XP</span></div><div class="lv-w" style="margin:4px 0"><div class="lv-b" id="lB"></div><div class="lv-t"><span id="xC">0</span>/<span id="xM">500</span></div></div></div>
-<div class="sec">📊 능력치</div><div style="margin:0 auto;width:200px;height:200px"><canvas id="sC" width="200" height="200"></canvas></div>
-<div class="sec">📜 학습 진도</div><div id="progSummary"></div>
-<div class="sec">🏅 뱃지 <span style="font-size:9px;color:var(--t3)" id="bC">0/16</span></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px" id="bG"></div>
-<div style="margin-top:12px;text-align:center;display:flex;gap:4px;justify-content:center"><button class="bt bs" onclick="chNk()" style="font-size:9px">닉네임 변경</button><button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp5');location.reload()}" style="font-size:9px">초기화</button></div>
-</div>
-
+<div class="pg" id="p1"><div class="sec">📺 전체 영상</div><div id="allV"></div></div>
+<div class="pg" id="p2"><div class="sec">🔬 과학 실험</div><div class="g2" id="allS"></div><div class="sec">📝 퀴즈</div><div id="allQ"></div><div class="sec">🛠️ 도구</div><div class="g2" id="allU"></div></div>
+<div class="pg" id="p3"><div class="sec">💬 커뮤니티</div><div id="allP"></div></div>
+<div class="pg" id="p4"><div style="text-align:center;padding:10px 0"><div style="width:56px;height:56px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 6px">🧑‍🚀</div><div style="font-size:16px;font-weight:700" id="pN">탐험가</div><div style="font-size:10px;color:var(--t3)" id="pTi"></div></div><div style="background:var(--c1);border-radius:var(--r);padding:10px;margin-bottom:8px"><div style="display:flex;justify-content:space-between"><span style="font-size:16px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="pL">1</span></span><span style="font-size:9px;color:var(--t3)"><span id="xC">0</span>/<span id="xM">500</span> XP</span></div><div class="lv-w" style="margin:4px 0"><div class="lv-b" id="lB"></div></div></div><div class="sec">📊 능력치</div><div style="width:200px;height:200px;margin:0 auto"><canvas id="sC" width="200" height="200"></canvas></div><div class="sec">📜 활동</div><div id="tl"></div><div style="margin-top:12px;text-align:center"><button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp6');location.reload()}" style="font-size:9px">초기화</button></div></div>
 </div>
 <button class="fab" id="fab" onclick="shW()">✏️</button>
 <nav>
 <button class="on" onclick="go(0)"><span>🏠</span>홈</button>
-<button onclick="go(1)"><span>📖</span>교육</button>
-<button onclick="go(2)"><span>💬</span>커뮤니티</button>
-<button onclick="go(3)"><span>🎮</span>플레이</button>
-<button onclick="go(4)"><span>👤</span>프로필</button>
+<button onclick="go(1)"><span>📺</span>영상</button>
+<button onclick="go(2)"><span>🔬</span>실험</button>
+<button onclick="go(3)"><span>💬</span>커뮤</button>
+<button onclick="go(4)"><span>👤</span>나</button>
 </nav>
-
 <script>
-const U=JSON.parse(localStorage.getItem('lp5')||'null')||{nk:'',lv:1,xp:0,xm:500,st:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},bg:Array(16).fill(0),ac:[],mp:[],done:{},v:5};
-const sv=()=>localStorage.setItem('lp5',JSON.stringify(U));
-const BDG=[{i:'🎓',n:'첫수료'},{i:'🔥',n:'3일연속'},{i:'📚',n:'10강완료'},{i:'🎬',n:'20강완료'},{i:'🎮',n:'게임클리어'},{i:'✏️',n:'첫글'},{i:'🏃',n:'체력왕'},{i:'⭐',n:'Lv10'},{i:'👑',n:'Lv30'},{i:'💎',n:'Lv50'},{i:'🌟',n:'올라운더'},{i:'🏆',n:'TOP10'},{i:'💬',n:'소통왕'},{i:'🎨',n:'아트'},{i:'🧪',n:'과학'},{i:'🌍',n:'탐험가'}];
-function tA(m){if(!m&&m!==0)return'';if(m<1)return'방금';if(m<60)return m+'분전';if(m<1440)return(m/60|0)+'시간전';const d=m/1440|0;return d<7?d+'일전':(d/7|0)+'주전';}
+const U=JSON.parse(localStorage.getItem('lp6')||'null')||{nk:'',lv:1,xp:0,xm:500,st:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},ac:[],mp:[]};
+const sv=()=>localStorage.setItem('lp6',JSON.stringify(U));
+function tA(m){if(m<1)return'방금';if(m<60)return m+'분전';if(m<1440)return(m/60|0)+'시간전';return(m/1440|0)+'일전';}
 
-// ===== 10개 과목 =====
-const SUBJECTS=[
-{id:'history',ic:'🏛️',nm:'역사',ds:'나라별 시대순 역사 흐름'},
-{id:'math',ic:'🔢',nm:'수학',ds:'수준별 → 역사 흐름'},
-{id:'science',ic:'🔬',nm:'과학',ds:'수준별 → 역사 흐름'},
-{id:'music',ic:'🎵',nm:'음악',ds:'역사흐름 → 작곡가 → 국가 → 악기'},
-{id:'sports',ic:'⚽',nm:'스포츠',ds:'대분야 → 소분야 → 신체발달'},
-{id:'explore',ic:'🔭',nm:'관찰탐구',ds:'자연관찰 · 실험 · 탐구'},
-{id:'language',ic:'🗣️',nm:'언어·두뇌',ds:'언어발달 · 두뇌훈련'},
-{id:'health',ic:'💪',nm:'건강',ds:'영양 · 운동 · 위생 · 안전'},
-{id:'social',ic:'🤝',nm:'사회·감성',ds:'예절 · 감정 · 협동 · 리더십'},
-{id:'special',ic:'🎨',nm:'특별활동',ds:'미술 · 공예 · 요리 · 코딩'},
-];
-
-// ===== 아이교육 커리큘럼 =====
-const KIDS={
-history:[
-{l:1,t:'[한국] 고조선과 단군 이야기',s:'EBS 한국사 시간여행',u:'https://www.ebssw.kr/',d:'애니메이션으로 배우는 고조선 건국 이야기'},
-{l:1,t:'[한국] 삼국시대 - 고구려/백제/신라',s:'EBS 초등 스토리한국사',u:'https://primary.ebs.co.kr/',d:'삼국의 건국과 발전, 문화 비교'},
-{l:2,t:'[한국] 고려시대',s:'설민석 한국사대모험',u:'https://www.youtube.com/@seolssaemTV',d:'고려 건국부터 몽골 항쟁까지'},
-{l:2,t:'[한국] 조선시대 - 세종대왕',s:'EBS',u:'https://primary.ebs.co.kr/',d:'한글 창제와 과학 발전'},
-{l:3,t:'[한국] 일제강점기~광복',s:'최태성 초등TV',u:'https://www.youtube.com/@bigstar1tv',d:'독립운동과 광복의 역사'},
-{l:1,t:'[이집트] 피라미드와 파라오',s:'TED-Ed',u:'https://ed.ted.com/',d:'고대 이집트 문명의 비밀'},
-{l:1,t:'[그리스] 올림포스 신들의 이야기',s:'올림포스 가디언',u:'https://www.youtube.com/',d:'그리스 신화 애니메이션'},
-{l:2,t:'[로마] 로마 제국의 탄생',s:'TED-Ed',u:'https://ed.ted.com/',d:'로마 건국부터 공화정까지'},
-{l:2,t:'[중국] 진시황과 만리장성',s:'별별역사',u:'https://www.youtube.com/@byulbyulhistory',d:'중국 최초의 통일 제국'},
-{l:3,t:'[유럽] 르네상스와 대항해시대',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'유럽의 대변혁 시대'},
-{l:3,t:'[일본] 사무라이와 전국시대',s:'별별역사',u:'https://www.youtube.com/@byulbyulhistory',d:'일본 전국시대 이야기'},
-{l:4,t:'[세계] 제1차/2차 세계대전',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'20세기 세계 대전쟁'},
-,
-{l:2,t:'한국사 시간여행 - 고조선의 탄생',s:'EBS 애니키즈',u:'https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150',d:'고조선부터 현대까지 시간여행하는 애니메이션. 대한이와 어리의 모험으로 한국사를 쉽게 이해'},
-{l:2,t:'초등 스토리 한국사 - 선사시대와 고조선',s:'EBS 초등',u:'https://primary.ebs.co.kr/course/view?courseId=10016271',d:'이야기로 배우는 한국사. 614,856명 학습, 99% 만족도. 고조선의 건국부터 시작'},
-{l:2,t:'설민석의 한국사 대모험 - 고조선 편',s:'설민석',u:'https://www.youtube.com/@설민석',d:'어린이용 한국사 학습만화 기반. 2024년 TV 애니메이션 방영. 고조선~근현대 커버'},
-{l:2,t:'최태성 초등TV - 고조선 이야기',s:'최태성',u:'https://www.youtube.com/@최태성초등TV',d:'큰별쌤 최태성의 초등학생 대상 한국사 강의. 쉽고 재미있는 스토리텔링'},
-{l:2,t:'한국사 시간여행 - 고구려, 백제, 신라',s:'EBS 애니키즈',u:'https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150',d:'삼국의 건국과 발전, 문화를 애니메이션으로 탐험'},
-{l:2,t:'설민석의 한국사 대모험 11권 - 고구려 편',s:'설민석',u:'https://www.youtube.com/@설민석',d:'부마 온달의 이야기를 통해 배우는 고구려의 역사와 문화'},
-{l:2,t:'벌거벗은 한국사 - 삼국시대 특집',s:'tvN Story/최태성',u:'https://www.youtube.com/@tvNStory',d:'최태성 선생님의 스토리텔링 한국사쇼. 삼국시대 핵심 사건과 인물'},
-{l:2,t:'초등 스토리 한국사 - 삼국통일과 발해',s:'EBS 초등',u:'https://primary.ebs.co.kr/course/view?courseId=10016271',d:'삼국통일의 과정과 발해의 건국을 이야기로 학습'},
-{l:2,t:'설민석의 한국사 대모험 20권 - 고려의 발전',s:'설민석',u:'https://www.youtube.com/@설민석',d:'서희와 거란의 한판 대결! 고려시대의 외교와 문화 발전'},
-{l:2,t:'한국사 시간여행 - 고려시대',s:'EBS 애니키즈',u:'https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150',d:'고려의 건국, 불교문화, 몽골침입 등을 애니메이션으로 학습'},
-{l:2,t:'초등 스토리 한국사 - 조선의 건국과 문화',s:'EBS 초등',u:'https://primary.ebs.co.kr/course/view?courseId=10016271',d:'조선 건국, 세종대왕, 임진왜란 등 조선사의 핵심을 이야기로 전달'},
-{l:2,t:'벌거벗은 한국사 - 조선왕조 특집',s:'tvN Story/최태성',u:'https://www.youtube.com/@tvNStory',d:'조선시대 왕들의 이야기, 사건, 문화를 깊이 있게 풀어냄'},
-{l:2,t:'설민석의 한국사 대모험 - 조선 발명품 편',s:'설민석',u:'https://www.youtube.com/@설민석',d:'조선시대의 위대한 발명품들을 만화로 재미있게 학습'},
-{l:2,t:'초등 스토리 한국사 - 근현대사',s:'EBS 초등',u:'https://primary.ebs.co.kr/course/view?courseId=10016271',d:'개항기, 일제강점기, 광복, 대한민국의 발전까지 이야기로 학습'},
-{l:2,t:'한국사 시간여행 - 근현대',s:'EBS 애니키즈',u:'https://anikids.ebs.co.kr/anikids/program/show/BA0AC000000000150',d:'일제강점기부터 현대까지 시간여행으로 배우는 근현대사'},
-{l:1,t:'고조선과 단군신화 - 우리 역사의 시작',s:'EBS 초등 스토리 한국사',u:'https://primary.ebs.co.kr/course/view?courseId=10016271',d:'곰과 호랑이 이야기로 배우는 고조선 건국신화. 환웅과 웅녀, 단군왕검의 탄생을 애니메이션으로 재미있'},
-{l:1,t:'고조선의 8조법과 생활 모습',s:'최태성 초등TV',u:'https://www.youtube.com/@choisuperstar',d:'고조선 사람들은 어떻게 살았을까? 8조법 중 남아있는 3가지 법을 통해 고조선의 사회 모습을 알아보'},
-{l:1,t:'삼국시대 - 고구려 광개토대왕의 대모험',s:'최태성 1TV',u:'https://www.youtube.com/@Choisuperstar1TV',d:'만주벌판을 달리던 고구려 광개토대왕! 광개토대왕릉비에 새겨진 정복의 역사를 통해 삼국시대 고구려의 '},
-{l:1,t:'삼국시대 - 백제와 신라의 경쟁',s:'EBS 역사채널e',u:'https://home.ebs.co.kr/historye/main',d:'근초고왕의 백제 전성기와 진흥왕의 신라 성장기. 한강을 둘러싼 세 나라의 치열한 경쟁을 생생한 영상'},
-{l:2,t:'고려시대 - 태조 왕건과 후삼국 통일',s:'EBS 초등 스토리 한국사',u:'https://primary.ebs.co.kr/course/view?courseId=10016272',d:'후고구려, 후백제, 신라의 혼란 속에서 왕건이 고려를 세우고 후삼국을 통일하는 과정. 훈요십조와 고'},
-{l:2,t:'고려시대 - 팔만대장경과 몽골 침입',s:'최태성 초등TV',u:'https://www.youtube.com/@choisuperstar',d:'몽골의 침략에 맞서 고려 사람들이 만든 팔만대장경! 나라를 지키려는 백성들의 마음과 고려의 문화유산'},
-{l:2,t:'조선시대 - 세종대왕과 한글 창제',s:'EBS 역사채널e',u:'https://home.ebs.co.kr/historye/main',d:'백성을 사랑한 세종대왕이 훈민정음을 만든 이유와 과정. 집현전 학자들과의 이야기, 그리고 한글의 과'},
-{l:2,t:'조선시대 - 이순신 장군과 임진왜란',s:'최태성 1TV',u:'https://www.youtube.com/@Choisuperstar1TV',d:'거북선을 이끌고 왜군과 싸운 이순신 장군! 한산도 대첩, 명량해전 등 임진왜란의 주요 전투와 이순신'},
-{l:3,t:'근현대사 - 일제강점기와 독립운동',s:'EBS 초등 스토리 한국사',u:'https://primary.ebs.co.kr/course/view?courseId=10016272',d:'일본에 나라를 빼앗긴 슬픈 역사와 이를 되찾기 위해 싸운 독립운동가들의 이야기. 안중근, 유관순, '},
-{l:3,t:'근현대사 - 6.25 전쟁과 대한민국의 발전',s:'최태성 1TV',u:'https://www.youtube.com/@Choisuperstar1TV',d:'한국전쟁의 발발과 휴전, 그리고 전쟁 후 대한민국이 경제 성장을 이루는 과정까지. 우리나라의 현대사'},
-{l:1,t:'고대 이집트 - 피라미드와 파라오의 세계',s:'TED-Ed',u:'https://ed.ted.com/on/MDPxVMuY',d:'고대 이집트의 피라미드는 어떻게 만들었을까? 파라오, 미라, 상형문자 등 신비로운 이집트 문명을 애'},
-{l:2,t:'고대 그리스 - 민주주의의 탄생',s:'CrashCourse World ',u:'https://www.youtube.com/@crashcourse',d:'올림픽과 민주주의가 시작된 고대 그리스! 아테네와 스파르타, 페르시아 전쟁을 통해 서양 문명의 뿌리'},
-{l:2,t:'고대 로마 - 공화정에서 제국까지',s:'CrashCourse World ',u:'https://www.youtube.com/@crashcourse',d:'줄리어스 시저와 로마 제국의 흥망성쇠. 공화정은 왜 무너졌고 제국은 어떻게 세계를 지배했는지 존 그'},
-{l:2,t:'중세 유럽 - 기사와 성의 시대',s:'TED-Ed',u:'https://ed.ted.com/on/FNmsYZiu',d:'중세 유럽의 봉건제도, 기사도, 십자군 전쟁을 3분 반에 정리! 중세 시대에 대한 6가지 오해도 함'},
-{l:3,t:'르네상스 - 레오나르도 다빈치와 문화의 부활',s:'TED-Ed',u:'https://ed.ted.com/on/XvUcTM2y',d:'르네상스는 정말 일어난 것일까? 다빈치의 비트루비우스 인체도, 미켈란젤로의 다비드상을 통해 인간 중'}],
-math:[
-{l:1,t:'수 세기와 비교하기',s:'칸아카데미',u:'https://ko.khanacademy.org/math/early-math',d:'1~100까지 수 세기, 크기 비교'},
-{l:1,t:'덧셈과 뺄셈 기초',s:'칸아카데미',u:'https://ko.khanacademy.org/math/early-math',d:'한 자리 덧셈 뺄셈부터 시작'},
-{l:2,t:'구구단과 곱셈',s:'칸아카데미',u:'https://ko.khanacademy.org/math/cc-third-grade-math',d:'곱셈의 원리와 구구단 암기'},
-{l:2,t:'분수의 이해',s:'칸아카데미',u:'https://ko.khanacademy.org/math/cc-fourth-grade-math',d:'분수 개념, 덧셈, 뺄셈, 비교'},
-{l:3,t:'도형과 기하학 (유클리드)',s:'GeoGebra',u:'https://www.geogebra.org/geometry',d:'삼각형, 사각형, 원의 성질 탐구'},
-{l:3,t:'넓이와 부피 계산',s:'칸아카데미',u:'https://ko.khanacademy.org/math/cc-fifth-grade-math',d:'평면도형 넓이, 입체도형 부피'},
-{l:4,t:'일차방정식 (알콰리즈미)',s:'칸아카데미',u:'https://ko.khanacademy.org/math/algebra-basics',d:'미지수 x를 구하는 방정식의 세계'},
-{l:4,t:'비와 비례',s:'칸아카데미',u:'https://ko.khanacademy.org/math/cc-sixth-grade-math',d:'비율, 비례식, 백분율'},
-{l:5,t:'좌표평면과 함수 (데카르트)',s:'Desmos',u:'https://www.desmos.com/calculator',d:'좌표계에서 그래프 그리기'},
-{l:5,t:'확률과 통계 기초',s:'칸아카데미',u:'https://ko.khanacademy.org/math/statistics-probability',d:'평균, 중앙값, 확률의 개념'},
-,
-{l:2,t:'칸아카데미 - 초등 1학년 1학기: 덧셈과 뺄셈',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/kor-1st-1/x22720cd23d5246e1:1-1-3',d:'수 세기부터 시작하는 가장 기초적인 덧셈과 뺄셈. 무료 연습문제 포함'},
-{l:2,t:'칸아카데미 - 초등 1학년 2학기: 덧셈과 뺄셈(1)',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/kor-1st-2/xdffa2afcc11cd098:1-2-2',d:'한 자리 수의 덧셈과 뺄셈 심화. 받아올림, 받아내림 개념 도입'},
-{l:2,t:'칸아카데미 - 덧셈의 기초 (동영상)',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/arithmetic/arith-review-add-subtract/arith-review-basic-add-subtract/v/basic-addition',d:'살 에셈이 가장 처음 배우는 기본 덧셈 동영상 강의'},
-{l:2,t:'칸아카데미 - 미국 1학년: 덧셈과 뺄셈',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/cc-1st-grade-math/cc-1st-add-subtract',d:'미국 커리큘럼 기준 1학년 수학. 한국어 번역 제공'},
-{l:2,t:'수학의 역사 - 고대인의 수 세기',s:'교육콘텐츠',u:'https://www.youtube.com/results?search_query=수학의+역사+수+세기+고대+어린이',d:'고대 문명에서 숫자가 어떻게 탄생했는지. 이집트/바빌론의 수 체계'},
-{l:2,t:'칸아카데미 - 초등 2학년: 곱셈의 기초',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/kor-2nd-1',d:'구구단의 기초, 곱셈과 나눗셈의 관계를 이해하는 단계'},
-{l:2,t:'칸아카데미 - 초등 3학년 1학기: 덧셈과 뺄셈 심화',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/kor-3rd-1/xf61be49f9afc04f2:3-1-1',d:'세 자리 수의 덧셈과 뺄셈. 곱셈구구 마스터'},
-{l:2,t:'칸아카데미 - 초등 4학년 2학기: 분수의 덧셈과 뺄셈',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/kor-4th-2/xd36dca6960632825:4-2-1',d:'분수의 개념 이해, 같은 분모의 분수 덧셈과 뺄셈'},
-{l:2,t:'칸아카데미 - 초등 5학년 1학기: 분수의 덧셈과 뺄셈',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/kor-5th-1/x82bde1dffd172801:5-1-5',d:'다른 분모의 분수 덧셈과 뺄셈. 통분 개념 학습'},
-{l:2,t:'칸아카데미 - 미국 5학년: 분수의 덧셈과 뺄셈',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/cc-fifth-grade-math/imp-fractions-3',d:'미국 커리큘럼 기준 5학년 분수 심화. 대분수, 가분수 변환'},
-{l:2,t:'수학의 역사 - 피타고라스와 수의 비밀',s:'교육콘텐츠',u:'https://www.youtube.com/results?search_query=피타고라스+수학+역사+어린이',d:'피타고라스 학파의 수 이론. 음악과 수학의 관계. 무리수의 발견'},
-{l:2,t:'칸아카데미 - 기하학 기초: 도형과 각도',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/math/geometry',d:'삼각형, 사각형, 원 등 기본 도형의 성질과 넓이/둘레 계산'},
-{l:2,t:'GeoGebra - 도형 탐구 시뮬레이션',s:'GeoGebra',u:'https://www.geogebra.org/geometry',d:'인터랙티브 기하학 도구. 도형을 직접 만들고 변형하며 학습. 무료'},
-{l:2,t:'3Blue1Brown - 기하학의 아름다움',s:'3Blue1Brown',u:'https://www.youtube.com/@3blue1brown',d:'수학 시각화의 최고봉. 유클리드 기하학의 원리를 아름다운 애니메이션으로'},
-{l:2,t:'수학의 역사 - 유클리드와 기하학 원론',s:'교육콘텐츠',u:'https://www.youtube.com/results?search_query=유클리드+기하학+원론+역사+수학',d:'기원전 300년 유클리드의 《원론》. 2300년간 수학의 교과서로 사용된 명저'}],
-science:[
-{l:1,t:'자연 관찰하기 - 동물과 식물',s:'LG사이언스랜드',u:'https://lgsl.kr/',d:'주변 자연 관찰 방법과 기록'},
-{l:1,t:'물질의 상태: 고체, 액체, 기체',s:'PhET',u:'https://phet.colorado.edu/sims/html/states-of-matter/latest/states-of-matter_all.html',d:'분자 운동으로 보는 물질의 세 가지 상태'},
-{l:2,t:'힘과 운동 (뉴턴)',s:'PhET',u:'https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_all.html',d:'힘이 물체의 운동에 미치는 영향'},
-{l:2,t:'에너지의 변환',s:'PhET',u:'https://phet.colorado.edu/sims/html/energy-skate-park-basics/latest/energy-skate-park-basics_all.html',d:'위치에너지↔운동에너지 전환 관찰'},
-{l:3,t:'원자의 구조 (돌턴→러더퍼드)',s:'PhET',u:'https://phet.colorado.edu/sims/html/build-an-atom/latest/build-an-atom_all.html',d:'양성자, 중성자, 전자로 원자 만들기'},
-{l:3,t:'화학 반응과 원소 (라부아지에)',s:'PhET',u:'https://phet.colorado.edu/sims/html/reactants-products-and-leftovers/latest/reactants-products-and-leftovers_all.html',d:'화학 반응에서 물질의 보존'},
-{l:4,t:'세포의 세계 (다윈/멘델)',s:'CrashCourse Biology',u:'https://www.youtube.com/@crashcourse',d:'세포 구조와 기능, 세포분열'},
-{l:4,t:'진화와 자연선택',s:'PhET',u:'https://phet.colorado.edu/sims/html/natural-selection/latest/natural-selection_all.html',d:'자연선택으로 진화하는 토끼 시뮬레이션'},
-{l:5,t:'태양계와 우주 탐사',s:'NASA STEM',u:'https://www.nasa.gov/learning-resources/',d:'태양계 행성, 우주 탐사 역사'},
-{l:5,t:'전기 회로 실험',s:'PhET',u:'https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_all.html',d:'전구, 저항, 배터리로 회로 만들기'},
-,
-{l:2,t:'LG사이언스랜드 - 자연관찰 실험',s:'LG사이언스랜드 유튜브',u:'https://www.youtube.com/@LGScienceLand',d:'어린이를 위한 과학 실험 영상. 자연현상 관찰, 식물/동물 탐구. 서비스 종료 후 유튜브로 이관'},
-{l:2,t:'EBS 애니키즈 - 과학 탐험',s:'EBS 애니키즈',u:'https://anikids.ebs.co.kr/anikids/allvods',d:'EBS 어린이 과학 애니메이션 모음. 자연, 동물, 식물 등 관찰 탐구'},
-{l:2,t:'팝콘플래닛 - 어린이과학동아',s:'동아사이언스',u:'https://www.popcornplanet.co.kr',d:'어린이과학동아+어린이수학동아 운영 플랫폼. 과학 만화, 실험, 퀴즈'},
-{l:2,t:'PhET - 물질의 상태: 기초편',s:'PhET',u:'https://phet.colorado.edu/ko/simulations/states-of-matter-basics',d:'고체, 액체, 기체의 상태 변화를 시뮬레이션으로 직접 탐구. 한국어'},
-{l:2,t:'자바실험실 - 자연과학 시뮬레이션',s:'JavaLab',u:'https://javalab.org/',d:'한국어 과학 시뮬레이션. 빛, 소리, 물, 자석 등 기초 자연현상 실험'},
-{l:2,t:'Google Earth - 지구 탐험',s:'Google',u:'https://earth.google.com/',d:'3D로 지구 탐색. 화산, 바다, 산맥 등 자연지형 관찰. Voyager 교육 스토리'},
-{l:2,t:'Stellarium - 밤하늘 관찰',s:'Stellarium',u:'https://stellarium-web.org/',d:'웹 기반 천문 시뮬레이터. 별자리, 행성, 달 관찰. 무료. 실제 밤하늘 재현'},
-{l:2,t:'PhET - 힘과 운동: 기초',s:'PhET',u:'https://phet.colorado.edu/ko/simulations/forces-and-motion-basics',d:'밀기/당기기, 마찰력, 가속도 등 힘과 운동의 기초를 시뮬레이션으로 체험'},
-{l:2,t:'PhET - 에너지 스케이트 공원: 기초',s:'PhET',u:'https://phet.colorado.edu/ko/simulations/energy-skate-park-basics',d:'위치에너지와 운동에너지의 변환을 스케이트 공원 시뮬레이션으로 학습'},
-{l:2,t:'1분과학 - 뉴턴의 운동법칙',s:'1분과학',u:'https://www.youtube.com/@1분과학',d:'뉴턴의 3가지 운동법칙을 1분 내외의 짧은 영상으로 간결하게 설명'},
-{l:2,t:'과학쿠키 - 중력이란 무엇인가',s:'과학쿠키',u:'https://www.youtube.com/@과학쿠키',d:'뉴턴의 만유인력부터 아인슈타인의 일반상대성이론까지. 중력의 본질 탐구'},
-{l:2,t:'PhET - 중력과 궤도',s:'PhET',u:'https://phet.colorado.edu/ko/simulations/gravity-and-orbits',d:'태양, 지구, 달의 중력 상호작용과 궤도 운동 시뮬레이션'},
-{l:2,t:'자바실험실 - 물리: 힘과 운동',s:'JavaLab',u:'https://javalab.org/category/physics/',d:'한국어 물리 시뮬레이션. 뉴턴의 법칙, 진자, 파동 등 인터랙티브 실험'},
-{l:2,t:'과학의 역사 - 갈릴레오와 역학의 탄생',s:'교육콘텐츠',u:'https://www.youtube.com/results?search_query=갈릴레오+역학+과학+역사+어린이',d:'갈릴레오의 낙체 실험, 망원경 관측. 과학적 방법론의 시작'},
-{l:2,t:'PhET - 원자 모형 만들기',s:'PhET',u:'https://phet.colorado.edu/ko/simulations/build-an-atom',d:'양성자, 중성자, 전자를 조합하여 원자를 직접 만들어보는 시뮬레이션'},
-{l:1,t:'칸아카데미 물리학 (한국어)',s:'칸아카데미',u:'https://ko.khanacademy.org/science/physics',d:'무료 물리학 기초 강좌. 운동, 힘, 에너지 등 체계적 커리큘럼. 한국어 자막/더빙 지원'},
-{l:1,t:'칸아카데미 화학 (한국어)',s:'칸아카데미',u:'https://ko.khanacademy.org/science/chemistry',d:'무료 화학 기초 강좌. 원자, 원소, 화학결합, 반응 등 체계적 커리큘럼. 한국어 지원'},
-{l:1,t:'칸아카데미 생물학 (한국어)',s:'칸아카데미',u:'https://ko.khanacademy.org/science/biology',d:'무료 생물학 기초 강좌. 세포, 유전, 진화, 생태계 등 체계적 커리큘럼. 한국어 지원'},
-{l:1,t:'칸아카데미 지구과학 (한국어)',s:'칸아카데미',u:'https://ko.khanacademy.org/science/earth-science',d:'무료 지구과학 기초 강좌. 지질, 대기, 해양, 판구조론 등 체계적 커리큘럼. 한국어 지원'},
-{l:1,t:'칸아카데미 천문학 (한국어)',s:'칸아카데미',u:'https://ko.khanacademy.org/science/cosmology-and-astronomy',d:'무료 천문학 기초 강좌. 태양계, 별, 은하, 우주의 역사 등 체계적 커리큘럼. 한국어 지원'}],
-music:[
-{l:1,t:'[바로크] 바흐 - 음악의 아버지',s:'EBS 클래식',u:'https://www.ebs.co.kr/',d:'바흐의 생애와 평균율 클라비어곡집'},
-{l:1,t:'[바로크] 비발디 - 사계',s:'YouTube 교육',u:'https://www.youtube.com/',d:'봄여름가을겨울 이탈리아 바로크'},
-{l:2,t:'[고전] 모차르트 - 천재의 생애',s:'EBS',u:'https://www.ebs.co.kr/',d:'5살에 작곡한 천재, 35살의 짧은 생'},
-{l:2,t:'[고전] 베토벤 - 운명 교향곡',s:'YouTube',u:'https://www.youtube.com/',d:'귀가 먹어도 작곡한 불굴의 의지'},
-{l:3,t:'[낭만] 쇼팽 - 피아노의 시인',s:'YouTube',u:'https://www.youtube.com/',d:'폴란드 출신 낭만파 피아노 거장'},
-{l:3,t:'[낭만] 차이코프스키 - 호두까기인형',s:'YouTube',u:'https://www.youtube.com/',d:'러시아 낭만주의 발레 음악'},
-{l:4,t:'악기 탐험: 피아노·바이올린·첼로',s:'YouTube',u:'https://www.youtube.com/',d:'현악기와 건반악기의 소리와 원리'},
-{l:4,t:'악기 탐험: 플루트·트럼펫·드럼',s:'YouTube',u:'https://www.youtube.com/',d:'관악기와 타악기의 세계'},
-,
-{l:2,t:'바흐 - 토카타와 푸가 시각화',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=ho9rZjlsyYY',d:'바흐의 토카타와 푸가 D단조를 색깔 애니메이션으로 시각화한 교육 영상'},
-{l:2,t:'바흐 - 첼로 모음곡 1번 시각화',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=mGQLXRTl3Z0',d:'바흐 첼로 모음곡 1번 프렐류드를 그래픽 악보로 감상'},
-{l:2,t:'비발디 - 사계 봄 시각화',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=GRxofEmo3HA',d:'비발디 사계 중 봄을 컬러풀한 그래픽 악보로 감상'},
-{l:2,t:'모차르트 - 작은 별 변주곡 시각화',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=NO-ecxHEPqI',d:'모차르트의 반짝반짝 작은별 변주곡 - 아이들에게 친숙한 곡'},
-{l:2,t:'모차르트 - 아이네 클라이네 나흐트무지크',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=o1FSN8_pp_o',d:'모차르트의 대표 세레나데를 시각적으로 감상'},
-{l:2,t:'모차르트 - 터키 행진곡 시각화',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=quxTnEEETbo',d:'모차르트 터키 행진곡(론도 알라 투르카) 그래픽 악보'},
-{l:2,t:'베토벤 - 엘리제를 위하여 시각화',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=yAsDGNjn8F8',d:'베토벤의 엘리제를 위하여를 색깔 음표로 감상'},
-{l:2,t:'베토벤 - 운명 교향곡 시각화',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=rRgXUFnfKIY',d:'베토벤 교향곡 5번 운명 1악장 그래픽 악보 감상'},
-{l:2,t:'차이콥스키 - 호두까기 인형 모음곡',s:'smalin (Music Anim',u:'https://www.youtube.com/watch?v=Sh_uAX0u_XE',d:'차이콥스키의 호두까기 인형 - 꽃의 왈츠 시각화'},
-{l:2,t:'핑크퐁 악기 동요 모음',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=clKAejFAML4',d:'핑크퐁과 함께하는 악기 소개 동요 모음집'},
-{l:2,t:'뽀로로 이상한 악기',s:'뽀로로',u:'https://www.youtube.com/watch?v=ykYUk67IEVE',d:'뽀로로 9기 - 다양한 악기를 소개하는 에피소드'},
-{l:2,t:'EBS 야옹! 클래식 - 이 곡이 클래식이었어?',s:'EBS Kids',u:'https://primary.ebs.co.kr/CPG/course/view?courseId=10200890',d:'EBS 클래식 교육 프로그램 - 친숙한 곡들의 클래식 원곡 소개'}],
-sports:[
-{l:1,t:'[구기] 축구 기초 - 패스와 드리블',s:'YouTube 교육',u:'https://www.youtube.com/',d:'축구의 기본기 익히기'},
-{l:1,t:'[구기] 농구 기초 - 슈팅과 드리블',s:'YouTube',u:'https://www.youtube.com/',d:'농구 입문자를 위한 기초 동작'},
-{l:2,t:'[무도] 태권도 기본 동작',s:'YouTube',u:'https://www.youtube.com/',d:'품새와 기본 발차기'},
-{l:2,t:'[수상] 수영 입문 - 자유형',s:'YouTube',u:'https://www.youtube.com/',d:'물에 뜨는 법부터 자유형까지'},
-{l:3,t:'[체조] 체조와 유연성 키우기',s:'YouTube',u:'https://www.youtube.com/',d:'기초 체조 동작과 스트레칭'},
-{l:3,t:'신체 발달과 성장',s:'EBS',u:'https://www.ebs.co.kr/',d:'운동이 키와 체력에 미치는 영향'},
-,
-{l:2,t:'호기와 함께 율동 운동',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=RzrAZNviGWQ',d:'호기의 봄/소풍 동요와 율동 모음 - 따라하며 운동'},
-{l:2,t:'호기 색깔놀이 체조',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=NwY-COjRfKw',d:'호기와 색깔놀이하며 몸 움직이기'},
-{l:2,t:'핑크퐁 체조 동요',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=o17WrC9v-Ew',d:'핑크퐁과 함께하는 체조 율동 동요 모음'},
-{l:2,t:'아기상어와 바다 수영',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=FNsP9ChbdMc',d:'아기상어와 함께 바다에서 수영하기 - 수상 안전'},
-{l:2,t:'태권도 기본 동작 배우기',s:'학교체육포털',u:'https://www.cspep.or.kr/',d:'태권도 3가지 막기동작 & 태극 1장 배우기 (학교체육포탈)'},
-{l:2,t:'뽀로로와 축구 놀이',s:'뽀로로',u:'https://www.youtube.com/watch?v=mYYIH1VWPGo',d:'뽀로로레인저스 - 스포츠 액션 에피소드'},
-{l:2,t:'호기 징글 운동놀이',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=5RWu87y8fpw',d:'용암과 징글놀이 - 재미있게 몸 움직이기'},
-{l:2,t:'호기 상어와 도망치기 운동',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=yZIrknhpTjA',d:'대왕 상어에게 도망치며 신체 활동하기'}],
-explore:[
-{l:1,t:'곤충 관찰 일기',s:'LG사이언스랜드',u:'https://lgsl.kr/',d:'개미, 나비, 무당벌레 관찰하기'},
-{l:1,t:'식물 키우기와 관찰',s:'YouTube',u:'https://www.youtube.com/',d:'씨앗 심기부터 꽃 피우기까지'},
-{l:2,t:'날씨와 구름 관찰',s:'기상청',u:'https://www.weather.go.kr/',d:'구름 종류와 날씨 예측하기'},
-{l:2,t:'별자리 찾기',s:'Stellarium',u:'https://stellarium-web.org/',d:'밤하늘 별자리 탐험 (온라인 천문대)'},
-{l:3,t:'간단한 과학 실험 모음',s:'자바실험실',u:'https://javalab.org/',d:'집에서 할 수 있는 과학 실험'},
-,
-{l:2,t:'에그박사 - 나비의 비밀: 밑면과 윗면',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=bRYyQGKpYfI',d:'나비의 밑면과 윗면이 다른 이유 - 신비한 나비의 세계'},
-{l:2,t:'에그박사 - 왕나비 애벌레의 비밀',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=ZPwgmxp99WI',d:'독이 있는 식물을 먹는 왕나비 애벌레 관찰'},
-{l:2,t:'에그박사 - 라오스 곤충과 거미 관찰',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=FnGcCOtx9P4',d:'한국에 없는 라오스의 특이한 곤충과 거미 관찰'},
-{l:2,t:'에그박사 - 라오스 장수말벌 독침',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=yfsEWSv2vaw',d:'라오스 장수말벌의 무시무시한 독침 관찰'},
-{l:2,t:'에그박사 - 나뭇잎인가 나비인가?',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=RRXm4TDP49A',d:'나뭇잎처럼 보이는 나비 - 자연의 위장술 탐구'},
-{l:2,t:'에그박사 - 빈 새둥지의 생물',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=TGrwT8qaTCs',d:'빈 새둥지에서 발견되는 다양한 생물 관찰'},
-{l:2,t:'에그박사 - 저빌 대형 미로 탐험',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=Xw2DcN2H8fE',d:'저빌에게 15M 대형 미로를 만들어주기'},
-{l:2,t:'에그박사 - 민물 복어 발견',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=VPUuvpqvgAY',d:'메콩강에서 투망으로 잡은 귀여운 민물 복어 관찰'},
-{l:2,t:'에그박사 - 공벌레 레고집 만들기',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=X_yNl0F2Cxw',d:'외국 공벌레에게 레고로 집 만들어주기'},
-{l:2,t:'에그박사 - 성게를 먹는 늑대장어',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=sV-Bt-oOlVY',d:'성게를 부숴먹는 늑대장어 관찰'},
-{l:2,t:'에그박사 - 바다생물 구출작전',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=E38DEdJAabM',d:'수산물시장에서 바다생물 구출하기'},
-{l:2,t:'핑크퐁 바다 청소 대작전',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=qEPE-FmlOKE',d:'바다 환경 보호 - 뮤지컬 동물 동화'},
-{l:2,t:'PhET 중력과 궤도 시뮬레이션',s:'PhET Colorado',u:'https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_all.html',d:'행성 궤도와 중력을 직접 실험하는 인터랙티브 시뮬레이션'},
-{l:2,t:'PhET 물질의 상태 시뮬레이션',s:'PhET Colorado',u:'https://phet.colorado.edu/sims/html/states-of-matter/latest/states-of-matter_all.html',d:'고체, 액체, 기체의 분자 운동을 직접 관찰하는 시뮬레이션'},
-{l:2,t:'뽀로로 에디의 캠핑 소동',s:'뽀로로',u:'https://www.youtube.com/watch?v=Tzl-tzfBDHU',d:'뽀로로 9기 - 자연 속에서 날씨 체험하기'}],
-language:[
-{l:1,t:'한글 자음과 모음',s:'EBS',u:'https://www.ebs.co.kr/',d:'ㄱㄴㄷ부터 시작하는 한글 공부'},
-{l:2,t:'영어 알파벳과 파닉스',s:'YouTube',u:'https://www.youtube.com/',d:'ABC 알파벳과 발음 규칙'},
-{l:3,t:'독서 습관 만들기',s:'EBS',u:'https://www.ebs.co.kr/',d:'하루 10분 독서부터 시작'},
-{l:4,t:'논리적 사고와 퍼즐',s:'Brilliant',u:'https://brilliant.org/',d:'수학적 사고력 키우기'},
-,
-{l:2,t:'핑크퐁 색깔 놀이 한글',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=zWGDMO-KI2g',d:'알록달록 색깔을 잡아라! 색깔 이름 한글 학습'},
-{l:2,t:'핑크퐁 도둑 수수께끼',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=QUgO7Nn_sNI',d:'정글의 왕 호랑이 수수께끼 - 사고력과 어휘력 발달'},
-{l:2,t:'핑크퐁 색깔 도둑을 잡아라',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=vaADZZGXAZE',d:'색깔이 사라졌어요! 색깔 도둑 잡기 게임'},
-{l:2,t:'호기 ABC 영어 배우기',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=LvDd1yQKMxc',d:'호기와 함께 ABC 알파벳 영어 배우기'},
-{l:2,t:'핑크퐁 니니모 영어',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=iuuesnGQvWI',d:'영어 천재 니니모와 알파벳 버스 타기'},
-{l:2,t:'호기 티라노와 색깔놀이 영어',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=63xpk1DmmDw',d:'티라노사우르스와 색깔 영어 단어 배우기'},
-{l:2,t:'뽀로로 신비한 연못 - 추리',s:'뽀로로',u:'https://www.youtube.com/watch?v=Hxuz5b-mmnw',d:'뽀로로 9기 - 신비한 연못의 비밀을 추리하기'},
-{l:2,t:'호기 수수께끼 고양이 니니모',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=Zdzs6o37iE8',d:'수수께끼 고양이 니니모와 논리 퀴즈 풀기'},
-{l:2,t:'핑크퐁 뮤지컬 동물 동화 모음',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=vPWg9TIgemM',d:'뮤지컬 동물 동화 이어보기 - 동물의 왕은 누구?'},
-{l:2,t:'Scratch 코딩 에디터',s:'Scratch (MIT)',u:'https://scratch.mit.edu/projects/editor/',d:'Scratch 블록 코딩으로 논리적 사고력 기르기'},
-{l:2,t:'Scratch 수학 퀴즈 게임',s:'Scratch (MIT)',u:'https://scratch.mit.edu/projects/12115110/embed',d:'곱셈 연습 수학 퀴즈 - Scratch로 만든 교육 게임'},
-{l:2,t:'EBS 엔트리 코딩 교육',s:'EBS',u:'https://primary.ebs.co.kr/CPG/course/view?courseId=10026770',d:'헬로! EBS 소프트웨어 - 엔트리로 배우는 코딩'}],
-health:[
-{l:1,t:'골고루 먹기 - 영양소 이야기',s:'EBS',u:'https://www.ebs.co.kr/',d:'탄수화물, 단백질, 비타민의 역할'},
-{l:2,t:'운동 습관 만들기',s:'YouTube',u:'https://www.youtube.com/',d:'매일 10분 운동으로 건강하게'},
-{l:3,t:'손씻기와 위생 관리',s:'질병관리청',u:'https://www.kdca.go.kr/',d:'세균과 바이러스 예방하기'},
-{l:4,t:'안전 교육 - 교통/화재/지진',s:'안전교육포털',u:'https://www.safekorea.go.kr/',d:'생활 속 안전 수칙'},
-,
-{l:2,t:'핑크퐁 간식 시간 동요',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=bzue_7hIonI',d:'핑크퐁 가방에 뭐가 들었을까? 건강한 간식 ASMR'},
-{l:2,t:'핑크퐁 바다 청소 위생',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=qEPE-FmlOKE',d:'뽀득뽀득 바다 청소 대작전 - 깨끗이 하는 습관'},
-{l:2,t:'호기 모기에게 물렸어요',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=r3AEvAPOsdQ',d:'모기에게 물렸을 때 대처법 - 건강 위생 교육'},
-{l:2,t:'뽀로로와 체조 시간',s:'뽀로로',u:'https://www.youtube.com/watch?v=TvYld5bmT6Y',d:'뽀로로와 함께 즐겁게 노는 운동 습관 만들기'},
-{l:2,t:'국민안전교육 - 어린이 안전',s:'국민안전교육플랫폼',u:'https://kasem.safekorea.go.kr/',d:'행정안전부 국민안전교육플랫폼 - 생애주기별 안전교육'},
-{l:2,t:'교통안전 교육센터',s:'도로교통공단',u:'https://trafficedu.koroad.or.kr/',d:'어린이 교통안전 교육 영상 및 자료'},
-{l:2,t:'어린이 재난안전 교육',s:'한국화재보험협회',u:'https://www.kfpa.or.kr/?menucode=30600&tmenu=edu',d:'화재, 지진, 태풍 등 재난 대처 방법 교육 동영상'},
-{l:2,t:'행정안전부 안전한TV',s:'행정안전부',u:'https://www.safetv.go.kr/',d:'안전 교육 동영상 - 재난 예방, 생활안전, 교통안전'}],
-social:[
-{l:1,t:'인사와 예절 배우기',s:'EBS',u:'https://www.ebs.co.kr/',d:'어른에게 인사하기, 감사 표현'},
-{l:2,t:'내 감정 이해하기',s:'YouTube',u:'https://www.youtube.com/',d:'화가 날 때, 슬플 때 어떻게 할까'},
-{l:3,t:'친구와 잘 지내는 법',s:'EBS',u:'https://www.ebs.co.kr/',d:'갈등 해결과 소통 방법'},
-{l:4,t:'함께하는 협동 활동',s:'YouTube',u:'https://www.youtube.com/',d:'팀워크와 리더십 기초'},
-,
-{l:2,t:'뽀로로 아기가 된 뽀로로',s:'뽀로로',u:'https://www.youtube.com/watch?v=zJdly0IzNHw',d:'뽀로로 9기 - 아기가 되어 감정 이해하기'},
-{l:2,t:'호기 니니모가 다쳤어요',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=3v1dQlW35Bs',d:'친구가 다쳤을 때 어떻게 해야 할까? 감정 교육'},
-{l:2,t:'뽀로로 9기 연속 재생',s:'뽀로로',u:'https://www.youtube.com/watch?v=mlntTQ--rnU',d:'뽀로로와 친구들의 우정과 협동 이야기 모음'},
-{l:2,t:'뽀로로와 패티의 펭귄 허그',s:'뽀로로',u:'https://www.youtube.com/watch?v=mlSLqSRZD7I',d:'뽀로로와 패티의 따뜻한 우정 이야기'},
-{l:2,t:'핑크퐁 생일 축하 노래',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=o17WrC9v-Ew',d:'생일 축하 예절 - 인기 생일 축하 노래 모음'},
-{l:2,t:'핑크퐁 유치원 등원 동요',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=xMNeGmZfrj0',d:'유치원 등원하며 인사하기 - 사회생활 예절'},
-{l:2,t:'호기와 키키팝팝 노래',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=3BYx7Jbgoeo',d:'친구와 함께 노래하며 감정 표현하기'},
-{l:2,t:'육영재단 어린이 예절교육',s:'육영재단 어린이회관',u:'https://www.yookyoung.org/site/education/page/mannerLesson.jsp',d:'인의예지 기본 예절 교육 - 계절별 체험학습'}],
-special:[
-{l:1,t:'그림 그리기 기초',s:'YouTube',u:'https://www.youtube.com/',d:'연필 드로잉부터 색칠까지'},
-{l:2,t:'종이접기와 공예',s:'YouTube',u:'https://www.youtube.com/',d:'색종이로 만드는 다양한 작품'},
-{l:3,t:'쉬운 요리 함께하기',s:'YouTube',u:'https://www.youtube.com/',d:'아이와 함께 만드는 간식'},
-{l:4,t:'코딩 첫걸음 - Scratch',s:'Scratch',u:'https://scratch.mit.edu/',d:'블록 코딩으로 게임 만들기'},
-{l:5,t:'코딩 - 엔트리',s:'엔트리',u:'https://playentry.org/',d:'한국형 블록 코딩 플랫폼'},
-,
-{l:2,t:'핑크퐁 알록달록 변신 미술',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=Wg_0hZqXa_I',d:'알록달록 핑크퐁으로 변신! 색깔 미술 놀이'},
-{l:2,t:'핑크퐁 대형 풍선 만들기',s:'핑크퐁 (인기 동요·동화)',u:'https://www.youtube.com/watch?v=EuGWAusZSDc',d:'아기상어 대형 풍선 만들기 - 미술 창작 활동'},
-{l:2,t:'에그박사 - 레고로 생물 집 만들기',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=X_yNl0F2Cxw',d:'공벌레에게 레고로 집 만들어주기 - 공예와 자연 관찰'},
-{l:2,t:'뽀로로 에디의 캠핑 소동',s:'뽀로로',u:'https://www.youtube.com/watch?v=Xttu7GL6Uy8',d:'뽀로로 9기 - 에디의 캠핑 체험과 자연 탐구'},
-{l:2,t:'에그박사 - 잎꾼개미굴 탐험',s:'에그박사 Egg&Bugs',u:'https://www.youtube.com/watch?v=ue-Eo-bd1RA',d:'잎꾼개미굴에 갇힌 에그박사 - 야외 탐험 특별활동'},
-{l:2,t:'Scratch 블록 코딩 체험',s:'Scratch (MIT)',u:'https://scratch.mit.edu/projects/editor/',d:'Scratch 에디터에서 직접 코딩 체험하기'},
-{l:2,t:'EBS 엔트리 소프트웨어 교육',s:'EBS',u:'https://primary.ebs.co.kr/CPG/course/view?courseId=10026770',d:'엔트리로 배우는 코딩 - 블록 프로그래밍 입문'},
-{l:2,t:'뽀로로 로디 GPT 요리',s:'뽀로로',u:'https://www.youtube.com/watch?v=Dn6wo9rrdgs',d:'로디 GPT에게 물어보는 요리 이야기'},
-{l:2,t:'호기 냠냠 간식 만들기',s:'호기! 놀이친구 (핑크퐁)',u:'https://www.youtube.com/watch?v=AG0mo6MskaM',d:'멈출 수 없는 냠냠 - 간식 만들기 놀이'},
-{l:2,t:'GeoGebra 기하학 그리기',s:'GeoGebra',u:'https://www.geogebra.org/geometry',d:'GeoGebra로 도형 그리기 - 수학과 미술의 결합'}],
-economy:[
-{l:1,t:'용돈 관리와 저축',s:'EBS',u:'https://www.ebs.co.kr/',d:'용돈 기입장 쓰기 저축의 중요성'},
-{l:2,t:'화폐와 은행의 역할',s:'EBS',u:'https://www.ebs.co.kr/',d:'돈은 왜 필요할까 은행은 뭐하는 곳'},
-{l:3,t:'어린이 경제 시뮬레이터',s:'YouTube',u:'https://www.youtube.com/',d:'가상 사업과 투자 경제 체험'},
-,
-{l:1,t:'기획재정부 어린이 경제교실',s:'기획재정부',u:'https://kids.moef.go.kr/',d:'정부 공식 어린이 경제교실. 돈의 가치, 저축, 소비 등 기초 경제 개념을 게임과 만화로 학습'},
-{l:1,t:'어린이 경제신문 유튜브',s:'어린이경제신문',u:'https://www.econoi.com/',d:'경제 현상을 아이 눈높이에서 쉽고 재미있게 풀어주는 주간신문. 유튜브 채널에서 경제 영상 콘텐츠 제'},
-{l:1,t:'금융감독원 청소년 금융교실',s:'금융감독원',u:'https://www.fss.or.kr/edu/main.do',d:'금융감독원에서 제공하는 초등~청소년용 금융교육. 용돈관리, 저축, 보험 등 기초 금융 지식'},
-{l:2,t:'하나은행 어린이 금융교육',s:'하나금융그룹',u:'https://www.hanafn.com/hfm/mnu/esg/financialedu.do',d:'화폐의 비밀, 돈의 가치, 용돈관리 꿀팁. 캐릭터 애니메이션으로 제작된 어린이 금융교육 프로그램'},
-{l:2,t:'경제배움e (한국은행)',s:'한국은행',u:'https://econedu.go.kr/',d:'한국은행 경제교육포털. 아동·청소년 대상 경제교육 자료, 경제교육 사이트 모음, 교육 프로그램 제공'},
-{l:2,t:'비바샘 경제·금융교실',s:'비바샘',u:'https://e.vivasam.com/creative/edu/economy/list',d:'교실에서 경제·금융 활동 체험. 직업, 임금, 소비, 창업, 부동산 거래 등을 게임처럼 배움'},
-{l:3,t:'주니어 생글생글 (한경)',s:'한국경제신문',u:'https://jrsgsg.hankyung.com/',d:'한국경제신문의 청소년 경제교육 콘텐츠. 경제 기사, 시사 퀴즈, 논술 등 심화 경제 학습'},
-{l:2,t:'신한금융 어린이 금융교육',s:'신한금융희망재단',u:'https://www.shinhanfoundation.or.kr/project/financial/01',d:'신한금융그룹의 생애주기별 금융교육. 어린이·사회초년생 대상 체험형 금융교육 프로그램'},
-{l:1,t:'전국은행연합회 금융교육',s:'전국은행연합회',u:'https://portal.kfb.or.kr/finedu/introduce.php',d:'전국은행연합회 소비자포털 금융교육. 어린이~성인 대상 금융 기초 교육자료 제공'}],
-career:[
-{l:1,t:'다양한 직업 알아보기',s:'EBS',u:'https://www.ebs.co.kr/',d:'의사 선생님 소방관 프로그래머 등'},
-{l:2,t:'내가 좋아하는 것 찾기',s:'YouTube',u:'https://www.youtube.com/',d:'적성검사와 꿈 찾기 활동'},
-{l:3,t:'미래 직업 탐구',s:'YouTube',u:'https://www.youtube.com/',d:'AI 시대의 새로운 직업들'},
-,
-{l:1,t:'주니어 커리어넷',s:'교육부',u:'https://www.career.go.kr/cloud/j/main/home',d:'교육부 공식 초등학생용 진로정보망. 진로흥미탐색, 진로카드, 500+직업정보, 진로검사, 심리검사 '},
-{l:1,t:'커리어넷 직업정보',s:'교육부',u:'https://www.career.go.kr/cnet/front/base/juniorJob/juniorList.do',d:'500개 이상 직업 상세 소개. 직업별 하는 일, 필요한 능력, 되는 방법 등 어린이 눈높이 설명'},
-{l:2,t:'한국잡월드 어린이체험관',s:'한국잡월드',u:'https://www.koreajobworld.or.kr/',d:'종합직업체험관. 약 55가지 직업체험 가능. 어린이체험관에서 실제 직업 환경을 모의 체험'},
-{l:2,t:'키자니아 서울/부산',s:'키자니아',u:'https://www.kidzania.co.kr/',d:'어린이 직업체험 테마파크. 실제 기업 파트너사 참여, 모든 시설이 어린이 눈높이(실제 2/3 크기)'},
-{l:1,t:'고용노동부 어린이 홈페이지',s:'고용노동부',u:'https://www.moel.go.kr/kids/intro/jobworld/list.do',d:'고용노동부 어린이 페이지. 다양한 직업 세계 소개, 직업 관련 정보를 쉽게 전달'},
-{l:2,t:'초등 진로놀이 콘텐츠 (커리어넷)',s:'커리어넷',u:'https://www.career.go.kr/cnet/front/commbbs/courseMenu/commBbsView.do?BBS_SEQ=168083',d:'초등학생이 진로와 직업에 대해 쉽고 친근하게 접근할 수 있는 놀이형 진로탐색 콘텐츠'},
-{l:3,t:'SEN 진로교육자료 몽땅',s:'서울시교육청',u:'https://sites.google.com/sonline20.sen.go.kr/sencareer/',d:'서울시교육청 초등 진로교육 프로그램. 학년별 자아이해, 진로탐색 수업 자료 및 활동지 제공'},
-{l:1,t:'교육부 어린이 꿈 탐색',s:'교육부',u:'http://kids.moe.go.kr/home/dream/job.jsp',d:'다양한 직업 소개 페이지. 어린이가 관심 있는 직업을 찾고 탐색할 수 있는 공식 사이트'},
-{l:2,t:'찾아가는 직업체험 해오름',s:'즐거운학교',u:'https://www.njoyschool.net/?c=13&c_id=21',d:'찾아가는 학생 체험교육. 학교로 직접 방문하여 진행하는 직업체험 프로그램 해오름'}],
-coding:[
-{l:1,t:'Scratch 코딩 첫걸음',s:'Scratch',u:'https://scratch.mit.edu/',d:'블록 코딩으로 게임 만들기'},
-{l:2,t:'엔트리 코딩',s:'엔트리',u:'https://playentry.org/',d:'한국형 블록 코딩 플랫폼'},
-{l:3,t:'HTML/CSS 기초',s:'생활코딩',u:'https://opentutorials.org/course/3084',d:'나만의 웹페이지 만들기'},
-{l:4,t:'Python 첫걸음',s:'칸아카데미',u:'https://ko.khanacademy.org/',d:'텍스트 코딩 입문'},
-],
-};
-
-// ===== 성인교육 커리큘럼 =====
-const ADULT={
-history:[
-{l:1,t:'[한국사] 선사~삼국 (최태성)',s:'최태성1TV',u:'https://www.youtube.com/@bigstar1tv',d:'87강 무료 한국사 통사. 선사~삼국시대'},
-{l:2,t:'[한국사] 고려~조선 (최태성)',s:'최태성1TV',u:'https://www.youtube.com/@bigstar1tv',d:'고려 건국부터 조선 후기까지'},
-{l:3,t:'[한국사] 근현대사 (최태성)',s:'최태성1TV',u:'https://www.youtube.com/@bigstar1tv',d:'개항~일제강점기~민주화까지'},
-{l:2,t:'[세계사] 4대문명~고대',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'42편 세계사 시리즈. 한글자막 지원'},
-{l:3,t:'[세계사] 중세~근대',s:'tvN 벌거벗은세계사',u:'https://tvn.cjenm.com/',d:'십자군전쟁, 흑사병, 르네상스, 대항해'},
-{l:4,t:'[세계사] 근현대~냉전',s:'tvN 벌거벗은세계사',u:'https://tvn.cjenm.com/',d:'산업혁명, 세계대전, 냉전, 소련 해체'},
-{l:2,t:'[한국사] KBS 역사저널 그날',s:'KBS',u:'https://www.youtube.com/@KBSHistory',d:'한국사 주요 사건 토론형 프로그램'},
-{l:3,t:'[세계사] KOCW 세계사 대학강의',s:'KOCW',u:'https://www.kocw.net/',d:'대학 수준 세계사/서양사/동양사 강의'},
-,
-{l:1,t:'최태성 1TV - 한국사 통사 전체 무료 강의',s:'YouTube (최태성 1TV)',u:'https://www.youtube.com/@최태성1tv',d:'구독자 100만+. 사학과 출신 한국사 강사. 선사시대~현대까지 한국사 전 범위 무료 강의. 정확하'},
-{l:1,t:'황현필 한국사 - 삼국시대~현대 강연',s:'YouTube (황현필 한국사)',u:'https://www.youtube.com/@황현필한국사',d:'구독자 100만+. 수험용이 아닌 일반인 대상 한국사 강연. 임진왜란 65부작 등 깊이 있는 시대별'},
-{l:2,t:'KBS 역사저널 그날 - 한국사편',s:'KBS',u:'https://www.youtube.com/@KBSHistory',d:'한국사 주요 사건의 그날을 전문가 패널 대담으로 풀어낸 교양 프로그램. 삼국~근현대 주요 사건 '},
-{l:2,t:'EBS 역사채널e - 5분 한국사',s:'EBS',u:'https://home.ebs.co.kr/historye/main',d:'세련된 영상미와 강렬한 메시지로 한국사 주요 사건/인물을 5분 분량에 호소력 있게 전달. 시리즈 2'},
-{l:1,t:'EBS 다큐프라임 - 한국사 오천년, 생존의 길',s:'EBS',u:'https://home.ebs.co.kr/docuprime/newReleaseView/351',d:'한국사 5천년의 생존 전략을 탐구하는 다큐멘터리. 고대~현대까지 한민족의 역사적 선택과 그 결과'},
-{l:3,t:'KBS 역사스페셜 아카이브',s:'KBS',u:'https://www.youtube.com/@KBSHistory',d:'1998~2013 방영된 한국사 전문 다큐. 고고학 발굴, 사료 검증 등 학술적 깊이. 유튜브에서 '},
-{l:2,t:'EBSi 한국사 강의 (수능/한능검)',s:'EBS',u:'https://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?tabIdx=3',d:'EBS 국가대표 고교강의 한국사. 선사~현대까지 전 범위 체계적 강의. 수능·한국사능력검정시험 대비'},
-{l:1,t:'최태성 초등TV - 어린이 한국사',s:'YouTube (최태성 초등TV)',u:'https://www.youtube.com/@최태성초등TV',d:'초등학생 눈높이 한국사 강의. 삼국시대~현대까지 쉽고 재미있게 설명. 한국사 입문용으로 성인에게도 '},
-{l:3,t:'KOCW 한국사 대학 공개강좌',s:'KOCW',u:'https://www.kocw.net/home/search/majorCourses.do',d:'국내 대학 한국사 관련 공개강좌 모음. 한국고대사, 고려사, 조선시대사, 한국근현대사 등 전문 강의'},
-{l:2,t:'국사편찬위원회 한국사 데이터베이스',s:'국사편찬위원회',u:'https://db.history.go.kr/',d:'한국사 1차 사료 데이터베이스. 삼국사기, 고려사, 조선왕조실록, 승정원일기 등 원문+번역 무료 열'},
-{l:1,t:'EBS 시간을 달리는 세계사',s:'EBS',u:'https://home.ebs.co.kr/w-history/main',d:'EBS 세계사 교양 프로그램. 4대 문명~현대까지 세계사 주요 사건을 시간순으로 흥미롭게 전달'},
-{l:2,t:'KBS 역사저널 그날 - 세계사편',s:'KBS',u:'https://www.youtube.com/@KBSHistory',d:'2021년 7월부터 세계사 본격 다룸. 한국사와 접점 있는 세계사 사건 중심. 전문가 패널 대담 형'},
-{l:1,t:'함께하는 세계사 유튜브',s:'YouTube',u:'https://www.youtube.com/@함께하는세계사',d:'세계사 전문 유튜브 채널. 유럽사 중심으로 중세~근현대 세계사를 상세하게 다루는 교양 콘텐츠'},
-{l:2,t:'국회방송 세계사를 바꾼 그 날',s:'국회방송(NATV)',u:'https://www.natv.go.kr/natv/program/programInfo.do?programId=980',d:'세계사의 결정적 순간들을 조명하는 다큐멘터리. 주요 전쟁, 혁명, 발견의 순간들을 재현'},
-{l:1,t:'칸아카데미 세계사 (한국어)',s:'칸아카데미',u:'https://ko.khanacademy.org/humanities/world-history',d:'무료 세계사 기초 강좌. 4대문명→그리스→로마→중세→르네상스→근현대 체계적 커리큘럼. 한국어 지원'},
-{l:2,t:'지니스쿨 세계사 강좌',s:'지니스쿨',u:'https://www.youtube.com/@genischool',d:'고대~중세 세계사 강좌 제공. 4대 문명, 그리스·로마, 중세 유럽 등 시대별 체계적 설명'},
-{l:2,t:'EBSi 세계사 강의',s:'EBS',u:'https://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?tabIdx=3',d:'EBS 국가대표 고교강의 세계사. 인류 문명~현대까지 전 범위 무료 강의. 수능 대비용이지만 교양으'},
-{l:3,t:'KOCW 서양사/동양사 대학 공개강좌',s:'KOCW',u:'https://www.kocw.net/home/search/majorCourses.do',d:'국내 대학 세계사 관련 공개강좌. 서양고대사, 중세유럽사, 동아시아사, 세계근현대사 등 전문 강의'},
-{l:1,t:'KBS 글로벌 다큐멘터리 (역사편)',s:'KBS',u:'https://www.youtube.com/@KBSDocumentary',d:'해외 유명 역사 다큐멘터리 한국어 더빙/자막. BBC, NHK 등 제작 세계사 다큐. 2차대전, 냉'},
-{l:1,t:'이희명 세계사 강좌',s:'YouTube',u:'https://www.youtube.com/@이희명세계사',d:'고교 16년 교직+EBS 경력의 세계사 전문 강사. 교과서 집필 참여. 고대~현대 세계사 체계적 해'}],
-math:[
-{l:1,t:'기초수학 (이상엽Math)',s:'이상엽Math',u:'https://www.youtube.com/@isangyeopmath',d:'수학 취미인을 위한 기초부터 시작'},
-{l:2,t:'미분적분학 (KOCW 한양대)',s:'KOCW',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=432440',d:'극한, 미분, 적분. 대학 1학년 수준'},
-{l:2,t:'선형대수학의 본질 (3Blue1Brown)',s:'3Blue1Brown',u:'https://www.youtube.com/@3blue1brown',d:'15편 시각화 시리즈. 직관적 이해'},
-{l:3,t:'확률및통계 (KOCW)',s:'KOCW',u:'http://kocw.net/home/cview.do?mty=p&kemId=1056974',d:'확률변수, 분포, 통계적 추론'},
-{l:4,t:'해석학 (이상엽Math)',s:'이상엽Math',u:'https://www.youtube.com/@isangyeopmath',d:'실수체계, 수열, 연속, 미분, 적분론'},
-{l:1,t:'Khan Academy 기초 미적분',s:'Khan Academy',u:'https://ko.khanacademy.org/math/precalculus-new',d:'삼각함수, 복소수, 벡터, 행렬'},
-],
-science:[
-{l:1,t:'고전역학 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'뉴턴역학, 운동법칙, 만유인력'},
-{l:2,t:'전자기학 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'맥스웰 방정식, 전자기파'},
-{l:3,t:'상대성이론 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'특수/일반 상대성이론, 시공간'},
-{l:4,t:'양자역학 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'파동함수, 불확정성원리, 슈뢰딩거'},
-{l:2,t:'일반화학 (KOCW)',s:'KOCW',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=906737',d:'원자구조, 화학결합, 열화학'},
-{l:3,t:'생물학 (CrashCourse)',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'세포~유전~진화~생태계. 한글자막'},
-{l:3,t:'천문학 - 태양계~블랙홀 (Kurzgesagt)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'한글자막 과학 애니메이션'},
-{l:5,t:'MIT OCW 양자물리학',s:'MIT OCW',u:'https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/',d:'MIT 양자물리학 전체 강의 무료'},
-,
-{l:2,t:'KOCW 일반물리학1 (충남대)',s:'KOCW',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=1258707',d:'학부 1학년 대상. 뉴턴 역학, 운동방정식, 에너지, 열 및 열역학 강의. 무료 대학 공개강좌'},
-{l:1,t:'안될과학 - 물리 시리즈',s:'YouTube',u:'https://www.youtube.com/@안될과학',d:'박사급 출연진의 과학 채널. 구독자 131만+. 뉴턴역학, 에너지, 양자역학 등 물리 주제를 쉽게 '},
-{l:3,t:'PhET 물리 시뮬레이션',s:'콜로라도대학',u:'https://phet.colorado.edu/ko/simulations/filter?subjects=physics',d:'무료 물리 시뮬레이션. 역학, 에너지, 파동, 전자기학 등 인터랙티브 실험. 한국어 지원'},
-{l:2,t:'EBSi 물리학 강의',s:'EBS',u:'https://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?tabIdx=5&homeSubjCd=2',d:'EBS 국가대표 고교강의. 물리학I/II 전 범위 무료 강의. 역학과 에너지, 전자기학, 파동'},
-{l:2,t:'KOCW 유기화학I (건양대)',s:'KOCW',u:'http://kocw.net/home/cview.do?mty=p&kemId=1411898',d:'탄소화합물의 화학구조적 특징 학습. 기본적 유기화학 반응들의 메커니즘 강의. 무료 대학 공개강좌'},
-{l:1,t:'켐베어 (CHEM BEAR) 일반화학',s:'켐베어',u:'https://www.chembear.com/',d:'모두를 위한 일반화학·유기화학 강의. 원소, 화학결합, 화학반응 기초부터 체계적 설명'},
-{l:1,t:'PhET 화학 시뮬레이션',s:'콜로라도대학',u:'https://phet.colorado.edu/ko/simulations/filter?subjects=chemistry',d:'무료 화학 시뮬레이션. 원자구조, 분자, 화학반응, 산염기 등 인터랙티브 실험. 한국어 지원'},
-{l:2,t:'EBSi 화학 강의',s:'EBS',u:'https://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?tabIdx=5',d:'EBS 국가대표 고교강의. 화학I/II 전 범위 무료 강의. 원소, 화학반응, 유기화학 기초'},
-{l:1,t:'과학드림 - 생물학 시리즈',s:'YouTube',u:'https://www.youtube.com/@과학드림',d:'구독자 100만+. 생물학 전문 과학 채널. 진화, 세포, 유전, 면역 등 애니메이션으로 쉽게 설명'},
-{l:2,t:'K-MOOC 분자생물학',s:'K-MOOC',u:'https://www.kmooc.kr/view/course/detail/7288',d:'알기 쉬운 분자생물학 무료 온라인 강좌. 세포, DNA, 유전자 발현, 단백질 합성 등 체계적 학습'},
-{l:1,t:'PhET 생물학 시뮬레이션',s:'콜로라도대학',u:'https://phet.colorado.edu/ko/simulations/filter?subjects=biology',d:'무료 생물학 시뮬레이션. 세포, 유전, 자연선택 등 인터랙티브 실험. 한국어 지원'},
-{l:2,t:'EBSi 생명과학 강의',s:'EBS',u:'https://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?tabIdx=5',d:'EBS 국가대표 고교강의. 생명과학I/II 전 범위 무료 강의. 세포, 유전, 진화, 생태계'},
-{l:2,t:'EBSi 지구과학 강의',s:'EBS',u:'https://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?tabIdx=5',d:'EBS 국가대표 고교강의. 지구과학I/II 전 범위 무료 강의. 지질학, 대기과학, 해양, 천문'},
-{l:1,t:'PhET 지구과학 시뮬레이션',s:'콜로라도대학',u:'https://phet.colorado.edu/ko/simulations/filter?subjects=earth-science',d:'무료 지구과학 시뮬레이션. 판구조론, 대기, 온실효과 등 인터랙티브 실험. 한국어 지원'},
-{l:2,t:'KOCW 지구과학 강좌 모음',s:'KOCW',u:'https://www.kocw.net/home/search/majorCourses.do',d:'KOCW 지구과학 관련 대학 공개강좌. 지질학, 대기과학, 해양학 분야별 무료 강의'},
-{l:1,t:'한국천문연구원 교육동영상',s:'한국천문연구원(KASI)',u:'https://astro.kasi.re.kr/learning/post/educationvideo',d:'공식 천문우주 교육 동영상. 망원경 활용, 별자리, 태양계, 우주 진화, 별의 생성/소멸'},
-{l:1,t:'안될과학 - 천문학 시리즈',s:'YouTube',u:'https://www.youtube.com/@안될과학',d:'외계행성, 블랙홀, 빅뱅이론, 중력파, 암흑물질 등 천문학 콘텐츠. 박사급 출연진의 쉬운 설명'},
-{l:1,t:'1분과학 - 우주/천문',s:'YouTube',u:'https://www.youtube.com/@1분과학',d:'구독자 88만+. 1분 내외 과학 교양. 태양계, 은하, 블랙홀, 우주론 등 짧고 강렬한 스토리텔링'},
-{l:1,t:'과학쿠키 - 우주 시리즈',s:'YouTube',u:'https://www.youtube.com/@과학쿠키',d:'구독자 44만+. 태양계, 블랙홀, 우주의 끝 등 천문학 주제를 부담 없이 즐기는 과학 이야기'},
-{l:2,t:'KASI 천문학습관',s:'한국천문연구원',u:'https://astro.kasi.re.kr/learning/pageView/40',d:'한국천문연구원 공식 천문학습관. 태양계, 은하, 우주론, 천체관측 등 체계적 천문학 학습자료'},
-{l:1,t:'궤도 - 나의 두 번째 교과서: 과학',s:'EBS',u:'https://classe.ebs.co.kr/classe/detail/448331/40010594',d:'과학커뮤니케이터 궤도의 EBS 클래스e 강좌. 물리, 우주, 에너지 등 교과 밖 과학을 흥미롭게 전'},
-{l:2,t:'KGOL 유전체학 온라인강좌',s:'KGOL',u:'https://www.kgol.org/',d:'K-Genome Online Lectures. 유전체학, 유전자 분석, 바이오인포매틱스 관련 전문 '},
-{l:1,t:'리뷰엉이 - SF/과학 리뷰',s:'YouTube',u:'https://www.youtube.com/@리뷰엉이',d:'SF 영화를 소재로 과학 상식을 소개. 우주, 블랙홀, 시간여행 등 천문학 관련 대중적 콘텐츠'}],
-music:[
-{l:1,t:'바로크: 바흐와 비발디',s:'EBS/YouTube',u:'https://www.ebs.co.kr/',d:'바로크 시대 음악의 특징과 대표 작곡가'},
-{l:2,t:'고전: 모차르트와 베토벤',s:'YouTube',u:'https://www.youtube.com/',d:'고전주의 음악의 형식미와 천재들'},
-{l:3,t:'낭만: 쇼팽, 슈베르트, 차이코프스키',s:'YouTube',u:'https://www.youtube.com/',d:'감정 표현의 극대화, 낭만주의 거장들'},
-{l:4,t:'현대: 드뷔시→재즈→록',s:'YouTube',u:'https://www.youtube.com/',d:'인상주의부터 현대 대중음악까지'},
-,
-{l:1,t:'EBS 클래스e - 클래식 뮤직 드라마 (바흐/헨델)',s:'EBS',u:'https://classe.ebs.co.kr/',d:'바로크 시대 음악의 아버지 바흐와 헨델. 같은 해 같은 나라 출생 두 천재의 음악 이야기'},
-{l:1,t:'EBS 서양음악기행 (6부작)',s:'EBS',u:'https://home.ebs.co.kr/art/replay/8/list',d:'바로크→고전→낭만→현대 서양 클래식 음악사를 여행하는 6부작 다큐멘터리'},
-{l:2,t:'EBS 정경의 클래식클래식',s:'EBS',u:'https://home.ebs.co.kr/classic2/main',d:'클래식 음악 감상과 스토리텔링. 모차르트, 베토벤, 쇼팽, 차이코프스키 등 작곡가별 해설'},
-{l:2,t:'이승열의 세계 음악 기행',s:'EBS',u:'https://home.ebs.co.kr/musictravel/main',d:'세계 각국의 음악 문화 탐방. 국가별 음악 역사와 특색 소개'},
-{l:2,t:'서울대 음대 레슨노트',s:'EBS',u:'https://home.ebs.co.kr/snumusic/main',d:'서울대 음대 교수진의 악기별 레슨. 피아노, 바이올린, 성악 등 전문 강의'},
-{l:3,t:'CrashCourse - History of Music (한글자막)',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'서양 음악사 체계적 정리. 바로크→고전→낭만→현대→재즈→록. 한글자막 지원'},
-{l:3,t:'재즈의 역사 - 뉴올리언스에서 현대까지',s:'YouTube 다큐',u:'https://www.youtube.com/',d:'재즈 탄생(뉴올리언스)→스윙→비밥→쿨재즈→프리재즈→퓨전 역사 흐름'},
-{l:3,t:'록 음악의 역사 다큐',s:'YouTube 다큐',u:'https://www.youtube.com/',d:'블루스→로큰롤→브리티시 인베이전→사이키델릭→펑크→얼터너티브→인디 역사'},
-{l:1,t:'KOCW 음악의 이해 대학강의',s:'KOCW',u:'https://www.kocw.net/',d:'대학 교양 수준의 음악 이해 강의. 서양음악사, 악기론, 음악 감상법'},
-{l:1,t:'피아노치는남자 (Piano Bro)',s:'YouTube',u:'https://www.youtube.com/@PianoBro',d:'독학으로 피아노를 배워 30만+ 구독자 달성. 초보자 입문 강좌, 악보 없이 치는 법, 코드 반주법'},
-{l:1,t:'flowkey 피아노 학습앱',s:'flowkey',u:'https://www.flowkey.com/en',d:'온라인 피아노 학습 앱. 기초부터 고급까지 체계적 코스. 실제 피아노와 연결하여 인터랙티브 학습'},
-{l:1,t:'피아노스쿨 앱',s:'피아노스쿨',u:'https://www.pianoschool.kr/index.asp',d:'성인 피아노 독학용 스마트 앱. 디지털피아노와 연결하여 전자악보로 배우는 새로운 학습 방법'},
-{l:2,t:'피아노 치는 이정환',s:'YouTube',u:'https://www.youtube.com/@이정환piano',d:'9살 때 1년 배운 후 독학. 감성적 연주와 함께 피아노 테크닉, 연습법 공유. 120만+ 구독자'},
-{l:1,t:'mapianist 피아노 커뮤니티',s:'마피아니스트',u:'https://www.mapianist.com/',d:'기초 피아노 과정 정리, 피아노 커뮤니티. 독학 커리큘럼 공유, 연습곡 추천, 질의응답'},
-{l:1,t:'나바독 (엘렌위) 바이올린 독학',s:'YouTube',u:'https://www.youtube.com/@ellenwe',d:'바이올린 독학 전문 채널. 10곡 기본 활긋기→13곡 클래식→8곡 가요/OST 체계적 커리큘럼'},
-{l:1,t:'에어클래스 바이올린 입문',s:'에어클래스',u:'https://www.airklass.com/k/CMJ4PJD',d:'가요와 OST로 쉽고 재미있게 배우는 바이올린 입문자용 강의. 온라인 수강'},
-{l:2,t:'길잡이별/다칼 바이올린 채널',s:'YouTube',u:'https://www.youtube.com/@giljabibyeol',d:'기초부터 고급까지 다양한 레벨의 바이올린 연주. 어려운 부분 반복 연습, 쉬운 요령 전수'},
-{l:1,t:'어썸기타 (ASOME GUITAR)',s:'YouTube',u:'https://www.youtube.com/@asomeguitar',d:'통기타/일렉기타 독학 전문 채널. 초보 입문 튜토리얼, 코드, 스트로크, 핑거링 체계적 강의'},
-{l:2,t:'모아뮤직 (MOA Music) 기타',s:'YouTube',u:'https://www.youtube.com/@MOAMusic',d:'버클리 음대 출신 재즈 기타리스트. 코드톤, 화성학, 모드, 코드텐션 등 체계적 필수 연습루틴'},
-{l:1,t:'예건 기타 (초보 입문)',s:'YouTube',u:'https://www.youtube.com/@yegeonguitar',d:'기타 초보자를 위한 체계적 입문 강좌. 카페/유튜브에서 천천히 쉽게 알려주는 것으로 유명'},
-{l:1,t:'고니드럼 (Goni Drum)',s:'YouTube/웹',u:'https://gonidrum.com/',d:'드럼 기초~입문 전문 강좌. 기초 지식, 음악 이론, 기본 자세/스트로크, 기초 필인 무료 제공'},
-{l:1,t:'에어클래스 전자드럼 입문',s:'에어클래스',u:'https://www.airklass.com/k/EZ2QPRU',d:'집에서 시작하는 전자드럼 입문 강좌. 기초 리듬부터 실전 연주까지 온라인 수강'},
-{l:2,t:'어썸드럼 튜토리얼',s:'YouTube',u:'https://www.youtube.com/@asomedrum',d:'드럼 입문자~독학자를 위한 체계적 드럼 교재. 쉽고 재밌게 배울 수 있도록 구성'},
-{l:1,t:'서양음악사 산책 - 바로크부터 현대까지',s:'KOCW (군산대학교)',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=1444413',d:'음악사 흐름에 따라 중세~현대음악 대표 작품과 역사 배경을 쉽게 해설하는 대학 공개강좌. 음악 용어'},
-{l:1,t:'서양음악사 1 - 고대~바로크',s:'KOCW (중앙대학교)',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=1133882',d:'장영심 교수의 서양음악사 강의. 고대 그리스·중세 시대 음악사를 문화사적 관점에서 체계적으로 다룸'},
-{l:1,t:'서양음악사 - 르네상스~바로크',s:'KOCW (한국교원대학교)',u:'http://kocw.net/home/cview.do?mty=p&kemId=1262508',d:'손민정 교수의 고대·중세·르네상스·초기 바로크 음악사. 문화사적 시각에서 음악의 흐름을 조망'},
-{l:2,t:'클래식좀들어라 - 클래식 입문 해설',s:'YouTube',u:'https://www.youtube.com/@classicplease',d:'개설 10개월에 구독자 11만+ 달성한 인기 클래식 해설 채널. 작곡가별 명곡 해설과 클래식 입문 '},
-{l:2,t:'클래식타벅스 - 클래식 교양 상식',s:'YouTube',u:'https://www.youtube.com/@classictabucks',d:'클래식 관련 상식과 교양을 알려주는 채널. 익숙하지만 제목이 기억나지 않는 클래식 곡을 자세히 설명'},
-{l:2,t:'EBS 다큐프라임 - 음악은 어떻게 우리를 사로잡는가 1부: 시간의 주인',s:'EBS',u:'https://www.ebs.co.kr/tv/show?prodId=348&lectId=3118687',d:'리듬과 시간의 관계를 탐구하는 음악 다큐. 음악가는 리듬으로 시간을 쪼개고 삶의 시간을 조직한다'},
-{l:2,t:'EBS 다큐프라임 - 음악은 어떻게 우리를 사로잡는가 2부: 집으로 가는 길',s:'EBS',u:'https://www.ebs.co.kr/tv/show?prodId=348',d:'멜로디의 비밀. 12개 음이 만드는 마술, 음악은 떠나서 다시 집으로 돌아오는 여행 같은 구조'},
-{l:2,t:'EBS 다큐프라임 - 음악은 어떻게 우리를 사로잡는가 3부: 히든 트랙',s:'EBS',u:'https://www.ebs.co.kr/tv/show?prodId=348',d:'모든 음악가들의 공통 고민. 음악이 우리를 사로잡는 숨겨진 메커니즘을 탐구'},
-{l:3,t:'서양음악사 - 서울신학대학교',s:'KOCW (서울신학대학교)',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=1216581',d:'강수정 교수의 서양음악사 심화 강의. 바로크~낭만주의 시대별 양식 변화와 작곡가 분석'},
-{l:3,t:'바흐 - 음악의 아버지 골드베르크 변주곡 해설',s:'YouTube',u:'https://www.youtube.com/@classicplease',d:'바흐의 대표작 골드베르크 변주곡 분석. 바로크 음악의 정수와 대위법의 완성'},
-{l:3,t:'모차르트 교향곡 전곡 해설',s:'YouTube',u:'https://www.youtube.com/@classicplease',d:'모차르트 41개 교향곡의 흐름과 발전. 고전주의 음악의 완성자로서의 모차르트'},
-{l:3,t:'베토벤 교향곡 전곡 시리즈',s:'YouTube',u:'https://www.youtube.com/@classicplease',d:'베토벤 9개 교향곡 완전 해설. 고전→낭만 전환기의 혁명적 음악 세계'}],
-sports:[
-{l:1,t:'구기 스포츠 입문',s:'YouTube',u:'https://www.youtube.com/',d:'축구/농구/배구 기초 규칙과 기술'},
-{l:2,t:'격투 스포츠',s:'YouTube',u:'https://www.youtube.com/',d:'복싱/태권도/유도 기초'},
-{l:3,t:'운동과학과 트레이닝',s:'YouTube',u:'https://www.youtube.com/',d:'근비대 원리, 효과적인 훈련법'},
-,
-{l:1,t:'KBS 스포츠 다큐멘터리',s:'KBS',u:'https://www.youtube.com/@KBSSports',d:'올림픽, 축구, 야구, 농구 등 주요 스포츠 다큐. KBS N SPORTS 제작'},
-{l:2,t:'피지컬갤러리 - 운동과학/체형교정',s:'피지컬갤러리',u:'https://www.youtube.com/@physicalgallery',d:'물리치료사 기반 운동과학 채널. 체형교정, 재활, 트레이닝 과학. 논문 기반 감수'},
-{l:1,t:'Netflix - 더 라스트 댄스 (마이클 조던)',s:'Netflix',u:'https://www.netflix.com/title/80203144',d:'마이클 조던과 1990년대 시카고 불스 다큐. 구기 스포츠(농구) 역사 명작'},
-{l:2,t:'Netflix - Formula 1: Drive to Survive',s:'Netflix',u:'https://www.netflix.com/title/80204890',d:'F1 레이싱 드라이버들의 시즌 이야기. 모터스포츠 다큐멘터리 시리즈'},
-{l:2,t:'격투기 다큐 - UFC/복싱/유도',s:'YouTube 다큐',u:'https://www.youtube.com/',d:'격투기 종류별(복싱, 유도, 태권도, MMA) 역사와 전설적 선수 이야기'},
-{l:3,t:'동계 스포츠 다큐 - 올림픽 특집',s:'KBS/EBS',u:'https://www.youtube.com/@KBSSports',d:'피겨스케이팅, 스키, 스노보드, 쇼트트랙 등 동계 올림픽 종목 다큐'},
-{l:2,t:'핏블리 - 홈트레이닝/운동과학',s:'핏블리',u:'https://www.youtube.com/@FitVely',d:'전문 트레이너의 홈트레이닝 가이드. 근력/유산소/스트레칭 과학적 접근'},
-{l:1,t:'수상 스포츠 다큐 - 수영/서핑/다이빙',s:'YouTube 다큐',u:'https://www.youtube.com/',d:'수영, 서핑, 다이빙, 수구 등 수상 스포츠 역사와 트레이닝 과학'},
-{l:1,t:'골프 그립의 기본 - 올바른 클럽 잡는 법',s:'임진한클라스',u:'https://www.youtube.com/@limjinhan',d:'오버래핑, 인터로킹, 베이스볼 그립의 차이와 자신에게 맞는 그립 선택법. 손목 힘 빼기와 클럽헤드 '},
-{l:1,t:'골프 기본 스윙 - 어드레스부터 피니시까지',s:'박하림프로',u:'https://www.youtube.com/@parkharim',d:'어드레스 자세, 백스윙, 다운스윙, 임팩트, 팔로스루, 피니시까지 스윙의 6단계를 초보 눈높이에서 '},
-{l:2,t:'드라이버 비거리 늘리기 - 티샷의 정석',s:'임진한클라스',u:'https://www.youtube.com/@limjinhan',d:'드라이버 티 높이, 볼 위치, 체중이동의 핵심. 힘이 아니라 효율적인 회전으로 비거리를 늘리는 임진'},
-{l:2,t:'아이언샷 정확도 높이기 - 방향과 거리 조절',s:'박하림프로',u:'https://www.youtube.com/@parkharim',d:'7번 아이언 기준 올바른 볼 위치와 다운블로 임팩트 방법. 뒤땅과 토핑을 방지하고 정확한 아이언샷을'},
-{l:3,t:'퍼팅 마스터하기 - 스코어를 줄이는 최고의 무기',s:'임진한클라스',u:'https://www.youtube.com/@limjinhan',d:'퍼팅 그립, 스트로크 궤도, 거리감 연습법. 그린 경사 읽기와 라인 설정까지, 스코어의 40%를 차'},
-{l:1,t:'복싱 기본 스탠스 - 올바른 자세 만들기',s:'Tony Jeffries',u:'https://www.youtube.com/@tonyjeffries',d:'발 너비, 무게 중심, 가드 위치까지 복싱의 모든 것은 스탠스에서 시작한다. 올림픽 메달리스트 토니'},
-{l:1,t:'잽 - 복싱의 가장 중요한 펀치',s:'Tony Jeffries',u:'https://www.tonyjeffries.com/watch/',d:'잽은 공격과 수비의 시작이자 끝. 어깨 회전, 팔 펴기, 리턴까지 빠르고 정확한 잽을 던지는 방법을'},
-{l:2,t:'스트레이트 - 파워 펀치의 기본',s:'Tony Jeffries',u:'https://www.youtube.com/@tonyjeffries',d:'뒷손으로 체중을 실어 정면을 꿰뚫는 스트레이트. 골반 회전과 체중이동을 활용한 파워 펀치의 메커니즘'},
-{l:2,t:'훅 - 근거리 파괴력의 핵심',s:'Tony Jeffries',u:'https://sanabulsports.com/blogs/techniques/boxing-basics-how-to-throw-a-hook-punch-by-tony-jeffries',d:'팔꿈치 각도 90도, 수평 회전으로 상대의 측면을 가격하는 훅. 리드 훅과 리어 훅의 차이점과 실전'},
-{l:3,t:'콤비네이션 - 잽-스트레이트-훅 연결하기',s:'Tony Jeffries',u:'https://www.youtube.com/@tonyjeffries',d:'1-2(잽-스트레이트), 1-2-3(잽-스트레이트-훅) 등 기본 콤비네이션 연습. 펀치 연결의 리듬'},
-{l:1,t:'임진한 클라스',s:'YouTube',u:'https://www.youtube.com/@임진한클라스',d:'구독자 42만+. 투어프로 출신. 그립 잡는 법, 백스윙 교정법 등 아마추어 고민 해결 고퀄리티 레'},
-{l:1,t:'닥치고스윙 (김준년 프로)',s:'YouTube',u:'https://www.youtube.com/@닥치고스윙',d:'구독자 16만+. 630개+ 레슨 영상. 뼈다귀 보디수트로 신체 움직임 시각화. 초보~상급자 레슨'},
-{l:1,t:'박하림 프로',s:'YouTube',u:'https://www.youtube.com/@박하림프로',d:'구독자 43만+. 우드/드라이버 잘 치는 꿀팁 등 실전 레슨. 재치있는 멘트로 초보자 친화적'},
-{l:1,t:'골프맨 조윤성 프로',s:'YouTube',u:'https://www.youtube.com/@골프맨',d:'구독자 48만+. 초보 아내 대상 골프 강습 콘텐츠. 입문자 눈높이의 실전 레슨'},
-{l:2,t:'SBS Golf 레슨',s:'SBS Golf',u:'https://golf.sbs.co.kr/lessonmain.html',d:'SBS Golf 공식 레슨 영상. 프로 강사진의 체계적 골프 레슨 콘텐츠'},
-{l:1,t:'트레이너 김지훈 복싱',s:'YouTube',u:'https://www.youtube.com/@trainer_kimjihoon',d:'지도자 10년, 최우수 지도자상, 전 서울체고 코치. 기초 탄탄한 복싱 입문 레슨'},
-{l:1,t:'Tony Jeffries 복싱 (영어/자막)',s:'YouTube',u:'https://www.youtube.com/@TonyJeffries',d:'올림픽 동메달리스트, 유럽 챔피언 7회. 기초 입문자 참고용. 한국어 자동번역 자막 활용'},
-{l:2,t:'권투 기술 가이드 (나무위키)',s:'나무위키',u:'https://namu.wiki/w/%EA%B6%8C%ED%88%AC/%EA%B8%B0%EC%88%A0',d:'복싱 기술 종합 가이드. 잽, 스트레이트, 훅, 어퍼컷, 슬립, 더킹, 위빙 등 기본기 해설'},
-{l:1,t:'러블리 스위머 (Lovely Swimmer)',s:'YouTube',u:'https://www.youtube.com/@lovelyswimmer',d:'선출 코치 이현진. FeedSpot 100 Swimming Youtubers 선정. 슬로모션/반복재'},
-{l:1,t:'더포스 수영',s:'YouTube',u:'https://www.youtube.com/@theforceswim',d:'전 국가대표 상비군 출신 코치 공동 운영. 체계적 영법 이해와 기술 완성 중심 강좌'},
-{l:1,t:'굿나잇진조 수영',s:'YouTube',u:'https://www.youtube.com/@goodnight_jinjo',d:'수영강사 진종남. 오랜 강습 경력 기반 자세 교정, 호흡, 발차기 팁 상세 설명'},
-{l:2,t:'YS SWIM (김예슬)',s:'YouTube',u:'https://www.youtube.com/@ysswim',d:'접영 국가대표 출신. 호흡 타이밍, 영법 디테일 등 세부적인 기술 위주 설명'},
-{l:1,t:'요가소년',s:'YouTube',u:'https://www.youtube.com/@요가소년',d:'구독자 50만+. 차분한 목소리로 요가 철학 전달. 호흡과 감각 집중. 디지털 명상 가이드 역할'},
-{l:1,t:'요가은 (YoGaEun)',s:'YouTube',u:'https://www.youtube.com/@YoGaEun',d:'입문자 기초~숙련자 고난도 시퀀스 폭넓게 제공. 아쉬탕가, 빈야사 포함. 해부학적 정렬/호흡법 강조'},
-{l:1,t:'에일린 mind yoga',s:'YouTube',u:'https://www.youtube.com/@eileenmindyoga',d:'정신적 안정과 명상 중점. 불안을 잠재우는 요가, 자존감 높이는 아침 요가 등 감성 콘텐츠'},
-{l:2,t:'요가테라스 (재활·교정 특화)',s:'YouTube',u:'https://www.youtube.com/@yogaterrace',d:'재활·교정 특화 요가 채널. 체형 교정, 통증 완화, 유연성 향상 등 목적별 요가 시퀀스'},
-{l:1,t:'골프 기초 레슨 - 조윤성 프로',s:'YouTube (골프맨 조윤성프로',u:'https://www.youtube.com/@golfman',d:'구독자 48만+. 초보 골퍼인 아내를 대상으로 골프 강습 진행. 초보자 눈높이 맞춤 레슨'},
-{l:1,t:'골프 스윙 교정 - 임진한 클라스',s:'YouTube (임진한 클라스)',u:'https://www.youtube.com/@imjinhan',d:'구독자 42만+. 그립·백스윙 교정법 등 아마추어 고민 해결. 고퀄리티 레슨 콘텐츠'},
-{l:2,t:'골프 중급 레슨 - 박하림 프로',s:'YouTube (박하림프로)',u:'https://www.youtube.com/@parkharim',d:'구독자 43만+. 중급자를 위한 체계적인 골프 기술 향상 레슨'},
-{l:2,t:'골프 심화 - 닥치고스윙',s:'YouTube (닥치고스윙)',u:'https://www.youtube.com/@shutupswing',d:'김준년 프로. 구독자 16만+. 초보~상급자 630개+ 레슨 동영상. 체계적 스윙 교정'},
-{l:1,t:'복싱 기초 - 잽부터 시작하는 복싱',s:'YouTube',u:'https://www.youtube.com/results?search_query=복싱+기초+레슨+한국어',d:'풋워크, 가드, 잽 기초부터 시작하는 복싱 입문. 격투기 중 과학화·체계화가 가장 잘 된 스포츠'},
-{l:2,t:'기능성 트레이닝 - Pato코치',s:'YouTube (Pato코치)',u:'https://www.youtube.com/results?search_query=Pato코치+기능성+트레이닝',d:'건강하고 기능적인 몸을 만드는 트레이닝 방법 연구. 스포츠 과학 기반 운동법'},
-{l:3,t:'스포츠 과학 - 한국스포츠과학원',s:'한국스포츠과학원',u:'https://www.sports.re.kr/front/main/main.do',d:'과학적·체계적 방법으로 선수 경기력 향상 지원. 스포츠 의학, 트레이닝 과학 자료'},
-{l:3,t:'대한체육회 경기 영상 아카이브',s:'대한체육회',u:'https://vod.sports.or.kr/',d:'올림픽·아시안게임 등 국가대표 경기 영상 아카이브. 구기/격투/수상/동계 스포츠 영상'},
-{l:2,t:'넷플릭스 스포츠 다큐 - 끝까지 전력투구',s:'Netflix',u:'https://www.netflix.com/browse/genre/180',d:'스포츠 마니아를 위한 넷플릭스 자체 제작 다큐. 야구·격투기·올림픽 등 다양한 종목'},
-{l:3,t:'SBS 특집 다큐멘터리 - 스포츠 편',s:'SBS',u:'https://programs.sbs.co.kr/culture/sbsdocum/clip/0/22000130147',d:'올림픽 양궁, 축구 등 한국 스포츠 다큐멘터리. 개발도상국 스포츠 현실도 조명'},
-{l:1,t:'홈트레이닝 - 심으뜸',s:'YouTube (심으뜸)',u:'https://www.youtube.com/@simeuddem',d:'스트레스 없는 건강한 라이프 스타일. 차분하고 자세한 운동 설명으로 초보자에게 최적'},
-{l:2,t:'체형교정 & 재활 트레이닝',s:'YouTube',u:'https://www.youtube.com/results?search_query=체형교정+재활+트레이닝+한국어',d:'재밌고 유익한 체형교정과 재활 정보. 스포츠 영양사의 운동영양·식단·보충제 콘텐츠'}],
-explore:[
-{l:1,t:'자연 다큐멘터리',s:'EBS/YouTube',u:'https://www.ebs.co.kr/',d:'한국의 자연, BBC Earth 스타일'},
-{l:2,t:'과학 실험과 탐구',s:'자바실험실',u:'https://javalab.org/',d:'인터랙티브 과학 시뮬레이션'},
-,
-{l:1,t:'EBS 자연 다큐 특집',s:'EBS',u:'https://home.ebs.co.kr/docun/main',d:'한국 자연생태 다큐. 호랑이, 여우, 개미, 오소리, 날다람쥐, 표범 등 국내 야생동물'},
-{l:2,t:'BBC 살아있는 지구 (Planet Earth) 한글더빙',s:'BBC',u:'https://tv.kakao.com/channel/3052905',d:'BBC+NHK 5년 제작 11부작. 데이비드 애튼버러 내레이션. HD 자연 다큐의 정석'},
-{l:2,t:'Netflix - 우리의 지구 (Our Planet)',s:'Netflix',u:'https://www.netflix.com/kr/title/80049832',d:'데이비드 애튼버러 내레이션. 지구 생태계와 기후변화 다큐. 한국어 더빙'},
-{l:1,t:'BBC 위대한 자연',s:'국회방송',u:'https://www.natv.go.kr/natv/program/programInfo.do?programId=1074',d:'BBC 명품 자연 다큐멘터리 한국어 더빙 시리즈'},
-{l:3,t:'Kurzgesagt - 자연/생태 시리즈 (한글자막)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'개미 전쟁, 면역체계, 바이러스 등 자연과학 애니메이션. 한글자막 지원'},
-{l:2,t:'EBS 다큐프라임 - 자연/생태 시리즈',s:'EBS',u:'https://docuprime.ebs.co.kr/docuprime/newReplay?courseId=BP0PAPB0000000005',d:'EBS 다큐프라임 자연/생태 카테고리. 국내외 자연 다큐 다수 보유'},
-{l:3,t:'과학실험 채널 - 과학쿠키/안될과학',s:'YouTube',u:'https://www.youtube.com/@sciencecookie',d:'과학 실험과 탐구 영상. 물리/화학/생물 실험 시각적 설명'},
-{l:1,t:'EBS 자연다큐 특집 - 자연의 세계',s:'EBS',u:'https://home.ebs.co.kr/docun/main',d:'EBS 자연 다큐멘터리 특집. 자연의 세계·자연의 신비·공존의 그늘 등 세계적 수준의 자연 다큐'},
-{l:1,t:'BBC 명품다큐 - 위대한 자연',s:'국회방송 (NATV)',u:'https://www.natv.go.kr/natv/program/programInfo.do?programId=1074',d:'BBC Earth 명품 자연 다큐멘터리 한국어 더빙. 세계 최강 수준의 자연 다큐'},
-{l:2,t:'BBC 특선 다큐 - YTN 사이언스',s:'YTN 사이언스',u:'https://science.ytn.co.kr/program/program_list.php?mcd=1113',d:'YTN 사이언스에서 방영하는 BBC 특선 다큐멘터리. 자연·과학 주제별 심층 탐구'},
-{l:2,t:'넷플릭스 자연 & 생태 다큐멘터리',s:'Netflix',u:'https://www.netflix.com/kr/browse/genre/48768',d:'넷플릭스 자연·생태 다큐 컬렉션. Our Planet, Night on Earth 등 고퀄리티 시리'},
-{l:1,t:'과학드림 - 자연과학 해설',s:'YouTube (과학드림)',u:'https://www.youtube.com/@sciencedream',d:'구독자 110만+. 과학잡지 기자 출신 크리에이터. 자연현상·생물학·물리학 등 과학 해설'},
-{l:2,t:'안될과학 - 과학 실험 & 탐구',s:'YouTube (안될과학)',u:'https://www.youtube.com/@안될과학',d:'구독자 131만+. 박사급 출연진의 과학 채널. 실험·탐구·자연현상 해설'},
-{l:1,t:'1분과학 - 자연 교양 콘텐츠',s:'YouTube (1분과학)',u:'https://www.youtube.com/@1분과학',d:'구독자 88만+. 1분 내외 과학 교양 콘텐츠. 자연현상을 간결한 스토리텔링으로 전달'},
-{l:2,t:'Kurzgesagt 한국어 - 우주·자연 과학',s:'YouTube (Kurzgesag',u:'https://www.youtube.com/@kuaboryo',d:'세계적 과학 채널의 한국어 더빙. 우주·생물학·물리학 고퀄리티 애니메이션'},
-{l:3,t:'디스커버리 채널 - 자연 탐사',s:'Discovery Channel',u:'https://www.youtube.com/results?search_query=디스커버리+자연+다큐+한국어',d:'디스커버리 채널 자연 탐사 다큐멘터리. 오지 탐험·야생동물·해양 탐사'},
-{l:3,t:'내셔널지오그래픽 - 디즈니플러스',s:'Disney+ (National ',u:'https://www.disneyplus.com/',d:'내셔널지오그래픽 다큐멘터리 컬렉션. 자연·탐험·과학 분야 세계 최고 수준 다큐'},
-{l:2,t:'과학쿠키 - 자연 과학 교양',s:'YouTube (과학쿠키)',u:'https://www.youtube.com/@과학쿠키',d:'구독자 44만+. 누구나 부담 없이 즐기는 재미있는 과학 이야기. 자연현상 해설'},
-{l:3,t:'EBS 다큐프라임 - 우주가 부른다',s:'EBS',u:'https://www.ebs.co.kr/tv/show?prodId=348',d:'EBS 다큐프라임 우주 특집. 우주 탐사·천문학·인류의 우주 도전기'}],
-language:[
-{l:1,t:'영어 회화 기초',s:'라이브아카데미',u:'https://www.youtube.com/',d:'실생활 영어 회화 패턴'},
-{l:2,t:'뇌과학과 학습법',s:'YouTube/TED',u:'https://www.ted.com/',d:'효율적 학습의 뇌과학적 원리'},
-,
-{l:1,t:'EBS 다큐프라임 - 뇌로 보는 인간 (5부작)',s:'EBS',u:'https://www.ebs.co.kr/tv/show?prodId=348&lectId=20256665',d:'뇌과학으로 본 인간의 본성. 돈, 폭력, 예술, 섹스, 종교. 정재승 교수 참여'},
-{l:2,t:'TED Talks - 뇌과학/학습 (한국어 자막)',s:'TED',u:'https://www.ted.com/talks?language=ko',d:'뇌과학, 학습법, 기억력 관련 TED 강연. 111개 언어 자막. 한국어 기본 지원'},
-{l:1,t:'뇌과학 외국어 학습 혁명 - 관련 강연',s:'YouTube',u:'https://www.youtube.com/',d:'흥미와 감정을 활용한 외국어 학습법. 뇌가 즐겁고 감정이 움직이는 표현을 더 오래 기억'},
-{l:2,t:'CrashCourse Psychology (한글자막)',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'40편 심리학 시리즈. 의식, 기억, 인지, 성격 등. AP Psychology 커리큘럼 기반'},
-{l:3,t:'KOCW 심리학개론 - 중앙대 박준성',s:'KOCW',u:'http://kocw.net/home/cview.do?mty=p&kemId=1178447',d:'인간행동 기초, 감각/지각, 학습, 기억, 사고, 발달 등 심리학 전반 소개'},
-{l:2,t:'독서법/학습법 - 자기계발 유튜브 채널',s:'YouTube',u:'https://www.youtube.com/',d:'효율적 독서법, 속독, 정독, 메모법, 학습전략 등 한국어 자기계발 콘텐츠'},
-{l:1,t:'TED - 5가지 외국어 학습법 (다국어 구사자)',s:'TED',u:'https://www.ted.com/talks?language=ko&topics%5B%5D=language',d:'16개 언어 구사자가 알려주는 5가지 외국어 학습법. 외국어를 배우는 가장 효과적인 방법'},
-{l:1,t:'영어 학습 유튜브 - EnglishInKorean',s:'YouTube',u:'https://www.youtube.com/results?search_query=EnglishInKorean',d:'문법·표현·회화를 한국어로 설명하는 영어 학습 채널. 자주 쓰이는 영어 표현 위주'},
-{l:2,t:'TED 강연으로 영어 공부하기',s:'TED / FluentU',u:'https://www.ted.com/talks?language=ko',d:'TED 강연 100개국 이상 자막 지원. 흥미로운 주제로 영어 듣기·읽기 동시 학습'},
-{l:2,t:'뇌과학 - 언어 습득의 비밀',s:'YouTube',u:'https://www.youtube.com/results?search_query=뇌과학+언어습득+한국어',d:'좌뇌의 베르니케·브로카 영역과 언어 습득의 과학. 모국어와 외국어 습득 원리는 동일'},
-{l:3,t:'닥터프렌즈 - 뇌과학 & 정신의학',s:'YouTube (닥터프렌즈)',u:'https://www.youtube.com/@doctorfriends',d:'정신건강의학과·내과·이비인후과 전문의 3인. 뇌과학·기억·수면 관련 의학 지식 전달'},
-{l:3,t:'EBS 다큐프라임 - 시간을 삼킨 뇌의 비밀',s:'EBS',u:'http://www.ebs.co.kr/tv/show?prodId=348&lectId=10974914',d:'뇌의 시간 인식과 기억의 비밀을 탐구하는 EBS 다큐프라임. 뇌과학 심화 다큐'},
-{l:2,t:'하루 3분 뇌과학 - 봉투월드',s:'YouTube (봉투월드)',u:'https://www.youtube.com/results?search_query=봉투월드+하루3분+뇌과학',d:'매일 3분씩 뇌과학 지식을 쌓는 채널. 기억력·집중력·학습 관련 뇌과학 팁'},
-{l:4,t:'기억술 - 메모리 팰리스 기법',s:'YouTube',u:'https://www.youtube.com/results?search_query=기억술+메모리팰리스+한국어',d:'장소법(메모리 팰리스) 등 고대부터 전해오는 기억술. 기억력 대회 챔피언들의 비법'},
-{l:4,t:'속독법 - 빠르게 읽고 깊이 이해하기',s:'YouTube',u:'https://www.youtube.com/results?search_query=속독법+한국어+강의',d:'속독의 원리와 실전 훈련법. 안구운동·청킹·스키밍 등 독서 속도 향상 기법'},
-{l:1,t:'칸아카데미 한국어 - 기초 학습',s:'Khan Academy 한국어',u:'https://ko.khanacademy.org/',d:'무료 온라인 교육 플랫폼. 수학·과학·코딩 등 기초 학습을 한국어로 체계적으로 제공'},
-{l:3,t:'인리치 아카데미 - 잠재의식과 뇌과학',s:'인리치 아카데미',u:'https://www.brainpluslife.com/news/421478',d:'매주 잠재의식과 뇌과학 학습. 뇌 활용 잠재력 개발 플랫폼'},
-{l:2,t:'일본어 기초 - 히라가나부터 시작',s:'YouTube',u:'https://www.youtube.com/results?search_query=일본어+기초+히라가나+한국어+강의',d:'일본어 입문 강좌. 히라가나·카타카나·기초문법부터 시작하는 체계적 학습'}],
-health:[
-{l:1,t:'영양학 기초',s:'YouTube',u:'https://www.youtube.com/',d:'탄단지 균형, 비타민, 미네랄'},
-{l:2,t:'운동과학',s:'YouTube',u:'https://www.youtube.com/',d:'근육 성장 원리, 유산소 vs 무산소'},
-{l:3,t:'정신건강과 수면',s:'TED',u:'https://www.ted.com/',d:'스트레스 관리, 수면의 과학'},
-,
-{l:1,t:'닥터프렌즈 - 의학/건강 채널',s:'닥터프렌즈',u:'https://www.youtube.com/@doctorfriends',d:'이비인후과/내과/정신건강의학과 전문의 3인 채널. 수면, 영양, 정신건강 등 의학 정보'},
-{l:2,t:'EBS 다큐프라임 - 인체/의학 시리즈',s:'EBS',u:'https://docuprime.ebs.co.kr/docuprime/newReplay?courseId=BP0PAPB0000000005',d:'EBS 다큐프라임 의학 카테고리. 수면, 식습관, 운동, 스트레스 등 건강 다큐'},
-{l:2,t:'피지컬갤러리 - 영양/운동과학',s:'피지컬갤러리',u:'https://www.youtube.com/@physicalgallery',d:'스포츠 영양사, 의사, 물리치료사 감수. 영양학, 운동과학 논문 기반 콘텐츠'},
-{l:1,t:'TED - 수면/영양/정신건강 강연 (한국어 자막)',s:'TED',u:'https://www.ted.com/talks?language=ko',d:'수면의 과학, 영양학 최신 연구, 정신건강 관련 TED 강연 모음. 한글자막'},
-{l:3,t:'Kurzgesagt - 건강/면역 시리즈 (한글자막)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'면역체계, 백신, 바이러스, 암 등 건강 관련 과학 애니메이션. 한글자막'},
-{l:2,t:'핏블리 - 운동/다이어트 과학',s:'핏블리',u:'https://www.youtube.com/@FitVely',d:'운동과학 기반 트레이닝, 다이어트, 체중관리 가이드'},
-{l:3,t:'KOCW 영양학/운동생리학 대학강의',s:'KOCW',u:'https://www.kocw.net/',d:'KOCW에서 영양학, 운동생리학, 보건학 검색. 대학 수준 건강과학 강의'},
-{l:1,t:'닥터프렌즈 - 건강 상식',s:'YouTube (닥터프렌즈)',u:'https://www.youtube.com/@doctorfriends',d:'전문의 3인이 알려주는 건강 상식. 매주 화·목·일 업로드. 의학 지식을 쉽게 전달'},
-{l:1,t:'EBS 다큐프라임 - 운동과 머리는 함께 자란다',s:'EBS',u:'https://home.ebs.co.kr/docuprime/replay/2/list',d:'운동이 뇌 발달에 미치는 영향. 운동과 학습능력의 과학적 상관관계'},
-{l:2,t:'수면과학 - 꿀잠을 위한 뇌 속 생체 리듬',s:'YouTube',u:'https://www.youtube.com/results?search_query=수면+뇌과학+생체리듬+한국어',d:'수면이 기억력을 강화하는 과학적 근거. 뇌의 생체리듬과 최적의 수면 패턴'},
-{l:2,t:'영양학 기초 - 3대 영양소와 미량 영양소',s:'YouTube',u:'https://www.youtube.com/results?search_query=영양학+기초+3대영양소+한국어',d:'탄수화물·단백질·지방 3대 영양소와 비타민·미네랄 미량 영양소의 역할과 균형 잡힌 식단'},
-{l:1,t:'심으뜸 - 홈트레이닝 건강 운동',s:'YouTube (심으뜸)',u:'https://www.youtube.com/@simeuddem',d:'초보자도 따라할 수 있는 홈트레이닝. 스트레스 없는 건강한 라이프 스타일 채널'},
-{l:3,t:'운동과학 - 근력·유산소·유연성',s:'YouTube',u:'https://www.youtube.com/results?search_query=운동과학+근력+유산소+한국어',d:'근력운동·유산소운동·유연성 훈련의 과학. 각 운동 유형의 생리학적 효과'},
-{l:3,t:'정신건강 - 스트레스 관리와 마음 챙김',s:'YouTube',u:'https://www.youtube.com/results?search_query=정신건강+스트레스관리+마음챙김+한국어',d:'스트레스 관리법·마인드풀니스·명상. 현대인의 정신건강을 위한 실용 가이드'},
-{l:4,t:'수면과학 심화 - 수면 단계와 꿈',s:'YouTube',u:'https://www.youtube.com/results?search_query=수면+단계+REM+NREM+한국어',d:'REM·NREM 수면 단계의 과학. 수면 주기·꿈의 기능·불면증 극복법'},
-{l:4,t:'노화 과학 - 텔로미어와 장수',s:'YouTube',u:'https://www.youtube.com/results?search_query=노화+텔로미어+장수+과학+한국어',d:'텔로미어·세포 노화·칼로리 제한·장수 유전자 등 노화 과학의 최전선'},
-{l:5,t:'장 건강 - 마이크로바이옴의 세계',s:'YouTube',u:'https://www.youtube.com/results?search_query=장내미생물+마이크로바이옴+한국어',d:'장내 미생물(마이크로바이옴)이 면역·기분·체중에 미치는 영향. 장-뇌 축의 과학'},
-{l:2,t:'KOCW 영양학 개론',s:'KOCW',u:'https://www.kocw.net/home/search/search.do',d:'대학 영양학 공개강좌. 영양소 대사·식이요법·영양과 질병의 관계를 체계적으로 학습'},
-{l:1,t:'걷기 운동의 과학 - 가장 쉬운 건강법',s:'YouTube',u:'https://www.youtube.com/results?search_query=걷기+운동+효과+과학+한국어',d:'걷기 운동이 심혈관·뇌·정신건강에 미치는 과학적 효과. 초보자를 위한 걷기 가이드'}],
-social:[
-{l:1,t:'심리학 입문',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'심리학 기초 시리즈. 한글자막'},
-{l:2,t:'소통과 리더십',s:'TED',u:'https://www.ted.com/',d:'효과적 커뮤니케이션 TED 강연'},
-,
-{l:1,t:'놀면서 배우는 심리학 (놀심)',s:'놀면서 배우는 심리학',u:'https://www.youtube.com/@nolsim',d:'국내 심리학 분야 구독자 1위 채널 (86만+). 자존감, 관계, 성격, 마음 관리'},
-{l:2,t:'CrashCourse Philosophy (한글자막)',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'46편 서양철학 입문. 소크라테스→칸트→실존주의→현대철학. 대학 입문 수준'},
-{l:2,t:'CrashCourse Psychology (한글자막)',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'40편 심리학 시리즈. 의식, 기억, 인지, 성격, 사회심리학 등'},
-{l:3,t:'KOCW 심리학개론 - 중앙대 박준성',s:'KOCW',u:'http://kocw.net/home/cview.do?mty=p&kemId=1178447',d:'인간행동 기초, 감각/지각, 학습, 기억, 사고, 발달 심리학 대학 강의'},
-{l:2,t:'TED - 리더십/소통/동기부여 (한국어 자막)',s:'TED',u:'https://www.ted.com/talks?language=ko',d:'리더십, 커뮤니케이션, 동기부여, 창의성 관련 TED 강연. 한글자막 지원'},
-{l:3,t:'KOCW 철학개론 대학강의',s:'KOCW',u:'https://www.kocw.net/',d:'KOCW에서 철학개론, 윤리학, 논리학 검색. 서양/동양 철학 대학강의'},
-{l:1,t:'Vsauce - Mind Field (한글자막)',s:'Vsauce',u:'https://www.youtube.com/@Vsauce',d:'인간 마음과 행동 실험. 플라시보 효과, 암시의 힘, 도덕적 선택 등 심리학 실험'},
-{l:2,t:'EBS 다큐프라임 - 인문/사회 시리즈',s:'EBS',u:'https://docuprime.ebs.co.kr/docuprime/newReplay?courseId=BP0PAPB0000000005',d:'EBS 다큐프라임 인문/정치/사회 카테고리. 소통, 관계, 사회심리 등 다큐'},
-{l:1,t:'5분 뚝딱 철학 - 철학 입문',s:'YouTube (5분뚝딱철학)',u:'https://www.youtube.com/@5min_philosophy',d:'철학·심리학·과학을 재미있게 해설. 시대별 철학 흐름과 사례를 유머러스하게 전달'},
-{l:1,t:'KOCW 심리학의 이해 - 이화여대',s:'KOCW (이화여자대학교)',u:'http://kocw.net/home/cview.do?mty=p&kemId=320642',d:'이화여대 심리학 공개강좌. 심리학의 주요 분야와 기본 개념을 체계적으로 소개'},
-{l:2,t:'뼈아대 - 통찰력 있는 강연',s:'YouTube (뼈아대)',u:'https://www.youtube.com/results?search_query=뼈아대+유튜브+채널',d:'다양한 주제에 대한 통찰력 있는 이야기. 어려운 주제도 쉽고 재미있게 강연'},
-{l:2,t:'심리학 논문 해설 채널',s:'YouTube',u:'https://www.youtube.com/results?search_query=심리학+논문+해설+한국어',d:'최신 심리학 논문을 바탕으로 인간 행동·인지·감정을 분석하는 교양 채널'},
-{l:3,t:'리더십의 기술 - TED 한국어 자막',s:'TED',u:'https://www.ted.com/talks?language=ko&topics%5B%5D=leadership',d:'TED 리더십 주제 강연 모음. 사이먼 사이넥, 브레네 브라운 등 세계적 연사의 리더십론'},
-{l:3,t:'소통기술 - 비폭력 대화(NVC)',s:'YouTube',u:'https://www.youtube.com/results?search_query=비폭력대화+NVC+한국어',d:'마셜 로젠버그의 비폭력 대화(NVC) 기법. 관찰·느낌·욕구·부탁 4단계 소통법'},
-{l:1,t:'감정 지능(EQ) - 자기 이해의 시작',s:'YouTube',u:'https://www.youtube.com/results?search_query=감정지능+EQ+한국어',d:'대니얼 골먼의 감정 지능 이론. 자기인식·자기조절·공감·사회적 기술 개발'},
-{l:4,t:'서양 철학사 - 소크라테스부터 현대까지',s:'YouTube',u:'https://www.youtube.com/results?search_query=서양철학사+소크라테스+한국어',d:'고대 그리스 철학부터 실존주의·구조주의까지 서양 철학의 흐름을 체계적으로 조망'},
-{l:4,t:'동양 철학 - 공자·노자·장자',s:'YouTube',u:'https://www.youtube.com/results?search_query=동양철학+공자+노자+한국어',d:'유가·도가·불교 동양 3대 사상. 공자의 인(仁)·노자의 도(道)·장자의 자유 사상'},
-{l:2,t:'자기계발 유튜브 - 동기부여',s:'YouTube',u:'https://www.youtube.com/results?search_query=자기계발+동기부여+한국어+채널',d:'목표 설정·습관 형성·시간 관리 등 자기계발 실용 콘텐츠. 동기부여 강연'},
-{l:3,t:'행동경제학 - 인간의 비합리적 선택',s:'YouTube',u:'https://www.youtube.com/results?search_query=행동경제학+한국어+강의',d:'대니얼 카너먼·리처드 탈러의 행동경제학. 넛지·프레이밍·앵커링 등 인지편향'},
-{l:5,t:'윤리학 - 정의란 무엇인가',s:'YouTube',u:'https://www.youtube.com/results?search_query=마이클샌델+정의+한국어',d:'마이클 샌델의 정의란 무엇인가. 공리주의·자유지상주의·공동체주의 윤리학 논쟁'}],
-special:[
-{l:1,t:'사진 촬영 기초',s:'YouTube',u:'https://www.youtube.com/',d:'구도, 노출, 조리개의 이해'},
-{l:2,t:'요리 기초',s:'YouTube',u:'https://www.youtube.com/',d:'기본 조리법과 레시피'},
-{l:3,t:'DIY와 아웃도어',s:'YouTube',u:'https://www.youtube.com/',d:'DIY 프로젝트, 캠핑 가이드'},
-,
-{l:1,t:'사진 촬영 기초 - DSLR/미러리스 입문',s:'YouTube',u:'https://www.youtube.com/',d:'DSLR/미러리스 카메라 기초. 조리개, 셔터스피드, ISO, 구도, 빛 활용법'},
-{l:2,t:'풍경/인물 사진 고급 테크닉',s:'YouTube',u:'https://www.youtube.com/',d:'풍경, 인물, 야경 사진 촬영 고급 테크닉과 후보정(라이트룸/포토샵)'},
-{l:1,t:'백종원 - 한식 기초 레시피',s:'백종원',u:'https://www.youtube.com/@paaborngag',d:'백종원의 한식 기초 레시피. 2019년 세계 3위 성장 채널. 대용량/가정식 레시피'},
-{l:2,t:'요리 채널 - 세계 요리/베이킹',s:'YouTube',u:'https://www.youtube.com/',d:'한식 외 세계 요리, 베이킹, 디저트 등 다양한 요리 채널'},
-{l:1,t:'목공 기초 - 쑤니르/나무와늘보',s:'YouTube',u:'https://www.youtube.com/',d:'목공 기초부터 가구 제작까지. 서랍, 상자, 문짝 만들기. 초보자 친화적'},
-{l:2,t:'셀프 인테리어 - 집꾸미기',s:'YouTube',u:'https://www.youtube.com/',d:'셀프 인테리어 가이드. 예산별 인테리어, 공간 활용, 가구 배치 등 30만 구독자'},
-{l:2,t:'아웃도어/캠핑 - 백패킹/노지캠핑',s:'YouTube',u:'https://www.youtube.com/',d:'캠핑 장비 리뷰, 요리, DIY 장비 제작, 백패킹 가이드 등 아웃도어 채널'},
-{l:1,t:'EBS 취미/생활 강좌',s:'EBS',u:'https://classe.ebs.co.kr/',d:'EBS 클래스e 취미/생활 카테고리. 사진, 요리, 공예, 원예 등 다양한 취미 강좌'},
-{l:1,t:'사진 기초 - DSLR/미러리스 입문',s:'YouTube (깨비의 사진수업)',u:'https://www.youtube.com/results?search_query=깨비+DSLR+미러리스+사진+기초',d:'카메라 입문 강의 600회+. DSLR·미러리스 기초 조작법·구도·노출의 3요소'},
-{l:2,t:'사진 구도 & 빛 활용법',s:'YouTube',u:'https://www.youtube.com/results?search_query=사진+구도+빛+활용+한국어',d:'삼분법·대각선 구도·프레이밍. 자연광·인공광 활용법과 골든아워 촬영 기법'},
-{l:3,t:'사진 후보정 - 라이트룸 & 포토샵',s:'YouTube',u:'https://www.youtube.com/results?search_query=사진+후보정+라이트룸+한국어',d:'Adobe Lightroom·Photoshop 기초. RAW 현상·색감 보정·리터칭 기법'},
-{l:1,t:'요리 기초 - 백종원의 쿠킹로그',s:'YouTube (백종원)',u:'https://www.youtube.com/@paaborns',d:'대한민국 요리 대명사. 집에 있는 식재료로 누구나 따라 할 수 있는 쉬운 레시피'},
-{l:2,t:'집밥 레시피 - 승우아빠',s:'YouTube (승우아빠)',u:'https://www.youtube.com/@seungwoodad',d:'라면·김밥부터 제대로 된 한 끼까지. 쉬운 버전부터 심화·고급 버전까지 다양하게 제시'},
-{l:3,t:'베이킹 기초 - 제빵·제과 입문',s:'YouTube',u:'https://www.youtube.com/results?search_query=베이킹+기초+제빵+한국어',d:'식빵·쿠키·케이크 기초 레시피. 제빵 원리(글루텐·발효·오븐 온도)와 기본 도구'},
-{l:1,t:'캠핑 입문 - 레디캠프고',s:'YouTube (레디캠프고)',u:'https://www.youtube.com/results?search_query=레디캠프고+캠핑+초보',d:'캠핑 초보자를 위한 따뜻하고 아름다운 캠핑 브이로그. 장비 추천·캠핑 노하우'},
-{l:2,t:'캠핑 장비 & 요리 - 김숙TV',s:'YouTube (김숙TV)',u:'https://www.youtube.com/results?search_query=김숙TV+캠핑',d:'목공·페인트칠·공예부터 캠핑 장비 리뷰·캠핑 요리까지. DIY와 아웃도어의 만남'},
-{l:3,t:'캠핑카 여행 - 캠핑카조아',s:'YouTube (캠핑카조아)',u:'https://www.youtube.com/results?search_query=캠핑카조아',d:'캠핑카 개조법·종류·특징 정보와 자작 캠핑카 유라시아 횡단기. 세계 대자연 여행'},
-{l:2,t:'모토캠핑 & 미니멀캠핑 - 빽가필름',s:'YouTube (빽가필름)',u:'https://www.youtube.com/results?search_query=빽가필름+모토캠핑',d:'모토 캠핑·미니멀 캠핑·섬 캠핑·홈 캠핑 등 다양한 캠핑 스타일 소개'},
-{l:1,t:'DIY 가구 만들기 - 목공 입문',s:'YouTube',u:'https://www.youtube.com/results?search_query=DIY+목공+가구+만들기+한국어',d:'목공 기초 도구 사용법부터 간단한 선반·테이블 만들기. DIY 입문자 가이드'},
-{l:2,t:'인테리어 DIY - 셀프 인테리어',s:'YouTube',u:'https://www.youtube.com/results?search_query=셀프인테리어+DIY+한국어',d:'벽지·페인트·몰딩·조명 셀프 시공. 적은 비용으로 공간 분위기 바꾸기'}],
-economy:[
-{l:1,t:'경제학 입문 미시경제',s:'Khan Academy',u:'https://ko.khanacademy.org/economics-finance-domain',d:'수요 공급 시장균형 탄력성'},
-{l:2,t:'거시경제학 기초',s:'Khan Academy',u:'https://ko.khanacademy.org/economics-finance-domain',d:'GDP 인플레이션 실업 통화정책'},
-{l:3,t:'주식 투자 입문',s:'YouTube',u:'https://www.youtube.com/',d:'PER PBR ROE 재무제표 읽는법'},
-{l:3,t:'재무설계 기초',s:'YouTube',u:'https://www.youtube.com/',d:'가계부 작성 지출통제 투자 입문'},
-{l:4,t:'부동산 ETF 파생상품',s:'YouTube',u:'https://www.youtube.com/',d:'부동산 투자 ETF 옵션 선물'},
-,
-{l:1,t:'수요와 공급의 법칙 - 경제학의 출발점',s:'Khan Academy',u:'https://www.khanacademy.org/economics-finance-domain/microeconomics',d:'왜 가격이 오르면 수요가 줄까? 수요곡선과 공급곡선, 균형가격의 원리를 시각적으로 이해하는 미시경제'},
-{l:1,t:'시장경제의 원리 - 보이지 않는 손',s:'슈카월드',u:'https://www.youtube.com/@syukaworld',d:'아담 스미스의 보이지 않는 손부터 시장 실패까지. 펀드매니저 출신 슈카가 쉽게 풀어주는 시장경제의 '},
-{l:1,t:'GDP와 경제성장 - 나라의 성적표 읽기',s:'슈카월드',u:'https://www.youtube.com/@syukaworld',d:'GDP가 뭔지, 명목GDP와 실질GDP의 차이, 경제성장률은 어떻게 계산하는지. 뉴스에 나오는 경제'},
-{l:1,t:'인플레이션과 금리 - 돈의 가치가 변하는 이유',s:'삼프로TV',u:'https://www.youtube.com/@3protv',d:'물가는 왜 오르고, 중앙은행은 왜 금리를 올리는 걸까? 인플레이션의 원인과 금리 정책의 관계를 실생'},
-{l:1,t:'거시경제학 입문 - 경기순환과 실업',s:'KOCW (건국대학교)',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=865370',d:'대학 수준의 거시경제학 기초. 경기순환, 실업률, 소비와 투자의 관계를 체계적으로 배우는 공개강의.'},
-{l:2,t:'주식투자 기초 - PER, PBR, ROE 완벽 이해',s:'삼프로TV',u:'https://www.youtube.com/@3protv',d:'주식 가치평가의 3대 지표 PER(주가수익비율), PBR(주가순자산비율), ROE(자기자본이익률)를'},
-{l:2,t:'사경인의 재무제표 읽기 - 기업의 건강상태 파악',s:'삼프로TV',u:'https://apps.3protv.com/lecture/view/68',d:'재무제표 3대 표(재무상태표, 손익계산서, 현금흐름표)를 통해 기업의 건강상태를 진단하는 방법. 투'},
-{l:2,t:'ETF 투자 완전정복 - 분산투자의 정석',s:'삼프로TV',u:'https://www.youtube.com/@3protv',d:'ETF란 무엇이고 어떻게 고르는가? 인덱스 ETF, 섹터 ETF, 해외 ETF의 차이와 장기투자 전'},
-{l:2,t:'부동산 투자의 기초 - 입지 분석과 시세 흐름',s:'신사임당',u:'https://www.youtube.com/@shinsaimdang',d:'부동산 투자에서 가장 중요한 입지 분석 방법. 교통, 학군, 개발호재를 종합적으로 판단하는 실전 부'},
-{l:2,t:'미시경제학 심화 - 탄력성과 시장구조',s:'Khan Academy',u:'https://www.khanacademy.org/economics-finance-domain/microeconomics',d:'가격탄력성, 소득탄력성의 개념과 완전경쟁, 독점, 과점 등 다양한 시장구조의 특성을 분석하는 심화 '},
-{l:3,t:'재무설계 로드맵 - 생애주기별 자산관리',s:'슈카월드',u:'https://www.youtube.com/@syukaworld',d:'20대 종잣돈 모으기부터 40대 자산증식, 60대 자산보전까지. 생애주기에 맞춘 재무설계 전략과 포'},
-{l:3,t:'은퇴설계와 연금 전략 - 노후 준비의 정석',s:'삼프로TV',u:'https://www.youtube.com/@3protv',d:'국민연금, 퇴직연금(DB/DC/IRP), 개인연금의 차이와 활용법. 연금저축 세액공제 전략까지 은퇴'},
-{l:3,t:'세금의 모든 것 - 절세 전략과 세금 신고',s:'신사임당',u:'https://www.youtube.com/@shinsaimdang',d:'종합소득세, 양도소득세, 증여세의 기본 구조와 합법적 절세 방법. 직장인과 사업자 각각의 세금 전략'},
-{l:3,t:'경제학원론 종합 - 미시+거시 통합 정리',s:'KOCW (충북대학교)',u:'http://www.kocw.net/home/cview.do?cid=d667e221f4467336',d:'미시경제와 거시경제를 아우르는 대학 수준의 경제학원론 전 과정. 수요공급부터 국제무역, 환율까지 체'},
-{l:3,t:'글로벌 경제 읽기 - 환율, 무역, 국제금융',s:'슈카월드',u:'https://www.youtube.com/@syukaworld',d:'환율은 왜 변하고, 무역전쟁은 경제에 어떤 영향을 미치나? 글로벌 경제 흐름을 읽는 눈을 키우는 국'},
-{l:1,t:'슈카월드',s:'YouTube',u:'https://www.youtube.com/@syukaworld',d:'구독자 200만+. 서울대 경제학+연대 금융공학 석사 출신. 경제·금융·시사·국제관계를 쉽고 재미있'}],
-career:[
-{l:1,t:'직업 탐색과 적성검사',s:'워크넷',u:'https://www.work.go.kr/',d:'직업심리검사 직업정보 탐색'},
-{l:2,t:'이력서 자기소개서 작성법',s:'YouTube',u:'https://www.youtube.com/',d:'합격하는 이력서와 자소서 전략'},
-{l:3,t:'면접 준비와 PT 스킬',s:'YouTube',u:'https://www.youtube.com/',d:'면접 유형별 대비법 프레젠테이션'},
-{l:4,t:'AI시대 미래 직업 전망',s:'TED',u:'https://www.ted.com/',d:'AI가 바꿀 직업의 미래'},
-],
-coding:[
-{l:1,t:'HTML CSS 기초 생활코딩',s:'생활코딩',u:'https://opentutorials.org/course/3084',d:'웹의 근간 HTML과 CSS 기초'},
-{l:1,t:'JavaScript 입문',s:'생활코딩',u:'https://opentutorials.org/course/3085',d:'JavaScript 기초 문법과 웹 프로그래밍'},
-{l:2,t:'Python 기초 나도코딩',s:'나도코딩',u:'https://www.youtube.com/@nadocoding',d:'파이썬 기초에서 실전 6시간 완성'},
-{l:2,t:'freeCodeCamp 풀스택',s:'freeCodeCamp',u:'https://www.freecodecamp.org/',d:'HTML CSS JS React Node.js 풀 커리큘럼'},
-{l:3,t:'Git GitHub 사용법',s:'YouTube',u:'https://www.youtube.com/',d:'버전관리와 협업 필수 도구'},
-{l:4,t:'AI 머신러닝 입문',s:'3Blue1Brown',u:'https://www.youtube.com/@3blue1brown',d:'신경망 경사하강법 시각화 시리즈'},
-],
-};
-
-// ===== COMMUNITY =====
-const GAL=[
-{id:'ai',ic:'🤖',nm:'AI 공유'},{id:'dev',ic:'💻',nm:'개발·코딩'},{id:'prog',ic:'📦',nm:'프로그램'},{id:'edu',ic:'📚',nm:'교육·강좌'},
-{id:'game',ic:'🎮',nm:'게임'},{id:'sci',ic:'🔬',nm:'과학·기술'},{id:'free',ic:'💬',nm:'자유'},{id:'qna',ic:'❓',nm:'질문·답변'},
-];
-const P=[
-{id:1,g:'ai',t:'Claude Code로 앱 만든 후기',b:'터미널에서 프롬프트만 쳐서 웹앱 완성\n근데 구체적으로 써야됨',a:'코딩입문',l:487,c:[{a:'개발K',t:'프롬프트가 핵심',m:120}],m:45},
-{id:2,g:'game',t:'별빛친구 RPG 도서관 공략',b:'낡은 책 NPC 앞에서 멈추는거 버그아님\n아이템 먼저 찾아야됨',a:'게임러',l:156,c:[{a:'게임맘',t:'우리애도 헤맴ㅋ',m:300}],m:120},
-{id:3,g:'ai',t:'Claude vs GPT vs Gemini 코딩비교',b:'같은 프롬프트로 테스트\nClaude: 코드깔끔\nGPT: 되긴되는데 지저분\nGemini: 최신API 잘알',a:'AI비교',l:312,c:[{a:'로컬러',t:'Ollama도 괜찮',m:500}],m:240},
-{id:4,g:'dev',t:'Playwright 크롤링 정리',b:'SPA는 BS4 한계\nPlaywright로 JS렌더링후 긁기\npip install playwright\npython -m playwright install',a:'크롤러',l:189,c:[],m:300},
-{id:5,g:'prog',t:'GitHub Pages 무료 배포법',b:'1.레포만들기 2.index.html push 3.Settings>Pages\n서버비 0원',a:'무료파',l:267,c:[],m:480},
-{id:6,g:'edu',t:'Canvas API 게임만들기 5단계',b:'1.fillRect배경 2.스프라이트 3.requestAnimationFrame 4.keydown 5.충돌판정\n번들러 필요없음',a:'게임개발',l:213,c:[],m:1080},
-{id:7,g:'free',t:'레벨시스템 중독성ㅋㅋ',b:'과학콘텐츠만 20개 읽음\n능력치 그래프 예쁘게 만들려고',a:'레벨충',l:178,c:[],m:180},
-{id:8,g:'ai',t:'Ollama 로컬AI 설치법',b:'ollama.com 설치\nollama run llama3\n끝. 인터넷없이 AI대화\nGPU없어도 CPU로 돌아감',a:'로컬러',l:223,c:[],m:90},
-{id:9,g:'qna',t:'PhET 시뮬레이션 한국어 되나요?',b:'과학실험 시뮬레이션인데 한국어 지원?',a:'과학교사',l:45,c:[{a:'답변자',t:'네 phet.colorado.edu/ko 가면 한국어버전 있어요',m:30}],m:60},
-{id:10,g:'sci',t:'WiFi CSI 동작인식 원리',b:'ESP32에서 CSI추출→ML분류\n스쿼트/런지/플랭크 구분가능\n카메라없이 프라이버시 좋음',a:'연구원',l:98,c:[],m:1440},
-];
-
-// ===== GAMES =====
-const GMS=[
-{nm:'별빛 대모험',em:'💖',tg:'플랫포머',u:'games/hatcuping-game.html',ak:'apk/hatcuping-platformer.apk',p:1},
-{nm:'별빛 RPG 대모험',em:'🗡️',tg:'RPG',u:'games/hatcuping-rpg.html',ak:'apk/hatcuping-rpg.apk',p:1},
-{nm:'2048',em:'🔢',tg:'퍼즐',eu:'https://play2048.co/',p:1},
-{nm:'Wordle',em:'📝',tg:'단어',eu:'https://wordlewebsite.com/',p:1},
-{nm:'체스',em:'♟️',tg:'전략',eu:'https://www.chess.com/play/online'},
-{nm:'타이핑',em:'⌨️',tg:'교육',eu:'https://www.keybr.com/'},
-{nm:'Scratch',em:'🐱',tg:'코딩',eu:'https://scratch.mit.edu/projects/editor/'},
-];
-
-const UTS=[
-{id:'calc',ic:'🧮',nm:'계산기'},{id:'unit',ic:'📏',nm:'단위변환'},{id:'color',ic:'🎨',nm:'색상피커'},
-{id:'qr',ic:'📱',nm:'QR생성'},{id:'json',ic:'📋',nm:'JSON정리'},{id:'timer',ic:'⏱️',nm:'타이머'},
-{id:'rand',ic:'🎲',nm:'랜덤'},{id:'b64',ic:'🔐',nm:'Base64'},{id:'dday',ic:'📅',nm:'D-Day'},
-{id:'bmi',ic:'🏋️',nm:'BMI'},{id:'loan',ic:'🏦',nm:'대출계산'},{id:'hash',ic:'#️⃣',nm:'해시'},
+const V=[
+{id:'ho9rZjlsyYY',t:'바흐 - 첼로 모음곡 시각화',c:'음악'},
+{id:'mGQLXRTl3Z0',t:'바흐 - 푸가 시각화',c:'음악'},
+{id:'GRxofEmo3HA',t:'비발디 - 사계 봄',c:'음악'},
+{id:'NO-ecxHEPqI',t:'모차르트 - 작은별 변주곡',c:'음악'},
+{id:'o1FSN8_pp_o',t:'모차르트 - 아이네 클라이네',c:'음악'},
+{id:'quxTnEEETbo',t:'모차르트 - 터키 행진곡',c:'음악'},
+{id:'yAsDGNjn8F8',t:'쇼팽 - 발라드 1번',c:'음악'},
+{id:'rRgXUFnfKIY',t:'베토벤 - 운명 교향곡',c:'음악'},
+{id:'Sh_uAX0u_XE',t:'차이코프스키 - 호두까기인형',c:'음악'},
+{id:'RzrAZNviGWQ',t:'호기 율동 운동',c:'체육'},
+{id:'NwY-COjRfKw',t:'호기 아침체조',c:'체육'},
+{id:'o17WrC9v-Ew',t:'핑크퐁 체조 노래',c:'체육'},
+{id:'FNsP9ChbdMc',t:'아기상어 바다 수영',c:'체육'},
+{id:'mYYIH1VWPGo',t:'뽀로로 축구',c:'체육'},
+{id:'5RWu87y8fpw',t:'호기 줄넘기',c:'체육'},
+{id:'bRYyQGKpYfI',t:'에그박사 - 곤충의 세계',c:'과학'},
+{id:'ZPwgmxp99WI',t:'에그박사 - 나비 관찰',c:'과학'},
+{id:'FnGcCOtx9P4',t:'에그박사 - 한국 벌',c:'과학'},
+{id:'yfsEWSv2vaw',t:'에그박사 - 무당벌레',c:'과학'},
+{id:'TGrwT8qaTCs',t:'에그박사 - 깊은산 생물',c:'과학'},
+{id:'Xw2DcN2H8fE',t:'에그박사 - 이끼 탐험',c:'과학'},
+{id:'VPUuvpqvgAY',t:'에그박사 - 산속 생물 발견',c:'과학'},
+{id:'sV-Bt-oOlVY',t:'에그박사 - 해파리',c:'과학'},
+{id:'E38DEdJAabM',t:'에그박사 - 바다생물',c:'과학'},
+{id:'Dn6wo9rrdgs',t:'뽀로로 로봇 이야기',c:'과학'},
+{id:'zWGDMO-KI2g',t:'핑크퐁 한글 공부',c:'언어'},
+{id:'QUgO7Nn_sNI',t:'핑크퐁 색깔 배우기',c:'언어'},
+{id:'vaADZZGXAZE',t:'핑크퐁 동물 이름',c:'언어'},
+{id:'LvDd1yQKMxc',t:'호기 ABC 영어',c:'언어'},
+{id:'iuuesnGQvWI',t:'핑크퐁 알파벳 노래',c:'언어'},
+{id:'63xpk1DmmDw',t:'호기 영어 단어',c:'언어'},
+{id:'Zdzs6o37iE8',t:'호기 추리 퍼즐',c:'두뇌'},
+{id:'vPWg9TIgemM',t:'핑크퐁 동화',c:'동화'},
+{id:'bzue_7hIonI',t:'핑크퐁 손씻기',c:'건강'},
+{id:'r3AEvAPOsdQ',t:'호기 위생 습관',c:'건강'},
+{id:'zJdly0IzNHw',t:'뽀로로 감정 교육',c:'감성'},
+{id:'3v1dQlW35Bs',t:'호기 친구 관계',c:'감성'},
+{id:'mlntTQ--rnU',t:'뽀로로 우정',c:'감성'},
+{id:'Wg_0hZqXa_I',t:'핑크퐁 미술 놀이',c:'미술'},
+{id:'EuGWAusZSDc',t:'핑크퐁 풍선 만들기',c:'미술'},
+{id:'clKAejFAML4',t:'핑크퐁 악기 소개',c:'음악'},
+{id:'ykYUk67IEVE',t:'뽀로로 악기 탐험',c:'음악'},
+{id:'AG0mo6MskaM',t:'호기 안전 교육',c:'안전'},
+{id:'qEPE-FmlOKE',t:'핑크퐁 바다 탐험',c:'과학'},
 ];
 
 const SIMS=[
-{nm:'에너지 스케이트파크',ic:'⛸️',u:'https://phet.colorado.edu/sims/html/energy-skate-park-basics/latest/energy-skate-park-basics_all.html'},
-{nm:'중력과 궤도',ic:'🌍',u:'https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_all.html'},
-{nm:'회로 만들기',ic:'🔋',u:'https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_all.html'},
-{nm:'빛의 굴절',ic:'🔦',u:'https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_all.html'},
-{nm:'파동',ic:'🌊',u:'https://phet.colorado.edu/sims/html/wave-on-a-string/latest/wave-on-a-string_all.html'},
-{nm:'원자 만들기',ic:'⚛️',u:'https://phet.colorado.edu/sims/html/build-an-atom/latest/build-an-atom_all.html'},
-{nm:'자연선택',ic:'🦎',u:'https://phet.colorado.edu/sims/html/natural-selection/latest/natural-selection_all.html'},
-{nm:'포물선 운동',ic:'🎯',u:'https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_all.html'},
-{nm:'pH 측정',ic:'🧪',u:'https://phet.colorado.edu/sims/html/ph-scale/latest/ph-scale_all.html'},
-{nm:'밀도',ic:'🧊',u:'https://phet.colorado.edu/sims/html/density/latest/density_all.html'},
+{nm:'에너지 스케이트파크',ic:'⛸️',u:'https://phet.colorado.edu/sims/html/energy-skate-park-basics/latest/energy-skate-park-basics_all.html',d:'위치-운동에너지 변환'},
+{nm:'중력과 궤도',ic:'🌍',u:'https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_all.html',d:'행성 궤도와 중력'},
+{nm:'회로 만들기',ic:'🔋',u:'https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_all.html',d:'전기 회로 조립'},
+{nm:'빛의 굴절',ic:'🔦',u:'https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_all.html',d:'빛의 굴절 실험'},
+{nm:'파동',ic:'🌊',u:'https://phet.colorado.edu/sims/html/wave-on-a-string/latest/wave-on-a-string_all.html',d:'파동의 진폭과 주파수'},
+{nm:'원자 만들기',ic:'⚛️',u:'https://phet.colorado.edu/sims/html/build-an-atom/latest/build-an-atom_all.html',d:'양성자 중성자 전자'},
+{nm:'자연선택',ic:'🦎',u:'https://phet.colorado.edu/sims/html/natural-selection/latest/natural-selection_all.html',d:'진화 시뮬레이션'},
+{nm:'포물선 운동',ic:'🎯',u:'https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_all.html',d:'각도와 속도'},
+{nm:'물질의 상태',ic:'🧊',u:'https://phet.colorado.edu/sims/html/states-of-matter/latest/states-of-matter_all.html',d:'고체 액체 기체'},
+{nm:'pH 측정',ic:'🧪',u:'https://phet.colorado.edu/sims/html/ph-scale/latest/ph-scale_all.html',d:'산성 염기성'},
+{nm:'힘과 운동',ic:'💪',u:'https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_all.html',d:'힘이 운동에 미치는 영향'},
+{nm:'밀도',ic:'⚖️',u:'https://phet.colorado.edu/sims/html/density/latest/density_all.html',d:'밀도 비교'},
 ];
 
-const RES=[];
+const GMS=[
+{nm:'별빛 대모험',em:'💖',u:'games/hatcuping-game.html',d:'플랫포머 액션'},
+{nm:'별빛 RPG',em:'🗡️',u:'games/hatcuping-rpg.html',d:'스토리 RPG'},
+];
 
-// ===== NAV =====
+const QUIZ=[
+{q:'지구에서 가장 큰 행성은?',a:['목성','토성','해왕성','천왕성'],c:0,cat:'과학'},
+{q:'물의 화학식은?',a:['H2O','CO2','O2','NaCl'],c:0,cat:'과학'},
+{q:'광합성에 필요한 기체는?',a:['이산화탄소','산소','질소','수소'],c:0,cat:'과학'},
+{q:'태양에서 가장 가까운 행성은?',a:['수성','금성','지구','화성'],c:0,cat:'과학'},
+{q:'3 x 7 = ?',a:['21','24','18','28'],c:0,cat:'수학'},
+{q:'1/2 + 1/4 = ?',a:['3/4','2/4','1/6','2/6'],c:0,cat:'수학'},
+{q:'삼각형의 내각의 합은?',a:['180도','360도','90도','270도'],c:0,cat:'수학'},
+{q:'원주율 파이의 값은?',a:['3.14...','2.71...','1.41...','1.61...'],c:0,cat:'수학'},
+{q:'조선을 건국한 왕은?',a:['이성계','왕건','세종','정조'],c:0,cat:'역사'},
+{q:'한글을 만든 왕은?',a:['세종대왕','태종','성종','영조'],c:0,cat:'역사'},
+{q:'임진왜란이 일어난 연도는?',a:['1592년','1492년','1692년','1392년'],c:0,cat:'역사'},
+{q:'피라미드가 있는 나라는?',a:['이집트','그리스','로마','인도'],c:0,cat:'역사'},
+{q:'베토벤의 국적은?',a:['독일','오스트리아','이탈리아','프랑스'],c:0,cat:'음악'},
+{q:'Apple을 한국어로?',a:['사과','바나나','포도','딸기'],c:0,cat:'영어'},
+{q:'Cat을 한국어로?',a:['고양이','강아지','토끼','거북이'],c:0,cat:'영어'},
+{q:'Thank you를 한국어로?',a:['감사합니다','안녕하세요','미안합니다','실례합니다'],c:0,cat:'영어'},
+{q:'뼈를 튼튼하게 하는 영양소는?',a:['칼슘','철분','비타민C','단백질'],c:0,cat:'건강'},
+];
+
+const P=[
+{id:1,g:'자유',t:'여기 레벨시스템 중독성 있네ㅋㅋ',b:'퀴즈 풀고 영상 보면 XP 올라감\n능력치 올리는 재미가 있음',a:'레벨충',l:178,c:[{a:'뉴비',t:'나도 해봐야지',m:60}],m:180},
+{id:2,g:'게임',t:'별빛 RPG 도서관 공략',b:'NPC 앞에서 멈추는거 버그아님\n아이템 먼저 찾아야됨',a:'게임러',l:156,c:[{a:'게임맘',t:'우리애도 거기서 헤맴ㅋ',m:300}],m:120},
+{id:3,g:'과학',t:'PhET 회로만들기 신기함',b:'전구 연결하고 스위치 넣고\n실제 실험하는것 같음',a:'과학덕',l:234,c:[{a:'교사',t:'수업에 쓰고있어요',m:500}],m:90},
+{id:4,g:'퀴즈',t:'역사 퀴즈 임진왜란 틀림ㅠ',b:'세종대왕은 맞췄는데 임진왜란 연도 틀림\n1592년이었네',a:'역사초보',l:89,c:[],m:45},
+{id:5,g:'자유',t:'에그박사 영상 바로 볼수있네',b:'유튜브 안가도 되서 편함\n곤충 관찰 시리즈 추천',a:'자연러',l:145,c:[{a:'엄마',t:'아이가 좋아해요',m:200}],m:60},
+];
+
+const UTS=[{id:'calc',ic:'🧮',nm:'계산기'},{id:'unit',ic:'📏',nm:'단위변환'},{id:'timer',ic:'⏱️',nm:'스톱워치'},{id:'dday',ic:'📅',nm:'D-Day'},{id:'bmi',ic:'🏋️',nm:'BMI'},{id:'rand',ic:'🎲',nm:'랜덤'}];
+
 const pgs=['p0','p1','p2','p3','p4'];let cur=0;
-function go(i){pgs.forEach((p,j)=>document.getElementById(p).classList.toggle('on',i===j));document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('on',i===j));cur=i;document.getElementById('fab').classList.toggle('sh',i===2);}
-
-// ===== NICK =====
+function go(i){pgs.forEach((p,j)=>document.getElementById(p).classList.toggle('on',i===j));document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('on',i===j));cur=i;document.getElementById('fab').classList.toggle('sh',i===3);}
 function ckNk(){if(!U.nk)document.getElementById('nkM').style.display='flex';}
-function setNk(){const n=document.getElementById('nkI').value.trim();if(!n)return;U.nk=n;sv();document.getElementById('nkM').style.display='none';uN();toast('환영합니다!');}
-function chNk(){oMo('<div style="font-size:14px;font-weight:700;margin-bottom:6px">닉네임 변경</div><input class="fi" id="nnk" value="'+U.nk+'"><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px"><button class="bt bs" onclick="cMo()">취소</button><button class="bt bp" onclick="const n=document.getElementById(\'nnk\').value.trim();if(n){U.nk=n;sv();cMo();uN();toast(\'변경!\')}">확인</button></div>');}
-function uN(){const n=U.nk||'탐험가';document.getElementById('hNk').textContent=n;document.getElementById('hLv').textContent='Lv.'+U.lv;document.getElementById('hXp').textContent=U.xp+'/'+U.xm;document.getElementById('hBar').style.width=(U.xp/U.xm*100)+'%';document.getElementById('pN').textContent=n;document.getElementById('pTi').textContent='Lv.'+U.lv+' 탐험가';document.getElementById('onC').textContent=(80+Math.floor(Math.random()*150))+'명';}
+function setNk(){const n=document.getElementById('nkI').value.trim();if(!n)return;U.nk=n;sv();document.getElementById('nkM').style.display='none';uN();toast('환영!');}
+function uN(){document.getElementById('hLv').textContent='Lv.'+U.lv+' '+(U.nk||'탐험가');document.getElementById('pN').textContent=U.nk||'탐험가';document.getElementById('pTi').textContent='Lv.'+U.lv;}
 
-// ===== HOME =====
-function vidCard(it,sk,lv){
-  const vid=(it.u||'').match(/v=([a-zA-Z0-9_-]{11})/);
-  if(!vid) return '';
-  const id=vid[1];
-  return `<div style="cursor:pointer;margin-bottom:8px" onclick="oMo('<iframe src=https://www.youtube.com/embed/${id}?autoplay=1 style=width:100%;aspect-ratio:16/9;border:none;border-radius:8px allow=autoplay allowfullscreen></iframe><div style=font-size:12px;font-weight:600;margin-top:6px>${it.t||''}</div><div style=font-size:10px;color:var(--t2);margin-top:2px>${it.d||''}</div><button class=bt.bp onclick=cMo() style=margin-top:8px>닫기</button>');${sk?`markDone('${sk}',${lv})`:''};xp(10,'영상')">
-    <div style="position:relative;border-radius:8px;overflow:hidden;background:#000">
-      <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" style="width:100%;display:block;opacity:.85" loading="lazy">
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:36px;height:36px;background:rgba(255,0,0,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff">▶</div></div>
-    </div>
-    <div style="padding:4px 2px 0"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.t||''}</div><div style="font-size:9px;color:var(--t3)">${it.s||''}</div></div>
-  </div>`;
-}
-
-function rHome(){
-  // 모든 콘텐츠에서 YouTube 영상만 추출
-  const allYT=[];
-  SUBJECTS.forEach(s=>{
-    (KIDS[s.id]||[]).forEach((it,i)=>{const v=(it.u||'').match(/v=([a-zA-Z0-9_-]{11})/);if(v)allYT.push({...it,sk:'k_'+s.id+'_'+i,lv:it.l,sub:s.nm});});
-    (ADULT[s.id]||[]).forEach((it,i)=>{const v=(it.u||'').match(/v=([a-zA-Z0-9_-]{11})/);if(v)allYT.push({...it,sk:'a_'+s.id+'_'+i,lv:it.l,sub:s.nm});});
-  });
-  // 셔플해서 다양한 소스
-  const shuffled=[...allYT].sort(()=>Math.random()-.5);
-
-  // 영상 Row 1: 2열 그리드 (4개)
-  document.getElementById('vidRow1').innerHTML='<div class="g2">'+shuffled.slice(0,4).map(r=>vidCard(r,r.sk,r.lv)).join('')+'</div>';
-  // 영상 Row 2: 2열 그리드 (4개 더)
-  document.getElementById('vidRow2').innerHTML='<div class="g2">'+shuffled.slice(4,8).map(r=>vidCard(r,r.sk,r.lv)).join('')+'</div>';
-
-  // 과학 실험: PhET (바로 실행)
-  document.getElementById('simRow').innerHTML=SIMS.slice(0,4).map(s=>`<div class="gi" onclick="oMo('<iframe src=${s.u} style=width:100%;height:400px;border:none;border-radius:8px></iframe><div style=font-size:12px;font-weight:600;margin-top:4px>${s.nm}</div><button class=bt.bp onclick=cMo() style=margin-top:6px>닫기</button>');xp(10,'실험')"><div class="ic">${s.ic}</div><div class="nm" style="font-size:10px">${s.nm}</div></div>`).join('');
-
-  // 게임
-  document.getElementById('gameRow').innerHTML=GMS.slice(0,4).map(g=>`<div class="gi" onclick="${g.u?`oG('${g.u}','${g.nm}','${g.ak||''}')`:(g.eu?`window.open('${g.eu}','_blank')`:'')}"><div class="ic">${g.em}</div><div class="nm" style="font-size:10px">${g.nm}</div><div class="ct">${g.tg}</div></div>`).join('');
-
-  // 더 보기: 영상 4개 더
-  document.getElementById('vidRow3').innerHTML='<div class="g2">'+shuffled.slice(8,12).map(r=>vidCard(r,r.sk,r.lv)).join('')+'</div>';
-
-  // 커뮤니티
-  document.getElementById('hotP').innerHTML=[...P].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
-
-  // 과목
-  document.getElementById('qGal').innerHTML=SUBJECTS.map(s=>`<div class="qg" onclick="go(1);setTimeout(()=>openSub('kids','${s.id}'),100)"><div class="qi">${s.ic}</div><div class="qn">${s.nm}</div></div>`).join('');
-  uN();
-}
-function pH(p){const g=GAL.find(x=>x.id===p.g);return`<div class="po" onclick='sPost(${JSON.stringify(p).replace(/'/g,"&#39;")})'><div class="po-c">[${g?g.nm:p.g}]</div><div class="po-t">${p.t}</div><div class="po-m"><span>👤${p.a}</span><span>❤️${p.l}</span><span>💬${(p.c||[]).length}</span><span>${tA(p.m)}</span></div></div>`;}
-
-// ===== EDUCATION =====
-let curMode='kids',curSub='';
-function rEduSubs(){
-  // 교육 탭 즉시 콘텐츠: 각 과목에서 랜덤 1개씩 (다양한 소스 보장)
-  const quickItems=[];
-  SUBJECTS.forEach(s=>{const items=KIDS[s.id]||[];if(items.length){const r=items[Math.floor(Math.random()*items.length)];quickItems.push({...r,sub:s.nm,ic:s.ic,sid:s.id});}});
-  document.getElementById('eduQuickStart').innerHTML='<div class="g2">'+quickItems.slice(0,6).map(r=>`<div class="gi" onclick="openSub('kids','${r.sid}')"><div class="ic">${r.ic}</div><div class="nm" style="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.t}</div><div class="ct">${r.sub} L${r.l}</div></div>`).join('')+'</div>';
-
-  document.getElementById('kSubG').innerHTML=SUBJECTS.map(s=>{const items=KIDS[s.id]||[];const done=items.filter((_,i)=>U.done['k_'+s.id+'_'+i]).length;const pct=items.length?Math.round(done/items.length*100):0;return`<div class="gi" onclick="openSub('kids','${s.id}')"><div class="ic">${s.ic}</div><div class="nm">${s.nm}</div><div class="ct">${items.length}강</div><div class="pb"><div style="width:${pct}%"></div></div></div>`;}).join('');
-  document.getElementById('aSubG').innerHTML=SUBJECTS.map(s=>{const items=ADULT[s.id]||[];const done=items.filter((_,i)=>U.done['a_'+s.id+'_'+i]).length;const pct=items.length?Math.round(done/items.length*100):0;return`<div class="gi" onclick="openSub('adult','${s.id}')"><div class="ic">${s.ic}</div><div class="nm">${s.nm}</div><div class="ct">${items.length}강</div><div class="pb"><div style="width:${pct}%"></div></div></div>`;}).join('');
-}
-function sEdu(b,m){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');document.getElementById('eduKids').style.display=m==='kids'?'':'none';document.getElementById('eduAdult').style.display=m==='adult'?'':'none';curMode=m;}
-function openSub(mode,subId){
-  curMode=mode;curSub=subId;
-  const s=SUBJECTS.find(x=>x.id===subId);
-  const items=mode==='kids'?KIDS[subId]||[]:ADULT[subId]||[];
-  document.getElementById('eduMain').style.display='none';
-  document.getElementById('eduSub').style.display='';
-  document.getElementById('subT').textContent=s.ic+' '+(mode==='kids'?'아이':'성인')+' '+s.nm;
-  // Progress
-  const done=items.filter((_,i)=>U.done[(mode==='kids'?'k_':'a_')+subId+'_'+i]).length;
-  const pct=items.length?Math.round(done/items.length*100):0;
-  document.getElementById('subProg').innerHTML=`<div class="cd" style="padding:8px 10px"><div style="display:flex;justify-content:space-between;font-size:11px"><span>진도: ${done}/${items.length}</span><span>${pct}%</span></div><div class="pb" style="margin-top:4px"><div style="width:${pct}%"></div></div></div>`;
-  // Level tabs
-  const levels=[...new Set(items.map(i=>i.l))].sort();
-  document.getElementById('subLvs').innerHTML='<button class="tb on" onclick="filterLv(this,0)">전체</button>'+levels.map(l=>`<button class="tb" onclick="filterLv(this,${l})"><span class="lbg l${l}">L${l}</span></button>`).join('');
-  renderSubItems(items,0);
-}
-function renderSubItems(items,lv){
-  const prefix=(curMode==='kids'?'k_':'a_')+curSub+'_';
-  const filtered=lv?items.filter(i=>i.l===lv):items;
-  document.getElementById('subItems').innerHTML=filtered.map((it,idx)=>{
-    const realIdx=items.indexOf(it);
-    const isDone=U.done[prefix+realIdx];
-    return`<a class="ci${isDone?' done':''}" href="${it.u}" target="_blank" onclick="markDone('${prefix+realIdx}',${it.l})">
-      <div><span class="lbg l${it.l}">L${it.l}</span><div class="cn">${it.s}</div></div>
-      <div style="flex:1;min-width:0"><div class="ct2">${it.t}</div><div class="cd2">${it.d}</div>${isDone?'<div style="font-size:9px;color:var(--gn);margin-top:2px">✅ 완료</div>':''}</div>
-    </a>`;
-  }).join('');
-}
-function filterLv(b,lv){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');const items=curMode==='kids'?KIDS[curSub]||[]:ADULT[curSub]||[];renderSubItems(items,lv);}
-function bkEdu(){document.getElementById('eduMain').style.display='';document.getElementById('eduSub').style.display='none';rEduSubs();}
-function markDone(key,lv){
-  if(!U.done[key]){U.done[key]=1;const statMap={1:'knowledge',2:'knowledge',3:'tech',4:'creativity',5:'tech'};const sk=statMap[lv]||'knowledge';if(U.st[sk]<100)U.st[sk]=Math.min(100,U.st[sk]+1);xp(10+(lv*5),'학습 완료');const doneCount=Object.keys(U.done).length;if(doneCount>=1&&!U.bg[0])U.bg[0]=1;if(doneCount>=10&&!U.bg[2])U.bg[2]=1;if(doneCount>=20&&!U.bg[3])U.bg[3]=1;}
-}
-
-// ===== COMMUNITY =====
-function rGal(){
-  // 커뮤니티 탭 즉시 인기글
-  document.getElementById('comQuickPosts').innerHTML=[...P,...U.mp].sort((a,b)=>(b.l||0)-(a.l||0)).slice(0,5).map(pH).join('');
-  document.getElementById('galG').innerHTML=GAL.map(g=>{const c=P.filter(p=>p.g===g.id).length;return`<div class="gi" onclick="oGal('${g.id}')"><div class="ic">${g.ic}</div><div class="nm">${g.nm}</div><div class="ct">${c}글</div></div>`;}).join('');
-}
-function oGal(id){const g=GAL.find(x=>x.id===id);document.getElementById('galG').style.display='none';document.getElementById('galV').style.display='';document.getElementById('galT').textContent=g.ic+' '+g.nm;document.getElementById('galP').innerHTML=[...P,...U.mp].filter(p=>p.g===id).sort((a,b)=>a.m-b.m).map(pH).join('')||'<div style="text-align:center;padding:20px;color:var(--t3)">첫 글을 써보세요!</div>';}
-function bkGal(){document.getElementById('galG').style.display='';document.getElementById('galV').style.display='none';}
-function sPost(p){const cs=(p.c||[]).map(c=>`<div style="padding:4px 0;border-bottom:1px solid rgba(139,92,246,.03)"><div style="font-size:10px;font-weight:600;color:var(--cy)">${c.a}</div><div style="font-size:11px;color:var(--t2)">${c.t}</div></div>`).join('');oMo(`<div class="po-c">[${(GAL.find(x=>x.id===p.g)||{}).nm||p.g}]</div><div style="font-size:14px;font-weight:700;margin:2px 0">${p.t}</div><div style="font-size:9px;color:var(--t3);margin-bottom:6px">👤${p.a} · ${tA(p.m)} · ❤️${p.l}</div><div class="po-b">${p.b||''}</div><div style="border-top:1px solid rgba(139,92,246,.04);padding-top:6px;margin-top:6px"><div style="font-size:11px;font-weight:600;margin-bottom:4px">💬 댓글</div>${cs||'<div style="color:var(--t3);font-size:10px">없음</div>'}</div><div style="display:flex;gap:4px;margin-top:6px"><input class="fi" id="cI" placeholder="댓글..." style="flex:1"><button class="bt bp" style="padding:5px 10px" onclick="xp(5,'댓글');toast('💬+5XP');cMo()">등록</button></div>`);xp(3,'글읽기');}
-
-// ===== GAMES =====
-function rGm(){document.getElementById('gmG').innerHTML=GMS.map(g=>`<div class="gi" onclick="${g.u?`oG('${g.u}','${g.nm}','${g.ak||''}')`:(g.eu?`window.open('${g.eu}','_blank');xp(10,'게임')`:`toast('준비중')`)}" style="${g.p?'border-color:rgba(6,214,160,.2)':''}"><div class="ic">${g.em}${g.p?'<span style="font-size:7px;color:var(--gn);position:absolute;margin-left:-8px;margin-top:-5px">▶</span>':''}</div><div class="nm">${g.nm}</div><div class="ct">${g.tg}</div></div>`).join('');}
-function oG(u,n,a){document.getElementById('gT').textContent=n;document.getElementById('gF').src=u;const ak=document.getElementById('gA');if(a){ak.href=a;ak.style.display='';}else ak.style.display='none';document.getElementById('gO').classList.add('sh');xp(15,'게임');}
+function vc(v){return'<div class="vc" onclick="playVid(\''+v.id+'\',\''+v.t+'\')"><div style="position:relative"><img src="https://img.youtube.com/vi/'+v.id+'/mqdefault.jpg" loading="lazy"><div class="play"><div>▶</div></div></div><div class="vt">'+v.t+'</div><div class="vs">'+v.c+'</div></div>';}
+function playVid(id,t){document.getElementById('moB').innerHTML='<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1" style="width:100%;aspect-ratio:16/9;border:none;border-radius:8px" allow="autoplay;fullscreen" allowfullscreen></iframe><div style="font-size:12px;font-weight:600;margin-top:8px">'+t+'</div>';document.getElementById('mo').classList.add('sh');xp(10,'영상');}
+function sc(s){return'<div class="gc" onclick="playSim(\''+s.u+'\',\''+s.nm+'\')"><div class="gi">'+s.ic+'</div><div class="gn">'+s.nm+'</div><div class="gd">'+s.d+'</div></div>';}
+function playSim(u,n){document.getElementById('moB').innerHTML='<iframe src="'+u+'" style="width:100%;height:450px;border:none;border-radius:8px"></iframe><div style="font-size:12px;font-weight:600;margin-top:6px">'+n+'</div>';document.getElementById('mo').classList.add('sh');xp(10,'실험');}
+function oG(u,n){document.getElementById('gT').textContent=n;document.getElementById('gF').src=u;document.getElementById('gO').classList.add('sh');xp(15,'게임');}
 function cG(){document.getElementById('gO').classList.remove('sh');document.getElementById('gF').src='';}
 
-// ===== UTILS =====
-function rUt(){document.getElementById('utG').innerHTML=UTS.map(u=>`<div class="gi" onclick="oUt('${u.id}')"><div class="ic">${u.ic}</div><div class="nm">${u.nm}</div></div>`).join('');}
-function oUt(id){const e=document.getElementById('utE');let h='';
-if(id==='calc')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">🧮 계산기</div><input class="fi" id="cV" placeholder="수식"><button class="bt bp" onclick="try{document.getElementById(\'cR\').textContent=\'= \'+Function(\'return \'+document.getElementById(\'cV\').value)()}catch(e){document.getElementById(\'cR\').textContent=\'오류\'}" style="margin-top:4px;font-size:10px">계산</button><div style="margin-top:4px;padding:8px;background:var(--c1);border-radius:6px;font-size:12px;color:var(--cy)" id="cR"></div>';
-else if(id==='unit')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">📏 단위변환</div><select class="fi" id="uTy" onchange="uCv()"><option value="l">길이</option><option value="w">무게</option><option value="t">온도</option></select><input class="fi" id="uVl" type="number" placeholder="값" oninput="uCv()"><div style="margin-top:4px;padding:8px;background:var(--c1);border-radius:6px;font-size:11px;color:var(--cy)" id="uRs"></div>';
-else if(id==='timer')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">⏱️ 스톱워치</div><div id="tmD" style="font-size:28px;font-weight:900;text-align:center;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:10px 0">00:00.0</div><div style="display:flex;gap:4px;justify-content:center"><button class="bt bp" onclick="tTg()">시작/중지</button><button class="bt bs" onclick="tRs()">리셋</button></div>';
-else if(id==='dday')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">📅 D-Day</div><input type="date" class="fi" onchange="const d=new Date(this.value),t=new Date();t.setHours(0,0,0,0);const df=Math.ceil((d-t)/864e5);document.getElementById(\'ddR\').textContent=df===0?\'D-Day!\':df>0?\'D-\'+df:\'D+\'+Math.abs(df)"><div style="margin-top:4px;padding:8px;background:var(--c1);border-radius:6px;font-size:16px;font-weight:700;text-align:center;color:var(--cy)" id="ddR"></div>';
-else if(id==='qr')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">📱 QR</div><input class="fi" id="qV" placeholder="URL/텍스트"><button class="bt bp" onclick="document.getElementById(\'qR\').innerHTML=\'<img src=https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=\'+encodeURIComponent(document.getElementById(\'qV\').value)+\' style=max-width:160px;border-radius:6px>\'" style="margin-top:4px;font-size:10px">생성</button><div id="qR" style="margin-top:6px;text-align:center"></div>';
-else if(id==='json')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">📋 JSON</div><textarea class="fi" id="jV" rows="3" placeholder=\'{"key":"val"}\'></textarea><button class="bt bp" onclick="try{document.getElementById(\'jR\').textContent=JSON.stringify(JSON.parse(document.getElementById(\'jV\').value),null,2)}catch(e){document.getElementById(\'jR\').textContent=e.message}" style="margin-top:4px;font-size:10px">정리</button><pre style="margin-top:4px;padding:8px;background:var(--c1);border-radius:6px;font-size:10px;color:var(--cy);white-space:pre-wrap;overflow-x:auto" id="jR"></pre>';
-else if(id==='rand')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">🎲 랜덤</div><div style="display:flex;gap:3px;flex-wrap:wrap"><button class="bt bp" onclick="document.getElementById(\'rR\').textContent=Math.floor(Math.random()*100+1)" style="font-size:9px">1~100</button><button class="bt bs" onclick="document.getElementById(\'rR\').textContent=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>\'abcdefghjkmnpqrstuvwxyz23456789\'[b%30]).join(\'\')" style="font-size:9px">비밀번호</button></div><div style="margin-top:4px;padding:8px;background:var(--c1);border-radius:6px;font-size:14px;color:var(--cy);text-align:center" id="rR">-</div>';
-else if(id==='b64')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">🔐 Base64</div><textarea class="fi" id="bV" rows="2" placeholder="텍스트"></textarea><div style="display:flex;gap:3px;margin-top:3px"><button class="bt bp" onclick="document.getElementById(\'bR\').textContent=btoa(unescape(encodeURIComponent(document.getElementById(\'bV\').value)))" style="font-size:9px">인코딩</button><button class="bt bs" onclick="try{document.getElementById(\'bR\').textContent=decodeURIComponent(escape(atob(document.getElementById(\'bV\').value)))}catch(e){document.getElementById(\'bR\').textContent=\'오류\'}" style="font-size:9px">디코딩</button></div><div style="margin-top:4px;padding:6px;background:var(--c1);border-radius:6px;font-size:10px;color:var(--cy);word-break:break-all" id="bR"></div>';
-else if(id==='color')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">🎨 색상</div><input type="color" value="#8b5cf6" style="width:100%;height:36px;border:none;cursor:pointer" oninput="const v=this.value;document.getElementById(\'clR\').textContent=v+\' rgb(\'+parseInt(v.slice(1,3),16)+\',\'+parseInt(v.slice(3,5),16)+\',\'+parseInt(v.slice(5,7),16)+\')\'"><div style="margin-top:4px;padding:6px;background:var(--c1);border-radius:6px;font-size:11px;color:var(--cy)" id="clR">#8b5cf6</div>';
-else if(id==='bmi')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">🏋️ BMI</div><input class="fi" type="number" id="bmH" placeholder="키(cm)"><input class="fi" type="number" id="bmW" placeholder="몸무게(kg)"><button class="bt bp" onclick="const h=document.getElementById(\'bmH\').value/100,w=document.getElementById(\'bmW\').value,b=(w/(h*h)).toFixed(1),s=b<18.5?\'저체중\':b<25?\'정상\':b<30?\'과체중\':\'비만\';document.getElementById(\'bmR\').textContent=\'BMI \'+b+\' (\'+s+\')\'">계산</button><div style="margin-top:4px;padding:8px;background:var(--c1);border-radius:6px;font-size:13px;color:var(--cy);text-align:center" id="bmR"></div>';
-else if(id==='loan')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">🏦 대출</div><input class="fi" type="number" id="loA" placeholder="금액(만원)"><input class="fi" type="number" id="loR" placeholder="연이율(%)"><input class="fi" type="number" id="loY" placeholder="기간(년)"><button class="bt bp" onclick="const a=document.getElementById(\'loA\').value*1e4,r=document.getElementById(\'loR\').value/100/12,n=document.getElementById(\'loY\').value*12,m=a*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);document.getElementById(\'loRs\').textContent=\'월 \'+Math.round(m).toLocaleString()+\'원 / 총이자 \'+Math.round(m*n-a).toLocaleString()+\'원\'" style="margin-top:3px">계산</button><div style="margin-top:4px;padding:6px;background:var(--c1);border-radius:6px;font-size:11px;color:var(--cy)" id="loRs"></div>';
-else if(id==='hash')h='<div style="font-weight:600;font-size:11px;margin-bottom:4px">#️⃣ 해시</div><input class="fi" id="hsV" placeholder="텍스트"><button class="bt bp" onclick="crypto.subtle.digest(\'SHA-256\',new TextEncoder().encode(document.getElementById(\'hsV\').value)).then(b=>document.getElementById(\'hsR\').textContent=Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,\'0\')).join(\'\'))" style="margin-top:3px;font-size:9px">SHA-256</button><div style="margin-top:4px;padding:6px;background:var(--c1);border-radius:6px;font-size:9px;color:var(--cy);word-break:break-all" id="hsR"></div>';
-e.innerHTML='<div style="background:var(--bg);border-radius:var(--r);padding:10px;margin-top:6px">'+h+'</div>';xp(2,'유틸');
-}
-function uCv(){const t=document.getElementById('uTy').value,v=+document.getElementById('uVl').value||0;const r=document.getElementById('uRs');if(t==='l')r.textContent=v+'cm = '+(v/2.54).toFixed(2)+'in = '+(v/100).toFixed(3)+'m';else if(t==='w')r.textContent=v+'kg = '+(v*2.205).toFixed(2)+'lb = '+(v*1000)+'g';else r.textContent=v+'°C = '+(v*9/5+32).toFixed(1)+'°F = '+(v+273.15).toFixed(1)+'K';}
+function renderQuiz(el,items){const sh=[...items].sort(()=>Math.random()-.5).slice(0,3);el.innerHTML=sh.map(q=>{const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).sort(()=>Math.random()-.5);return'<div class="qz"><div class="qz-q">'+q.cat+' | '+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';}).join('');}
+function chkA(b,ok){if(b.parentElement.querySelector('.correct,.wrong'))return;if(ok){b.classList.add('correct');xp(5,'퀴즈');toast('정답! +5XP');}else{b.classList.add('wrong');toast('오답!');};[...b.parentElement.children].forEach(x=>{try{if(x!==b&&x.getAttribute('onclick').includes('true'))x.classList.add('correct');}catch(e){}});}
+
+function renderUtils(el){el.innerHTML=UTS.map(u=>'<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+u.ic+'</div><div class="gn">'+u.nm+'</div></div>').join('');}
+function openU(id){let h='';
+if(id==='calc')h='<b>🧮 계산기</b><input class="fi" id="cV" placeholder="수식" style="margin:6px 0"><button class="bt bp" onclick="try{document.getElementById(\'cR\').textContent=\'= \'+Function(\'return \'+document.getElementById(\'cV\').value)()}catch(e){document.getElementById(\'cR\').textContent=\'오류\'}">계산</button><div style="margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;color:var(--cy);font-size:14px" id="cR"></div>';
+else if(id==='unit')h='<b>📏 단위변환</b><select class="fi" id="uT" style="margin:4px 0"><option value="l">길이</option><option value="w">무게</option><option value="t">온도</option></select><input class="fi" type="number" id="uV" placeholder="값" oninput="uCv()"><div style="margin-top:6px;padding:8px;background:var(--bg);border-radius:6px;color:var(--cy)" id="uR"></div>';
+else if(id==='timer')h='<b>⏱️ 스톱워치</b><div id="tmD" style="font-size:32px;font-weight:900;text-align:center;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:12px 0">00:00.0</div><div style="display:flex;gap:6px;justify-content:center"><button class="bt bp" onclick="tTg()">시작/중지</button><button class="bt bs" onclick="tRs()">리셋</button></div>';
+else if(id==='dday')h='<b>📅 D-Day</b><input type="date" class="fi" style="margin:6px 0" onchange="const d=new Date(this.value),t=new Date();t.setHours(0,0,0,0);const df=Math.ceil((d-t)/864e5);document.getElementById(\'ddR\').textContent=df===0?\'D-Day!\':df>0?\'D-\'+df:\'D+\'+Math.abs(df)"><div style="padding:12px;background:var(--bg);border-radius:6px;font-size:24px;text-align:center;font-weight:900;color:var(--cy)" id="ddR"></div>';
+else if(id==='bmi')h='<b>🏋️ BMI</b><input class="fi" type="number" id="bH" placeholder="키(cm)" style="margin:4px 0"><input class="fi" type="number" id="bW" placeholder="몸무게(kg)"><button class="bt bp" style="margin-top:6px" onclick="const h=document.getElementById(\'bH\').value/100,w=document.getElementById(\'bW\').value,b=(w/(h*h)).toFixed(1),s=b<18.5?\'저체중\':b<25?\'정상\':b<30?\'과체중\':\'비만\';document.getElementById(\'bR\').textContent=\'BMI \'+b+\' (\'+s+\')\'">계산</button><div style="padding:12px;background:var(--bg);border-radius:6px;font-size:18px;text-align:center;font-weight:700;color:var(--cy);margin-top:6px" id="bR"></div>';
+else if(id==='rand')h='<b>🎲 랜덤</b><div style="display:flex;gap:4px;margin:6px 0"><button class="bt bp" onclick="document.getElementById(\'rR\').textContent=Math.floor(Math.random()*100+1)">1~100</button><button class="bt bs" onclick="document.getElementById(\'rR\').textContent=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>\'abcdefghjkmnpqrstuvwxyz23456789\'[b%30]).join(\'\')">비밀번호</button></div><div style="padding:12px;background:var(--bg);border-radius:6px;font-size:20px;text-align:center;font-weight:700;color:var(--cy)" id="rR">-</div>';
+document.getElementById('moB').innerHTML=h;document.getElementById('mo').classList.add('sh');}
+function uCv(){const t=document.getElementById('uT').value,v=+document.getElementById('uV').value||0,r=document.getElementById('uR');if(t==='l')r.textContent=v+'cm = '+(v/2.54).toFixed(2)+'in = '+(v/100).toFixed(3)+'m';else if(t==='w')r.textContent=v+'kg = '+(v*2.205).toFixed(2)+'lb';else r.textContent=v+'C = '+(v*9/5+32).toFixed(1)+'F';}
 let tmOn=0,tmSt=0,tmEl=0,tmRf;function tTg(){if(tmOn){tmOn=0;tmEl+=performance.now()-tmSt;cancelAnimationFrame(tmRf);}else{tmOn=1;tmSt=performance.now();tmTk();}}function tmTk(){if(!tmOn)return;const t=tmEl+performance.now()-tmSt;document.getElementById('tmD').textContent=String(t/6e4|0).padStart(2,'0')+':'+String((t%6e4)/1e3|0).padStart(2,'0')+'.'+(t%1e3/100|0);tmRf=requestAnimationFrame(tmTk);}function tRs(){tmOn=0;tmEl=0;cancelAnimationFrame(tmRf);document.getElementById('tmD').textContent='00:00.0';}
 
-function sP(b,v){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');['vGm','vUt','vSr','vSim'].forEach(x=>document.getElementById(x).style.display='none');document.getElementById({gm:'vGm',ut:'vUt',sr:'vSr',sim:'vSim'}[v]).style.display='';}
-function doSr(e){const q=document.getElementById('srI').value.trim();if(!q)return;const u={google:'https://www.google.com/search?q=',naver:'https://search.naver.com/search.naver?query=',youtube:'https://www.youtube.com/results?search_query=',github:'https://github.com/search?q=',namu:'https://namu.wiki/w/'};window.open((u[e]||u.google)+encodeURIComponent(q),'_blank');xp(2,'검색');}
-function rSim(){document.getElementById('simL').innerHTML='<div style="font-size:10px;color:var(--t2);margin-bottom:6px">PhET 시뮬레이션 (콜로라도대학, CC-BY)</div>'+SIMS.map(s=>`<a class="rc" href="${s.u}" target="_blank"><div class="ri">${s.ic}</div><div><div style="font-size:12px;font-weight:600">${s.nm}</div></div></a>`).join('');}
-
-// ===== PROFILE =====
-function dH(st){const c=document.getElementById('sC');if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=w*.35,k=Object.keys(st),n=k.length,lb=['지식','체력','창의력','소통','리더십','기술'];x.clearRect(0,0,w,h);for(let g=5;g>=1;g--){x.beginPath();for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;i?x.lineTo(cx+Math.cos(a)*r*(g/5),cy+Math.sin(a)*r*(g/5)):x.moveTo(cx+Math.cos(a)*r*(g/5),cy+Math.sin(a)*r*(g/5));}x.closePath();x.strokeStyle='rgba(139,92,246,'+(0.04+g*.03)+')';x.stroke();}x.beginPath();const v=Object.values(st);for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;i?x.lineTo(cx+Math.cos(a)*r*(v[i]/100),cy+Math.sin(a)*r*(v[i]/100)):x.moveTo(cx+Math.cos(a)*r*(v[i]/100),cy+Math.sin(a)*r*(v[i]/100));}x.closePath();const gd=x.createLinearGradient(cx-r,cy-r,cx+r,cy+r);gd.addColorStop(0,'rgba(139,92,246,.2)');gd.addColorStop(1,'rgba(6,214,160,.2)');x.fillStyle=gd;x.fill();x.strokeStyle='rgba(139,92,246,.5)';x.lineWidth=1.5;x.stroke();x.fillStyle='#94a3b8';x.font='8px Noto Sans KR';x.textAlign='center';for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.fillText(lb[i]+' '+v[i],cx+Math.cos(a)*(r+12),cy+Math.sin(a)*(r+12)+2);}}
-function rP(){uN();document.getElementById('pL').textContent=U.lv;document.getElementById('xC').textContent=U.xp;document.getElementById('xM').textContent=U.xm;document.getElementById('xR').textContent=U.xm-U.xp;document.getElementById('bC').textContent=U.bg.filter(b=>b).length+'/16';setTimeout(()=>document.getElementById('lB').style.width=(U.xp/U.xm*100)+'%',80);dH(U.st);document.getElementById('bG').innerHTML=BDG.map((b,i)=>`<div class="bi ${U.bg[i]?'y':'n'}"><span>${b.i}</span><span style="font-size:7px;color:var(--t3)">${b.n}</span></div>`).join('');
-  // 학습 진도 요약
-  const kTotal=Object.values(KIDS).flat().length,kDone=Object.keys(U.done).filter(k=>k.startsWith('k_')).length;
-  const aTotal=Object.values(ADULT).flat().length,aDone=Object.keys(U.done).filter(k=>k.startsWith('a_')).length;
-  document.getElementById('progSummary').innerHTML=`<div class="cd" style="padding:8px 10px"><div style="font-size:11px;margin-bottom:4px">👶 아이교육: ${kDone}/${kTotal}강 (${kTotal?Math.round(kDone/kTotal*100):0}%)</div><div class="pb"><div style="width:${kTotal?kDone/kTotal*100:0}%"></div></div><div style="font-size:11px;margin:6px 0 4px">🧑 성인교육: ${aDone}/${aTotal}강 (${aTotal?Math.round(aDone/aTotal*100):0}%)</div><div class="pb"><div style="width:${aTotal?aDone/aTotal*100:0}%"></div></div></div>`;
-}
-
-// ===== XP =====
-function xp(a,t){U.xp+=a;U.ac.push({t,xp:a,m:0});while(U.xp>=U.xm){U.xp-=U.xm;U.lv++;U.xm=Math.floor(U.xm*1.1);const k=Object.keys(U.st),r=k[Math.random()*k.length|0];U.st[r]=Math.min(100,U.st[r]+(Math.random()*2|0)+1);if(U.lv>=10)U.bg[7]=1;if(U.lv>=30)U.bg[8]=1;if(U.lv>=50)U.bg[9]=1;toast('🎉Lv.'+U.lv);}sv();rP();uN();}
-
-// ===== WRITE =====
-function shW(){oMo('<div style="font-size:14px;font-weight:700;margin-bottom:6px">✏️ 글쓰기</div><select class="fi" id="wG">'+GAL.map(g=>'<option value="'+g.id+'">'+g.ic+' '+g.nm+'</option>').join('')+'</select><input class="fi" id="wT" placeholder="제목" style="margin-top:4px"><textarea class="fi" id="wB" rows="4" placeholder="내용" style="margin-top:4px"></textarea><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px"><button class="bt bs" onclick="cMo()">취소</button><button class="bt bp" onclick="sbP()">등록</button></div>');}
-function sbP(){const t=document.getElementById('wT').value.trim(),b=document.getElementById('wB').value.trim(),g=document.getElementById('wG').value;if(!t){toast('제목!');return;}U.mp.unshift({id:Date.now(),g,t,b,a:U.nk||'익명',l:0,c:[],m:0});if(!U.bg[5])U.bg[5]=1;xp(15,'글작성');cMo();rHome();toast('✏️+15XP');}
-
-function oMo(h){document.getElementById('moC').innerHTML=h;document.getElementById('mo').classList.add('sh');}
-function cMo(){document.getElementById('mo').classList.remove('sh');}
+function pH(p){return'<div class="po" onclick="sPost('+p.id+')"><div class="po-t">'+p.t+'</div><div class="po-m"><span>👤'+p.a+'</span><span>❤️'+p.l+'</span><span>💬'+(p.c||[]).length+'</span><span>'+tA(p.m)+'</span></div></div>';}
+function sPost(id){const p=[...P,...U.mp].find(x=>x.id===id);if(!p)return;document.getElementById('moB').innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:4px">'+p.t+'</div><div style="font-size:9px;color:var(--t3);margin-bottom:8px">👤'+p.a+' · '+tA(p.m)+' · ❤️'+p.l+'</div><div style="font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap">'+(p.b||'')+'</div>'+(p.c||[]).map(c=>'<div style="padding:4px 0;border-bottom:1px solid rgba(139,92,246,.03)"><div style="font-size:10px;font-weight:600;color:var(--cy)">'+c.a+'</div><div style="font-size:11px;color:var(--t2)">'+c.t+'</div></div>').join('');document.getElementById('mo').classList.add('sh');xp(3,'글읽기');}
+function shW(){document.getElementById('moB').innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:8px">✏️ 글쓰기</div><input class="fi" id="wT" placeholder="제목" style="margin-bottom:6px"><textarea class="fi" id="wB" rows="4" placeholder="내용"></textarea><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px"><button class="bt bs" onclick="cMo()">취소</button><button class="bt bp" onclick="sbP()">등록</button></div>';document.getElementById('mo').classList.add('sh');}
+function sbP(){const t=document.getElementById('wT').value.trim(),b=document.getElementById('wB').value.trim();if(!t)return;U.mp.unshift({id:Date.now(),g:'자유',t,b,a:U.nk||'익명',l:0,c:[],m:0});xp(15,'글작성');cMo();rAll();toast('+15XP');}
+function cMo(){document.getElementById('mo').classList.remove('sh');document.getElementById('moB').innerHTML='';}
+function xp(a,t){U.xp+=a;U.ac.push({t,xp:a,m:0});while(U.xp>=U.xm){U.xp-=U.xm;U.lv++;U.xm=Math.floor(U.xm*1.1);const k=Object.keys(U.st),r=k[Math.random()*k.length|0];U.st[r]=Math.min(100,U.st[r]+(Math.random()*2|0)+1);toast('Lv.'+U.lv+'!');}sv();rProf();uN();}
+function dH(){const c=document.getElementById('sC');if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=w*.35,st=U.st,k=Object.keys(st),n=k.length,lb=['지식','체력','창의력','소통','리더십','기술'];x.clearRect(0,0,w,h);for(let g=5;g>=1;g--){x.beginPath();for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;i?x.lineTo(cx+Math.cos(a)*r*(g/5),cy+Math.sin(a)*r*(g/5)):x.moveTo(cx+Math.cos(a)*r*(g/5),cy+Math.sin(a)*r*(g/5));}x.closePath();x.strokeStyle='rgba(139,92,246,'+(0.04+g*.03)+')';x.stroke();}x.beginPath();const v=Object.values(st);for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;i?x.lineTo(cx+Math.cos(a)*r*(v[i]/100),cy+Math.sin(a)*r*(v[i]/100)):x.moveTo(cx+Math.cos(a)*r*(v[i]/100),cy+Math.sin(a)*r*(v[i]/100));}x.closePath();const gd=x.createLinearGradient(cx-r,cy-r,cx+r,cy+r);gd.addColorStop(0,'rgba(139,92,246,.2)');gd.addColorStop(1,'rgba(6,214,160,.2)');x.fillStyle=gd;x.fill();x.strokeStyle='rgba(139,92,246,.5)';x.lineWidth=1.5;x.stroke();x.fillStyle='#94a3b8';x.font='9px Noto Sans KR';x.textAlign='center';for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.fillText(lb[i]+' '+v[i],cx+Math.cos(a)*(r+14),cy+Math.sin(a)*(r+14)+3);}}
+function rProf(){document.getElementById('pL').textContent=U.lv;document.getElementById('xC').textContent=U.xp;document.getElementById('xM').textContent=U.xm;setTimeout(()=>document.getElementById('lB').style.width=(U.xp/U.xm*100)+'%',80);dH();const ac=U.ac.length?U.ac.slice(-5).reverse():[{t:'가입!',xp:0,m:0}];document.getElementById('tl').innerHTML=ac.map(a=>'<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(139,92,246,.04)"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);margin-top:4px;flex-shrink:0"></div><div style="font-size:11px">'+a.t+(a.xp?' <span style="color:var(--gd)">+'+a.xp+'</span>':'')+'</div></div>').join('');}
 let tt;function toast(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('sh');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('sh'),1800);}
 
+function rAll(){
+  const sh=[...V].sort(()=>Math.random()-.5);
+  document.getElementById('vR1').innerHTML=sh.slice(0,6).map(vc).join('');
+  document.getElementById('vR2').innerHTML=sh.slice(6,12).map(vc).join('');
+  document.getElementById('sR').innerHTML=SIMS.slice(0,4).map(sc).join('');
+  document.getElementById('sR2').innerHTML=SIMS.slice(4,8).map(sc).join('');
+  document.getElementById('gR').innerHTML=GMS.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>').join('');
+  renderQuiz(document.getElementById('qR'),QUIZ);
+  document.getElementById('cR').innerHTML=[...P,...U.mp].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
+  const cats=[...new Set(V.map(v=>v.c))];
+  document.getElementById('allV').innerHTML=cats.map(c=>'<div class="sec" style="font-size:12px">'+c+'</div><div class="row">'+V.filter(v=>v.c===c).map(vc).join('')+'</div>').join('');
+  document.getElementById('allS').innerHTML=SIMS.map(sc).join('');
+  renderQuiz(document.getElementById('allQ'),QUIZ);
+  renderUtils(document.getElementById('allU'));
+  document.getElementById('allP').innerHTML=[...P,...U.mp].map(pH).join('');
+  rProf();uN();
+}
+
 function init(){
-  const b=document.getElementById('sB');setTimeout(()=>b.style.width='60%',80);setTimeout(()=>b.style.width='100%',400);
-  setTimeout(()=>{document.getElementById('splash').classList.add('h');ckNk();},700);
-  rHome();rEduSubs();rGal();rGm();rUt();rSim();rP();
+  setTimeout(()=>document.getElementById('splash').classList.add('h'),600);
+  setTimeout(()=>{ckNk();rAll();},700);
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 document.addEventListener('DOMContentLoaded',init);
