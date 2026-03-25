@@ -2,634 +2,542 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>LevelPlay - 배우고, 올리고, 증명하라</title>
-<meta name="description" content="LevelPlay - 교육·프로그램·AI 정보 공유 커뮤니티 플랫폼">
+<meta name="description" content="교육·프로그램·AI 정보 공유 커뮤니티">
 <meta name="theme-color" content="#0a0a1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#0a0a1a;--bg2:#111127;--bg3:#181838;--bg4:#222250;
---purple:#8b5cf6;--cyan:#06d6a0;--gold:#fbbf24;--pink:#ec4899;--red:#ef4444;--blue:#3b82f6;--green:#22c55e;
---text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
---grad1:linear-gradient(135deg,#8b5cf6,#06d6a0);
---r:14px;--r2:10px;--r3:6px;
---nav:56px;
-}
-html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+:root{--bg:#0a0a1a;--c1:#111127;--c2:#181838;--c3:#222250;--p:#8b5cf6;--cy:#06d6a0;--gd:#fbbf24;--pk:#ec4899;--rd:#ef4444;--bl:#3b82f6;--gn:#22c55e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;--g1:linear-gradient(135deg,#8b5cf6,#06d6a0);--r:12px;--nv:54px}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
 body{display:flex;flex-direction:column}
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
-a{color:var(--cyan);text-decoration:none}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--p);border-radius:3px}
+a{color:var(--cy);text-decoration:none}a:hover{text-decoration:underline}
 
-/* Layout */
 #app{flex:1;overflow:hidden;position:relative}
-.page{position:absolute;inset:0;overflow-y:auto;padding:12px 12px calc(var(--nav) + 20px);opacity:0;pointer-events:none;transition:opacity .25s}
-.page.active{opacity:1;pointer-events:auto}
+.pg{position:absolute;inset:0;overflow-y:auto;padding:10px 10px calc(var(--nv)+16px);opacity:0;pointer-events:none;transition:opacity .2s}
+.pg.on{opacity:1;pointer-events:auto}
 
-/* Nav */
-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:rgba(10,10,26,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(139,92,246,.15);display:flex;z-index:999}
-nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--text3);font:10px 'Noto Sans KR';cursor:pointer;transition:.2s;position:relative}
-nav button.on{color:var(--cyan)}
-nav button.on::before{content:'';position:absolute;top:0;width:24px;height:2px;background:var(--grad1);border-radius:0 0 2px 2px}
-nav button span:first-child{font-size:18px}
+nav{position:fixed;bottom:0;left:0;right:0;height:var(--nv);background:rgba(10,10,26,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(139,92,246,.12);display:flex;z-index:999}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:none;border:none;color:var(--t3);font:9px 'Noto Sans KR';cursor:pointer;position:relative}
+nav button.on{color:var(--cy)}
+nav button.on::before{content:'';position:absolute;top:0;width:20px;height:2px;background:var(--g1);border-radius:0 0 2px 2px}
+nav button span:first-child{font-size:17px}
 
-/* Cards */
-.card{background:var(--bg2);border:1px solid rgba(139,92,246,.1);border-radius:var(--r2);padding:14px;margin-bottom:10px}
-.card:hover{border-color:rgba(139,92,246,.25)}
+.cd{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:12px;margin-bottom:8px}
+.cd:hover{border-color:rgba(139,92,246,.2)}
+.sec{font-size:15px;font-weight:700;margin:14px 0 8px;display:flex;align-items:center;gap:5px}
+.sec:first-child{margin-top:2px}
 
-/* Section */
-.sec{font-size:16px;font-weight:700;margin:16px 0 10px;display:flex;align-items:center;gap:6px}
-.sec:first-child{margin-top:4px}
+/* Notice banner */
+.banner{background:linear-gradient(90deg,rgba(139,92,246,.15),rgba(6,214,160,.1));border:1px solid rgba(139,92,246,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:10px;font-size:12px;display:flex;align-items:center;gap:8px}
+.banner .tag{background:var(--rd);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0}
 
-/* Gallery list */
-.gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-@media(min-width:500px){.gal-grid{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:768px){.gal-grid{grid-template-columns:repeat(4,1fr)}}
-.gal-item{background:var(--bg2);border:1px solid rgba(139,92,246,.1);border-radius:var(--r2);padding:14px 10px;text-align:center;cursor:pointer;transition:.2s}
-.gal-item:hover{border-color:var(--purple);transform:translateY(-2px)}
-.gal-item .gi{font-size:28px;margin-bottom:6px}
-.gal-item .gn{font-size:13px;font-weight:600}
-.gal-item .gc{font-size:10px;color:var(--text3);margin-top:2px}
+/* Grid */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:500px){.g2{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:768px){.g2{grid-template-columns:repeat(4,1fr)}}
 
-/* Posts */
-.post{padding:12px 0;border-bottom:1px solid rgba(139,92,246,.06);cursor:pointer;transition:.15s}
-.post:hover{background:rgba(139,92,246,.03);margin:0 -12px;padding-left:12px;padding-right:12px}
-.post-cat{font-size:11px;font-weight:600;color:var(--purple)}
-.post-t{font-size:14px;font-weight:600;margin:2px 0}
-.post-m{font-size:11px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap}
-.post-hot{color:var(--red);font-weight:700}
-.post-body{font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap;margin:10px 0}
+/* Gallery item */
+.gi{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:12px 8px;text-align:center;cursor:pointer;transition:.15s}
+.gi:hover{border-color:var(--p);transform:translateY(-1px)}
+.gi .ic{font-size:26px;margin-bottom:4px}
+.gi .nm{font-size:12px;font-weight:600}
+.gi .ct{font-size:9px;color:var(--t3);margin-top:2px}
+
+/* Post */
+.po{padding:10px 0;border-bottom:1px solid rgba(139,92,246,.05);cursor:pointer}
+.po:hover{background:rgba(139,92,246,.02);margin:0 -10px;padding-left:10px;padding-right:10px}
+.po-c{font-size:10px;font-weight:600;color:var(--p)}
+.po-t{font-size:13px;font-weight:600;margin:1px 0}
+.po-m{font-size:10px;color:var(--t3);display:flex;gap:8px;flex-wrap:wrap}
+.po-b{font-size:12px;color:var(--t2);line-height:1.7;white-space:pre-wrap;margin:8px 0}
 
 /* Tabs */
-.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.tabs{display:flex;gap:5px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid rgba(139,92,246,.2);background:none;color:var(--text2);cursor:pointer;font-family:inherit;transition:.2s}
-.tab.on{background:var(--purple);color:#fff;border-color:transparent}
+.tb{flex-shrink:0;padding:5px 12px;border-radius:16px;font-size:11px;font-weight:500;border:1px solid rgba(139,92,246,.15);background:none;color:var(--t2);cursor:pointer;font-family:inherit}
+.tb.on{background:var(--p);color:#fff;border-color:transparent}
 
-/* Game cards */
-.game-card{background:var(--bg3);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:.2s;border:1px solid transparent}
-.game-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
-.game-thumb{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
-.game-info{padding:10px}
-.game-name{font-size:13px;font-weight:600}
-.game-meta{font-size:10px;color:var(--text3);margin-top:3px}
-.play-badge{position:absolute;top:6px;left:6px;background:var(--cyan);color:#000;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px}
+/* Resource card */
+.rc{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:12px;cursor:pointer;transition:.15s;display:flex;gap:10px;margin-bottom:8px;text-decoration:none;color:inherit}
+.rc:hover{border-color:var(--cy);transform:translateY(-1px);text-decoration:none}
+.rc .ri{font-size:28px;flex-shrink:0;width:40px;text-align:center}
+.rc .rn{font-size:13px;font-weight:600}
+.rc .rd{font-size:11px;color:var(--t2);margin-top:2px}
+.rc .rt{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.rc .rt span{font-size:9px;padding:1px 6px;border-radius:4px;background:rgba(139,92,246,.1);color:var(--p)}
 
-/* Utility cards */
-.util-card{background:var(--bg2);border:1px solid rgba(139,92,246,.1);border-radius:var(--r2);padding:16px;cursor:pointer;transition:.2s;text-align:center}
-.util-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
-.util-card .ui{font-size:32px;margin-bottom:8px}
-.util-card .un{font-size:13px;font-weight:600}
-.util-card .ud{font-size:10px;color:var(--text3);margin-top:3px}
+/* Embed frame */
+.ef{width:100%;border:none;border-radius:var(--r);background:var(--c2);min-height:300px}
 
 /* Profile */
-.prof-head{text-align:center;padding:16px 0}
-.prof-av{width:72px;height:72px;border-radius:50%;background:var(--grad1);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 10px;border:3px solid var(--bg);box-shadow:0 0 20px rgba(139,92,246,.3)}
-.prof-name{font-size:20px;font-weight:700}
-.lv-wrap{background:var(--bg);border-radius:20px;height:20px;position:relative;overflow:hidden;margin:6px 0}
-.lv-bar{height:100%;background:var(--grad1);border-radius:20px;transition:width 1s}
-.lv-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
-.stat-wrap{margin:0 auto;width:240px;height:240px}
-.badge-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.badge-i{aspect-ratio:1;border-radius:var(--r2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:24px;transition:.2s;cursor:pointer}
-.badge-i.on{background:var(--bg3);border:1px solid rgba(139,92,246,.25)}
-.badge-i.off{background:var(--bg2);opacity:.35;filter:grayscale(1)}
+.pf-av{width:64px;height:64px;border-radius:50%;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 8px;border:3px solid var(--bg);box-shadow:0 0 16px rgba(139,92,246,.25)}
+.lv-w{background:var(--bg);border-radius:16px;height:18px;position:relative;overflow:hidden;margin:4px 0}
+.lv-b{height:100%;background:var(--g1);border-radius:16px;transition:width 1s}
+.lv-t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700}
+.sw{margin:0 auto;width:220px;height:220px}
+.bg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.bi{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:20px}
+.bi.y{background:var(--c2);border:1px solid rgba(139,92,246,.2)}
+.bi.n{opacity:.3;filter:grayscale(1)}
 
 /* Modal */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:5000;opacity:0;pointer-events:none;transition:.25s;display:flex;align-items:flex-end;justify-content:center}
-.mo.show{opacity:1;pointer-events:auto}
-.mo-c{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;max-height:82vh;overflow-y:auto;padding:20px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-.mo.show .mo-c{transform:translateY(0)}
-.mo-bar{width:36px;height:3px;background:var(--text3);border-radius:3px;margin:0 auto 14px}
-.mo-t{font-size:17px;font-weight:700;margin-bottom:12px}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:5000;opacity:0;pointer-events:none;transition:.2s;display:flex;align-items:flex-end;justify-content:center}
+.mo.sh{opacity:1;pointer-events:auto}
+.mc{background:var(--c1);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:460px;max-height:82vh;overflow-y:auto;padding:18px;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.mo.sh .mc{transform:translateY(0)}
 
 /* Game overlay */
 .go{position:fixed;inset:0;z-index:6000;background:#000;display:none;flex-direction:column}
-.go.show{display:flex}
-.go-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--bg);flex-shrink:0}
-.go-bar span{font-size:13px;font-weight:700}
-.go-btns{display:flex;gap:6px}
-.go-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.go.sh{display:flex}
+.go-b{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg);flex-shrink:0}
 .go iframe{flex:1;border:none;width:100%}
 
 /* Nickname */
-.nick-o{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px}
-.nick-c{background:var(--bg2);border:2px solid rgba(139,92,246,.3);border-radius:var(--r);padding:28px;max-width:340px;width:100%;text-align:center}
-.nick-in{width:100%;padding:12px;background:var(--bg);border:2px solid rgba(139,92,246,.3);border-radius:var(--r3);color:var(--text);font-size:16px;font-family:inherit;text-align:center;margin:14px 0;outline:none}
-.nick-in:focus{border-color:var(--purple)}
+.nk{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px}
+.nk-c{background:var(--c1);border:2px solid rgba(139,92,246,.3);border-radius:var(--r);padding:24px;max-width:320px;width:100%;text-align:center}
+.nk-i{width:100%;padding:10px;background:var(--bg);border:2px solid rgba(139,92,246,.3);border-radius:6px;color:var(--tx);font-size:16px;font-family:inherit;text-align:center;margin:12px 0;outline:none}
+.nk-i:focus{border-color:var(--p)}
 
 /* Form */
-.fi{width:100%;padding:10px;background:var(--bg);border:1px solid rgba(139,92,246,.2);border-radius:var(--r3);color:var(--text);font-size:13px;font-family:inherit;resize:vertical}
-.fi:focus{outline:none;border-color:var(--purple)}
-.btn{padding:10px 20px;border:none;border-radius:var(--r3);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
-.btn-p{background:var(--grad1);color:#fff}
-.btn-s{background:var(--bg3);color:var(--text2)}
+.fi{width:100%;padding:8px;background:var(--bg);border:1px solid rgba(139,92,246,.15);border-radius:6px;color:var(--tx);font-size:12px;font-family:inherit;resize:vertical}
+.fi:focus{outline:none;border-color:var(--p)}
+.bt{padding:8px 16px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.bp{background:var(--g1);color:#fff}
+.bs{background:var(--c2);color:var(--t2)}
 
 /* Comment */
-.cmt{padding:8px 0;border-bottom:1px solid rgba(139,92,246,.05);display:flex;gap:8px}
-.cmt-av{width:28px;height:28px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.cmt-name{font-size:11px;font-weight:600;color:var(--cyan)}
-.cmt-txt{font-size:12px;color:var(--text2);margin-top:1px}
-.cmt-time{font-size:9px;color:var(--text3);margin-top:1px}
+.cm{padding:6px 0;border-bottom:1px solid rgba(139,92,246,.04);display:flex;gap:6px}
+.cm-a{font-size:10px;font-weight:600;color:var(--cy)}
+.cm-t{font-size:11px;color:var(--t2)}
+.cm-m{font-size:9px;color:var(--t3)}
 
-/* Util embedded */
-.util-embed{background:var(--bg);border-radius:var(--r2);padding:16px;margin-top:10px}
-.util-embed input,.util-embed select,.util-embed textarea{width:100%;padding:10px;background:var(--bg2);border:1px solid rgba(139,92,246,.2);border-radius:var(--r3);color:var(--text);font:13px 'Noto Sans KR';margin:4px 0}
-.util-embed button{margin-top:8px}
-.util-result{margin-top:10px;padding:12px;background:var(--bg2);border-radius:var(--r3);font-size:13px;color:var(--cyan);min-height:40px}
+/* Util */
+.ue{background:var(--bg);border-radius:var(--r);padding:14px;margin-top:8px}
+.ue input,.ue select,.ue textarea{width:100%;padding:8px;background:var(--c1);border:1px solid rgba(139,92,246,.15);border-radius:6px;color:var(--tx);font:12px 'Noto Sans KR';margin:3px 0}
+.ur{margin-top:8px;padding:10px;background:var(--c1);border-radius:6px;font-size:12px;color:var(--cy);min-height:36px}
 
-/* Toast */
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--bg3);border:1px solid rgba(139,92,246,.25);border-radius:var(--r2);padding:10px 20px;font-size:12px;font-weight:500;z-index:9999;transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 8px 30px rgba(0,0,0,.4)}
-.toast.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--c2);border:1px solid rgba(139,92,246,.2);border-radius:var(--r);padding:8px 18px;font-size:11px;z-index:9999;transition:transform .25s;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.toast.sh{transform:translateX(-50%) translateY(0)}
 
-/* Splash */
-#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .5s}
-#splash.hide{opacity:0;pointer-events:none}
-#splash h1{font-size:40px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-#splash p{color:var(--text3);font-size:12px;margin-top:6px}
-.splash-bar{width:100px;height:2px;background:var(--bg3);border-radius:2px;margin-top:16px;overflow:hidden}
-.splash-bar div{height:100%;width:0;background:var(--grad1);transition:width .4s}
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .4s}
+#splash.h{opacity:0;pointer-events:none}
+#splash h1{font-size:36px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb{width:80px;height:2px;background:var(--c2);border-radius:2px;margin-top:12px;overflow:hidden}
+.sb div{height:100%;width:0;background:var(--g1);transition:width .3s}
 
-/* FAB */
-.fab{position:fixed;bottom:calc(var(--nav) + 16px);right:14px;width:50px;height:50px;border-radius:50%;background:var(--grad1);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(139,92,246,.35);z-index:500;display:none;align-items:center;justify-content:center;transition:.2s}
-.fab:hover{transform:scale(1.1)}
-.fab.show{display:flex}
+.fab{position:fixed;bottom:calc(var(--nv)+14px);right:12px;width:46px;height:46px;border-radius:50%;background:var(--g1);border:none;color:#fff;font-size:18px;cursor:pointer;box-shadow:0 3px 12px rgba(139,92,246,.3);z-index:500;display:none;align-items:center;justify-content:center}
+.fab.sh{display:flex}
 
-@media(min-width:768px){.page{padding:16px 24px calc(var(--nav)+16px)}}
-@media(min-width:1024px){nav{left:50%;transform:translateX(-50%);max-width:560px;border-radius:var(--r) var(--r) 0 0}}
+@media(min-width:768px){.pg{padding:14px 20px calc(var(--nv)+14px)}}
+@media(min-width:1024px){nav{left:50%;transform:translateX(-50%);max-width:520px;border-radius:var(--r) var(--r) 0 0}}
 </style>
 </head>
 <body>
 
-<div id="splash"><h1>LevelPlay</h1><p>배우고, 올리고, 증명하라</p><div class="splash-bar"><div id="sBar"></div></div></div>
-<div class="toast" id="toast"></div>
+<div id="splash"><h1>LevelPlay</h1><p style="color:var(--t3);font-size:11px;margin-top:4px">배우고, 올리고, 증명하라</p><div class="sb"><div id="sB"></div></div></div>
+<div class="toast" id="tst"></div>
 
-<!-- Nickname -->
-<div class="nick-o" id="nickMo" style="display:none">
-<div class="nick-c">
-  <div style="font-size:40px;margin-bottom:8px">🧑‍🚀</div>
-  <div style="font-size:20px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">LevelPlay</div>
-  <div style="font-size:13px;color:var(--text2);margin-top:6px">닉네임을 정해주세요</div>
-  <input class="nick-in" id="nickIn" placeholder="닉네임" maxlength="12">
-  <button class="btn btn-p" style="width:100%;padding:12px" onclick="setNick()">시작</button>
-</div>
-</div>
+<div class="nk" id="nkM" style="display:none"><div class="nk-c">
+<div style="font-size:36px;margin-bottom:6px">🧑‍🚀</div>
+<div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">LevelPlay</div>
+<div style="font-size:12px;color:var(--t2);margin-top:4px">닉네임을 정해주세요</div>
+<input class="nk-i" id="nkI" placeholder="닉네임" maxlength="12">
+<button class="bt bp" style="width:100%;padding:10px" onclick="setNk()">시작</button>
+</div></div>
 
-<!-- Modals -->
-<div class="mo" id="mo" onclick="if(event.target===this)closeMo()"><div class="mo-c" id="moC"></div></div>
+<div class="mo" id="mo" onclick="if(event.target===this)cMo()"><div class="mc" id="moC"></div></div>
 
-<!-- Game overlay -->
-<div class="go" id="gameO">
-  <div class="go-bar"><span id="gameT"></span><div class="go-btns"><a id="gameApk" class="go-btn" style="background:rgba(6,214,160,.2);color:var(--cyan)" download>APK</a><button class="go-btn" style="background:rgba(239,68,68,.2);color:var(--red)" onclick="closeGame()">닫기</button></div></div>
-  <iframe id="gameF" allow="autoplay" sandbox="allow-scripts allow-same-origin"></iframe>
-</div>
+<div class="go" id="gO"><div class="go-b"><span id="gT" style="font-size:12px;font-weight:700"></span><div style="display:flex;gap:4px"><a id="gA" class="bt" style="background:rgba(6,214,160,.15);color:var(--cy);font-size:10px;padding:4px 10px" download>APK</a><button class="bt" style="background:rgba(239,68,68,.15);color:var(--rd);font-size:10px;padding:4px 10px" onclick="cG()">닫기</button></div></div><iframe id="gF" allow="autoplay" sandbox="allow-scripts allow-same-origin"></iframe></div>
 
-<!-- App -->
 <div id="app">
 
 <!-- HOME -->
-<div class="page active" id="pgHome">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-    <div style="font-size:24px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">LevelPlay</div>
-    <div style="font-size:11px;color:var(--text3)" id="homeLv">Lv.1</div>
-  </div>
-
-  <div class="sec">🔥 실시간 인기글</div>
-  <div id="hotPosts"></div>
-
-  <div class="sec">🕐 최신글</div>
-  <div id="recentPosts"></div>
+<div class="pg on" id="p0">
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+<div style="font-size:20px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">LevelPlay</div>
+<div style="font-size:10px;color:var(--t3)" id="hLv">Lv.1</div>
 </div>
 
-<!-- GALLERY LIST -->
-<div class="page" id="pgGal">
-  <div class="sec">📂 갤러리</div>
-  <div class="gal-grid" id="galGrid"></div>
+<div class="banner"><span class="tag">NEW</span> 하츄핑 게임 2종 추가! 에듀플레이에서 바로 플레이하세요 🎮</div>
 
-  <!-- 갤러리 내부 (동적 렌더) -->
-  <div id="galView" style="display:none">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-      <button class="btn btn-s" onclick="backToGalList()" style="padding:6px 12px;font-size:12px">← 목록</button>
-      <div style="font-size:16px;font-weight:700;flex:1" id="galTitle"></div>
-    </div>
-    <div id="galPosts"></div>
-  </div>
+<div class="sec">🔥 실시간 인기</div>
+<div id="hotP"></div>
+
+<div class="sec">📚 추천 학습 리소스</div>
+<div class="g2" id="resGrid"></div>
+
+<div class="sec">🕐 최신글</div>
+<div id="newP"></div>
 </div>
 
-<!-- GAMES & UTILS -->
-<div class="page" id="pgPlay">
-  <div class="sec">🎮 플레이존</div>
-  <div class="tabs">
-    <button class="tab on" onclick="switchPlayTab(this,'games')">게임</button>
-    <button class="tab" onclick="switchPlayTab(this,'utils')">유틸리티</button>
-    <button class="tab" onclick="switchPlayTab(this,'search')">웹서치</button>
-  </div>
-  <div id="playGames">
-    <div class="gal-grid" id="gameGrid"></div>
-  </div>
-  <div id="playUtils" style="display:none">
-    <div class="gal-grid" id="utilGrid"></div>
-    <div id="utilEmbed"></div>
-  </div>
-  <div id="playSearch" style="display:none">
-    <div class="util-embed">
-      <div style="font-weight:600;margin-bottom:8px">🔍 통합 검색</div>
-      <input id="searchIn" placeholder="검색어를 입력하세요..." onkeydown="if(event.key==='Enter')doSearch()">
-      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
-        <button class="btn btn-p" onclick="doSearch()" style="padding:8px 16px;font-size:12px">검색</button>
-        <button class="btn btn-s" onclick="doSearch('google')" style="padding:8px 16px;font-size:12px">Google</button>
-        <button class="btn btn-s" onclick="doSearch('naver')" style="padding:8px 16px;font-size:12px">Naver</button>
-        <button class="btn btn-s" onclick="doSearch('youtube')" style="padding:8px 16px;font-size:12px">YouTube</button>
-        <button class="btn btn-s" onclick="doSearch('github')" style="padding:8px 16px;font-size:12px">GitHub</button>
-      </div>
-      <div class="util-result" id="searchResult" style="display:none"></div>
-    </div>
-  </div>
+<!-- GALLERY -->
+<div class="pg" id="p1">
+<div class="sec">📂 갤러리</div>
+<div class="g2" id="galG"></div>
+<div id="galV" style="display:none">
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+<button class="bt bs" onclick="bkGal()" style="padding:4px 10px;font-size:11px">← 목록</button>
+<div style="font-size:14px;font-weight:700;flex:1" id="galT"></div>
+</div>
+<div id="galP"></div>
+</div>
+</div>
+
+<!-- PLAY -->
+<div class="pg" id="p2">
+<div class="sec">🎮 플레이존</div>
+<div class="tabs">
+<button class="tb on" onclick="sPlay(this,'gm')">게임</button>
+<button class="tb" onclick="sPlay(this,'ut')">유틸리티</button>
+<button class="tb" onclick="sPlay(this,'sr')">웹서치</button>
+<button class="tb" onclick="sPlay(this,'sim')">과학 시뮬레이션</button>
+<button class="tb" onclick="sPlay(this,'edu')">교육 사이트</button>
+</div>
+<div id="vGm"><div class="g2" id="gmG"></div></div>
+<div id="vUt" style="display:none"><div class="g2" id="utG"></div><div id="utE"></div></div>
+<div id="vSr" style="display:none">
+<div class="ue"><div style="font-weight:600;margin-bottom:6px">🔍 통합 검색</div>
+<input id="srI" placeholder="검색어 입력..." onkeydown="if(event.key==='Enter')doSr()">
+<div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+<button class="bt bp" onclick="doSr()" style="font-size:10px;padding:6px 12px">검색</button>
+<button class="bt bs" onclick="doSr('google')" style="font-size:10px;padding:6px 12px">Google</button>
+<button class="bt bs" onclick="doSr('naver')" style="font-size:10px;padding:6px 12px">Naver</button>
+<button class="bt bs" onclick="doSr('youtube')" style="font-size:10px;padding:6px 12px">YouTube</button>
+<button class="bt bs" onclick="doSr('github')" style="font-size:10px;padding:6px 12px">GitHub</button>
+<button class="bt bs" onclick="doSr('namu')" style="font-size:10px;padding:6px 12px">나무위키</button>
+<button class="bt bs" onclick="doSr('stackoverflow')" style="font-size:10px;padding:6px 12px">StackOverflow</button>
+</div></div>
+</div>
+<div id="vSim" style="display:none"><div id="simList"></div></div>
+<div id="vEdu" style="display:none"><div id="eduList"></div></div>
+</div>
+
+<!-- LEARN -->
+<div class="pg" id="p3">
+<div class="sec">📖 학습센터</div>
+<div class="tabs">
+<button class="tb on" onclick="sLearn(this,'channels')">추천 채널</button>
+<button class="tb" onclick="sLearn(this,'courses')">무료 강좌</button>
+<button class="tb" onclick="sLearn(this,'tools')">AI 도구</button>
+<button class="tb" onclick="sLearn(this,'programs')">추천 프로그램</button>
+</div>
+<div id="lChannels"></div>
+<div id="lCourses" style="display:none"></div>
+<div id="lTools" style="display:none"></div>
+<div id="lPrograms" style="display:none"></div>
 </div>
 
 <!-- PROFILE -->
-<div class="page" id="pgProf">
-  <div class="prof-head">
-    <div class="prof-av">🧑‍🚀</div>
-    <div class="prof-name" id="profName">탐험가</div>
-    <div style="font-size:12px;color:var(--text3)" id="profTitle">LevelPlay 탐험가</div>
-  </div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:20px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="profLv">1</span></span>
-      <span style="font-size:11px;color:var(--text3)">다음 레벨까지 <span id="xpLeft">500</span> XP</span>
-    </div>
-    <div class="lv-wrap"><div class="lv-bar" id="lvBar"></div><div class="lv-txt"><span id="xpNow">0</span>/<span id="xpMax">500</span></div></div>
-  </div>
-  <div class="sec">📊 능력치</div>
-  <div class="stat-wrap"><canvas id="statC" width="240" height="240"></canvas></div>
-  <div class="sec">🏅 뱃지 <span style="font-size:11px;font-weight:400;color:var(--text3)" id="badgeCnt">0/16</span></div>
-  <div class="badge-g" id="badgeG"></div>
-  <div class="sec" style="margin-top:16px">📜 활동</div>
-  <div id="timeline"></div>
-  <div style="margin-top:16px;text-align:center;display:flex;gap:6px;justify-content:center">
-    <button class="btn btn-s" onclick="changeNick()" style="font-size:11px">닉네임 변경</button>
-    <button class="btn btn-s" onclick="if(confirm('초기화?')){localStorage.removeItem('lp3');location.reload()}" style="font-size:11px">초기화</button>
-  </div>
+<div class="pg" id="p4">
+<div style="text-align:center;padding:12px 0">
+<div class="pf-av">🧑‍🚀</div>
+<div style="font-size:18px;font-weight:700" id="pN">탐험가</div>
+<div style="font-size:11px;color:var(--t3)" id="pT">LevelPlay 탐험가</div>
+</div>
+<div class="cd">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="pL">1</span></span>
+<span style="font-size:10px;color:var(--t3)">다음 <span id="xR">500</span> XP</span>
+</div>
+<div class="lv-w"><div class="lv-b" id="lB"></div><div class="lv-t"><span id="xC">0</span>/<span id="xM">500</span></div></div>
+</div>
+<div class="sec">📊 능력치</div>
+<div class="sw"><canvas id="sC" width="220" height="220"></canvas></div>
+<div class="sec">🏅 뱃지 <span style="font-size:10px;color:var(--t3)" id="bC">0/16</span></div>
+<div class="bg" id="bG"></div>
+<div class="sec" style="margin-top:12px">📜 활동</div>
+<div id="tl"></div>
+<div style="margin-top:12px;text-align:center;display:flex;gap:4px;justify-content:center">
+<button class="bt bs" onclick="chNk()" style="font-size:10px">닉네임 변경</button>
+<button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp4');location.reload()}" style="font-size:10px">초기화</button>
+</div>
 </div>
 
 </div>
 
-<!-- FAB -->
-<button class="fab" id="fab" onclick="showWrite()">✏️</button>
+<button class="fab" id="fab" onclick="shW()">✏️</button>
 
-<!-- Nav -->
 <nav>
-  <button class="on" onclick="go(0)"><span>🏠</span>홈</button>
-  <button onclick="go(1)"><span>📂</span>갤러리</button>
-  <button onclick="go(2)"><span>🎮</span>플레이</button>
-  <button onclick="go(3)"><span>👤</span>프로필</button>
+<button class="on" onclick="go(0)"><span>🏠</span>홈</button>
+<button onclick="go(1)"><span>📂</span>갤러리</button>
+<button onclick="go(2)"><span>🎮</span>플레이</button>
+<button onclick="go(3)"><span>📖</span>학습</button>
+<button onclick="go(4)"><span>👤</span>프로필</button>
 </nav>
 
 <script>
-// ===== DATA =====
-const D=JSON.parse(localStorage.getItem('lp3')||'null')||{
-  nick:'',lv:1,xp:0,xpM:500,
-  st:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},
-  bg:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  acts:[],myPosts:[],liked:[],v:3
-};
-const save=()=>localStorage.setItem('lp3',JSON.stringify(D));
+// ===== USER =====
+const U=JSON.parse(localStorage.getItem('lp4')||'null')||{nk:'',lv:1,xp:0,xm:500,st:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},bg:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],ac:[],mp:[],lk:[]};
+const sv=()=>localStorage.setItem('lp4',JSON.stringify(U));
+const BDG=[{i:'🎓',n:'첫수료'},{i:'🔥',n:'3일연속'},{i:'📚',n:'에듀툰10'},{i:'🎬',n:'캐스트10'},{i:'🎮',n:'게임클리어'},{i:'✏️',n:'첫창작'},{i:'🏃',n:'체력왕'},{i:'⭐',n:'Lv10'},{i:'👑',n:'Lv30'},{i:'💎',n:'Lv50'},{i:'🌟',n:'올라운더'},{i:'🏆',n:'TOP10'},{i:'💬',n:'소통왕'},{i:'🎨',n:'아트마스터'},{i:'🧪',n:'과학마스터'},{i:'🌍',n:'탐험가'}];
+function tA(m){if(m<1)return'방금';if(m<60)return m+'분전';if(m<1440)return(m/60|0)+'시간전';const d=m/1440|0;return d<7?d+'일전':(d/7|0)+'주전';}
 
-const BADGES=[
-  {i:'🎓',n:'첫 수료'},{i:'🔥',n:'3일 연속'},{i:'📚',n:'에듀툰 10'},{i:'🎬',n:'캐스트 10'},
-  {i:'🎮',n:'게임 클리어'},{i:'✏️',n:'첫 창작'},{i:'🏃',n:'체력왕'},{i:'⭐',n:'Lv.10'},
-  {i:'👑',n:'Lv.30'},{i:'💎',n:'Lv.50'},{i:'🌟',n:'올라운더'},{i:'🏆',n:'TOP10'},
-  {i:'💬',n:'소통왕'},{i:'🎨',n:'아트마스터'},{i:'🧪',n:'과학마스터'},{i:'🌍',n:'탐험가'}
+// ===== GALLERIES =====
+const GAL=[
+{id:'ai',ic:'🤖',nm:'AI 정보공유',ds:'AI 도구, 프롬프트, 자동화'},
+{id:'dev',ic:'💻',nm:'개발·코딩',ds:'프로그래밍, 웹, 앱개발'},
+{id:'prog',ic:'📦',nm:'프로그램 공유',ds:'유용한 도구, 스크립트'},
+{id:'edu',ic:'📚',nm:'교육·강좌',ds:'학습자료, 튜토리얼'},
+{id:'game',ic:'🎮',nm:'게임',ds:'공략, 추천, 리뷰'},
+{id:'sci',ic:'🔬',nm:'과학·기술',ds:'과학뉴스, 기술트렌드'},
+{id:'free',ic:'💬',nm:'자유게시판',ds:'수다, 잡담, 일상'},
+{id:'qna',ic:'❓',nm:'질문·답변',ds:'뭐든 물어보세요'},
+{id:'create',ic:'🎨',nm:'창작·크리에이터',ds:'작품공유, 피드백'},
+{id:'news',ic:'📰',nm:'뉴스·이슈',ds:'IT/과학/교육 뉴스'},
 ];
-
-// 갤러리 정의
-const GALLERIES=[
-  {id:'ai',icon:'🤖',name:'AI 정보공유',desc:'AI 도구 비교, 프롬프트 팁, 자동화 노하우'},
-  {id:'dev',icon:'💻',name:'개발·코딩',desc:'프로그래밍, 웹개발, 앱개발 정보'},
-  {id:'prog',icon:'📦',name:'프로그램 공유',desc:'유용한 프로그램, 스크립트, 도구 공유'},
-  {id:'edu',icon:'📚',name:'교육·강좌',desc:'학습 자료, 튜토리얼, 온라인 강좌'},
-  {id:'game',icon:'🎮',name:'게임',desc:'게임 공략, 추천, 리뷰'},
-  {id:'science',icon:'🔬',name:'과학·기술',desc:'과학 뉴스, 기술 트렌드, 논문 리뷰'},
-  {id:'free',icon:'💬',name:'자유게시판',desc:'자유롭게 수다, 잡담, 일상'},
-  {id:'qna',icon:'❓',name:'질문·답변',desc:'모르는 거 물어보고 답해주기'},
-];
-
-// 게임
-const GAMES=[
-  {name:'사랑의 하츄핑 대모험',emoji:'💖',desc:'22개 스프라이트 캐릭터, 보스배틀, Web Audio',tag:'플랫포머',url:'games/hatcuping-game.html',apk:'apk/hatcuping-platformer.apk',play:true},
-  {name:'하츄핑 RPG 대모험',emoji:'🗡️',desc:'6챕터 스토리, NPC 대화, 타일맵 탐험',tag:'RPG',url:'games/hatcuping-rpg.html',apk:'apk/hatcuping-rpg.apk',play:true},
-  {name:'수학 퍼즐 마스터',emoji:'🔢',desc:'사칙연산부터 방정식까지 단계별 도전',tag:'퍼즐'},
-  {name:'세계 지리 퀴즈',emoji:'🗺️',desc:'수도, 국기, 랜드마크 퀴즈',tag:'퀴즈'},
-  {name:'역사 타워 디펜스',emoji:'🏰',desc:'역사 영웅으로 적을 막아라',tag:'전략'},
-  {name:'리듬 영어 단어',emoji:'🎵',desc:'리듬게임 + 영어 타이핑',tag:'교육'},
-  {name:'한자 드래곤 RPG',emoji:'🐉',desc:'한자 학습형 RPG',tag:'RPG'},
-  {name:'경제 시뮬레이터',emoji:'📈',desc:'주식·부동산 경영 시뮬',tag:'시뮬'},
-];
-
-// 유틸리티
-const UTILS=[
-  {id:'calc',icon:'🧮',name:'계산기',desc:'공학용 계산기'},
-  {id:'unit',icon:'📏',name:'단위 변환',desc:'길이·무게·온도·속도'},
-  {id:'color',icon:'🎨',name:'색상 피커',desc:'HEX·RGB·HSL 변환'},
-  {id:'qr',icon:'📱',name:'QR 생성기',desc:'텍스트→QR코드'},
-  {id:'json',icon:'📋',name:'JSON 포맷터',desc:'JSON 정리·검증'},
-  {id:'timer',icon:'⏱️',name:'타이머',desc:'스톱워치·카운트다운'},
-  {id:'random',icon:'🎲',name:'랜덤 생성기',desc:'숫자·이름·비밀번호'},
-  {id:'base64',icon:'🔐',name:'Base64 변환',desc:'인코딩·디코딩'},
-];
-
-// 커뮤니티 글 (자연스러운 한국어)
-const POSTS=[
-{id:1,gal:'ai',t:'Claude Code CLI 써본 사람 후기 좀',b:'터미널에서 바로 코딩하는건데 생각보다 좋음\n프롬프트 잘 쓰면 웹앱 하나 뚝딱 나옴\n\n근데 context window 넘어가면 좀 헤매는 느낌\n긴 프로젝트는 CLAUDE.md 파일 써서 맥락 유지하는게 핵심인듯',a:'코드몽키',l:487,c:[{a:'AI덕',t:'맞아 CLAUDE.md 없으면 중간에 까먹음',m:180},{a:'뉴비',t:'설치 어떻게 해요?',m:120},{a:'코드몽키',t:'npm install -g @anthropic-ai/claude-code 끝',m:90}],m:45},
-{id:2,gal:'game',t:'하츄핑 RPG 도서관에서 막히는 분들',b:'낡은 책 NPC 앞에서 멈추는 버그 아님\n아이템 먼저 찾아야됨\n\n숲 챕터 오른쪽 끝에 있음',a:'게임러',l:156,c:[{a:'하츄맘',t:'우리 애도 거기서 30분 헤맴 ㅋㅋ',m:300},{a:'RPG매니아',t:'보스전 패턴도 알려줘요',m:240}],m:120},
-{id:3,gal:'ai',t:'Gemini vs Claude vs GPT 코딩 비교 (직접 테스트)',b:'같은 프롬프트로 투두앱 만들어봄\n\nClaude: 코드 깔끔, 에러처리 좋음, 파일 구조 잘 잡음\nGPT: 기능 다 되는데 코드가 좀 지저분\nGemini: 최신 API 잘 알고 있음, 무료 많이 줌\n\n코딩은 Claude > GPT > Gemini 순인듯\n일반 질문은 Gemini가 편하고',a:'AI비교충',l:312,c:[{a:'로컬러',t:'Ollama로 로컬에서 돌리는것도 괜찮음',m:500},{a:'개발자K',t:'Sonnet이면 충분하지 않나',m:420},{a:'GPT파',t:'o1으로 하면 얘기가 달라짐',m:360}],m:240},
-{id:4,gal:'dev',t:'Playwright 크롤링 vs BeautifulSoup 결론',b:'요즘 사이트 대부분 SPA라서 BS4로는 한계있음\n\nPlaywright: JS 렌더링 후 긁어서 확실\nBS4: 정적 HTML만 가능\n\n속도는 BS4가 10배 빠름\n근데 긁히는게 없으면 의미없으니까\n결론: Playwright 쓰세요\n\npip install playwright\npython -m playwright install\n이 두줄이면 설치 끝',a:'크롤러',l:189,c:[{a:'신입',t:'와 정리 감사합니다',m:180},{a:'데이터맨',t:'Selenium이랑 비교하면?',m:120},{a:'크롤러',t:'모든 면에서 Playwright가 나음',m:60}],m:300},
-{id:5,gal:'prog',t:'GitHub Pages로 무료 웹앱 배포하는 법',b:'1. GitHub 레포 만들기\n2. index.html 푸시\n3. Settings > Pages > main 브랜치 선택\n4. 끝. https://유저명.github.io/레포명/ 으로 접속\n\nPWA 만들려면 manifest.json이랑 sw.js 추가\n그러면 모바일에서 앱처럼 설치 가능\n\n서버 비용 0원임',a:'무료파',l:267,c:[{a:'웹초보',t:'커스텀 도메인도 되나요?',m:600},{a:'무료파',t:'CNAME 파일 만들고 DNS 설정하면 됨',m:540}],m:480},
-{id:6,gal:'edu',t:'[강좌] HTML 하나로 웹앱 만드는 구조',b:'빌드도구 없이 index.html 하나에 다 넣는 방법\n\n1. <style> 태그에 CSS 전부\n2. <script> 태그에 JS 전부\n3. localStorage로 데이터 저장\n4. 외부 라이브러리는 CDN으로\n\n장점: 배포가 개쉬움. 파일 하나만 올리면 끝\n단점: 파일이 좀 커짐\n\n근데 100KB 이하면 문제없음',a:'풀스택',l:201,c:[{a:'리액터',t:'React 안쓰면 유지보수가...',m:420},{a:'풀스택',t:'소규모 프로젝트는 이게 훨씬 빠름',m:360}],m:720},
-{id:7,gal:'free',t:'여기 레벨 시스템 중독성 있네',b:'에듀툰 읽고 게임하면 XP 올라가는거\n생각보다 재밌음 ㅋㅋ\n\n육각형 능력치 그래프 예쁘게 만들고 싶어서\n과학 콘텐츠만 20개 읽음',a:'레벨충',l:178,c:[{a:'50렙',t:'ㅊㅋ 계속 하다보면 올라감',m:300}],m:180},
-{id:8,gal:'ai',t:'Python + Outlook COM 자동화 삽질기',b:'회사 메일 자동화 하려고 win32com 썼는데\n\n핵심 삽질 포인트:\n1. pythoncom.CoInitialize() 안하면 Flask에서 안됨\n2. GetDefaultFolder(6)이 받은편지함\n3. 첨부파일 텍스트 추출은 pdfplumber\n4. 답장은 ReplyAll() 메서드\n\n1번 때문에 3시간 날림 ㅋㅋ',a:'자동화맨',l:234,c:[{a:'직장인',t:'1번 ㄹㅇ ㅋㅋ 나도 당했음',m:1440},{a:'파이썬러',t:'좋은 정리 감사',m:1200}],m:1440},
-{id:9,gal:'qna',t:'Cordova로 HTML을 APK로 만드는법?',b:'웹 게임을 안드로이드 앱으로 바꾸고 싶은데\nCordova라는게 있다길래\n\n설치부터 빌드까지 순서가 어떻게 되나요?\nJava도 필요한가요?',a:'앱만들고싶',l:67,c:[{a:'모바일러',t:'Java JDK 17 + Android SDK + Gradle 8.5 + Cordova\n설치 순서대로 하면 됨\ncordova create app\ncordova platform add android\ncordova build android\n이러면 APK 나옴',m:480},{a:'앱만들고싶',t:'감사합니다!! 해볼게요',m:420}],m:720},
-{id:10,gal:'dev',t:'[공유] python-docx로 워드 자동생성',b:'보고서 매번 손으로 만들기 귀찮아서\npython-docx로 자동화함\n\nfrom docx import Document\ndoc = Document()\ndoc.add_heading("제목", 0)\ndoc.add_paragraph("내용")\ndoc.save("output.docx")\n\n이게 기본이고\n스타일, 표, 이미지도 넣을 수 있음\npython-pptx 쓰면 PPT도 가능',a:'자동화덕',l:145,c:[{a:'직장인B',t:'엑셀은 openpyxl 쓰면 되나요?',m:360},{a:'자동화덕',t:'네 맞아요 openpyxl이 제일 편함',m:300}],m:600},
-{id:11,gal:'science',t:'WiFi CSI로 동작인식 되는 원리',b:'ESP32 같은 칩에서 WiFi 신호의 채널 상태 정보(CSI)를 추출하면\n사람이 움직일때 신호 패턴이 변함\n\n이걸 머신러닝으로 분류하면\n스쿼트인지 런지인지 플랭크인지 구분 가능\n\nSenseFi 프레임워크 참고\n카메라 없이 동작인식 가능해서 프라이버시 좋음',a:'연구원',l:98,c:[{a:'IT덕',t:'이거 실제로 정확도 어느정도?',m:720},{a:'연구원',t:'잘 튜닝하면 90% 이상 나옴',m:660}],m:1440},
-{id:12,gal:'prog',t:'Leaflet.js로 지도앱 만드는 법 간단정리',b:'구글맵 API는 유료인데 Leaflet은 무료임\n\nL.map("div").setView([37.5,127],13)\nL.tileLayer(타일URL).addTo(map)\nL.marker([37.5,127]).addTo(map)\n\n이 세줄이면 지도 나옴\n\nOSRM API 쓰면 경로 계산도 무료\nNominatim으로 주소→좌표 변환도 무료\n\n전부 무료로 지도앱 만들 수 있음',a:'지도쟁이',l:176,c:[{a:'웹개발',t:'Leaflet 진짜 좋음 성능도 괜찮고',m:480}],m:960},
-{id:13,gal:'ai',t:'MCP(Model Context Protocol) 설명',b:'Claude가 외부 도구랑 연동되는 프로토콜인데\n\n예를 들면\n- Gmail MCP → 메일 읽기/보내기\n- GitHub MCP → 코드 관리\n- Outlook MCP → 메일 자동화\n\n설정은 claude_desktop_config.json에서 하면 됨\n좀 복잡하긴 한데 한번 세팅해두면 개편함',a:'MCP유저',l:156,c:[{a:'얼리어답터',t:'카카오톡이랑도 연동 가능?',m:240},{a:'MCP유저',t:'카카오 REST API MCP 서버 만들면 가능은 함',m:180}],m:360},
-{id:14,gal:'free',t:'요즘 AI로 뭐 만들고 계세요?',b:'저는 업무 자동화 툴 만들어서 쓰고 있는데\n다른분들은 뭐 만드시는지 궁금\n\n공유해주세요!',a:'궁금이',l:89,c:[{a:'게임러',t:'아이한테 줄 교육용 게임 만들었어요',m:480},{a:'직장인',t:'메일 분류 자동화',m:360},{a:'학생',t:'영어 단어장 앱 만드는중',m:300}],m:120},
-{id:15,gal:'edu',t:'[강좌] Canvas API로 게임 만들기 기초',b:'HTML5 Canvas로 간단한 게임 만드는 법\n\nconst ctx = canvas.getContext("2d")\n\n1. 배경 그리기: ctx.fillRect()\n2. 캐릭터: 스프라이트 이미지 or 도형\n3. 게임루프: requestAnimationFrame()\n4. 입력: addEventListener("keydown")\n5. 충돌: AABB 판정\n\n이 5개만 알면 기본적인 게임은 만들 수 있음\n번들러 필요없고 HTML 하나면 됨',a:'게임개발',l:213,c:[{a:'코린이',t:'이거 보고 첫 게임 만들었어요!',m:720}],m:1080},
-];
-
-// ===== HELPERS =====
-function tAgo(mins){
-  if(mins<1)return '방금';if(mins<60)return mins+'분 전';if(mins<1440)return Math.floor(mins/60)+'시간 전';
-  const d=Math.floor(mins/1440);return d<7?d+'일 전':Math.floor(d/7)+'주 전';
-}
-
-// ===== NAV =====
-const pgs=['pgHome','pgGal','pgPlay','pgProf'];
-let cur=0;
-function go(i){
-  pgs.forEach((p,j)=>{const e=document.getElementById(p);e.classList.toggle('active',i===j);});
-  document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('on',i===j));
-  cur=i;
-  document.getElementById('fab').classList.toggle('show',i===0||i===1);
-}
-
-// ===== NICKNAME =====
-function checkNick(){if(!D.nick)document.getElementById('nickMo').style.display='flex';}
-function setNick(){const n=document.getElementById('nickIn').value.trim();if(!n)return;D.nick=n;save();document.getElementById('nickMo').style.display='none';updNames();toast('환영합니다, '+n+'님!');}
-function changeNick(){openMo(`<div class="mo-bar"></div><div class="mo-t">닉네임 변경</div><input class="fi" id="newNick" value="${D.nick}"><div style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px"><button class="btn btn-s" onclick="closeMo()">취소</button><button class="btn btn-p" onclick="const n=document.getElementById('newNick').value.trim();if(n){D.nick=n;save();closeMo();updNames();toast('변경 완료!')}">확인</button></div>`);}
-function updNames(){
-  const n=D.nick||'탐험가';
-  document.getElementById('homeLv').textContent='Lv.'+D.lv+' '+n;
-  document.getElementById('profName').textContent=n;
-  document.getElementById('profTitle').textContent='Lv.'+D.lv+' 탐험가';
-}
-
-// ===== RENDER HOME =====
-function renderHome(){
-  const hot=POSTS.concat(D.myPosts).sort((a,b)=>(b.l||0)-(a.l||0)).slice(0,8);
-  document.getElementById('hotPosts').innerHTML=hot.map(p=>postHTML(p)).join('');
-  const recent=POSTS.concat(D.myPosts).sort((a,b)=>(a.m||0)-(b.m||0)).slice(0,6);
-  document.getElementById('recentPosts').innerHTML=recent.map(p=>postHTML(p)).join('');
-}
-
-function postHTML(p){
-  const g=GALLERIES.find(g=>g.id===p.gal);
-  return `<div class="post" onclick='showPost(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
-    <div class="post-cat">[${g?g.name:p.gal}]</div>
-    <div class="post-t">${p.t}</div>
-    <div class="post-m"><span>👤 ${p.a}</span><span>❤️ ${p.l||0}</span><span>💬 ${(p.c||[]).length}</span><span>${tAgo(p.m||0)}</span></div>
-  </div>`;
-}
-
-// ===== GALLERY =====
-function renderGalList(){
-  document.getElementById('galGrid').innerHTML=GALLERIES.map(g=>{
-    const cnt=POSTS.filter(p=>p.gal===g.id).length;
-    return `<div class="gal-item" onclick="openGal('${g.id}')"><div class="gi">${g.icon}</div><div class="gn">${g.name}</div><div class="gc">${cnt}개 글</div></div>`;
-  }).join('');
-}
-
-function openGal(id){
-  const g=GALLERIES.find(x=>x.id===id);
-  document.getElementById('galGrid').style.display='none';
-  document.getElementById('galView').style.display='block';
-  document.getElementById('galTitle').textContent=g.icon+' '+g.name;
-  const posts=POSTS.concat(D.myPosts).filter(p=>p.gal===id).sort((a,b)=>(a.m||0)-(b.m||0));
-  document.getElementById('galPosts').innerHTML=posts.length?posts.map(p=>postHTML(p)).join(''):'<div style="text-align:center;padding:40px;color:var(--text3)">아직 글이 없습니다. 첫 글을 써보세요!</div>';
-}
-
-function backToGalList(){
-  document.getElementById('galGrid').style.display='';
-  document.getElementById('galView').style.display='none';
-}
-
-// ===== POST DETAIL =====
-function showPost(p){
-  const cmts=(p.c||[]).map(c=>`<div class="cmt"><div class="cmt-av">😊</div><div><div class="cmt-name">${c.a}</div><div class="cmt-txt">${c.t}</div><div class="cmt-time">${tAgo(c.m||0)}</div></div></div>`).join('');
-  const g=GALLERIES.find(x=>x.id===p.gal);
-  openMo(`<div class="mo-bar"></div>
-    <div class="post-cat">[${g?g.name:p.gal}]</div>
-    <div class="mo-t">${p.t}</div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">👤 ${p.a} · ${tAgo(p.m||0)} · ❤️ ${p.l||0} · 💬 ${(p.c||[]).length}</div>
-    <div class="post-body">${p.b||''}</div>
-    <div style="border-top:1px solid rgba(139,92,246,.08);padding-top:10px;margin-top:10px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:6px">💬 댓글 ${(p.c||[]).length}</div>
-      ${cmts||'<div style="color:var(--text3);font-size:12px;padding:10px 0">아직 댓글이 없습니다</div>'}
-    </div>
-    <div style="display:flex;gap:6px;margin-top:10px">
-      <input class="fi" id="cmtIn" placeholder="댓글..." style="flex:1;padding:8px">
-      <button class="btn btn-p" style="padding:8px 14px" onclick="addCmt()">등록</button>
-    </div>`);
-  gainXP(5,'글 읽기');
-}
-function addCmt(){const t=document.getElementById('cmtIn').value.trim();if(!t)return;gainXP(5,'댓글');toast('💬 댓글 등록! +5 XP');closeMo();}
 
 // ===== GAMES =====
-function renderGames(){
-  document.getElementById('gameGrid').innerHTML=GAMES.map(g=>`
-    <div class="game-card" onclick="${g.url?`openGame('${g.url}','${g.name}','${g.apk||''}')`:`toast('준비중입니다!')`}" style="background:${g.play?'var(--bg3)':'var(--bg2)'}">
-      <div class="game-thumb" style="background:${g.play?'linear-gradient(135deg,#1a1a3a,#2a2a5a)':'var(--bg3)'}">${g.play?'<div class="play-badge">▶ PLAY</div>':''}
-        <span style="font-size:36px">${g.emoji}</span></div>
-      <div class="game-info"><div class="game-name">${g.name}</div><div class="game-meta">${g.tag} · ${g.desc.slice(0,25)}...</div></div>
-    </div>`).join('');
-}
-function openGame(url,name,apk){
-  document.getElementById('gameT').textContent=name;
-  document.getElementById('gameF').src=url;
-  const a=document.getElementById('gameApk');
-  if(apk){a.href=apk;a.style.display='';}else a.style.display='none';
-  document.getElementById('gameO').classList.add('show');
-  gainXP(15,'게임: '+name,'action');
-}
-function closeGame(){document.getElementById('gameO').classList.remove('show');document.getElementById('gameF').src='';}
+const GMS=[
+{nm:'사랑의 하츄핑 대모험',em:'💖',ds:'22개 스프라이트, 보스배틀, Web Audio',tg:'플랫포머',u:'games/hatcuping-game.html',ak:'apk/hatcuping-platformer.apk',p:1},
+{nm:'하츄핑 RPG 대모험',em:'🗡️',ds:'6챕터, NPC대화, 타일맵 탐험',tg:'RPG',u:'games/hatcuping-rpg.html',ak:'apk/hatcuping-rpg.apk',p:1},
+{nm:'2048 퍼즐',em:'🔢',ds:'숫자 합치기 중독성 퍼즐',tg:'퍼즐',eu:'https://play2048.co/',p:1},
+{nm:'Wordle 영어단어',em:'📝',ds:'5글자 영단어 맞추기',tg:'교육',eu:'https://wordlewebsite.com/',p:1},
+{nm:'GeoGuessr',em:'🌍',ds:'구글 스트리트뷰로 위치 추측',tg:'퀴즈',eu:'https://www.geoguessr.com/'},
+{nm:'체스',em:'♟️',ds:'온라인 체스 대전',tg:'전략',eu:'https://www.chess.com/play/online'},
+{nm:'타이핑 연습',em:'⌨️',ds:'타자 속도 측정 & 연습',tg:'교육',eu:'https://www.keybr.com/'},
+{nm:'Scratch 코딩',em:'🐱',ds:'블록 코딩으로 게임 만들기',tg:'교육',eu:'https://scratch.mit.edu/projects/editor/'},
+];
 
 // ===== UTILS =====
-function renderUtils(){
-  document.getElementById('utilGrid').innerHTML=UTILS.map(u=>`
-    <div class="util-card" onclick="openUtil('${u.id}')"><div class="ui">${u.icon}</div><div class="un">${u.name}</div><div class="ud">${u.desc}</div></div>`).join('');
+const UTS=[
+{id:'calc',ic:'🧮',nm:'계산기',ds:'공학용'},{id:'unit',ic:'📏',nm:'단위변환',ds:'길이·무게·온도'},
+{id:'color',ic:'🎨',nm:'색상피커',ds:'HEX·RGB·HSL'},{id:'qr',ic:'📱',nm:'QR생성',ds:'텍스트→QR'},
+{id:'json',ic:'📋',nm:'JSON정리',ds:'포맷·검증'},{id:'timer',ic:'⏱️',nm:'스톱워치',ds:'타이머'},
+{id:'rand',ic:'🎲',nm:'랜덤생성',ds:'숫자·비번'},{id:'b64',ic:'🔐',nm:'Base64',ds:'인코딩'},
+{id:'dday',ic:'📅',nm:'D-Day',ds:'날짜 계산'},{id:'bmi',ic:'🏋️',nm:'BMI 계산',ds:'체질량지수'},
+{id:'loan',ic:'🏦',nm:'대출계산',ds:'이자·원리금'},{id:'hash',ic:'#️⃣',nm:'해시생성',ds:'MD5·SHA'},
+];
+
+// ===== SIMULATIONS =====
+const SIMS=[
+{nm:'에너지 스케이트 파크',ic:'⛸️',ds:'위치에너지↔운동에너지 전환 관찰',u:'https://phet.colorado.edu/sims/html/energy-skate-park/latest/energy-skate-park_ko.html'},
+{nm:'중력과 궤도',ic:'🌍',ds:'행성 궤도와 중력의 관계',u:'https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_ko.html'},
+{nm:'회로 만들기: DC',ic:'🔋',ds:'전기 회로 조립 실험',u:'https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_ko.html'},
+{nm:'빛의 굴절',ic:'🔦',ds:'빛이 매질을 통과할 때',u:'https://phet.colorado.edu/sims/html/bending-light/latest/bending-light_ko.html'},
+{nm:'파동',ic:'🌊',ds:'파동의 간섭과 회절',u:'https://phet.colorado.edu/sims/html/wave-interference/latest/wave-interference_ko.html'},
+{nm:'원자 모형',ic:'⚛️',ds:'보어 모형부터 현대 모형까지',u:'https://phet.colorado.edu/sims/html/build-an-atom/latest/build-an-atom_ko.html'},
+{nm:'분수 만들기',ic:'🔢',ds:'분수 개념 시각적 학습',u:'https://phet.colorado.edu/sims/html/build-a-fraction/latest/build-a-fraction_ko.html'},
+{nm:'자연선택',ic:'🦎',ds:'자연선택과 진화 시뮬레이션',u:'https://phet.colorado.edu/sims/html/natural-selection/latest/natural-selection_ko.html'},
+{nm:'밀도',ic:'🧊',ds:'밀도의 개념과 측정',u:'https://phet.colorado.edu/sims/html/density/latest/density_ko.html'},
+{nm:'pH 측정',ic:'🧪',ds:'산성·염기성 측정 실험',u:'https://phet.colorado.edu/sims/html/ph-scale/latest/ph-scale_ko.html'},
+];
+
+// ===== EDUCATION SITES =====
+const EDUS=[
+{nm:'K-MOOC',ic:'🎓',ds:'한국형 무크 - 3,000+ 대학 강좌',u:'https://www.kmooc.kr/',tg:['강좌','대학','무료']},
+{nm:'KOCW',ic:'🏫',ds:'20,000+ 대학 공개강의',u:'https://www.kocw.net/',tg:['강좌','대학']},
+{nm:'생활코딩',ic:'💻',ds:'코딩 입문 무료 강좌 (HTML/CSS/JS/Python)',u:'https://opentutorials.org/',tg:['코딩','무료']},
+{nm:'노마드코더',ic:'🌴',ds:'클론코딩으로 배우는 실전 개발',u:'https://nomadcoders.co/',tg:['코딩','실전']},
+{nm:'freeCodeCamp',ic:'🏕️',ds:'무료 풀스택 개발 커리큘럼 (영어)',u:'https://www.freecodecamp.org/',tg:['코딩','영어','무료']},
+{nm:'Codecademy',ic:'📖',ds:'인터랙티브 코딩 학습',u:'https://www.codecademy.com/',tg:['코딩','인터랙티브']},
+{nm:'Khan Academy',ic:'🎯',ds:'수학·과학·프로그래밍 무료 강좌',u:'https://ko.khanacademy.org/',tg:['수학','과학','무료']},
+{nm:'MDN Web Docs',ic:'📄',ds:'웹 기술 공식 문서 (Mozilla)',u:'https://developer.mozilla.org/ko/',tg:['웹개발','문서']},
+{nm:'W3Schools',ic:'🌐',ds:'웹개발 튜토리얼 & 레퍼런스',u:'https://www.w3schools.com/',tg:['웹개발','튜토리얼']},
+{nm:'점프 투 파이썬',ic:'🐍',ds:'파이썬 무료 교재 (WikiDocs)',u:'https://wikidocs.net/book/1',tg:['파이썬','교재','무료']},
+{nm:'모던 JavaScript 튜토리얼',ic:'📜',ds:'JS 기초~고급 한국어 번역본',u:'https://ko.javascript.info/',tg:['자바스크립트','튜토리얼']},
+{nm:'인프런',ic:'🎬',ds:'IT/프로그래밍 강좌 플랫폼 (무료多)',u:'https://www.inflearn.com/',tg:['강좌','IT']},
+{nm:'EBS 이솦',ic:'📺',ds:'AI·소프트웨어·코딩 교육 (EBS)',u:'https://www.ebssw.kr/',tg:['AI','코딩','EBS']},
+{nm:'PhET 시뮬레이션',ic:'🔬',ds:'무료 과학·수학 인터랙티브 시뮬레이션',u:'https://phet.colorado.edu/ko/',tg:['과학','수학','시뮬레이션']},
+{nm:'GeoGebra',ic:'📐',ds:'수학 시각화 & 계산 도구',u:'https://www.geogebra.org/',tg:['수학','시각화']},
+{nm:'코드잇',ic:'🚀',ds:'5분 단위 코딩 강의',u:'https://www.codeit.kr/',tg:['코딩','5분']},
+];
+
+// ===== CHANNELS =====
+const CHS=[
+{nm:'1분과학',ic:'🔬',ds:'88만+ 구독 · 짧고 임팩트 있는 과학 교양',u:'https://www.youtube.com/@1minsci',ct:'과학'},
+{nm:'안될과학',ic:'⚗️',ds:'과학 실험 & 괴짜 과학 콘텐츠',u:'https://www.youtube.com/@unrealscience',ct:'과학'},
+{nm:'과학쿠키',ic:'🍪',ds:'과학 뉴스 & 논문 리뷰',u:'https://www.youtube.com/@sciencecookies',ct:'과학'},
+{nm:'코스모스웍',ic:'🌌',ds:'우주·천문학 전문 채널',u:'https://www.youtube.com/@cosmoswork',ct:'과학'},
+{nm:'생활코딩',ic:'💻',ds:'코딩 입문자를 위한 무료 강좌',u:'https://www.youtube.com/@coohde',ct:'코딩'},
+{nm:'노마드코더',ic:'🌴',ds:'50만+ 구독 · 실전 코딩 & IT트렌드',u:'https://www.youtube.com/@nomadcoders',ct:'코딩'},
+{nm:'조코딩',ic:'🧑‍💻',ds:'쉬운 코딩 & AI 활용법',u:'https://www.youtube.com/@jocoding',ct:'코딩'},
+{nm:'드림코딩',ic:'🦄',ds:'프론트엔드 개발 전문',u:'https://www.youtube.com/@dream-coding',ct:'코딩'},
+{nm:'나도코딩',ic:'🐶',ds:'파이썬 기초부터 실전까지',u:'https://www.youtube.com/@nadocoding',ct:'코딩'},
+{nm:'코딩알려주는누나',ic:'👩‍🏫',ds:'친절한 코딩 입문 강좌',u:'https://www.youtube.com/@codingnoona',ct:'코딩'},
+{nm:'역사맛집',ic:'🏯',ds:'맛있는 역사 콘텐츠',u:'https://www.youtube.com/@historyfood',ct:'역사'},
+{nm:'별별역사',ic:'⭐',ds:'세계사 & 한국사 이야기',u:'https://www.youtube.com/@byulbyulhistory',ct:'역사'},
+{nm:'Kurzgesagt 한국어',ic:'🐤',ds:'세계적 과학 애니메이션 채널',u:'https://www.youtube.com/@kuaboreum',ct:'과학'},
+{nm:'3Blue1Brown',ic:'🔵',ds:'수학 시각화의 성지 (영어)',u:'https://www.youtube.com/@3blue1brown',ct:'수학'},
+{nm:'Crash Course',ic:'🎓',ds:'모든 과목 속성 강좌 (영어)',u:'https://www.youtube.com/@crashcourse',ct:'종합'},
+{nm:'교양만두',ic:'🥟',ds:'청소년 선정 교양 채널',u:'https://www.youtube.com/@gyoyang_mandu',ct:'교양'},
+];
+
+// ===== AI TOOLS =====
+const AIS=[
+{nm:'Claude',ic:'🟣',ds:'Anthropic의 AI. 코딩·분석·글쓰기에 강함. Claude Code CLI로 터미널 코딩 가능',u:'https://claude.ai',pr:'무료/Pro $20',tg:['코딩','분석','안전']},
+{nm:'ChatGPT',ic:'🟢',ds:'OpenAI의 AI. 범용성 최고. GPT-4o/o1 모델',u:'https://chat.openai.com',pr:'무료/Plus $20',tg:['범용','이미지','플러그인']},
+{nm:'Gemini',ic:'🔵',ds:'Google AI. 검색연동, 이미지이해, 무료 많이줌',u:'https://gemini.google.com',pr:'무료/Advanced $20',tg:['검색','무료','구글연동']},
+{nm:'GitHub Copilot',ic:'🤖',ds:'VS Code 코딩 AI 어시스턴트',u:'https://github.com/features/copilot',pr:'무료(학생)/Pro $10',tg:['코딩','IDE','자동완성']},
+{nm:'Ollama',ic:'🦙',ds:'로컬에서 AI 모델 실행. 인터넷 불필요',u:'https://ollama.com',pr:'완전무료',tg:['로컬','오프라인','프라이버시']},
+{nm:'Perplexity',ic:'🔍',ds:'AI 기반 검색엔진. 출처 표시',u:'https://www.perplexity.ai',pr:'무료/Pro $20',tg:['검색','출처','리서치']},
+{nm:'Midjourney',ic:'🎨',ds:'AI 이미지 생성. 최고 퀄리티',u:'https://www.midjourney.com',pr:'$10~/월',tg:['이미지','아트','디자인']},
+{nm:'Stable Diffusion',ic:'🖼️',ds:'오픈소스 이미지 생성. 로컬 실행 가능',u:'https://stability.ai',pr:'무료(로컬)',tg:['이미지','오픈소스','로컬']},
+];
+
+// ===== PROGRAMS =====
+const PRGS=[
+{nm:'VS Code',ic:'💙',ds:'마이크로소프트 무료 코드 에디터. 확장 생태계',u:'https://code.visualstudio.com',ct:'개발'},
+{nm:'Git',ic:'🌿',ds:'버전 관리 시스템. 필수 개발 도구',u:'https://git-scm.com',ct:'개발'},
+{nm:'Node.js',ic:'💚',ds:'서버사이드 자바스크립트 런타임',u:'https://nodejs.org/ko',ct:'개발'},
+{nm:'Python',ic:'🐍',ds:'범용 프로그래밍 언어. AI/데이터/자동화',u:'https://www.python.org',ct:'개발'},
+{nm:'OBS Studio',ic:'🎥',ds:'무료 방송/녹화 프로그램',u:'https://obsproject.com',ct:'영상'},
+{nm:'DaVinci Resolve',ic:'🎬',ds:'무료 전문 영상편집 (할리우드급)',u:'https://www.blackmagicdesign.com/products/davinciresolve',ct:'영상'},
+{nm:'GIMP',ic:'🖌️',ds:'무료 포토샵 대안. 이미지 편집',u:'https://www.gimp.org',ct:'디자인'},
+{nm:'Blender',ic:'🧊',ds:'무료 3D 모델링/애니메이션/렌더링',u:'https://www.blender.org',ct:'디자인'},
+{nm:'Figma',ic:'🎨',ds:'UI/UX 디자인 협업 도구',u:'https://www.figma.com',ct:'디자인'},
+{nm:'Notion',ic:'📓',ds:'올인원 메모/프로젝트 관리',u:'https://www.notion.so',ct:'생산성'},
+{nm:'Obsidian',ic:'💎',ds:'마크다운 기반 지식 관리',u:'https://obsidian.md',ct:'생산성'},
+{nm:'7-Zip',ic:'📦',ds:'무료 파일 압축/해제',u:'https://www.7-zip.org',ct:'유틸'},
+];
+
+// ===== POSTS =====
+const P=[
+{id:1,g:'ai',t:'Claude Code로 웹앱 만든 후기 (진짜 코드 한줄도 안침)',b:'터미널에서 "골프장 검색앱 만들어줘" 쳤더니\nLeaflet 지도 연동, OSRM 경로계산, 필터링까지 다 해줌\n\n근데 프롬프트를 구체적으로 써야됨\n"Leaflet.js 지도에 마커 찍고 OSRM으로 이동시간 계산" 이런식\n\n막연하게 쓰면 퀄 떨어짐',a:'코딩입문자',l:487,c:[{a:'개발K',t:'프롬프트 엔지니어링이 핵심 ㅋ',m:120},{a:'뉴비',t:'와 이거 보고 도전해봐야겠다',m:60}],m:45},
+{id:2,g:'game',t:'하츄핑 RPG 도서관 챕터 공략',b:'낡은 책 NPC 앞에서 멈추는거 버그 아님\n아이템 먼저 찾아야됨\n숲 챕터 오른쪽 끝에 있음\n\nAPK로 모바일에서 하는게 더 편함\n터치컨트롤 의외로 잘됨',a:'게임러',l:156,c:[{a:'하츄맘',t:'우리애도 30분 헤맴ㅋㅋ',m:300}],m:120},
+{id:3,g:'ai',t:'Claude vs GPT vs Gemini 코딩 실전비교',b:'같은 프롬프트로 투두앱 만들어봄\n\nClaude: 코드 깔끔, 에러처리 좋음\nGPT-4o: 기능은 되는데 좀 지저분\nGemini: 최신 API 잘 알고있음\n\n코딩은 Claude > GPT > Gemini\n일반질문은 Gemini가 편함\n검색은 Perplexity가 넘사',a:'AI양다리',l:312,c:[{a:'로컬러',t:'Ollama도 괜찮음',m:500},{a:'GPT파',t:'o1으로 하면 얘기 달라짐',m:360}],m:240},
+{id:4,g:'dev',t:'Playwright로 크롤링하는법 (BS4 비교)',b:'요즘 사이트 대부분 SPA라 BS4로 한계\n\nPlaywright: JS렌더링 후 긁어서 확실\nBS4: 정적 HTML만 가능, 대신 10배 빠름\n\npip install playwright\npython -m playwright install\n이 두줄이면 끝\n\n근데 일부 사이트는 봇 차단해서 안됨 ㅋ',a:'크롤러',l:189,c:[{a:'신입',t:'정리 감사합니다',m:180},{a:'데이터맨',t:'Selenium이랑 비교하면?',m:120},{a:'크롤러',t:'모든면에서 Playwright 나음',m:60}],m:300},
+{id:5,g:'prog',t:'GitHub Pages 무료 배포 완전정복',b:'1. GitHub 레포 만들기\n2. index.html push\n3. Settings > Pages > main 선택\n4. 끝. https://유저명.github.io/레포명/\n\nPWA 만들려면 manifest.json + sw.js 추가\n모바일에서 앱처럼 설치됨\n서버비 0원',a:'무료파',l:267,c:[{a:'웹초보',t:'커스텀 도메인도 됨?',m:600},{a:'무료파',t:'CNAME 파일 + DNS 설정',m:540}],m:480},
+{id:6,g:'edu',t:'[강좌] HTML 하나로 웹앱 만드는 구조',b:'빌드도구 없이 index.html 하나에 다 넣기\n\n1. <style>에 CSS 전부\n2. <script>에 JS 전부\n3. localStorage로 데이터\n4. CDN으로 외부 라이브러리\n\n장점: 배포 개쉬움. 파일 하나 올리면 끝\n단점: 파일 좀 커짐\n100KB 이하면 문제없음',a:'풀스택',l:201,c:[{a:'리액터',t:'유지보수가...',m:420},{a:'풀스택',t:'소규모는 이게 훨씬 빠름',m:360}],m:720},
+{id:7,g:'free',t:'여기 레벨 시스템 중독성 있네',b:'에듀툰 읽고 게임하면 XP 올라가는거\n생각보다 재밌음ㅋㅋ\n\n능력치 그래프 예쁘게 만들려고\n과학콘텐츠만 20개 읽음',a:'레벨충',l:178,c:[{a:'50렙',t:'ㅊㅋ 계속하면 올라감',m:300}],m:180},
+{id:8,g:'ai',t:'Python Outlook COM 자동화 삽질기',b:'메일 자동화 하려고 win32com 썼는데\n\n핵심 삽질:\n1. pythoncom.CoInitialize() 안하면 Flask에서 안됨\n2. GetDefaultFolder(6) = 받은편지함\n3. 첨부파일 추출은 pdfplumber\n4. 답장은 ReplyAll()\n\n1번 때문에 3시간 날림ㅋ',a:'자동화맨',l:234,c:[{a:'직장인',t:'1번 ㄹㅇ 나도 당함',m:1440}],m:1440},
+{id:9,g:'qna',t:'Cordova로 HTML→APK 만드는법?',b:'웹게임을 APK로 바꾸고싶은데\n설치부터 빌드까지 순서가 어떻게?',a:'앱만들고싶',l:67,c:[{a:'모바일러',t:'Java JDK 17 + Android SDK + Gradle + Cordova\ncordova create app\ncordova platform add android\ncordova build android\n이러면 APK 나옴',m:480}],m:720},
+{id:10,g:'dev',t:'python-docx/pptx로 문서 자동생성',b:'보고서 매번 손으로 귀찮아서 자동화함\n\nfrom docx import Document\ndoc = Document()\ndoc.add_heading("제목",0)\ndoc.save("out.docx")\n\n표, 이미지도 됨\npython-pptx 쓰면 PPT도 가능\nopenpyxl로 엑셀도',a:'자동화덕',l:145,c:[{a:'직장인B',t:'엑셀은 openpyxl?',m:360},{a:'자동화덕',t:'네 제일 편함',m:300}],m:600},
+{id:11,g:'sci',t:'WiFi CSI로 동작인식 되는 원리',b:'ESP32에서 WiFi 채널상태정보(CSI) 추출하면\n사람 움직일때 신호패턴 변함\n\n머신러닝으로 분류 → 스쿼트/런지/플랭크 구분\nSenseFi 프레임워크 참고\n카메라 없이 동작인식 → 프라이버시 좋음\n잘 튜닝하면 90%+',a:'연구원',l:98,c:[],m:1440},
+{id:12,g:'prog',t:'Leaflet.js 무료 지도앱 만들기',b:'구글맵API 유료인데 Leaflet은 무료\n\nL.map("div").setView([37.5,127],13)\nL.tileLayer(URL).addTo(map)\nL.marker([37.5,127]).addTo(map)\n\n세줄이면 지도 나옴\nOSRM=경로계산, Nominatim=주소변환 다 무료',a:'지도쟁이',l:176,c:[],m:960},
+{id:13,g:'ai',t:'MCP(Model Context Protocol) 설명',b:'Claude가 외부 도구랑 연동되는 프로토콜\n\n예: Gmail MCP → 메일 읽기/보내기\nGitHub MCP → 코드 관리\n\nclaude_desktop_config.json에서 설정\n복잡하긴 한데 한번 해두면 개편함',a:'MCP유저',l:156,c:[{a:'얼리',t:'카톡이랑도 됨?',m:240}],m:360},
+{id:14,g:'edu',t:'Canvas API 게임 만들기 기초 5단계',b:'HTML5 Canvas로 게임 만드는법\n\n1. ctx.fillRect() 배경\n2. 스프라이트 or 도형 캐릭터\n3. requestAnimationFrame() 루프\n4. addEventListener("keydown") 입력\n5. AABB 충돌판정\n\n이 5개면 기본 게임 가능\n번들러 필요없음 HTML 하나면 됨',a:'게임개발',l:213,c:[{a:'코린이',t:'이거 보고 첫게임 만들었어요!',m:720}],m:1080},
+{id:15,g:'news',t:'PhET 시뮬레이션 한국어 지원 확대',b:'콜로라도대학의 PhET 과학 시뮬레이션이\n한국어 버전을 대폭 늘렸다고\n\n물리, 화학, 생물, 수학 등 125개+ 시뮬\n전부 무료, 브라우저에서 바로 실행\n플레이존 > 과학 시뮬레이션에서 바로 해볼수있음',a:'과학기자',l:134,c:[],m:200},
+{id:16,g:'create',t:'에듀툰 그리는데 추천 도구',b:'무료로 교육만화 그리는법\n\n1. Canva - 템플릿 많음\n2. 메디방페인트 - 무료 만화 전문\n3. Krita - 무료 포토샵급\n4. Figma - 벡터 일러스트\n\n그림 못그려도 Canva 템플릿이면 충분',a:'아트퀸',l:89,c:[],m:400},
+{id:17,g:'free',t:'요즘 AI로 뭐 만들고 계세요?',b:'저는 업무자동화 도구 만들어서 쓰는데\n다른분들은? 공유해주세요!',a:'궁금이',l:89,c:[{a:'게임러',t:'교육용 게임 만들었어요',m:480},{a:'직장인',t:'메일 분류 자동화',m:360},{a:'학생',t:'영어 단어장 앱',m:300}],m:120},
+{id:18,g:'qna',t:'GitHub Pages 커스텀 도메인?',b:'지금 github.io인데\n내 도메인으로 바꾸려면?',a:'웹초보',l:8,c:[{a:'풀스택',t:'레포 Settings > Custom domain\n+ DNS에 CNAME 추가',m:60}],m:180},
+{id:19,g:'ai',t:'Ollama로 로컬 AI 돌리는법',b:'인터넷 없이 AI 쓰고싶으면\n\n1. ollama.com에서 설치\n2. ollama run llama3\n3. 끝. 로컬에서 AI 대화 가능\n\nGPU 없어도 CPU로 돌아감 (좀 느림)\n프라이버시 100% 보장',a:'로컬러',l:223,c:[{a:'보안덕',t:'회사에서 쓰기 좋음',m:120}],m:90},
+{id:20,g:'dev',t:'Flask vs FastAPI 뭐 쓸까',b:'Python 웹서버 고민중이면\n\nFlask: 쉬움, 자료많음, 소규모\nFastAPI: 빠름, 타입힌트, API특화\n\n학습용이면 Flask\n실무/API면 FastAPI\n\n둘 다 10분이면 Hello World 띄움',a:'백엔드러',l:167,c:[],m:840},
+];
+
+// ===== RECOMMENDED RESOURCES (Home) =====
+const RES=[
+{nm:'PhET 과학실험',ic:'🔬',u:'https://phet.colorado.edu/ko/',ds:'무료 시뮬레이션'},
+{nm:'생활코딩',ic:'💻',u:'https://opentutorials.org/',ds:'코딩 입문'},
+{nm:'Khan Academy',ic:'🎯',u:'https://ko.khanacademy.org/',ds:'수학·과학'},
+{nm:'freeCodeCamp',ic:'🏕️',u:'https://www.freecodecamp.org/',ds:'풀스택 개발'},
+{nm:'K-MOOC',ic:'🎓',u:'https://www.kmooc.kr/',ds:'대학 강좌'},
+{nm:'MDN Docs',ic:'📄',u:'https://developer.mozilla.org/ko/',ds:'웹개발 문서'},
+];
+
+// ===== NAV =====
+const pgs=['p0','p1','p2','p3','p4'];
+let cur=0;
+function go(i){pgs.forEach((p,j)=>{document.getElementById(p).classList.toggle('on',i===j)});document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('on',i===j));cur=i;document.getElementById('fab').classList.toggle('sh',i<2);}
+
+// ===== NICK =====
+function ckNk(){if(!U.nk)document.getElementById('nkM').style.display='flex';}
+function setNk(){const n=document.getElementById('nkI').value.trim();if(!n)return;U.nk=n;sv();document.getElementById('nkM').style.display='none';uN();toast('환영합니다 '+n+'님!');}
+function chNk(){oMo('<div style="font-size:15px;font-weight:700;margin-bottom:8px">닉네임 변경</div><input class="fi" id="nnk" value="'+U.nk+'"><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:8px"><button class="bt bs" onclick="cMo()">취소</button><button class="bt bp" onclick="const n=document.getElementById(\'nnk\').value.trim();if(n){U.nk=n;sv();cMo();uN();toast(\'변경!\')}">확인</button></div>');}
+function uN(){const n=U.nk||'탐험가';document.getElementById('hLv').textContent='Lv.'+U.lv+' '+n;document.getElementById('pN').textContent=n;document.getElementById('pT').textContent='Lv.'+U.lv+' 탐험가';}
+
+// ===== RENDER HOME =====
+function rHome(){
+  const hot=[...P].sort((a,b)=>b.l-a.l).slice(0,6);
+  document.getElementById('hotP').innerHTML=hot.map(pH).join('');
+  const nw=[...P].sort((a,b)=>a.m-b.m).slice(0,5);
+  document.getElementById('newP').innerHTML=nw.map(pH).join('');
+  document.getElementById('resGrid').innerHTML=RES.map(r=>`<a class="gi" href="${r.u}" target="_blank" style="text-decoration:none;color:inherit"><div class="ic">${r.ic}</div><div class="nm">${r.nm}</div><div class="ct">${r.ds}</div></a>`).join('');
+}
+function pH(p){const g=GAL.find(x=>x.id===p.g);return `<div class="po" onclick='sP(${JSON.stringify(p).replace(/'/g,"&#39;")})'><div class="po-c">[${g?g.nm:p.g}]</div><div class="po-t">${p.t}</div><div class="po-m"><span>👤${p.a}</span><span>❤️${p.l}</span><span>💬${(p.c||[]).length}</span><span>${tA(p.m)}</span></div></div>`;}
+
+// ===== GALLERY =====
+function rGal(){document.getElementById('galG').innerHTML=GAL.map(g=>{const c=P.filter(p=>p.g===g.id).length;return `<div class="gi" onclick="oGal('${g.id}')"><div class="ic">${g.ic}</div><div class="nm">${g.nm}</div><div class="ct">${c}글</div></div>`;}).join('');}
+function oGal(id){const g=GAL.find(x=>x.id===id);document.getElementById('galG').style.display='none';document.getElementById('galV').style.display='';document.getElementById('galT').textContent=g.ic+' '+g.nm;const ps=[...P,...U.mp].filter(p=>p.g===id).sort((a,b)=>a.m-b.m);document.getElementById('galP').innerHTML=ps.length?ps.map(pH).join(''):'<div style="text-align:center;padding:30px;color:var(--t3)">첫 글을 써보세요!</div>';}
+function bkGal(){document.getElementById('galG').style.display='';document.getElementById('galV').style.display='none';}
+
+// ===== POST DETAIL =====
+function sP(p){
+  const cs=(p.c||[]).map(c=>`<div class="cm"><div><div class="cm-a">${c.a}</div><div class="cm-t">${c.t}</div><div class="cm-m">${tA(c.m||0)}</div></div></div>`).join('');
+  const g=GAL.find(x=>x.id===p.g);
+  oMo(`<div class="po-c">[${g?g.nm:p.g}]</div><div style="font-size:15px;font-weight:700;margin:2px 0">${p.t}</div><div style="font-size:10px;color:var(--t3);margin-bottom:8px">👤${p.a} · ${tA(p.m)} · ❤️${p.l} · 💬${(p.c||[]).length}</div><div class="po-b">${p.b||''}</div><div style="border-top:1px solid rgba(139,92,246,.06);padding-top:8px;margin-top:8px"><div style="font-size:12px;font-weight:600;margin-bottom:4px">💬 댓글</div>${cs||'<div style="color:var(--t3);font-size:11px;padding:8px 0">아직 없음</div>'}</div><div style="display:flex;gap:4px;margin-top:8px"><input class="fi" id="cI" placeholder="댓글..." style="flex:1"><button class="bt bp" style="padding:6px 12px" onclick="xp(5,'댓글');toast('💬 +5XP');cMo()">등록</button></div>`);
+  xp(3,'글읽기');
 }
 
-function openUtil(id){
-  const embed=document.getElementById('utilEmbed');
-  let html='';
-  if(id==='calc'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🧮 계산기</div>
-      <input id="calcIn" class="fi" placeholder="수식 입력 (예: 2+3*4)" style="font-size:16px">
-      <button class="btn btn-p" onclick="try{document.getElementById('calcR').textContent='= '+eval(document.getElementById('calcIn').value)}catch(e){document.getElementById('calcR').textContent='오류'}" style="margin-top:8px">계산</button>
-      <div class="util-result" id="calcR"></div></div>`;
-  }else if(id==='unit'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">📏 단위 변환</div>
-      <select id="unitType" class="fi" onchange="unitConv()"><option value="length">길이</option><option value="weight">무게</option><option value="temp">온도</option></select>
-      <input id="unitIn" class="fi" type="number" placeholder="값 입력" oninput="unitConv()">
-      <div class="util-result" id="unitR"></div></div>`;
-  }else if(id==='color'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🎨 색상 피커</div>
-      <input type="color" id="colorPick" value="#8b5cf6" style="width:100%;height:50px;border:none;cursor:pointer" oninput="colorConv()">
-      <div class="util-result" id="colorR">#8b5cf6 / rgb(139,92,246)</div></div>`;
-  }else if(id==='qr'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">📱 QR 생성기</div>
-      <input id="qrIn" class="fi" placeholder="URL 또는 텍스트 입력">
-      <button class="btn btn-p" onclick="genQR()" style="margin-top:8px">생성</button>
-      <div class="util-result" id="qrR"></div></div>`;
-  }else if(id==='json'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">📋 JSON 포맷터</div>
-      <textarea id="jsonIn" class="fi" rows="5" placeholder='{"key":"value"}'></textarea>
-      <button class="btn btn-p" onclick="fmtJSON()" style="margin-top:8px">정리</button>
-      <pre class="util-result" id="jsonR" style="overflow-x:auto;white-space:pre-wrap"></pre></div>`;
-  }else if(id==='timer'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">⏱️ 스톱워치</div>
-      <div id="timerDisp" style="font-size:36px;font-weight:900;text-align:center;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:16px 0">00:00.0</div>
-      <div style="display:flex;gap:6px;justify-content:center">
-        <button class="btn btn-p" onclick="toggleTimer()">시작/중지</button>
-        <button class="btn btn-s" onclick="resetTimer()">리셋</button>
-      </div></div>`;
-  }else if(id==='random'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🎲 랜덤 생성기</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-p" onclick="document.getElementById('randR').textContent='🎲 '+Math.floor(Math.random()*100+1)" style="font-size:12px">1~100</button>
-        <button class="btn btn-s" onclick="document.getElementById('randR').textContent='🔐 '+Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>'abcdefghijkmnpqrstuvwxyz23456789'[b%31]).join('')" style="font-size:12px">비밀번호</button>
-        <button class="btn btn-s" onclick="const n=['김','이','박','최','정','강','조','윤'];const g=['민준','서윤','도윤','하은','시우','지유'];document.getElementById('randR').textContent='👤 '+n[Math.floor(Math.random()*n.length)]+g[Math.floor(Math.random()*g.length)]" style="font-size:12px">이름</button>
-      </div>
-      <div class="util-result" id="randR">버튼을 누르세요</div></div>`;
-  }else if(id==='base64'){
-    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🔐 Base64</div>
-      <textarea id="b64In" class="fi" rows="3" placeholder="텍스트 입력"></textarea>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="btn btn-p" onclick="document.getElementById('b64R').textContent=btoa(unescape(encodeURIComponent(document.getElementById('b64In').value)))" style="font-size:12px">인코딩</button>
-        <button class="btn btn-s" onclick="try{document.getElementById('b64R').textContent=decodeURIComponent(escape(atob(document.getElementById('b64In').value)))}catch(e){document.getElementById('b64R').textContent='오류'}" style="font-size:12px">디코딩</button>
-      </div>
-      <div class="util-result" id="b64R"></div></div>`;
-  }
-  embed.innerHTML=html;
-  gainXP(3,'유틸리티: '+UTILS.find(u=>u.id===id).name,'tech');
-}
+// ===== GAMES =====
+function rGm(){document.getElementById('gmG').innerHTML=GMS.map(g=>`<div class="gi" onclick="${g.u?`oG('${g.u}','${g.nm}','${g.ak||''}')`:(g.eu?`window.open('${g.eu}','_blank');xp(10,'게임')`:`toast('준비중')`)}" style="${g.p?'border-color:rgba(6,214,160,.3)':''}"><div class="ic" style="position:relative">${g.em}${g.p?'<span style="position:absolute;top:-2px;right:-8px;background:var(--cy);color:#000;font-size:7px;padding:1px 4px;border-radius:3px;font-weight:700">PLAY</span>':''}</div><div class="nm">${g.nm}</div><div class="ct">${g.tg}</div></div>`).join('');}
+function oG(u,n,a){document.getElementById('gT').textContent=n;document.getElementById('gF').src=u;const ak=document.getElementById('gA');if(a){ak.href=a;ak.style.display='';}else ak.style.display='none';document.getElementById('gO').classList.add('sh');xp(15,'게임: '+n);}
+function cG(){document.getElementById('gO').classList.remove('sh');document.getElementById('gF').src='';}
 
-// Util helpers
-function unitConv(){const t=document.getElementById('unitType').value,v=parseFloat(document.getElementById('unitIn').value)||0,r=document.getElementById('unitR');
-  if(t==='length')r.textContent=`${v}cm = ${(v/2.54).toFixed(2)}inch = ${(v/100).toFixed(3)}m = ${(v/30.48).toFixed(2)}ft`;
-  else if(t==='weight')r.textContent=`${v}kg = ${(v*2.205).toFixed(2)}lb = ${(v*1000).toFixed(0)}g = ${(v*35.274).toFixed(2)}oz`;
-  else if(t==='temp')r.textContent=`${v}°C = ${(v*9/5+32).toFixed(1)}°F = ${(v+273.15).toFixed(1)}K`;
+// ===== UTILS =====
+function rUt(){document.getElementById('utG').innerHTML=UTS.map(u=>`<div class="gi" onclick="oUt('${u.id}')"><div class="ic">${u.ic}</div><div class="nm">${u.nm}</div><div class="ct">${u.ds}</div></div>`).join('');}
+function oUt(id){
+  const e=document.getElementById('utE');let h='';
+  if(id==='calc')h='<div class="ue"><b>🧮 계산기</b><input id="cI2" placeholder="수식 (2+3*4)"><button class="bt bp" onclick="try{document.getElementById(\'cR\').textContent=\'= \'+Function(\'return \'+document.getElementById(\'cI2\').value)()}catch(e){document.getElementById(\'cR\').textContent=\'오류\'}" style="margin-top:4px">계산</button><div class="ur" id="cR"></div></div>';
+  else if(id==='unit')h='<div class="ue"><b>📏 단위변환</b><select id="uT" onchange="uC()"><option value="l">길이</option><option value="w">무게</option><option value="t">온도</option></select><input id="uI" type="number" placeholder="값" oninput="uC()"><div class="ur" id="uR"></div></div>';
+  else if(id==='color')h='<div class="ue"><b>🎨 색상피커</b><input type="color" id="cP" value="#8b5cf6" style="width:100%;height:40px;border:none;cursor:pointer" oninput="cC()"><div class="ur" id="cR2">#8b5cf6</div></div>';
+  else if(id==='qr')h='<div class="ue"><b>📱 QR생성</b><input id="qI" placeholder="URL/텍스트"><button class="bt bp" onclick="document.getElementById(\'qR\').innerHTML=\'<img src=https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=\'+encodeURIComponent(document.getElementById(\'qI\').value)+\' style=max-width:180px;border-radius:8px>\'" style="margin-top:4px">생성</button><div class="ur" id="qR"></div></div>';
+  else if(id==='json')h='<div class="ue"><b>📋 JSON정리</b><textarea id="jI" rows="4" placeholder=\'{"key":"val"}\'></textarea><button class="bt bp" onclick="try{document.getElementById(\'jR\').textContent=JSON.stringify(JSON.parse(document.getElementById(\'jI\').value),null,2)}catch(e){document.getElementById(\'jR\').textContent=\'❌ \'+e.message}" style="margin-top:4px">정리</button><pre class="ur" id="jR" style="white-space:pre-wrap"></pre></div>';
+  else if(id==='timer')h='<div class="ue"><b>⏱️ 스톱워치</b><div id="tD" style="font-size:30px;font-weight:900;text-align:center;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:12px 0">00:00.0</div><div style="display:flex;gap:4px;justify-content:center"><button class="bt bp" onclick="tT()">시작/중지</button><button class="bt bs" onclick="tR()">리셋</button></div></div>';
+  else if(id==='rand')h='<div class="ue"><b>🎲 랜덤</b><div style="display:flex;gap:4px;flex-wrap:wrap"><button class="bt bp" onclick="document.getElementById(\'rR\').textContent=Math.floor(Math.random()*100+1)" style="font-size:10px">1~100</button><button class="bt bs" onclick="document.getElementById(\'rR\').textContent=Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>\'abcdefghjkmnpqrstuvwxyz23456789\'[b%30]).join(\'\')" style="font-size:10px">비밀번호</button><button class="bt bs" onclick="document.getElementById(\'rR\').textContent=[\'가\',\'나\',\'다\',\'라\',\'마\',\'바\',\'사\',\'아\'][Math.random()*8|0]+\'팀\'" style="font-size:10px">랜덤팀</button></div><div class="ur" id="rR">버튼 누르세요</div></div>';
+  else if(id==='b64')h='<div class="ue"><b>🔐 Base64</b><textarea id="bI" rows="2" placeholder="텍스트"></textarea><div style="display:flex;gap:4px;margin-top:4px"><button class="bt bp" onclick="document.getElementById(\'bR\').textContent=btoa(unescape(encodeURIComponent(document.getElementById(\'bI\').value)))" style="font-size:10px">인코딩</button><button class="bt bs" onclick="try{document.getElementById(\'bR\').textContent=decodeURIComponent(escape(atob(document.getElementById(\'bI\').value)))}catch(e){document.getElementById(\'bR\').textContent=\'오류\'}" style="font-size:10px">디코딩</button></div><div class="ur" id="bR"></div></div>';
+  else if(id==='dday')h='<div class="ue"><b>📅 D-Day</b><input type="date" id="dI" onchange="const d=new Date(this.value),t=new Date();t.setHours(0,0,0,0);const diff=Math.ceil((d-t)/86400000);document.getElementById(\'dR\').textContent=diff===0?\'D-Day!\':diff>0?\'D-\'+diff:\'D+\'+Math.abs(diff)"><div class="ur" id="dR">날짜를 선택하세요</div></div>';
+  else if(id==='bmi')h='<div class="ue"><b>🏋️ BMI</b><input id="bH" type="number" placeholder="키(cm)"><input id="bW" type="number" placeholder="몸무게(kg)"><button class="bt bp" onclick="const h=document.getElementById(\'bH\').value/100,w=document.getElementById(\'bW\').value;const b=(w/(h*h)).toFixed(1);const s=b<18.5?\'저체중\':b<25?\'정상\':b<30?\'과체중\':\'비만\';document.getElementById(\'bmR\').textContent=\'BMI: \'+b+\' (\'+s+\')\'">계산</button><div class="ur" id="bmR"></div></div>';
+  else if(id==='loan')h='<div class="ue"><b>🏦 대출계산</b><input id="lA" type="number" placeholder="대출금(만원)"><input id="lR2" type="number" placeholder="연이율(%)"><input id="lY" type="number" placeholder="기간(년)"><button class="bt bp" onclick="const a=document.getElementById(\'lA\').value*10000,r=document.getElementById(\'lR2\').value/100/12,n=document.getElementById(\'lY\').value*12;const m=a*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);document.getElementById(\'loR\').textContent=\'월 상환: \'+Math.round(m).toLocaleString()+\'원\\n총 이자: \'+Math.round(m*n-a).toLocaleString()+\'원\'">계산</button><pre class="ur" id="loR"></pre></div>';
+  else if(id==='hash')h='<div class="ue"><b>#️⃣ 해시</b><input id="hI" placeholder="텍스트"><button class="bt bp" onclick="async function h(){const d=new TextEncoder().encode(document.getElementById(\'hI\').value);const b=await crypto.subtle.digest(\'SHA-256\',d);document.getElementById(\'hR\').textContent=\'SHA-256: \'+Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,\'0\')).join(\'\')}h()">생성</button><div class="ur" id="hR" style="word-break:break-all"></div></div>';
+  e.innerHTML=h;xp(3,'유틸');
 }
-function colorConv(){const v=document.getElementById('colorPick').value;const r=parseInt(v.slice(1,3),16),g=parseInt(v.slice(3,5),16),b=parseInt(v.slice(5,7),16);document.getElementById('colorR').textContent=`${v} / rgb(${r},${g},${b}) / hsl(${Math.round(rgbToHsl(r,g,b)[0])},${Math.round(rgbToHsl(r,g,b)[1])}%,${Math.round(rgbToHsl(r,g,b)[2])}%)`;}
-function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);if(mx===r)h=((g-b)/d+(g<b?6:0))/6;else if(mx===g)h=((b-r)/d+2)/6;else h=((r-g)/d+4)/6;}return[h*360,s*100,l*100];}
-function genQR(){const t=document.getElementById('qrIn').value.trim();if(!t)return;document.getElementById('qrR').innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(t)}" style="max-width:200px;border-radius:8px">`;}
-function fmtJSON(){try{document.getElementById('jsonR').textContent=JSON.stringify(JSON.parse(document.getElementById('jsonIn').value),null,2);}catch(e){document.getElementById('jsonR').textContent='❌ JSON 오류: '+e.message;}}
-let timerOn=false,timerStart=0,timerElapsed=0,timerRAF;
-function toggleTimer(){if(timerOn){timerOn=false;timerElapsed+=performance.now()-timerStart;cancelAnimationFrame(timerRAF);}else{timerOn=true;timerStart=performance.now();tickTimer();}}
-function tickTimer(){if(!timerOn)return;const t=timerElapsed+performance.now()-timerStart;const m=Math.floor(t/60000),s=Math.floor((t%60000)/1000),ms=Math.floor((t%1000)/100);document.getElementById('timerDisp').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+ms;timerRAF=requestAnimationFrame(tickTimer);}
-function resetTimer(){timerOn=false;timerElapsed=0;cancelAnimationFrame(timerRAF);document.getElementById('timerDisp').textContent='00:00.0';}
+function uC(){const t=document.getElementById('uT').value,v=+document.getElementById('uI').value||0,r=document.getElementById('uR');if(t==='l')r.textContent=v+'cm = '+(v/2.54).toFixed(2)+'in = '+(v/100).toFixed(3)+'m';else if(t==='w')r.textContent=v+'kg = '+(v*2.205).toFixed(2)+'lb = '+(v*1000)+'g';else r.textContent=v+'°C = '+(v*9/5+32).toFixed(1)+'°F = '+(v+273.15).toFixed(1)+'K';}
+function cC(){const v=document.getElementById('cP').value;document.getElementById('cR2').textContent=v+' / rgb('+parseInt(v.slice(1,3),16)+','+parseInt(v.slice(3,5),16)+','+parseInt(v.slice(5,7),16)+')';}
+let tOn=0,tSt=0,tEl=0,tRf;
+function tT(){if(tOn){tOn=0;tEl+=performance.now()-tSt;cancelAnimationFrame(tRf);}else{tOn=1;tSt=performance.now();tTk();}}
+function tTk(){if(!tOn)return;const t=tEl+performance.now()-tSt;document.getElementById('tD').textContent=String(t/60000|0).padStart(2,'0')+':'+String((t%60000)/1000|0).padStart(2,'0')+'.'+(t%1000/100|0);tRf=requestAnimationFrame(tTk);}
+function tR(){tOn=0;tEl=0;cancelAnimationFrame(tRf);document.getElementById('tD').textContent='00:00.0';}
 
-function switchPlayTab(btn,tab){
-  btn.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
-  document.getElementById('playGames').style.display=tab==='games'?'':'none';
-  document.getElementById('playUtils').style.display=tab==='utils'?'':'none';
-  document.getElementById('playSearch').style.display=tab==='search'?'':'none';
+function sPlay(b,v){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');['vGm','vUt','vSr','vSim','vEdu'].forEach(x=>document.getElementById(x).style.display='none');document.getElementById({gm:'vGm',ut:'vUt',sr:'vSr',sim:'vSim',edu:'vEdu'}[v]).style.display='';}
+function doSr(e){const q=document.getElementById('srI').value.trim();if(!q)return;const u={google:'https://www.google.com/search?q=',naver:'https://search.naver.com/search.naver?query=',youtube:'https://www.youtube.com/results?search_query=',github:'https://github.com/search?q=',namu:'https://namu.wiki/w/',stackoverflow:'https://stackoverflow.com/search?q='};if(e)window.open(u[e]+encodeURIComponent(q),'_blank');else window.open(u.google+encodeURIComponent(q),'_blank');xp(3,'검색');}
+
+// ===== SIMULATIONS =====
+function rSim(){document.getElementById('simList').innerHTML='<div style="font-size:12px;color:var(--t2);margin-bottom:8px">PhET 시뮬레이션 (콜로라도대학 제공, 무료)</div>'+SIMS.map(s=>`<a class="rc" href="${s.u}" target="_blank"><div class="ri">${s.ic}</div><div><div class="rn">${s.nm}</div><div class="rd">${s.ds}</div></div></a>`).join('');}
+
+// ===== EDUCATION =====
+function rEdu(){document.getElementById('eduList').innerHTML=EDUS.map(e=>`<a class="rc" href="${e.u}" target="_blank"><div class="ri">${e.ic}</div><div style="flex:1"><div class="rn">${e.nm}</div><div class="rd">${e.ds}</div><div class="rt">${(e.tg||[]).map(t=>'<span>'+t+'</span>').join('')}</div></div></a>`).join('');}
+
+// ===== LEARN =====
+function rLn(){
+  document.getElementById('lChannels').innerHTML=CHS.map(c=>`<a class="rc" href="${c.u}" target="_blank"><div class="ri">${c.ic}</div><div style="flex:1"><div class="rn">${c.nm}</div><div class="rd">${c.ds}</div><div class="rt"><span>${c.ct}</span></div></div></a>`).join('');
+  document.getElementById('lCourses').innerHTML=EDUS.map(e=>`<a class="rc" href="${e.u}" target="_blank"><div class="ri">${e.ic}</div><div style="flex:1"><div class="rn">${e.nm}</div><div class="rd">${e.ds}</div><div class="rt">${(e.tg||[]).map(t=>'<span>'+t+'</span>').join('')}</div></div></a>`).join('');
+  document.getElementById('lTools').innerHTML=AIS.map(a=>`<a class="rc" href="${a.u}" target="_blank"><div class="ri">${a.ic}</div><div style="flex:1"><div class="rn">${a.nm} <span style="font-size:9px;color:var(--gd)">${a.pr}</span></div><div class="rd">${a.ds}</div><div class="rt">${(a.tg||[]).map(t=>'<span>'+t+'</span>').join('')}</div></div></a>`).join('');
+  document.getElementById('lPrograms').innerHTML=PRGS.map(p=>`<a class="rc" href="${p.u}" target="_blank"><div class="ri">${p.ic}</div><div style="flex:1"><div class="rn">${p.nm}</div><div class="rd">${p.ds}</div><div class="rt"><span>${p.ct}</span></div></div></a>`).join('');
 }
-function doSearch(engine){
-  const q=document.getElementById('searchIn').value.trim();if(!q)return;
-  const urls={google:'https://www.google.com/search?q=',naver:'https://search.naver.com/search.naver?query=',youtube:'https://www.youtube.com/results?search_query=',github:'https://github.com/search?q='};
-  if(engine&&urls[engine]){window.open(urls[engine]+encodeURIComponent(q),'_blank');gainXP(3,'웹서치','tech');}
-  else{
-    const r=document.getElementById('searchResult');r.style.display='block';
-    r.innerHTML='<div style="margin-bottom:6px">🔍 "'+q+'" 검색 결과:</div>'+
-      Object.entries(urls).map(([k,v])=>`<a href="${v}${encodeURIComponent(q)}" target="_blank" style="display:block;margin:4px 0;font-size:12px">${k.charAt(0).toUpperCase()+k.slice(1)}에서 검색 →</a>`).join('');
-    gainXP(3,'웹서치','tech');
-  }
-}
+function sLearn(b,v){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');['lChannels','lCourses','lTools','lPrograms'].forEach(x=>document.getElementById(x).style.display='none');document.getElementById(v==='channels'?'lChannels':v==='courses'?'lCourses':v==='tools'?'lTools':'lPrograms').style.display='';}
 
 // ===== PROFILE =====
-function drawHex(cid,st,sz){
-  const c=document.getElementById(cid);if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=sz||w*.38,k=Object.keys(st),n=k.length,lb=['지식','체력','창의력','소통','리더십','기술'];
-  x.clearRect(0,0,w,h);
-  for(let g=5;g>=1;g--){x.beginPath();for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,px=cx+Math.cos(a)*r*(g/5),py=cy+Math.sin(a)*r*(g/5);i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.strokeStyle='rgba(139,92,246,'+(0.06+g*.04)+')';x.stroke();}
-  for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);x.strokeStyle='rgba(139,92,246,.12)';x.stroke();}
-  x.beginPath();const v=Object.values(st);for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,px=cx+Math.cos(a)*r*(v[i]/100),py=cy+Math.sin(a)*r*(v[i]/100);i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();
-  const g=x.createLinearGradient(cx-r,cy-r,cx+r,cy+r);g.addColorStop(0,'rgba(139,92,246,.25)');g.addColorStop(1,'rgba(6,214,160,.25)');x.fillStyle=g;x.fill();x.strokeStyle='rgba(139,92,246,.7)';x.lineWidth=2;x.stroke();
-  for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,vv=v[i]/100;x.beginPath();x.arc(cx+Math.cos(a)*r*vv,cy+Math.sin(a)*r*vv,3,0,Math.PI*2);x.fillStyle='#8b5cf6';x.fill();}
-  x.fillStyle='#94a3b8';x.font='10px Noto Sans KR';x.textAlign='center';
-  for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.fillText(lb[i]+' '+v[i],cx+Math.cos(a)*(r+16),cy+Math.sin(a)*(r+16)+3);}
-}
-
-function renderProf(){
-  updNames();
-  document.getElementById('profLv').textContent=D.lv;
-  document.getElementById('xpNow').textContent=D.xp;
-  document.getElementById('xpMax').textContent=D.xpM;
-  document.getElementById('xpLeft').textContent=D.xpM-D.xp;
-  document.getElementById('badgeCnt').textContent=D.bg.filter(b=>b).length+'/16';
-  setTimeout(()=>document.getElementById('lvBar').style.width=(D.xp/D.xpM*100)+'%',100);
-  drawHex('statC',D.st,85);
-  document.getElementById('badgeG').innerHTML=BADGES.map((b,i)=>`<div class="badge-i ${D.bg[i]?'on':'off'}"><span>${b.i}</span><span style="font-size:8px;color:var(--text3)">${b.n}</span></div>`).join('');
-  const acts=D.acts.length?D.acts.slice(-8).reverse():[{t:'LevelPlay에 가입!',xp:0,m:0,col:'var(--cyan)'}];
-  document.getElementById('timeline').innerHTML=acts.map(a=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(139,92,246,.05)"><div style="width:8px;height:8px;border-radius:50%;background:${a.col||'var(--purple)'};margin-top:4px;flex-shrink:0"></div><div><div style="font-size:12px">${a.t} ${a.xp?'<span style="font-size:10px;color:var(--gold);background:rgba(251,191,36,.15);padding:1px 6px;border-radius:8px">+'+a.xp+'</span>':''}</div><div style="font-size:10px;color:var(--text3)">${tAgo(a.m||0)}</div></div></div>`).join('');
-}
+function dH(cid,st,sz){const c=document.getElementById(cid);if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=sz||w*.38,k=Object.keys(st),n=k.length,lb=['지식','체력','창의력','소통','리더십','기술'];x.clearRect(0,0,w,h);for(let g=5;g>=1;g--){x.beginPath();for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,px=cx+Math.cos(a)*r*(g/5),py=cy+Math.sin(a)*r*(g/5);i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.strokeStyle='rgba(139,92,246,'+(0.05+g*.03)+')';x.stroke();}x.beginPath();const v=Object.values(st);for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,px=cx+Math.cos(a)*r*(v[i]/100),py=cy+Math.sin(a)*r*(v[i]/100);i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();const gd=x.createLinearGradient(cx-r,cy-r,cx+r,cy+r);gd.addColorStop(0,'rgba(139,92,246,.2)');gd.addColorStop(1,'rgba(6,214,160,.2)');x.fillStyle=gd;x.fill();x.strokeStyle='rgba(139,92,246,.6)';x.lineWidth=1.5;x.stroke();x.fillStyle='#94a3b8';x.font='9px Noto Sans KR';x.textAlign='center';for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.fillText(lb[i]+' '+v[i],cx+Math.cos(a)*(r+14),cy+Math.sin(a)*(r+14)+3);}}
+function rP(){uN();document.getElementById('pL').textContent=U.lv;document.getElementById('xC').textContent=U.xp;document.getElementById('xM').textContent=U.xm;document.getElementById('xR').textContent=U.xm-U.xp;document.getElementById('bC').textContent=U.bg.filter(b=>b).length+'/16';setTimeout(()=>document.getElementById('lB').style.width=(U.xp/U.xm*100)+'%',80);dH('sC',U.st,78);document.getElementById('bG').innerHTML=BDG.map((b,i)=>`<div class="bi ${U.bg[i]?'y':'n'}"><span>${b.i}</span><span style="font-size:7px;color:var(--t3)">${b.n}</span></div>`).join('');const ac=U.ac.length?U.ac.slice(-6).reverse():[{t:'가입!',xp:0,m:0}];document.getElementById('tl').innerHTML=ac.map(a=>`<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(139,92,246,.04)"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);margin-top:4px;flex-shrink:0"></div><div style="font-size:11px">${a.t} ${a.xp?'<span style="font-size:9px;color:var(--gd);background:rgba(251,191,36,.12);padding:0 4px;border-radius:4px">+'+a.xp+'</span>':''}</div></div>`).join('');}
 
 // ===== XP =====
-const STAT_MAP={science:'knowledge',history:'knowledge',math:'knowledge',tech:'tech',language:'communication',art:'creativity',action:'stamina',puzzle:'knowledge',rpg:'creativity',edu:'knowledge',challenge:'stamina'};
-function gainXP(amt,act,genre){
-  D.xp+=amt;D.acts.push({t:act,xp:amt,m:0,col:'var(--cyan)'});
-  if(genre&&STAT_MAP[genre]&&D.st[STAT_MAP[genre]]<100)D.st[STAT_MAP[genre]]=Math.min(100,D.st[STAT_MAP[genre]]+1);
-  let up=false;
-  while(D.xp>=D.xpM){D.xp-=D.xpM;D.lv++;D.xpM=Math.floor(D.xpM*1.1);up=true;const k=Object.keys(D.st),r=k[Math.floor(Math.random()*k.length)];D.st[r]=Math.min(100,D.st[r]+Math.floor(Math.random()*2)+1);if(D.lv>=10)D.bg[7]=1;if(D.lv>=30)D.bg[8]=1;if(D.lv>=50)D.bg[9]=1;}
-  if(up)toast('🎉 Lv.'+D.lv+' 달성!');
-  save();renderProf();updNames();
-}
+function xp(a,t){U.xp+=a;U.ac.push({t,xp:a,m:0});while(U.xp>=U.xm){U.xp-=U.xm;U.lv++;U.xm=Math.floor(U.xm*1.1);const k=Object.keys(U.st),r=k[Math.random()*k.length|0];U.st[r]=Math.min(100,U.st[r]+(Math.random()*2|0)+1);if(U.lv>=10)U.bg[7]=1;if(U.lv>=30)U.bg[8]=1;if(U.lv>=50)U.bg[9]=1;toast('🎉 Lv.'+U.lv);}sv();rP();uN();}
 
 // ===== WRITE =====
-function showWrite(){
-  openMo(`<div class="mo-bar"></div><div class="mo-t">✏️ 글쓰기</div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2)">갤러리</label><select class="fi" id="wGal">${GALLERIES.map(g=>'<option value="'+g.id+'">'+g.icon+' '+g.name+'</option>').join('')}</select></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2)">제목</label><input class="fi" id="wTitle" placeholder="제목"></div>
-    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2)">내용</label><textarea class="fi" id="wBody" rows="6" placeholder="내용을 작성하세요"></textarea></div>
-    <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-s" onclick="closeMo()">취소</button><button class="btn btn-p" onclick="submitPost()">등록</button></div>`);
-}
-function submitPost(){
-  const t=document.getElementById('wTitle').value.trim(),b=document.getElementById('wBody').value.trim(),g=document.getElementById('wGal').value;
-  if(!t){toast('제목을 입력하세요');return;}
-  D.myPosts.unshift({id:Date.now(),gal:g,t,b,a:D.nick||'익명',l:0,c:[],m:0});
-  if(!D.bg[5])D.bg[5]=1;
-  gainXP(15,'글 작성: '+t);closeMo();renderHome();toast('✏️ 글 등록! +15 XP');
-}
+function shW(){oMo('<div style="font-size:15px;font-weight:700;margin-bottom:8px">✏️ 글쓰기</div><div style="margin-bottom:6px"><select class="fi" id="wG">'+GAL.map(g=>'<option value="'+g.id+'">'+g.ic+' '+g.nm+'</option>').join('')+'</select></div><div style="margin-bottom:6px"><input class="fi" id="wT" placeholder="제목"></div><div style="margin-bottom:6px"><textarea class="fi" id="wB" rows="5" placeholder="내용"></textarea></div><div style="display:flex;gap:4px;justify-content:flex-end"><button class="bt bs" onclick="cMo()">취소</button><button class="bt bp" onclick="sbP()">등록</button></div>');}
+function sbP(){const t=document.getElementById('wT').value.trim(),b=document.getElementById('wB').value.trim(),g=document.getElementById('wG').value;if(!t){toast('제목!');return;}U.mp.unshift({id:Date.now(),g,t,b,a:U.nk||'익명',l:0,c:[],m:0});if(!U.bg[5])U.bg[5]=1;xp(15,'글작성');cMo();rHome();toast('✏️ +15XP');}
 
-// ===== MODAL / TOAST =====
-function openMo(h){document.getElementById('moC').innerHTML=h;document.getElementById('mo').classList.add('show');}
-function closeMo(){document.getElementById('mo').classList.remove('show');}
-let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200);}
+// ===== MODAL =====
+function oMo(h){document.getElementById('moC').innerHTML=h;document.getElementById('mo').classList.add('sh');}
+function cMo(){document.getElementById('mo').classList.remove('sh');}
+let tt;function toast(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('sh');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('sh'),2e3);}
 
 // ===== INIT =====
 function init(){
-  const b=document.getElementById('sBar');
-  setTimeout(()=>b.style.width='50%',100);setTimeout(()=>b.style.width='100%',500);
-  setTimeout(()=>{document.getElementById('splash').classList.add('hide');checkNick();},900);
-  renderHome();renderGalList();renderGames();renderUtils();renderProf();
+  const b=document.getElementById('sB');
+  setTimeout(()=>b.style.width='60%',80);setTimeout(()=>b.style.width='100%',400);
+  setTimeout(()=>{document.getElementById('splash').classList.add('h');ckNk();},700);
+  rHome();rGal();rGm();rUt();rSim();rEdu();rLn();rP();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 document.addEventListener('DOMContentLoaded',init);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGame();closeMo();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){cG();cMo();}});
 </script>
 </body>
 </html>
