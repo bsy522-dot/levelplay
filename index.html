@@ -97,6 +97,14 @@ nav button span:first-child{font-size:20px}
 </div>
 </div>
 
+<div class="sec">🔤 영어 단어 맞히기</div>
+<div class="qz" id="engGame">
+<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;font-weight:700">🔤 영어 단어!</span><span style="font-size:11px;color:var(--cy)" id="engScore">0점</span></div>
+<div style="font-size:28px;text-align:center;margin:12px 0" id="engQ">🍎</div>
+<div style="font-size:13px;text-align:center;color:var(--t2);margin-bottom:8px" id="engHint">이것의 영어 이름은?</div>
+<div class="qz-a" id="engOpts"></div>
+</div>
+
 <div class="sec">📝 퀴즈 도전</div><div id="qR"></div>
 <div class="sec">🔬 더 많은 실험</div><div class="g2" id="sR2"></div>
 <div class="sec">🛠️ 도구</div><div class="g2" id="hU"></div>
@@ -347,6 +355,12 @@ function dH(){const c=document.getElementById('sC');if(!c)return;const x=c.getCo
 function rProf(){document.getElementById('pL').textContent=U.lv;document.getElementById('xC').textContent=U.xp;document.getElementById('xM').textContent=U.xm;setTimeout(()=>document.getElementById('lB').style.width=(U.xp/U.xm*100)+'%',80);dH();const ac=U.ac.length?U.ac.slice(-5).reverse():[{t:'가입!',xp:0,m:0}];document.getElementById('tl').innerHTML=ac.map(a=>'<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(139,92,246,.04)"><div style="width:6px;height:6px;border-radius:50%;background:var(--p);margin-top:4px;flex-shrink:0"></div><div style="font-size:11px">'+a.t+(a.xp?' <span style="color:var(--gd)">+'+a.xp+'</span>':'')+'</div></div>').join('');}
 let tt;function toast(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('sh');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('sh'),1800);}
 
+// 영어 단어 게임
+const ENG_WORDS=[{e:'🍎',w:'Apple',k:'사과'},{e:'🐱',w:'Cat',k:'고양이'},{e:'🐶',w:'Dog',k:'강아지'},{e:'🏠',w:'House',k:'집'},{e:'📚',w:'Book',k:'책'},{e:'🌙',w:'Moon',k:'달'},{e:'⭐',w:'Star',k:'별'},{e:'🌊',w:'Ocean',k:'바다'},{e:'🌈',w:'Rainbow',k:'무지개'},{e:'🎵',w:'Music',k:'음악'},{e:'🌸',w:'Flower',k:'꽃'},{e:'🦋',w:'Butterfly',k:'나비'},{e:'🐘',w:'Elephant',k:'코끼리'},{e:'🚗',w:'Car',k:'자동차'},{e:'✈️',w:'Airplane',k:'비행기'},{e:'🍕',w:'Pizza',k:'피자'},{e:'🎂',w:'Cake',k:'케이크'},{e:'👨‍👩‍👧‍👦',w:'Family',k:'가족'},{e:'🏫',w:'School',k:'학교'},{e:'💧',w:'Water',k:'물'}];
+let engPts=0,engIdx=0;
+function nextEng(){const w=ENG_WORDS[Math.floor(Math.random()*ENG_WORDS.length)];document.getElementById('engQ').textContent=w.e;document.getElementById('engHint').textContent=w.k+'의 영어 이름은?';const opts=[w.w,...ENG_WORDS.filter(x=>x.w!==w.w).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.w)].sort(()=>Math.random()-.5);document.getElementById('engOpts').innerHTML=opts.map(o=>'<button onclick="checkEng(this,\''+(o===w.w)+'\',\''+w.w+'\')">'+o+'</button>').join('');}
+function checkEng(btn,ok,ans){if(btn.parentElement.querySelector('.correct,.wrong'))return;if(ok==='true'){btn.classList.add('correct');engPts++;document.getElementById('engScore').textContent=engPts+'점';xp(3,'영어');toast('Correct! +3XP');setTimeout(nextEng,800);}else{btn.classList.add('wrong');toast('정답: '+ans);[...btn.parentElement.children].forEach(b=>{if(b.textContent===ans)b.classList.add('correct');});setTimeout(nextEng,1500);}}
+
 // 구구단 챌린지
 let ggA=0,ggB=0,ggPts=0;
 function startGG(){ggPts=0;document.getElementById('ggScore').textContent='0점';nextGG();}
@@ -367,6 +381,7 @@ function rAll(){
   document.getElementById('sR').innerHTML=SIMS.slice(0,4).map(sc).join('');
   document.getElementById('sR2').innerHTML=SIMS.slice(4,8).map(sc).join('');
   document.getElementById('gR').innerHTML=GMS.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>').join('');
+  nextEng();
   renderQuiz(document.getElementById('qR'),QUIZ);
   document.getElementById('hU').innerHTML=UTS.map(u=>'<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+u.ic+'</div><div class="gn">'+u.nm+'</div></div>').join('');
   document.getElementById('calcR').innerHTML=[...P,...U.mp].sort((a,b)=>b.l-a.l).slice(0,3).map(pH).join('');
