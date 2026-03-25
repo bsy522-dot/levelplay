@@ -4,1114 +4,632 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>LevelPlay - 배우고, 올리고, 증명하라</title>
-<meta name="description" content="LevelPlay 레벨플레이 - 성취욕 기반 교육+엔터테인먼트 통합 플랫폼">
+<meta name="description" content="LevelPlay - 교육·프로그램·AI 정보 공유 커뮤니티 플랫폼">
 <meta name="theme-color" content="#0a0a1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
-
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
---bg:#0a0a1a;--bg2:#12122a;--bg3:#1a1a3a;--bg4:#22224a;
---purple:#8b5cf6;--cyan:#06d6a0;--gold:#fbbf24;--pink:#ec4899;
---red:#ef4444;--blue:#3b82f6;--green:#22c55e;
+--bg:#0a0a1a;--bg2:#111127;--bg3:#181838;--bg4:#222250;
+--purple:#8b5cf6;--cyan:#06d6a0;--gold:#fbbf24;--pink:#ec4899;--red:#ef4444;--blue:#3b82f6;--green:#22c55e;
 --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
 --grad1:linear-gradient(135deg,#8b5cf6,#06d6a0);
---grad2:linear-gradient(135deg,#ec4899,#8b5cf6);
---grad3:linear-gradient(135deg,#fbbf24,#ef4444);
---grad4:linear-gradient(135deg,#06d6a0,#3b82f6);
---radius:16px;--radius2:12px;--radius3:8px;
---nav-h:70px;--safe-bottom:env(safe-area-inset-bottom,0px);
+--r:14px;--r2:10px;--r3:6px;
+--nav:56px;
 }
-html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text)}
+html,body{height:100%;overflow:hidden;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
 body{display:flex;flex-direction:column}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--purple);border-radius:4px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
+a{color:var(--cyan);text-decoration:none}
 
+/* Layout */
 #app{flex:1;overflow:hidden;position:relative}
-.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:16px 16px calc(var(--nav-h) + var(--safe-bottom) + 16px);opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity .35s,transform .35s}
-.page.active{opacity:1;transform:translateY(0);pointer-events:auto}
+.page{position:absolute;inset:0;overflow-y:auto;padding:12px 12px calc(var(--nav) + 20px);opacity:0;pointer-events:none;transition:opacity .25s}
+.page.active{opacity:1;pointer-events:auto}
 
-#bottomNav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(10,10,26,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(139,92,246,.2);display:flex;align-items:center;justify-content:space-around;z-index:1000}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;cursor:pointer;transition:all .2s;position:relative;border:none;background:none;color:var(--text3);font-family:inherit;font-size:10px;min-width:56px}
-.nav-item.active{color:var(--cyan)}
-.nav-item .nav-icon{font-size:22px;transition:transform .2s}
-.nav-item.active .nav-icon{transform:scale(1.15)}
-.nav-item.active::after{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:30px;height:3px;background:var(--grad1);border-radius:0 0 4px 4px}
-.nav-item.profile-btn{margin-top:-20px}
-.nav-item.profile-btn .nav-icon{width:48px;height:48px;background:var(--grad1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 20px rgba(139,92,246,.4);border:3px solid var(--bg)}
+/* Nav */
+nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:rgba(10,10,26,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(139,92,246,.15);display:flex;z-index:999}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--text3);font:10px 'Noto Sans KR';cursor:pointer;transition:.2s;position:relative}
+nav button.on{color:var(--cyan)}
+nav button.on::before{content:'';position:absolute;top:0;width:24px;height:2px;background:var(--grad1);border-radius:0 0 2px 2px}
+nav button span:first-child{font-size:18px}
 
-.card{background:var(--bg2);border:1px solid rgba(139,92,246,.15);border-radius:var(--radius);padding:16px;margin-bottom:12px;transition:transform .2s,box-shadow .2s}
-.card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(139,92,246,.15)}
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media(min-width:600px){.card-grid{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:900px){.card-grid{grid-template-columns:repeat(4,1fr)}}
+/* Cards */
+.card{background:var(--bg2);border:1px solid rgba(139,92,246,.1);border-radius:var(--r2);padding:14px;margin-bottom:10px}
+.card:hover{border-color:rgba(139,92,246,.25)}
 
-.section-title{font-size:18px;font-weight:700;margin:20px 0 12px;display:flex;align-items:center;gap:8px}
-.section-title:first-child{margin-top:8px}
-.badge-pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+/* Section */
+.sec{font-size:16px;font-weight:700;margin:16px 0 10px;display:flex;align-items:center;gap:6px}
+.sec:first-child{margin-top:4px}
 
-#heroPage{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:40px}
-.hero-logo{font-size:48px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;letter-spacing:-1px}
-.hero-sub{font-size:14px;color:var(--text2);margin-bottom:6px}
-.hero-tagline{font-size:20px;font-weight:700;color:var(--gold);margin-bottom:24px}
-.hero-preview{width:100%;max-width:340px;margin-bottom:28px;position:relative}
-.hero-level-card{background:var(--bg3);border:2px solid rgba(139,92,246,.3);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
-.hero-level-card::before{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;background:radial-gradient(circle,rgba(139,92,246,.1),transparent);pointer-events:none}
-.hero-lv{font-size:40px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-name{font-size:16px;color:var(--text2);margin-bottom:12px}
-.hero-canvas-wrap{margin:0 auto;width:200px;height:200px}
-.hero-start-btn{display:inline-flex;align-items:center;gap:8px;padding:16px 48px;font-size:18px;font-weight:700;color:#fff;background:var(--grad1);border:none;border-radius:50px;cursor:pointer;transition:all .3s;box-shadow:0 4px 25px rgba(139,92,246,.4);font-family:inherit;margin-bottom:32px}
-.hero-start-btn:hover{transform:scale(1.05);box-shadow:0 6px 35px rgba(139,92,246,.5)}
-.hero-start-btn:active{transform:scale(.97)}
-.hero-stats{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
-.hero-stat{text-align:center}
-.hero-stat-num{font-size:32px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-stat-label{font-size:12px;color:var(--text3)}
+/* Gallery list */
+.gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:500px){.gal-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:768px){.gal-grid{grid-template-columns:repeat(4,1fr)}}
+.gal-item{background:var(--bg2);border:1px solid rgba(139,92,246,.1);border-radius:var(--r2);padding:14px 10px;text-align:center;cursor:pointer;transition:.2s}
+.gal-item:hover{border-color:var(--purple);transform:translateY(-2px)}
+.gal-item .gi{font-size:28px;margin-bottom:6px}
+.gal-item .gn{font-size:13px;font-weight:600}
+.gal-item .gc{font-size:10px;color:var(--text3);margin-top:2px}
 
-.tab-pills{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.tab-pills::-webkit-scrollbar{display:none}
-.tab-pill{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;border:1px solid rgba(139,92,246,.3);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap}
-.tab-pill.active{background:var(--grad1);color:#fff;border-color:transparent}
+/* Posts */
+.post{padding:12px 0;border-bottom:1px solid rgba(139,92,246,.06);cursor:pointer;transition:.15s}
+.post:hover{background:rgba(139,92,246,.03);margin:0 -12px;padding-left:12px;padding-right:12px}
+.post-cat{font-size:11px;font-weight:600;color:var(--purple)}
+.post-t{font-size:14px;font-weight:600;margin:2px 0}
+.post-m{font-size:11px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap}
+.post-hot{color:var(--red);font-weight:700}
+.post-body{font-size:13px;color:var(--text2);line-height:1.7;white-space:pre-wrap;margin:10px 0}
 
-.content-card{background:var(--bg3);border-radius:var(--radius2);overflow:hidden;cursor:pointer;transition:all .2s;border:1px solid transparent}
-.content-card:hover{border-color:rgba(139,92,246,.3);transform:translateY(-3px)}
-.content-thumb{width:100%;aspect-ratio:16/10;position:relative;overflow:hidden}
-.content-thumb-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px}
-.content-card-body{padding:10px}
-.content-card-title{font-size:13px;font-weight:600;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.content-card-meta{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px}
-.xp-tag{font-size:10px;font-weight:700;color:var(--gold);background:rgba(251,191,36,.15);padding:2px 8px;border-radius:10px}
-.hot-tag{position:absolute;top:6px;right:6px;background:var(--grad3);padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700}
-.playable-tag{position:absolute;top:6px;left:6px;background:rgba(6,214,160,.9);padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700;color:#000}
+/* Tabs */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid rgba(139,92,246,.2);background:none;color:var(--text2);cursor:pointer;font-family:inherit;transition:.2s}
+.tab.on{background:var(--purple);color:#fff;border-color:transparent}
 
-.profile-header{text-align:center;padding:20px 0}
-.profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--grad1);display:flex;align-items:center;justify-content:center;font-size:44px;margin:0 auto 12px;border:4px solid var(--bg);box-shadow:0 0 30px rgba(139,92,246,.3)}
-.profile-name{font-size:22px;font-weight:700}
-.profile-title{font-size:13px;color:var(--text3)}
-.level-section{background:var(--bg2);border-radius:var(--radius);padding:16px;margin:12px 0}
-.level-bar-wrap{background:var(--bg);border-radius:20px;height:24px;position:relative;overflow:hidden;margin:8px 0}
-.level-bar{height:100%;background:var(--grad1);border-radius:20px;transition:width 1.5s ease}
-.level-bar-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-.stat-canvas-wrap{margin:0 auto;width:260px;height:260px}
-.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.badge-item{aspect-ratio:1;border-radius:var(--radius2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:28px;position:relative;transition:transform .2s;cursor:pointer}
-.badge-item.earned{background:var(--bg3);border:1px solid rgba(139,92,246,.3)}
-.badge-item.locked{background:var(--bg2);border:1px solid rgba(100,116,139,.2);opacity:.45;filter:grayscale(1)}
-.badge-item:hover{transform:scale(1.08)}
-.badge-label{font-size:9px;color:var(--text3);text-align:center}
-.timeline-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(139,92,246,.08)}
-.timeline-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.timeline-text{font-size:13px}
-.timeline-time{font-size:11px;color:var(--text3)}
+/* Game cards */
+.game-card{background:var(--bg3);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:.2s;border:1px solid transparent}
+.game-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.game-thumb{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+.game-info{padding:10px}
+.game-name{font-size:13px;font-weight:600}
+.game-meta{font-size:10px;color:var(--text3);margin-top:3px}
+.play-badge{position:absolute;top:6px;left:6px;background:var(--cyan);color:#000;font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px}
 
-.community-tabs{display:flex;border-bottom:1px solid rgba(139,92,246,.15);margin-bottom:12px}
-.community-tab{flex:1;text-align:center;padding:12px;font-size:14px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
-.community-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
-.post-item{padding:14px 0;border-bottom:1px solid rgba(139,92,246,.08);cursor:pointer;transition:background .2s}
-.post-item:hover{background:rgba(139,92,246,.05);margin:0 -16px;padding-left:16px;padding-right:16px}
-.post-category{font-size:11px;font-weight:600;color:var(--purple);margin-bottom:2px}
-.post-title{font-size:14px;font-weight:600;margin-bottom:4px}
-.post-meta{font-size:11px;color:var(--text3);display:flex;gap:12px}
-.post-body{font-size:13px;color:var(--text2);line-height:1.8;margin:12px 0;white-space:pre-wrap}
-.comment-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(139,92,246,.06)}
-.comment-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.comment-body{flex:1}
-.comment-author{font-size:12px;font-weight:600;color:var(--cyan)}
-.comment-text{font-size:13px;color:var(--text2);margin-top:2px}
-.comment-time{font-size:10px;color:var(--text3);margin-top:2px}
+/* Utility cards */
+.util-card{background:var(--bg2);border:1px solid rgba(139,92,246,.1);border-radius:var(--r2);padding:16px;cursor:pointer;transition:.2s;text-align:center}
+.util-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.util-card .ui{font-size:32px;margin-bottom:8px}
+.util-card .un{font-size:13px;font-weight:600}
+.util-card .ud{font-size:10px;color:var(--text3);margin-top:3px}
 
-.fab{position:fixed;bottom:calc(var(--nav-h) + var(--safe-bottom) + 20px);right:20px;width:56px;height:56px;border-radius:50%;background:var(--grad1);border:none;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(139,92,246,.4);transition:transform .2s;z-index:500;display:none}
-.fab:hover{transform:scale(1.1)}
-.fab.show{display:flex;align-items:center;justify-content:center}
+/* Profile */
+.prof-head{text-align:center;padding:16px 0}
+.prof-av{width:72px;height:72px;border-radius:50%;background:var(--grad1);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 10px;border:3px solid var(--bg);box-shadow:0 0 20px rgba(139,92,246,.3)}
+.prof-name{font-size:20px;font-weight:700}
+.lv-wrap{background:var(--bg);border-radius:20px;height:20px;position:relative;overflow:hidden;margin:6px 0}
+.lv-bar{height:100%;background:var(--grad1);border-radius:20px;transition:width 1s}
+.lv-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.stat-wrap{margin:0 auto;width:240px;height:240px}
+.badge-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.badge-i{aspect-ratio:1;border-radius:var(--r2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:24px;transition:.2s;cursor:pointer}
+.badge-i.on{background:var(--bg3);border:1px solid rgba(139,92,246,.25)}
+.badge-i.off{background:var(--bg2);opacity:.35;filter:grayscale(1)}
 
-.service-card{display:flex;gap:14px;background:var(--bg2);border:1px solid rgba(139,92,246,.15);border-radius:var(--radius);padding:16px;margin-bottom:12px;text-decoration:none;color:inherit;transition:all .2s}
-.service-card:hover{border-color:var(--purple);transform:translateY(-2px);box-shadow:0 8px 30px rgba(139,92,246,.15)}
-.service-icon{width:56px;height:56px;border-radius:var(--radius2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
-.service-info{flex:1}
-.service-name{font-size:15px;font-weight:700;margin-bottom:3px}
-.service-desc{font-size:12px;color:var(--text3);margin-bottom:6px}
-.service-link{font-size:11px;color:var(--cyan);font-weight:500}
-.service-badge{display:inline-block;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:6px}
+/* Modal */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:5000;opacity:0;pointer-events:none;transition:.25s;display:flex;align-items:flex-end;justify-content:center}
+.mo.show{opacity:1;pointer-events:auto}
+.mo-c{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;max-height:82vh;overflow-y:auto;padding:20px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.mo.show .mo-c{transform:translateY(0)}
+.mo-bar{width:36px;height:3px;background:var(--text3);border-radius:3px;margin:0 auto 14px}
+.mo-t{font-size:17px;font-weight:700;margin-bottom:12px}
 
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--bg3);border:1px solid rgba(139,92,246,.3);border-radius:var(--radius2);padding:12px 24px;font-size:13px;font-weight:500;z-index:9999;transition:transform .4s cubic-bezier(.4,0,.2,1);box-shadow:0 10px 40px rgba(0,0,0,.5)}
+/* Game overlay */
+.go{position:fixed;inset:0;z-index:6000;background:#000;display:none;flex-direction:column}
+.go.show{display:flex}
+.go-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--bg);flex-shrink:0}
+.go-bar span{font-size:13px;font-weight:700}
+.go-btns{display:flex;gap:6px}
+.go-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;border:none;cursor:pointer;font-family:inherit}
+.go iframe{flex:1;border:none;width:100%}
+
+/* Nickname */
+.nick-o{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px}
+.nick-c{background:var(--bg2);border:2px solid rgba(139,92,246,.3);border-radius:var(--r);padding:28px;max-width:340px;width:100%;text-align:center}
+.nick-in{width:100%;padding:12px;background:var(--bg);border:2px solid rgba(139,92,246,.3);border-radius:var(--r3);color:var(--text);font-size:16px;font-family:inherit;text-align:center;margin:14px 0;outline:none}
+.nick-in:focus{border-color:var(--purple)}
+
+/* Form */
+.fi{width:100%;padding:10px;background:var(--bg);border:1px solid rgba(139,92,246,.2);border-radius:var(--r3);color:var(--text);font-size:13px;font-family:inherit;resize:vertical}
+.fi:focus{outline:none;border-color:var(--purple)}
+.btn{padding:10px 20px;border:none;border-radius:var(--r3);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
+.btn-p{background:var(--grad1);color:#fff}
+.btn-s{background:var(--bg3);color:var(--text2)}
+
+/* Comment */
+.cmt{padding:8px 0;border-bottom:1px solid rgba(139,92,246,.05);display:flex;gap:8px}
+.cmt-av{width:28px;height:28px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.cmt-name{font-size:11px;font-weight:600;color:var(--cyan)}
+.cmt-txt{font-size:12px;color:var(--text2);margin-top:1px}
+.cmt-time{font-size:9px;color:var(--text3);margin-top:1px}
+
+/* Util embedded */
+.util-embed{background:var(--bg);border-radius:var(--r2);padding:16px;margin-top:10px}
+.util-embed input,.util-embed select,.util-embed textarea{width:100%;padding:10px;background:var(--bg2);border:1px solid rgba(139,92,246,.2);border-radius:var(--r3);color:var(--text);font:13px 'Noto Sans KR';margin:4px 0}
+.util-embed button{margin-top:8px}
+.util-result{margin-top:10px;padding:12px;background:var(--bg2);border-radius:var(--r3);font-size:13px;color:var(--cyan);min-height:40px}
+
+/* Toast */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--bg3);border:1px solid rgba(139,92,246,.25);border-radius:var(--r2);padding:10px 20px;font-size:12px;font-weight:500;z-index:9999;transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 8px 30px rgba(0,0,0,.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .6s}
+/* Splash */
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10000;transition:opacity .5s}
 #splash.hide{opacity:0;pointer-events:none}
-#splash .logo{font-size:56px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:pulse 1.5s ease-in-out infinite}
-#splash .loader{width:120px;height:3px;background:var(--bg3);border-radius:3px;margin-top:20px;overflow:hidden}
-#splash .loader-bar{height:100%;width:0;background:var(--grad1);border-radius:3px;transition:width .5s}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+#splash h1{font-size:40px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#splash p{color:var(--text3);font-size:12px;margin-top:6px}
+.splash-bar{width:100px;height:2px;background:var(--bg3);border-radius:2px;margin-top:16px;overflow:hidden}
+.splash-bar div{height:100%;width:0;background:var(--grad1);transition:width .4s}
 
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:5000;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;align-items:flex-end;justify-content:center}
-.modal-overlay.show{opacity:1;pointer-events:auto}
-.modal-content{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:500px;max-height:80vh;overflow-y:auto;padding:24px;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1)}
-.modal-overlay.show .modal-content{transform:translateY(0)}
-.modal-handle{width:40px;height:4px;background:var(--text3);border-radius:4px;margin:0 auto 16px}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:16px}
+/* FAB */
+.fab{position:fixed;bottom:calc(var(--nav) + 16px);right:14px;width:50px;height:50px;border-radius:50%;background:var(--grad1);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(139,92,246,.35);z-index:500;display:none;align-items:center;justify-content:center;transition:.2s}
+.fab:hover{transform:scale(1.1)}
+.fab.show{display:flex}
 
-/* Game Modal - fullscreen */
-.game-overlay{position:fixed;inset:0;z-index:6000;background:#000;display:none;flex-direction:column}
-.game-overlay.show{display:flex}
-.game-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(10,10,26,.95);border-bottom:1px solid rgba(139,92,246,.2);flex-shrink:0}
-.game-bar-title{font-size:14px;font-weight:700;color:var(--text)}
-.game-bar-actions{display:flex;gap:8px}
-.game-bar-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .2s}
-.game-bar-close{background:rgba(239,68,68,.2);color:#ef4444}
-.game-bar-close:hover{background:rgba(239,68,68,.3)}
-.game-bar-apk{background:rgba(6,214,160,.2);color:var(--cyan)}
-.game-bar-apk:hover{background:rgba(6,214,160,.3)}
-.game-frame{flex:1;border:none;width:100%;height:100%}
-
-/* Nickname modal */
-.nickname-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:20px}
-.nickname-card{background:var(--bg2);border:2px solid rgba(139,92,246,.3);border-radius:var(--radius);padding:32px;max-width:360px;width:100%;text-align:center}
-.nickname-input{width:100%;padding:14px;background:var(--bg);border:2px solid rgba(139,92,246,.3);border-radius:var(--radius3);color:var(--text);font-size:18px;font-family:inherit;text-align:center;margin:16px 0;outline:none;transition:border-color .2s}
-.nickname-input:focus{border-color:var(--purple)}
-
-.form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text2)}
-.form-input{width:100%;padding:12px;background:var(--bg);border:1px solid rgba(139,92,246,.2);border-radius:var(--radius3);color:var(--text);font-size:14px;font-family:inherit;resize:vertical}
-.form-input:focus{outline:none;border-color:var(--purple)}
-.form-btn{padding:12px 24px;border:none;border-radius:var(--radius3);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
-.form-btn.primary{background:var(--grad1);color:#fff}
-.form-btn.secondary{background:var(--bg3);color:var(--text2)}
-
-@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.anim-in{animation:fadeInUp .5s ease forwards}
-.anim-delay-1{animation-delay:.1s;opacity:0}
-.anim-delay-2{animation-delay:.2s;opacity:0}
-.anim-delay-3{animation-delay:.3s;opacity:0}
-.anim-delay-4{animation-delay:.4s;opacity:0}
-
-@media(min-width:768px){
-  .page{padding:24px 32px calc(var(--nav-h) + 24px)}
-  .hero-logo{font-size:64px}
-  .hero-tagline{font-size:26px}
-  .card-grid{gap:16px}
-}
-@media(min-width:1024px){
-  #bottomNav{left:50%;transform:translateX(-50%);max-width:600px;border-radius:var(--radius) var(--radius) 0 0}
-}
+@media(min-width:768px){.page{padding:16px 24px calc(var(--nav)+16px)}}
+@media(min-width:1024px){nav{left:50%;transform:translateX(-50%);max-width:560px;border-radius:var(--r) var(--r) 0 0}}
 </style>
 </head>
 <body>
 
-<!-- Splash -->
-<div id="splash">
-  <div class="logo">LevelPlay</div>
-  <div style="color:var(--text3);font-size:14px;margin-top:8px">배우고, 올리고, 증명하라</div>
-  <div class="loader"><div class="loader-bar" id="splashBar"></div></div>
-</div>
-
-<!-- Toast -->
+<div id="splash"><h1>LevelPlay</h1><p>배우고, 올리고, 증명하라</p><div class="splash-bar"><div id="sBar"></div></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- Nickname Modal -->
-<div class="nickname-overlay" id="nicknameModal" style="display:none">
-  <div class="nickname-card">
-    <div style="font-size:48px;margin-bottom:12px">🧑‍🚀</div>
-    <div style="font-size:22px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">LevelPlay</div>
-    <div style="font-size:14px;color:var(--text2);margin-top:8px">탐험을 시작하기 전에<br>닉네임을 정해주세요!</div>
-    <input class="nickname-input" id="nicknameInput" placeholder="닉네임 입력" maxlength="12" autocomplete="off">
-    <button class="form-btn primary" style="width:100%;padding:14px;font-size:16px" onclick="setNickname()">시작하기</button>
-  </div>
+<!-- Nickname -->
+<div class="nick-o" id="nickMo" style="display:none">
+<div class="nick-c">
+  <div style="font-size:40px;margin-bottom:8px">🧑‍🚀</div>
+  <div style="font-size:20px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">LevelPlay</div>
+  <div style="font-size:13px;color:var(--text2);margin-top:6px">닉네임을 정해주세요</div>
+  <input class="nick-in" id="nickIn" placeholder="닉네임" maxlength="12">
+  <button class="btn btn-p" style="width:100%;padding:12px" onclick="setNick()">시작</button>
+</div>
 </div>
 
-<!-- Modal Overlay -->
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal-content" id="modalContent"></div>
-</div>
+<!-- Modals -->
+<div class="mo" id="mo" onclick="if(event.target===this)closeMo()"><div class="mo-c" id="moC"></div></div>
 
-<!-- Game Overlay -->
-<div class="game-overlay" id="gameOverlay">
-  <div class="game-bar">
-    <div class="game-bar-title" id="gameBarTitle"></div>
-    <div class="game-bar-actions">
-      <a id="gameApkLink" class="game-bar-btn game-bar-apk" download>APK 다운로드</a>
-      <button class="game-bar-btn game-bar-close" onclick="closeGame()">닫기</button>
-    </div>
-  </div>
-  <iframe class="game-frame" id="gameFrame" allow="autoplay" sandbox="allow-scripts allow-same-origin"></iframe>
+<!-- Game overlay -->
+<div class="go" id="gameO">
+  <div class="go-bar"><span id="gameT"></span><div class="go-btns"><a id="gameApk" class="go-btn" style="background:rgba(6,214,160,.2);color:var(--cyan)" download>APK</a><button class="go-btn" style="background:rgba(239,68,68,.2);color:var(--red)" onclick="closeGame()">닫기</button></div></div>
+  <iframe id="gameF" allow="autoplay" sandbox="allow-scripts allow-same-origin"></iframe>
 </div>
 
 <!-- App -->
 <div id="app">
 
-  <!-- Hero Page -->
-  <div class="page active" id="heroPage">
-    <div class="hero-logo anim-in">LevelPlay</div>
-    <div class="hero-sub anim-in anim-delay-1">레벨플레이</div>
-    <div class="hero-tagline anim-in anim-delay-2">🔥 배우고, 올리고, 증명하라</div>
+<!-- HOME -->
+<div class="page active" id="pgHome">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <div style="font-size:24px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">LevelPlay</div>
+    <div style="font-size:11px;color:var(--text3)" id="homeLv">Lv.1</div>
+  </div>
 
-    <div class="hero-preview anim-in anim-delay-3">
-      <div class="hero-level-card">
-        <div class="hero-lv" id="heroLv">Lv.1</div>
-        <div class="hero-name" id="heroName">탐험가님의 스탯</div>
-        <div class="hero-canvas-wrap">
-          <canvas id="heroStatCanvas" width="200" height="200"></canvas>
-        </div>
+  <div class="sec">🔥 실시간 인기글</div>
+  <div id="hotPosts"></div>
+
+  <div class="sec">🕐 최신글</div>
+  <div id="recentPosts"></div>
+</div>
+
+<!-- GALLERY LIST -->
+<div class="page" id="pgGal">
+  <div class="sec">📂 갤러리</div>
+  <div class="gal-grid" id="galGrid"></div>
+
+  <!-- 갤러리 내부 (동적 렌더) -->
+  <div id="galView" style="display:none">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <button class="btn btn-s" onclick="backToGalList()" style="padding:6px 12px;font-size:12px">← 목록</button>
+      <div style="font-size:16px;font-weight:700;flex:1" id="galTitle"></div>
+    </div>
+    <div id="galPosts"></div>
+  </div>
+</div>
+
+<!-- GAMES & UTILS -->
+<div class="page" id="pgPlay">
+  <div class="sec">🎮 플레이존</div>
+  <div class="tabs">
+    <button class="tab on" onclick="switchPlayTab(this,'games')">게임</button>
+    <button class="tab" onclick="switchPlayTab(this,'utils')">유틸리티</button>
+    <button class="tab" onclick="switchPlayTab(this,'search')">웹서치</button>
+  </div>
+  <div id="playGames">
+    <div class="gal-grid" id="gameGrid"></div>
+  </div>
+  <div id="playUtils" style="display:none">
+    <div class="gal-grid" id="utilGrid"></div>
+    <div id="utilEmbed"></div>
+  </div>
+  <div id="playSearch" style="display:none">
+    <div class="util-embed">
+      <div style="font-weight:600;margin-bottom:8px">🔍 통합 검색</div>
+      <input id="searchIn" placeholder="검색어를 입력하세요..." onkeydown="if(event.key==='Enter')doSearch()">
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+        <button class="btn btn-p" onclick="doSearch()" style="padding:8px 16px;font-size:12px">검색</button>
+        <button class="btn btn-s" onclick="doSearch('google')" style="padding:8px 16px;font-size:12px">Google</button>
+        <button class="btn btn-s" onclick="doSearch('naver')" style="padding:8px 16px;font-size:12px">Naver</button>
+        <button class="btn btn-s" onclick="doSearch('youtube')" style="padding:8px 16px;font-size:12px">YouTube</button>
+        <button class="btn btn-s" onclick="doSearch('github')" style="padding:8px 16px;font-size:12px">GitHub</button>
       </div>
-    </div>
-
-    <button class="hero-start-btn anim-in anim-delay-4" onclick="switchTab(0)">
-      🚀 시작하기
-    </button>
-
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="hero-stat-num" data-count="5">0</div>
-        <div class="hero-stat-label">5대 기둥</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num" data-count="100">0</div>
-        <div class="hero-stat-label">최대 레벨</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-num" data-count="2000">0</div>
-        <div class="hero-stat-label">콘텐츠</div>
-      </div>
-    </div>
-
-    <div style="margin-top:20px;width:100%;max-width:500px">
-      <div class="section-title">🔗 연결된 서비스</div>
-
-      <a class="service-card" href="https://bsy522-dot.github.io/culture-center-finder/" target="_blank">
-        <div class="service-icon" style="background:rgba(236,72,153,.15)">🏫</div>
-        <div class="service-info">
-          <div class="service-name">문센 강좌 파인더 <span class="service-badge" style="background:rgba(6,214,160,.2);color:var(--cyan)">LIVE</span></div>
-          <div class="service-desc">4,862개 문화센터 강좌 검색 · 홈플러스 실시간 크롤링 · PWA</div>
-          <div class="service-link">바로가기 →</div>
-        </div>
-      </a>
-
-      <a class="service-card" href="https://bsy522-dot.github.io/smartgolf/" target="_blank">
-        <div class="service-icon" style="background:rgba(34,197,94,.15)">⛳</div>
-        <div class="service-info">
-          <div class="service-name">SmartGolf 골프장 파인더 <span class="service-badge" style="background:rgba(6,214,160,.2);color:var(--cyan)">LIVE</span></div>
-          <div class="service-desc">전국 590개 골프장 · OSRM 이동시간 · 그린피 비교 · 지도뷰</div>
-          <div class="service-link">바로가기 →</div>
-        </div>
-      </a>
-
-      <a class="service-card" href="https://bsy522-dot.github.io/smartgolf/" target="_blank" style="display:none"><!-- placeholder --></a>
+      <div class="util-result" id="searchResult" style="display:none"></div>
     </div>
   </div>
+</div>
 
-  <!-- Edutoon Page -->
-  <div class="page" id="edutoonPage">
-    <div class="section-title">📚 에듀툰</div>
-    <div class="tab-pills">
-      <button class="tab-pill active" onclick="filterContent(this,'all','edutoon')">전체</button>
-      <button class="tab-pill" onclick="filterContent(this,'science','edutoon')">🔬 과학</button>
-      <button class="tab-pill" onclick="filterContent(this,'history','edutoon')">🏛️ 역사</button>
-      <button class="tab-pill" onclick="filterContent(this,'math','edutoon')">🔢 수학</button>
-      <button class="tab-pill" onclick="filterContent(this,'language','edutoon')">🌍 언어</button>
-      <button class="tab-pill" onclick="filterContent(this,'art','edutoon')">🎨 예술</button>
-      <button class="tab-pill" onclick="filterContent(this,'tech','edutoon')">💻 기술</button>
-    </div>
-    <div class="card-grid" id="edutoonGrid"></div>
+<!-- PROFILE -->
+<div class="page" id="pgProf">
+  <div class="prof-head">
+    <div class="prof-av">🧑‍🚀</div>
+    <div class="prof-name" id="profName">탐험가</div>
+    <div style="font-size:12px;color:var(--text3)" id="profTitle">LevelPlay 탐험가</div>
   </div>
-
-  <!-- Educast Page -->
-  <div class="page" id="educastPage">
-    <div class="section-title">🎬 에듀캐스트</div>
-    <div class="tab-pills">
-      <button class="tab-pill active" onclick="filterContent(this,'all','educast')">전체</button>
-      <button class="tab-pill" onclick="filterContent(this,'trending','educast')">🔥 인기</button>
-      <button class="tab-pill" onclick="filterContent(this,'new','educast')">🆕 최신</button>
-      <button class="tab-pill" onclick="filterContent(this,'short','educast')">⚡ 숏폼</button>
-      <button class="tab-pill" onclick="filterContent(this,'series','educast')">📺 시리즈</button>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:20px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="profLv">1</span></span>
+      <span style="font-size:11px;color:var(--text3)">다음 레벨까지 <span id="xpLeft">500</span> XP</span>
     </div>
-    <div class="card-grid" id="educastGrid"></div>
+    <div class="lv-wrap"><div class="lv-bar" id="lvBar"></div><div class="lv-txt"><span id="xpNow">0</span>/<span id="xpMax">500</span></div></div>
   </div>
-
-  <!-- Eduplay Page -->
-  <div class="page" id="eduplayPage">
-    <div class="section-title">🎮 에듀플레이</div>
-    <div class="tab-pills">
-      <button class="tab-pill active" onclick="filterContent(this,'all','eduplay')">전체</button>
-      <button class="tab-pill" onclick="filterContent(this,'action','eduplay')">⚔️ 액션</button>
-      <button class="tab-pill" onclick="filterContent(this,'puzzle','eduplay')">🧩 퍼즐</button>
-      <button class="tab-pill" onclick="filterContent(this,'rpg','eduplay')">🗡️ RPG</button>
-      <button class="tab-pill" onclick="filterContent(this,'edu','eduplay')">📖 교육</button>
-    </div>
-    <div class="card-grid" id="eduplayGrid"></div>
+  <div class="sec">📊 능력치</div>
+  <div class="stat-wrap"><canvas id="statC" width="240" height="240"></canvas></div>
+  <div class="sec">🏅 뱃지 <span style="font-size:11px;font-weight:400;color:var(--text3)" id="badgeCnt">0/16</span></div>
+  <div class="badge-g" id="badgeG"></div>
+  <div class="sec" style="margin-top:16px">📜 활동</div>
+  <div id="timeline"></div>
+  <div style="margin-top:16px;text-align:center;display:flex;gap:6px;justify-content:center">
+    <button class="btn btn-s" onclick="changeNick()" style="font-size:11px">닉네임 변경</button>
+    <button class="btn btn-s" onclick="if(confirm('초기화?')){localStorage.removeItem('lp3');location.reload()}" style="font-size:11px">초기화</button>
   </div>
-
-  <!-- Creator Page -->
-  <div class="page" id="creatorPage">
-    <div class="section-title">✏️ 크리에이터</div>
-    <div class="tab-pills">
-      <button class="tab-pill active" onclick="switchCreatorTab('upload')">📤 업로드</button>
-      <button class="tab-pill" onclick="switchCreatorTab('ranking')">🏆 랭킹</button>
-    </div>
-    <div id="creatorUpload">
-      <div class="card" style="text-align:center;padding:40px 20px;border:2px dashed rgba(139,92,246,.3);cursor:pointer" onclick="showUploadModal()">
-        <div style="font-size:48px;margin-bottom:12px">📤</div>
-        <div style="font-size:16px;font-weight:600;margin-bottom:4px">콘텐츠 업로드</div>
-        <div style="font-size:13px;color:var(--text3)">에듀툰, 영상, 게임을 공유하고 XP를 획득하세요!</div>
-      </div>
-      <div class="section-title" style="font-size:15px">📌 내 콘텐츠</div>
-      <div id="myContentList"></div>
-    </div>
-    <div id="creatorRanking" style="display:none">
-      <div id="rankingList"></div>
-    </div>
-  </div>
-
-  <!-- Eduphysical Page -->
-  <div class="page" id="physicalPage">
-    <div class="section-title">🏃 에듀피지컬</div>
-    <div class="tab-pills">
-      <button class="tab-pill active" onclick="filterContent(this,'all','physical')">전체</button>
-      <button class="tab-pill" onclick="filterContent(this,'challenge','physical')">🏆 챌린지</button>
-      <button class="tab-pill" onclick="filterContent(this,'record','physical')">📊 기록</button>
-      <button class="tab-pill" onclick="filterContent(this,'wifi','physical')">📡 WiFi CSI</button>
-    </div>
-    <div id="physicalContent"></div>
-  </div>
-
-  <!-- Profile Page -->
-  <div class="page" id="profilePage">
-    <div class="profile-header">
-      <div class="profile-avatar">🧑‍🚀</div>
-      <div class="profile-name" id="profileName">탐험가</div>
-      <div class="profile-title" id="profileTitle">LevelPlay 탐험가</div>
-    </div>
-    <div class="level-section">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:24px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Lv.<span id="profileLevel">1</span></span>
-        <span style="font-size:13px;color:var(--text3)">다음 레벨까지 <span id="xpRemain">500</span> XP</span>
-      </div>
-      <div class="level-bar-wrap">
-        <div class="level-bar" id="levelBar" style="width:0%"></div>
-        <div class="level-bar-text"><span id="xpCurrent">0</span> / <span id="xpMax2">500</span> XP</div>
-      </div>
-    </div>
-    <div class="section-title">📊 능력치</div>
-    <div class="stat-canvas-wrap"><canvas id="profileStatCanvas" width="260" height="260"></canvas></div>
-    <div class="section-title">🏅 뱃지 컬렉션 <span class="badge-pill" style="background:rgba(251,191,36,.15);color:var(--gold)" id="badgeCount">0/16</span></div>
-    <div class="badge-grid" id="badgeGrid"></div>
-    <div class="section-title" style="margin-top:24px">📜 최근 활동</div>
-    <div id="timeline"></div>
-    <div style="margin-top:24px;text-align:center;display:flex;gap:8px;justify-content:center">
-      <button class="form-btn secondary" onclick="changeNickname()" style="font-size:12px">✏️ 닉네임 변경</button>
-      <button class="form-btn secondary" onclick="resetProgress()" style="font-size:12px">🔄 진행도 초기화</button>
-    </div>
-  </div>
-
-  <!-- Community Page -->
-  <div class="page" id="communityPage">
-    <div class="section-title">💬 커뮤니티</div>
-    <div class="community-tabs">
-      <button class="community-tab active" onclick="switchCommunity(this,'popular')">🔥 인기</button>
-      <button class="community-tab" onclick="switchCommunity(this,'recent')">🕐 최신</button>
-      <button class="community-tab" onclick="switchCommunity(this,'ai')">🤖 AI공유</button>
-      <button class="community-tab" onclick="switchCommunity(this,'my')">👤 내글</button>
-    </div>
-    <div id="communityList"></div>
-  </div>
+</div>
 
 </div>
 
 <!-- FAB -->
-<button class="fab" id="fab" onclick="showWriteModal()">✏️</button>
+<button class="fab" id="fab" onclick="showWrite()">✏️</button>
 
-<!-- Bottom Navigation -->
-<nav id="bottomNav">
-  <button class="nav-item" data-tab="0" onclick="switchTab(0)"><span class="nav-icon">📚</span><span>에듀툰</span></button>
-  <button class="nav-item" data-tab="1" onclick="switchTab(1)"><span class="nav-icon">🎬</span><span>에듀캐스트</span></button>
-  <button class="nav-item profile-btn" data-tab="5" onclick="switchTab(5)"><span class="nav-icon">👤</span></button>
-  <button class="nav-item" data-tab="2" onclick="switchTab(2)"><span class="nav-icon">🎮</span><span>에듀플레이</span></button>
-  <button class="nav-item" data-tab="6" onclick="switchTab(6)"><span class="nav-icon">💬</span><span>커뮤니티</span></button>
+<!-- Nav -->
+<nav>
+  <button class="on" onclick="go(0)"><span>🏠</span>홈</button>
+  <button onclick="go(1)"><span>📂</span>갤러리</button>
+  <button onclick="go(2)"><span>🎮</span>플레이</button>
+  <button onclick="go(3)"><span>👤</span>프로필</button>
 </nav>
 
 <script>
-// ========== USER DATA ==========
-const defaultUser = {
-  nickname:'', level:1, xp:0, xpMax:500,
-  stats:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},
-  badges:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  activities:[], myPosts:[], myContent:[], likedPosts:[], version:2
+// ===== DATA =====
+const D=JSON.parse(localStorage.getItem('lp3')||'null')||{
+  nick:'',lv:1,xp:0,xpM:500,
+  st:{knowledge:10,stamina:8,creativity:12,communication:7,leadership:5,tech:15},
+  bg:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  acts:[],myPosts:[],liked:[],v:3
 };
-let userData = JSON.parse(localStorage.getItem('lp_user2')||'null') || {...defaultUser};
-if(!userData.version || userData.version<2){ userData={...defaultUser}; }
-function saveUser(){ localStorage.setItem('lp_user2',JSON.stringify(userData)); }
+const save=()=>localStorage.setItem('lp3',JSON.stringify(D));
 
 const BADGES=[
-  {icon:'🎓',name:'첫 수료'},{icon:'🔥',name:'3일 연속'},{icon:'📚',name:'에듀툰 10'},
-  {icon:'🎬',name:'에듀캐스트 10'},{icon:'🎮',name:'게임 클리어'},{icon:'✏️',name:'첫 창작'},
-  {icon:'🏃',name:'체력왕'},{icon:'⭐',name:'Lv.10'},{icon:'👑',name:'Lv.30'},
-  {icon:'💎',name:'Lv.50'},{icon:'🌟',name:'올라운더'},{icon:'🏆',name:'랭킹 TOP10'},
-  {icon:'💬',name:'소통왕'},{icon:'🎨',name:'아트 마스터'},{icon:'🧪',name:'과학 마스터'},
-  {icon:'🌍',name:'탐험가'}
+  {i:'🎓',n:'첫 수료'},{i:'🔥',n:'3일 연속'},{i:'📚',n:'에듀툰 10'},{i:'🎬',n:'캐스트 10'},
+  {i:'🎮',n:'게임 클리어'},{i:'✏️',n:'첫 창작'},{i:'🏃',n:'체력왕'},{i:'⭐',n:'Lv.10'},
+  {i:'👑',n:'Lv.30'},{i:'💎',n:'Lv.50'},{i:'🌟',n:'올라운더'},{i:'🏆',n:'TOP10'},
+  {i:'💬',n:'소통왕'},{i:'🎨',n:'아트마스터'},{i:'🧪',n:'과학마스터'},{i:'🌍',n:'탐험가'}
 ];
 
-// ========== EXPANDED CONTENT ==========
-// 동적 시간 계산
-function timeAgo(mins){
-  if(mins<60)return mins+'분 전';
-  if(mins<1440)return Math.floor(mins/60)+'시간 전';
-  if(mins<10080)return Math.floor(mins/1440)+'일 전';
-  return Math.floor(mins/10080)+'주 전';
-}
-function rTime(){return timeAgo(Math.floor(Math.random()*20160)+5);}
-
-const EDUTOON_DATA=[
-  {title:'우주의 비밀: 블랙홀 편',genre:'science',emoji:'🌌',xp:30,views:'23,471',desc:'사건의 지평선 넘어서면 빛도 못 빠져나온다는데... 진짜 그 안에 뭐가 있을까? 만화로 보니까 확 이해됨'},
-  {title:'조선왕조 500년 ① 건국편',genre:'history',emoji:'🏯',xp:25,views:'18,209',desc:'이성계가 위화도에서 말 돌린 그 순간부터. 정도전이랑의 케미가 진짜 좋음'},
-  {title:'미적분 없이 이해하는 미적분',genre:'math',emoji:'🔢',xp:20,views:'11,847',desc:'수포자도 이해하는 미적분 만화. "기울기"가 뭔지 이거 보면 바로 감옴'},
-  {title:'영어로 세계여행',genre:'language',emoji:'✈️',xp:15,views:'31,502',desc:'공항에서 "I have nothing to declare" 이것만 알면 됨 ㅋㅋ 여행 필수 표현 모음'},
-  {title:'미켈란젤로의 비밀',genre:'art',emoji:'🎨',xp:35,views:'8,734',desc:'시스티나 성당 천장에 매달려서 4년... 목 안 아팠을까 진짜. 천재의 고통'},
-  {title:'화학 원소 배틀로얄',genre:'science',emoji:'⚗️',xp:25,views:'14,891',desc:'수소 vs 산소 불꽃 만남! 원소들이 싸우면서 결합하는 설정 개웃김'},
-  {title:'삼국지 영웅전 - 적벽대전',genre:'history',emoji:'⚔️',xp:30,views:'42,158',desc:'제갈량 동남풍 개사기인데 이게 실화라니... 역대급 전투 만화화'},
-  {title:'확률로 로또 당첨될까?',genre:'math',emoji:'🎲',xp:20,views:'7,623',desc:'결론: 안됨. 근데 왜 안되는지 수학적으로 증명해주는게 슬프면서 재밌음'},
-  {title:'일본어 첫걸음: 히라가나편',genre:'language',emoji:'🇯🇵',xp:15,views:'19,845',desc:'あいうえお부터 차근차근. 귀여운 캐릭터가 가르쳐줘서 외우기 쉬움'},
-  {title:'반 고흐는 왜 귀를 잘랐나',genre:'art',emoji:'🌃',xp:30,views:'10,576',desc:'별이 빛나는 밤 그림 뒤에 숨겨진 광기. 예술가의 어두운 면을 솔직하게'},
-  {title:'DNA 이중나선의 비밀',genre:'science',emoji:'🧬',xp:35,views:'16,502',desc:'왓슨 & 크릭 말고 로잘린드 프랭클린이 진짜 주인공이라는 반전'},
-  {title:'피라미드는 누가 만들었나',genre:'history',emoji:'🏛️',xp:25,views:'25,347',desc:'외계인설? 노예설? 최신 고고학 연구 결과가 의외로 재밌음'},
-  {title:'[AI특집] Claude한테 코딩 시키기',genre:'tech',emoji:'🤖',xp:40,views:'51,238',desc:'프롬프트 하나로 웹앱 만들기. 실제 LevelPlay 에듀플레이 게임도 이렇게 만들었음'},
-  {title:'[AI특집] 나만의 AI 봇 만들기',genre:'tech',emoji:'🤖',xp:35,views:'38,102',desc:'텔레그램 봇을 Python으로 만드는 과정. API 연동부터 자동 재시작까지 완전 가이드'},
-  {title:'양자역학 개쉽게 설명',genre:'science',emoji:'⚛️',xp:35,views:'12,891',desc:'슈뢰딩거 고양이 죽었어? 살았어? 둘 다라는게 무슨 소리인지 드디어 이해함'},
-  {title:'로마는 하루아침에 망했다',genre:'history',emoji:'🏟️',xp:30,views:'20,765',desc:'1000년 제국이 무너진 진짜 이유. 내부 분열 + 게르만족 콤보'},
-  {title:'프랙탈: 무한반복의 아름다움',genre:'math',emoji:'📐',xp:25,views:'6,891',desc:'브로콜리 자르면 작은 브로콜리... 자연이 수학이라는 증거'},
-  {title:'중국어 성조 마스터',genre:'language',emoji:'🇨🇳',xp:15,views:'15,673',desc:'māmámǎmà 엄마가 말에게 욕하다?? 성조 틀리면 대참사 ㅋㅋ'},
-  {title:'모차르트는 진짜 천재였나',genre:'art',emoji:'🎵',xp:25,views:'8,234',desc:'5살에 작곡 35살에 사망. 짧지만 압도적이었던 삶. 레퀴엠의 비밀'},
-  {title:'[AI특집] 웹 크롤러 만들기',genre:'tech',emoji:'⛓️',xp:30,views:'24,567',desc:'Playwright로 실시간 데이터 긁어오기. 실제 문센파인더 앱 만든 방법 공개'},
+// 갤러리 정의
+const GALLERIES=[
+  {id:'ai',icon:'🤖',name:'AI 정보공유',desc:'AI 도구 비교, 프롬프트 팁, 자동화 노하우'},
+  {id:'dev',icon:'💻',name:'개발·코딩',desc:'프로그래밍, 웹개발, 앱개발 정보'},
+  {id:'prog',icon:'📦',name:'프로그램 공유',desc:'유용한 프로그램, 스크립트, 도구 공유'},
+  {id:'edu',icon:'📚',name:'교육·강좌',desc:'학습 자료, 튜토리얼, 온라인 강좌'},
+  {id:'game',icon:'🎮',name:'게임',desc:'게임 공략, 추천, 리뷰'},
+  {id:'science',icon:'🔬',name:'과학·기술',desc:'과학 뉴스, 기술 트렌드, 논문 리뷰'},
+  {id:'free',icon:'💬',name:'자유게시판',desc:'자유롭게 수다, 잡담, 일상'},
+  {id:'qna',icon:'❓',name:'질문·답변',desc:'모르는 거 물어보고 답해주기'},
 ];
 
-const EDUCAST_DATA=[
-  {title:'[실전] Claude Code로 웹앱 만들기 A to Z',tag:'trending',emoji:'🤖',xp:50,views:'62,871',dur:'28:15',desc:'실제로 Claude Code CLI 켜서 프롬프트 하나로 골프장 파인더 앱 만드는 전 과정. 코드 한 줄도 직접 안 침 ㅋ Playwright 크롤링부터 GitHub Pages 배포까지.'},
-  {title:'[실전] Outlook 메일 AI 자동화 구축기',tag:'trending',emoji:'📧',xp:45,views:'41,205',dur:'35:40',desc:'Python으로 Outlook COM 연동해서 메일 읽기→AI 분석→답장 초안 자동생성. Flask 서버 구조랑 Claude API 연동 방법 전부 공개. 회사에서 바로 쓸 수 있음.'},
-  {title:'[실전] 텔레그램 AI 봇 만들기 (자동재시작)',tag:'new',emoji:'🤖',xp:40,views:'38,452',dur:'22:30',desc:'python-telegram-bot으로 봇 만들고, 세션 분리하고, Windows 시작프로그램에 등록해서 자동 재시작까지. 실제 돌아가는 봇 라이브 시연.'},
-  {title:'[실전] 25만개 파일 해시 스캔으로 드라이브 정리',tag:'new',emoji:'🔍',xp:35,views:'24,891',dur:'18:50',desc:'SHA-256으로 3개 드라이브 1.7TB 스캔한 후기. 중복 840GB 찾아냄. Python hashlib + json으로 만드는 파일 고고학 도구.'},
-  {title:'[실전] GitHub Pages 무료 PWA 배포',tag:'trending',emoji:'🌐',xp:30,views:'55,102',dur:'12:20',desc:'index.html 하나로 PWA 앱 만들어서 GitHub Pages에 배포하는 방법. manifest.json, sw.js 설정 다 보여줌. 도메인도 무료!'},
-  {title:'5분 과학: 양자역학 핵쉽게',tag:'short',emoji:'⚛️',xp:15,views:'83,421',dur:'5:00',desc:'양자역학 5분컷 도전. 이중슬릿 실험이 뭔지 모르면 이것만 봐.'},
-  {title:'역사 다큐: 고려의 멸망',tag:'series',emoji:'📜',xp:35,views:'31,576',dur:'42:10',desc:'공민왕 시해부터 이성계 위화도 회군까지. 고려가 망하는 과정이 드라마보다 드라마틱'},
-  {title:'코딩 입문 EP.1 - 변수가 뭔데',tag:'series',emoji:'💻',xp:30,views:'51,289',dur:'18:20',desc:'변수를 상자에 비유하는건 이제 그만. 진짜 메모리에서 뭐가 일어나는지 보여줌'},
-  {title:'1분 영어: th 발음 이렇게',tag:'short',emoji:'🗣️',xp:10,views:'152,340',dur:'1:00',desc:'한국인이 제일 못하는 th 발음. 혀 위치 하나만 바꾸면 됨'},
-  {title:'운동 과학: 근비대의 원리',tag:'trending',emoji:'💪',xp:30,views:'78,123',dur:'12:40',desc:'근육이 찢어져야 커진다는게 진짜임? 운동 과학자가 알려주는 팩트'},
-  {title:'[실전] Cordova로 HTML→APK 빌드하기',tag:'new',emoji:'📱',xp:40,views:'19,873',dur:'25:00',desc:'웹 게임을 안드로이드 APK로 변환하는 전 과정. Java SDK + Gradle + Cordova 설정. 실제 하츄핑 게임 APK 만든 방법 그대로.'},
-  {title:'골프 스윙: 그립부터 다시',tag:'new',emoji:'⛳',xp:20,views:'21,456',dur:'11:30',desc:'100타 벽 못 넘는 분들 십중팔구 그립이 문제. 프로가 교정해줌'},
-  {title:'30초 상식퀴즈 #47',tag:'short',emoji:'❓',xp:10,views:'203,891',dur:'0:30',desc:'지구에서 가장 깊은 곳은? 마리아나 해구 11km... 에베레스트 넣어도 2km 남음'},
-  {title:'[실전] Python으로 Word/PPT 자동생성',tag:'new',emoji:'📄',xp:35,views:'28,345',dur:'20:15',desc:'python-docx, python-pptx로 이력서랑 발표자료 자동 생성. 템플릿 만들어두면 데이터만 바꿔서 찍어낼 수 있음.'},
-  {title:'심리학: 미루기의 과학',tag:'series',emoji:'🧠',xp:25,views:'47,821',dur:'16:50',desc:'미루는건 게으른게 아니라 편도체 반응이래. 근데 알아도 미루는건 똑같음 ㅋ'},
+// 게임
+const GAMES=[
+  {name:'사랑의 하츄핑 대모험',emoji:'💖',desc:'22개 스프라이트 캐릭터, 보스배틀, Web Audio',tag:'플랫포머',url:'games/hatcuping-game.html',apk:'apk/hatcuping-platformer.apk',play:true},
+  {name:'하츄핑 RPG 대모험',emoji:'🗡️',desc:'6챕터 스토리, NPC 대화, 타일맵 탐험',tag:'RPG',url:'games/hatcuping-rpg.html',apk:'apk/hatcuping-rpg.apk',play:true},
+  {name:'수학 퍼즐 마스터',emoji:'🔢',desc:'사칙연산부터 방정식까지 단계별 도전',tag:'퍼즐'},
+  {name:'세계 지리 퀴즈',emoji:'🗺️',desc:'수도, 국기, 랜드마크 퀴즈',tag:'퀴즈'},
+  {name:'역사 타워 디펜스',emoji:'🏰',desc:'역사 영웅으로 적을 막아라',tag:'전략'},
+  {name:'리듬 영어 단어',emoji:'🎵',desc:'리듬게임 + 영어 타이핑',tag:'교육'},
+  {name:'한자 드래곤 RPG',emoji:'🐉',desc:'한자 학습형 RPG',tag:'RPG'},
+  {name:'경제 시뮬레이터',emoji:'📈',desc:'주식·부동산 경영 시뮬',tag:'시뮬'},
 ];
 
-const EDUPLAY_DATA=[
-  {title:'🌈 사랑의 하츄핑 대모험',genre:'action',emoji:'💖',xp:50,players:'2.1만',gameUrl:'games/hatcuping-game.html',apkUrl:'apk/hatcuping-platformer.apk',hot:true,playable:true,desc:'22개 커스텀 스프라이트 캐릭터, 멀티 챕터 스토리, 보스 배틀! Canvas + Web Audio 기반 플랫포머 게임.'},
-  {title:'⚔️ 하츄핑 RPG 대모험',genre:'rpg',emoji:'🗡️',xp:60,players:'1.8만',gameUrl:'games/hatcuping-rpg.html',apkUrl:'apk/hatcuping-rpg.apk',hot:true,playable:true,desc:'6챕터 스토리, NPC 대화 시스템, 타일맵 탐험. 성/숲/축제/도서관 환경에서 펼쳐지는 RPG!'},
-  {title:'🧩 수학 퍼즐 마스터',genre:'puzzle',emoji:'🔢',xp:25,players:'3.5만',desc:'사칙연산부터 방정식까지, 단계별 수학 퍼즐 도전!'},
-  {title:'🌍 세계 지리 퀴즈',genre:'edu',emoji:'🗺️',xp:20,players:'2.8만',desc:'세계 수도, 국기, 랜드마크를 맞히는 퀴즈 게임.'},
-  {title:'🧪 화학 실험실',genre:'edu',emoji:'⚗️',xp:30,players:'1.2만',desc:'가상 실험실에서 안전하게 화학 실험! 원소 조합의 재미.'},
-  {title:'🏰 역사 타워 디펜스',genre:'action',emoji:'🏰',xp:40,players:'4.1만',desc:'역사 속 영웅들로 적을 막아라! 전략적 타워 배치.'},
-  {title:'🎵 리듬 영어 단어',genre:'edu',emoji:'🎶',xp:15,players:'5.3만',desc:'음악 리듬에 맞춰 영어 단어를 타이핑! 리듬게임+학습.'},
-  {title:'🐉 한자 드래곤 RPG',genre:'rpg',emoji:'🐉',xp:45,players:'1.5만',desc:'한자를 배우며 드래곤과 싸우는 학습형 RPG.'},
-  {title:'🔬 바이러스 퇴치 퍼즐',genre:'puzzle',emoji:'🦠',xp:25,players:'0.9만',desc:'바이러스 구조를 이해하며 퍼즐을 풀어 퇴치하라!'},
-  {title:'📊 경제 시뮬레이터',genre:'edu',emoji:'📈',xp:35,players:'0.7만',desc:'주식, 부동산, 기업 경영 시뮬레이션으로 경제 감각 UP!'},
-  {title:'🎯 사자성어 타이핑',genre:'edu',emoji:'📝',xp:20,players:'1.1만',desc:'사자성어를 타이핑하며 뜻도 함께 배우는 게임.'},
-  {title:'🌊 해양 탐험 어드벤처',genre:'action',emoji:'🐋',xp:35,players:'0.6만',desc:'심해 생물을 발견하며 해양 생태계를 탐험하는 어드벤처.'},
+// 유틸리티
+const UTILS=[
+  {id:'calc',icon:'🧮',name:'계산기',desc:'공학용 계산기'},
+  {id:'unit',icon:'📏',name:'단위 변환',desc:'길이·무게·온도·속도'},
+  {id:'color',icon:'🎨',name:'색상 피커',desc:'HEX·RGB·HSL 변환'},
+  {id:'qr',icon:'📱',name:'QR 생성기',desc:'텍스트→QR코드'},
+  {id:'json',icon:'📋',name:'JSON 포맷터',desc:'JSON 정리·검증'},
+  {id:'timer',icon:'⏱️',name:'타이머',desc:'스톱워치·카운트다운'},
+  {id:'random',icon:'🎲',name:'랜덤 생성기',desc:'숫자·이름·비밀번호'},
+  {id:'base64',icon:'🔐',name:'Base64 변환',desc:'인코딩·디코딩'},
 ];
 
-const CREATOR_RANKING=[
-  {name:'김교육',avatar:'👨‍🏫',level:89,xp:'1.2M',works:234,fans:'15.3만'},
-  {name:'사이언스걸',avatar:'👩‍🔬',level:76,xp:'890K',works:156,fans:'12.1만'},
-  {name:'역사탐험가',avatar:'🧙‍♂️',level:71,xp:'780K',works:189,fans:'9.8만'},
-  {name:'코딩마스터',avatar:'👨‍💻',level:68,xp:'650K',works:98,fans:'8.5만'},
-  {name:'아트퀸',avatar:'👩‍🎨',level:65,xp:'590K',works:312,fans:'7.2만'},
-  {name:'수학천재',avatar:'🧑‍🏫',level:61,xp:'520K',works:145,fans:'6.4만'},
-  {name:'체육대장',avatar:'🏋️',level:58,xp:'480K',works:87,fans:'5.9만'},
-  {name:'음악요정',avatar:'🧚',level:55,xp:'430K',works:201,fans:'5.1만'},
-  {name:'골프프로',avatar:'⛳',level:52,xp:'380K',works:65,fans:'4.3만'},
-  {name:'AI연구원',avatar:'🤖',level:49,xp:'340K',works:78,fans:'3.8만'},
+// 커뮤니티 글 (자연스러운 한국어)
+const POSTS=[
+{id:1,gal:'ai',t:'Claude Code CLI 써본 사람 후기 좀',b:'터미널에서 바로 코딩하는건데 생각보다 좋음\n프롬프트 잘 쓰면 웹앱 하나 뚝딱 나옴\n\n근데 context window 넘어가면 좀 헤매는 느낌\n긴 프로젝트는 CLAUDE.md 파일 써서 맥락 유지하는게 핵심인듯',a:'코드몽키',l:487,c:[{a:'AI덕',t:'맞아 CLAUDE.md 없으면 중간에 까먹음',m:180},{a:'뉴비',t:'설치 어떻게 해요?',m:120},{a:'코드몽키',t:'npm install -g @anthropic-ai/claude-code 끝',m:90}],m:45},
+{id:2,gal:'game',t:'하츄핑 RPG 도서관에서 막히는 분들',b:'낡은 책 NPC 앞에서 멈추는 버그 아님\n아이템 먼저 찾아야됨\n\n숲 챕터 오른쪽 끝에 있음',a:'게임러',l:156,c:[{a:'하츄맘',t:'우리 애도 거기서 30분 헤맴 ㅋㅋ',m:300},{a:'RPG매니아',t:'보스전 패턴도 알려줘요',m:240}],m:120},
+{id:3,gal:'ai',t:'Gemini vs Claude vs GPT 코딩 비교 (직접 테스트)',b:'같은 프롬프트로 투두앱 만들어봄\n\nClaude: 코드 깔끔, 에러처리 좋음, 파일 구조 잘 잡음\nGPT: 기능 다 되는데 코드가 좀 지저분\nGemini: 최신 API 잘 알고 있음, 무료 많이 줌\n\n코딩은 Claude > GPT > Gemini 순인듯\n일반 질문은 Gemini가 편하고',a:'AI비교충',l:312,c:[{a:'로컬러',t:'Ollama로 로컬에서 돌리는것도 괜찮음',m:500},{a:'개발자K',t:'Sonnet이면 충분하지 않나',m:420},{a:'GPT파',t:'o1으로 하면 얘기가 달라짐',m:360}],m:240},
+{id:4,gal:'dev',t:'Playwright 크롤링 vs BeautifulSoup 결론',b:'요즘 사이트 대부분 SPA라서 BS4로는 한계있음\n\nPlaywright: JS 렌더링 후 긁어서 확실\nBS4: 정적 HTML만 가능\n\n속도는 BS4가 10배 빠름\n근데 긁히는게 없으면 의미없으니까\n결론: Playwright 쓰세요\n\npip install playwright\npython -m playwright install\n이 두줄이면 설치 끝',a:'크롤러',l:189,c:[{a:'신입',t:'와 정리 감사합니다',m:180},{a:'데이터맨',t:'Selenium이랑 비교하면?',m:120},{a:'크롤러',t:'모든 면에서 Playwright가 나음',m:60}],m:300},
+{id:5,gal:'prog',t:'GitHub Pages로 무료 웹앱 배포하는 법',b:'1. GitHub 레포 만들기\n2. index.html 푸시\n3. Settings > Pages > main 브랜치 선택\n4. 끝. https://유저명.github.io/레포명/ 으로 접속\n\nPWA 만들려면 manifest.json이랑 sw.js 추가\n그러면 모바일에서 앱처럼 설치 가능\n\n서버 비용 0원임',a:'무료파',l:267,c:[{a:'웹초보',t:'커스텀 도메인도 되나요?',m:600},{a:'무료파',t:'CNAME 파일 만들고 DNS 설정하면 됨',m:540}],m:480},
+{id:6,gal:'edu',t:'[강좌] HTML 하나로 웹앱 만드는 구조',b:'빌드도구 없이 index.html 하나에 다 넣는 방법\n\n1. <style> 태그에 CSS 전부\n2. <script> 태그에 JS 전부\n3. localStorage로 데이터 저장\n4. 외부 라이브러리는 CDN으로\n\n장점: 배포가 개쉬움. 파일 하나만 올리면 끝\n단점: 파일이 좀 커짐\n\n근데 100KB 이하면 문제없음',a:'풀스택',l:201,c:[{a:'리액터',t:'React 안쓰면 유지보수가...',m:420},{a:'풀스택',t:'소규모 프로젝트는 이게 훨씬 빠름',m:360}],m:720},
+{id:7,gal:'free',t:'여기 레벨 시스템 중독성 있네',b:'에듀툰 읽고 게임하면 XP 올라가는거\n생각보다 재밌음 ㅋㅋ\n\n육각형 능력치 그래프 예쁘게 만들고 싶어서\n과학 콘텐츠만 20개 읽음',a:'레벨충',l:178,c:[{a:'50렙',t:'ㅊㅋ 계속 하다보면 올라감',m:300}],m:180},
+{id:8,gal:'ai',t:'Python + Outlook COM 자동화 삽질기',b:'회사 메일 자동화 하려고 win32com 썼는데\n\n핵심 삽질 포인트:\n1. pythoncom.CoInitialize() 안하면 Flask에서 안됨\n2. GetDefaultFolder(6)이 받은편지함\n3. 첨부파일 텍스트 추출은 pdfplumber\n4. 답장은 ReplyAll() 메서드\n\n1번 때문에 3시간 날림 ㅋㅋ',a:'자동화맨',l:234,c:[{a:'직장인',t:'1번 ㄹㅇ ㅋㅋ 나도 당했음',m:1440},{a:'파이썬러',t:'좋은 정리 감사',m:1200}],m:1440},
+{id:9,gal:'qna',t:'Cordova로 HTML을 APK로 만드는법?',b:'웹 게임을 안드로이드 앱으로 바꾸고 싶은데\nCordova라는게 있다길래\n\n설치부터 빌드까지 순서가 어떻게 되나요?\nJava도 필요한가요?',a:'앱만들고싶',l:67,c:[{a:'모바일러',t:'Java JDK 17 + Android SDK + Gradle 8.5 + Cordova\n설치 순서대로 하면 됨\ncordova create app\ncordova platform add android\ncordova build android\n이러면 APK 나옴',m:480},{a:'앱만들고싶',t:'감사합니다!! 해볼게요',m:420}],m:720},
+{id:10,gal:'dev',t:'[공유] python-docx로 워드 자동생성',b:'보고서 매번 손으로 만들기 귀찮아서\npython-docx로 자동화함\n\nfrom docx import Document\ndoc = Document()\ndoc.add_heading("제목", 0)\ndoc.add_paragraph("내용")\ndoc.save("output.docx")\n\n이게 기본이고\n스타일, 표, 이미지도 넣을 수 있음\npython-pptx 쓰면 PPT도 가능',a:'자동화덕',l:145,c:[{a:'직장인B',t:'엑셀은 openpyxl 쓰면 되나요?',m:360},{a:'자동화덕',t:'네 맞아요 openpyxl이 제일 편함',m:300}],m:600},
+{id:11,gal:'science',t:'WiFi CSI로 동작인식 되는 원리',b:'ESP32 같은 칩에서 WiFi 신호의 채널 상태 정보(CSI)를 추출하면\n사람이 움직일때 신호 패턴이 변함\n\n이걸 머신러닝으로 분류하면\n스쿼트인지 런지인지 플랭크인지 구분 가능\n\nSenseFi 프레임워크 참고\n카메라 없이 동작인식 가능해서 프라이버시 좋음',a:'연구원',l:98,c:[{a:'IT덕',t:'이거 실제로 정확도 어느정도?',m:720},{a:'연구원',t:'잘 튜닝하면 90% 이상 나옴',m:660}],m:1440},
+{id:12,gal:'prog',t:'Leaflet.js로 지도앱 만드는 법 간단정리',b:'구글맵 API는 유료인데 Leaflet은 무료임\n\nL.map("div").setView([37.5,127],13)\nL.tileLayer(타일URL).addTo(map)\nL.marker([37.5,127]).addTo(map)\n\n이 세줄이면 지도 나옴\n\nOSRM API 쓰면 경로 계산도 무료\nNominatim으로 주소→좌표 변환도 무료\n\n전부 무료로 지도앱 만들 수 있음',a:'지도쟁이',l:176,c:[{a:'웹개발',t:'Leaflet 진짜 좋음 성능도 괜찮고',m:480}],m:960},
+{id:13,gal:'ai',t:'MCP(Model Context Protocol) 설명',b:'Claude가 외부 도구랑 연동되는 프로토콜인데\n\n예를 들면\n- Gmail MCP → 메일 읽기/보내기\n- GitHub MCP → 코드 관리\n- Outlook MCP → 메일 자동화\n\n설정은 claude_desktop_config.json에서 하면 됨\n좀 복잡하긴 한데 한번 세팅해두면 개편함',a:'MCP유저',l:156,c:[{a:'얼리어답터',t:'카카오톡이랑도 연동 가능?',m:240},{a:'MCP유저',t:'카카오 REST API MCP 서버 만들면 가능은 함',m:180}],m:360},
+{id:14,gal:'free',t:'요즘 AI로 뭐 만들고 계세요?',b:'저는 업무 자동화 툴 만들어서 쓰고 있는데\n다른분들은 뭐 만드시는지 궁금\n\n공유해주세요!',a:'궁금이',l:89,c:[{a:'게임러',t:'아이한테 줄 교육용 게임 만들었어요',m:480},{a:'직장인',t:'메일 분류 자동화',m:360},{a:'학생',t:'영어 단어장 앱 만드는중',m:300}],m:120},
+{id:15,gal:'edu',t:'[강좌] Canvas API로 게임 만들기 기초',b:'HTML5 Canvas로 간단한 게임 만드는 법\n\nconst ctx = canvas.getContext("2d")\n\n1. 배경 그리기: ctx.fillRect()\n2. 캐릭터: 스프라이트 이미지 or 도형\n3. 게임루프: requestAnimationFrame()\n4. 입력: addEventListener("keydown")\n5. 충돌: AABB 판정\n\n이 5개만 알면 기본적인 게임은 만들 수 있음\n번들러 필요없고 HTML 하나면 됨',a:'게임개발',l:213,c:[{a:'코린이',t:'이거 보고 첫 게임 만들었어요!',m:720}],m:1080},
 ];
 
-const PHYSICAL_CHALLENGES=[
-  {title:'🏃 30일 달리기 챌린지',type:'challenge',progress:12,total:30,xp:100,participants:'5,230'},
-  {title:'💪 팔굽혀펴기 100개 달성',type:'challenge',progress:67,total:100,xp:50,participants:'3,120'},
-  {title:'🧘 매일 스트레칭 21일',type:'challenge',progress:8,total:21,xp:70,participants:'8,450'},
-  {title:'🏊 수영 1km 기록 도전',type:'challenge',progress:0,total:1,xp:80,participants:'1,890'},
-  {title:'⛳ 골프 드라이버 200m 도전',type:'challenge',progress:3,total:10,xp:90,participants:'2,340'},
-  {title:'🥊 30일 복싱 챌린지',type:'challenge',progress:0,total:30,xp:100,participants:'1,560'},
-];
-
-const PHYSICAL_RECORDS=[
-  {title:'오늘의 운동 기록',icon:'📊',desc:'달리기 3.2km · 23분 14초 · 칼로리 280kcal',time:'2시간 전'},
-  {title:'주간 리포트',icon:'📈',desc:'이번 주 활동량 +15% · 연속 5일 달성',time:'어제'},
-  {title:'WiFi CSI 동작 분석',icon:'📡',desc:'스쿼트 정확도 92% · 런지 87% · 플랭크 95%',time:'3시간 전'},
-  {title:'골프 스윙 분석',icon:'⛳',desc:'드라이버 헤드스피드 95mph · 비거리 210m · 정확도 78%',time:'5시간 전'},
-];
-
-const COMMUNITY_POSTS_POPULAR=[
-  {id:1,cat:'AI공유',title:'Claude Code로 실제 앱 만들어본 후기 (스샷有)',body:'에듀캐스트에서 Claude Code 강좌 보고 직접 해봤는데 진짜 됨;;\n\n터미널에서 "골프장 검색 웹앱 만들어줘" 치니까 index.html 하나로 완성해줌\n지도 라이브러리 연동, GPS, 필터 전부 다...\n\n근데 프롬프트를 구체적으로 써야 퀄리티가 올라감\n예: "Leaflet.js 지도에 590개 마커 찍고, 출발지에서 OSRM으로 이동시간 계산해줘" 이런식으로\n\n혹시 해보신 분 있으면 프롬프트 공유해요!',author:'코딩입문자',likes:487,comments:[{author:'개발자K',text:'프롬프트 엔지니어링이 핵심이죠 ㅋㅋ 저도 똑같은 경험',time:'2시간 전'},{author:'AI초보',text:'와 이거 보고 저도 도전해봐야겠다',time:'1시간 전'},{author:'풀스택러',text:'단일 HTML 파일로 만드는게 배포가 편해서 좋음',time:'45분 전'}],time:'3시간 전'},
-  {id:2,cat:'에듀플레이',title:'하츄핑 RPG 도서관 챕터에서 막힘 ㅠ',body:'낡은 책 NPC한테 말 걸어도 다음으로 안넘어가는데 뭐 놓친거 있나요?\n\n참고로 숲 챕터까지는 클리어함\n라미엔느 보스도 잡음',author:'게임고수',likes:156,comments:[{author:'RPG매니아',text:'NPC 근처에 숨겨진 아이템 있음 찾아봐',time:'4시간 전'},{author:'하츄핑맘',text:'우리 아이도 거기서 한참 헤맸어요 ㅋㅋ',time:'2시간 전'}],time:'5시간 전'},
-  {id:3,cat:'AI공유',title:'Gemini vs Claude 실사용 비교 (3개월차)',body:'업무에서 둘 다 쓰고 있는데 솔직 비교\n\nClaude: 코드 품질이 좋고 맥락 이해 잘함, 긴 문서 요약 갑\nGemini: 최신 정보 검색 가능, 이미지 이해 잘함, 무료 많이 줌\n\n코딩은 Claude가 확실히 나은 것 같고\n일상 질문은 Gemini가 편함\n\n여러분은 뭐 쓰세요?',author:'AI양다리',likes:312,comments:[{author:'ChatGPT파',text:'GPT도 써보세요 ㅋ',time:'8시간 전'},{author:'로컬AI',text:'Ollama로 로컬에서 돌리는것도 추천',time:'6시간 전'},{author:'개발자',text:'Claude Code CLI가 게임체인저임',time:'3시간 전'}],time:'8시간 전'},
-  {id:4,cat:'크리에이터',title:'첫 에듀툰 만들었는데 봐주실분?',body:'수학 관련 에듀툰인데 그림 실력이 별로라...\n그래도 내용은 자신있어요! 확률 부분\n\n피드백 주시면 감사하겠습니당',author:'수학도전',likes:89,comments:[{author:'아트퀸',text:'그림보다 스토리가 중요해요! 응원합니다',time:'11시간 전'},{author:'만화가지망',text:'캔바로 그리면 훨씬 예쁘게 나옴',time:'9시간 전'}],time:'14시간 전'},
-  {id:5,cat:'AI공유',title:'Python + Outlook COM 자동화 꿀팁 정리',body:'회사 메일 자동화하면서 배운것들 정리합니다\n\n1. win32com.client.Dispatch("Outlook.Application") 으로 연결\n2. 메일함 접근: namespace.GetDefaultFolder(6)\n3. 첨부파일 텍스트 추출: pdfplumber 쓰면 편함\n4. Flask에서 COM 쓸때 pythoncom.CoInitialize() 필수!!\n\n4번 때문에 3시간 삽질함 ㅋㅋ\n스레드 문제인데 이거 안하면 COM 객체 생성 안됨',author:'자동화덕후',likes:234,comments:[{author:'회사원',text:'4번 진짜 중요 ㅋㅋ 저도 당했음',time:'1일 전'},{author:'파이썬러',text:'좋은 정리 감사합니다',time:'20시간 전'}],time:'1일 전'},
-  {id:6,cat:'자유',title:'드디어 30렙 ㅋㅋㅋㅋ',body:'한달동안 매일 들어와서 에듀툰 읽고 게임하고 했더니 30렙 찍음\n\n능력치 보니까 기술이 제일 높고 체력이 제일 낮음... 현실 반영인가 ㅋㅋ\n\n육각형 차트 예쁘게 만들고 싶다',author:'노력충',likes:178,comments:[{author:'레벨50',text:'ㅊㅋ!! 50까지 화이팅',time:'22시간 전'},{author:'운동러',text:'에듀피지컬 챌린지 하면 체력 올라감',time:'19시간 전'}],time:'1일 전'},
-  {id:7,cat:'에듀툰',title:'삼국지 다음화 빨리요 제발',body:'적벽대전에서 끊기면 어떡해요ㅠㅠ\n제갈량 빨대꽂기 보고싶은데',author:'유비팬',likes:201,comments:[],time:'2일 전'},
-  {id:8,cat:'질문',title:'에듀캐스트에서 실제 코딩하는 영상이요',body:'Claude Code로 앱 만들기 영상 봤는데\n저도 따라하고 싶은데 Windows에서 어떻게 설치하나요?\n\nnpm install -g @anthropic-ai/claude-code\n이거 치면 되는건가요?',author:'코린이',likes:67,comments:[{author:'개발자K',text:'네 맞아요! Node.js 먼저 설치하고 그 명령어 치면 됩니다',time:'1일 전'},{author:'뉴비2',text:'저도 궁금했어요 감사합니다',time:'18시간 전'}],time:'2일 전'},
-  {id:9,cat:'AI공유',title:'MCP(Model Context Protocol) 써본 사람?',body:'Claude가 외부 도구랑 연동되는 MCP라는게 있다는데\n카카오톡이나 Gmail 같은거랑 연결할 수 있다고 함\n\n실제로 써본 분 있으면 후기 좀...\n설정이 복잡한지 궁금',author:'얼리어답터',likes:145,comments:[{author:'MCP유저',text:'설정 좀 복잡하긴 한데 한번 해두면 ㄹㅇ 개편함. Gmail MCP로 메일 요약 자동화했음',time:'1일 전'}],time:'2일 전'},
-  {id:10,cat:'에듀플레이',title:'하츄핑 플랫포머 전스테이지 공략',body:'보스전 패턴 정리:\n- 1챕터: 좌우 이동만 피하면 됨\n- 2챕터: 점프 타이밍이 핵심, 3번째 공격 후 빈틈\n- 3챕터: 패턴 외워야함 진짜\n\n근데 APK로 모바일에서 하는게 더 편함\n터치 컨트롤이 생각보다 잘됨',author:'올클리어',likes:267,comments:[{author:'초보',text:'3챕터 보스 ㄹㅇ 어려움ㅠ',time:'6시간 전'}],time:'1일 전'},
-  {id:11,cat:'AI공유',title:'Playwright 크롤링 vs BeautifulSoup 비교',body:'홈플러스 문화센터 데이터 긁으려고 둘 다 써봤는데\n\nBeautifulSoup: 정적 HTML만 가능. SPA 사이트는 못긁음\nPlaywright: 브라우저 자체를 띄워서 JS 렌더링 후 긁음. 느리지만 확실\n\n결론: 요즘 사이트 대부분 SPA라서 Playwright가 거의 필수\n근데 이마트는 둘 다 안됨 ㅋㅋ 차단당함',author:'크롤러마스터',likes:189,comments:[{author:'데이터맨',text:'Selenium보다 Playwright가 나은 이유가 뭔가요?',time:'3시간 전'},{author:'크롤러마스터',text:'속도, 안정성, API 편의성 전부 Playwright가 나음',time:'2시간 전'}],time:'5시간 전'},
-];
-
-const COMMUNITY_POSTS_RECENT=[
-  {id:101,cat:'자유',title:'처음인데 뭐부터 하면 되나요',body:'방금 가입했는데 콘텐츠가 너무 많아서 뭐부터 봐야할지 모르겠어요 ㅋㅋ\n추천 좀 해주세요',author:'새싹이',likes:3,comments:[],time:'방금'},
-  {id:102,cat:'AI공유',title:'GPT-4o vs Claude 4 코딩 비교 테스트',body:'같은 프롬프트로 투두리스트 앱 만들어봤는데\n\nClaude: 코드 구조가 깔끔하고 에러 처리 잘함\nGPT: 기능은 다 되는데 코드가 좀 지저분\n\n시간은 비슷했음',author:'AI테스터',likes:23,comments:[{author:'코딩러',text:'Sonnet으로 해도 충분하지 않나요?',time:'5분 전'}],time:'12분 전'},
-  {id:103,cat:'에듀캐스트',title:'Outlook 자동화 강좌 따라해봄',body:'에듀캐스트에서 메일 AI 자동화 강좌 보고 COM 연동까지 성공!\n근데 pythoncom.CoInitialize 이거 빼먹어서 30분 삽질ㅋㅋ\n영상에서 분명 말했는데 놓침',author:'직장인A',likes:41,comments:[],time:'28분 전'},
-  {id:104,cat:'에듀플레이',title:'하츄핑 APK 설치 안되는분',body:'설정 > 보안 > 알 수 없는 소스 허용 하셔야돼요\n크롬에서 다운받으면 크롬 앱에서 허용해야됨',author:'안드유저',likes:15,comments:[],time:'47분 전'},
-  {id:105,cat:'AI공유',title:'Playwright 설치 한방에 하는법',body:'pip install playwright\npython -m playwright install\n\n이 두줄이면 끝\n근데 회사 프록시 환경이면 좀 다름',author:'크롤러',likes:56,comments:[{author:'신입개발',text:'감사합니다 한번에 됐어요!',time:'20분 전'}],time:'1시간 전'},
-  {id:106,cat:'에듀피지컬',title:'골프 드라이버 챌린지 3일차',body:'오늘 연습장 가서 200m 3번 넘김!\n근데 10번 중 3번이라 아직 갈 길이 멀다ㅠ\n스윙 교정 영상 하나 더 봐야겠음',author:'주말골퍼',likes:19,comments:[],time:'2시간 전'},
-  {id:107,cat:'질문',title:'GitHub Pages 커스텀 도메인 연결 방법?',body:'지금 github.io 주소인데\n내 도메인으로 바꾸려면 어떻게 해야되나요?\nCNAME 파일이라는게 있다는데',author:'웹초보',likes:8,comments:[{author:'풀스택',text:'레포 설정에서 Custom domain 입력하고 DNS에 CNAME 추가하면 됩니다',time:'1시간 전'}],time:'3시간 전'},
-];
-
-const GENRE_COLORS={
-  science:'rgba(6,214,160,.15)',history:'rgba(251,191,36,.15)',math:'rgba(59,130,246,.15)',
-  language:'rgba(236,72,153,.15)',art:'rgba(139,92,246,.15)',tech:'rgba(34,211,238,.15)',
-  action:'rgba(239,68,68,.15)',puzzle:'rgba(6,214,160,.15)',rpg:'rgba(251,191,36,.15)',edu:'rgba(59,130,246,.15)',
-  trending:'rgba(239,68,68,.15)',new:'rgba(6,214,160,.15)',short:'rgba(251,191,36,.15)',series:'rgba(139,92,246,.15)',
-  challenge:'rgba(236,72,153,.15)',record:'rgba(59,130,246,.15)',wifi:'rgba(6,214,160,.15)'
-};
-
-// ========== NICKNAME ==========
-function checkNickname(){
-  if(!userData.nickname){
-    document.getElementById('nicknameModal').style.display='flex';
-    document.getElementById('nicknameInput').focus();
-  }
-}
-function setNickname(){
-  const n=document.getElementById('nicknameInput').value.trim();
-  if(!n){showToast('닉네임을 입력해주세요!');return;}
-  userData.nickname=n;saveUser();
-  document.getElementById('nicknameModal').style.display='none';
-  updateNameDisplays();
-  showToast('🎉 환영합니다, '+n+'님!');
-}
-function changeNickname(){
-  openModal(`
-    <div class="modal-handle"></div>
-    <div class="modal-title">✏️ 닉네임 변경</div>
-    <div class="form-group">
-      <input class="form-input" id="newNickname" value="${userData.nickname}" placeholder="새 닉네임" maxlength="12">
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="form-btn secondary" onclick="closeModal()">취소</button>
-      <button class="form-btn primary" onclick="doChangeNickname()">변경</button>
-    </div>
-  `);
-}
-function doChangeNickname(){
-  const n=document.getElementById('newNickname').value.trim();
-  if(!n)return;
-  userData.nickname=n;saveUser();closeModal();updateNameDisplays();
-  showToast('닉네임이 변경되었습니다!');
-}
-function updateNameDisplays(){
-  const n=userData.nickname||'탐험가';
-  document.getElementById('heroLv').textContent='Lv.'+userData.level;
-  document.getElementById('heroName').textContent=n+'님의 스탯';
-  document.getElementById('profileName').textContent=n;
-  document.getElementById('profileTitle').textContent='LevelPlay Lv.'+userData.level+' 탐험가';
+// ===== HELPERS =====
+function tAgo(mins){
+  if(mins<1)return '방금';if(mins<60)return mins+'분 전';if(mins<1440)return Math.floor(mins/60)+'시간 전';
+  const d=Math.floor(mins/1440);return d<7?d+'일 전':Math.floor(d/7)+'주 전';
 }
 
-// ========== PAGES & NAV ==========
-const pages=['edutoonPage','educastPage','eduplayPage','creatorPage','physicalPage','profilePage','communityPage'];
-let currentTab=-1;
-
-function switchTab(idx){
-  document.getElementById('heroPage').classList.remove('active');
-  pages.forEach((p,i)=>{
-    const el=document.getElementById(p);
-    if(i===idx)el.classList.add('active');else el.classList.remove('active');
-  });
-  document.querySelectorAll('.nav-item').forEach(n=>{
-    n.classList.toggle('active',parseInt(n.dataset.tab)===idx);
-  });
-  currentTab=idx;
-  document.getElementById('fab').classList.toggle('show',idx===6);
-  const activeP=document.querySelector('.page.active');
-  if(activeP)activeP.scrollTop=0;
+// ===== NAV =====
+const pgs=['pgHome','pgGal','pgPlay','pgProf'];
+let cur=0;
+function go(i){
+  pgs.forEach((p,j)=>{const e=document.getElementById(p);e.classList.toggle('active',i===j);});
+  document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('on',i===j));
+  cur=i;
+  document.getElementById('fab').classList.toggle('show',i===0||i===1);
 }
 
-function goHero(){
-  pages.forEach(p=>document.getElementById(p).classList.remove('active'));
-  document.getElementById('heroPage').classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  currentTab=-1;
-  document.getElementById('fab').classList.remove('show');
+// ===== NICKNAME =====
+function checkNick(){if(!D.nick)document.getElementById('nickMo').style.display='flex';}
+function setNick(){const n=document.getElementById('nickIn').value.trim();if(!n)return;D.nick=n;save();document.getElementById('nickMo').style.display='none';updNames();toast('환영합니다, '+n+'님!');}
+function changeNick(){openMo(`<div class="mo-bar"></div><div class="mo-t">닉네임 변경</div><input class="fi" id="newNick" value="${D.nick}"><div style="display:flex;gap:6px;justify-content:flex-end;margin-top:10px"><button class="btn btn-s" onclick="closeMo()">취소</button><button class="btn btn-p" onclick="const n=document.getElementById('newNick').value.trim();if(n){D.nick=n;save();closeMo();updNames();toast('변경 완료!')}">확인</button></div>`);}
+function updNames(){
+  const n=D.nick||'탐험가';
+  document.getElementById('homeLv').textContent='Lv.'+D.lv+' '+n;
+  document.getElementById('profName').textContent=n;
+  document.getElementById('profTitle').textContent='Lv.'+D.lv+' 탐험가';
 }
 
-// ========== HEXAGON CHART ==========
-function drawHexStat(canvasId,stats,size,labels){
-  const c=document.getElementById(canvasId);
-  if(!c)return;
-  const ctx=c.getContext('2d');
-  const w=c.width,h=c.height;
-  const cx=w/2,cy=h/2;
-  const r=size||Math.min(w,h)*0.38;
-  const keys=Object.keys(stats);
-  const n=keys.length;
-  const labelNames=labels||['지식','체력','창의력','소통','리더십','기술'];
-  ctx.clearRect(0,0,w,h);
-  for(let ring=5;ring>=1;ring--){
-    ctx.beginPath();
-    for(let i=0;i<n;i++){
-      const angle=(Math.PI*2/n)*i-Math.PI/2;
-      const x=cx+Math.cos(angle)*r*(ring/5);
-      const y=cy+Math.sin(angle)*r*(ring/5);
-      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    }
-    ctx.closePath();
-    ctx.strokeStyle='rgba(139,92,246,'+(0.08+ring*0.04)+')';
-    ctx.lineWidth=1;ctx.stroke();
-  }
-  for(let i=0;i<n;i++){
-    const angle=(Math.PI*2/n)*i-Math.PI/2;
-    ctx.beginPath();ctx.moveTo(cx,cy);
-    ctx.lineTo(cx+Math.cos(angle)*r,cy+Math.sin(angle)*r);
-    ctx.strokeStyle='rgba(139,92,246,.15)';ctx.stroke();
-  }
-  ctx.beginPath();
-  const vals=Object.values(stats);
-  for(let i=0;i<n;i++){
-    const angle=(Math.PI*2/n)*i-Math.PI/2;
-    const v=vals[i]/100;
-    const x=cx+Math.cos(angle)*r*v;
-    const y=cy+Math.sin(angle)*r*v;
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  }
-  ctx.closePath();
-  const grad=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
-  grad.addColorStop(0,'rgba(139,92,246,.3)');grad.addColorStop(1,'rgba(6,214,160,.3)');
-  ctx.fillStyle=grad;ctx.fill();
-  ctx.strokeStyle='rgba(139,92,246,.8)';ctx.lineWidth=2;ctx.stroke();
-  for(let i=0;i<n;i++){
-    const angle=(Math.PI*2/n)*i-Math.PI/2;
-    const v=vals[i]/100;
-    const x=cx+Math.cos(angle)*r*v;
-    const y=cy+Math.sin(angle)*r*v;
-    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
-    ctx.fillStyle='#8b5cf6';ctx.fill();
-    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-  }
-  ctx.fillStyle='#94a3b8';
-  ctx.font=(size&&size<80?'10':'11')+'px Noto Sans KR';
-  ctx.textAlign='center';
-  for(let i=0;i<n;i++){
-    const angle=(Math.PI*2/n)*i-Math.PI/2;
-    const lx=cx+Math.cos(angle)*(r+18);
-    const ly=cy+Math.sin(angle)*(r+18);
-    ctx.fillText(labelNames[i]+' '+vals[i],lx,ly+4);
-  }
+// ===== RENDER HOME =====
+function renderHome(){
+  const hot=POSTS.concat(D.myPosts).sort((a,b)=>(b.l||0)-(a.l||0)).slice(0,8);
+  document.getElementById('hotPosts').innerHTML=hot.map(p=>postHTML(p)).join('');
+  const recent=POSTS.concat(D.myPosts).sort((a,b)=>(a.m||0)-(b.m||0)).slice(0,6);
+  document.getElementById('recentPosts').innerHTML=recent.map(p=>postHTML(p)).join('');
 }
 
-// ========== RENDER ==========
-function renderEdutoon(){
-  document.getElementById('edutoonGrid').innerHTML=EDUTOON_DATA.map(d=>`
-    <div class="content-card" data-genre="${d.genre}" onclick="showContentDetail('edutoon',${JSON.stringify(d).replace(/"/g,'&quot;')})">
-      <div class="content-thumb" style="background:${GENRE_COLORS[d.genre]||'var(--bg4)'}">
-        <div class="content-thumb-inner">${d.emoji}</div>
-      </div>
-      <div class="content-card-body">
-        <div class="content-card-title">${d.title}</div>
-        <div class="content-card-meta"><span class="xp-tag">+${d.xp} XP</span><span>👁️ ${d.views}</span></div>
-      </div>
-    </div>`).join('');
+function postHTML(p){
+  const g=GALLERIES.find(g=>g.id===p.gal);
+  return `<div class="post" onclick='showPost(${JSON.stringify(p).replace(/'/g,"&#39;")})'>
+    <div class="post-cat">[${g?g.name:p.gal}]</div>
+    <div class="post-t">${p.t}</div>
+    <div class="post-m"><span>👤 ${p.a}</span><span>❤️ ${p.l||0}</span><span>💬 ${(p.c||[]).length}</span><span>${tAgo(p.m||0)}</span></div>
+  </div>`;
 }
 
-function renderEducast(){
-  document.getElementById('educastGrid').innerHTML=EDUCAST_DATA.map(d=>`
-    <div class="content-card" data-genre="${d.tag}" onclick="showContentDetail('educast',${JSON.stringify(d).replace(/"/g,'&quot;')})">
-      <div class="content-thumb" style="background:${GENRE_COLORS[d.tag]||'var(--bg4)'}">
-        <div class="content-thumb-inner">${d.emoji}</div>
-        <div style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.8);padding:2px 8px;border-radius:4px;font-size:11px">${d.dur}</div>
-      </div>
-      <div class="content-card-body">
-        <div class="content-card-title">${d.title}</div>
-        <div class="content-card-meta"><span class="xp-tag">+${d.xp} XP</span><span>👁️ ${d.views}</span></div>
-      </div>
-    </div>`).join('');
-}
-
-function renderEduplay(){
-  document.getElementById('eduplayGrid').innerHTML=EDUPLAY_DATA.map(d=>`
-    <div class="content-card" data-genre="${d.genre}" onclick="${d.gameUrl?`openGame('${d.gameUrl}','${d.title.replace(/'/g,"\\'")}','${d.apkUrl||''}')`:`showContentDetail('eduplay',${JSON.stringify(d).replace(/"/g,'&quot;')})`}">
-      <div class="content-thumb" style="background:${GENRE_COLORS[d.genre]||'var(--bg4)'}">
-        <div class="content-thumb-inner">${d.emoji}</div>
-        ${d.hot?'<div class="hot-tag">🔥 HOT</div>':''}
-        ${d.playable?'<div class="playable-tag">▶ PLAY</div>':''}
-      </div>
-      <div class="content-card-body">
-        <div class="content-card-title">${d.title}</div>
-        <div class="content-card-meta"><span class="xp-tag">+${d.xp} XP</span><span>🎮 ${d.players}</span></div>
-      </div>
-    </div>`).join('');
-}
-
-function renderCreator(){
-  const list=document.getElementById('myContentList');
-  if(userData.myContent.length===0){
-    list.innerHTML='<div class="card" style="text-align:center;color:var(--text3);padding:30px">아직 업로드한 콘텐츠가 없습니다</div>';
-  }else{
-    list.innerHTML=userData.myContent.map(c=>`
-      <div class="card" style="display:flex;gap:12px;align-items:center">
-        <div style="font-size:28px">${c.emoji}</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:600">${c.title}</div><div style="font-size:11px;color:var(--text3)">${c.type} · ${c.date}</div></div>
-        <span class="xp-tag">+${c.xp} XP</span>
-      </div>`).join('');
-  }
-  document.getElementById('rankingList').innerHTML=CREATOR_RANKING.map((c,i)=>`
-    <div class="card" style="display:flex;gap:14px;align-items:center">
-      <div style="font-size:20px;font-weight:900;width:30px;text-align:center;color:${i<3?'var(--gold)':'var(--text3)'}">${i<3?['🥇','🥈','🥉'][i]:(i+1)}</div>
-      <div style="font-size:32px">${c.avatar}</div>
-      <div style="flex:1"><div style="font-size:14px;font-weight:600">${c.name} <span style="font-size:11px;color:var(--purple)">Lv.${c.level}</span></div><div style="font-size:11px;color:var(--text3)">작품 ${c.works}개 · 팬 ${c.fans}</div></div>
-      <div style="font-size:13px;font-weight:700;color:var(--cyan)">${c.xp} XP</div>
-    </div>`).join('');
-}
-
-function switchCreatorTab(tab){
-  document.getElementById('creatorUpload').style.display=tab==='upload'?'block':'none';
-  document.getElementById('creatorRanking').style.display=tab==='ranking'?'block':'none';
-  document.querySelector('#creatorPage .tab-pills').querySelectorAll('.tab-pill').forEach(p=>p.classList.toggle('active',(tab==='upload'&&p.textContent.includes('업로드'))||(tab==='ranking'&&p.textContent.includes('랭킹'))));
-}
-
-function renderPhysical(){
-  let html='<div class="section-title" style="font-size:15px">🏆 진행 중인 챌린지</div>';
-  html+=PHYSICAL_CHALLENGES.map(c=>{
-    const pct=Math.round(c.progress/c.total*100);
-    return `<div class="card" data-genre="challenge" onclick="earnXP(10,'챌린지 참여: ${c.title}')">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><div style="font-size:14px;font-weight:600">${c.title}</div><span class="xp-tag">+${c.xp} XP</span></div>
-      <div class="level-bar-wrap" style="height:16px;margin:4px 0"><div class="level-bar" style="width:${pct}%"></div><div class="level-bar-text" style="font-size:10px">${c.progress}/${c.total} (${pct}%)</div></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:4px">👥 ${c.participants}명 참여중</div>
-    </div>`;
+// ===== GALLERY =====
+function renderGalList(){
+  document.getElementById('galGrid').innerHTML=GALLERIES.map(g=>{
+    const cnt=POSTS.filter(p=>p.gal===g.id).length;
+    return `<div class="gal-item" onclick="openGal('${g.id}')"><div class="gi">${g.icon}</div><div class="gn">${g.name}</div><div class="gc">${cnt}개 글</div></div>`;
   }).join('');
-
-  html+='<div class="section-title" style="font-size:15px">📊 활동 기록</div>';
-  html+=PHYSICAL_RECORDS.map(r=>`
-    <div class="card" data-genre="${r.icon==='📡'||r.icon==='⛳'?'wifi':'record'}" style="display:flex;gap:12px;align-items:flex-start">
-      <div style="font-size:28px">${r.icon}</div>
-      <div style="flex:1"><div style="font-size:14px;font-weight:600">${r.title}</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${r.desc}</div><div style="font-size:11px;color:var(--text3);margin-top:4px">${r.time}</div></div>
-    </div>`).join('');
-
-  html+=`<div class="section-title" style="font-size:15px">📡 WiFi CSI 실시간 스코어</div>
-    <div class="card" style="text-align:center;padding:20px">
-      <div style="font-size:14px;color:var(--text2);margin-bottom:8px">현재 동작: 스쿼트</div>
-      <div style="font-size:48px;font-weight:900;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent">92<span style="font-size:20px">점</span></div>
-      <div style="display:flex;justify-content:center;gap:20px;margin-top:12px">
-        <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--cyan)">15</div><div style="font-size:11px;color:var(--text3)">횟수</div></div>
-        <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--gold)">87%</div><div style="font-size:11px;color:var(--text3)">정확도</div></div>
-        <div style="text-align:center"><div style="font-size:20px;font-weight:700;color:var(--pink)">142</div><div style="font-size:11px;color:var(--text3)">칼로리</div></div>
-      </div>
-    </div>`;
-  document.getElementById('physicalContent').innerHTML=html;
 }
 
-function renderProfile(){
-  updateNameDisplays();
-  document.getElementById('profileLevel').textContent=userData.level;
-  document.getElementById('xpCurrent').textContent=userData.xp;
-  document.getElementById('xpMax2').textContent=userData.xpMax;
-  document.getElementById('xpRemain').textContent=userData.xpMax-userData.xp;
-  document.getElementById('badgeCount').textContent=userData.badges.filter(b=>b).length+'/16';
-  setTimeout(()=>{document.getElementById('levelBar').style.width=(userData.xp/userData.xpMax*100)+'%';},100);
-  drawHexStat('profileStatCanvas',userData.stats,95);
-  document.getElementById('badgeGrid').innerHTML=BADGES.map((b,i)=>`
-    <div class="badge-item ${userData.badges[i]?'earned':'locked'}">
-      <span style="font-size:28px">${b.icon}</span><span class="badge-label">${b.name}</span>
-    </div>`).join('');
-  const activities=userData.activities.length>0?userData.activities.slice(-10).reverse():[
-    {text:'LevelPlay에 가입했습니다!',xp:0,time:'방금 전',color:'var(--cyan)'},
-  ];
-  document.getElementById('timeline').innerHTML=activities.map(a=>`
-    <div class="timeline-item">
-      <div class="timeline-dot" style="background:${a.color||'var(--purple)'}"></div>
-      <div style="flex:1"><div class="timeline-text">${a.text} ${a.xp?'<span class="xp-tag">+'+a.xp+' XP</span>':''}</div><div class="timeline-time">${a.time}</div></div>
-    </div>`).join('');
+function openGal(id){
+  const g=GALLERIES.find(x=>x.id===id);
+  document.getElementById('galGrid').style.display='none';
+  document.getElementById('galView').style.display='block';
+  document.getElementById('galTitle').textContent=g.icon+' '+g.name;
+  const posts=POSTS.concat(D.myPosts).filter(p=>p.gal===id).sort((a,b)=>(a.m||0)-(b.m||0));
+  document.getElementById('galPosts').innerHTML=posts.length?posts.map(p=>postHTML(p)).join(''):'<div style="text-align:center;padding:40px;color:var(--text3)">아직 글이 없습니다. 첫 글을 써보세요!</div>';
 }
 
-function renderCommunity(type){
-  const list=document.getElementById('communityList');
-  const posts=type==='ai'?COMMUNITY_POSTS_POPULAR.concat(COMMUNITY_POSTS_RECENT).filter(p=>p.cat==='AI공유'):type==='recent'?COMMUNITY_POSTS_RECENT:type==='my'?userData.myPosts:COMMUNITY_POSTS_POPULAR;
-  if(posts.length===0){
-    list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)">아직 작성한 글이 없습니다</div>';
-    return;
-  }
-  list.innerHTML=posts.map(p=>`
-    <div class="post-item" onclick="showPostDetail(${JSON.stringify(p).replace(/"/g,'&quot;')})">
-      <div class="post-category">[${p.cat}]</div>
-      <div class="post-title">${p.title}</div>
-      <div class="post-meta">
-        <span>👤 ${p.author}</span>
-        <span onclick="event.stopPropagation();toggleLike(${p.id||0},this)">❤️ ${p.likes}</span>
-        <span>💬 ${(p.comments||[]).length}</span>
-        <span>${p.time}</span>
-      </div>
-    </div>`).join('');
+function backToGalList(){
+  document.getElementById('galGrid').style.display='';
+  document.getElementById('galView').style.display='none';
 }
 
-function switchCommunity(el,type){
-  el.parentElement.querySelectorAll('.community-tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  renderCommunity(type);
-}
-
-// ========== CONTENT DETAIL MODAL ==========
-function showContentDetail(section,data){
-  const d=typeof data==='string'?JSON.parse(data):data;
-  earnXP(d.xp, section==='edutoon'?'에듀툰: '+d.title:section==='educast'?'에듀캐스트: '+d.title:'에듀플레이: '+d.title);
-  openModal(`
-    <div class="modal-handle"></div>
-    <div style="font-size:48px;text-align:center;margin-bottom:12px">${d.emoji}</div>
-    <div class="modal-title" style="text-align:center">${d.title}</div>
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="xp-tag" style="font-size:12px">+${d.xp} XP 획득!</span>
-      ${d.views?'<span style="font-size:12px;color:var(--text3);margin-left:8px">👁️ '+d.views+'</span>':''}
-      ${d.players?'<span style="font-size:12px;color:var(--text3);margin-left:8px">🎮 '+d.players+'</span>':''}
-      ${d.dur?'<span style="font-size:12px;color:var(--text3);margin-left:8px">⏱️ '+d.dur+'</span>':''}
+// ===== POST DETAIL =====
+function showPost(p){
+  const cmts=(p.c||[]).map(c=>`<div class="cmt"><div class="cmt-av">😊</div><div><div class="cmt-name">${c.a}</div><div class="cmt-txt">${c.t}</div><div class="cmt-time">${tAgo(c.m||0)}</div></div></div>`).join('');
+  const g=GALLERIES.find(x=>x.id===p.gal);
+  openMo(`<div class="mo-bar"></div>
+    <div class="post-cat">[${g?g.name:p.gal}]</div>
+    <div class="mo-t">${p.t}</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">👤 ${p.a} · ${tAgo(p.m||0)} · ❤️ ${p.l||0} · 💬 ${(p.c||[]).length}</div>
+    <div class="post-body">${p.b||''}</div>
+    <div style="border-top:1px solid rgba(139,92,246,.08);padding-top:10px;margin-top:10px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px">💬 댓글 ${(p.c||[]).length}</div>
+      ${cmts||'<div style="color:var(--text3);font-size:12px;padding:10px 0">아직 댓글이 없습니다</div>'}
     </div>
-    <div style="font-size:14px;color:var(--text2);line-height:1.8;padding:12px;background:var(--bg);border-radius:var(--radius3)">${d.desc||'콘텐츠를 감상했습니다!'}</div>
-    <div style="text-align:center;margin-top:16px">
-      <button class="form-btn primary" onclick="closeModal()">닫기</button>
-    </div>
-  `);
-}
-
-// ========== POST DETAIL MODAL ==========
-function showPostDetail(post){
-  const p=typeof post==='string'?JSON.parse(post):post;
-  const comments=(p.comments||[]).map(c=>`
-    <div class="comment-item">
-      <div class="comment-avatar">😊</div>
-      <div class="comment-body">
-        <div class="comment-author">${c.author}</div>
-        <div class="comment-text">${c.text}</div>
-        <div class="comment-time">${c.time}</div>
-      </div>
-    </div>`).join('');
-
-  openModal(`
-    <div class="modal-handle"></div>
-    <div class="post-category">[${p.cat}]</div>
-    <div class="modal-title">${p.title}</div>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px">👤 ${p.author} · ${p.time} · ❤️ ${p.likes} · 💬 ${(p.comments||[]).length}</div>
-    <div class="post-body">${p.body||''}</div>
-    <div style="border-top:1px solid rgba(139,92,246,.1);padding-top:12px;margin-top:12px">
-      <div style="font-size:14px;font-weight:600;margin-bottom:8px">💬 댓글 ${(p.comments||[]).length}개</div>
-      ${comments||'<div style="color:var(--text3);font-size:13px;text-align:center;padding:12px">아직 댓글이 없습니다</div>'}
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <input class="form-input" id="commentInput" placeholder="댓글을 입력하세요..." style="flex:1;padding:10px">
-      <button class="form-btn primary" style="padding:10px 16px" onclick="addComment(${p.id||0})">등록</button>
-    </div>
-  `);
-}
-
-function addComment(postId){
-  const text=document.getElementById('commentInput').value.trim();
-  if(!text){showToast('댓글을 입력해주세요');return;}
-  earnXP(5,'댓글 작성');
-  showToast('💬 댓글이 등록되었습니다! +5 XP');
-  closeModal();
-}
-
-function toggleLike(postId,el){
-  if(!userData.likedPosts)userData.likedPosts=[];
-  if(!userData.likedPosts.includes(postId)){
-    userData.likedPosts.push(postId);
-    saveUser();
-    const num=parseInt(el.textContent.replace(/[^0-9]/g,''))+1;
-    el.textContent='❤️ '+num;
-    showToast('❤️ 좋아요!');
-  }
-}
-
-// ========== GAME MODAL ==========
-function openGame(url,title,apkUrl){
-  document.getElementById('gameBarTitle').textContent=title;
-  document.getElementById('gameFrame').src=url;
-  const apkLink=document.getElementById('gameApkLink');
-  if(apkUrl){apkLink.href=apkUrl;apkLink.style.display='inline-block';}
-  else{apkLink.style.display='none';}
-  document.getElementById('gameOverlay').classList.add('show');
-  earnXP(10,'게임 시작: '+title);
-}
-function closeGame(){
-  document.getElementById('gameOverlay').classList.remove('show');
-  document.getElementById('gameFrame').src='';
-}
-
-// ========== FILTER ==========
-function filterContent(btn,genre,section){
-  btn.parentElement.querySelectorAll('.tab-pill').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  let container;
-  if(section==='edutoon')container=document.getElementById('edutoonGrid');
-  else if(section==='educast')container=document.getElementById('educastGrid');
-  else if(section==='eduplay')container=document.getElementById('eduplayGrid');
-  else if(section==='physical'){
-    document.querySelectorAll('#physicalContent .card[data-genre]').forEach(c=>{
-      c.style.display=(genre==='all'||c.dataset.genre===genre)?'':'none';
-    });return;
-  }
-  if(!container)return;
-  container.querySelectorAll('.content-card').forEach(c=>{
-    c.style.display=(genre==='all'||c.dataset.genre===genre)?'':'none';
-  });
-}
-
-// ========== XP / LEVEL ==========
-// 장르→능력치 매핑
-const GENRE_STAT_MAP={
-  science:'knowledge',history:'knowledge',math:'knowledge',tech:'tech',
-  language:'communication',art:'creativity',action:'stamina',puzzle:'knowledge',
-  rpg:'creativity',edu:'knowledge',challenge:'stamina',record:'stamina',
-  wifi:'tech',trending:'communication',new:'creativity',short:'communication',
-  series:'knowledge'
-};
-function earnXP(amount,activity,genre){
-  userData.xp+=amount;
-  userData.activities.push({text:activity,xp:amount,time:'방금 전',color:'var(--cyan)'});
-  // 장르에 따라 관련 능력치 +1~2
-  const statKey=GENRE_STAT_MAP[genre];
-  if(statKey&&userData.stats[statKey]<100){
-    userData.stats[statKey]=Math.min(100,userData.stats[statKey]+Math.floor(Math.random()*2)+1);
-  }
-  let leveledUp=false;
-  while(userData.xp>=userData.xpMax){
-    userData.xp-=userData.xpMax;
-    userData.level++;
-    userData.xpMax=Math.floor(userData.xpMax*1.1);
-    leveledUp=true;
-    const statKeys=Object.keys(userData.stats);
-    const rk=statKeys[Math.floor(Math.random()*statKeys.length)];
-    userData.stats[rk]=Math.min(100,userData.stats[rk]+Math.floor(Math.random()*2)+1);
-    // Badge checks
-    if(userData.level>=10)userData.badges[7]=1;
-    if(userData.level>=30)userData.badges[8]=1;
-    if(userData.level>=50)userData.badges[9]=1;
-  }
-  if(leveledUp)showToast('🎉 레벨 UP! Lv.'+userData.level+' 달성!');
-  else showToast('✨ +'+amount+' XP 획득!');
-  saveUser();renderProfile();
-  drawHexStat('heroStatCanvas',userData.stats,70);
-}
-
-function resetProgress(){
-  if(confirm('정말 진행도를 초기화하시겠습니까?')){
-    localStorage.removeItem('lp_user2');location.reload();
-  }
-}
-
-// ========== MODALS ==========
-function openModal(html){
-  document.getElementById('modalContent').innerHTML=html;
-  document.getElementById('modalOverlay').classList.add('show');
-}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
-
-function showUploadModal(){
-  openModal(`
-    <div class="modal-handle"></div>
-    <div class="modal-title">📤 콘텐츠 업로드</div>
-    <div class="form-group"><label>콘텐츠 유형</label><select class="form-input" id="uploadType"><option value="에듀툰">📚 에듀툰</option><option value="에듀캐스트">🎬 에듀캐스트</option><option value="에듀플레이">🎮 에듀플레이</option></select></div>
-    <div class="form-group"><label>제목</label><input class="form-input" id="uploadTitle" placeholder="콘텐츠 제목을 입력하세요"></div>
-    <div class="form-group"><label>설명</label><textarea class="form-input" id="uploadDesc" rows="3" placeholder="콘텐츠 설명을 입력하세요"></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="form-btn secondary" onclick="closeModal()">취소</button>
-      <button class="form-btn primary" onclick="submitUpload()">업로드</button>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <input class="fi" id="cmtIn" placeholder="댓글..." style="flex:1;padding:8px">
+      <button class="btn btn-p" style="padding:8px 14px" onclick="addCmt()">등록</button>
     </div>`);
+  gainXP(5,'글 읽기');
+}
+function addCmt(){const t=document.getElementById('cmtIn').value.trim();if(!t)return;gainXP(5,'댓글');toast('💬 댓글 등록! +5 XP');closeMo();}
+
+// ===== GAMES =====
+function renderGames(){
+  document.getElementById('gameGrid').innerHTML=GAMES.map(g=>`
+    <div class="game-card" onclick="${g.url?`openGame('${g.url}','${g.name}','${g.apk||''}')`:`toast('준비중입니다!')`}" style="background:${g.play?'var(--bg3)':'var(--bg2)'}">
+      <div class="game-thumb" style="background:${g.play?'linear-gradient(135deg,#1a1a3a,#2a2a5a)':'var(--bg3)'}">${g.play?'<div class="play-badge">▶ PLAY</div>':''}
+        <span style="font-size:36px">${g.emoji}</span></div>
+      <div class="game-info"><div class="game-name">${g.name}</div><div class="game-meta">${g.tag} · ${g.desc.slice(0,25)}...</div></div>
+    </div>`).join('');
+}
+function openGame(url,name,apk){
+  document.getElementById('gameT').textContent=name;
+  document.getElementById('gameF').src=url;
+  const a=document.getElementById('gameApk');
+  if(apk){a.href=apk;a.style.display='';}else a.style.display='none';
+  document.getElementById('gameO').classList.add('show');
+  gainXP(15,'게임: '+name,'action');
+}
+function closeGame(){document.getElementById('gameO').classList.remove('show');document.getElementById('gameF').src='';}
+
+// ===== UTILS =====
+function renderUtils(){
+  document.getElementById('utilGrid').innerHTML=UTILS.map(u=>`
+    <div class="util-card" onclick="openUtil('${u.id}')"><div class="ui">${u.icon}</div><div class="un">${u.name}</div><div class="ud">${u.desc}</div></div>`).join('');
 }
 
-function submitUpload(){
-  const title=document.getElementById('uploadTitle').value.trim();
-  const type=document.getElementById('uploadType').value;
-  if(!title){showToast('⚠️ 제목을 입력해주세요');return;}
-  const emojis={'에듀툰':'📚','에듀캐스트':'🎬','에듀플레이':'🎮'};
-  userData.myContent.push({title,type,emoji:emojis[type],xp:50,date:new Date().toLocaleDateString('ko-KR')});
-  if(!userData.badges[5])userData.badges[5]=1;
-  earnXP(50,'콘텐츠 업로드: '+title);
-  closeModal();renderCreator();
-  showToast('🎉 콘텐츠가 업로드되었습니다!');
+function openUtil(id){
+  const embed=document.getElementById('utilEmbed');
+  let html='';
+  if(id==='calc'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🧮 계산기</div>
+      <input id="calcIn" class="fi" placeholder="수식 입력 (예: 2+3*4)" style="font-size:16px">
+      <button class="btn btn-p" onclick="try{document.getElementById('calcR').textContent='= '+eval(document.getElementById('calcIn').value)}catch(e){document.getElementById('calcR').textContent='오류'}" style="margin-top:8px">계산</button>
+      <div class="util-result" id="calcR"></div></div>`;
+  }else if(id==='unit'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">📏 단위 변환</div>
+      <select id="unitType" class="fi" onchange="unitConv()"><option value="length">길이</option><option value="weight">무게</option><option value="temp">온도</option></select>
+      <input id="unitIn" class="fi" type="number" placeholder="값 입력" oninput="unitConv()">
+      <div class="util-result" id="unitR"></div></div>`;
+  }else if(id==='color'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🎨 색상 피커</div>
+      <input type="color" id="colorPick" value="#8b5cf6" style="width:100%;height:50px;border:none;cursor:pointer" oninput="colorConv()">
+      <div class="util-result" id="colorR">#8b5cf6 / rgb(139,92,246)</div></div>`;
+  }else if(id==='qr'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">📱 QR 생성기</div>
+      <input id="qrIn" class="fi" placeholder="URL 또는 텍스트 입력">
+      <button class="btn btn-p" onclick="genQR()" style="margin-top:8px">생성</button>
+      <div class="util-result" id="qrR"></div></div>`;
+  }else if(id==='json'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">📋 JSON 포맷터</div>
+      <textarea id="jsonIn" class="fi" rows="5" placeholder='{"key":"value"}'></textarea>
+      <button class="btn btn-p" onclick="fmtJSON()" style="margin-top:8px">정리</button>
+      <pre class="util-result" id="jsonR" style="overflow-x:auto;white-space:pre-wrap"></pre></div>`;
+  }else if(id==='timer'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">⏱️ 스톱워치</div>
+      <div id="timerDisp" style="font-size:36px;font-weight:900;text-align:center;background:var(--grad1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:16px 0">00:00.0</div>
+      <div style="display:flex;gap:6px;justify-content:center">
+        <button class="btn btn-p" onclick="toggleTimer()">시작/중지</button>
+        <button class="btn btn-s" onclick="resetTimer()">리셋</button>
+      </div></div>`;
+  }else if(id==='random'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🎲 랜덤 생성기</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-p" onclick="document.getElementById('randR').textContent='🎲 '+Math.floor(Math.random()*100+1)" style="font-size:12px">1~100</button>
+        <button class="btn btn-s" onclick="document.getElementById('randR').textContent='🔐 '+Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>'abcdefghijkmnpqrstuvwxyz23456789'[b%31]).join('')" style="font-size:12px">비밀번호</button>
+        <button class="btn btn-s" onclick="const n=['김','이','박','최','정','강','조','윤'];const g=['민준','서윤','도윤','하은','시우','지유'];document.getElementById('randR').textContent='👤 '+n[Math.floor(Math.random()*n.length)]+g[Math.floor(Math.random()*g.length)]" style="font-size:12px">이름</button>
+      </div>
+      <div class="util-result" id="randR">버튼을 누르세요</div></div>`;
+  }else if(id==='base64'){
+    html=`<div class="util-embed"><div style="font-weight:600;margin-bottom:8px">🔐 Base64</div>
+      <textarea id="b64In" class="fi" rows="3" placeholder="텍스트 입력"></textarea>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <button class="btn btn-p" onclick="document.getElementById('b64R').textContent=btoa(unescape(encodeURIComponent(document.getElementById('b64In').value)))" style="font-size:12px">인코딩</button>
+        <button class="btn btn-s" onclick="try{document.getElementById('b64R').textContent=decodeURIComponent(escape(atob(document.getElementById('b64In').value)))}catch(e){document.getElementById('b64R').textContent='오류'}" style="font-size:12px">디코딩</button>
+      </div>
+      <div class="util-result" id="b64R"></div></div>`;
+  }
+  embed.innerHTML=html;
+  gainXP(3,'유틸리티: '+UTILS.find(u=>u.id===id).name,'tech');
 }
 
-function showWriteModal(){
-  openModal(`
-    <div class="modal-handle"></div>
-    <div class="modal-title">✏️ 글쓰기</div>
-    <div class="form-group"><label>카테고리</label><select class="form-input" id="postCategory"><option>자유</option><option>AI공유</option><option>에듀툰</option><option>에듀캐스트</option><option>에듀플레이</option><option>크리에이터</option><option>에듀피지컬</option><option>질문</option></select></div>
-    <div class="form-group"><label>제목</label><input class="form-input" id="postTitle" placeholder="글 제목을 입력하세요"></div>
-    <div class="form-group"><label>내용</label><textarea class="form-input" id="postContent" rows="5" placeholder="내용을 작성하세요"></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="form-btn secondary" onclick="closeModal()">취소</button>
-      <button class="form-btn primary" onclick="submitPost()">등록</button>
-    </div>`);
+// Util helpers
+function unitConv(){const t=document.getElementById('unitType').value,v=parseFloat(document.getElementById('unitIn').value)||0,r=document.getElementById('unitR');
+  if(t==='length')r.textContent=`${v}cm = ${(v/2.54).toFixed(2)}inch = ${(v/100).toFixed(3)}m = ${(v/30.48).toFixed(2)}ft`;
+  else if(t==='weight')r.textContent=`${v}kg = ${(v*2.205).toFixed(2)}lb = ${(v*1000).toFixed(0)}g = ${(v*35.274).toFixed(2)}oz`;
+  else if(t==='temp')r.textContent=`${v}°C = ${(v*9/5+32).toFixed(1)}°F = ${(v+273.15).toFixed(1)}K`;
+}
+function colorConv(){const v=document.getElementById('colorPick').value;const r=parseInt(v.slice(1,3),16),g=parseInt(v.slice(3,5),16),b=parseInt(v.slice(5,7),16);document.getElementById('colorR').textContent=`${v} / rgb(${r},${g},${b}) / hsl(${Math.round(rgbToHsl(r,g,b)[0])},${Math.round(rgbToHsl(r,g,b)[1])}%,${Math.round(rgbToHsl(r,g,b)[2])}%)`;}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);if(mx===r)h=((g-b)/d+(g<b?6:0))/6;else if(mx===g)h=((b-r)/d+2)/6;else h=((r-g)/d+4)/6;}return[h*360,s*100,l*100];}
+function genQR(){const t=document.getElementById('qrIn').value.trim();if(!t)return;document.getElementById('qrR').innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(t)}" style="max-width:200px;border-radius:8px">`;}
+function fmtJSON(){try{document.getElementById('jsonR').textContent=JSON.stringify(JSON.parse(document.getElementById('jsonIn').value),null,2);}catch(e){document.getElementById('jsonR').textContent='❌ JSON 오류: '+e.message;}}
+let timerOn=false,timerStart=0,timerElapsed=0,timerRAF;
+function toggleTimer(){if(timerOn){timerOn=false;timerElapsed+=performance.now()-timerStart;cancelAnimationFrame(timerRAF);}else{timerOn=true;timerStart=performance.now();tickTimer();}}
+function tickTimer(){if(!timerOn)return;const t=timerElapsed+performance.now()-timerStart;const m=Math.floor(t/60000),s=Math.floor((t%60000)/1000),ms=Math.floor((t%1000)/100);document.getElementById('timerDisp').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+ms;timerRAF=requestAnimationFrame(tickTimer);}
+function resetTimer(){timerOn=false;timerElapsed=0;cancelAnimationFrame(timerRAF);document.getElementById('timerDisp').textContent='00:00.0';}
+
+function switchPlayTab(btn,tab){
+  btn.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  document.getElementById('playGames').style.display=tab==='games'?'':'none';
+  document.getElementById('playUtils').style.display=tab==='utils'?'':'none';
+  document.getElementById('playSearch').style.display=tab==='search'?'':'none';
+}
+function doSearch(engine){
+  const q=document.getElementById('searchIn').value.trim();if(!q)return;
+  const urls={google:'https://www.google.com/search?q=',naver:'https://search.naver.com/search.naver?query=',youtube:'https://www.youtube.com/results?search_query=',github:'https://github.com/search?q='};
+  if(engine&&urls[engine]){window.open(urls[engine]+encodeURIComponent(q),'_blank');gainXP(3,'웹서치','tech');}
+  else{
+    const r=document.getElementById('searchResult');r.style.display='block';
+    r.innerHTML='<div style="margin-bottom:6px">🔍 "'+q+'" 검색 결과:</div>'+
+      Object.entries(urls).map(([k,v])=>`<a href="${v}${encodeURIComponent(q)}" target="_blank" style="display:block;margin:4px 0;font-size:12px">${k.charAt(0).toUpperCase()+k.slice(1)}에서 검색 →</a>`).join('');
+    gainXP(3,'웹서치','tech');
+  }
 }
 
+// ===== PROFILE =====
+function drawHex(cid,st,sz){
+  const c=document.getElementById(cid);if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=sz||w*.38,k=Object.keys(st),n=k.length,lb=['지식','체력','창의력','소통','리더십','기술'];
+  x.clearRect(0,0,w,h);
+  for(let g=5;g>=1;g--){x.beginPath();for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,px=cx+Math.cos(a)*r*(g/5),py=cy+Math.sin(a)*r*(g/5);i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.strokeStyle='rgba(139,92,246,'+(0.06+g*.04)+')';x.stroke();}
+  for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);x.strokeStyle='rgba(139,92,246,.12)';x.stroke();}
+  x.beginPath();const v=Object.values(st);for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,px=cx+Math.cos(a)*r*(v[i]/100),py=cy+Math.sin(a)*r*(v[i]/100);i?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();
+  const g=x.createLinearGradient(cx-r,cy-r,cx+r,cy+r);g.addColorStop(0,'rgba(139,92,246,.25)');g.addColorStop(1,'rgba(6,214,160,.25)');x.fillStyle=g;x.fill();x.strokeStyle='rgba(139,92,246,.7)';x.lineWidth=2;x.stroke();
+  for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2,vv=v[i]/100;x.beginPath();x.arc(cx+Math.cos(a)*r*vv,cy+Math.sin(a)*r*vv,3,0,Math.PI*2);x.fillStyle='#8b5cf6';x.fill();}
+  x.fillStyle='#94a3b8';x.font='10px Noto Sans KR';x.textAlign='center';
+  for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.fillText(lb[i]+' '+v[i],cx+Math.cos(a)*(r+16),cy+Math.sin(a)*(r+16)+3);}
+}
+
+function renderProf(){
+  updNames();
+  document.getElementById('profLv').textContent=D.lv;
+  document.getElementById('xpNow').textContent=D.xp;
+  document.getElementById('xpMax').textContent=D.xpM;
+  document.getElementById('xpLeft').textContent=D.xpM-D.xp;
+  document.getElementById('badgeCnt').textContent=D.bg.filter(b=>b).length+'/16';
+  setTimeout(()=>document.getElementById('lvBar').style.width=(D.xp/D.xpM*100)+'%',100);
+  drawHex('statC',D.st,85);
+  document.getElementById('badgeG').innerHTML=BADGES.map((b,i)=>`<div class="badge-i ${D.bg[i]?'on':'off'}"><span>${b.i}</span><span style="font-size:8px;color:var(--text3)">${b.n}</span></div>`).join('');
+  const acts=D.acts.length?D.acts.slice(-8).reverse():[{t:'LevelPlay에 가입!',xp:0,m:0,col:'var(--cyan)'}];
+  document.getElementById('timeline').innerHTML=acts.map(a=>`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(139,92,246,.05)"><div style="width:8px;height:8px;border-radius:50%;background:${a.col||'var(--purple)'};margin-top:4px;flex-shrink:0"></div><div><div style="font-size:12px">${a.t} ${a.xp?'<span style="font-size:10px;color:var(--gold);background:rgba(251,191,36,.15);padding:1px 6px;border-radius:8px">+'+a.xp+'</span>':''}</div><div style="font-size:10px;color:var(--text3)">${tAgo(a.m||0)}</div></div></div>`).join('');
+}
+
+// ===== XP =====
+const STAT_MAP={science:'knowledge',history:'knowledge',math:'knowledge',tech:'tech',language:'communication',art:'creativity',action:'stamina',puzzle:'knowledge',rpg:'creativity',edu:'knowledge',challenge:'stamina'};
+function gainXP(amt,act,genre){
+  D.xp+=amt;D.acts.push({t:act,xp:amt,m:0,col:'var(--cyan)'});
+  if(genre&&STAT_MAP[genre]&&D.st[STAT_MAP[genre]]<100)D.st[STAT_MAP[genre]]=Math.min(100,D.st[STAT_MAP[genre]]+1);
+  let up=false;
+  while(D.xp>=D.xpM){D.xp-=D.xpM;D.lv++;D.xpM=Math.floor(D.xpM*1.1);up=true;const k=Object.keys(D.st),r=k[Math.floor(Math.random()*k.length)];D.st[r]=Math.min(100,D.st[r]+Math.floor(Math.random()*2)+1);if(D.lv>=10)D.bg[7]=1;if(D.lv>=30)D.bg[8]=1;if(D.lv>=50)D.bg[9]=1;}
+  if(up)toast('🎉 Lv.'+D.lv+' 달성!');
+  save();renderProf();updNames();
+}
+
+// ===== WRITE =====
+function showWrite(){
+  openMo(`<div class="mo-bar"></div><div class="mo-t">✏️ 글쓰기</div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2)">갤러리</label><select class="fi" id="wGal">${GALLERIES.map(g=>'<option value="'+g.id+'">'+g.icon+' '+g.name+'</option>').join('')}</select></div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2)">제목</label><input class="fi" id="wTitle" placeholder="제목"></div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;color:var(--text2)">내용</label><textarea class="fi" id="wBody" rows="6" placeholder="내용을 작성하세요"></textarea></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-s" onclick="closeMo()">취소</button><button class="btn btn-p" onclick="submitPost()">등록</button></div>`);
+}
 function submitPost(){
-  const title=document.getElementById('postTitle').value.trim();
-  const body=document.getElementById('postContent').value.trim();
-  const cat=document.getElementById('postCategory').value;
-  if(!title){showToast('⚠️ 제목을 입력해주세요');return;}
-  userData.myPosts.unshift({id:Date.now(),cat,title,body,author:userData.nickname||'익명',likes:0,comments:[],time:'방금 전'});
-  earnXP(15,'커뮤니티 글작성: '+title);
-  closeModal();renderCommunity('my');
-  showToast('🎉 글이 등록되었습니다!');
+  const t=document.getElementById('wTitle').value.trim(),b=document.getElementById('wBody').value.trim(),g=document.getElementById('wGal').value;
+  if(!t){toast('제목을 입력하세요');return;}
+  D.myPosts.unshift({id:Date.now(),gal:g,t,b,a:D.nick||'익명',l:0,c:[],m:0});
+  if(!D.bg[5])D.bg[5]=1;
+  gainXP(15,'글 작성: '+t);closeMo();renderHome();toast('✏️ 글 등록! +15 XP');
 }
 
-// ========== TOAST ==========
-let toastTimer;
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
-}
+// ===== MODAL / TOAST =====
+function openMo(h){document.getElementById('moC').innerHTML=h;document.getElementById('mo').classList.add('show');}
+function closeMo(){document.getElementById('mo').classList.remove('show');}
+let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2200);}
 
-// ========== COUNT UP ==========
-function animateCounters(){
-  document.querySelectorAll('[data-count]').forEach(el=>{
-    const target=parseInt(el.dataset.count);
-    const suffix=target>=1000?'+':'';
-    let current=0;const step=Math.max(1,Math.floor(target/40));
-    const interval=setInterval(()=>{
-      current+=step;
-      if(current>=target){current=target;clearInterval(interval);}
-      el.textContent=current.toLocaleString()+suffix;
-    },30);
-  });
-}
-
-// ========== SPLASH + INIT ==========
-function initSplash(){
-  const bar=document.getElementById('splashBar');
-  setTimeout(()=>bar.style.width='40%',100);
-  setTimeout(()=>bar.style.width='70%',400);
-  setTimeout(()=>bar.style.width='100%',700);
-  setTimeout(()=>{
-    document.getElementById('splash').classList.add('hide');
-    animateCounters();
-    drawHexStat('heroStatCanvas',userData.stats,70);
-    checkNickname();
-  },1200);
-}
-
+// ===== INIT =====
 function init(){
-  initSplash();
-  renderEdutoon();renderEducast();renderEduplay();
-  renderCreator();renderPhysical();renderProfile();
-  renderCommunity('popular');
-  updateNameDisplays();
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+  const b=document.getElementById('sBar');
+  setTimeout(()=>b.style.width='50%',100);setTimeout(()=>b.style.width='100%',500);
+  setTimeout(()=>{document.getElementById('splash').classList.add('hide');checkNick();},900);
+  renderHome();renderGalList();renderGames();renderUtils();renderProf();
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 document.addEventListener('DOMContentLoaded',init);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGame();closeModal();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGame();closeMo();}});
 </script>
 </body>
 </html>
