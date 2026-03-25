@@ -153,6 +153,12 @@ nav button span:first-child{font-size:16px}
 <div style="display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none" id="qGal"></div>
 <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px" id="tTags"></div>
 
+<!-- 오늘의 XP -->
+<div class="cd" style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(6,214,160,.04));padding:8px 10px;display:flex;justify-content:space-between;align-items:center">
+<div><div style="font-size:9px;color:var(--t3)">오늘의 학습</div><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="todayXp">+0 XP</div></div>
+<div style="text-align:right"><div style="font-size:9px;color:var(--t3)">완료한 강의</div><div style="font-size:18px;font-weight:900" id="todayDone">0개</div></div>
+</div>
+
 <div class="sec">🔥 인기글</div><div id="hotP"></div>
 <div class="sec">📚 추천 리소스</div><div class="g3" id="resG"></div>
 <div class="sec">🕐 최신글</div><div id="newP"></div>
@@ -458,14 +464,42 @@ math:[
 {l:1,t:'Khan Academy 기초 미적분',s:'Khan Academy',u:'https://ko.khanacademy.org/math/precalculus-new',d:'삼각함수, 복소수, 벡터, 행렬'},
 ],
 science:[
-{l:1,t:'고전역학 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'뉴턴역학, 운동법칙, 만유인력'},
-{l:2,t:'전자기학 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'맥스웰 방정식, 전자기파'},
-{l:3,t:'상대성이론 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'특수/일반 상대성이론, 시공간'},
-{l:4,t:'양자역학 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'파동함수, 불확정성원리, 슈뢰딩거'},
-{l:2,t:'일반화학 (KOCW)',s:'KOCW',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=906737',d:'원자구조, 화학결합, 열화학'},
-{l:3,t:'생물학 (CrashCourse)',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'세포~유전~진화~생태계. 한글자막'},
-{l:3,t:'천문학 - 태양계~블랙홀 (Kurzgesagt)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'한글자막 과학 애니메이션'},
-{l:5,t:'MIT OCW 양자물리학',s:'MIT OCW',u:'https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/',d:'MIT 양자물리학 전체 강의 무료'},
+// 물리 - 역학
+{l:1,t:'[역학] 고전역학 기초 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'뉴턴 운동법칙, 만유인력, 운동학. 물리의 뼈대',f:'physics'},
+{l:2,t:'[역학] KOCW 일반물리학1',s:'KOCW',u:'http://kocw.net/home/cview.do?mty=p&kemId=1225953',d:'역학, 진동, 파동, 열역학. 대학 1학년',f:'physics'},
+{l:3,t:'[역학] MIT OCW 고전역학',s:'MIT OCW',u:'https://ocw.mit.edu/courses/8-01sc-classical-mechanics-fall-2016/',d:'MIT 8.01 고전역학 전체 강의. 영어자막',f:'physics'},
+// 물리 - 전자기학/열역학
+{l:2,t:'[전자기] 전자기학 시리즈 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'맥스웰 방정식, 전기장/자기장, 전자기파',f:'physics'},
+{l:3,t:'[열역학] 열역학 법칙과 엔트로피',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'열역학 1~3법칙, 엔트로피, 카르노 기관',f:'physics'},
+// 물리 - 현대물리
+{l:3,t:'[현대] 상대성이론 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'특수/일반 상대성이론, 시공간 곡률',f:'physics'},
+{l:4,t:'[양자] 양자역학 기초 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'파동함수, 불확정성원리, 슈뢰딩거 방정식',f:'physics'},
+{l:5,t:'[양자] MIT OCW 양자물리학',s:'MIT OCW',u:'https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/',d:'MIT 8.04 양자물리학 전체 강의 무료',f:'physics'},
+{l:5,t:'[입자] PBS Space Time 양자/입자물리',s:'PBS Space Time',u:'https://www.youtube.com/@pbsspacetime',d:'양자역학, 입자물리, 끈이론 등 고급 물리. 300만 구독',f:'physics'},
+// 화학
+{l:1,t:'[일반] 일반화학1 (KOCW 한양대)',s:'KOCW',u:'http://www.kocw.net/home/cview.do?mty=p&kemId=906737',d:'원자구조, 전자배치, 화학결합, 열화학, 전기화학',f:'chemistry'},
+{l:2,t:'[일반] 화학사 시리즈 (과학쿠키)',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'원소 발견부터 현대 화학까지 역사 흐름',f:'chemistry'},
+{l:3,t:'[유기] 유기화학 I (KOCW)',s:'KOCW',u:'http://kocw.net/home/cview.do?mty=p&kemId=1411898',d:'탄소화합물, 작용기, 반응메커니즘 (SN1/SN2/E1/E2)',f:'chemistry'},
+{l:2,t:'[화학] Kurzgesagt 화학 영상 (한글자막)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'원소/분자/화학반응 애니메이션. 한글자막',f:'chemistry'},
+// 생물
+{l:2,t:'[면역] 면역체계 시리즈 (Kurzgesagt)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'면역체계, 세포, 바이러스 한글자막 애니메이션',f:'biology'},
+{l:2,t:'[유전] 유전/진화 시리즈 (Kurzgesagt)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'DNA, 유전자, 진화론, CRISPR 유전자 가위',f:'biology'},
+{l:3,t:'[생물] CrashCourse Biology (한글자막)',s:'CrashCourse',u:'https://www.youtube.com/@crashcourse',d:'세포→유전→진화→생태계 체계적 시리즈',f:'biology'},
+{l:3,t:'[생명공학] 안될과학 생물학 콘텐츠',s:'안될과학',u:'https://www.youtube.com/@unrealscience',d:'유전자 가위, 생명공학, 신경과학 최신 주제',f:'biology'},
+{l:2,t:'[생물] KOCW 일반생물학',s:'KOCW',u:'https://www.kocw.net/',d:'세포생물학, 유전학, 진화, 생태계 대학강의',f:'biology'},
+// 지구과학
+{l:1,t:'[지구] 지구과학 핵심 시스템',s:'EBS',u:'https://www.ebs.co.kr/',d:'지질학, 대기과학, 해양과학, 환경과학',f:'earth'},
+{l:2,t:'[기상] 기후변화와 지구온난화',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'기후변화 원인, 영향, 대응 방안. 한글자막',f:'earth'},
+// 천문
+{l:1,t:'[천문] 태양계와 행성 (Kurzgesagt)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'태양계, 행성, 별의 크기 비교. 한글자막',f:'astro'},
+{l:2,t:'[천문] 은하와 우주론 (Kurzgesagt)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'은하 구조, 우주 팽창, 암흑물질/에너지',f:'astro'},
+{l:3,t:'[천문] 블랙홀 시리즈 (Kurzgesagt)',s:'Kurzgesagt',u:'https://www.youtube.com/@kurzgesagt',d:'블랙홀 탄생~죽음, 사건의 지평선, 호킹복사',f:'astro'},
+{l:4,t:'[천문] PBS Space Time 우주론',s:'PBS Space Time',u:'https://www.youtube.com/@pbsspacetime',d:'우주론, 블랙홀, 암흑에너지, 홀로그래픽 우주',f:'astro'},
+{l:3,t:'[천문] 과학쿠키 우주/천문 콘텐츠',s:'과학쿠키',u:'https://www.youtube.com/@sciencecookie',d:'상대성이론 기반 우주론, 빅뱅, 별의 진화',f:'astro'},
+{l:2,t:'[천문] KOCW 천문학 대학강의',s:'KOCW',u:'https://www.kocw.net/',d:'대학 수준 천문학/우주론 강의',f:'astro'},
+// 응용
+{l:3,t:'[AI] 인공지능과 데이터과학',s:'YouTube',u:'https://www.youtube.com/',d:'AI/ML/데이터사이언스 입문',f:'applied'},
+{l:4,t:'[공학] 재료과학/반도체/에너지',s:'YouTube',u:'https://www.youtube.com/',d:'반도체 원리, 신재생에너지, 나노기술',f:'applied'},
 ],
 music:[
 {l:1,t:'바로크: 바흐와 비발디',s:'EBS/YouTube',u:'https://www.ebs.co.kr/',d:'바로크 시대 음악의 특징과 대표 작곡가'},
@@ -655,9 +689,13 @@ function rHome(){
   document.getElementById('resG').innerHTML=RES.map(r=>`<a class="gi" href="${r.u}" target="_blank" style="text-decoration:none;color:inherit"><div class="ic">${r.ic}</div><div class="nm">${r.nm}</div></a>`).join('');
   document.getElementById('qGal').innerHTML=[...SUBJECTS.slice(0,6),...GAL.slice(0,4)].map(g=>`<div class="qg" onclick="${g.id&&SUBJECTS.find(s=>s.id===g.id)?`go(1)`:g.id?`go(2);setTimeout(()=>oGal('${g.id}'),50)`:''}""><div class="qi">${g.ic}</div><div class="qn">${g.nm||g.nm}</div></div>`).join('');
   document.getElementById('tTags').innerHTML=['#PhET','#칸아카데미','#Claude','#Playwright','#Python','#Scratch'].map(t=>`<span class="tt">${t}</span>`).join('');
+  // 오늘의 XP
+  const todayXp=U.ac.filter(a=>a.m<1440).reduce((s,a)=>s+(a.xp||0),0);
+  document.getElementById('todayXp').textContent='+'+todayXp+' XP';
+  document.getElementById('todayDone').textContent=Object.keys(U.done).length+'개';
   uN();
 }
-function pH(p){const g=GAL.find(x=>x.id===p.g);return`<div class="po" onclick='sPost(${JSON.stringify(p).replace(/'/g,"&#39;")})'><div class="po-c">[${g?g.nm:p.g}]</div><div class="po-t">${p.t}</div><div class="po-m"><span>👤${p.a}</span><span>❤️${p.l}</span><span>💬${(p.c||[]).length}</span><span>${tA(p.m)}</span></div></div>`;}
+function pH(p){const g=GAL.find(x=>x.id===p.g);const preview=(p.b||'').replace(/\n/g,' ').slice(0,50);return`<div class="po" onclick='sPost(${JSON.stringify(p).replace(/'/g,"&#39;")})' style="display:flex;gap:8px"><div style="display:flex;flex-direction:column;align-items:center;min-width:32px;padding-top:2px"><div style="font-size:12px;font-weight:700;color:var(--cy)">${p.l||0}</div><div style="font-size:7px;color:var(--t3)">추천</div></div><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:4px"><span class="po-c">[${g?g.nm:p.g}]</span><span style="font-size:9px;color:var(--t3)">${tA(p.m)}</span></div><div class="po-t">${p.t}</div>${preview?'<div style="font-size:10px;color:var(--t3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+preview+'...</div>':''}<div class="po-m"><span>👤${p.a}</span><span>💬${(p.c||[]).length}</span></div></div></div>`;}
 
 // ===== EDUCATION =====
 let curMode='kids',curSub='';
@@ -677,9 +715,14 @@ function openSub(mode,subId){
   const done=items.filter((_,i)=>U.done[(mode==='kids'?'k_':'a_')+subId+'_'+i]).length;
   const pct=items.length?Math.round(done/items.length*100):0;
   document.getElementById('subProg').innerHTML=`<div class="cd" style="padding:8px 10px"><div style="display:flex;justify-content:space-between;font-size:11px"><span>진도: ${done}/${items.length}</span><span>${pct}%</span></div><div class="pb" style="margin-top:4px"><div style="width:${pct}%"></div></div></div>`;
-  // Level tabs
+  // Level tabs + 분야 필터 (과학 전용)
   const levels=[...new Set(items.map(i=>i.l))].sort();
-  document.getElementById('subLvs').innerHTML='<button class="tb on" onclick="filterLv(this,0)">전체</button>'+levels.map(l=>`<button class="tb" onclick="filterLv(this,${l})"><span class="lbg l${l}">L${l}</span></button>`).join('');
+  const fields=[...new Set(items.filter(i=>i.f).map(i=>i.f))];
+  const fieldNames={physics:'물리',chemistry:'화학',biology:'생물',earth:'지구과학',astro:'천문학',applied:'응용과학'};
+  let tabsHtml='<button class="tb on" onclick="filterLv(this,0)">전체</button>';
+  tabsHtml+=levels.map(l=>`<button class="tb" onclick="filterLv(this,${l})"><span class="lbg l${l}">L${l}</span></button>`).join('');
+  if(fields.length>1){tabsHtml+='<span style="width:1px;height:16px;background:rgba(139,92,246,.2);margin:0 2px"></span>';tabsHtml+=fields.map(f=>`<button class="tb" onclick="filterField(this,'${f}')">${fieldNames[f]||f}</button>`).join('');}
+  document.getElementById('subLvs').innerHTML=tabsHtml;
   renderSubItems(items,0);
 }
 function renderSubItems(items,lv){
@@ -695,6 +738,7 @@ function renderSubItems(items,lv){
   }).join('');
 }
 function filterLv(b,lv){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');const items=curMode==='kids'?KIDS[curSub]||[]:ADULT[curSub]||[];renderSubItems(items,lv);}
+function filterField(b,field){b.parentElement.querySelectorAll('.tb').forEach(t=>t.classList.remove('on'));b.classList.add('on');const items=(curMode==='kids'?KIDS[curSub]||[]:ADULT[curSub]||[]).filter(i=>i.f===field);renderSubItems(items,0);}
 function bkEdu(){document.getElementById('eduMain').style.display='';document.getElementById('eduSub').style.display='none';rEduSubs();}
 function markDone(key,lv){
   if(!U.done[key]){U.done[key]=1;const statMap={1:'knowledge',2:'knowledge',3:'tech',4:'creativity',5:'tech'};const sk=statMap[lv]||'knowledge';if(U.st[sk]<100)U.st[sk]=Math.min(100,U.st[sk]+1);xp(10+(lv*5),'학습 완료');const doneCount=Object.keys(U.done).length;if(doneCount>=1&&!U.bg[0])U.bg[0]=1;if(doneCount>=10&&!U.bg[2])U.bg[2]=1;if(doneCount>=20&&!U.bg[3])U.bg[3]=1;}
