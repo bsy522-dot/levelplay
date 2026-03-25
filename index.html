@@ -160,6 +160,9 @@ nav button span:first-child{font-size:16px}
 </div>
 
 <div class="sec">🔥 인기글</div><div id="hotP"></div>
+<div class="sec">📖 나의 학습 현황</div>
+<div id="homeProgress" style="display:flex;gap:4px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none"></div>
+
 <div class="sec">📂 갤러리 미리보기</div>
 <div id="galPreview"></div>
 
@@ -1239,6 +1242,14 @@ function rHome(){
   document.getElementById('resG').innerHTML=RES.map(r=>`<a class="gi" href="${r.u}" target="_blank" style="text-decoration:none;color:inherit"><div class="ic">${r.ic}</div><div class="nm">${r.nm}</div></a>`).join('');
   document.getElementById('qGal').innerHTML=[...SUBJECTS.slice(0,6),...GAL.slice(0,4)].map(g=>`<div class="qg" onclick="${g.id&&SUBJECTS.find(s=>s.id===g.id)?`go(1)`:g.id?`go(2);setTimeout(()=>oGal('${g.id}'),50)`:''}""><div class="qi">${g.ic}</div><div class="qn">${g.nm||g.nm}</div></div>`).join('');
   document.getElementById('tTags').innerHTML=['#PhET','#칸아카데미','#Claude','#Playwright','#Python','#Scratch'].map(t=>`<span class="tt">${t}</span>`).join('');
+  // 나의 학습 현황
+  document.getElementById('homeProgress').innerHTML=SUBJECTS.slice(0,8).map(s=>{
+    const kItems=KIDS[s.id]||[],aItems=ADULT[s.id]||[];
+    const total=kItems.length+aItems.length;
+    const done=kItems.filter((_,i)=>U.done['k_'+s.id+'_'+i]).length+aItems.filter((_,i)=>U.done['a_'+s.id+'_'+i]).length;
+    const pct=total?Math.round(done/total*100):0;
+    return`<div style="flex-shrink:0;width:60px;text-align:center;cursor:pointer" onclick="go(1)"><div style="font-size:16px">${s.ic}</div><div style="font-size:8px;color:var(--t2);margin:2px 0">${s.nm}</div><div class="pb" style="height:3px"><div style="width:${pct}%"></div></div><div style="font-size:7px;color:var(--t3)">${pct}%</div></div>`;
+  }).join('');
   // 갤러리 미리보기
   const galPrev=GAL.map(g=>{const gPosts=[...P,...U.mp].filter(p=>p.g===g.id).sort((a,b)=>a.m-b.m);const latest=gPosts[0];return latest?`<div style="display:flex;gap:6px;padding:6px 0;border-bottom:1px solid rgba(139,92,246,.04);cursor:pointer" onclick="go(2);setTimeout(()=>oGal('${g.id}'),50)"><span style="font-size:10px;min-width:50px;color:var(--p);font-weight:600">[${g.nm}]</span><span style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${latest.t}</span><span style="font-size:9px;color:var(--t3)">${tA(latest.m)}</span></div>`:''}).filter(x=>x).join('');
   document.getElementById('galPreview').innerHTML=galPrev||'<div style="font-size:11px;color:var(--t3);padding:8px">게시글이 없습니다</div>';
