@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "generated": "2026-03-26",
+    "description": "실제 YouTube video ID 수집 - 과학/수학/역사/성인교육 4개 카테고리",
+    "total_count": 40,
+    "note": "모든 video ID는 웹검색으로 검증된 실제 영상 ID입니다"
+  },
+  "science_education": [
+    {"id": "zQGOcOUBi6s", "t": "The Immune System Explained I - Bacteria Infection", "c": "과학-면역계", "src": "Kurzgesagt"},
+    {"id": "lXfEK8G8CUI", "t": "How The Immune System ACTUALLY Works - IMMUNE", "c": "과학-면역계", "src": "Kurzgesagt"},
+    {"id": "JQVmkDUkZT4", "t": "What Are You?", "c": "과학-생물학", "src": "Kurzgesagt"},
+    {"id": "BtN-goy9VOY", "t": "The Coronavirus Explained & What You Should Do", "c": "과학-바이러스", "src": "Kurzgesagt"},
+    {"id": "PSRJfaAYkW4", "t": "How does the immune system work? - Emma Bryce", "c": "과학-면역계", "src": "TED-Ed"},
+    {"id": "D9N7QaIOkG8", "t": "Why is it so hard to escape poverty?", "c": "과학-사회과학", "src": "TED-Ed"},
+    {"id": "jdrNjHPYKz4", "t": "Why do cats have vertical pupils?", "c": "과학-생물학", "src": "TED-Ed"},
+    {"id": "lkdLg0Nq4SQ", "t": "Why are cockroaches so hard to kill?", "c": "과학-생물학", "src": "TED-Ed"},
+    {"id": "yRwoReHd7XU", "t": "What is the rarest color in nature?", "c": "과학-자연", "src": "TED-Ed"},
+    {"id": "A5w-dEgIU1M", "t": "The Trillion Dollar Equation", "c": "과학-수학응용", "src": "Veritasium"}
+  ],
+  "math_education": [
+    {"id": "fNk_zzaMoSs", "t": "Vectors | Chapter 1, Essence of Linear Algebra", "c": "수학-선형대수", "src": "3Blue1Brown"},
+    {"id": "k7RM-ot2NWY", "t": "Linear combinations, span, and basis vectors | Chapter 2", "c": "수학-선형대수", "src": "3Blue1Brown"},
+    {"id": "kYB8IZa5AuE", "t": "Linear transformations and matrices | Chapter 3", "c": "수학-선형대수", "src": "3Blue1Brown"},
+    {"id": "XkY2DOUCWMU", "t": "Matrix multiplication as composition | Chapter 4", "c": "수학-선형대수", "src": "3Blue1Brown"},
+    {"id": "Ip3X9LOh2dk", "t": "The determinant | Chapter 6", "c": "수학-선형대수", "src": "3Blue1Brown"},
+    {"id": "PFDu9oVAE-g", "t": "Eigenvectors and eigenvalues | Chapter 14", "c": "수학-선형대수", "src": "3Blue1Brown"},
+    {"id": "WUvTyaaNkzM", "t": "The Essence of Calculus", "c": "수학-미적분", "src": "3Blue1Brown"},
+    {"id": "9vKqVkMQHKk", "t": "The paradox of the derivative", "c": "수학-미적분", "src": "3Blue1Brown"},
+    {"id": "3d6DsjIBzJ4", "t": "Taylor series", "c": "수학-미적분", "src": "3Blue1Brown"},
+    {"id": "aOT_bG-vWyg", "t": "The Parker Square - 재미있는 수학 도전", "c": "수학-정수론", "src": "Numberphile"}
+  ],
+  "history_education": [
+    {"id": "Yocja_N5s1I", "t": "The Agricultural Revolution - Crash Course World History #1", "c": "역사-고대", "src": "CrashCourse"},
+    {"id": "sohXPx_XZ6Y", "t": "Mesopotamia - Crash Course World History #3", "c": "역사-고대", "src": "CrashCourse"},
+    {"id": "Z3Wvw6BivVI", "t": "Ancient Egypt - Crash Course World History #4", "c": "역사-이집트", "src": "CrashCourse"},
+    {"id": "Q-mkVSasZIM", "t": "The Persians & Greeks - Crash Course World History #5", "c": "역사-그리스/페르시아", "src": "CrashCourse"},
+    {"id": "0LsrkWDCvxg", "t": "Alexander the Great - Crash Course World History #8", "c": "역사-헬레니즘", "src": "CrashCourse"},
+    {"id": "oPf27gAup9U", "t": "The Roman Empire. Or Republic. Or...Which Was It?", "c": "역사-로마", "src": "CrashCourse"},
+    {"id": "szxPar0BcMo", "t": "Wait For It...The Mongols! - Crash Course World History #17", "c": "역사-몽골", "src": "CrashCourse"},
+    {"id": "juWYhMoDTN0", "t": "A glimpse of teenage life in ancient Rome - Ray Laurence", "c": "역사-로마생활", "src": "TED-Ed"},
+    {"id": "ar8S6virCwM", "t": "A day in the life of an ancient Athenian - Robert Garland", "c": "역사-그리스생활", "src": "TED-Ed"},
+    {"id": "RQMgLxVxsrw", "t": "Four sisters in Ancient Rome - Ray Laurence", "c": "역사-로마생활", "src": "TED-Ed"}
+  ],
+  "adult_education": [
+    {"id": "S0_qX4VJhMQ", "t": "Power Rule through geometry - 3Blue1Brown Calculus", "c": "성인-수학", "src": "3Blue1Brown"},
+    {"id": "m2MIpDrF7Es", "t": "What's so special about Euler's number e?", "c": "성인-수학", "src": "3Blue1Brown"},
+    {"id": "rfG8ce4nNh0", "t": "Integration and the fundamental theorem of calculus", "c": "성인-수학", "src": "3Blue1Brown"},
+    {"id": "SC2eSujzrUY", "t": "How One Company Secretly Poisoned The Planet (PFAS)", "c": "성인-과학/사회", "src": "Veritasium"},
+    {"id": "YMDJA4UvXLA", "t": "The Explosive Element That Changed The World", "c": "성인-과학/역사", "src": "Veritasium"},
+    {"id": "_Qd3erAPI9w", "t": "Survivor Bias", "c": "성인-사고력", "src": "Veritasium"},
+    {"id": "_XPZQ0LAlR4", "t": "Archdukes, Cynicism, and World War I - Crash Course", "c": "성인-세계사", "src": "CrashCourse"},
+    {"id": "Q78COTwT7nE", "t": "World War II - Crash Course World History #38", "c": "성인-세계사", "src": "CrashCourse"},
+    {"id": "y9HjvHZfCUI", "t": "USA vs USSR Fight! The Cold War - Crash Course", "c": "성인-세계사", "src": "CrashCourse"},
+    {"id": "B3u4EFTwprM", "t": "Capitalism and Socialism - Crash Course World History #33", "c": "성인-경제/사회", "src": "CrashCourse"}
+  ]
+}
