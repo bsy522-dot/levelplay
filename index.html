@@ -83,7 +83,16 @@ nav button span:first-child{font-size:20px}
 <div id="app">
 <div class="pg on" id="p0">
 <div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">LevelPlay</div><div style="font-size:10px;color:var(--t3)" id="hLv">Lv.1</div></div>
-<div id="homeRows"></div>
+
+<!-- 과목 선택 (홈에서 바로) -->
+<div class="sec">📖 과목 선택</div>
+<div class="g2" id="homeSubjects"></div>
+
+<!-- 이어서 학습 -->
+<div class="sec">📝 바로 학습하기</div>
+<div id="homeLesson"></div>
+
+<!-- 게임/실험/퀴즈는 아래에 -->
 <div class="sec">🔬 과학 실험</div><div class="g2" id="sR"></div>
 <div class="sec">🎮 게임</div><div class="g2" id="gR"></div>
 <div class="sec">🔢 구구단 챌린지</div>
@@ -717,14 +726,15 @@ function checkGG(){const ans=parseInt(document.getElementById('ggA').value);if(i
 function filterVids(cat){document.querySelectorAll('[data-vcat]').forEach(el=>{el.style.display=(!cat||el.dataset.vcat===cat)?'':'none';});}
 
 function rAll(){
-  // 홈: 과목별 영상 행 (넷플릭스 스타일)
-  const cats=[...new Set(V.map(v=>v.c))];
-  const catIcons={음악:'🎵',체육:'⚽',과학:'🔬',언어:'🗣️',두뇌:'🧠',동화:'📖',건강:'💪',감성:'🤝',미술:'🎨',안전:'🛡️'};
-  document.getElementById('homeRows').innerHTML=cats.map(c=>{
-    const items=V.filter(v=>v.c===c);
-    if(items.length<2)return '';
-    return '<div class="sec">'+(catIcons[c]||'▶️')+' '+c+' <span style="margin-left:auto;font-size:10px;font-weight:400;color:var(--cy);cursor:pointer" onclick="go(1)">더보기 ›</span></div><div class="row">'+items.map(vc).join('')+'</div>';
+  // 홈: 과목 선택 그리드
+  document.getElementById('homeSubjects').innerHTML=Object.entries(CURRICULUM).map(([k,v])=>{
+    const total=v.units.reduce((s,u)=>s+u.lessons.length,0);
+    return '<div class="gc" onclick="go(1);setTimeout(()=>openSubject(\''+k+'\'),50)"><div class="gi">'+v.ic+'</div><div class="gn">'+v.nm+'</div><div class="gd">'+total+'개 레슨</div></div>';
   }).join('');
+  // 홈: 첫 레슨 바로 표시 (수학 > 덧셈뺄셈)
+  const firstSubj=Object.keys(CURRICULUM)[0];
+  const firstLesson=CURRICULUM[firstSubj].units[0].lessons[0];
+  document.getElementById('homeLesson').innerHTML='<div class="gc" style="text-align:left;padding:12px" onclick="go(1);setTimeout(()=>{openSubject(\''+firstSubj+'\');setTimeout(()=>openLesson(0,0),50)},50)"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:24px">'+CURRICULUM[firstSubj].ic+'</span><div><div style="font-size:13px;font-weight:600">'+firstLesson.t+'</div><div style="font-size:10px;color:var(--t3)">'+CURRICULUM[firstSubj].nm+' > '+CURRICULUM[firstSubj].units[0].nm+' > Lv.'+firstLesson.lv+'</div></div><span style="margin-left:auto;color:var(--cy)">시작 ›</span></div></div>';
   document.getElementById('sR').innerHTML=SIMS.slice(0,4).map(sc).join('');
   document.getElementById('sR2').innerHTML=SIMS.slice(4,8).map(sc).join('');
   document.getElementById('gR').innerHTML=GMS.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>').join('');
