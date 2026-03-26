@@ -749,7 +749,8 @@ function rAll(){
 function init(){
   setTimeout(()=>document.getElementById('splash').classList.add('h'),600);
   setTimeout(()=>{ckNk();rAll();},700);
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+  // SW 캐시 완전 제거
+  if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(regs=>{regs.forEach(r=>r.unregister());});caches.keys().then(names=>names.forEach(n=>caches.delete(n)));}
 }
 document.addEventListener('DOMContentLoaded',init);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){cG();cMo();}});
