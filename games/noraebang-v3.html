@@ -15,17 +15,17 @@ button{font-family:inherit;cursor:pointer}
 #header{background:linear-gradient(135deg,#1a1040,#2a1060);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #6a3aaa;flex-shrink:0;z-index:10}
 #header h1{font-size:20px;color:#ff6ab0;text-shadow:0 0 20px rgba(255,106,176,.5)}
 .hdr-btns{display:flex;gap:6px}
-.hdr-btns button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 12px;border-radius:18px;font-size:12px;transition:all .2s}
+.hdr-btns button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 12px;border-radius:18px;font-size:12px;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
 .hdr-btns button:hover,.hdr-btns button.active{background:rgba(255,106,176,.3);border-color:#ff6ab0}
 
 /* Song Select */
 #songSelect{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;align-content:start}
 .cat-header{grid-column:1/-1;font-size:14px;font-weight:700;color:#a855f7;margin:8px 0 2px;padding-left:4px;border-left:3px solid #a855f7}
-.song-card{background:linear-gradient(135deg,rgba(40,20,80,.8),rgba(60,30,100,.6));border:2px solid rgba(255,106,176,.15);border-radius:14px;padding:14px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.song-card{background:linear-gradient(135deg,rgba(40,20,80,.8),rgba(60,30,100,.6));border:2px solid rgba(255,106,176,.15);border-radius:14px;padding:14px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;min-height:0}
 .song-card:hover{border-color:#ff6ab0;transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,106,176,.2)}
-.song-card .sc-icon{font-size:32px;float:left;margin-right:10px}
-.song-card .sc-title{font-size:15px;font-weight:700;color:#fff}
-.song-card .sc-info{font-size:11px;color:#aaa;margin-top:2px}
+.song-card .sc-icon{font-size:32px;float:left;margin-right:10px;flex-shrink:0}
+.song-card .sc-title{font-size:15px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.song-card .sc-info{font-size:11px;color:#aaa;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .song-card .sc-stars{color:#ffd700;font-size:13px;margin-top:4px}
 .song-card .sc-high{font-size:10px;color:#8f8;margin-top:2px}
 .song-card .sc-grade{position:absolute;top:8px;right:10px;font-size:20px;font-weight:900;opacity:.3}
@@ -68,7 +68,7 @@ button{font-family:inherit;cursor:pointer}
 /* Controls overlay */
 #singControls{position:absolute;bottom:128px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:6;opacity:.7;transition:opacity .2s}
 #singControls:hover{opacity:1}
-#singControls button{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center}
+#singControls button{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
 #singControls button.active{background:rgba(255,106,176,.4);border-color:#ff6ab0}
 
 /* Result */
@@ -87,7 +87,7 @@ button{font-family:inherit;cursor:pointer}
 .res-bar-row .bar-fill{height:100%;border-radius:5px;transition:width 1s}
 .res-bar-row .val{width:36px;text-align:right;margin-left:6px;color:#fff;font-weight:700}
 .res-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center}
-.res-btns button{padding:10px 24px;border:none;border-radius:20px;font-size:14px;font-weight:700;transition:all .2s}
+.res-btns button{padding:10px 24px;border:none;border-radius:20px;font-size:14px;font-weight:700;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .btn-retry{background:linear-gradient(135deg,#ff6ab0,#a855f7);color:#fff}
 .btn-back{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)!important}
 .btn-play{background:rgba(76,175,80,.3);color:#8f8;border:1px solid rgba(76,175,80,.4)!important}
@@ -658,11 +658,11 @@ function gameLoop(){
     const cents=1200*Math.log2(userFreq/targetFreq);
     const ac=Math.abs(cents);
     totalN++;
-    if(ac<50){hitN++;combo++;if(combo>maxCombo)maxCombo=combo;
-      const ns=Math.max(0,100-ac*2);score+=ns*(1+Math.min(combo,10)*0.05);
-      pitchSum+=Math.max(0,100-ac*2);rhythmSum+=100;
-      if(ac<15){spawnParticles(document.getElementById('particleCanvas').width/3,document.getElementById('particleCanvas').height/2,'#ffd700',3);}
-    }else if(ac<100){score+=30;pitchSum+=30;rhythmSum+=60;combo=Math.max(0,combo-1);}
+    if(ac<80){hitN++;combo++;if(combo>maxCombo)maxCombo=combo;
+      const ns=Math.max(0,100-ac*1.25);score+=ns*(1+Math.min(combo,10)*0.05);
+      pitchSum+=Math.max(0,100-ac*1.25);rhythmSum+=100;
+      if(ac<25){spawnParticles(document.getElementById('particleCanvas').width/3,document.getElementById('particleCanvas').height/2,'#ffd700',3);}
+    }else if(ac<150){score+=30;pitchSum+=30;rhythmSum+=60;combo=Math.max(0,combo-1);}
     else{combo=0;pitchSum+=0;rhythmSum+=20;}
   }else if(targetFreq){totalN++;combo=0;}
 

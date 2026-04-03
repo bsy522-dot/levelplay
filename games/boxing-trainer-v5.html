@@ -201,7 +201,19 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+  onerror="tryFallbackThree()"></script>
+<script>
+function tryFallbackThree(){
+  if(window.THREE)return;
+  var s=document.createElement('script');
+  s.src='https://unpkg.com/three@0.128.0/build/three.min.js';
+  s.onerror=function(){
+    document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#e63946;font-size:20px;text-align:center;padding:20px;background:#0a0a10;font-family:sans-serif">Three.js 로딩 실패<br><small style="color:#888;font-size:14px">인터넷 연결을 확인하고 새로고침 해주세요</small></div>';
+  };
+  document.head.appendChild(s);
+}
+</script>
 <script>
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
@@ -315,6 +327,9 @@ function saveSave() { localStorage.setItem('boxingV5', JSON.stringify(save)); }
 function resetAll() { if (confirm('모든 진행 데이터를 초기화하시겠습니까?')) { localStorage.removeItem('boxingV5'); save = defaultSave(); showMain(); } }
 
 // ==================== THREE.JS SETUP ====================
+if(typeof THREE==='undefined'){
+  document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#e63946;font-size:20px;text-align:center;padding:20px;background:#0a0a10;font-family:sans-serif">Three.js 로딩 중...<br><small style="color:#888;font-size:14px">잠시 후 새로고침 해보세요</small></div>';
+}
 let scene, camera, renderer, clock;
 let ringGroup, playerModel, oppModel;
 let particles3D = [];

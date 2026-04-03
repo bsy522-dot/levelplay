@@ -21,6 +21,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 
 #panel{position:fixed;top:44px;right:0;width:260px;bottom:70px;background:rgba(10,8,24,.97);border-left:2px solid #4a2a7a;z-index:90;display:flex;flex-direction:column;overflow:hidden;transition:transform .3s}
 #panel.hide{transform:translateX(100%)}
+#panelToggle{display:none;position:fixed;top:50px;right:6px;z-index:95;width:36px;height:36px;background:rgba(140,80,255,.3);border:1px solid #a070ff;border-radius:8px;color:#d0b0ff;font-size:18px;cursor:pointer;text-align:center;line-height:36px}
 .ptabs{display:flex;border-bottom:1px solid #4a2a7a}
 .ptab{flex:1;padding:8px 4px;text-align:center;font-size:11px;cursor:pointer;border-bottom:2px solid transparent;color:#888}
 .ptab.act{color:#d0b0ff;border-bottom-color:#a070ff}
@@ -65,7 +66,8 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 
 #bpOverlay{position:fixed;top:44px;left:0;right:0;bottom:70px;pointer-events:none;z-index:5}
 
-@media(max-width:600px){#panel{width:220px}}
+@media(max-width:600px){#panel{width:220px}#panel.hide+#panelToggle,#panelToggle{display:block}}
+@media(max-width:900px){#panelToggle{display:block}}
 </style>
 </head>
 <body>
@@ -84,6 +86,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <canvas id="cvs"></canvas>
 <canvas id="bpOverlay"></canvas>
 
+<div id="panelToggle" onclick="togglePanel()">☰</div>
 <div id="panel">
 <div class="ptabs">
 <div class="ptab act" data-t="rooms">방</div>
@@ -114,6 +117,20 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <div id="galleryModal"><div id="galleryBox"></div></div>
 
 <script>
+// === PANEL TOGGLE ===
+function togglePanel(){
+  const p=document.getElementById('panel');
+  p.classList.toggle('hide');
+  document.getElementById('panelToggle').textContent=p.classList.contains('hide')?'☰':'✕';
+}
+// Auto-hide panel on mobile/tablet
+if(window.innerWidth<=900){
+  document.addEventListener('DOMContentLoaded',()=>{
+    const p=document.getElementById('panel');
+    if(p)p.classList.add('hide');
+  });
+}
+
 // === DATA ===
 const ROOMS=[
 {id:'living',n:'거실',ic:'🛋️',c:'#b0a090',w:6,h:5,cost:30000},
@@ -516,7 +533,7 @@ function status(t){document.getElementById('statusTxt').textContent=t;}
 document.getElementById('weatherIcon').onclick=()=>{weather=(weather+1)%4;document.getElementById('weatherIcon').textContent=WEATHERS[weather];};
 
 // === PANEL ===
-document.getElementById('btnPanel').onclick=()=>{panelVisible=!panelVisible;document.getElementById('panel').classList.toggle('hide');};
+document.getElementById('btnPanel').onclick=()=>{panelVisible=!panelVisible;togglePanel();};
 document.getElementById('btnBP').onclick=()=>{blueprintMode=!blueprintMode;document.getElementById('btnBP').classList.toggle('act');};
 
 document.querySelectorAll('.ptab').forEach(t=>t.onclick=()=>{

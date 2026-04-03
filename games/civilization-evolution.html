@@ -212,10 +212,11 @@ const OBJECTIVES=[
 let G={
 era:0,day:1,time:0,season:0,population:1,
 inv:{},crafted:{},built:{},discoveredRecipes:[],
-px:400,py:300,
+px:400,py:300,targetX:null,targetY:null,walking:false,walkFrame:0,
 worldResources:[],buildings:[],villagers:[],
 camX:0,camY:0,
-selectedSlot:0
+selectedSlot:0,
+floatingTexts:[]
 };
 
 let canvas,ctx,mmCanvas,mmCtx;
@@ -273,9 +274,62 @@ G.worldResources.push({
 type:rt,
 x:Math.random()*WORLD_W*TILE,
 y:Math.random()*WORLD_H*TILE,
-hp:3
+hp:3,
+bobOffset:Math.random()*Math.PI*2
 });
 }
+}
+
+// Resource node drawing (distinct visuals per type)
+function drawResourceNode(ctx,r,sx,sy,dist,anim){
+const res=RESOURCES[r.type];if(!res)return;
+const bob=Math.sin(anim*0.02+r.bobOffset)*3;
+const sz=dist<50?24:20;
+// Draw ground deposit visual
+const cat=getResourceCategory(r.type);
+if(cat==='stone'){
+  // Grey rocky deposits
+  ctx.fillStyle='#8a8a8a';ctx.beginPath();ctx.ellipse(sx,sy+6,14,6,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#999';ctx.beginPath();ctx.arc(sx-4,sy+bob-2,7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(sx+5,sy+bob-4,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#bbb';ctx.beginPath();ctx.arc(sx+1,sy+bob-8,4,0,Math.PI*2);ctx.fill();
+}else if(cat==='wood'){
+  // Green tree
+  ctx.fillStyle='#5D4037';ctx.fillRect(sx-2,sy-2,4,14);
+  ctx.fillStyle='#2E7D32';ctx.beginPath();ctx.arc(sx,sy+bob-8,11,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#388E3C';ctx.beginPath();ctx.arc(sx-3,sy+bob-5,7,0,Math.PI*2);ctx.fill();
+}else if(cat==='ore'){
+  // Copper/brown ore vein
+  ctx.fillStyle='#6D4C41';ctx.beginPath();ctx.ellipse(sx,sy+5,12,5,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#D4760A';ctx.beginPath();ctx.arc(sx-3,sy+bob-2,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#E8A735';ctx.beginPath();ctx.arc(sx+4,sy+bob-5,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(sx,sy+bob-1,2,0,Math.PI*2);ctx.fill();
+}else if(cat==='clay'){
+  // Orange clay pit
+  ctx.fillStyle='#D2691E';ctx.beginPath();ctx.ellipse(sx,sy+4,13,7,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#E8A060';ctx.beginPath();ctx.ellipse(sx,sy+bob+1,9,4,0,0,Math.PI*2);ctx.fill();
+}else{
+  // Default: emoji
+  ctx.font=sz+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(res.icon,sx,sy+bob);
+}
+// Hover glow
+if(dist<50){
+  ctx.fillStyle='rgba(255,215,0,.2)';ctx.beginPath();ctx.arc(sx,sy,20,0,Math.PI*2);ctx.fill();
+  ctx.font='9px sans-serif';ctx.fillStyle='#ffd700';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(res.name+' ('+r.hp+'/3)',sx,sy+20);
+}else if(dist<80){
+  ctx.font='9px sans-serif';ctx.fillStyle='#ddd';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(res.name,sx,sy+16);
+}
+}
+
+function getResourceCategory(type){
+if(['stone','flint','limestone','sand','saltpeter'].includes(type))return 'stone';
+if(['stick','wood','fiber','rubber'].includes(type))return 'wood';
+if(['copperOre','tinOre','gold','ironOre','coal','silicon','uranium','oil'].includes(type))return 'ore';
+if(['clay'].includes(type))return 'clay';
+return 'other';
 }
 
 function getEraResources(era){
@@ -311,12 +365,25 @@ requestAnimationFrame(gameLoop);
 function update(){
 // Movement
 const spd=3;
-if(keys['ArrowUp']||keys['w'])G.py-=spd;
-if(keys['ArrowDown']||keys['s'])G.py+=spd;
-if(keys['ArrowLeft']||keys['a'])G.px-=spd;
-if(keys['ArrowRight']||keys['d'])G.px+=spd;
+if(keys['ArrowUp']||keys['w']){G.py-=spd;G.targetX=null;G.walking=true;G.walkFrame++;}
+if(keys['ArrowDown']||keys['s']){G.py+=spd;G.targetX=null;G.walking=true;G.walkFrame++;}
+if(keys['ArrowLeft']||keys['a']){G.px-=spd;G.targetX=null;G.walking=true;G.walkFrame++;}
+if(keys['ArrowRight']||keys['d']){G.px+=spd;G.targetX=null;G.walking=true;G.walkFrame++;}
+// Walk to target (click-to-move)
+if(G.targetX!==null&&G.targetY!==null){
+  const dx=G.targetX-G.px,dy=G.targetY-G.py;
+  const d=Math.sqrt(dx*dx+dy*dy);
+  if(d>3){G.px+=dx/d*spd;G.py+=dy/d*spd;G.walking=true;G.walkFrame++;}
+  else{G.targetX=null;G.targetY=null;G.walking=false;}
+}else if(!keys['ArrowUp']&&!keys['w']&&!keys['ArrowDown']&&!keys['s']&&
+         !keys['ArrowLeft']&&!keys['a']&&!keys['ArrowRight']&&!keys['d']){
+  G.walking=false;
+}
 G.px=Math.max(10,Math.min(WORLD_W*TILE-10,G.px));
 G.py=Math.max(10,Math.min(WORLD_H*TILE-10,G.py));
+// Update floating texts
+if(G.floatingTexts){G.floatingTexts.forEach(ft=>{ft.y-=1;ft.t--});
+  G.floatingTexts=G.floatingTexts.filter(ft=>ft.t>0);}
 
 // Camera follow
 G.camX=G.px-W/2;
@@ -437,31 +504,16 @@ ctx.fillStyle='#aaa';
 ctx.fillText(bDef.name,sx,sy+22);
 });
 
-// Resources
+// Resources (visible nodes with distinct visuals)
 G.worldResources.forEach(r=>{
 const res=RESOURCES[r.type];
 if(!res)return;
 const sx=r.x-G.camX;
 const sy=r.y-G.camY;
 if(sx<-30||sx>W+30||sy<-30||sy>H+30)return;
-// Hover glow
 const dx=G.px-r.x,dy=G.py-r.y;
 const dist=Math.sqrt(dx*dx+dy*dy);
-if(dist<50){
-ctx.fillStyle='rgba(255,215,0,.15)';
-ctx.beginPath();
-ctx.arc(sx,sy,18,0,Math.PI*2);
-ctx.fill();
-}
-ctx.font='20px serif';
-ctx.textAlign='center';
-ctx.textBaseline='middle';
-ctx.fillText(res.icon,sx,sy);
-if(dist<80){
-ctx.font='9px sans-serif';
-ctx.fillStyle='#ddd';
-ctx.fillText(res.name,sx,sy+16);
-}
+drawResourceNode(ctx,r,sx,sy,dist,animFrame);
 });
 
 // Villagers
@@ -474,7 +526,7 @@ ctx.textAlign='center';
 ctx.fillText('👤',sx,sy);
 });
 
-// Player
+// Player with walking animation
 const px=G.px-G.camX;
 const py=G.py-G.camY;
 // Shadow
@@ -482,16 +534,39 @@ ctx.fillStyle='rgba(0,0,0,.3)';
 ctx.beginPath();
 ctx.ellipse(px,py+12,10,4,0,0,Math.PI*2);
 ctx.fill();
+// Walking sprite (simple pixel-art body)
+const bobY=G.walking?Math.sin(G.walkFrame*0.3)*3:Math.sin(animFrame*0.05)*1;
+const legAnim=G.walking?Math.sin(G.walkFrame*0.4)*4:0;
 // Body
-ctx.font='24px serif';
-ctx.textAlign='center';
-ctx.textBaseline='middle';
-const bobY=Math.sin(animFrame*0.1)*2;
-ctx.fillText('🧑',px,py+bobY);
+ctx.fillStyle='#F5CBA7';ctx.beginPath();ctx.arc(px,py-10+bobY,7,0,Math.PI*2);ctx.fill();// head
+ctx.fillStyle='#3498DB';ctx.fillRect(px-5,py-3+bobY,10,12);// torso
+// Arms
+ctx.fillStyle='#F5CBA7';
+ctx.fillRect(px-8,py-1+bobY+legAnim*0.3,3,8);
+ctx.fillRect(px+5,py-1+bobY-legAnim*0.3,3,8);
+// Legs
+ctx.fillStyle='#2C3E50';
+ctx.fillRect(px-4,py+9+bobY,3,6+legAnim);
+ctx.fillRect(px+1,py+9+bobY,3,6-legAnim);
+// Eyes
+ctx.fillStyle='#333';ctx.fillRect(px-3,py-11+bobY,2,2);ctx.fillRect(px+1,py-11+bobY,2,2);
 // Name
 ctx.font='10px sans-serif';
-ctx.fillStyle='#ffd700';
-ctx.fillText('플레이어',px,py-18);
+ctx.fillStyle='#ffd700';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText('플레이어',px,py-22);
+// Walking target indicator
+if(G.targetX!==null){
+  const tx=G.targetX-G.camX,ty=G.targetY-G.camY;
+  ctx.strokeStyle='rgba(255,215,0,.4)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(tx,ty);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,215,0,.5)';ctx.beginPath();ctx.arc(tx,ty,4,0,Math.PI*2);ctx.fill();
+}
+// Floating texts
+if(G.floatingTexts){G.floatingTexts.forEach(ft=>{
+  ctx.globalAlpha=Math.min(1,ft.t/20);
+  ctx.fillStyle=ft.color||'#FFD700';ctx.font='bold 14px sans-serif';ctx.textAlign='center';
+  ctx.fillText(ft.text,ft.x-G.camX,ft.y-G.camY);ctx.globalAlpha=1;
+});}
 
 // Gather range indicator
 ctx.strokeStyle='rgba(255,215,0,.15)';
@@ -633,22 +708,24 @@ const res=RESOURCES[clicked.type];
 if(clicked.hp<=0){
 addItem(clicked.type,1);
 showToast(`${res.icon} ${res.name} 획득!`);
+// Floating text
+if(!G.floatingTexts)G.floatingTexts=[];
+G.floatingTexts.push({text:'+1 '+res.name,x:clicked.x,y:clicked.y-10,t:50,color:'#4CAF50'});
 G.worldResources=G.worldResources.filter(r=>r!==clicked);
 discoverRecipesFor(clicked.type);
 }else{
 showToast(`${res.icon} 채집 중... (${3-clicked.hp}/3)`);
+if(!G.floatingTexts)G.floatingTexts=[];
+G.floatingTexts.push({text:(3-clicked.hp)+'/3',x:clicked.x,y:clicked.y-10,t:30,color:'#FFD700'});
 }
 }else{
-// Move toward resource
-G.px+=(clicked.x-G.px)*0.3;
-G.py+=(clicked.y-G.py)*0.3;
+// Walk toward resource
+G.targetX=clicked.x;G.targetY=clicked.y;
 }
 }else{
-// Move to click position
-const tx=e.clientX+G.camX;
-const ty=e.clientY+G.camY;
-G.px+=(tx-G.px)*0.3;
-G.py+=(ty-G.py)*0.3;
+// Walk to click position
+G.targetX=e.clientX+G.camX;
+G.targetY=e.clientY+G.camY;
 }
 }
 

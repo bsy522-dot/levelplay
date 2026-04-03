@@ -558,19 +558,69 @@ function drawCookingStep(){
  const stoveY=H*.3;
  fillRect(0,stoveY,W,H*.4,'#78909C');
  fillRect(0,stoveY,W,4,'#546E7A');
- // Burner
+ // Burner with animated flame
  const bx=W/2,by=stoveY+H*.2;
  X.beginPath();X.arc(bx,by,50,0,Math.PI*2);
  X.fillStyle=stype==='hold'&&touching?'#FF5722':'#37474F';X.fill();
+ // Animated flame ring when cooking
+ if(stype==='hold'&&touching){
+   for(let i=0;i<8;i++){
+     const a=i*Math.PI/4+animT*3;
+     const fx=bx+Math.cos(a)*42,fy=by+Math.sin(a)*42;
+     const fs=4+Math.sin(animT*8+i)*2;
+     X.fillStyle='rgba(255,100,0,'+(0.5+Math.sin(animT*6+i)*0.3)+')';
+     X.beginPath();X.arc(fx,fy,fs,0,Math.PI*2);X.fill();
+   }
+ }
  X.beginPath();X.arc(bx,by,35,0,Math.PI*2);X.fillStyle='#263238';X.fill();
 
- // Pan on stove
+ // Pan on stove with cooking state visual
  const panY=by-20;
  X.beginPath();X.ellipse(bx,panY,65,25,0,0,Math.PI*2);X.fillStyle='#424242';X.fill();
- X.beginPath();X.ellipse(bx,panY-5,58,20,0,0,Math.PI*2);X.fillStyle='#616161';X.fill();
+ X.beginPath();X.ellipse(bx,panY-5,58,20,0,0,Math.PI*2);
+ // Cooking state transition: raw -> cooking -> done
+ const cookProgress=stype==='hold'?Math.min(1,holdProgress/holdTarget):stepComplete?1:0;
+ if(cookProgress>0.7){X.fillStyle='#8B6914';} // done - golden brown
+ else if(cookProgress>0.3){X.fillStyle='#A0522D';} // cooking - browning
+ else{X.fillStyle='#616161';} // raw - grey pan
+ X.fill();
 
- // Recipe emoji in pan
- drawText(recipe.emoji,bx,panY-5,30,'#000');
+ // Stirring animation (circular motion of food in pan)
+ if(stype==='hold'&&touching&&!stepComplete){
+   const stirAngle=animT*4;
+   const stirR=15;
+   for(let i=0;i<3;i++){
+     const sa=stirAngle+i*Math.PI*2/3;
+     const sx=bx+Math.cos(sa)*stirR,sy=panY-5+Math.sin(sa)*stirR*0.4;
+     X.fillStyle=['#FFE0B2','#FFCC80','#FFB74D'][i];
+     X.beginPath();X.arc(sx,sy,5,0,Math.PI*2);X.fill();
+   }
+ }
+
+ // Recipe emoji in pan (bounce when cooking)
+ const emojiShake=stype==='hold'&&touching?Math.sin(animT*10)*3:0;
+ drawText(recipe.emoji,bx+emojiShake,panY-5+emojiShake*0.5,30,'#000');
+
+ // Boiling bubbles
+ if(stype==='hold'&&touching&&(step.includes('끓') ||step.includes('익'))){
+   for(let i=0;i<5;i++){
+     const bub=Math.sin(animT*3+i*1.5);
+     const bubX=bx-20+i*10+Math.sin(animT*2+i)*5;
+     const bubY=panY-10-Math.abs(bub)*20;
+     const bubR=2+Math.abs(bub)*2;
+     X.fillStyle='rgba(255,255,255,'+(0.3+Math.abs(bub)*0.3)+')';
+     X.beginPath();X.arc(bubX,bubY,bubR,0,Math.PI*2);X.fill();
+   }
+ }
+
+ // Chopping animation
+ if(stype==='tap'&&!stepComplete&&(step.includes('잘') ||step.includes('썰'))){
+   const chopAngle=Math.sin(animT*8)*0.3;
+   X.save();X.translate(bx+50,panY-30);X.rotate(chopAngle);
+   X.fillStyle='#9E9E9E';X.fillRect(-2,-15,4,15);
+   X.fillStyle='#BDBDBD';X.fillRect(-6,-18,12,5);
+   X.restore();
+ }
 
  // Counter
  fillRect(0,H*.7,W,H*.3,'#6D4C41');fillRect(0,H*.7,W,4,'#4E342E');
@@ -618,10 +668,17 @@ function drawCookingStep(){
     dragItem={x:dzx,y:dzy};tapped=false;
    }
    if(dragItem&&touching){
-    drawText(info?info.emoji:'🍽️',tx,ty,32,'#000');
-    // Arrow
-    X.strokeStyle='#FF9800';X.lineWidth=2;X.setLineDash([5,5]);
-    X.beginPath();X.moveTo(tx,ty+20);X.lineTo(bx,panY);X.stroke();X.setLineDash([]);
+    // Smooth drag with trail effect
+    X.globalAlpha=0.3;drawText(info?info.emoji:'🍽️',dragItem.x+(tx-dragItem.x)*0.3,dragItem.y+(ty-dragItem.y)*0.3,28,'#000');
+    X.globalAlpha=1;drawText(info?info.emoji:'🍽️',tx,ty,32,'#000');
+    // Animated dashed arrow to pan
+    X.strokeStyle='#FF9800';X.lineWidth=2;
+    const dashOffset=animT*20;
+    X.setLineDash([8,8]);X.lineDashOffset=-dashOffset;
+    X.beginPath();X.moveTo(tx,ty+20);X.lineTo(bx,panY);X.stroke();X.setLineDash([]);X.lineDashOffset=0;
+    // Target glow on pan
+    X.fillStyle='rgba(255,152,0,'+(0.2+Math.sin(animT*5)*0.15)+')';
+    X.beginPath();X.ellipse(bx,panY,70,28,0,0,Math.PI*2);X.fill();
    }
    if(dragItem&&!touching){
     if(Math.abs(tx-bx)<80&&Math.abs(ty-panY)<60){

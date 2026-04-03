@@ -1,0 +1,1753 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "created": "2026-03-28",
+    "description": "LevelPlay 마스터 커리큘럼 - 인류 지식 전체 체계",
+    "levelGuide": {
+      "1": "입문 - 기초 개념 이해",
+      "2": "초급 - 기본 원리 적용",
+      "3": "중급 - 심화 개념과 연결",
+      "4": "고급 - 분석과 응용",
+      "5": "심화 - 전문가 수준"
+    }
+  },
+  "kids": {
+    "수학": {
+      "icon": "🔢",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "수와 연산",
+          "topics": [
+            {"name": "1~10 세기", "level": 1, "lessonCount": 3},
+            {"name": "11~100 세기", "level": 1, "lessonCount": 3},
+            {"name": "덧셈과 뺄셈 (한 자리)", "level": 1, "lessonCount": 4},
+            {"name": "덧셈과 뺄셈 (두 자리)", "level": 2, "lessonCount": 3},
+            {"name": "곱셈 구구단", "level": 2, "lessonCount": 4},
+            {"name": "나눗셈 기초", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "분수와 소수",
+          "topics": [
+            {"name": "분수란 무엇일까", "level": 2, "lessonCount": 3},
+            {"name": "분수의 덧셈과 뺄셈", "level": 3, "lessonCount": 3},
+            {"name": "소수 이해하기", "level": 3, "lessonCount": 3},
+            {"name": "분수와 소수 변환", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "도형과 측정",
+          "topics": [
+            {"name": "기본 도형 (삼각형, 사각형, 원)", "level": 1, "lessonCount": 3},
+            {"name": "길이와 무게 재기", "level": 1, "lessonCount": 3},
+            {"name": "넓이와 둘레", "level": 2, "lessonCount": 3},
+            {"name": "부피와 들이", "level": 3, "lessonCount": 3},
+            {"name": "대칭과 이동", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "비율과 비례",
+          "topics": [
+            {"name": "비율이란", "level": 3, "lessonCount": 3},
+            {"name": "백분율(%) 이해", "level": 3, "lessonCount": 3},
+            {"name": "비례식과 비례배분", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "규칙과 문제해결",
+          "topics": [
+            {"name": "수 배열의 규칙 찾기", "level": 2, "lessonCount": 3},
+            {"name": "문장제 문제 풀기", "level": 2, "lessonCount": 4},
+            {"name": "표와 그래프 읽기", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "과학": {
+      "icon": "🔬",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "동물의 세계",
+          "topics": [
+            {"name": "우리 주변의 동물", "level": 1, "lessonCount": 3},
+            {"name": "동물의 분류 (포유류, 조류, 파충류)", "level": 1, "lessonCount": 4},
+            {"name": "동물의 한살이", "level": 2, "lessonCount": 3},
+            {"name": "멸종위기 동물", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "식물의 세계",
+          "topics": [
+            {"name": "씨앗에서 꽃까지", "level": 1, "lessonCount": 3},
+            {"name": "나무와 풀의 차이", "level": 1, "lessonCount": 3},
+            {"name": "광합성이란", "level": 2, "lessonCount": 3},
+            {"name": "식물의 구조 (뿌리, 줄기, 잎)", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "우리 몸",
+          "topics": [
+            {"name": "뼈와 근육", "level": 1, "lessonCount": 3},
+            {"name": "소화와 영양", "level": 2, "lessonCount": 3},
+            {"name": "호흡과 혈액순환", "level": 2, "lessonCount": 3},
+            {"name": "감각기관 (눈, 코, 귀, 혀, 피부)", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "지구와 날씨",
+          "topics": [
+            {"name": "지구의 모양과 구조", "level": 2, "lessonCount": 3},
+            {"name": "날씨의 변화", "level": 1, "lessonCount": 3},
+            {"name": "계절이 바뀌는 이유", "level": 2, "lessonCount": 3},
+            {"name": "물의 순환", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "우주 탐험",
+          "topics": [
+            {"name": "태양과 달", "level": 1, "lessonCount": 3},
+            {"name": "태양계 행성", "level": 2, "lessonCount": 3},
+            {"name": "별자리 이야기", "level": 1, "lessonCount": 3},
+            {"name": "우주 탐사의 역사", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "물질과 에너지",
+          "topics": [
+            {"name": "고체, 액체, 기체", "level": 1, "lessonCount": 3},
+            {"name": "열과 온도", "level": 2, "lessonCount": 3},
+            {"name": "빛과 그림자", "level": 1, "lessonCount": 3},
+            {"name": "소리의 세계", "level": 2, "lessonCount": 3},
+            {"name": "자석과 전기", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "한국사": {
+      "icon": "🇰🇷",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "옛날 옛적 한반도",
+          "topics": [
+            {"name": "단군 할아버지와 고조선", "level": 1, "lessonCount": 3},
+            {"name": "선사시대 사람들의 생활", "level": 1, "lessonCount": 3},
+            {"name": "고구려, 백제, 신라 이야기", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "통일신라와 고려",
+          "topics": [
+            {"name": "삼국통일과 통일신라", "level": 2, "lessonCount": 3},
+            {"name": "고려의 건국과 문화", "level": 2, "lessonCount": 3},
+            {"name": "팔만대장경과 금속활자", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "조선시대",
+          "topics": [
+            {"name": "조선의 건국과 한글 창제", "level": 2, "lessonCount": 3},
+            {"name": "임진왜란과 이순신 장군", "level": 2, "lessonCount": 3},
+            {"name": "조선의 생활과 문화", "level": 2, "lessonCount": 3},
+            {"name": "조선의 과학 (측우기, 해시계)", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "근현대",
+          "topics": [
+            {"name": "일제강점기와 독립운동", "level": 3, "lessonCount": 3},
+            {"name": "6·25 전쟁", "level": 3, "lessonCount": 3},
+            {"name": "대한민국의 발전", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "문화유산 탐방",
+          "topics": [
+            {"name": "유네스코 세계유산", "level": 2, "lessonCount": 3},
+            {"name": "우리의 전통 놀이와 풍습", "level": 1, "lessonCount": 3},
+            {"name": "전통 건축 (궁궐, 한옥)", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "세계사": {
+      "icon": "🌍",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "고대 문명",
+          "topics": [
+            {"name": "이집트 피라미드와 파라오", "level": 1, "lessonCount": 3},
+            {"name": "메소포타미아 문명", "level": 2, "lessonCount": 3},
+            {"name": "그리스 신화와 올림픽", "level": 1, "lessonCount": 3},
+            {"name": "로마 제국 이야기", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "중세 시대",
+          "topics": [
+            {"name": "기사와 성 이야기", "level": 1, "lessonCount": 3},
+            {"name": "실크로드와 동서양 교류", "level": 2, "lessonCount": 3},
+            {"name": "바이킹의 모험", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "탐험의 시대",
+          "topics": [
+            {"name": "콜럼버스와 신대륙 발견", "level": 2, "lessonCount": 3},
+            {"name": "마젤란의 세계일주", "level": 2, "lessonCount": 3},
+            {"name": "르네상스와 레오나르도 다빈치", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "혁명과 변화",
+          "topics": [
+            {"name": "산업혁명 이야기", "level": 3, "lessonCount": 3},
+            {"name": "미국 독립과 자유", "level": 3, "lessonCount": 3},
+            {"name": "프랑스 혁명", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "현대 세계",
+          "topics": [
+            {"name": "세계대전과 평화", "level": 3, "lessonCount": 3},
+            {"name": "유엔과 국제 협력", "level": 2, "lessonCount": 3},
+            {"name": "오늘날의 세계", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "한글국어": {
+      "icon": "📝",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "한글 익히기",
+          "topics": [
+            {"name": "자음 ㄱ~ㅎ 배우기", "level": 1, "lessonCount": 4},
+            {"name": "모음 ㅏ~ㅣ 배우기", "level": 1, "lessonCount": 4},
+            {"name": "글자 조합 (가, 나, 다...)", "level": 1, "lessonCount": 4},
+            {"name": "받침 글자 읽기", "level": 1, "lessonCount": 3},
+            {"name": "쌍자음과 복모음", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "단어와 문장",
+          "topics": [
+            {"name": "일상 단어 배우기 (가족, 음식, 동물)", "level": 1, "lessonCount": 4},
+            {"name": "간단한 문장 만들기", "level": 2, "lessonCount": 3},
+            {"name": "의문문, 명령문, 감탄문", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "읽기와 이해",
+          "topics": [
+            {"name": "짧은 글 읽기", "level": 2, "lessonCount": 3},
+            {"name": "동화 읽고 이해하기", "level": 2, "lessonCount": 4},
+            {"name": "설명문 읽기", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "글쓰기",
+          "topics": [
+            {"name": "일기 쓰기", "level": 2, "lessonCount": 3},
+            {"name": "편지 쓰기", "level": 2, "lessonCount": 3},
+            {"name": "이야기 만들기", "level": 3, "lessonCount": 3},
+            {"name": "독서 감상문", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "맞춤법과 어휘",
+          "topics": [
+            {"name": "자주 틀리는 맞춤법", "level": 3, "lessonCount": 4},
+            {"name": "속담과 관용어", "level": 3, "lessonCount": 3},
+            {"name": "사자성어 배우기", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "영어": {
+      "icon": "🔤",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "알파벳과 발음",
+          "topics": [
+            {"name": "A~Z 대문자 소문자", "level": 1, "lessonCount": 4},
+            {"name": "파닉스 기초 (a=애, b=브)", "level": 1, "lessonCount": 4},
+            {"name": "단모음과 장모음", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "기초 단어",
+          "topics": [
+            {"name": "색깔, 숫자, 동물", "level": 1, "lessonCount": 4},
+            {"name": "가족, 음식, 신체", "level": 1, "lessonCount": 3},
+            {"name": "학교, 날씨, 요일", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "기초 문장",
+          "topics": [
+            {"name": "I am / You are", "level": 2, "lessonCount": 3},
+            {"name": "This is / That is", "level": 2, "lessonCount": 3},
+            {"name": "의문문 (What, Where, Who)", "level": 2, "lessonCount": 3},
+            {"name": "Can I / Do you", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "생활 영어 회화",
+          "topics": [
+            {"name": "인사와 자기소개", "level": 1, "lessonCount": 3},
+            {"name": "쇼핑과 음식 주문", "level": 2, "lessonCount": 3},
+            {"name": "감정 표현하기", "level": 2, "lessonCount": 3},
+            {"name": "전화와 편지", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "읽기와 쓰기",
+          "topics": [
+            {"name": "짧은 영어 동화 읽기", "level": 2, "lessonCount": 4},
+            {"name": "영어 일기 쓰기", "level": 3, "lessonCount": 3},
+            {"name": "기초 문법 (과거/현재/미래)", "level": 3, "lessonCount": 4}
+          ]
+        }
+      ]
+    },
+    "음악": {
+      "icon": "🎵",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "노래 부르기",
+          "topics": [
+            {"name": "즐거운 동요 배우기", "level": 1, "lessonCount": 4},
+            {"name": "계이름 (도레미파솔라시도)", "level": 1, "lessonCount": 3},
+            {"name": "전래동요와 세계 동요", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "리듬과 박자",
+          "topics": [
+            {"name": "박자 치기 (2박, 3박, 4박)", "level": 1, "lessonCount": 3},
+            {"name": "리듬 패턴 따라하기", "level": 2, "lessonCount": 3},
+            {"name": "음표와 쉼표", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "악기 탐험",
+          "topics": [
+            {"name": "리코더 기초", "level": 1, "lessonCount": 4},
+            {"name": "타악기 (탬버린, 캐스터네츠)", "level": 1, "lessonCount": 3},
+            {"name": "피아노 기초", "level": 2, "lessonCount": 4},
+            {"name": "우쿨렐레 기초", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "음악 이론 기초",
+          "topics": [
+            {"name": "높은 소리 낮은 소리", "level": 1, "lessonCount": 3},
+            {"name": "장조와 단조의 느낌", "level": 2, "lessonCount": 3},
+            {"name": "악보 읽는 법", "level": 3, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "음악 감상",
+          "topics": [
+            {"name": "클래식 명곡 감상", "level": 1, "lessonCount": 3},
+            {"name": "세계 여러 나라의 음악", "level": 2, "lessonCount": 3},
+            {"name": "악기 소리 구별하기", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "미술": {
+      "icon": "🎨",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "색깔의 세계",
+          "topics": [
+            {"name": "빨강, 파랑, 노랑 (삼원색)", "level": 1, "lessonCount": 3},
+            {"name": "색깔 섞기 (혼합색)", "level": 1, "lessonCount": 3},
+            {"name": "따뜻한 색과 차가운 색", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "그리기",
+          "topics": [
+            {"name": "선과 모양 그리기", "level": 1, "lessonCount": 3},
+            {"name": "사람 그리기", "level": 1, "lessonCount": 3},
+            {"name": "동물과 자연 그리기", "level": 2, "lessonCount": 3},
+            {"name": "원근법 기초", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "만들기",
+          "topics": [
+            {"name": "종이접기", "level": 1, "lessonCount": 4},
+            {"name": "찰흙 조형", "level": 1, "lessonCount": 3},
+            {"name": "재활용 아트", "level": 2, "lessonCount": 3},
+            {"name": "판화 만들기", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "미술 감상",
+          "topics": [
+            {"name": "유명 화가 이야기 (고흐, 피카소)", "level": 2, "lessonCount": 3},
+            {"name": "한국의 전통 미술", "level": 2, "lessonCount": 3},
+            {"name": "미술관 탐방", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "디지털 아트",
+          "topics": [
+            {"name": "태블릿으로 그리기", "level": 2, "lessonCount": 3},
+            {"name": "사진 찍기 기초", "level": 2, "lessonCount": 3},
+            {"name": "간단한 애니메이션", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "체육": {
+      "icon": "⚽",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "기초 체력",
+          "topics": [
+            {"name": "스트레칭과 준비운동", "level": 1, "lessonCount": 3},
+            {"name": "달리기와 걷기", "level": 1, "lessonCount": 3},
+            {"name": "줄넘기", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "체조와 균형",
+          "topics": [
+            {"name": "매트 운동", "level": 1, "lessonCount": 3},
+            {"name": "균형잡기와 유연성", "level": 2, "lessonCount": 3},
+            {"name": "철봉과 뜀틀", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "구기 종목",
+          "topics": [
+            {"name": "축구 기초", "level": 1, "lessonCount": 3},
+            {"name": "농구 기초", "level": 2, "lessonCount": 3},
+            {"name": "배드민턴과 탁구", "level": 2, "lessonCount": 3},
+            {"name": "야구 기초", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "수영",
+          "topics": [
+            {"name": "물 적응하기", "level": 1, "lessonCount": 3},
+            {"name": "자유형 배우기", "level": 2, "lessonCount": 3},
+            {"name": "배영과 평영", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "전통 놀이와 무술",
+          "topics": [
+            {"name": "태권도 기초", "level": 1, "lessonCount": 4},
+            {"name": "전통 놀이 (제기차기, 팽이치기)", "level": 1, "lessonCount": 3},
+            {"name": "요가와 명상", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "코딩": {
+      "icon": "💻",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "컴퓨터 이해하기",
+          "topics": [
+            {"name": "컴퓨터란 무엇일까", "level": 1, "lessonCount": 3},
+            {"name": "입력과 출력", "level": 1, "lessonCount": 3},
+            {"name": "인터넷과 검색", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "언플러그드 코딩",
+          "topics": [
+            {"name": "순서대로 명령하기", "level": 1, "lessonCount": 3},
+            {"name": "반복 찾기", "level": 1, "lessonCount": 3},
+            {"name": "조건과 선택", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "Scratch 블록코딩",
+          "topics": [
+            {"name": "Scratch 시작하기", "level": 1, "lessonCount": 3},
+            {"name": "캐릭터 움직이기", "level": 2, "lessonCount": 3},
+            {"name": "간단한 게임 만들기", "level": 2, "lessonCount": 4},
+            {"name": "애니메이션 만들기", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "Python 기초",
+          "topics": [
+            {"name": "print()로 인사하기", "level": 3, "lessonCount": 3},
+            {"name": "변수와 자료형", "level": 3, "lessonCount": 3},
+            {"name": "if문과 for문", "level": 3, "lessonCount": 4},
+            {"name": "간단한 프로그램 만들기", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "AI와 로봇",
+          "topics": [
+            {"name": "인공지능이란", "level": 2, "lessonCount": 3},
+            {"name": "로봇의 세계", "level": 2, "lessonCount": 3},
+            {"name": "AI와 함께하는 미래", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "사회": {
+      "icon": "🏘️",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "나와 가족",
+          "topics": [
+            {"name": "우리 가족 소개", "level": 1, "lessonCount": 3},
+            {"name": "가족의 역할", "level": 1, "lessonCount": 3},
+            {"name": "다양한 가족의 모습", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "학교와 동네",
+          "topics": [
+            {"name": "학교에서의 규칙", "level": 1, "lessonCount": 3},
+            {"name": "우리 동네 탐험", "level": 1, "lessonCount": 3},
+            {"name": "이웃과 함께 살기", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "우리나라",
+          "topics": [
+            {"name": "대한민국의 상징 (태극기, 무궁화)", "level": 1, "lessonCount": 3},
+            {"name": "지방과 도시", "level": 2, "lessonCount": 3},
+            {"name": "민주주의와 선거", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "세계와 문화",
+          "topics": [
+            {"name": "세계 여러 나라 (대륙별)", "level": 2, "lessonCount": 4},
+            {"name": "다문화 이해하기", "level": 2, "lessonCount": 3},
+            {"name": "세계의 축제", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "경제 기초",
+          "topics": [
+            {"name": "돈이란 무엇일까", "level": 1, "lessonCount": 3},
+            {"name": "저축과 용돈 관리", "level": 2, "lessonCount": 3},
+            {"name": "직업의 세계", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "안전건강": {
+      "icon": "🛡️",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "교통안전",
+          "topics": [
+            {"name": "신호등과 횡단보도", "level": 1, "lessonCount": 3},
+            {"name": "자전거 안전 수칙", "level": 1, "lessonCount": 3},
+            {"name": "자동차 안전벨트", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "생활 안전",
+          "topics": [
+            {"name": "화재 대피 방법", "level": 1, "lessonCount": 3},
+            {"name": "지진과 자연재해 대비", "level": 2, "lessonCount": 3},
+            {"name": "물놀이 안전", "level": 1, "lessonCount": 3},
+            {"name": "온라인 안전 (개인정보)", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "위생과 건강",
+          "topics": [
+            {"name": "손 씻기와 양치질", "level": 1, "lessonCount": 3},
+            {"name": "감기 예방과 건강 습관", "level": 1, "lessonCount": 3},
+            {"name": "깨끗한 환경 만들기", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "영양과 식습관",
+          "topics": [
+            {"name": "5대 영양소", "level": 2, "lessonCount": 3},
+            {"name": "균형 잡힌 식사", "level": 2, "lessonCount": 3},
+            {"name": "건강한 간식 고르기", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "응급처치",
+          "topics": [
+            {"name": "119에 전화하는 법", "level": 1, "lessonCount": 3},
+            {"name": "상처 소독과 반창고", "level": 1, "lessonCount": 3},
+            {"name": "심폐소생술(CPR) 기초", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "인성감성": {
+      "icon": "💛",
+      "ageRange": "5~12",
+      "units": [
+        {
+          "name": "감정 이해하기",
+          "topics": [
+            {"name": "기쁨, 슬픔, 화남 알아보기", "level": 1, "lessonCount": 3},
+            {"name": "감정 표현하기", "level": 1, "lessonCount": 3},
+            {"name": "감정 조절하는 방법", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "친구 관계",
+          "topics": [
+            {"name": "좋은 친구 되기", "level": 1, "lessonCount": 3},
+            {"name": "다툼 해결하기", "level": 2, "lessonCount": 3},
+            {"name": "따돌림 예방", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "예의와 존중",
+          "topics": [
+            {"name": "인사 잘하기", "level": 1, "lessonCount": 3},
+            {"name": "공공장소 예절", "level": 1, "lessonCount": 3},
+            {"name": "존댓말과 고운 말", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "배려와 나눔",
+          "topics": [
+            {"name": "남을 도와주기", "level": 1, "lessonCount": 3},
+            {"name": "다름을 존중하기", "level": 2, "lessonCount": 3},
+            {"name": "환경 보호하기", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "자기 성장",
+          "topics": [
+            {"name": "자신감 갖기", "level": 2, "lessonCount": 3},
+            {"name": "목표 세우기", "level": 2, "lessonCount": 3},
+            {"name": "실패에서 배우기", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    }
+  },
+  "adult": {
+    "수학": {
+      "icon": "🔢",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "대수학",
+          "topics": [
+            {"name": "다항식과 인수분해", "level": 1, "lessonCount": 4},
+            {"name": "방정식과 부등식", "level": 1, "lessonCount": 4},
+            {"name": "함수의 개념과 그래프", "level": 2, "lessonCount": 4},
+            {"name": "지수와 로그", "level": 2, "lessonCount": 3},
+            {"name": "수열과 급수", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "기하학",
+          "topics": [
+            {"name": "평면기하와 좌표계", "level": 1, "lessonCount": 3},
+            {"name": "삼각함수", "level": 2, "lessonCount": 4},
+            {"name": "벡터와 행렬", "level": 2, "lessonCount": 4},
+            {"name": "공간도형과 좌표공간", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "미적분학",
+          "topics": [
+            {"name": "극한과 연속", "level": 2, "lessonCount": 3},
+            {"name": "미분의 개념과 응용", "level": 3, "lessonCount": 5},
+            {"name": "적분의 개념과 응용", "level": 3, "lessonCount": 5},
+            {"name": "다변수 미적분학", "level": 4, "lessonCount": 4},
+            {"name": "미분방정식", "level": 4, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "선형대수학",
+          "topics": [
+            {"name": "벡터공간과 기저", "level": 3, "lessonCount": 4},
+            {"name": "선형변환", "level": 3, "lessonCount": 3},
+            {"name": "고유값과 고유벡터", "level": 4, "lessonCount": 3},
+            {"name": "내적공간과 직교화", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "확률과 통계",
+          "topics": [
+            {"name": "확률의 기초", "level": 2, "lessonCount": 3},
+            {"name": "확률분포 (이항, 정규, 포아송)", "level": 3, "lessonCount": 4},
+            {"name": "통계적 추론과 검정", "level": 3, "lessonCount": 4},
+            {"name": "회귀분석", "level": 4, "lessonCount": 3},
+            {"name": "베이즈 통계학", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "이산수학과 정수론",
+          "topics": [
+            {"name": "집합론과 논리", "level": 2, "lessonCount": 3},
+            {"name": "그래프 이론", "level": 3, "lessonCount": 3},
+            {"name": "조합론", "level": 3, "lessonCount": 3},
+            {"name": "정수론 기초", "level": 3, "lessonCount": 3},
+            {"name": "암호학의 수학", "level": 5, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "물리학": {
+      "icon": "⚛️",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "고전역학",
+          "topics": [
+            {"name": "뉴턴의 운동법칙", "level": 1, "lessonCount": 4},
+            {"name": "에너지와 운동량 보존", "level": 2, "lessonCount": 4},
+            {"name": "회전운동과 강체역학", "level": 2, "lessonCount": 3},
+            {"name": "진동과 파동", "level": 2, "lessonCount": 4},
+            {"name": "라그랑주/해밀턴 역학", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "전자기학",
+          "topics": [
+            {"name": "정전기와 쿨롱의 법칙", "level": 2, "lessonCount": 3},
+            {"name": "전류와 자기장", "level": 2, "lessonCount": 4},
+            {"name": "맥스웰 방정식", "level": 3, "lessonCount": 4},
+            {"name": "전자기파와 광학", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "열역학과 통계역학",
+          "topics": [
+            {"name": "열역학 법칙 (0~3법칙)", "level": 2, "lessonCount": 4},
+            {"name": "엔트로피와 자유에너지", "level": 3, "lessonCount": 3},
+            {"name": "통계역학 기초", "level": 4, "lessonCount": 3},
+            {"name": "볼츠만 분포와 앙상블", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "양자역학",
+          "topics": [
+            {"name": "양자역학의 탄생 (흑체복사, 광전효과)", "level": 3, "lessonCount": 3},
+            {"name": "슈뢰딩거 방정식", "level": 4, "lessonCount": 4},
+            {"name": "양자 연산자와 측정", "level": 4, "lessonCount": 3},
+            {"name": "수소 원자와 스핀", "level": 4, "lessonCount": 3},
+            {"name": "양자 얽힘과 양자컴퓨팅", "level": 5, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "상대성이론",
+          "topics": [
+            {"name": "특수상대성이론", "level": 3, "lessonCount": 4},
+            {"name": "시공간과 로렌츠 변환", "level": 4, "lessonCount": 3},
+            {"name": "일반상대성이론과 중력", "level": 5, "lessonCount": 4},
+            {"name": "블랙홀과 중력파", "level": 5, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "현대물리",
+          "topics": [
+            {"name": "핵물리학", "level": 4, "lessonCount": 3},
+            {"name": "입자물리학 (표준모형)", "level": 5, "lessonCount": 3},
+            {"name": "고체물리학", "level": 4, "lessonCount": 3},
+            {"name": "플라즈마 물리학", "level": 5, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "화학": {
+      "icon": "🧪",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "일반화학",
+          "topics": [
+            {"name": "원자 구조와 주기율표", "level": 1, "lessonCount": 4},
+            {"name": "화학결합 (이온, 공유, 금속)", "level": 2, "lessonCount": 4},
+            {"name": "화학반응과 양론", "level": 2, "lessonCount": 3},
+            {"name": "기체, 액체, 고체의 성질", "level": 2, "lessonCount": 3},
+            {"name": "산-염기와 산화-환원", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "유기화학",
+          "topics": [
+            {"name": "탄소화합물의 기초", "level": 2, "lessonCount": 3},
+            {"name": "작용기와 명명법", "level": 3, "lessonCount": 4},
+            {"name": "유기반응 메커니즘", "level": 3, "lessonCount": 4},
+            {"name": "고분자와 플라스틱", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "물리화학",
+          "topics": [
+            {"name": "화학열역학", "level": 3, "lessonCount": 4},
+            {"name": "화학반응속도론", "level": 3, "lessonCount": 3},
+            {"name": "양자화학", "level": 4, "lessonCount": 3},
+            {"name": "분광학", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "무기화학",
+          "topics": [
+            {"name": "배위화합물", "level": 3, "lessonCount": 3},
+            {"name": "전이금속 화학", "level": 3, "lessonCount": 3},
+            {"name": "결정구조와 고체화학", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "생화학",
+          "topics": [
+            {"name": "아미노산과 단백질", "level": 3, "lessonCount": 3},
+            {"name": "효소와 대사과정", "level": 3, "lessonCount": 4},
+            {"name": "DNA와 유전정보", "level": 3, "lessonCount": 4},
+            {"name": "신약 개발과 약리학", "level": 5, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "생물학": {
+      "icon": "🧬",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "세포생물학",
+          "topics": [
+            {"name": "세포의 구조와 기능", "level": 1, "lessonCount": 4},
+            {"name": "세포분열 (유사분열, 감수분열)", "level": 2, "lessonCount": 3},
+            {"name": "세포막과 물질수송", "level": 2, "lessonCount": 3},
+            {"name": "세포호흡과 광합성", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "유전학",
+          "topics": [
+            {"name": "멘델의 유전법칙", "level": 2, "lessonCount": 3},
+            {"name": "DNA 구조와 복제", "level": 3, "lessonCount": 4},
+            {"name": "유전자 발현 (전사, 번역)", "level": 3, "lessonCount": 3},
+            {"name": "유전공학과 GMO", "level": 4, "lessonCount": 3},
+            {"name": "후성유전학", "level": 5, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "진화와 생태학",
+          "topics": [
+            {"name": "다윈의 자연선택설", "level": 2, "lessonCount": 3},
+            {"name": "종의 분화와 계통수", "level": 3, "lessonCount": 3},
+            {"name": "생태계의 구조", "level": 2, "lessonCount": 3},
+            {"name": "개체군 생태학", "level": 3, "lessonCount": 3},
+            {"name": "생물다양성과 보전", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "인체생리학",
+          "topics": [
+            {"name": "소화계와 영양", "level": 2, "lessonCount": 3},
+            {"name": "순환계와 호흡계", "level": 2, "lessonCount": 3},
+            {"name": "신경계와 내분비계", "level": 3, "lessonCount": 4},
+            {"name": "면역계", "level": 3, "lessonCount": 4},
+            {"name": "근골격계와 운동생리", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "신경과학",
+          "topics": [
+            {"name": "뉴런의 구조와 신경전달", "level": 3, "lessonCount": 3},
+            {"name": "뇌의 구조와 기능", "level": 4, "lessonCount": 4},
+            {"name": "학습과 기억의 신경기전", "level": 4, "lessonCount": 3},
+            {"name": "신경퇴행성 질환", "level": 5, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "지구과학": {
+      "icon": "🌏",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "지질학",
+          "topics": [
+            {"name": "암석과 광물", "level": 1, "lessonCount": 3},
+            {"name": "판구조론", "level": 2, "lessonCount": 4},
+            {"name": "화산과 지진", "level": 2, "lessonCount": 3},
+            {"name": "지질시대와 화석", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "대기과학",
+          "topics": [
+            {"name": "대기의 구조와 조성", "level": 2, "lessonCount": 3},
+            {"name": "기상현상과 일기예보", "level": 2, "lessonCount": 3},
+            {"name": "기후변화와 지구온난화", "level": 3, "lessonCount": 4},
+            {"name": "태풍, 토네이도, 허리케인", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "해양학",
+          "topics": [
+            {"name": "해류와 조석", "level": 2, "lessonCount": 3},
+            {"name": "해양 생태계", "level": 2, "lessonCount": 3},
+            {"name": "심해 탐사", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "환경과학",
+          "topics": [
+            {"name": "생태계 서비스와 자원", "level": 2, "lessonCount": 3},
+            {"name": "대기/수질/토양 오염", "level": 3, "lessonCount": 4},
+            {"name": "재생에너지와 지속가능성", "level": 3, "lessonCount": 4},
+            {"name": "탄소 순환과 기후 정책", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "자연재해와 방재",
+          "topics": [
+            {"name": "지진 대비와 내진설계", "level": 3, "lessonCount": 3},
+            {"name": "홍수와 가뭄", "level": 2, "lessonCount": 3},
+            {"name": "산사태와 쓰나미", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "천문학": {
+      "icon": "🔭",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "태양계",
+          "topics": [
+            {"name": "태양의 구조와 에너지", "level": 1, "lessonCount": 3},
+            {"name": "행성과 위성", "level": 1, "lessonCount": 4},
+            {"name": "소행성, 혜성, 유성", "level": 2, "lessonCount": 3},
+            {"name": "태양계 탐사 역사", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "항성과 은하",
+          "topics": [
+            {"name": "별의 일생 (탄생→죽음)", "level": 2, "lessonCount": 4},
+            {"name": "HR도와 별의 분류", "level": 3, "lessonCount": 3},
+            {"name": "은하의 종류와 구조", "level": 3, "lessonCount": 3},
+            {"name": "우리은하 (은하수)", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "우주론",
+          "topics": [
+            {"name": "빅뱅 이론", "level": 3, "lessonCount": 3},
+            {"name": "우주의 팽창과 허블법칙", "level": 3, "lessonCount": 3},
+            {"name": "암흑물질과 암흑에너지", "level": 4, "lessonCount": 3},
+            {"name": "우주배경복사", "level": 5, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "블랙홀과 극한천체",
+          "topics": [
+            {"name": "블랙홀의 형성과 특성", "level": 4, "lessonCount": 3},
+            {"name": "중성자별과 펄서", "level": 4, "lessonCount": 3},
+            {"name": "퀘이사와 활동은하핵", "level": 5, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "천문관측과 우주개발",
+          "topics": [
+            {"name": "망원경의 원리와 종류", "level": 2, "lessonCount": 3},
+            {"name": "우주 탐사선과 로켓", "level": 2, "lessonCount": 3},
+            {"name": "국제우주정거장(ISS)과 화성탐사", "level": 3, "lessonCount": 3},
+            {"name": "외계행성과 외계생명 탐색", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "역사": {
+      "icon": "📜",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "고대 문명",
+          "topics": [
+            {"name": "메소포타미아와 이집트", "level": 1, "lessonCount": 4},
+            {"name": "인더스와 황하 문명", "level": 1, "lessonCount": 3},
+            {"name": "그리스 도시국가와 민주주의", "level": 2, "lessonCount": 4},
+            {"name": "로마 제국의 흥망", "level": 2, "lessonCount": 4},
+            {"name": "페르시아와 알렉산더", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "중세와 이슬람 세계",
+          "topics": [
+            {"name": "중세 유럽과 봉건제도", "level": 2, "lessonCount": 3},
+            {"name": "비잔틴 제국", "level": 2, "lessonCount": 3},
+            {"name": "이슬람 황금시대", "level": 2, "lessonCount": 3},
+            {"name": "십자군 전쟁", "level": 3, "lessonCount": 3},
+            {"name": "몽골 제국", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "동아시아사",
+          "topics": [
+            {"name": "중국 왕조 통사 (진→청)", "level": 2, "lessonCount": 5},
+            {"name": "한국사 심화 (고조선→대한민국)", "level": 2, "lessonCount": 5},
+            {"name": "일본사 (막부→메이지유신)", "level": 3, "lessonCount": 4},
+            {"name": "동아시아 교류와 갈등", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "근대 혁명과 제국주의",
+          "topics": [
+            {"name": "르네상스와 종교개혁", "level": 2, "lessonCount": 3},
+            {"name": "대항해시대와 식민지배", "level": 3, "lessonCount": 3},
+            {"name": "미국/프랑스 혁명", "level": 3, "lessonCount": 4},
+            {"name": "산업혁명과 사회변화", "level": 3, "lessonCount": 4},
+            {"name": "제국주의와 아프리카 분할", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "세계대전과 냉전",
+          "topics": [
+            {"name": "제1차 세계대전", "level": 3, "lessonCount": 4},
+            {"name": "제2차 세계대전과 홀로코스트", "level": 3, "lessonCount": 4},
+            {"name": "냉전과 이념 대립", "level": 3, "lessonCount": 4},
+            {"name": "한국전쟁과 베트남전쟁", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "현대사와 문명사",
+          "topics": [
+            {"name": "탈식민지화와 신생국가", "level": 3, "lessonCount": 3},
+            {"name": "소련 붕괴와 세계화", "level": 3, "lessonCount": 3},
+            {"name": "기술사 (인쇄→인터넷→AI)", "level": 3, "lessonCount": 4},
+            {"name": "전쟁사 특강 (전략과 전술)", "level": 4, "lessonCount": 4},
+            {"name": "21세기 국제질서", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "철학": {
+      "icon": "🤔",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "고대 철학",
+          "topics": [
+            {"name": "소크라테스와 문답법", "level": 1, "lessonCount": 3},
+            {"name": "플라톤의 이데아론", "level": 2, "lessonCount": 3},
+            {"name": "아리스토텔레스의 논리학", "level": 2, "lessonCount": 3},
+            {"name": "동양철학: 공자, 노자, 석가", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "중세와 근세 철학",
+          "topics": [
+            {"name": "스콜라 철학과 토마스 아퀴나스", "level": 3, "lessonCount": 3},
+            {"name": "데카르트: 나는 생각한다, 고로 존재한다", "level": 2, "lessonCount": 3},
+            {"name": "경험론 vs 합리론", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "칸트와 독일 관념론",
+          "topics": [
+            {"name": "칸트의 비판철학", "level": 3, "lessonCount": 4},
+            {"name": "헤겔의 변증법", "level": 4, "lessonCount": 3},
+            {"name": "마르크스의 유물론", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "현대 철학",
+          "topics": [
+            {"name": "니체: 신은 죽었다", "level": 3, "lessonCount": 3},
+            {"name": "실존주의 (사르트르, 카뮈)", "level": 3, "lessonCount": 3},
+            {"name": "현상학 (후설, 하이데거)", "level": 4, "lessonCount": 3},
+            {"name": "분석철학과 비트겐슈타인", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "윤리학과 실천철학",
+          "topics": [
+            {"name": "공리주의 vs 의무론", "level": 2, "lessonCount": 3},
+            {"name": "정의론 (롤스)", "level": 3, "lessonCount": 3},
+            {"name": "생명윤리와 기술윤리", "level": 3, "lessonCount": 3},
+            {"name": "AI 윤리와 미래 철학", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "심리학": {
+      "icon": "🧠",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "심리학 입문",
+          "topics": [
+            {"name": "심리학이란 무엇인가", "level": 1, "lessonCount": 3},
+            {"name": "심리학의 역사와 주요 학파", "level": 1, "lessonCount": 3},
+            {"name": "심리학 연구방법", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "인지심리학",
+          "topics": [
+            {"name": "지각과 주의", "level": 2, "lessonCount": 3},
+            {"name": "기억의 구조와 과정", "level": 2, "lessonCount": 4},
+            {"name": "사고와 문제해결", "level": 3, "lessonCount": 3},
+            {"name": "언어와 인지", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "발달심리학",
+          "topics": [
+            {"name": "피아제의 인지발달이론", "level": 2, "lessonCount": 3},
+            {"name": "애착이론 (볼비, 에인스워스)", "level": 2, "lessonCount": 3},
+            {"name": "청소년기와 정체성", "level": 2, "lessonCount": 3},
+            {"name": "성인발달과 노화", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "사회심리학",
+          "topics": [
+            {"name": "태도와 설득", "level": 2, "lessonCount": 3},
+            {"name": "편견과 차별", "level": 2, "lessonCount": 3},
+            {"name": "집단역학과 동조", "level": 3, "lessonCount": 3},
+            {"name": "밀그램 실험과 권위 복종", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "이상심리학과 상담",
+          "topics": [
+            {"name": "불안장애와 우울증", "level": 3, "lessonCount": 3},
+            {"name": "성격장애와 정신병리", "level": 4, "lessonCount": 3},
+            {"name": "상담 이론 (CBT, 정신분석, 인본주의)", "level": 3, "lessonCount": 4},
+            {"name": "긍정심리학과 웰빙", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "경제학": {
+      "icon": "📈",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "경제학 원론",
+          "topics": [
+            {"name": "수요와 공급의 원리", "level": 1, "lessonCount": 4},
+            {"name": "시장균형과 가격결정", "level": 1, "lessonCount": 3},
+            {"name": "탄력성", "level": 2, "lessonCount": 3},
+            {"name": "시장실패와 정부개입", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "미시경제학",
+          "topics": [
+            {"name": "소비자이론 (효용, 무차별곡선)", "level": 2, "lessonCount": 3},
+            {"name": "생산자이론 (비용, 이윤극대화)", "level": 3, "lessonCount": 3},
+            {"name": "시장구조 (완전경쟁→독점)", "level": 3, "lessonCount": 4},
+            {"name": "게임이론 기초", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "거시경제학",
+          "topics": [
+            {"name": "GDP와 경제성장", "level": 2, "lessonCount": 3},
+            {"name": "인플레이션과 실업", "level": 2, "lessonCount": 3},
+            {"name": "재정정책과 통화정책", "level": 3, "lessonCount": 4},
+            {"name": "국제무역과 환율", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "금융과 투자",
+          "topics": [
+            {"name": "은행과 금융시스템", "level": 2, "lessonCount": 3},
+            {"name": "주식과 채권", "level": 2, "lessonCount": 4},
+            {"name": "포트폴리오 이론", "level": 3, "lessonCount": 3},
+            {"name": "부동산과 대안투자", "level": 3, "lessonCount": 3},
+            {"name": "암호화폐와 핀테크", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "행동경제학과 실생활 경제",
+          "topics": [
+            {"name": "행동경제학 (넛지, 편향)", "level": 2, "lessonCount": 3},
+            {"name": "개인 재무설계", "level": 1, "lessonCount": 4},
+            {"name": "세금과 연금", "level": 2, "lessonCount": 3},
+            {"name": "창업과 사업계획", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "컴퓨터과학": {
+      "icon": "🖥️",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "프로그래밍 기초",
+          "topics": [
+            {"name": "Python 프로그래밍", "level": 1, "lessonCount": 5},
+            {"name": "JavaScript와 웹개발", "level": 2, "lessonCount": 5},
+            {"name": "자료구조 (배열, 리스트, 트리, 그래프)", "level": 2, "lessonCount": 5},
+            {"name": "객체지향 프로그래밍", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "알고리즘",
+          "topics": [
+            {"name": "정렬과 탐색 알고리즘", "level": 2, "lessonCount": 4},
+            {"name": "동적 프로그래밍", "level": 3, "lessonCount": 3},
+            {"name": "그래프 알고리즘 (BFS, DFS, 최단경로)", "level": 3, "lessonCount": 4},
+            {"name": "알고리즘 복잡도 분석", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "시스템과 네트워크",
+          "topics": [
+            {"name": "운영체제 원리 (프로세스, 메모리)", "level": 3, "lessonCount": 4},
+            {"name": "컴퓨터 네트워크 (TCP/IP, HTTP)", "level": 2, "lessonCount": 4},
+            {"name": "데이터베이스 (SQL, NoSQL)", "level": 2, "lessonCount": 4},
+            {"name": "클라우드 컴퓨팅 (AWS, Azure)", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "인공지능과 데이터사이언스",
+          "topics": [
+            {"name": "머신러닝 기초", "level": 3, "lessonCount": 4},
+            {"name": "딥러닝과 신경망", "level": 4, "lessonCount": 4},
+            {"name": "자연어처리 (NLP)", "level": 4, "lessonCount": 3},
+            {"name": "컴퓨터비전", "level": 4, "lessonCount": 3},
+            {"name": "데이터 분석과 시각화", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "보안과 소프트웨어 공학",
+          "topics": [
+            {"name": "정보보안 기초 (암호화, 인증)", "level": 2, "lessonCount": 4},
+            {"name": "웹 보안 (XSS, SQL Injection)", "level": 3, "lessonCount": 3},
+            {"name": "소프트웨어 개발 방법론 (Agile, DevOps)", "level": 3, "lessonCount": 3},
+            {"name": "Git과 버전관리", "level": 1, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "공학_기계": {
+      "icon": "⚙️",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "역학 기초",
+          "topics": [
+            {"name": "정역학 (힘, 모멘트, 평형)", "level": 1, "lessonCount": 4},
+            {"name": "동역학 (운동학, 운동역학)", "level": 2, "lessonCount": 4},
+            {"name": "기구학 (링크, 캠, 기어)", "level": 3, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "재료역학 (고체역학)",
+          "topics": [
+            {"name": "응력과 변형률", "level": 2, "lessonCount": 4},
+            {"name": "보의 처짐과 굽힘", "level": 3, "lessonCount": 4},
+            {"name": "비틀림과 전단", "level": 3, "lessonCount": 3},
+            {"name": "기둥의 좌굴", "level": 3, "lessonCount": 3},
+            {"name": "파괴역학과 피로", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "열역학",
+          "topics": [
+            {"name": "열역학 제1, 2법칙", "level": 2, "lessonCount": 4},
+            {"name": "이상기체와 상태방정식", "level": 2, "lessonCount": 3},
+            {"name": "동력 사이클 (카르노, 오토, 디젤)", "level": 3, "lessonCount": 4},
+            {"name": "냉동 사이클과 열펌프", "level": 3, "lessonCount": 3},
+            {"name": "열전달 (전도, 대류, 복사)", "level": 3, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "유체역학",
+          "topics": [
+            {"name": "유체의 성질과 정역학", "level": 2, "lessonCount": 3},
+            {"name": "연속방정식과 베르누이", "level": 2, "lessonCount": 4},
+            {"name": "나비에-스토크스 방정식", "level": 4, "lessonCount": 3},
+            {"name": "관로 유동과 펌프", "level": 3, "lessonCount": 3},
+            {"name": "공기역학과 양력/항력", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "기계설계",
+          "topics": [
+            {"name": "기계요소 (볼트, 축, 베어링, 기어)", "level": 2, "lessonCount": 5},
+            {"name": "응력 해석과 안전계수", "level": 3, "lessonCount": 3},
+            {"name": "CAD와 3D 모델링", "level": 2, "lessonCount": 4},
+            {"name": "공차와 끼워맞춤", "level": 3, "lessonCount": 3},
+            {"name": "유한요소법(FEM) 기초", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "제어공학과 로봇공학",
+          "topics": [
+            {"name": "계측공학 기초 (센서, 신호처리)", "level": 2, "lessonCount": 3},
+            {"name": "제어시스템 (PID, 피드백)", "level": 3, "lessonCount": 4},
+            {"name": "로봇의 기구학과 동역학", "level": 4, "lessonCount": 3},
+            {"name": "로봇 프로그래밍과 ROS", "level": 4, "lessonCount": 3},
+            {"name": "자율주행 기술", "level": 5, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "재료공학",
+          "topics": [
+            {"name": "금속재료 (철강, 비철금속)", "level": 2, "lessonCount": 3},
+            {"name": "고분자와 복합재료", "level": 3, "lessonCount": 3},
+            {"name": "세라믹과 신소재", "level": 3, "lessonCount": 3},
+            {"name": "재료시험법 (인장, 경도, 충격)", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "공학_전기전자": {
+      "icon": "🔌",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "전기회로",
+          "topics": [
+            {"name": "전압, 전류, 저항 (옴의 법칙)", "level": 1, "lessonCount": 3},
+            {"name": "키르히호프 법칙", "level": 2, "lessonCount": 3},
+            {"name": "RC/RL/RLC 회로", "level": 2, "lessonCount": 4},
+            {"name": "교류회로와 페이저", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "전자공학",
+          "topics": [
+            {"name": "반도체 기초 (PN접합, 다이오드)", "level": 2, "lessonCount": 3},
+            {"name": "트랜지스터 (BJT, MOSFET)", "level": 3, "lessonCount": 4},
+            {"name": "연산증폭기 (Op-Amp)", "level": 3, "lessonCount": 3},
+            {"name": "디지털 논리회로", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "통신공학",
+          "topics": [
+            {"name": "신호와 시스템", "level": 2, "lessonCount": 4},
+            {"name": "아날로그/디지털 통신", "level": 3, "lessonCount": 3},
+            {"name": "무선통신 (Wi-Fi, 5G, Bluetooth)", "level": 3, "lessonCount": 3},
+            {"name": "광통신과 위성통신", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "제어공학",
+          "topics": [
+            {"name": "전달함수와 블록선도", "level": 3, "lessonCount": 3},
+            {"name": "안정성 분석 (루스, 보드)", "level": 3, "lessonCount": 3},
+            {"name": "PLC와 산업자동화", "level": 3, "lessonCount": 3},
+            {"name": "임베디드 시스템 (아두이노, 라즈베리파이)", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "전력공학",
+          "topics": [
+            {"name": "발전 (화력, 원자력, 신재생)", "level": 2, "lessonCount": 3},
+            {"name": "송배전과 전력계통", "level": 3, "lessonCount": 3},
+            {"name": "전력전자 (인버터, 컨버터)", "level": 4, "lessonCount": 3},
+            {"name": "전기자동차와 배터리", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "의학건강": {
+      "icon": "🏥",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "해부학과 생리학",
+          "topics": [
+            {"name": "인체 기관계 총론", "level": 1, "lessonCount": 4},
+            {"name": "근골격계 해부", "level": 2, "lessonCount": 4},
+            {"name": "순환기/호흡기 생리", "level": 2, "lessonCount": 3},
+            {"name": "소화기/비뇨기 생리", "level": 2, "lessonCount": 3},
+            {"name": "신경계와 내분비계", "level": 3, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "영양학",
+          "topics": [
+            {"name": "3대 영양소 (탄수화물, 단백질, 지방)", "level": 1, "lessonCount": 4},
+            {"name": "비타민과 미네랄", "level": 2, "lessonCount": 3},
+            {"name": "식단 설계와 칼로리", "level": 2, "lessonCount": 3},
+            {"name": "특수영양 (당뇨, 고혈압, 다이어트)", "level": 3, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "운동과학",
+          "topics": [
+            {"name": "운동생리학 기초", "level": 2, "lessonCount": 3},
+            {"name": "근력 트레이닝 과학", "level": 2, "lessonCount": 4},
+            {"name": "유산소 운동과 심폐기능", "level": 2, "lessonCount": 3},
+            {"name": "스포츠 부상과 재활", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "질병과 치료",
+          "topics": [
+            {"name": "감염병과 면역", "level": 2, "lessonCount": 4},
+            {"name": "생활습관병 (고혈압, 당뇨, 비만)", "level": 2, "lessonCount": 4},
+            {"name": "암의 이해와 예방", "level": 3, "lessonCount": 3},
+            {"name": "약리학 기초", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "정신건강",
+          "topics": [
+            {"name": "스트레스 관리", "level": 1, "lessonCount": 3},
+            {"name": "수면의 과학", "level": 2, "lessonCount": 3},
+            {"name": "불안과 우울 이해", "level": 2, "lessonCount": 3},
+            {"name": "마음챙김과 명상", "level": 2, "lessonCount": 3},
+            {"name": "중독의 이해 (스마트폰, 알코올)", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "법학": {
+      "icon": "⚖️",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "법학 입문",
+          "topics": [
+            {"name": "법이란 무엇인가", "level": 1, "lessonCount": 3},
+            {"name": "법의 분류 (공법, 사법, 사회법)", "level": 1, "lessonCount": 3},
+            {"name": "법원과 재판 절차", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "헌법",
+          "topics": [
+            {"name": "대한민국 헌법의 기본원리", "level": 2, "lessonCount": 3},
+            {"name": "기본권 (자유권, 사회권, 참정권)", "level": 2, "lessonCount": 4},
+            {"name": "국가기관 (대통령, 국회, 법원)", "level": 2, "lessonCount": 3},
+            {"name": "헌법재판소와 위헌심사", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "민법",
+          "topics": [
+            {"name": "민법 총칙 (권리능력, 법률행위)", "level": 2, "lessonCount": 3},
+            {"name": "계약법 기초", "level": 2, "lessonCount": 4},
+            {"name": "물권법 (소유권, 담보)", "level": 3, "lessonCount": 3},
+            {"name": "불법행위와 손해배상", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "형법",
+          "topics": [
+            {"name": "범죄의 성립요건", "level": 2, "lessonCount": 3},
+            {"name": "주요 범죄유형", "level": 2, "lessonCount": 3},
+            {"name": "형사절차와 피의자 권리", "level": 2, "lessonCount": 3},
+            {"name": "소년법과 특별형법", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "지식재산권법",
+          "topics": [
+            {"name": "특허법 기초", "level": 2, "lessonCount": 3},
+            {"name": "상표법과 브랜드 보호", "level": 2, "lessonCount": 3},
+            {"name": "저작권법", "level": 2, "lessonCount": 3},
+            {"name": "영업비밀과 부정경쟁방지", "level": 3, "lessonCount": 3},
+            {"name": "국제 지식재산권 (PCT, 마드리드)", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "실생활 법률",
+          "topics": [
+            {"name": "근로기준법과 노동법", "level": 2, "lessonCount": 3},
+            {"name": "부동산 계약과 등기", "level": 2, "lessonCount": 3},
+            {"name": "소비자 보호법", "level": 2, "lessonCount": 3},
+            {"name": "국제거래법 기초", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "언어": {
+      "icon": "🗣️",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "영어",
+          "topics": [
+            {"name": "문법 체계 정리 (시제, 수동태, 가정법)", "level": 2, "lessonCount": 5},
+            {"name": "비즈니스 영어 (이메일, 프레젠테이션)", "level": 2, "lessonCount": 4},
+            {"name": "TOEIC 전략과 실전", "level": 3, "lessonCount": 4},
+            {"name": "IELTS 전략과 실전", "level": 3, "lessonCount": 4},
+            {"name": "OPIc 스피킹 연습", "level": 3, "lessonCount": 3},
+            {"name": "영어 에세이 라이팅", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "일본어",
+          "topics": [
+            {"name": "히라가나와 카타카나", "level": 1, "lessonCount": 4},
+            {"name": "기초 문법과 회화", "level": 1, "lessonCount": 4},
+            {"name": "한자 읽기 (JLPT N5~N4)", "level": 2, "lessonCount": 4},
+            {"name": "중급 문법 (JLPT N3~N2)", "level": 3, "lessonCount": 4},
+            {"name": "비즈니스 일본어", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "중국어",
+          "topics": [
+            {"name": "발음과 성조 (핀인)", "level": 1, "lessonCount": 4},
+            {"name": "기초 회화 (HSK 1~2)", "level": 1, "lessonCount": 4},
+            {"name": "한자 쓰기와 읽기", "level": 2, "lessonCount": 4},
+            {"name": "중급 중국어 (HSK 3~4)", "level": 3, "lessonCount": 4},
+            {"name": "비즈니스 중국어", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "독일어",
+          "topics": [
+            {"name": "알파벳과 발음", "level": 1, "lessonCount": 3},
+            {"name": "기초 문법 (명사 성, 격변화)", "level": 1, "lessonCount": 4},
+            {"name": "일상 회화 (A1~A2)", "level": 2, "lessonCount": 4},
+            {"name": "중급 독일어 (B1~B2)", "level": 3, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "한국어 심화",
+          "topics": [
+            {"name": "한국어 문법 심화 (어미, 조사)", "level": 3, "lessonCount": 3},
+            {"name": "고전문학 읽기", "level": 3, "lessonCount": 3},
+            {"name": "논술과 비판적 글쓰기", "level": 3, "lessonCount": 4},
+            {"name": "한국어의 역사와 변화", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "언어학 개론",
+          "topics": [
+            {"name": "음성학과 음운론", "level": 3, "lessonCount": 3},
+            {"name": "형태론과 통사론", "level": 3, "lessonCount": 3},
+            {"name": "의미론과 화용론", "level": 4, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "음악": {
+      "icon": "🎶",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "음악이론",
+          "topics": [
+            {"name": "악보 읽기와 음정", "level": 1, "lessonCount": 4},
+            {"name": "음계와 조성", "level": 2, "lessonCount": 3},
+            {"name": "화성학 기초 (코드, 진행)", "level": 2, "lessonCount": 4},
+            {"name": "리듬과 박자 심화", "level": 2, "lessonCount": 3},
+            {"name": "대위법과 형식론", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "작곡과 편곡",
+          "topics": [
+            {"name": "멜로디 작법", "level": 2, "lessonCount": 3},
+            {"name": "코드 진행과 편곡", "level": 3, "lessonCount": 4},
+            {"name": "DAW로 음악 만들기 (GarageBand, FL Studio)", "level": 2, "lessonCount": 4},
+            {"name": "믹싱과 마스터링", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "음악사",
+          "topics": [
+            {"name": "서양 클래식 (바로크→낭만주의)", "level": 2, "lessonCount": 4},
+            {"name": "20세기 음악 (재즈, 블루스, 록)", "level": 2, "lessonCount": 4},
+            {"name": "K-POP과 대중음악", "level": 1, "lessonCount": 3},
+            {"name": "한국 전통음악 (국악)", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "악기 연주",
+          "topics": [
+            {"name": "피아노/키보드 중급~고급", "level": 3, "lessonCount": 4},
+            {"name": "기타 (어쿠스틱/일렉)", "level": 2, "lessonCount": 4},
+            {"name": "드럼과 퍼커션", "level": 2, "lessonCount": 3},
+            {"name": "보컬 트레이닝", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "음악과 기술",
+          "topics": [
+            {"name": "사운드 엔지니어링", "level": 3, "lessonCount": 3},
+            {"name": "AI 작곡과 음악생성", "level": 3, "lessonCount": 3},
+            {"name": "영화/게임 음악 제작", "level": 4, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "미술디자인": {
+      "icon": "🎨",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "미술사",
+          "topics": [
+            {"name": "고대~르네상스 미술", "level": 1, "lessonCount": 3},
+            {"name": "바로크~인상주의", "level": 2, "lessonCount": 3},
+            {"name": "현대미술 (추상~팝아트~개념미술)", "level": 2, "lessonCount": 4},
+            {"name": "한국 미술사", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "드로잉과 회화",
+          "topics": [
+            {"name": "소묘 기초 (연필, 목탄)", "level": 1, "lessonCount": 4},
+            {"name": "인체 드로잉", "level": 2, "lessonCount": 4},
+            {"name": "수채화와 유화 기법", "level": 3, "lessonCount": 3},
+            {"name": "디지털 일러스트레이션", "level": 2, "lessonCount": 4}
+          ]
+        },
+        {
+          "name": "그래픽 디자인",
+          "topics": [
+            {"name": "디자인 원리 (구성, 색채, 타이포)", "level": 1, "lessonCount": 4},
+            {"name": "포토샵/일러스트레이터", "level": 2, "lessonCount": 4},
+            {"name": "로고와 브랜딩 디자인", "level": 3, "lessonCount": 3},
+            {"name": "인포그래픽과 레이아웃", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "UI/UX 디자인",
+          "topics": [
+            {"name": "UX 리서치와 사용자 분석", "level": 2, "lessonCount": 3},
+            {"name": "와이어프레임과 프로토타이핑", "level": 2, "lessonCount": 4},
+            {"name": "피그마 실전 활용", "level": 3, "lessonCount": 4},
+            {"name": "디자인 시스템", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "3D와 영상",
+          "topics": [
+            {"name": "3D 모델링 (Blender 기초)", "level": 2, "lessonCount": 4},
+            {"name": "3D 렌더링과 애니메이션", "level": 3, "lessonCount": 3},
+            {"name": "영상 편집 (Premiere, DaVinci)", "level": 2, "lessonCount": 4},
+            {"name": "모션그래픽 (After Effects)", "level": 3, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "경영": {
+      "icon": "💼",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "경영학 원론",
+          "topics": [
+            {"name": "경영이란 무엇인가", "level": 1, "lessonCount": 3},
+            {"name": "경영전략 (SWOT, 포터5forces)", "level": 2, "lessonCount": 3},
+            {"name": "조직구조와 조직문화", "level": 2, "lessonCount": 3},
+            {"name": "리더십 이론", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "마케팅",
+          "topics": [
+            {"name": "마케팅 기초 (4P, STP)", "level": 1, "lessonCount": 4},
+            {"name": "디지털 마케팅 (SEO, SNS, 광고)", "level": 2, "lessonCount": 4},
+            {"name": "소비자 행동론", "level": 3, "lessonCount": 3},
+            {"name": "브랜드 전략", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "재무와 회계",
+          "topics": [
+            {"name": "회계 기초 (재무제표 읽기)", "level": 1, "lessonCount": 4},
+            {"name": "원가관리와 관리회계", "level": 3, "lessonCount": 3},
+            {"name": "재무관리 (NPV, IRR, WACC)", "level": 3, "lessonCount": 4},
+            {"name": "기업가치평가", "level": 4, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "인사관리와 조직행동",
+          "topics": [
+            {"name": "채용과 인재관리", "level": 2, "lessonCount": 3},
+            {"name": "성과평가와 보상체계", "level": 3, "lessonCount": 3},
+            {"name": "조직행동론 (동기부여, 팀워크)", "level": 2, "lessonCount": 3},
+            {"name": "노사관계와 근로법", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "창업과 혁신",
+          "topics": [
+            {"name": "사업 아이디어 발굴", "level": 1, "lessonCount": 3},
+            {"name": "사업계획서 작성", "level": 2, "lessonCount": 4},
+            {"name": "린 스타트업과 MVP", "level": 3, "lessonCount": 3},
+            {"name": "투자유치 (VC, 엔젤)", "level": 4, "lessonCount": 3},
+            {"name": "스케일업과 Exit 전략", "level": 4, "lessonCount": 3}
+          ]
+        }
+      ]
+    },
+    "요리생활": {
+      "icon": "🍳",
+      "ageRange": "13+",
+      "units": [
+        {
+          "name": "요리 기초",
+          "topics": [
+            {"name": "주방 도구와 안전", "level": 1, "lessonCount": 3},
+            {"name": "기본 조리법 (굽기, 볶기, 삶기, 찌기)", "level": 1, "lessonCount": 4},
+            {"name": "밥 짓기와 국/찌개", "level": 1, "lessonCount": 3},
+            {"name": "양념과 소스 만들기", "level": 2, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "한식",
+          "topics": [
+            {"name": "밑반찬 만들기", "level": 1, "lessonCount": 4},
+            {"name": "김치 담그기", "level": 2, "lessonCount": 3},
+            {"name": "한식 메인 요리 (불고기, 갈비찜)", "level": 2, "lessonCount": 3},
+            {"name": "전통 디저트 (떡, 한과)", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "세계 요리",
+          "topics": [
+            {"name": "이탈리안 (파스타, 피자)", "level": 2, "lessonCount": 3},
+            {"name": "일식 (스시, 라멘, 돈부리)", "level": 2, "lessonCount": 3},
+            {"name": "중식 (볶음밥, 마파두부)", "level": 2, "lessonCount": 3},
+            {"name": "태국/베트남/인도 요리", "level": 3, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "베이킹과 디저트",
+          "topics": [
+            {"name": "기본 빵 굽기", "level": 2, "lessonCount": 3},
+            {"name": "케이크와 쿠키", "level": 2, "lessonCount": 3},
+            {"name": "커피와 음료 만들기", "level": 1, "lessonCount": 3}
+          ]
+        },
+        {
+          "name": "DIY와 생활기술",
+          "topics": [
+            {"name": "집 청소와 정리정돈", "level": 1, "lessonCount": 3},
+            {"name": "기본 바느질과 수선", "level": 1, "lessonCount": 3},
+            {"name": "가구 조립과 간단한 수리", "level": 2, "lessonCount": 3},
+            {"name": "원예 (화분관리, 텃밭)", "level": 1, "lessonCount": 4},
+            {"name": "자동차 기본 관리", "level": 2, "lessonCount": 3}
+          ]
+        }
+      ]
+    }
+  }
+}

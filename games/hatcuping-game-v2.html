@@ -87,10 +87,10 @@ function sin(v){return Math.sin(v)}
 
 // ===== CHARACTER SELECTION =====
 const CHARACTERS=[
-  {id:'romi',name:'로미',desc:'균형잡힌 능력!',spr:'rs',portrait:'rp',color:'#FF6B9D',spd:4.2,jmp:-11.5,special:'하트 파워'},
-  {id:'hatchu',name:'하츄핑',desc:'빠르고 높이 점프!',spr:'hs',portrait:'hp',color:'#FF69B4',spd:4.8,jmp:-12.5,special:'사랑의 힘'},
-  {id:'baro',name:'바로핑',desc:'튼튼하고 강해!',spr:'ba',portrait:'ba',color:'#FFD700',spd:3.8,jmp:-11,special:'정의 펀치'},
-  {id:'chacha',name:'차차핑',desc:'불꽃처럼 빨라!',spr:'ch',portrait:'ch',color:'#FF6347',spd:5.2,jmp:-11,special:'불꽃 대시'},
+  {id:'romi',name:'로미',desc:'균형잡힌 능력!',spr:'rs',portrait:'rp',color:'#FF6B9D',spd:2.5,jmp:-9.5,special:'하트 파워'},
+  {id:'hatchu',name:'하츄핑',desc:'빠르고 높이 점프!',spr:'hs',portrait:'hp',color:'#FF69B4',spd:2.9,jmp:-10.2,special:'사랑의 힘'},
+  {id:'baro',name:'바로핑',desc:'튼튼하고 강해!',spr:'ba',portrait:'ba',color:'#FFD700',spd:2.3,jmp:-9,special:'정의 펀치'},
+  {id:'chacha',name:'차차핑',desc:'불꽃처럼 빨라!',spr:'ch',portrait:'ch',color:'#FF6347',spd:3.1,jmp:-9,special:'불꽃 대시'},
 ];
 let selChar=0,chosenChar=null;
 
@@ -272,7 +272,7 @@ function updatePlay(){
     for(let i=0;i<6;i++)parts.push({x:P.x+PW/2,y:P.y+PH/2,vx:-P.face*(1+Math.random()),vy:(Math.random()-0.5)*2,l:0.6,s:rng(3,5),c:'#FF6B9D'});
   }
   if(P.dashCD>0)P.dashCD--;
-  if(P.dashing){P.vx=P.dashDir*12;P.dashT--;if(P.dashT<=0)P.dashing=false;}
+  if(P.dashing){P.vx=P.dashDir*7;P.dashT--;if(P.dashT<=0)P.dashing=false;}
   else P.vx=mx*spd;
   // Wall slide
   P.wallSlide=false;

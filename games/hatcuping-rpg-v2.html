@@ -306,6 +306,26 @@ function startMiniRhythm(cb){
   for(let i=0;i<8;i++)miniGame.beats.push({t:60+i*50,hit:false,miss:false});
   scr='minigame';
 }
+// ===== BEFRIEND ENCOUNTER (Library) =====
+function startBefriendEncounter(cb){
+  miniGame={type:'befriend',phase:'appear',timer:0,tries:0,maxTries:3,
+    actions:['말 걸기','선물 주기','노래 부르기'],selIdx:0,
+    friendship:0,friendMax:3,msg:'야생 하츄핑이 나타났다!',msgT:90,
+    heartAnim:[],shakeT:0,successT:0,cb};
+  AM.battleStart();scr='minigame';
+}
+// ===== BUS DODGE MINI-GAME =====
+function startBusDodge(cb){
+  miniGame={type:'busdodge',busX:W/2,busY:H*0.55,laneW:W/3,speed:3,timer:0,maxTime:900,
+    obstacles:[],score:0,lane:1,lives:3,spawnT:0,hitFlash:0,
+    roadY:0,trees:[],cb};
+  // Generate decorative trees
+  for(let i=0;i<20;i++){
+    miniGame.trees.push({x:rng(0,30),y:rng(0,H),s:rng(8,16)});
+    miniGame.trees.push({x:rng(W-30,W),y:rng(0,H),s:rng(8,16)});
+  }
+  scr='minigame';
+}
 
 // ===== GAME STATE =====
 let scr='title',t=0,ticks=0,paused=false;
@@ -452,8 +472,14 @@ function advDlg(){
       ],null);
     }
     if(npc&&npc.cond==='ch6'&&storyFlags.ch===7){startBattle(mkCh('trup',10),true)}
+    if(npc&&npc.cond==='ch2'&&storyFlags.ch===3){
+      // Library befriend encounter
+      startBefriendEncounter(()=>{bag.hearts+=5;saveGame()});return;
+    }
     if(npc&&npc.cond==='ch4'&&storyFlags.ch===5){
-      goStory([{bg:'bg_deep',char:null,sp:'',tx:'특급버스를 타고\n라미엔느 왕국으로!'}],()=>enterMap('laminne'))}
+      goStory([{bg:'bg_deep',char:null,sp:'',tx:'특급버스를 타고\n라미엔느 왕국으로!'}],()=>{
+        startBusDodge(()=>enterMap('laminne'));
+      })}
     checkStickers();
   }
 }
@@ -594,6 +620,49 @@ function update(){
             setTimeout(()=>{const cb=miniGame.cb;miniGame=null;scr='map';if(cb)cb()},1500)}}
         else{miniGame.cards[miniGame.first].flipped=false;miniGame.cards[miniGame.second].flipped=false}
         miniGame.first=null;miniGame.second=null}}
+    if(miniGame&&miniGame.type==='befriend'){
+      miniGame.timer++;
+      if(miniGame.msgT>0)miniGame.msgT--;
+      miniGame.heartAnim=miniGame.heartAnim.filter(h=>{h.y-=1.5;h.t--;return h.t>0});
+      if(miniGame.shakeT>0)miniGame.shakeT--;
+      if(miniGame.successT>0){miniGame.successT--;
+        if(miniGame.successT<=0){AM.captureOk();bag.hearts+=5;
+          setTimeout(()=>{const cb=miniGame.cb;miniGame=null;scr='map';if(cb)cb()},800)}}
+    }
+    if(miniGame&&miniGame.type==='busdodge'){
+      miniGame.timer++;miniGame.roadY=(miniGame.roadY+miniGame.speed)%40;
+      if(miniGame.hitFlash>0)miniGame.hitFlash--;
+      // speed up over time
+      miniGame.speed=3+miniGame.timer/300;
+      // spawn obstacles
+      miniGame.spawnT++;
+      if(miniGame.spawnT>Math.max(25,60-miniGame.timer/20)){
+        miniGame.spawnT=0;
+        const lane=rng(0,2);
+        const types=['🪨','🌲','🪵'];
+        miniGame.obstacles.push({lane,y:-30,type:types[rng(0,2)]});
+      }
+      // move obstacles
+      miniGame.obstacles.forEach(o=>o.y+=miniGame.speed);
+      // collision check
+      const bx=miniGame.lane*miniGame.laneW+miniGame.laneW/2;
+      miniGame.obstacles=miniGame.obstacles.filter(o=>{
+        const ox=o.lane*miniGame.laneW+miniGame.laneW/2;
+        if(Math.abs(ox-bx)<40&&Math.abs(o.y-miniGame.busY)<25){
+          miniGame.lives--;miniGame.hitFlash=20;AM.damage();return false;
+        }
+        return o.y<H+40;
+      });
+      miniGame.score=Math.floor(miniGame.timer/10);
+      // game over
+      if(miniGame.lives<=0||miniGame.timer>=miniGame.maxTime){
+        AM.miniWin();
+        setTimeout(()=>{const cb=miniGame.cb;miniGame=null;scr='map';if(cb)cb()},1200);
+        miniGame.timer=miniGame.maxTime;// stop
+      }
+      // move trees down
+      miniGame.trees.forEach(tr=>{tr.y+=miniGame.speed*0.5;if(tr.y>H+20)tr.y=-20});
+    }
     if(miniGame&&miniGame.type==='rhythm'){miniGame.timer++;
       if(miniGame.beatI<miniGame.beats.length){const b=miniGame.beats[miniGame.beatI];
         if(miniGame.timer>b.t+20&&!b.hit){b.miss=true;miniGame.beatI++}}
@@ -837,6 +906,131 @@ function renderBattle(){
 function renderMiniGame(){
   if(!miniGame)return;
   X.fillStyle=getBgGrad('sunset');X.fillRect(0,0,W,H);
+  // ===== BEFRIEND ENCOUNTER =====
+  if(miniGame.type==='befriend'){
+    drawEnvBG('bg_castle');
+    X.fillStyle='rgba(0,0,0,0.2)';X.fillRect(0,0,W,H);
+    // Title
+    X.fillStyle='#FFD700';X.font='bold '+FN(20);X.textAlign='center';
+    X.fillText('야생 하츄핑 조우!',W/2,45);
+    // Hatcuping sprite
+    const shk=miniGame.shakeT>0?Math.sin(miniGame.shakeT*2)*5:0;
+    const bob=Math.sin(t*2)*6;
+    if(IM.hm){const im=IM.hm;const ch=160;const cw=im.width*(ch/im.height);
+      X.drawImage(im,W/2-cw/2+shk,100+bob,cw,ch)}
+    else{X.fillStyle='#FF6B9D';X.beginPath();X.arc(W/2+shk,180+bob,40,0,Math.PI*2);X.fill();
+      X.fillStyle='#fff';X.font=FN(30);X.fillText('💗',W/2+shk,190+bob)}
+    // Friendship hearts
+    X.fillStyle='#fff';X.font=FN(14);X.fillText('우호도:',W/2,280);
+    for(let i=0;i<miniGame.friendMax;i++){
+      const hx=W/2-40+i*30;
+      heart(X,hx,300,12,i<miniGame.friendship?'#FF6B9D':'#555');
+    }
+    // Floating hearts
+    miniGame.heartAnim.forEach(h=>{
+      X.globalAlpha=h.t/40;heart(X,h.x,h.y,8,'#FF6B9D');X.globalAlpha=1});
+    // Message
+    if(miniGame.msgT>0){
+      rr(X,20,330,W-40,50,10,'rgba(0,0,0,0.8)');
+      X.fillStyle='#fff';X.font=FN(15);X.textAlign='center';
+      X.fillText(miniGame.msg,W/2,360);
+    }
+    // Action buttons
+    btns=[];
+    if(miniGame.successT<=0&&miniGame.friendship<miniGame.friendMax){
+      miniGame.actions.forEach((a,i)=>{
+        const bx=30,by=400+i*60,bw=W-60,bh=50;
+        const emojis=['💬','🎁','🎵'];
+        rr(X,bx,by,bw,bh,12,'rgba(255,107,157,0.5)','rgba(255,255,255,0.3)');
+        X.fillStyle='#fff';X.font='bold '+FN(16);X.textAlign='center';
+        X.fillText(emojis[i]+' '+a,W/2,by+30);
+        btns.push({x:bx,y:by,w:bw,h:bh,id:'befriend'+i});
+      });
+    }
+    // Success message
+    if(miniGame.friendship>=miniGame.friendMax&&miniGame.successT>0){
+      X.fillStyle='rgba(0,0,0,0.5)';X.fillRect(0,0,W,H);
+      X.fillStyle='#FFD700';X.font='bold '+FN(24);X.textAlign='center';
+      X.fillText('하츄핑과 친구가 됐다!',W/2,H/2-20);
+      X.fillStyle='#fff';X.font=FN(14);X.fillText('하트 +5!',W/2,H/2+20);
+    }
+    return;
+  }
+  // ===== BUS DODGE MINI-GAME =====
+  if(miniGame.type==='busdodge'){
+    // Sky
+    const skyG=X.createLinearGradient(0,0,0,H);
+    skyG.addColorStop(0,'#87CEEB');skyG.addColorStop(0.6,'#B5EAD7');skyG.addColorStop(1,'#7EC850');
+    X.fillStyle=skyG;X.fillRect(0,0,W,H);
+    // Road
+    X.fillStyle='#555';X.fillRect(W/6,0,W*2/3,H);
+    X.fillStyle='#444';X.fillRect(W/6,0,4,H);X.fillRect(W*5/6-4,0,4,H);
+    // Lane dividers (dashed moving)
+    X.strokeStyle='#FFD700';X.lineWidth=2;X.setLineDash([20,20]);
+    for(let l=1;l<3;l++){
+      const lx=W/6+l*miniGame.laneW;
+      X.beginPath();
+      for(let dy=-40+miniGame.roadY%40;dy<H;dy+=40){
+        X.moveTo(lx,dy);X.lineTo(lx,dy+15);
+      }
+      X.stroke();
+    }
+    X.setLineDash([]);
+    // Trees on sides
+    miniGame.trees.forEach(tr=>{
+      X.fillStyle='#5D4037';X.fillRect(tr.x-2,tr.y,4,tr.s);
+      X.fillStyle='#2E7D32';X.beginPath();X.arc(tr.x,tr.y-tr.s/3,tr.s/2,0,Math.PI*2);X.fill();
+    });
+    // Obstacles
+    miniGame.obstacles.forEach(o=>{
+      const ox=W/6+o.lane*miniGame.laneW+miniGame.laneW/2;
+      X.font=FN(28);X.textAlign='center';X.fillText(o.type,ox,o.y);
+    });
+    // Bus
+    const bx=W/6+miniGame.lane*miniGame.laneW+miniGame.laneW/2;
+    if(miniGame.hitFlash>0&&miniGame.hitFlash%4<2){X.globalAlpha=0.4}
+    X.fillStyle='#FF6B9D';X.fillRect(bx-18,miniGame.busY-20,36,40);
+    X.fillStyle='#FFB8D4';X.fillRect(bx-14,miniGame.busY-16,28,14);
+    X.fillStyle='#333';X.fillRect(bx-16,miniGame.busY+12,8,8);X.fillRect(bx+8,miniGame.busY+12,8,8);
+    X.fillStyle='#FFD700';X.font=FN(8);X.textAlign='center';X.fillText('BUS',bx,miniGame.busY+4);
+    X.globalAlpha=1;
+    // HUD
+    rr(X,8,8,W-16,36,10,'rgba(0,0,0,0.7)');
+    X.fillStyle='#fff';X.font=FN(13);X.textAlign='left';
+    X.fillText('라미엔느행 버스!',16,28);
+    X.fillStyle='#FF6B9D';X.textAlign='right';
+    let livesStr='';for(let i=0;i<miniGame.lives;i++)livesStr+='💗';
+    X.fillText(livesStr,W-16,28);
+    // Progress bar
+    const prog=Math.min(1,miniGame.timer/miniGame.maxTime);
+    rr(X,20,50,W-40,10,5,'rgba(255,255,255,0.2)');
+    rr(X,20,50,(W-40)*prog,10,5,'#4CAF50');
+    X.fillStyle='#fff';X.font=FN(10);X.textAlign='center';
+    X.fillText(Math.floor(prog*100)+'%',W/2,57);
+    // Left/Right buttons
+    btns=[];
+    const btnR=50;
+    X.fillStyle='rgba(255,255,255,0.3)';
+    X.beginPath();X.arc(60,H-70,btnR,0,Math.PI*2);X.fill();
+    X.fillStyle='#fff';X.font=FN(22);X.textAlign='center';X.fillText('◀',60,H-64);
+    btns.push({x:10,y:H-120,w:100,h:100,id:'busLeft'});
+    X.fillStyle='rgba(255,255,255,0.3)';
+    X.beginPath();X.arc(W-60,H-70,btnR,0,Math.PI*2);X.fill();
+    X.fillStyle='#fff';X.font=FN(22);X.fillText('▶',W-60,H-64);
+    btns.push({x:W-110,y:H-120,w:100,h:100,id:'busRight'});
+    // Game over overlay
+    if(miniGame.lives<=0){
+      X.fillStyle='rgba(0,0,0,0.5)';X.fillRect(0,0,W,H);
+      X.fillStyle='#FFD700';X.font='bold '+FN(22);X.textAlign='center';
+      X.fillText('도착! 라미엔느로!',W/2,H/2);
+    }
+    if(miniGame.timer>=miniGame.maxTime){
+      X.fillStyle='rgba(0,0,0,0.5)';X.fillRect(0,0,W,H);
+      X.fillStyle='#FFD700';X.font='bold '+FN(22);X.textAlign='center';
+      X.fillText('안전 도착! 대단해!',W/2,H/2);
+    }
+    return;
+  }
   if(miniGame.type==='match'){
     X.fillStyle='#fff';X.font='bold '+FN(20);X.textAlign='center';X.fillText('짝 맞추기!',W/2,40);
     X.fillStyle='rgba(255,255,255,0.7)';X.font=FN(13);X.fillText('같은 그림을 찾아봐!',W/2,65);
@@ -966,6 +1160,37 @@ function onDown(e){
     if(b.id==='run'){batAction('run');return}
     if(b.id==='back'&&bat){bat.phase='select';return}
     if(b.id&&b.id.startsWith('sk')){useSkill(parseInt(b.id.slice(2)));return}
+    if(b.id&&b.id.startsWith('befriend')&&miniGame&&miniGame.type==='befriend'){
+      const ai=parseInt(b.id.slice(7));AM.menuClick();
+      miniGame.tries++;
+      const responses=[
+        ['...뭐야?','(경계하는 눈빛)','조금 관심을 보인다!'],
+        ['(선물을 받았다!)','고마워...!','눈이 반짝인다!'],
+        ['(노래를 듣고 있다)','좋은 노래...','꼬리를 살랑인다!']
+      ];
+      // Each action has a chance to increase friendship
+      const success=Math.random()<0.6||(miniGame.tries>=2&&miniGame.friendship<miniGame.friendMax);
+      if(success){
+        miniGame.friendship++;
+        miniGame.msg=responses[ai][2];
+        miniGame.heartAnim.push({x:W/2+rng(-30,30),y:270,t:40});
+        AM.captureOk();
+      }else{
+        miniGame.msg=responses[ai][rng(0,1)];
+        miniGame.shakeT=15;AM.captureFail();
+      }
+      miniGame.msgT=90;
+      if(miniGame.friendship>=miniGame.friendMax){
+        miniGame.successT=90;
+      }
+      return;
+    }
+    if(b.id==='busLeft'&&miniGame&&miniGame.type==='busdodge'){
+      if(miniGame.lane>0){miniGame.lane--;AM.menuClick()}return;
+    }
+    if(b.id==='busRight'&&miniGame&&miniGame.type==='busdodge'){
+      if(miniGame.lane<2){miniGame.lane++;AM.menuClick()}return;
+    }
     if(b.id&&b.id.startsWith('card')&&miniGame&&miniGame.type==='match'){
       const ci=parseInt(b.id.slice(4));
       if(miniGame.lockT>0||miniGame.cards[ci].flipped||miniGame.cards[ci].matched)return;

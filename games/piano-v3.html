@@ -144,6 +144,11 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 </style>
 </head>
 <body>
+<div id="audio-start-overlay" style="position:fixed;inset:0;z-index:9999;background:rgba(10,14,26,.95);display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer" onclick="ensureAudio();this.style.display='none'">
+  <div style="font-size:60px;margin-bottom:16px">🎹</div>
+  <div style="font-size:18px;color:#4a7dff;font-weight:700">터치하여 시작</div>
+  <div style="font-size:12px;color:#8892a8;margin-top:8px">Tap to Start</div>
+</div>
 <div id="app">
   <div class="header">
     <span class="header-title">Piano Master v3</span>
@@ -272,6 +277,7 @@ const nameToMidi = name => nameToMidiMap.get(name) || -1;
 
 // ================ AUDIO ENGINE ================
 let audioCtx, reverbNode, masterGain;
+let audioReady = false;
 function ensureAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -281,8 +287,17 @@ function ensureAudio() {
     createReverb();
     masterGain.connect(audioCtx.destination);
   }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().then(() => { audioReady = true; hideAudioOverlay(); });
+  } else {
+    audioReady = true;
+    hideAudioOverlay();
+  }
   return audioCtx;
+}
+function hideAudioOverlay(){
+  const ov=document.getElementById('audio-start-overlay');
+  if(ov)ov.style.display='none';
 }
 
 function createReverb() {

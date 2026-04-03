@@ -33,12 +33,12 @@ html,body{width:100%;height:100%;overflow:hidden;touch-action:none;
 .mtab:active{transform:scale(.96);}
 
 /* Fingerboard zone */
-#fb{flex:0 0 auto;position:relative;z-index:3;padding:2px 0 4px 0;
+#fb{flex:0 0 auto;position:relative;z-index:3;padding:2px 0 4px 8%;
   display:flex;flex-direction:row;align-items:stretch;}
 
 /* Open string buttons — LEFT column inside fingerboard */
 #osCol{display:flex;flex-direction:column;gap:1px;padding:0 2px;
-  justify-content:space-around;flex:0 0 auto;width:15%;min-width:44px;
+  justify-content:space-around;flex:0 0 auto;width:12%;min-width:38px;
   position:relative;z-index:3;}
 .ob{flex:1;max-height:48px;border-radius:10px;border:2px solid;
   background:rgba(10,8,5,.5);
@@ -1171,7 +1171,9 @@ function startRhythmGame(songKey){
     notePressed:{},
     finished:false,
     gameOver:false,
-    lastHitNote:null
+    lastHitNote:null,
+    waitPaused:false,
+    waitPauseStart:0
   };
 
   document.getElementById('gameHud').style.display='block';
@@ -1260,6 +1262,14 @@ function checkRhythmHit(si,sm){
     st.maxCombo=Math.max(st.maxCombo,st.combo);
     st.lastHitNote=n;
     delete st.notePressed[si+'_'+sm];
+    /* If we were in wait-pause (easy mode), adjust startTime to compensate for pause duration */
+    if(st.waitPaused){
+      const pauseDur=performance.now()-st.waitPauseStart;
+      st.startTime+=pauseDur;
+      st.waitPaused=false;
+      /* Clear highlights */
+      document.querySelectorAll('.nb.highlight,.ob.highlight').forEach(el=>el.classList.remove('highlight'));
+    }
     /* Advance noteIdx past hit notes */
     while(st.noteIdx<st.notes.length&&st.notes[st.noteIdx].hit)st.noteIdx++;
   }
@@ -1276,11 +1286,18 @@ function updateRhythm(now){
     if(n.hit||n.judge)continue;
     const diff=elapsed-n.hitTime;
     if(diff>350){
-      if(st.practice){
-        /* In practice mode, pause time until correct note is pressed */
+      if(st.practice||(st.difficulty==='easy'&&!st.waitPaused)){
+        /* In easy/practice mode, pause time until correct note is pressed */
         /* Highlight what to press */
+        st.waitPaused=true;
+        st.waitPauseStart=now;
         highlightNote(n.s,n.f);
         return; /* Freeze progression */
+      }
+      if(st.waitPaused){
+        /* Still waiting for correct note in easy mode */
+        highlightNote(n.s,n.f);
+        return;
       }
       n.judge='miss';n.hit=true;
       st.miss++;st.combo=0;st.multiplier=1;

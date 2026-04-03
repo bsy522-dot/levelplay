@@ -1,0 +1,482 @@
+[
+  {
+    "subject": "영어",
+    "unit": "기초",
+    "topic": "알파벳 대소문자",
+    "level": 1,
+    "content": "<h3>알파벳 대소문자 익히기</h3><p>영어는 26개의 알파벳으로 이루어져 있습니다. 각 알파벳에는 <b>대문자(Capital Letter)</b>와 <b>소문자(Small Letter)</b>가 있습니다.</p><p><b>대문자</b>: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</p><p><b>소문자</b>: a b c d e f g h i j k l m n o p q r s t u v w x y z</p><h4>대문자를 쓰는 경우</h4><p>1. 문장의 맨 앞글자: <b>T</b>he cat is cute.<br>2. 이름: <b>M</b>inho, <b>S</b>arah<br>3. 나라 이름: <b>K</b>orea, <b>A</b>merica<br>4. 요일과 달: <b>M</b>onday, <b>J</b>anuary<br>5. I(나)는 항상 대문자</p><h4>모음과 자음</h4><p><b>모음(Vowels)</b>: A, E, I, O, U — 이 5개 글자는 특별합니다. 모든 영어 단어에는 최소 하나의 모음이 들어갑니다.<br><b>자음(Consonants)</b>: 나머지 21개 글자입니다.</p><p>알파벳 노래(ABC Song)를 부르면 순서를 쉽게 외울 수 있습니다. 매일 대소문자를 함께 써보면 자연스럽게 익숙해집니다.</p>",
+    "examples": ["A=에이, B=비, C=씨, D=디, E=이", "apple(소문자) vs Apple(고유명사)", "모음: A, E, I, O, U"],
+    "quiz": [
+      {"q": "영어 알파벳은 총 몇 개인가요?", "a": ["26개", "24개", "28개", "30개"], "c": 0},
+      {"q": "모음(Vowel)이 아닌 것은?", "a": ["B", "A", "E", "I"], "c": 0},
+      {"q": "문장 맨 앞은 어떤 글자로 쓰나요?", "a": ["대문자", "소문자", "아무거나", "숫자"], "c": 0}
+    ],
+    "tip": "알파벳 노래를 부르면서 A부터 Z까지 대소문자를 함께 써보세요. 매일 5글자씩 연습하면 일주일이면 마스터!"
+  },
+  {
+    "subject": "영어",
+    "unit": "기초",
+    "topic": "기본 인사와 자기소개",
+    "level": 1,
+    "content": "<h3>영어로 인사하기</h3><p>영어에서 가장 먼저 배우는 것은 인사입니다. 때와 상황에 따라 다른 인사를 사용합니다.</p><h4>시간대별 인사</h4><p><b>Good morning!</b> — 아침 인사 (오전 6시~12시)<br><b>Good afternoon!</b> — 오후 인사 (12시~5시)<br><b>Good evening!</b> — 저녁 인사 (5시 이후)<br><b>Good night!</b> — 잠자리 인사</p><h4>일반 인사</h4><p><b>Hello!</b> / <b>Hi!</b> — 안녕! (언제나 사용 가능)<br><b>How are you?</b> — 어떻게 지내? → <b>I'm fine, thank you.</b> 잘 지내요, 감사합니다.<br><b>Nice to meet you.</b> — 만나서 반가워요. (처음 만났을 때)</p><h4>자기소개</h4><p><b>My name is ___.</b> 제 이름은 ___입니다.<br><b>I am ___ years old.</b> 저는 ___살입니다.<br><b>I like ___.</b> 저는 ___을 좋아합니다.<br><b>I am from Korea.</b> 저는 한국에서 왔습니다.</p><h4>헤어질 때</h4><p><b>Goodbye!</b> / <b>Bye!</b> — 안녕! (헤어질 때)<br><b>See you later!</b> — 나중에 봐!<br><b>Take care!</b> — 잘 지내!</p>",
+    "examples": ["Hello! My name is Minho.", "Good morning! How are you?", "Nice to meet you. I am 8 years old."],
+    "quiz": [
+      {"q": "오전에 하는 인사는?", "a": ["Good morning", "Good evening", "Good night", "Goodbye"], "c": 0},
+      {"q": "'만나서 반가워요'를 영어로 하면?", "a": ["Nice to meet you", "How are you", "Thank you", "See you"], "c": 0},
+      {"q": "'My name is ___'의 뜻은?", "a": ["제 이름은 ___입니다", "저는 ___살입니다", "저는 ___을 좋아합니다", "저는 ___에 삽니다"], "c": 0}
+    ],
+    "tip": "매일 아침 가족에게 'Good morning!'이라고 인사해보세요. 실생활에서 쓰면 기억에 오래 남아요!"
+  },
+  {
+    "subject": "영어",
+    "unit": "단어",
+    "topic": "숫자와 색깔 영단어",
+    "level": 1,
+    "content": "<h3>숫자와 색깔을 영어로 배우기</h3><h4>숫자 1~20</h4><p><b>1</b> one, <b>2</b> two, <b>3</b> three, <b>4</b> four, <b>5</b> five, <b>6</b> six, <b>7</b> seven, <b>8</b> eight, <b>9</b> nine, <b>10</b> ten</p><p><b>11</b> eleven, <b>12</b> twelve, <b>13</b> thirteen, <b>14</b> fourteen, <b>15</b> fifteen, <b>16</b> sixteen, <b>17</b> seventeen, <b>18</b> eighteen, <b>19</b> nineteen, <b>20</b> twenty</p><p>11과 12는 불규칙하므로 따로 외워야 합니다. 13~19는 뒤에 <b>-teen</b>이 붙습니다.</p><h4>큰 수</h4><p><b>30</b> thirty, <b>40</b> forty, <b>50</b> fifty, <b>100</b> one hundred, <b>1000</b> one thousand</p><h4>기본 색깔</h4><p><b>빨강</b> red, <b>주황</b> orange, <b>노랑</b> yellow, <b>초록</b> green, <b>파랑</b> blue, <b>남색</b> navy, <b>보라</b> purple</p><p><b>하양</b> white, <b>검정</b> black, <b>분홍</b> pink, <b>갈색</b> brown, <b>회색</b> gray</p><p>색깔은 형용사로 명사 앞에 놓입니다: <b>red</b> apple (빨간 사과), <b>blue</b> sky (파란 하늘)</p>",
+    "examples": ["I have three cats. (나는 고양이 3마리가 있어)", "The sky is blue. (하늘은 파란색이야)", "She is fifteen years old. (그녀는 15살이야)"],
+    "quiz": [
+      {"q": "숫자 12를 영어로 하면?", "a": ["twelve", "twenty", "eleven", "thirteen"], "c": 0},
+      {"q": "초록색을 영어로 하면?", "a": ["green", "blue", "yellow", "red"], "c": 0},
+      {"q": "'I have ___ books'에서 5를 넣으면?", "a": ["five", "fiv", "fife", "fifes"], "c": 0}
+    ],
+    "tip": "집에 있는 물건을 영어 색깔로 말해보세요. 'Red tomato, yellow banana!' 숫자는 엘리베이터 층수를 영어로 읽어보세요."
+  },
+  {
+    "subject": "영어",
+    "unit": "단어",
+    "topic": "동물과 음식 영단어",
+    "level": 2,
+    "content": "<h3>동물과 음식 영단어</h3><h4>동물 (Animals)</h4><p><b>강아지</b> dog/puppy, <b>고양이</b> cat/kitten, <b>토끼</b> rabbit, <b>햄스터</b> hamster, <b>물고기</b> fish, <b>새</b> bird, <b>거북이</b> turtle</p><p><b>사자</b> lion, <b>호랑이</b> tiger, <b>코끼리</b> elephant, <b>기린</b> giraffe, <b>원숭이</b> monkey, <b>곰</b> bear, <b>펭귄</b> penguin</p><p><b>소</b> cow, <b>돼지</b> pig, <b>닭</b> chicken, <b>말</b> horse, <b>양</b> sheep, <b>오리</b> duck</p><h4>음식 (Food)</h4><p><b>과일</b>: apple(사과), banana(바나나), grape(포도), strawberry(딸기), watermelon(수박), orange(오렌지)</p><p><b>채소</b>: carrot(당근), tomato(토마토), potato(감자), onion(양파), cucumber(오이)</p><p><b>식사</b>: rice(밥), bread(빵), milk(우유), egg(계란), chicken(닭고기), pizza(피자), hamburger(햄버거)</p><p>동물의 <b>울음소리</b>도 나라마다 다릅니다. 강아지: woof woof, 고양이: meow, 닭: cock-a-doodle-doo!</p>",
+    "examples": ["I like dogs. (나는 강아지를 좋아해)", "An elephant is very big. (코끼리는 매우 커)", "I eat bread for breakfast. (나는 아침에 빵을 먹어)"],
+    "quiz": [
+      {"q": "기린을 영어로 하면?", "a": ["giraffe", "gorilla", "goat", "gecko"], "c": 0},
+      {"q": "딸기를 영어로 하면?", "a": ["strawberry", "blueberry", "raspberry", "cranberry"], "c": 0},
+      {"q": "강아지의 영어 울음소리는?", "a": ["woof woof", "meow", "moo", "quack"], "c": 0}
+    ],
+    "tip": "좋아하는 동물과 음식 단어를 카드로 만들어보세요. 한쪽에 그림, 반대쪽에 영어 단어를 적으면 재미있는 플래시카드가 됩니다!"
+  },
+  {
+    "subject": "영어",
+    "unit": "문장",
+    "topic": "be동사와 기본 문장",
+    "level": 2,
+    "content": "<h3>be동사로 문장 만들기</h3><p><b>be동사</b>는 영어에서 가장 중요한 동사입니다. '~이다, ~있다'라는 뜻으로, 주어에 따라 모양이 바뀝니다.</p><h4>be동사의 3가지 형태</h4><p><b>am</b> — I(나)에만 사용: I <b>am</b> happy. (나는 행복해)<br><b>is</b> — He, She, It, 이름 하나에 사용: She <b>is</b> tall. (그녀는 키가 커)<br><b>are</b> — You, We, They, 여러 명에 사용: They <b>are</b> friends. (그들은 친구야)</p><h4>부정문 만들기</h4><p>be동사 뒤에 <b>not</b>을 붙입니다:<br>I am <b>not</b> tired. (나는 피곤하지 않아)<br>He is <b>not</b> a teacher. (그는 선생님이 아니야)<br>줄임말: is not = <b>isn't</b>, are not = <b>aren't</b></p><h4>의문문 만들기</h4><p>be동사를 주어 앞으로 보냅니다:<br><b>Is</b> she a student? (그녀는 학생이야?) — Yes, she is. / No, she isn't.<br><b>Are</b> you ready? (준비됐어?) — Yes, I am. / No, I am not.</p><p>be동사를 잘 사용하면 수많은 영어 문장을 만들 수 있습니다. 주어와 be동사의 짝을 잘 기억하세요!</p>",
+    "examples": ["I am a student. → Am I a student?", "She is kind. → She is not kind. → Is she kind?", "We are happy. → Are we happy?"],
+    "quiz": [
+      {"q": "'She ___ a doctor.'에 알맞은 것은?", "a": ["is", "am", "are", "be"], "c": 0},
+      {"q": "'They are not busy'의 줄임말은?", "a": ["They aren't busy", "They isn't busy", "They am not busy", "They not are busy"], "c": 0},
+      {"q": "'___ you Korean?'에 알맞은 것은?", "a": ["Are", "Is", "Am", "Do"], "c": 0}
+    ],
+    "tip": "am-is-are를 노래로 만들어보세요: 'I am, You are, He is, She is, It is, We are, They are!' 반복하면 자동으로 외워집니다."
+  },
+  {
+    "subject": "영어",
+    "unit": "문장",
+    "topic": "일반동사와 의문문",
+    "level": 3,
+    "content": "<h3>일반동사로 풍부한 문장 만들기</h3><p><b>일반동사</b>는 be동사를 제외한 모든 동작/상태 동사입니다. play(놀다), eat(먹다), like(좋아하다), study(공부하다) 등이 있습니다.</p><h4>현재 시제 규칙</h4><p>주어가 <b>I, You, We, They</b>일 때: 동사 원형 → I <b>play</b> soccer.<br>주어가 <b>He, She, It</b>일 때: 동사에 <b>-(e)s</b> 붙임 → She <b>plays</b> soccer.</p><p><b>-es를 붙이는 경우</b>: go→goes, do→does, wash→washes, watch→watches (o, s, sh, ch, x로 끝날 때)<br><b>y→ies</b>: study→studies, cry→cries (자음+y로 끝날 때)<br><b>예외</b>: have→has</p><h4>부정문: do/does + not</h4><p>I <b>do not</b>(don't) like spiders. → He <b>does not</b>(doesn't) like spiders.<br>※ does를 쓸 때 동사는 원형으로 돌아갑니다!</p><h4>의문문: Do/Does + 주어 + 동사원형?</h4><p><b>Do</b> you like pizza? — Yes, I do. / No, I don't.<br><b>Does</b> he play tennis? — Yes, he does. / No, he doesn't.</p>",
+    "examples": ["I eat breakfast at 7. / She eats breakfast at 7.", "Do you speak English? — Yes, I do.", "He doesn't watch TV at night."],
+    "quiz": [
+      {"q": "'She ___ to school every day.'에 알맞은 것은?", "a": ["goes", "go", "going", "gone"], "c": 0},
+      {"q": "'___ they like ice cream?'에 알맞은 것은?", "a": ["Do", "Does", "Are", "Is"], "c": 0},
+      {"q": "study의 3인칭 단수형은?", "a": ["studies", "studys", "studing", "studyes"], "c": 0}
+    ],
+    "tip": "do/does가 나오면 뒤의 동사는 항상 원형! 'Does he plays'(X) → 'Does he play'(O). 이것만 기억하면 실수가 줄어요."
+  },
+  {
+    "subject": "영어",
+    "unit": "문장",
+    "topic": "과거시제와 미래시제",
+    "level": 3,
+    "content": "<h3>과거와 미래를 영어로 표현하기</h3><h4>과거시제 (Past Tense)</h4><p>이미 일어난 일을 말할 때 사용합니다. 동사에 <b>-ed</b>를 붙이거나, <b>불규칙 동사</b>는 형태가 바뀝니다.</p><p><b>규칙 동사</b>: play→<b>played</b>, like→<b>liked</b>, study→<b>studied</b>, stop→<b>stopped</b></p><p><b>불규칙 동사(자주 나오는 것)</b>:<br>go→<b>went</b>, eat→<b>ate</b>, see→<b>saw</b>, come→<b>came</b>, have→<b>had</b>, make→<b>made</b>, do→<b>did</b>, say→<b>said</b>, take→<b>took</b>, give→<b>gave</b></p><p>부정문: <b>did not(didn't)</b> + 동사원형 → I <b>didn't go</b> to school yesterday.<br>의문문: <b>Did</b> + 주어 + 동사원형? → <b>Did</b> you eat lunch?</p><h4>미래시제 (Future Tense)</h4><p>앞으로 일어날 일을 말할 때 <b>will + 동사원형</b>을 사용합니다.</p><p>I <b>will visit</b> my grandma tomorrow. (나는 내일 할머니를 방문할 거야)<br>부정문: I <b>will not(won't)</b> be late.<br>의문문: <b>Will</b> you come to the party?</p><p><b>be going to</b>도 미래를 나타냅니다: I <b>am going to</b> study English. (나는 영어를 공부할 거야)</p>",
+    "examples": ["Yesterday, I went to the park. (어제 나는 공원에 갔어)", "She will travel to Japan next month.", "Did you finish your homework? — Yes, I did."],
+    "quiz": [
+      {"q": "go의 과거형은?", "a": ["went", "goed", "gone", "goes"], "c": 0},
+      {"q": "'She ___ visit Seoul tomorrow.'에 알맞은 것은?", "a": ["will", "did", "was", "does"], "c": 0},
+      {"q": "'I ___ not eat breakfast this morning.'에 알맞은 것은?", "a": ["did", "do", "will", "am"], "c": 0}
+    ],
+    "tip": "불규칙 동사는 외우는 수밖에 없어요! go-went-gone, eat-ate-eaten처럼 3단 변화를 세트로 외우세요."
+  },
+  {
+    "subject": "영어",
+    "unit": "문장",
+    "topic": "전치사와 위치 표현",
+    "level": 2,
+    "content": "<h3>전치사로 위치와 시간 표현하기</h3><p><b>전치사(Preposition)</b>는 명사 앞에 놓여 위치, 방향, 시간 등을 나타내는 작은 단어입니다.</p><h4>장소 전치사</h4><p><b>in</b> — 안에: The cat is <b>in</b> the box. (고양이가 상자 안에 있어)<br><b>on</b> — 위에(접촉): The book is <b>on</b> the desk. (책이 책상 위에 있어)<br><b>under</b> — 아래에: The dog is <b>under</b> the table. (강아지가 탁자 아래에 있어)<br><b>next to</b> — 옆에: The bank is <b>next to</b> the school.<br><b>between</b> — 사이에: I sit <b>between</b> Minho and Jisu.<br><b>behind</b> — 뒤에: The garden is <b>behind</b> the house.<br><b>in front of</b> — 앞에: The car is <b>in front of</b> the building.</p><h4>시간 전치사</h4><p><b>at</b> — 시각: at 7 o'clock, at noon, at night<br><b>on</b> — 요일/날짜: on Monday, on March 15th<br><b>in</b> — 월/년/계절: in January, in 2026, in summer</p><p><b>기억법</b>: in(넓은 공간/기간) → on(표면/특정 날) → at(좁은 지점/시각)</p>",
+    "examples": ["The cat is under the chair. (고양이가 의자 아래에 있어)", "I wake up at 7 in the morning.", "My birthday is on May 5th."],
+    "quiz": [
+      {"q": "'The ball is ___ the box.'(안에)에 알맞은 것은?", "a": ["in", "on", "at", "under"], "c": 0},
+      {"q": "시간 'at'을 쓰는 경우는?", "a": ["at 3 o'clock", "at Monday", "at January", "at summer"], "c": 0},
+      {"q": "'___ the table'(아래에)에 알맞은 것은?", "a": ["under", "on", "in", "next to"], "c": 0}
+    ],
+    "tip": "in-on-at을 외울 때: in은 큰 것(in the room, in summer), on은 표면(on the desk, on Monday), at은 작은 것(at school, at 3pm)!"
+  },
+  {
+    "subject": "영어",
+    "unit": "회화",
+    "topic": "쇼핑과 주문 표현",
+    "level": 3,
+    "content": "<h3>쇼핑과 식당에서 쓰는 영어</h3><h4>물건 살 때 (Shopping)</h4><p><b>점원</b>: Can I help you? (도와드릴까요?)<br><b>손님</b>: I'm looking for a jacket. (재킷을 찾고 있어요)<br><b>손님</b>: How much is this? (이것은 얼마인가요?)<br><b>점원</b>: It's 30 dollars. (30달러입니다)<br><b>손님</b>: I'll take it. (살게요) / It's too expensive. (너무 비싸요)<br><b>점원</b>: Cash or card? (현금 아니면 카드요?)</p><h4>음식 주문할 때 (Ordering Food)</h4><p><b>직원</b>: May I take your order? (주문하시겠어요?)<br><b>손님</b>: I'd like a hamburger and a coke, please. (햄버거 하나와 콜라 하나 주세요)<br><b>손님</b>: Can I have some water? (물 좀 주시겠어요?)<br><b>직원</b>: For here or to go? (여기서 드실 건가요, 가져가실 건가요?)<br><b>손님</b>: For here, please. (여기서 먹을게요)</p><h4>유용한 표현들</h4><p><b>Excuse me.</b> — 실례합니다 (주목을 끌 때)<br><b>Thank you. / Thanks.</b> — 감사합니다<br><b>You're welcome.</b> — 천만에요<br><b>Could you say that again?</b> — 다시 말씀해 주시겠어요?</p>",
+    "examples": ["How much is this shirt? — It's 20 dollars.", "I'd like a pizza, please.", "For here or to go? — To go, please."],
+    "quiz": [
+      {"q": "'얼마인가요?'를 영어로 하면?", "a": ["How much is this?", "How old is this?", "How big is this?", "How far is this?"], "c": 0},
+      {"q": "'여기서 먹을게요'를 영어로 하면?", "a": ["For here, please.", "To go, please.", "I'll take it.", "Can I have it?"], "c": 0},
+      {"q": "'주문하시겠어요?'는 영어로?", "a": ["May I take your order?", "Can I help you?", "How are you?", "What is this?"], "c": 0}
+    ],
+    "tip": "패스트푸드점에 가면 영어 메뉴를 읽어보세요. 'I'd like ___'로 시작하면 어떤 주문이든 할 수 있어요!"
+  },
+  {
+    "subject": "영어",
+    "unit": "회화",
+    "topic": "감정 표현과 일상 대화",
+    "level": 2,
+    "content": "<h3>감정을 영어로 표현하기</h3><h4>기본 감정 단어</h4><p><b>happy</b> 행복한, <b>sad</b> 슬픈, <b>angry</b> 화난, <b>scared</b> 무서운, <b>surprised</b> 놀란, <b>excited</b> 신나는, <b>tired</b> 피곤한, <b>bored</b> 지루한, <b>worried</b> 걱정되는, <b>proud</b> 자랑스러운, <b>shy</b> 수줍은, <b>hungry</b> 배고픈, <b>thirsty</b> 목마른</p><h4>감정 표현 문장</h4><p><b>I feel happy.</b> 나는 행복해요.<br><b>I am so excited!</b> 나는 너무 신나요!<br><b>She looks sad.</b> 그녀는 슬퍼 보여요.<br><b>Are you okay?</b> 괜찮아요?<br><b>Don't worry.</b> 걱정 마세요.<br><b>I'm sorry to hear that.</b> 그거 안됐네요.</p><h4>일상 대화 패턴</h4><p><b>What's wrong?</b> — 무슨 일이야?<br><b>I'm not feeling well.</b> — 몸이 안 좋아요.<br><b>That's great!</b> — 대단해!/좋아!<br><b>Really?</b> — 정말?<br><b>Me too!</b> — 나도!<br><b>No problem.</b> — 문제없어요/괜찮아요.</p><p>감정을 표현할 때는 <b>I feel + 형용사</b> 또는 <b>I am + 형용사</b> 패턴을 사용하면 됩니다.</p>",
+    "examples": ["I feel happy today! (오늘 기분이 좋아!)", "Are you okay? — I'm a little tired. (좀 피곤해)", "That's great! Me too! (좋아! 나도!)"],
+    "quiz": [
+      {"q": "'피곤한'을 영어로 하면?", "a": ["tired", "bored", "angry", "scared"], "c": 0},
+      {"q": "'괜찮아요?'를 영어로 하면?", "a": ["Are you okay?", "How are you?", "What is it?", "Where are you?"], "c": 0},
+      {"q": "'걱정 마세요'를 영어로 하면?", "a": ["Don't worry.", "Don't cry.", "Don't go.", "Don't stop."], "c": 0}
+    ],
+    "tip": "오늘 기분을 영어로 한 줄 일기를 써보세요. 'Today I feel ___.' 매일 다른 감정 단어를 쓰면 자연스럽게 어휘가 늘어납니다!"
+  },
+
+  {
+    "subject": "코딩",
+    "unit": "입문",
+    "topic": "컴퓨터란 무엇일까?",
+    "level": 1,
+    "content": "<h3>컴퓨터의 세계에 오신 것을 환영합니다!</h3><p><b>컴퓨터</b>는 사람이 시키는 일을 아주 빠르게 처리하는 전자 기계입니다. 1초에 수십억 번의 계산을 할 수 있지만, 스스로 생각하지는 못합니다. 반드시 사람이 <b>명령(프로그램)</b>을 내려야 합니다.</p><h4>컴퓨터의 주요 부품</h4><p><b>CPU(중앙처리장치)</b> — 컴퓨터의 두뇌. 모든 계산과 판단을 합니다.<br><b>RAM(메모리)</b> — 지금 하고 있는 작업을 기억하는 공간. 전원을 끄면 사라집니다.<br><b>저장장치(SSD/HDD)</b> — 파일과 프로그램을 영구적으로 저장합니다.<br><b>모니터</b> — 결과를 눈으로 보여주는 화면.<br><b>키보드/마우스</b> — 사람이 명령을 내리는 입력장치.</p><h4>컴퓨터의 언어: 0과 1</h4><p>컴퓨터는 <b>2진법</b>만 이해합니다. 전기가 흐르면 <b>1</b>, 안 흐르면 <b>0</b>. 이 0과 1의 조합으로 글자, 그림, 음악, 동영상 모든 것을 표현합니다. 이 0 또는 1 하나를 <b>비트(bit)</b>라 하고, 8비트를 <b>바이트(byte)</b>라 합니다.</p><p><b>프로그래밍</b>이란 이런 컴퓨터에게 사람이 이해하기 쉬운 언어(파이썬, 자바스크립트 등)로 명령을 내리는 것입니다.</p>",
+    "examples": ["CPU = 두뇌, RAM = 작업 책상, SSD = 서랍장", "1바이트 = 8비트 = 영어 글자 1개 저장 가능", "2진법: 0, 1, 10(=2), 11(=3), 100(=4)"],
+    "quiz": [
+      {"q": "컴퓨터의 두뇌에 해당하는 부품은?", "a": ["CPU", "RAM", "모니터", "키보드"], "c": 0},
+      {"q": "컴퓨터가 이해하는 숫자 체계는?", "a": ["2진법(0과 1)", "10진법", "16진법", "60진법"], "c": 0},
+      {"q": "1바이트는 몇 비트인가요?", "a": ["8비트", "4비트", "16비트", "2비트"], "c": 0}
+    ],
+    "tip": "컴퓨터를 요리사에 비유해보세요. CPU는 요리하는 사람, RAM은 조리대(넓을수록 좋아), SSD는 냉장고(재료 보관)!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "입문",
+    "topic": "변수와 데이터 타입",
+    "level": 2,
+    "content": "<h3>변수: 데이터를 담는 상자</h3><p><b>변수(Variable)</b>는 데이터를 저장하는 이름이 붙은 공간입니다. 마치 이름표가 붙은 상자와 같아서, 나중에 이름을 부르면 안에 든 값을 꺼낼 수 있습니다.</p><h4>변수 만들기 (파이썬 기준)</h4><p><code>name = \"민호\"</code> → name이라는 상자에 \"민호\"를 넣음<br><code>age = 10</code> → age라는 상자에 10을 넣음<br><code>height = 142.5</code> → height라는 상자에 142.5를 넣음</p><h4>주요 데이터 타입</h4><p><b>정수(int)</b>: 소수점 없는 숫자 → 1, 42, -7<br><b>실수(float)</b>: 소수점 있는 숫자 → 3.14, -0.5, 99.9<br><b>문자열(string)</b>: 글자 데이터 → \"Hello\", \"안녕\"<br><b>불린(boolean)</b>: 참/거짓 → True, False</p><h4>변수 이름 규칙</h4><p>1. 영문, 숫자, 언더스코어(_)만 사용<br>2. 숫자로 시작 불가: 1name(X), name1(O)<br>3. 띄어쓰기 불가: my name(X), my_name(O)<br>4. 의미 있는 이름: a(X), student_name(O)</p><p>변수의 값은 언제든 바꿀 수 있습니다: <code>age = 10</code> → <code>age = 11</code> (생일이 지나면!)</p>",
+    "examples": ["name = \"서연\" → 문자열(string)", "score = 95 → 정수(int)", "is_student = True → 불린(boolean)"],
+    "quiz": [
+      {"q": "변수란 무엇인가요?", "a": ["데이터를 저장하는 공간", "화면에 출력하는 명령", "계산하는 명령", "프로그램 이름"], "c": 0},
+      {"q": "3.14는 어떤 데이터 타입인가요?", "a": ["실수(float)", "정수(int)", "문자열(string)", "불린(boolean)"], "c": 0},
+      {"q": "올바른 변수 이름은?", "a": ["my_name", "1name", "my name", "my-name"], "c": 0}
+    ],
+    "tip": "변수 이름을 지을 때 미래의 나도 이해할 수 있는 이름을 짓세요. x보다 student_count가 훨씬 좋아요!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "기초",
+    "topic": "조건문 (if-else)",
+    "level": 2,
+    "content": "<h3>조건문: 컴퓨터가 판단을 내리게 하기</h3><p><b>조건문</b>은 특정 조건이 참(True)인지 거짓(False)인지에 따라 다른 행동을 하게 하는 명령입니다. 우리가 매일 하는 판단과 같습니다.</p><h4>일상 속 조건문</h4><p>\"비가 오면 우산을 가져가고, 안 오면 그냥 나간다\"<br>→ <b>if</b> 비가 온다: 우산을 가져간다 <b>else</b>: 그냥 나간다</p><h4>파이썬 조건문</h4><p><code>temperature = 35</code><br><code>if temperature >= 30:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"더운 날이에요! 물을 많이 마시세요\")</code><br><code>elif temperature >= 20:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"쾌적한 날씨에요\")</code><br><code>else:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"쌀쌀하니 겉옷을 챙기세요\")</code></p><h4>비교 연산자</h4><p><b>==</b> 같다, <b>!=</b> 다르다, <b>&gt;</b> 크다, <b>&lt;</b> 작다, <b>&gt;=</b> 크거나 같다, <b>&lt;=</b> 작거나 같다</p><h4>논리 연산자</h4><p><b>and</b>: 두 조건 모두 참이어야 참<br><b>or</b>: 하나만 참이어도 참<br><b>not</b>: 참과 거짓을 뒤집음</p>",
+    "examples": ["if score >= 90: print(\"A학점\")", "if age >= 18 and has_id: print(\"입장 가능\")", "비가 오면(if) 우산을, 아니면(else) 모자를"],
+    "quiz": [
+      {"q": "조건이 거짓일 때 실행되는 부분은?", "a": ["else", "if", "elif", "for"], "c": 0},
+      {"q": "'같다'를 나타내는 비교 연산자는?", "a": ["==", "=", "!=", ">="], "c": 0},
+      {"q": "True and False의 결과는?", "a": ["False", "True", "Error", "None"], "c": 0}
+    ],
+    "tip": "조건문은 일상에서 찾아보세요. 신호등이 초록불이면 건너고, 빨간불이면 멈추는 것도 if-else입니다!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "기초",
+    "topic": "반복문 (for, while)",
+    "level": 3,
+    "content": "<h3>반복문: 같은 일을 여러 번 시키기</h3><p>컴퓨터의 가장 큰 장점은 같은 일을 지치지 않고 반복할 수 있다는 것입니다. <b>반복문</b>을 사용하면 수백, 수만 번의 작업도 코드 몇 줄로 해결됩니다.</p><h4>for 반복문</h4><p>정해진 횟수만큼 반복합니다:</p><p><code>for i in range(5):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"안녕하세요!\", i+1, \"번째\")</code><br>→ \"안녕하세요! 1번째\"부터 \"안녕하세요! 5번째\"까지 출력</p><p><b>range(5)</b>는 0, 1, 2, 3, 4를 만듭니다 (0부터 시작, 5개).</p><h4>while 반복문</h4><p>조건이 참인 동안 계속 반복합니다:</p><p><code>count = 0</code><br><code>while count < 3:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"반복 중:\", count)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>count = count + 1</code><br>→ count가 3이 되면 멈춤</p><h4>주의: 무한루프</h4><p>while 조건이 영원히 참이면 프로그램이 멈추지 않습니다! 반드시 조건을 변경하는 코드를 넣어야 합니다.</p><h4>break와 continue</h4><p><b>break</b>: 반복을 즉시 중단<br><b>continue</b>: 이번 회차를 건너뛰고 다음 회차로</p>",
+    "examples": ["for i in range(3): print(i) → 0, 1, 2 출력", "while문: 배가 부를 때까지(조건) 밥을 먹는다(반복)", "1부터 100까지 합: for i in range(1, 101): total += i"],
+    "quiz": [
+      {"q": "for i in range(4)는 몇 번 반복하나요?", "a": ["4번", "3번", "5번", "1번"], "c": 0},
+      {"q": "반복을 즉시 중단하는 키워드는?", "a": ["break", "continue", "stop", "exit"], "c": 0},
+      {"q": "무한루프란?", "a": ["끝나지 않는 반복", "1번만 실행", "조건문", "변수 선언"], "c": 0}
+    ],
+    "tip": "for는 '몇 번 할지 알 때', while은 '언제 끝날지 모를 때' 사용하세요. 100번 점프는 for, 지칠 때까지 달리기는 while!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "기초",
+    "topic": "함수 만들기",
+    "level": 3,
+    "content": "<h3>함수: 코드를 깔끔하게 정리하기</h3><p><b>함수(Function)</b>는 특정 작업을 수행하는 코드 묶음에 이름을 붙인 것입니다. 한 번 만들면 이름만 불러 여러 번 재사용할 수 있습니다.</p><h4>함수를 쓰는 이유</h4><p>1. <b>재사용</b>: 같은 코드를 반복해서 쓸 필요 없음<br>2. <b>정리</b>: 코드가 깔끔하고 읽기 쉬워짐<br>3. <b>수정 용이</b>: 한 곳만 고치면 전체에 적용</p><h4>함수 만들기 (파이썬)</h4><p><code>def greet(name):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"안녕하세요, \" + name + \"님!\")</code><br><br><code>greet(\"민호\")</code> → 안녕하세요, 민호님!<br><code>greet(\"서연\")</code> → 안녕하세요, 서연님!</p><h4>매개변수와 반환값</h4><p><b>매개변수(parameter)</b>: 함수에 전달하는 값 (위 예시의 name)<br><b>반환값(return)</b>: 함수가 결과를 돌려주는 것</p><p><code>def add(a, b):</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>return a + b</code><br><br><code>result = add(3, 5)</code> → result에 8이 저장됨</p><h4>내장 함수</h4><p>파이썬에는 이미 만들어진 함수가 많습니다:<br><b>print()</b> 출력, <b>len()</b> 길이, <b>max()</b> 최대값, <b>min()</b> 최소값, <b>input()</b> 입력 받기</p>",
+    "examples": ["def square(x): return x * x → square(4) = 16", "def is_even(n): return n % 2 == 0 → is_even(6) = True", "내장함수: len(\"Hello\") = 5"],
+    "quiz": [
+      {"q": "함수를 만들 때 사용하는 키워드는?", "a": ["def", "func", "function", "make"], "c": 0},
+      {"q": "함수가 결과를 돌려주는 키워드는?", "a": ["return", "print", "give", "send"], "c": 0},
+      {"q": "len(\"ABC\")의 결과는?", "a": ["3", "ABC", "0", "Error"], "c": 0}
+    ],
+    "tip": "함수는 레시피와 같아요. 재료(매개변수)를 넣으면 요리(반환값)가 나옵니다. 한 번 레시피를 만들어두면 몇 번이든 같은 요리를 할 수 있죠!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "중급",
+    "topic": "리스트와 딕셔너리",
+    "level": 3,
+    "content": "<h3>리스트와 딕셔너리: 데이터 모음 관리하기</h3><h4>리스트 (List)</h4><p><b>리스트</b>는 여러 데이터를 순서대로 저장하는 자료구조입니다. 대괄호 []를 사용합니다.</p><p><code>fruits = [\"사과\", \"바나나\", \"포도\", \"딸기\"]</code><br><code>fruits[0]</code> → \"사과\" (인덱스는 0부터!)<br><code>fruits[2]</code> → \"포도\"<br><code>len(fruits)</code> → 4 (요소 개수)</p><p><b>리스트 조작</b>:<br><code>fruits.append(\"수박\")</code> → 맨 뒤에 추가<br><code>fruits.remove(\"바나나\")</code> → 바나나 삭제<br><code>fruits.sort()</code> → 정렬</p><h4>딕셔너리 (Dictionary)</h4><p><b>딕셔너리</b>는 키(key)와 값(value)의 쌍으로 데이터를 저장합니다. 중괄호 {}를 사용합니다.</p><p><code>student = {\"name\": \"민호\", \"age\": 10, \"grade\": 4}</code><br><code>student[\"name\"]</code> → \"민호\"<br><code>student[\"age\"]</code> → 10</p><p><b>딕셔너리 조작</b>:<br><code>student[\"school\"] = \"하늘초등학교\"</code> → 새 항목 추가<br><code>del student[\"grade\"]</code> → 항목 삭제</p><p>리스트는 <b>순서가 중요할 때</b>, 딕셔너리는 <b>이름으로 찾을 때</b> 사용합니다.</p>",
+    "examples": ["numbers = [1, 2, 3] → numbers[0] = 1", "person = {\"name\": \"서연\"} → person[\"name\"] = \"서연\"", "리스트: 출석번호 / 딕셔너리: 전화번호부"],
+    "quiz": [
+      {"q": "리스트의 첫 번째 요소 인덱스는?", "a": ["0", "1", "-1", "첫째"], "c": 0},
+      {"q": "딕셔너리에서 값을 찾을 때 사용하는 것은?", "a": ["키(key)", "인덱스", "순서", "번호"], "c": 0},
+      {"q": "리스트에 요소를 추가하는 메서드는?", "a": ["append", "add", "insert", "push"], "c": 0}
+    ],
+    "tip": "리스트는 줄 서있는 학생들(번호로 찾기), 딕셔너리는 사전(단어로 뜻 찾기)이라고 생각하세요!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "중급",
+    "topic": "간단한 프로젝트: 숫자 맞추기 게임",
+    "level": 4,
+    "content": "<h3>프로젝트: 숫자 맞추기 게임 만들기</h3><p>지금까지 배운 변수, 조건문, 반복문, 함수를 모두 활용하여 간단한 게임을 만들어봅시다!</p><h4>게임 규칙</h4><p>1. 컴퓨터가 1~100 사이 숫자를 하나 정합니다<br>2. 플레이어가 숫자를 추측합니다<br>3. 컴퓨터가 \"더 크게\" 또는 \"더 작게\" 힌트를 줍니다<br>4. 정답을 맞추면 게임 종료!</p><h4>파이썬 코드</h4><p><code>import random</code><br><code></code><br><code>def number_game():</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>answer = random.randint(1, 100)</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>tries = 0</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code></code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>while True:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>guess = int(input(\"1~100 숫자를 맞춰보세요: \"))</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>tries = tries + 1</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code></code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>if guess == answer:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print(f\"정답! {tries}번 만에 맞추셨어요!\")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>break</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>elif guess &lt; answer:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"더 크게!\")</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>else:</code><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>print(\"더 작게!\")</code></p><h4>사용된 개념 정리</h4><p><b>변수</b>: answer, tries, guess<br><b>조건문</b>: if-elif-else로 비교<br><b>반복문</b>: while True로 반복, break로 종료<br><b>함수</b>: number_game()으로 묶기<br><b>라이브러리</b>: random 모듈로 난수 생성</p>",
+    "examples": ["random.randint(1, 100) → 1부터 100 사이 무작위 숫자", "int(input()) → 사용자 입력을 숫자로 변환", "이진 탐색: 항상 중간값을 부르면 최대 7번에 맞출 수 있음!"],
+    "quiz": [
+      {"q": "random.randint(1, 10)의 결과 범위는?", "a": ["1부터 10까지", "0부터 9까지", "1부터 9까지", "0부터 10까지"], "c": 0},
+      {"q": "이 게임에서 반복을 멈추는 키워드는?", "a": ["break", "stop", "end", "quit"], "c": 0},
+      {"q": "input()은 무슨 역할을 하나요?", "a": ["사용자 입력 받기", "화면 출력", "파일 저장", "계산하기"], "c": 0}
+    ],
+    "tip": "이 게임에서 가장 효율적인 전략은 이진 탐색(Binary Search)입니다. 항상 남은 범위의 중간값을 부르면 1~100도 최대 7번에 맞출 수 있어요!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "중급",
+    "topic": "웹페이지의 기초: HTML과 CSS",
+    "level": 4,
+    "content": "<h3>나만의 웹페이지 만들기: HTML과 CSS</h3><h4>HTML: 웹페이지의 뼈대</h4><p><b>HTML(HyperText Markup Language)</b>은 웹페이지의 구조와 내용을 정의합니다. 태그(tag)를 사용하여 요소를 구분합니다.</p><p><b>기본 구조</b>:<br><code>&lt;html&gt;</code><br>&nbsp;&nbsp;<code>&lt;head&gt;&lt;title&gt;내 페이지&lt;/title&gt;&lt;/head&gt;</code><br>&nbsp;&nbsp;<code>&lt;body&gt;</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>&lt;h1&gt;안녕하세요!&lt;/h1&gt;</code><br>&nbsp;&nbsp;&nbsp;&nbsp;<code>&lt;p&gt;이것은 문단입니다.&lt;/p&gt;</code><br>&nbsp;&nbsp;<code>&lt;/body&gt;</code><br><code>&lt;/html&gt;</code></p><h4>자주 쓰는 HTML 태그</h4><p><b>&lt;h1&gt;~&lt;h6&gt;</b>: 제목 (h1이 가장 크고 h6이 가장 작음)<br><b>&lt;p&gt;</b>: 문단<br><b>&lt;a href=\"주소\"&gt;</b>: 링크<br><b>&lt;img src=\"파일\"&gt;</b>: 이미지<br><b>&lt;ul&gt;&lt;li&gt;</b>: 목록</p><h4>CSS: 웹페이지의 옷</h4><p><b>CSS(Cascading Style Sheets)</b>는 HTML 요소의 색상, 크기, 배치 등 디자인을 담당합니다.</p><p><code>h1 { color: blue; font-size: 24px; }</code><br><code>p { color: gray; line-height: 1.5; }</code><br><code>body { background-color: lightyellow; }</code></p><p>HTML이 집의 구조(벽, 지붕)라면, CSS는 인테리어(페인트, 가구 배치)입니다!</p>",
+    "examples": ["<h1>제목</h1> → 큰 제목 표시", "color: red; → 글자를 빨간색으로", "메모장에서 .html 파일을 만들어 브라우저로 열면 웹페이지 완성!"],
+    "quiz": [
+      {"q": "HTML에서 제목을 만드는 태그는?", "a": ["<h1>", "<p>", "<a>", "<div>"], "c": 0},
+      {"q": "CSS에서 글자 색을 바꾸는 속성은?", "a": ["color", "font", "size", "text"], "c": 0},
+      {"q": "HTML은 무엇의 약자인가요?", "a": ["HyperText Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyper Transfer Main Link"], "c": 0}
+    ],
+    "tip": "메모장에서 HTML 파일을 만들어 웹 브라우저로 열어보세요. 태그를 바꿀 때마다 새로고침하면 변화를 바로 확인할 수 있어요!"
+  },
+  {
+    "subject": "코딩",
+    "unit": "입문",
+    "topic": "알고리즘과 순서도",
+    "level": 1,
+    "content": "<h3>알고리즘: 문제 해결의 단계별 레시피</h3><p><b>알고리즘(Algorithm)</b>이란 문제를 해결하기 위한 정확한 단계별 절차입니다. 요리 레시피처럼 순서대로 따라 하면 결과를 얻을 수 있습니다.</p><h4>일상 속 알고리즘: 라면 끓이기</h4><p>1. 냄비에 물 550ml를 넣는다<br>2. 물이 끓을 때까지 기다린다<br>3. 면과 스프를 넣는다<br>4. 4분 30초 동안 끓인다<br>5. 그릇에 담는다<br>→ 순서가 바뀌면 맛이 달라지거나 실패!</p><h4>순서도 (Flowchart)</h4><p>알고리즘을 그림으로 표현한 것을 <b>순서도</b>라 합니다:</p><p><b>타원(○)</b>: 시작/끝<br><b>직사각형(□)</b>: 처리/실행<br><b>마름모(◇)</b>: 판단/조건 (예/아니오로 갈림)<br><b>화살표(→)</b>: 흐름 방향</p><h4>좋은 알고리즘의 조건</h4><p>1. <b>정확성</b>: 올바른 결과를 내야 합니다<br>2. <b>효율성</b>: 가능한 빠르고 적은 자원으로<br>3. <b>명확성</b>: 누구나 따라 할 수 있도록 분명하게<br>4. <b>유한성</b>: 반드시 끝이 있어야 합니다</p><p>프로그래밍은 이런 알고리즘을 컴퓨터 언어로 옮기는 것입니다. 코드를 짜기 전에 먼저 순서도를 그려보면 훨씬 쉬워집니다!</p>",
+    "examples": ["라면 끓이기 = 일상 알고리즘", "숫자 정렬: 작은 수부터 큰 수 순서로 나열", "길 찾기: 네비게이션도 알고리즘을 사용!"],
+    "quiz": [
+      {"q": "순서도에서 판단/조건을 나타내는 도형은?", "a": ["마름모", "직사각형", "타원", "삼각형"], "c": 0},
+      {"q": "좋은 알고리즘의 조건이 아닌 것은?", "a": ["복잡해야 한다", "정확해야 한다", "효율적이어야 한다", "끝이 있어야 한다"], "c": 0},
+      {"q": "알고리즘을 가장 쉽게 설명하면?", "a": ["문제 해결 레시피", "컴퓨터 부품", "프로그래밍 언어", "수학 공식"], "c": 0}
+    ],
+    "tip": "코드를 짜기 전에 종이에 순서도를 그려보세요. 글로 쓰든 그림으로 그리든, 계획을 세우면 코딩이 훨씬 쉬워집니다!"
+  },
+
+  {
+    "subject": "음악",
+    "unit": "기초",
+    "topic": "음계와 음이름",
+    "level": 1,
+    "content": "<h3>음악의 기본: 음계</h3><p><b>음계(Scale)</b>란 높이 순서대로 배열된 음의 모음입니다. 가장 기본적인 것이 <b>다장조 음계</b>(C Major Scale)인 '도레미파솔라시도'입니다.</p><h4>음이름 체계</h4><p><b>계이름</b>: 도(Do) 레(Re) 미(Mi) 파(Fa) 솔(Sol) 라(La) 시(Si) 도(Do)<br><b>음이름(영어)</b>: C - D - E - F - G - A - B - C<br><b>독일식</b>: C - D - E - F - G - A - H - C</p><h4>온음과 반음</h4><p>피아노 건반을 보면:<br>흰 건반 사이에 검은 건반이 있는 곳 = <b>온음</b> (도→레, 레→미 등)<br>검은 건반이 없는 곳 = <b>반음</b> (미→파, 시→도)</p><p>도장조 음계의 구조: <b>온-온-반-온-온-온-반</b></p><h4>옥타브</h4><p>도에서 높은 도까지를 <b>1옥타브</b>라 합니다. 주파수가 정확히 2배가 됩니다. 피아노에는 약 7옥타브(88건반)가 있습니다.</p><h4>샤프(#)와 플랫(b)</h4><p><b>샤프(#)</b>: 반음 올림 (도# = 도와 레 사이의 검은 건반)<br><b>플랫(b)</b>: 반음 내림 (레b = 도와 레 사이의 검은 건반)<br>도# = 레b — 같은 음, 다른 이름(이명동음)</p>",
+    "examples": ["도레미파솔라시도 = C D E F G A B C", "피아노 흰 건반이 도장조 음계", "옥타브: 낮은 도(262Hz) → 높은 도(524Hz)로 주파수 2배"],
+    "quiz": [
+      {"q": "미(Mi)의 영어 음이름은?", "a": ["E", "D", "F", "G"], "c": 0},
+      {"q": "미와 파 사이의 간격은?", "a": ["반음", "온음", "2온음", "3반음"], "c": 0},
+      {"q": "피아노에는 약 몇 개의 건반이 있나요?", "a": ["88개", "52개", "76개", "100개"], "c": 0}
+    ],
+    "tip": "피아노 건반이나 앱에서 '도레미파솔라시도'를 직접 쳐보세요. 미-파, 시-도 사이에 검은 건반이 없는 것을 눈으로 확인해보세요!"
+  },
+  {
+    "subject": "음악",
+    "unit": "기초",
+    "topic": "리듬과 박자",
+    "level": 2,
+    "content": "<h3>리듬: 음악의 심장박동</h3><p><b>리듬(Rhythm)</b>은 음의 길고 짧음, 강하고 약함의 패턴입니다. 음악에서 가장 기본적이고 중요한 요소입니다.</p><h4>음표와 쉼표</h4><p><b>온음표 ○</b>: 4박 (하나 둘 셋 넷)<br><b>2분음표 𝅗𝅥</b>: 2박 (하나 둘)<br><b>4분음표 ♩</b>: 1박 (하나)<br><b>8분음표 ♪</b>: 반 박<br><b>16분음표 ♬</b>: 4분의 1 박</p><p>각 음표에 대응하는 <b>쉼표</b>가 있어 같은 길이만큼 쉽니다.</p><h4>박자표</h4><p>악보 맨 앞에 있는 숫자가 박자표입니다:<br><b>4/4 박자</b>: 한 마디에 4분음표가 4개 — 대부분의 팝송<br><b>3/4 박자</b>: 한 마디에 4분음표가 3개 — 왈츠(쿵짝짝)<br><b>6/8 박자</b>: 한 마디에 8분음표가 6개 — 리듬감 있는 곡</p><h4>강박과 약박</h4><p>4/4 박자: <b>강</b>-약-<b>중강</b>-약<br>3/4 박자: <b>강</b>-약-약<br>첫 박이 가장 강한 것이 특징입니다.</p><h4>템포(Tempo)</h4><p>음악의 빠르기를 나타냅니다:<br><b>Largo</b>(매우 느리게) → <b>Adagio</b>(느리게) → <b>Andante</b>(걸음 속도) → <b>Allegro</b>(빠르게) → <b>Presto</b>(매우 빠르게)</p>",
+    "examples": ["4분음표 4개 = 온음표 1개", "4/4 박자: 강-약-중강-약 (팝송 대부분)", "왈츠는 3/4 박자: 쿵-짝-짝"],
+    "quiz": [
+      {"q": "4분음표의 길이는?", "a": ["1박", "2박", "4박", "반 박"], "c": 0},
+      {"q": "왈츠의 박자는?", "a": ["3/4", "4/4", "2/4", "6/8"], "c": 0},
+      {"q": "Allegro는 어떤 빠르기인가요?", "a": ["빠르게", "느리게", "매우 느리게", "보통 속도"], "c": 0}
+    ],
+    "tip": "좋아하는 노래를 들으며 손뼉을 박자에 맞춰 쳐보세요. 대부분의 노래가 4/4 박자라는 것을 발견할 수 있어요!"
+  },
+  {
+    "subject": "음악",
+    "unit": "악기",
+    "topic": "악기의 종류와 분류",
+    "level": 2,
+    "content": "<h3>악기의 세계: 4대 분류</h3><p>오케스트라의 악기는 소리를 내는 방법에 따라 크게 4가지로 나뉩니다.</p><h4>1. 현악기 (String Instruments)</h4><p>줄(현)을 진동시켜 소리를 냅니다.<br><b>활로 연주</b>: 바이올린(가장 작고 높은 음), 비올라, 첼로, 더블베이스(가장 크고 낮은 음)<br><b>손으로 퉁겨 연주</b>: 기타, 하프, 우쿨렐레<br>오케스트라에서 가장 많은 비율을 차지합니다.</p><h4>2. 관악기 (Wind Instruments)</h4><p>공기를 불어넣어 소리를 냅니다.<br><b>목관악기</b>: 플루트, 클라리넷, 오보에, 바순 — 나무로 만들거나 리드(갈대) 사용<br><b>금관악기</b>: 트럼펫, 트롬본, 호른, 튜바 — 금속으로 만들고 입술 진동으로 소리</p><h4>3. 타악기 (Percussion Instruments)</h4><p>두드려서 소리를 냅니다.<br><b>음정 있는 타악기</b>: 팀파니, 실로폰, 마림바<br><b>음정 없는 타악기</b>: 큰북, 작은북, 심벌즈, 트라이앵글, 탬버린</p><h4>4. 건반악기 (Keyboard Instruments)</h4><p>건반을 눌러 소리를 냅니다: 피아노, 오르간, 하프시코드, 신디사이저<br>피아노는 건반을 누르면 해머가 현을 때려 소리를 내므로 현악기이면서 타악기의 성격도 있습니다!</p>",
+    "examples": ["바이올린 < 비올라 < 첼로 < 더블베이스 (크기순)", "플루트: 입으로 불기 / 트럼펫: 입술 진동", "피아노: 건반+해머+현 = 여러 원리 결합"],
+    "quiz": [
+      {"q": "활로 연주하지 않는 현악기는?", "a": ["기타", "바이올린", "첼로", "비올라"], "c": 0},
+      {"q": "리드를 사용하는 악기는?", "a": ["클라리넷", "플루트", "트럼펫", "피아노"], "c": 0},
+      {"q": "음정이 있는 타악기는?", "a": ["실로폰", "큰북", "심벌즈", "탬버린"], "c": 0}
+    ],
+    "tip": "유튜브에서 오케스트라 공연 영상을 보면서 각 악기를 찾아보세요. 어떤 악기가 어떤 소리를 내는지 직접 듣는 것이 가장 좋은 공부입니다!"
+  },
+  {
+    "subject": "음악",
+    "unit": "감상",
+    "topic": "클래식 음악 시대와 작곡가",
+    "level": 3,
+    "content": "<h3>클래식 음악의 시대별 여행</h3><h4>1. 바로크 시대 (1600~1750)</h4><p>화려하고 장식적인 음악. 오르간과 하프시코드가 중심.<br><b>바흐</b>(음악의 아버지): 토카타와 푸가, 브란덴부르크 협주곡<br><b>비발디</b>: 사계 (봄/여름/가을/겨울 바이올린 협주곡)<br><b>헨델</b>: 메시아 (할렐루야 합창)</p><h4>2. 고전파 시대 (1750~1820)</h4><p>균형과 질서를 중시. 소나타, 교향곡 형식 완성.<br><b>하이든</b>(교향곡의 아버지): 104곡의 교향곡<br><b>모차르트</b>(음악 신동): 5세부터 작곡. 세레나데, 마술피리<br><b>베토벤</b>: 운명(5번), 합창(9번) 교향곡. 귀가 들리지 않는 상태에서도 작곡</p><h4>3. 낭만파 시대 (1820~1900)</h4><p>개인의 감정과 상상력을 강조.<br><b>쇼팽</b>(피아노의 시인): 야상곡, 발라드<br><b>리스트</b>(피아노 마왕): 화려한 기교의 연주<br><b>차이코프스키</b>: 백조의 호수, 호두까기 인형</p><h4>4. 근현대 (1900~)</h4><p>새로운 실험과 다양한 스타일.<br><b>드뷔시</b>: 달빛, 인상주의 음악<br><b>스트라빈스키</b>: 봄의 제전 (충격적 리듬)</p>",
+    "examples": ["바흐 → 비발디 → 모차르트 → 베토벤 → 쇼팽 → 차이코프스키", "바로크=화려, 고전=균형, 낭만=감정, 근현대=실험", "베토벤 운명의 첫 4음: 빠빠빠빰!"],
+    "quiz": [
+      {"q": "사계를 작곡한 바로크 시대 작곡가는?", "a": ["비발디", "바흐", "모차르트", "베토벤"], "c": 0},
+      {"q": "베토벤의 교향곡 5번의 별명은?", "a": ["운명", "합창", "전원", "영웅"], "c": 0},
+      {"q": "피아노의 시인이라 불리는 작곡가는?", "a": ["쇼팽", "리스트", "모차르트", "바흐"], "c": 0}
+    ],
+    "tip": "각 시대의 대표곡을 한 곡씩 들어보세요. 비발디 사계-봄, 모차르트 아이네 클라이네, 베토벤 운명, 쇼팽 야상곡만 들어도 클래식의 흐름을 느낄 수 있어요!"
+  },
+  {
+    "subject": "음악",
+    "unit": "이론",
+    "topic": "화음과 코드의 기초",
+    "level": 3,
+    "content": "<h3>화음: 여러 음이 만드는 조화</h3><p><b>화음(Chord)</b>은 두 개 이상의 음을 동시에 울리는 것입니다. 음악에 풍성함과 감정을 더해줍니다.</p><h4>3화음의 기본</h4><p>가장 기본적인 화음은 <b>3화음(Triad)</b>으로, 3개의 음으로 이루어집니다:</p><p><b>장3화음(Major)</b>: 밝고 활기찬 느낌 → 도-미-솔 (C Major)<br><b>단3화음(Minor)</b>: 어둡고 슬픈 느낌 → 라-도-미 (A Minor)<br><b>감3화음(Diminished)</b>: 불안한 느낌<br><b>증3화음(Augmented)</b>: 신비로운 느낌</p><h4>기본 코드 이름</h4><p>코드는 근음(맨 아래 음)의 이름을 따서 부릅니다:<br><b>C</b> = 도미솔 (밝은 느낌)<br><b>Dm</b> = 레파라 (m=minor, 슬픈 느낌)<br><b>G</b> = 솔시레 (밝은 느낌)<br><b>Am</b> = 라도미 (슬픈 느낌)</p><h4>코드 진행</h4><p>노래는 코드가 순서대로 바뀌며 진행됩니다.<br><b>가장 유명한 진행</b>: C → G → Am → F<br>이 4개의 코드로 수많은 팝송을 연주할 수 있습니다! Let It Be, 좋은 날 등 수백 곡이 이 진행을 사용합니다.</p><h4>으뜸화음과 딸림화음</h4><p><b>으뜸화음(I)</b>: 곡의 으뜸음(도) 위에 쌓은 화음 → 안정감<br><b>딸림화음(V)</b>: 5번째 음(솔) 위에 쌓은 화음 → 긴장감 → 으뜸화음으로 돌아가고 싶은 느낌</p>",
+    "examples": ["도미솔(C) = 밝은 느낌, 라도미(Am) = 슬픈 느낌", "C-G-Am-F 진행으로 수백 곡 연주 가능", "으뜸(I)→딸림(V)→으뜸(I) = 가장 기본적인 진행"],
+    "quiz": [
+      {"q": "장3화음(Major)의 느낌은?", "a": ["밝고 활기찬", "어둡고 슬픈", "불안한", "신비로운"], "c": 0},
+      {"q": "C코드를 구성하는 음은?", "a": ["도-미-솔", "도-레-미", "도-파-라", "도-솔-시"], "c": 0},
+      {"q": "Am에서 m은 무엇의 약자인가요?", "a": ["Minor(단조)", "Major(장조)", "Music(음악)", "Medium(중간)"], "c": 0}
+    ],
+    "tip": "기타나 피아노로 C, G, Am, F 네 개의 코드만 배우면 좋아하는 노래를 직접 반주할 수 있어요. 유튜브에서 '4코드 기타' 검색!"
+  },
+
+  {
+    "subject": "미술",
+    "unit": "기초",
+    "topic": "색의 원리와 색상환",
+    "level": 1,
+    "content": "<h3>색의 세계: 보이는 것 이상의 비밀</h3><p>세상은 색으로 가득합니다. 미술에서 색을 이해하는 것은 가장 기본이자 가장 중요한 능력입니다.</p><h4>빛의 3원색과 색의 3원색</h4><p><b>빛의 3원색(가산혼합)</b>: 빨강(R) + 초록(G) + 파랑(B) = 흰색 → 모니터, TV에 사용<br><b>색의 3원색(감산혼합)</b>: 빨강 + 노랑 + 파랑 = 검정(에 가까움) → 물감, 그림에 사용</p><h4>색상환 (Color Wheel)</h4><p><b>1차색(Primary)</b>: 빨강, 노랑, 파랑 — 다른 색을 섞어 만들 수 없는 기본 색<br><b>2차색(Secondary)</b>: 1차색을 섞어 만듦<br>→ 빨강+노랑=<b>주황</b>, 노랑+파랑=<b>초록</b>, 파랑+빨강=<b>보라</b><br><b>3차색(Tertiary)</b>: 1차색+2차색 = 빨간주황, 노란초록 등</p><h4>색의 3요소</h4><p><b>색상(Hue)</b>: 색의 종류 (빨강, 파랑 등)<br><b>명도(Value)</b>: 밝기. 흰색을 섞으면 밝아지고(tint), 검정을 섞으면 어두워집니다(shade)<br><b>채도(Saturation)</b>: 색의 선명도. 채도가 높으면 생생하고, 낮으면 탁합니다.</p><h4>보색</h4><p>색상환에서 마주보는 색: 빨강↔초록, 파랑↔주황, 노랑↔보라. 보색을 나란히 놓으면 서로 더 선명하게 보입니다!</p>",
+    "examples": ["빨강+노랑=주황, 빨강+파랑=보라, 파랑+노랑=초록", "흰색+빨강=분홍(밝아짐), 검정+빨강=암적색(어두워짐)", "보색: 크리스마스 빨강+초록, 할로윈 주황+보라"],
+    "quiz": [
+      {"q": "색의 3원색이 아닌 것은?", "a": ["초록", "빨강", "노랑", "파랑"], "c": 0},
+      {"q": "빨강과 노랑을 섞으면?", "a": ["주황", "보라", "초록", "갈색"], "c": 0},
+      {"q": "빨강의 보색은?", "a": ["초록", "파랑", "노랑", "보라"], "c": 0}
+    ],
+    "tip": "집에 물감이 있다면 3원색(빨강, 노랑, 파랑)만으로 다양한 색을 만들어보세요. 섞는 비율에 따라 무한한 색이 탄생합니다!"
+  },
+  {
+    "subject": "미술",
+    "unit": "기초",
+    "topic": "선과 형태의 표현",
+    "level": 1,
+    "content": "<h3>선과 형태: 그림의 시작</h3><p>모든 그림은 <b>선(Line)</b>에서 시작됩니다. 연필 한 자루만 있으면 세상의 모든 것을 표현할 수 있습니다.</p><h4>선의 종류와 느낌</h4><p><b>직선(Straight Line)</b>: 딱딱하고 안정적 → 건물, 책상<br><b>곡선(Curved Line)</b>: 부드럽고 유연 → 구름, 꽃잎<br><b>지그재그선(Zigzag)</b>: 역동적이고 불안 → 번개, 산맥<br><b>굵은 선</b>: 강하고 무거운 느낌<br><b>가는 선</b>: 섬세하고 가벼운 느낌<br><b>점선</b>: 불확실하고 가벼운 느낌</p><h4>기본 도형으로 그리기</h4><p>복잡한 그림도 기본 도형의 조합입니다:<br><b>원(○)</b>: 머리, 사과, 해<br><b>세모(△)</b>: 지붕, 산, 나무<br><b>네모(□)</b>: 건물, 창문, 책<br><b>타원</b>: 얼굴, 잎사귀<br><b>사다리꼴</b>: 컵, 양동이</p><p>사람 그리기: 원(머리) + 길쭉한 네모(몸통) + 가는 네모(팔, 다리) → 세부 묘사</p><h4>명암으로 입체감 주기</h4><p>같은 원이라도 한쪽을 어둡게 칠하면 <b>공(구)</b>처럼 보입니다:<br>1. 빛이 오는 방향을 정합니다<br>2. 반대쪽을 점점 어둡게 칠합니다<br>3. 바닥에 그림자를 넣습니다</p>",
+    "examples": ["사람 = 원(머리) + 네모(몸) + 막대(팔다리)", "곡선은 부드러운 느낌, 직선은 딱딱한 느낌", "원 + 명암 = 입체적인 공"],
+    "quiz": [
+      {"q": "부드러운 느낌을 주는 선은?", "a": ["곡선", "직선", "지그재그선", "점선"], "c": 0},
+      {"q": "그림에 입체감을 주는 방법은?", "a": ["명암(밝기 차이)", "색 바꾸기", "크게 그리기", "선 두껍게 하기"], "c": 0},
+      {"q": "사람 얼굴을 그릴 때 기본 도형은?", "a": ["타원/원", "네모", "세모", "별"], "c": 0}
+    ],
+    "tip": "주변의 물건을 기본 도형(원, 세모, 네모)으로 분해해보세요. 컵=세모+타원, 집=네모+세모. 복잡한 것도 쉬워집니다!"
+  },
+  {
+    "subject": "미술",
+    "unit": "표현",
+    "topic": "다양한 미술 기법",
+    "level": 2,
+    "content": "<h3>미술 표현 기법: 다양한 재료와 방법</h3><h4>1. 수채화 (Watercolor)</h4><p>물을 많이 섞어 투명하고 부드러운 느낌을 냅니다. 물의 양으로 농담(진하기)을 조절합니다.<br><b>번지기 기법</b>: 젖은 종이에 물감을 떨어뜨리면 자연스럽게 퍼짐 → 하늘, 배경<br><b>겹치기 기법</b>: 마른 후에 덧칠하면 색이 겹쳐 깊이감 표현</p><h4>2. 콜라주 (Collage)</h4><p>종이, 천, 사진 등을 오려 붙여 작품을 만드는 기법입니다. 다양한 재료의 질감을 활용할 수 있어 창의적 표현에 좋습니다.</p><h4>3. 판화 (Print)</h4><p>판을 만들어 찍어내는 기법:<br><b>고무판화</b>: 고무에 파서 찍기 (초등학교에서 많이 함)<br><b>스텐실</b>: 틀을 만들어 위에 색 올리기</p><h4>4. 점묘법 (Pointillism)</h4><p>작은 점을 수없이 찍어 그림을 완성합니다. 멀리서 보면 점들이 섞여 하나의 색으로 보입니다. 인상파 화가 쇠라가 유명합니다.</p><h4>5. 데칼코마니 (Decalcomania)</h4><p>종이에 물감을 칠하고 반으로 접었다 펴면 좌우 대칭의 아름다운 무늬가 만들어집니다. 나비 날개 같은 무늬를 쉽게 만들 수 있습니다.</p>",
+    "examples": ["수채화 번지기: 하늘과 노을 표현에 적합", "콜라주: 잡지 오려붙여 포스터 만들기", "데칼코마니: 접었다 펴면 좌우대칭 무늬"],
+    "quiz": [
+      {"q": "종이를 반으로 접어 대칭 무늬를 만드는 기법은?", "a": ["데칼코마니", "콜라주", "점묘법", "판화"], "c": 0},
+      {"q": "작은 점을 찍어 그림을 완성하는 기법은?", "a": ["점묘법", "수채화", "콜라주", "스텐실"], "c": 0},
+      {"q": "다양한 재료를 오려 붙이는 기법은?", "a": ["콜라주", "판화", "데칼코마니", "점묘법"], "c": 0}
+    ],
+    "tip": "집에서 당장 해볼 수 있는 기법: 데칼코마니(물감+종이 접기), 콜라주(잡지+풀+가위). 재미있게 시작해보세요!"
+  },
+  {
+    "subject": "미술",
+    "unit": "감상",
+    "topic": "세계의 명화와 화가",
+    "level": 3,
+    "content": "<h3>세계 명화 여행: 시대별 대표 화가</h3><h4>르네상스 (14~16세기)</h4><p><b>레오나르도 다 빈치</b>: 모나리자(세계에서 가장 유명한 그림), 최후의 만찬. 과학자이자 발명가이기도 했습니다.<br><b>미켈란젤로</b>: 시스티나 성당 천장화, 다비드 조각상. 4년간 천장에 그림을 그렸습니다.</p><h4>인상주의 (19세기 후반)</h4><p><b>클로드 모네</b>: 수련, 인상 해돋이. 빛의 변화를 포착하여 같은 풍경을 여러 번 그렸습니다.<br><b>빈센트 반 고흐</b>: 별이 빛나는 밤, 해바라기. 살아생전 그림이 거의 팔리지 않았지만 지금은 가장 사랑받는 화가입니다.</p><h4>현대 미술 (20세기)</h4><p><b>파블로 피카소</b>: 게르니카, 아비뇽의 처녀들. 여러 각도에서 본 모습을 한 화면에 담는 입체파(큐비즘)를 창시했습니다.<br><b>앤디 워홀</b>: 캠벨 수프 캔, 마릴린 먼로. 대중문화를 미술에 접목한 팝 아트의 대표 작가입니다.</p><h4>한국의 화가</h4><p><b>김홍도</b>: 풍속화(씨름, 서당). 조선 시대 서민들의 생활을 생생하게 그렸습니다.<br><b>이중섭</b>: 황소, 아이들. 한국 근현대 미술의 대표 화가입니다.</p>",
+    "examples": ["모나리자: 미소의 비밀, 루브르 박물관 소장", "반 고흐: 생전 1점만 팔림 → 지금 한 작품에 수천억 원", "피카소: 한 얼굴에 정면과 옆면을 동시에 그림(큐비즘)"],
+    "quiz": [
+      {"q": "모나리자를 그린 화가는?", "a": ["레오나르도 다 빈치", "피카소", "모네", "반 고흐"], "c": 0},
+      {"q": "별이 빛나는 밤을 그린 화가는?", "a": ["반 고흐", "모네", "다 빈치", "피카소"], "c": 0},
+      {"q": "한국 조선시대 풍속화로 유명한 화가는?", "a": ["김홍도", "이중섭", "신윤복", "안견"], "c": 0}
+    ],
+    "tip": "구글 아트 앤 컬처(Google Arts & Culture)에서 세계 명화를 고해상도로 감상할 수 있어요. 붓의 결 하나하나까지 볼 수 있답니다!"
+  },
+  {
+    "subject": "미술",
+    "unit": "감상",
+    "topic": "미술사 흐름과 미술관 감상법",
+    "level": 3,
+    "content": "<h3>미술사의 흐름과 미술관 즐기기</h3><h4>미술사 타임라인</h4><p><b>고대 미술</b> (BC~5C): 동굴벽화, 이집트 벽화 → 기록과 종교 목적<br><b>중세 미술</b> (5~14C): 종교화 중심, 평면적 표현<br><b>르네상스</b> (14~16C): 인간 중심, 원근법 발견 → 다 빈치, 미켈란젤로<br><b>바로크</b> (17C): 화려하고 극적 → 렘브란트, 카라바조<br><b>인상주의</b> (19C 후반): 빛과 색 실험 → 모네, 르누아르<br><b>후기인상주의</b>: 개성 표현 → 반 고흐, 세잔, 고갱<br><b>현대미술</b> (20C~): 입체파(피카소), 추상(칸딘스키), 팝아트(워홀), 설치미술 등 다양화</p><h4>원근법의 발견</h4><p>르네상스 시대에 <b>원근법(Perspective)</b>이 발견되면서 그림이 입체적으로 변했습니다:<br>1. 멀리 있는 것은 <b>작게</b> 그린다<br>2. 멀리 있는 것은 <b>흐리게</b> 표현한다<br>3. 평행선은 하나의 점(<b>소실점</b>)으로 모인다</p><h4>미술관 감상법</h4><p>1. <b>첫인상</b>: 작품을 보고 느낀 감정을 먼저 느끼기<br>2. <b>관찰</b>: 색, 선, 형태, 구도를 자세히 보기<br>3. <b>해석</b>: 작가가 무엇을 표현하려 했을까?<br>4. <b>맥락</b>: 작품 옆의 설명을 읽고 시대배경 이해하기<br>5. <b>비교</b>: 같은 시대 다른 작가, 또는 같은 주제 다른 시대의 작품과 비교하기</p>",
+    "examples": ["원근법: 도로가 먼 곳에서 한 점으로 모이는 것", "동굴벽화(3만년 전) → 모나리자(500년 전) → 팝아트(60년 전)", "미술관에서: 느끼기 → 관찰하기 → 해석하기 → 비교하기"],
+    "quiz": [
+      {"q": "원근법이 발견된 시대는?", "a": ["르네상스", "중세", "고대", "현대"], "c": 0},
+      {"q": "빛과 색의 변화를 포착한 미술 사조는?", "a": ["인상주의", "바로크", "입체파", "팝아트"], "c": 0},
+      {"q": "미술관 감상의 첫 단계로 가장 좋은 것은?", "a": ["작품을 보고 느낀 감정 느끼기", "설명문 먼저 읽기", "사진 찍기", "다음 작품으로 이동"], "c": 0}
+    ],
+    "tip": "미술관에 갈 때 좋아하는 작품 3개만 골라서 오래 보세요. 100개를 훑어보는 것보다 3개를 깊이 보는 것이 훨씬 기억에 남습니다!"
+  },
+
+  {
+    "subject": "사회",
+    "unit": "기초",
+    "topic": "우리 가족과 이웃",
+    "level": 1,
+    "content": "<h3>가족과 이웃: 가장 가까운 사회</h3><p>사람은 혼자서 살 수 없습니다. 태어나면서부터 <b>가족</b>이라는 작은 사회에서 생활하기 시작합니다.</p><h4>가족의 종류</h4><p><b>핵가족</b>: 부모와 자녀로 이루어진 가족 (오늘날 가장 많은 형태)<br><b>대가족</b>: 할아버지, 할머니, 부모, 자녀가 함께 사는 가족<br><b>한부모가족</b>: 엄마 또는 아빠와 자녀로 이루어진 가족<br><b>다문화가족</b>: 서로 다른 나라의 문화가 만난 가족<br><b>조손가족</b>: 조부모와 손자녀가 함께 사는 가족<br>모든 가족의 형태는 소중하며, 중요한 것은 서로 <b>사랑하고 존중</b>하는 것입니다.</p><h4>가족 구성원의 역할</h4><p>가족 안에서 각자의 역할이 있습니다. 어른들은 생활비를 벌고, 아이들은 공부하며, 모두 함께 집안일을 나누어 합니다. 역할은 고정된 것이 아니라 서로 도우며 유연하게 변할 수 있습니다.</p><h4>이웃과 공동체</h4><p>집 밖으로 나가면 <b>이웃</b>을 만납니다. 같은 아파트, 같은 동네에 사는 사람들이 이웃입니다.<br>이웃과 인사하고, 어려울 때 서로 돕고, 공공시설을 함께 사용하며 <b>공동체</b>를 이룹니다.<br>쓰레기 분리배출, 소음 줄이기, 인사하기 등 작은 배려가 살기 좋은 동네를 만듭니다.</p>",
+    "examples": ["핵가족: 엄마+아빠+나+동생", "이웃 배려: 층간소음 줄이기, 인사하기", "공동체: 동네 청소, 김장 나누기"],
+    "quiz": [
+      {"q": "부모와 자녀로 이루어진 가족을 무엇이라 하나요?", "a": ["핵가족", "대가족", "조손가족", "한부모가족"], "c": 0},
+      {"q": "이웃과 함께 살 때 중요한 것은?", "a": ["서로 배려하기", "혼자만 잘 살기", "경쟁하기", "무시하기"], "c": 0},
+      {"q": "모든 가족 형태에서 가장 중요한 것은?", "a": ["사랑과 존중", "많은 식구", "큰 집", "많은 돈"], "c": 0}
+    ],
+    "tip": "오늘 가족에게 '고마워'라고 말해보세요. 이웃에게 먼저 인사도 해보세요. 작은 실천이 따뜻한 사회를 만듭니다!"
+  },
+  {
+    "subject": "사회",
+    "unit": "기초",
+    "topic": "학교와 학교생활",
+    "level": 1,
+    "content": "<h3>학교: 배움과 성장의 공간</h3><p><b>학교</b>는 공부뿐만 아니라 사회생활을 배우는 중요한 장소입니다. 친구를 사귀고, 규칙을 배우고, 함께 생활하는 법을 익힙니다.</p><h4>학교에서 만나는 사람들</h4><p><b>선생님</b>: 지식을 가르치고 학생을 이끌어주는 분<br><b>친구</b>: 함께 배우고 놀고 성장하는 동료<br><b>교장/교감 선생님</b>: 학교 전체를 관리하시는 분<br><b>영양사/조리사</b>: 급식을 준비해주시는 분<br><b>행정실 직원</b>: 학교 운영을 돕는 분</p><h4>학교 규칙을 지키는 이유</h4><p>1. 모든 학생이 <b>안전</b>하게 생활하기 위해<br>2. 서로의 <b>학습권</b>을 존중하기 위해 (수업 중 떠들면 다른 친구가 못 들음)<br>3. <b>공공물품</b>을 소중히 사용하기 위해</p><h4>학교에서 배우는 것</h4><p><b>교과 학습</b>: 국어, 수학, 과학, 사회, 영어, 음악, 미술, 체육 등<br><b>사회성</b>: 친구와 협력하기, 차례 지키기, 갈등 해결하기<br><b>자율성</b>: 스스로 공부 계획 세우기, 시간 관리하기<br><b>인성</b>: 정직, 배려, 책임감, 존중</p><p>학교는 작은 사회입니다. 여기서 배운 규칙과 태도가 어른이 되어서도 사회에서 잘 살아가는 기초가 됩니다.</p>",
+    "examples": ["학교 규칙: 복도에서 뛰지 않기, 수업 시간 지키기", "사회성: 조별 활동에서 역할 분담하기", "자율성: 스스로 숙제 계획 세우기"],
+    "quiz": [
+      {"q": "학교에서 규칙을 지키는 가장 중요한 이유는?", "a": ["모두의 안전과 학습권 보호", "벌을 받지 않으려고", "선생님이 시키니까", "상을 받으려고"], "c": 0},
+      {"q": "학교에서 배우는 것이 아닌 것은?", "a": ["돈 버는 방법", "교과 지식", "사회성", "규칙 지키기"], "c": 0},
+      {"q": "학교는 무엇에 비유할 수 있나요?", "a": ["작은 사회", "큰 놀이터", "경쟁장", "수용소"], "c": 0}
+    ],
+    "tip": "학교에서 힘든 일이 있을 때는 혼자 고민하지 말고 선생님이나 부모님께 이야기하세요. 도움을 요청하는 것도 중요한 능력입니다!"
+  },
+  {
+    "subject": "사회",
+    "unit": "사회",
+    "topic": "지역사회와 공공기관",
+    "level": 2,
+    "content": "<h3>우리 동네의 공공기관</h3><p><b>지역사회</b>는 우리가 살고 있는 동네, 도시, 지역을 말합니다. 지역사회에는 주민들의 생활을 돕는 다양한 <b>공공기관</b>이 있습니다.</p><h4>주요 공공기관과 역할</h4><p><b>시청/구청/동사무소(주민센터)</b>: 주민등록, 민원 처리, 지역 행정<br><b>경찰서/파출소</b>: 범죄 예방, 교통 관리, 시민 보호 (신고: 112)<br><b>소방서</b>: 화재 진압, 인명 구조, 응급 구조 (신고: 119)<br><b>병원/보건소</b>: 진료, 예방접종, 건강 관리<br><b>우체국</b>: 우편물 배달, 택배, 금융 서비스<br><b>도서관</b>: 책 대출, 독서 공간, 문화 프로그램<br><b>학교</b>: 교육, 학생 건강 관리</p><h4>공공시설</h4><p><b>공원</b>: 주민들의 휴식과 운동 공간<br><b>체육관/수영장</b>: 건강과 체력 증진<br><b>문화센터</b>: 다양한 취미와 교육 프로그램<br><b>대중교통(버스, 지하철)</b>: 시민들의 이동 수단</p><h4>세금과 공공서비스</h4><p>이 모든 공공기관과 시설은 주민들이 내는 <b>세금</b>으로 운영됩니다. 세금은 도로를 만들고, 소방관을 고용하고, 학교를 운영하는 데 사용됩니다. 그래서 공공시설을 깨끗하게 사용하고 소중히 여기는 것이 중요합니다.</p>",
+    "examples": ["112 = 경찰, 119 = 소방/구급", "세금 → 도로, 학교, 소방서 운영", "도서관: 누구나 무료로 책을 빌릴 수 있는 곳"],
+    "quiz": [
+      {"q": "불이 났을 때 전화해야 하는 번호는?", "a": ["119", "112", "114", "120"], "c": 0},
+      {"q": "공공기관이 운영되는 재원은?", "a": ["세금", "기부금", "입장료", "벌금"], "c": 0},
+      {"q": "주민등록이나 민원을 처리하는 곳은?", "a": ["주민센터(동사무소)", "경찰서", "우체국", "도서관"], "c": 0}
+    ],
+    "tip": "동네를 산책하면서 공공기관을 찾아보세요. 주민센터, 파출소, 도서관이 어디에 있는지 알면 필요할 때 바로 찾아갈 수 있어요!"
+  },
+  {
+    "subject": "사회",
+    "unit": "사회",
+    "topic": "우리나라의 정치와 민주주의",
+    "level": 3,
+    "content": "<h3>대한민국의 민주주의</h3><p><b>민주주의</b>란 국민이 나라의 주인이 되어 스스로 다스리는 정치 체제입니다. 대한민국 헌법 제1조는 \"대한민국은 민주공화국이다. 대한민국의 주권은 국민에게 있고, 모든 권력은 국민으로부터 나온다\"고 명시합니다.</p><h4>3권 분립</h4><p>권력이 한 곳에 집중되면 독재가 될 수 있으므로, 세 곳으로 나누어 서로 감시합니다:<br><b>입법부(국회)</b>: 법을 만드는 곳. 국회의원들이 국민을 대표하여 법률을 제정합니다.<br><b>행정부(정부)</b>: 법을 실행하는 곳. 대통령을 중심으로 정부 부처가 정책을 시행합니다.<br><b>사법부(법원)</b>: 법에 따라 판단하는 곳. 법관이 분쟁을 해결하고 정의를 실현합니다.</p><h4>선거와 참여</h4><p><b>선거</b>는 국민이 대표를 뽑는 가장 중요한 참여 방법입니다.<br>대통령 선거: 5년마다 / 국회의원 선거: 4년마다 / 지방선거: 4년마다<br>만 18세 이상이면 투표할 수 있습니다.</p><h4>시민의 권리와 의무</h4><p><b>권리</b>: 자유권(말할 자유, 종교 자유), 평등권, 참정권(투표할 권리), 교육받을 권리<br><b>의무</b>: 납세(세금), 국방(군 복무), 교육(학교 다니기), 근로</p>",
+    "examples": ["국회 = 법 만드는 곳, 정부 = 법 실행하는 곳, 법원 = 법 판단하는 곳", "선거: 18세 이상 투표 → 대표 선출", "헌법 1조: 대한민국은 민주공화국이다"],
+    "quiz": [
+      {"q": "법을 만드는 곳은?", "a": ["국회(입법부)", "정부(행정부)", "법원(사법부)", "군대"], "c": 0},
+      {"q": "대한민국의 대통령 임기는?", "a": ["5년", "4년", "6년", "3년"], "c": 0},
+      {"q": "3권 분립의 목적은?", "a": ["권력 집중 방지", "일을 빨리 하기 위해", "돈을 아끼기 위해", "군대를 강하게 하기 위해"], "c": 0}
+    ],
+    "tip": "뉴스에서 국회, 정부, 법원 관련 소식을 찾아보세요. '이것은 3권 중 어디에 해당할까?' 생각하면 민주주의를 쉽게 이해할 수 있어요!"
+  },
+  {
+    "subject": "사회",
+    "unit": "세계",
+    "topic": "세계의 다양한 문화와 국제기구",
+    "level": 3,
+    "content": "<h3>하나의 지구, 다양한 문화</h3><p>지구에는 약 200개 나라, 80억 명의 사람이 살고 있습니다. 각 나라마다 고유한 <b>언어, 음식, 의복, 축제, 종교</b>가 있습니다.</p><h4>세계의 다양한 인사</h4><p><b>한국</b>: 안녕하세요 (고개 숙여 인사)<br><b>일본</b>: 곤니치와 (허리를 굽혀 인사)<br><b>인도</b>: 나마스테 (합장하며 인사)<br><b>뉴질랜드 마오리족</b>: 홍이 (코를 맞대는 인사)<br><b>프랑스</b>: 봉주르 (볼에 키스 인사)</p><h4>세계의 대표 축제</h4><p><b>브라질 카니발</b>: 삼바 춤과 화려한 퍼레이드<br><b>인도 홀리축제</b>: 온몸에 색가루를 뿌리며 축하<br><b>스페인 토마토축제</b>: 토마토를 던지며 즐기는 축제<br><b>한국 추석</b>: 한가위, 송편 빚기와 성묘</p><h4>국제기구</h4><p><b>유엔(UN)</b>: 국제 평화와 안보. 총 193개국 가입<br><b>유니세프(UNICEF)</b>: 전 세계 어린이 보호와 지원<br><b>유네스코(UNESCO)</b>: 교육, 과학, 문화 분야 국제 협력<br><b>WHO(세계보건기구)</b>: 전 세계 질병 예방과 건강 증진<br><b>적십자(Red Cross)</b>: 전쟁과 재난 시 인도적 지원</p><h4>세계 시민의 자세</h4><p>다른 문화를 <b>존중</b>하고, 지구 환경을 <b>보호</b>하며, 어려운 나라를 <b>돕는</b> 것이 세계 시민의 역할입니다.</p>",
+    "examples": ["유엔(UN): 193개국이 가입한 세계 최대 국제기구", "홀리축제(인도): 색가루를 뿌리며 봄을 축하", "세계 시민: 다른 문화 존중 + 환경 보호 + 국제 협력"],
+    "quiz": [
+      {"q": "전 세계 어린이를 보호하는 국제기구는?", "a": ["유니세프(UNICEF)", "유엔(UN)", "WHO", "유네스코(UNESCO)"], "c": 0},
+      {"q": "인도의 전통 인사는?", "a": ["나마스테(합장)", "봉주르(볼 키스)", "홍이(코 맞대기)", "악수"], "c": 0},
+      {"q": "세계 시민의 태도로 적절하지 않은 것은?", "a": ["다른 문화를 무시한다", "환경을 보호한다", "어려운 나라를 돕는다", "다양성을 존중한다"], "c": 0}
+    ],
+    "tip": "세계 여러 나라의 인사를 배워보세요! 다른 문화를 이해하는 첫걸음은 그 나라의 인사를 아는 것입니다."
+  }
+]

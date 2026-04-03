@@ -1,0 +1,182 @@
+[
+  {
+    "subject": "영어",
+    "unit": "일상회화",
+    "topic": "자기소개",
+    "level": 1,
+    "content": "<h3>영어로 자기소개하기</h3><p>영어 회화의 첫걸음은 <b>자기소개(Self-Introduction)</b>입니다. 새로운 사람을 만났을 때, 자연스럽게 자신을 소개할 수 있으면 자신감이 생깁니다.</p><h4>기본 인사와 이름</h4><p>처음 만난 사람에게는 <b>\"Hi, I'm [이름]. Nice to meet you.\"</b>라고 합니다. 격식 있는 자리에서는 <b>\"Hello, my name is [이름]. It's a pleasure to meet you.\"</b>가 더 적절합니다.</p><h4>직업과 출신 소개</h4><p>직업은 <b>\"I work at [회사] as a [직책].\"</b> 또는 <b>\"I'm a [직업].\"</b>으로 표현합니다. 출신지는 <b>\"I'm from [도시/나라].\"</b>로 말합니다. 한국 출신이라면 \"I'm from Korea\" 또는 \"I'm from Seoul, Korea\"라고 합니다.</p><h4>취미와 관심사</h4><p>취미를 말할 때는 <b>\"I like [동사-ing].\"</b> 또는 <b>\"I enjoy [동사-ing].\"</b>를 사용합니다. 예를 들어 \"I like playing games and reading books.\"처럼요. 마무리는 <b>\"Nice talking to you!\"</b>로 자연스럽게 합니다.</p>",
+    "examples": [
+      "Hi, I'm Byeongseok. Nice to meet you.",
+      "I'm from Seoul, Korea. I work as a trader.",
+      "I enjoy coding and playing golf in my free time."
+    ],
+    "quiz": [
+      {"q": "처음 만난 사람에게 하는 인사 표현은?", "a": ["Nice to meet you.", "See you later.", "Long time no see.", "Take care."], "c": 0},
+      {"q": "\"나는 한국 출신이다\"를 영어로?", "a": ["I'm from Korea.", "I'm at Korea.", "I'm in Korea.", "I'm to Korea."], "c": 0},
+      {"q": "취미를 말할 때 알맞은 표현은?", "a": ["I enjoy reading.", "I enjoy read.", "I enjoy to read.", "I enjoy reads."], "c": 0}
+    ],
+    "tip": "거울 앞에서 자기소개를 영어로 연습해보세요. 30초 안에 핵심만 말하는 게 포인트!"
+  },
+  {
+    "subject": "영어",
+    "unit": "일상회화",
+    "topic": "숫자와시간",
+    "level": 1,
+    "content": "<h3>숫자와 시간 표현</h3><p>숫자와 시간은 일상에서 가장 자주 쓰이는 영어 표현입니다. 가격, 전화번호, 약속 시간 등 어디서나 필요합니다.</p><h4>기본 숫자 읽기</h4><p>1~12는 one부터 twelve까지 각각 고유한 이름이 있습니다. 13~19는 <b>-teen</b>이 붙고, 20~90의 십의 자리는 <b>-ty</b>가 붙습니다. 100은 <b>one hundred</b>, 1,000은 <b>one thousand</b>입니다. 큰 숫자는 세 자리씩 끊어 읽습니다.</p><h4>시간 말하기</h4><p>시간은 <b>\"It's + 시 + 분\"</b>으로 말합니다. 3시 15분은 \"It's three fifteen\" 또는 \"It's quarter past three\"입니다. 30분은 <b>half past</b>, 15분은 <b>quarter past</b>, 45분은 <b>quarter to (다음 시)</b>로 표현합니다.</p><h4>날짜와 요일</h4><p>날짜는 <b>서수(ordinal)</b>로 읽습니다. March 28th는 \"March twenty-eighth\"입니다. 요일은 Monday부터 Sunday까지, 월은 January부터 December까지입니다. 미국식은 월/일/년, 영국식은 일/월/년 순서입니다.</p>",
+    "examples": [
+      "It's half past two. (2시 30분)",
+      "The meeting is at quarter to five. (4시 45분)",
+      "My birthday is on October third."
+    ],
+    "quiz": [
+      {"q": "2시 30분을 영어로 말하면?", "a": ["It's half past two.", "It's two half.", "It's half two past.", "It's thirty two."], "c": 0},
+      {"q": "숫자 15를 영어로?", "a": ["fifteen", "fiveteen", "fiften", "fifty"], "c": 0},
+      {"q": "시간에서 quarter는 몇 분을 의미하나?", "a": ["15분", "30분", "45분", "10분"], "c": 0}
+    ],
+    "tip": "영어 숫자가 바로 나오지 않으면, 매일 전화번호나 가격을 영어로 읽는 습관을 들여보세요!"
+  },
+  {
+    "subject": "영어",
+    "unit": "일상회화",
+    "topic": "쇼핑영어",
+    "level": 2,
+    "content": "<h3>쇼핑할 때 쓰는 영어</h3><p>해외여행이나 온라인 쇼핑에서 유용한 <b>쇼핑 영어 표현</b>을 배워봅시다. 기본적인 문장 패턴만 알면 자신 있게 쇼핑할 수 있습니다.</p><h4>물건 찾기와 질문</h4><p>원하는 물건을 찾을 때는 <b>\"Do you have [물건]?\"</b> 또는 <b>\"I'm looking for [물건].\"</b>을 사용합니다. 가격을 물을 때는 <b>\"How much is this?\"</b>, 다른 사이즈/색상은 <b>\"Do you have this in [size/color]?\"</b>로 묻습니다.</p><h4>입어보기와 결정</h4><p>옷을 입어보고 싶을 때는 <b>\"Can I try this on?\"</b>이라고 합니다. 마음에 들면 <b>\"I'll take this.\"</b> 또는 <b>\"I'll take it.\"</b>으로 구매 의사를 밝힙니다. 고민 중이면 <b>\"I'm just browsing, thanks.\"</b>라고 하면 됩니다.</p><h4>결제와 할인</h4><p>결제할 때 <b>\"Can I pay by card?\"</b> 또는 <b>\"Do you accept credit cards?\"</b>를 씁니다. 할인을 물을 때는 <b>\"Is this on sale?\"</b>, 영수증은 <b>\"Can I get a receipt, please?\"</b>입니다. 환불은 <b>\"I'd like to return this.\"</b>로 요청합니다.</p>",
+    "examples": [
+      "Excuse me, I'm looking for a jacket in size medium.",
+      "How much is this bag? — It's $45.",
+      "Can I try this on? — Sure, the fitting room is over there."
+    ],
+    "quiz": [
+      {"q": "가격을 물을 때 올바른 표현은?", "a": ["How much is this?", "How many is this?", "What cost is this?", "How price is this?"], "c": 0},
+      {"q": "\"그냥 구경 중이에요\"를 영어로?", "a": ["I'm just browsing.", "I'm just watching.", "I'm just seeing.", "I'm just viewing."], "c": 0},
+      {"q": "카드 결제 가능 여부를 묻는 표현은?", "a": ["Can I pay by card?", "Can I use money?", "Is card OK?", "Do you have card?"], "c": 0}
+    ],
+    "tip": "쇼핑할 때 가장 중요한 세 문장: How much? / Can I try this on? / I'll take it!"
+  },
+  {
+    "subject": "영어",
+    "unit": "일상회화",
+    "topic": "식당영어",
+    "level": 2,
+    "content": "<h3>식당에서 쓰는 영어</h3><p>해외 식당에서 <b>주문부터 계산까지</b> 당황하지 않고 영어로 소통하는 방법을 배워봅시다. 핵심 표현만 익히면 어떤 식당에서도 문제없습니다.</p><h4>입장과 자리 안내</h4><p>식당에 들어가면 직원이 <b>\"How many?\"</b>(몇 분이세요?) 또는 <b>\"Do you have a reservation?\"</b>(예약하셨나요?)라고 물을 수 있습니다. 2명이면 <b>\"Table for two, please.\"</b>라고 답합니다.</p><h4>메뉴 주문하기</h4><p>주문할 준비가 되면 <b>\"I'd like [메뉴], please.\"</b> 또는 <b>\"Can I have [메뉴]?\"</b>를 사용합니다. 추천을 물을 때는 <b>\"What do you recommend?\"</b>, 특정 재료 알레르기가 있으면 <b>\"Does this contain [재료]?\"</b>로 확인합니다.</p><h4>추가 요청과 계산</h4><p>물은 <b>\"Can I have some water, please?\"</b>, 냅킨 등 추가 요청은 <b>\"Could I get some [물건]?\"</b>를 씁니다. 계산서는 <b>\"Can I get the check, please?\"</b> 또는 <b>\"Bill, please.\"</b>로 요청합니다. 팁 문화가 있는 나라에서는 보통 15~20%를 남깁니다.</p>",
+    "examples": [
+      "I'd like a steak, medium rare, please.",
+      "What do you recommend for dessert?",
+      "Can I get the check, please? — Sure, I'll be right back."
+    ],
+    "quiz": [
+      {"q": "식당에서 주문할 때 올바른 표현은?", "a": ["I'd like a coffee, please.", "I want coffee, give me.", "Coffee, now.", "Make me a coffee."], "c": 0},
+      {"q": "계산서를 요청하는 표현은?", "a": ["Can I get the check?", "Give me money paper.", "Where is pay?", "I want to pay money."], "c": 0},
+      {"q": "추천 메뉴를 물을 때는?", "a": ["What do you recommend?", "What is good food?", "Tell me best.", "Which is delicious?"], "c": 0}
+    ],
+    "tip": "미국에서는 check, 영국에서는 bill이라고 합니다. 둘 다 알아두면 편해요!"
+  },
+  {
+    "subject": "영어",
+    "unit": "일상회화",
+    "topic": "감정표현",
+    "level": 2,
+    "content": "<h3>감정을 영어로 표현하기</h3><p>기쁨, 슬픔, 놀라움, 화남 등 <b>감정을 영어로 자연스럽게 표현</b>하는 것은 진정한 의사소통의 핵심입니다. 다양한 감정 표현을 익혀봅시다.</p><h4>긍정적 감정</h4><p><b>기쁨</b>: \"I'm so happy!\" \"I'm thrilled!\" \"That's wonderful!\" <b>감사</b>: \"I really appreciate it.\" \"That means a lot to me.\" <b>흥분</b>: \"I'm so excited!\" \"I can't wait!\" 정도의 강도를 나타내려면 <b>so, really, extremely, absolutely</b> 같은 강조 부사를 활용합니다.</p><h4>부정적 감정</h4><p><b>슬픔</b>: \"I feel sad.\" \"I'm disappointed.\" <b>걱정</b>: \"I'm worried about [주제].\" \"I'm concerned.\" <b>화남</b>: \"I'm upset.\" \"I'm frustrated.\" angry보다 upset이나 frustrated가 더 부드러운 표현입니다.</p><h4>놀라움과 공감</h4><p><b>놀라움</b>: \"No way!\" \"Are you serious?\" \"I can't believe it!\" <b>공감</b>: \"I understand how you feel.\" \"That must be tough.\" \"I'm sorry to hear that.\" 상대방의 감정에 공감하는 표현은 대화를 깊게 만들어줍니다.</p>",
+    "examples": [
+      "I'm so excited about the trip! I can't wait!",
+      "I'm a bit worried about the exam tomorrow.",
+      "That must be really tough. I'm sorry to hear that."
+    ],
+    "quiz": [
+      {"q": "\"정말 기대돼!\"에 가장 가까운 영어 표현은?", "a": ["I'm so excited!", "I'm so happy!", "I'm so good!", "I'm so nice!"], "c": 0},
+      {"q": "상대방에게 공감할 때 쓰는 표현은?", "a": ["That must be tough.", "That is your problem.", "I don't care.", "So what?"], "c": 0},
+      {"q": "angry보다 부드러운 '화남' 표현은?", "a": ["upset", "furious", "mad", "rage"], "c": 0}
+    ],
+    "tip": "감정 표현은 표정과 억양이 중요해요. 미드나 영화에서 배우들의 표현을 따라해보세요!"
+  },
+  {
+    "subject": "영어",
+    "unit": "영문법기초",
+    "topic": "be동사",
+    "level": 1,
+    "content": "<h3>be동사 완전 정복</h3><p><b>be동사</b>는 영어에서 가장 기본이면서 가장 많이 쓰이는 동사입니다. \"~이다\", \"~있다\", \"~한 상태이다\"를 표현할 때 사용합니다.</p><h4>be동사의 형태</h4><p>주어에 따라 형태가 변합니다. <b>I → am</b>, <b>You/We/They → are</b>, <b>He/She/It → is</b>입니다. 과거형은 <b>was(I/He/She/It)</b>와 <b>were(You/We/They)</b>로 바뀝니다.</p><h4>be동사의 역할</h4><p><b>1) 신분/정체</b>: \"I am a student.\" (나는 학생이다) <b>2) 상태/감정</b>: \"She is happy.\" (그녀는 행복하다) <b>3) 위치</b>: \"The book is on the table.\" (책이 테이블 위에 있다)</p><h4>부정문과 의문문</h4><p>부정문은 be동사 뒤에 <b>not</b>을 붙입니다. \"I am not tired.\" \"She is not here.\" 축약형은 <b>isn't, aren't, wasn't, weren't</b>입니다. 의문문은 <b>be동사를 주어 앞으로</b> 보냅니다. \"Is she happy?\" \"Are you ready?\" 대답은 \"Yes, I am.\" / \"No, I'm not.\"입니다.</p>",
+    "examples": [
+      "I am a developer. (나는 개발자이다)",
+      "They are not ready yet. (그들은 아직 준비가 안 됐다)",
+      "Is he your brother? — Yes, he is."
+    ],
+    "quiz": [
+      {"q": "\"She ___ a teacher.\" 빈칸에 알맞은 것은?", "a": ["is", "am", "are", "be"], "c": 0},
+      {"q": "be동사 의문문은 어떻게 만드나?", "a": ["be동사를 주어 앞으로", "do를 앞에 붙인다", "주어 뒤에 ?를 붙인다", "not을 앞에 붙인다"], "c": 0},
+      {"q": "is not의 축약형은?", "a": ["isn't", "is'nt", "isnt'", "in't"], "c": 0}
+    ],
+    "tip": "be동사는 주어와 세트로 외우세요! I am, You are, He is — 리듬처럼 반복하면 자연스러워집니다."
+  },
+  {
+    "subject": "영어",
+    "unit": "영문법기초",
+    "topic": "일반동사",
+    "level": 2,
+    "content": "<h3>일반동사 사용법</h3><p><b>일반동사</b>는 be동사를 제외한 모든 동사를 말합니다. eat, go, study, play, work 등 구체적인 <b>동작이나 상태</b>를 나타냅니다.</p><h4>현재형 규칙</h4><p>주어가 <b>3인칭 단수(He/She/It)</b>일 때 동사 뒤에 <b>-s 또는 -es</b>를 붙입니다. \"I play\" → \"He play<b>s</b>\". -ch, -sh, -s, -x, -o로 끝나면 <b>-es</b>를 붙입니다. \"She watch<b>es</b> TV.\" 자음+y로 끝나면 y를 i로 바꾸고 -es를 붙입니다. \"He stud<b>ies</b>.\"</p><h4>부정문: do/does + not</h4><p>일반동사의 부정문은 <b>do not(don't)</b> 또는 <b>does not(doesn't)</b>을 동사 앞에 넣습니다. \"I don't like coffee.\" \"She doesn't eat meat.\" <b>주의</b>: doesn't 뒤에는 동사원형을 씁니다!</p><h4>의문문: Do/Does + 주어 + 동사원형?</h4><p>\"Do you speak English?\" \"Does she work here?\" 대답은 \"Yes, I do.\" / \"No, she doesn't.\"입니다. be동사와 달리 <b>do/does</b>가 조동사 역할을 합니다.</p>",
+    "examples": [
+      "She studies English every day.",
+      "I don't drink coffee in the evening.",
+      "Does he play soccer? — Yes, he does."
+    ],
+    "quiz": [
+      {"q": "\"She ___ to school.\" 빈칸에 알맞은 것은?", "a": ["goes", "go", "going", "gos"], "c": 0},
+      {"q": "일반동사 부정문에서 사용하는 조동사는?", "a": ["do/does", "be/is", "have/has", "can/will"], "c": 0},
+      {"q": "doesn't 뒤에 오는 동사의 형태는?", "a": ["동사원형", "동사+s", "동사+ing", "과거형"], "c": 0}
+    ],
+    "tip": "3인칭 단수 -s를 자꾸 빠뜨린다면, 주어를 먼저 확인하는 습관을 들이세요!"
+  },
+  {
+    "subject": "영어",
+    "unit": "영문법시제",
+    "topic": "과거시제",
+    "level": 3,
+    "content": "<h3>과거시제로 지난 일 말하기</h3><p><b>과거시제(Past Tense)</b>는 이미 끝난 일이나 과거의 상태를 표현할 때 사용합니다. 영어에서 과거를 나타내는 가장 기본적인 시제입니다.</p><h4>규칙 변화</h4><p>대부분의 동사는 뒤에 <b>-ed</b>를 붙여 과거형을 만듭니다. \"play → played\", \"work → worked\". -e로 끝나면 <b>-d</b>만 붙입니다. \"like → liked\". 자음+y로 끝나면 y를 i로 바꾸고 -ed를 붙입니다. \"study → studied\".</p><h4>불규칙 변화</h4><p>자주 쓰는 동사 중 많은 것이 불규칙입니다. <b>go → went, eat → ate, see → saw, have → had, make → made, take → took, come → came, get → got</b> 등은 통째로 외워야 합니다.</p><h4>부정문과 의문문</h4><p>과거시제 부정문은 <b>didn't + 동사원형</b>입니다. \"I didn't go.\" \"She didn't call.\" 의문문은 <b>Did + 주어 + 동사원형?</b>입니다. \"Did you eat lunch?\" \"Did he come yesterday?\" didn't/Did 뒤에는 반드시 <b>동사원형</b>을 씁니다.</p>",
+    "examples": [
+      "I visited my grandparents last weekend.",
+      "She didn't finish her homework yesterday.",
+      "Did you watch the movie? — Yes, I did."
+    ],
+    "quiz": [
+      {"q": "go의 과거형은?", "a": ["went", "goed", "gone", "goes"], "c": 0},
+      {"q": "과거시제 의문문의 올바른 형태는?", "a": ["Did you eat?", "Did you ate?", "Do you ate?", "Were you eat?"], "c": 0},
+      {"q": "study의 과거형은?", "a": ["studied", "studyed", "studyd", "studies"], "c": 0}
+    ],
+    "tip": "불규칙 동사는 매일 10개씩 소리 내어 읽으면서 외우세요. go-went-gone 세트로 기억하면 효과적!"
+  },
+  {
+    "subject": "영어",
+    "unit": "영문법시제",
+    "topic": "미래시제",
+    "level": 3,
+    "content": "<h3>미래시제로 계획과 예측 말하기</h3><p><b>미래시제(Future Tense)</b>는 앞으로 일어날 일이나 계획, 의지, 예측을 표현할 때 사용합니다. 영어에서 미래를 표현하는 방법은 크게 두 가지입니다.</p><h4>will + 동사원형</h4><p><b>will</b>은 그 자리에서 결정한 일, 예측, 약속을 나타냅니다. \"I will help you.\" (내가 도와줄게 — 즉석 결정) \"It will rain tomorrow.\" (내일 비가 올 거야 — 예측) 부정문은 <b>will not(won't)</b>, 의문문은 <b>Will + 주어 + 동사원형?</b>입니다.</p><h4>be going to + 동사원형</h4><p><b>be going to</b>는 이미 계획된 일이나 확실한 예측에 사용합니다. \"I'm going to study abroad next year.\" (내년에 유학 갈 거야 — 이미 계획됨) \"Look at those clouds! It's going to rain.\" (구름 좀 봐! 비 올 거야 — 근거 있는 예측)</p><h4>will vs be going to 비교</h4><p>즉석 결정은 <b>will</b>, 사전 계획은 <b>be going to</b>를 사용하는 것이 자연스럽습니다. 다만 일상회화에서는 혼용되기도 합니다. 확실한 예측(근거 있음)은 be going to, 불확실한 예측(추측)은 will이 더 적합합니다.</p>",
+    "examples": [
+      "I will call you later tonight.",
+      "We're going to move to a new apartment next month.",
+      "Will you come to the party? — Yes, I will."
+    ],
+    "quiz": [
+      {"q": "이미 계획된 일을 말할 때 더 적합한 표현은?", "a": ["be going to", "will", "shall", "can"], "c": 0},
+      {"q": "will not의 축약형은?", "a": ["won't", "willn't", "wouldn't", "willt"], "c": 0},
+      {"q": "\"나 내일 공부할 거야(즉석 결정)\"에 알맞은 것은?", "a": ["I will study tomorrow.", "I am going to study tomorrow.", "I studied tomorrow.", "I study tomorrow."], "c": 0}
+    ],
+    "tip": "will과 be going to를 구분하는 핵심: 즉석 결정이면 will, 이미 마음먹었으면 be going to!"
+  },
+  {
+    "subject": "영어",
+    "unit": "영문법시제",
+    "topic": "현재진행",
+    "level": 3,
+    "content": "<h3>현재진행형으로 지금 하는 일 표현하기</h3><p><b>현재진행형(Present Continuous)</b>은 지금 이 순간 진행 중인 동작을 표현할 때 사용합니다. <b>be동사 + 동사-ing</b> 형태로 만듭니다.</p><h4>형태 만들기</h4><p><b>I am studying. / She is reading. / They are playing.</b> -ing를 붙이는 규칙: 대부분의 동사는 그냥 -ing를 붙입니다(playing, reading). <b>-e</b>로 끝나면 e를 빼고 -ing를 붙입니다(make → making, write → writing). 짧은 모음+자음으로 끝나면 자음을 한 번 더 쓰고 -ing를 붙입니다(run → running, sit → sitting).</p><h4>용법</h4><p><b>1) 지금 진행 중</b>: \"I'm eating lunch right now.\" <b>2) 요즘 하는 일</b>: \"I'm learning English these days.\" <b>3) 가까운 미래 계획</b>: \"I'm meeting a friend tomorrow.\" (이미 약속됨)</p><h4>부정문과 의문문</h4><p>부정문은 <b>be동사 + not + -ing</b>입니다. \"She isn't sleeping.\" 의문문은 <b>be동사를 앞으로</b> 보냅니다. \"Are you listening?\" \"Is he coming?\" 참고로, know, like, want 같은 <b>상태 동사</b>는 진행형을 쓰지 않습니다.</p>",
+    "examples": [
+      "I'm studying for the exam right now.",
+      "She isn't working today. She's on vacation.",
+      "What are you doing? — I'm watching TV."
+    ],
+    "quiz": [
+      {"q": "현재진행형의 형태는?", "a": ["be동사 + 동사-ing", "do + 동사-ing", "have + 동사-ing", "동사 + -ing"], "c": 0},
+      {"q": "make의 -ing 형태는?", "a": ["making", "makeing", "makking", "mading"], "c": 0},
+      {"q": "진행형을 쓸 수 없는 동사는?", "a": ["know", "run", "eat", "play"], "c": 0}
+    ],
+    "tip": "전화 통화에서 \"What are you doing?\"은 가장 많이 쓰는 현재진행형이에요. 매일 써보세요!"
+  }
+]
