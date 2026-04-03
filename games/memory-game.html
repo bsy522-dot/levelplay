@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>기억력 카드 게임</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:480px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.4);border-radius:12px;font-size:15px;font-weight:700;margin-bottom:8px;flex-wrap:wrap;gap:4px}
+.hud .fl{color:#7FDBFF}.hud .mt{color:#4CAF50}.hud .tm{color:#FF6B9D}
+
+.grid{display:grid;gap:8px;margin:auto 0;padding:8px 0;justify-content:center}
+.card{aspect-ratio:1;border-radius:14px;cursor:pointer;position:relative;perspective:600px;transition:transform 0.1s}
+.card:active{transform:scale(0.95)}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.4s}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.card.matched .card-inner{transform:rotateY(180deg)}
+.card.matched{opacity:0.6;pointer-events:none}
+.card-front,.card-back{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-weight:700}
+.card-back{background:linear-gradient(135deg,#2d2d5e,#3d3d7e);border:2px solid #555;font-size:28px;color:#888}
+.card-front{background:linear-gradient(135deg,#16213e,#1a1a3e);border:2px solid #7FDBFF;transform:rotateY(180deg);padding:4px;text-align:center;overflow:hidden}
+.card-front .emoji{font-size:32px}
+.card-front .text{font-size:14px;color:#ddd;word-break:keep-all}
+.card.matched .card-front{border-color:#4CAF50;background:linear-gradient(135deg,rgba(76,175,80,0.15),rgba(76,175,80,0.05))}
+
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px}
+.menu h1{font-size:32px;color:#FFD700;margin-bottom:4px}
+.menu p{font-size:15px;color:#aaa;text-align:center;max-width:320px}
+.section-title{font-size:14px;color:#888;margin-top:8px;width:280px;text-align:left}
+.mode-btn{width:280px;padding:12px 16px;font-size:17px;font-weight:700;border:none;border-radius:14px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.mode-btn:active{transform:scale(0.95)}
+.mode-btn.m1{background:linear-gradient(135deg,#FF6B9D,#FF9A9E)}
+.mode-btn.m2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.mode-btn.m3{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+.diff-row{display:flex;gap:8px;width:280px;flex-wrap:wrap}
+.diff-btn{flex:1;min-width:60px;padding:10px 8px;font-size:14px;font-weight:700;border:2px solid #555;border-radius:12px;background:rgba(255,255,255,0.05);color:#aaa;cursor:pointer;text-align:center;transition:all 0.15s}
+.diff-btn:active{transform:scale(0.95)}
+.diff-btn.active{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,0.1)}
+.diff-btn .best-info{font-size:10px;display:block;margin-top:2px;color:#666}
+.start-btn{width:280px;padding:14px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#81C784);color:#fff;cursor:pointer;margin-top:8px;transition:transform 0.15s}
+.start-btn:active{transform:scale(0.95)}
+
+.result{text-align:center;margin:auto 0;padding:16px;display:none}
+.result.show{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1}
+.result h2{font-size:32px;color:#FFD700;margin-bottom:8px}
+.result p{font-size:20px;margin-bottom:6px}
+.result .big{font-size:72px;margin-bottom:8px}
+.stars{font-size:36px;margin:4px 0}
+.best-record{font-size:14px;color:#888;margin-top:4px}
+.retry{padding:14px 40px;font-size:22px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.menu-link{padding:10px 30px;font-size:18px;font-weight:700;border:2px solid #555;border-radius:14px;background:transparent;color:#aaa;cursor:pointer;margin-top:8px}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+// 모드1: 이모지 매칭
+const EMOJI_PAIRS=['🍎','🍊','🍋','🍇','🍓','🍑','🍒','🥝','🌻','🌹','🦋','🐶','🐱','🐻','🐼','🦊','🐸','🐰','🌈','⭐','🎵','🎨','🚗','✈️','🏠','🎂','⚽','🎸'];
+
+// 모드2: 한영 매칭
+const KO_EN=[
+  ['사과','Apple'],['바나나','Banana'],['고양이','Cat'],['강아지','Dog'],
+  ['코끼리','Elephant'],['물고기','Fish'],['포도','Grape'],['집','House'],
+  ['아이스크림','Ice Cream'],['주스','Juice'],['왕','King'],['사자','Lion'],
+  ['달','Moon'],['밤','Night'],['바다','Ocean'],['피아노','Piano'],
+  ['여왕','Queen'],['비','Rain'],['별','Star'],['나무','Tree'],
+  ['우산','Umbrella'],['바이올린','Violin'],['물','Water'],['크리스마스','X-mas'],
+];
+
+// 모드3: 수도 매칭
+const CAPITALS=[
+  ['한국','서울'],['일본','도쿄'],['중국','베이징'],['미국','워싱턴'],
+  ['영국','런던'],['프랑스','파리'],['독일','베를린'],['이탈리아','로마'],
+  ['스페인','마드리드'],['호주','캔버라'],['캐나다','오타와'],['브라질','브라질리아'],
+  ['인도','뉴델리'],['러시아','모스크바'],['멕시코','멕시코시티'],['태국','방콕'],
+  ['베트남','하노이'],['터키','앙카라'],['이집트','카이로'],['스위스','베른'],
+];
+
+const MODES=[
+  {name:'이모지 매칭',emoji:'😊',desc:'같은 이모지를 찾으세요'},
+  {name:'한영 매칭',emoji:'🔤',desc:'한국어-영어 짝을 찾으세요'},
+  {name:'수도 매칭',emoji:'🌍',desc:'나라-수도 짝을 찾으세요'},
+];
+
+const DIFFS=[
+  {name:'쉬움',cols:4,rows:3,pairs:6},
+  {name:'보통',cols:4,rows:4,pairs:8},
+  {name:'어려움',cols:5,rows:4,pairs:10},
+  {name:'고급',cols:6,rows:4,pairs:12},
+];
+
+let screen='menu',modeIdx=0,diffIdx=0;
+let cards=[],flipped=[],matched=0,flips=0,totalPairs=0;
+let locked=false,timerStart=0,timerInterval=null;
+
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'memory-game'},'*');}catch(e){}}
+function getBest(m,d){try{return JSON.parse(localStorage.getItem('memory_best_'+m+'_'+d))||{stars:0,flips:999};}catch(e){return{stars:0,flips:999};}}
+function saveBest(m,d,stars,fl){const p=getBest(m,d);if(stars>p.stars||fl<p.flips)localStorage.setItem('memory_best_'+m+'_'+d,JSON.stringify({stars:Math.max(stars,p.stars),flips:Math.min(fl,p.flips)}));}
+function getStars(flips,pairs){const ratio=flips/(pairs*2);return ratio<=1.3?3:ratio<=1.8?2:ratio<=2.5?1:0;}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu') renderMenu(app);
+  else if(screen==='game') renderGame(app);
+  else if(screen==='result') renderResult(app);
+}
+
+function renderMenu(app){
+  const modeHTML=MODES.map((m,i)=>`<button class="mode-btn m${i+1}" onclick="selectMode(${i})" style="${modeIdx===i?'box-shadow:0 0 0 3px #FFD700':''}">${m.emoji} ${m.name}<br><span style="font-size:13px;font-weight:400;opacity:0.8">${m.desc}</span></button>`).join('');
+
+  const diffHTML=DIFFS.map((d,i)=>{
+    const b=getBest(modeIdx,i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)}</span>`:'';
+    return `<button class="diff-btn ${diffIdx===i?'active':''}" onclick="selectDiff(${i})">${d.name}<br>${d.cols}x${d.rows}${bst}</button>`;
+  }).join('');
+
+  app.innerHTML=`
+    <div class="menu">
+      <h1>🃏 기억력 카드</h1>
+      <p>카드를 뒤집어 짝을 맞추세요!<br>최소 뒤집기로 높은 별점을 받으세요.</p>
+      <div class="section-title">모드 선택</div>
+      ${modeHTML}
+      <div class="section-title">난이도</div>
+      <div class="diff-row">${diffHTML}</div>
+      <button class="start-btn" onclick="startGame()">🎮 게임 시작</button>
+    </div>`;
+}
+
+function selectMode(i){modeIdx=i;render();}
+function selectDiff(i){diffIdx=i;render();}
+
+function generateCards(){
+  const diff=DIFFS[diffIdx];
+  const numPairs=diff.pairs;
+
+  if(modeIdx===0){
+    // Emoji matching: each pair is same emoji
+    const selected=shuffle(EMOJI_PAIRS).slice(0,numPairs);
+    const cardData=[];
+    selected.forEach((e,i)=>{
+      cardData.push({pairId:i,display:`<span class="emoji">${e}</span>`,matchKey:e});
+      cardData.push({pairId:i,display:`<span class="emoji">${e}</span>`,matchKey:e});
+    });
+    return shuffle(cardData);
+  } else if(modeIdx===1){
+    // Korean-English matching
+    const selected=shuffle(KO_EN).slice(0,numPairs);
+    const cardData=[];
+    selected.forEach(([ko,en],i)=>{
+      cardData.push({pairId:i,display:`<span class="text">${ko}</span>`,matchKey:i});
+      cardData.push({pairId:i,display:`<span class="text">${en}</span>`,matchKey:i});
+    });
+    return shuffle(cardData);
+  } else {
+    // Capital matching
+    const selected=shuffle(CAPITALS).slice(0,numPairs);
+    const cardData=[];
+    selected.forEach(([country,capital],i)=>{
+      cardData.push({pairId:i,display:`<span class="text">🏳️ ${country}</span>`,matchKey:i});
+      cardData.push({pairId:i,display:`<span class="text">🏛️ ${capital}</span>`,matchKey:i});
+    });
+    return shuffle(cardData);
+  }
+}
+
+function startGame(){
+  const diff=DIFFS[diffIdx];
+  cards=generateCards();
+  flipped=[];matched=0;flips=0;totalPairs=diff.pairs;locked=false;
+  timerStart=Date.now();
+  screen='game';
+  render();
+  timerInterval=setInterval(updateTimer,1000);
+}
+
+function updateTimer(){
+  const t=document.querySelector('.tm');
+  if(t)t.textContent='⏱ '+((Date.now()-timerStart)/1000|0)+'초';
+}
+
+function renderGame(app){
+  const diff=DIFFS[diffIdx];
+  const elapsed=((Date.now()-timerStart)/1000)|0;
+  const cardSize=Math.min(Math.floor((480-24-diff.cols*8)/diff.cols),80);
+
+  let gridHTML='';
+  cards.forEach((c,i)=>{
+    const isFlipped=flipped.includes(i);
+    const isMatched=c.matched;
+    gridHTML+=`<div class="card ${isFlipped?'flipped':''} ${isMatched?'matched':''}" onclick="flipCard(${i})" style="width:${cardSize}px;height:${cardSize}px">
+      <div class="card-inner">
+        <div class="card-back">?</div>
+        <div class="card-front">${c.display}</div>
+      </div>
+    </div>`;
+  });
+
+  app.innerHTML=`
+    <div class="hud">
+      <span class="fl">🔄 ${flips}회</span>
+      <span class="mt">✅ ${matched}/${totalPairs}</span>
+      <span class="tm">⏱ ${elapsed}초</span>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(${diff.cols},${cardSize}px)">${gridHTML}</div>
+    <div style="text-align:center;margin-top:8px"><button class="menu-link" onclick="backToMenu()">🏠 메뉴</button></div>`;
+}
+
+function flipCard(idx){
+  if(locked)return;
+  const card=cards[idx];
+  if(card.matched||flipped.includes(idx))return;
+
+  flipped.push(idx);
+  flips++;
+
+  // Re-render to show flip
+  renderGame(document.getElementById('app'));
+
+  if(flipped.length===2){
+    locked=true;
+    const [a,b]=flipped;
+    if(cards[a].pairId===cards[b].pairId){
+      // Match!
+      setTimeout(()=>{
+        cards[a].matched=true;
+        cards[b].matched=true;
+        matched++;
+        flipped=[];
+        locked=false;
+        if(matched>=totalPairs){
+          endGame();
+        } else {
+          renderGame(document.getElementById('app'));
+        }
+      },500);
+    } else {
+      // No match
+      setTimeout(()=>{
+        flipped=[];
+        locked=false;
+        renderGame(document.getElementById('app'));
+      },800);
+    }
+  }
+}
+
+function endGame(){
+  clearInterval(timerInterval);
+  const elapsed=((Date.now()-timerStart)/1000)|0;
+  const stars=getStars(flips,totalPairs);
+  saveBest(modeIdx,diffIdx,stars,flips);
+
+  const xp=stars>=3?40:stars>=2?25:stars>=1?15:5;
+  sendXP(xp);
+
+  screen='result';
+  render();
+}
+
+function renderResult(app){
+  const stars=getStars(flips,totalPairs);
+  const xp=stars>=3?40:stars>=2?25:stars>=1?15:5;
+  const best=getBest(modeIdx,diffIdx);
+  const elapsed=((Date.now()-timerStart)/1000)|0;
+  const mode=MODES[modeIdx];
+  const diff=DIFFS[diffIdx];
+
+  app.innerHTML=`
+    <div class="result show">
+      <div class="big">🎉</div>
+      <h2>클리어!</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>🔄 뒤집기: ${flips}회</p>
+      <p>⏱ 시간: ${elapsed}초</p>
+      <p style="font-size:16px;color:#aaa">${mode.emoji} ${mode.name} / ${diff.name} (${diff.cols}x${diff.rows})</p>
+      <p style="font-size:16px;color:#7FDBFF">+${xp} XP 획득!</p>
+      <div class="best-record">최고 기록: ${best.flips<999?best.flips+'회':'--'} ${starStr(best.stars)}</div>
+      <button class="retry" onclick="startGame()">🔄 다시 하기</button>
+      <button class="menu-link" onclick="backToMenu()">🏠 메뉴</button>
+    </div>`;
+}
+
+function backToMenu(){
+  clearInterval(timerInterval);
+  screen='menu';render();
+}
+
+render();
+</script>
+</body></html>

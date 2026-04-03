@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>동물농장 타이쿤</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#2d5a1e;font-family:'Segoe UI',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+canvas{display:block;margin:0 auto}
+#ui{position:absolute;top:0;left:0;width:100%;pointer-events:none}
+#topbar{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(0,0,0,.55);color:#fff;font-size:13px;pointer-events:auto}
+#topbar>div{display:flex;align-items:center;gap:6px}
+.tb{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:14px;padding:3px 10px;font-size:12px;cursor:pointer;pointer-events:auto}
+.tb:active{background:rgba(255,255,255,.3)}
+#bottombar{position:absolute;bottom:0;left:0;width:100%;display:flex;justify-content:center;gap:6px;padding:8px;background:rgba(0,0,0,.5);pointer-events:auto;flex-wrap:wrap}
+.bb{background:#4a7c3f;border:2px solid #6aad55;color:#fff;border-radius:10px;padding:6px 12px;font-size:12px;cursor:pointer;min-width:55px;text-align:center}
+.bb:active{background:#6aad55}
+.bb.sel{background:#e8a735;border-color:#ffd700}
+#modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;justify-content:center;align-items:center;pointer-events:auto}
+#modal.show{display:flex}
+#mpanel{background:#f5edd6;border-radius:16px;padding:20px;max-width:380px;width:90%;max-height:80vh;overflow-y:auto;color:#333;position:relative}
+#mpanel h2{color:#2d5a1e;margin-bottom:10px;font-size:18px}
+#mpanel .close{position:absolute;top:8px;right:12px;font-size:22px;cursor:pointer;color:#888}
+.item-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.item-card{background:#fff;border:2px solid #ccc;border-radius:10px;padding:8px;text-align:center;cursor:pointer;font-size:11px}
+.item-card:active{border-color:#e8a735}
+.item-card .icon{font-size:28px}
+.item-card .price{color:#d4760a;font-weight:bold}
+.fact-box{background:#e8f5e9;border-left:4px solid #4caf50;padding:8px;margin:8px 0;font-size:12px;border-radius:4px}
+.eco-box{background:#fff3e0;border-left:4px solid #ff9800;padding:8px;margin:8px 0;font-size:12px;border-radius:4px}
+#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;z-index:200;display:none;white-space:nowrap}
+#achieve{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#ffd700,#ffaa00);color:#333;padding:16px 28px;border-radius:16px;font-size:16px;font-weight:bold;z-index:200;display:none;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+#minigame{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:150;justify-content:center;align-items:center;flex-direction:column}
+#minigame.show{display:flex}
+#mgcanvas{background:#f5edd6;border-radius:12px}
+#mginfo{color:#fff;font-size:14px;margin:8px}
+#mgclose{position:fixed;top:10px;right:14px;color:#fff;font-size:28px;cursor:pointer;z-index:160}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+<div id="topbar">
+<div><span id="season">봄</span> <span id="day">1일차</span> <span id="weather">☀️</span></div>
+<div><span id="money">💰 1000</span></div>
+<div><span id="time">06:00</span> <button class="tb" onclick="G.toggleSpeed()">⏩</button></div>
+</div>
+<div id="bottombar">
+<button class="bb sel" data-tool="select" onclick="G.setTool('select')">👆선택</button>
+<button class="bb" data-tool="animal" onclick="G.openShop('animal')">🐄동물</button>
+<button class="bb" data-tool="crop" onclick="G.openShop('crop')">🌱작물</button>
+<button class="bb" data-tool="build" onclick="G.openShop('build')">🏠건물</button>
+<button class="bb" data-tool="market" onclick="G.openMarket()">🏪시장</button>
+<button class="bb" data-tool="learn" onclick="G.openLearn()">📚학습</button>
+<button class="bb" data-tool="save" onclick="G.saveGame();showToast('저장 완료!')">💾저장</button>
+</div>
+</div>
+<div id="modal"><div id="mpanel"><span class="close" onclick="closeModal()">&times;</span><div id="mcontent"></div></div></div>
+<div id="toast"></div>
+<div id="achieve"></div>
+<div id="minigame"><span id="mgclose" onclick="G.closeMini()">&times;</span><canvas id="mgcanvas"></canvas><div id="mginfo"></div></div>
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const MC=document.getElementById('mgcanvas'),MX=MC.getContext('2d');
+let W,H;
+function resize(){W=innerWidth;H=innerHeight;C.width=W;C.height=H;MC.width=Math.min(W-40,360);MC.height=Math.min(H-120,400)}
+resize();addEventListener('resize',resize);
+
+// Data
+const ANIMALS={
+chicken:{name:'닭',icon:'🐔',cost:80,feed:'곡물',product:'달걀',prodTime:4,prodVal:15,lifespan:180,fact:'닭은 하루에 1개의 달걀을 낳아요. 세계에서 가장 많은 가축이에요!',feedCost:5},
+cow:{name:'소',icon:'🐄',cost:500,feed:'건초',product:'우유',prodTime:6,prodVal:40,lifespan:360,fact:'소는 하루에 약 30리터의 우유를 생산해요. 4개의 위장이 있어요!',feedCost:15},
+pig:{name:'돼지',icon:'🐷',cost:300,feed:'잡식',product:'고기',prodTime:30,prodVal:200,lifespan:120,fact:'돼지는 매우 똑똑해서 거울 속 자신을 인식할 수 있어요!',feedCost:10},
+sheep:{name:'양',icon:'🐑',cost:250,feed:'풀',product:'양모',prodTime:10,prodVal:50,lifespan:240,fact:'양의 양모는 매년 자라요. 한 마리에서 약 4.5kg의 양모를 얻어요!',feedCost:8},
+duck:{name:'오리',icon:'🦆',cost:100,feed:'곡물',product:'오리알',prodTime:5,prodVal:20,lifespan:150,fact:'오리 깃털은 방수예요! 기름샘에서 나온 기름을 깃털에 발라요.',feedCost:6},
+goat:{name:'염소',icon:'🐐',cost:350,feed:'풀',product:'치즈',prodTime:8,prodVal:55,lifespan:300,fact:'염소 우유로 만든 치즈는 소화가 잘 돼요. 염소는 산도 잘 올라가요!',feedCost:9},
+dog:{name:'강아지',icon:'🐕',cost:200,feed:'사료',product:'행복',prodTime:0,prodVal:0,lifespan:500,fact:'강아지는 농장 동물들을 지켜줘요. 양치기 개로 유명해요!',feedCost:8,guard:true},
+cat:{name:'고양이',icon:'🐱',cost:150,feed:'사료',product:'쥐잡기',prodTime:0,prodVal:0,lifespan:500,fact:'고양이는 농장의 쥐를 잡아줘요. 곡물 창고를 지켜요!',feedCost:5,pest:true},
+bee:{name:'꿀벌',icon:'🐝',cost:400,feed:'꽃',product:'꿀',prodTime:12,prodVal:70,lifespan:90,fact:'꿀벌 한 마리가 평생 만드는 꿀은 티스푼 1/12이에요! 꽃가루 수정도 도와요.',feedCost:3},
+rabbit:{name:'토끼',icon:'🐰',cost:120,feed:'당근',product:'토끼털',prodTime:8,prodVal:25,lifespan:200,fact:'토끼 이빨은 평생 자라요. 앙고라 토끼는 부드러운 털을 만들어줘요!',feedCost:4},
+horse:{name:'말',icon:'🐴',cost:800,feed:'건초',product:'일손',prodTime:0,prodVal:0,lifespan:400,fact:'말은 서서 잠을 잘 수 있어요! 농장에서 짐을 나르는 데 도움을 줘요.',feedCost:20,speed:true},
+fish:{name:'물고기',icon:'🐟',cost:60,feed:'먹이',product:'생선',prodTime:7,prodVal:30,lifespan:120,fact:'양어장에서 키우는 틸라피아는 4개월이면 수확할 수 있어요!',feedCost:3}
+};
+
+const CROPS={
+potato:{name:'감자',icon:'🥔',cost:20,season:'spring',growTime:12,sellPrice:35,fact:'감자는 땅속에서 자라요. 비타민C가 풍부해요!'},
+strawberry:{name:'딸기',icon:'🍓',cost:30,season:'spring',growTime:8,sellPrice:45,fact:'딸기는 씨가 겉에 있는 유일한 과일이에요! 약 200개나 돼요.'},
+lettuce:{name:'상추',icon:'🥬',cost:15,season:'spring',growTime:6,sellPrice:25,fact:'상추는 빨리 자라요. 로마 시대부터 먹었대요!'},
+watermelon:{name:'수박',icon:'🍉',cost:40,season:'summer',growTime:16,sellPrice:80,fact:'수박의 92%는 물이에요! 더운 여름에 딱이죠.'},
+corn:{name:'옥수수',icon:'🌽',cost:25,season:'summer',growTime:14,sellPrice:50,fact:'옥수수 하나에 약 800개의 알갱이가 있어요!'},
+tomato:{name:'토마토',icon:'🍅',cost:22,season:'summer',growTime:10,sellPrice:40,fact:'토마토는 원래 관상용이었어요. 과일일까 채소일까? 둘 다에요!'},
+apple:{name:'사과',icon:'🍎',cost:50,season:'fall',growTime:20,sellPrice:65,fact:'세계에 7,500종이 넘는 사과가 있어요! 하루 한 개면 건강해요.'},
+pear:{name:'배',icon:'🍐',cost:45,season:'fall',growTime:18,sellPrice:60,fact:'배는 수분이 많고 식이섬유가 풍부해요. 한국 배는 세계적이에요!'},
+sweetpotato:{name:'고구마',icon:'🍠',cost:20,season:'fall',growTime:15,sellPrice:45,fact:'고구마는 뿌리를 먹는 거예요. 비타민A가 풍부해요!'},
+spinach:{name:'시금치',icon:'🥬',cost:18,season:'winter',growTime:8,sellPrice:30,fact:'시금치는 추위에 강해요! 철분이 풍부해서 뽀빠이가 좋아해요.'}
+};
+
+const BUILDINGS={
+barn:{name:'헛간',icon:'🏚️',cost:300,size:2,desc:'동물 4마리 수용'},
+silo:{name:'사일로',icon:'🏗️',cost:400,size:1,desc:'사료 저장량 +50'},
+greenhouse:{name:'온실',icon:'🏡',cost:600,size:2,desc:'겨울에도 작물 재배'},
+pond:{name:'연못',icon:'💧',cost:250,size:2,desc:'물고기 양어장'},
+market_b:{name:'직판장',icon:'🏪',cost:500,size:2,desc:'판매가격 +20%'},
+windmill:{name:'풍차',icon:'🌀',cost:350,size:1,desc:'곡물 가공'}
+};
+
+const SEASONS=['spring','summer','fall','winter'];
+const SEASON_KR=['봄','여름','가을','겨울'];
+const SEASON_CLR=['#4caf50','#ff9800','#e65100','#90caf9'];
+const WEATHER_TYPES=['sunny','rain','cloudy','snow'];
+const WEATHER_ICONS=['☀️','🌧️','⛅','❄️'];
+
+const ACHIEVEMENTS=[
+{id:'first_harvest',name:'첫 수확!',desc:'작물을 처음 수확했어요',icon:'🌾',check:s=>s.totalHarvest>=1},
+{id:'animals10',name:'동물 10마리!',desc:'동물 10마리를 키우고 있어요',icon:'🐾',check:s=>s.animals.length>=10},
+{id:'rich',name:'부자 농부!',desc:'10,000원을 모았어요',icon:'💰',check:s=>s.money>=10000},
+{id:'all_season',name:'사계절 농부',desc:'4계절을 모두 경험했어요',icon:'🌍',check:s=>s.year>=2},
+{id:'zoo',name:'미니 동물원',desc:'6종 이상의 동물을 키워요',icon:'🦁',check:s=>{let t=new Set(s.animals.map(a=>a.type));return t.size>=6}},
+{id:'crops5',name:'다품종 농부',desc:'5종 이상 작물을 심었어요',icon:'🌈',check:s=>s.cropTypes>=5},
+{id:'market_pro',name:'시장의 달인',desc:'50번 판매했어요',icon:'📈',check:s=>s.totalSales>=50},
+{id:'eco_learner',name:'생태계 박사',desc:'학습 5개를 읽었어요',icon:'🎓',check:s=>s.learnCount>=5}
+];
+
+const ECO_LESSONS=[
+{title:'우유는 어디서 올까?',content:'풀 🌿 → 소가 먹어요 🐄 → 우유를 짜요 🥛 → 살균해요 🔥 → 포장해요 📦 → 마트에서 팔아요 🏪',icon:'🥛'},
+{title:'달걀의 여행',content:'닭이 모이를 먹어요 🌾 → 달걀을 낳아요 🥚 → 세척해요 💧 → 등급을 나눠요 ⭐ → 포장 📦 → 식탁으로! 🍳',icon:'🥚'},
+{title:'먹이사슬이란?',content:'태양 ☀️ → 풀이 자라요 🌱 → 닭이 풀을 먹어요 🐔 → 사람이 닭고기를 먹어요 👨 → 모든 생물은 연결되어 있어요!',icon:'🔗'},
+{title:'계절과 농사',content:'봄 🌸: 씨를 뿌려요 | 여름 ☀️: 열매가 자라요 | 가을 🍂: 수확해요 | 겨울 ❄️: 땅이 쉬어요. 계절마다 다른 작물이 자라요!',icon:'🗓️'},
+{title:'꿀벌의 중요성',content:'꿀벌은 꽃가루를 옮겨서 식물이 열매를 맺게 도와요 🐝🌸 전 세계 식량의 1/3이 꿀벌 덕분이에요! 꿀벌이 없으면 사과도 없어요.',icon:'🐝'},
+{title:'물의 순환',content:'비가 와요 🌧️ → 땅이 물을 흡수해요 💧 → 식물이 물을 마셔요 🌱 → 수증기가 돼요 💨 → 구름이 돼요 ☁️ → 다시 비! 농사에 물은 필수!',icon:'💧'},
+{title:'퇴비란?',content:'음식 찌꺼기 🍂 + 동물 똥 💩 → 미생물이 분해해요 🦠 → 영양 많은 흙이 돼요 🌍 → 작물이 잘 자라요! 자연의 재활용이에요 ♻️',icon:'🌱'},
+{title:'치즈 만들기',content:'염소/소 우유 🥛 → 레닛 효소 추가 🧪 → 굳어요 🧀 → 숙성해요 📅 → 맛있는 치즈! 종류만 1,800가지가 넘어요.',icon:'🧀'}
+];
+
+// Game State
+let G={
+money:1000,day:1,hour:6,season:0,year:1,weather:0,speed:1,
+animals:[],crops:[],buildings:[],inventory:{},
+grid:Array(16).fill(null).map(()=>Array(16).fill(null)),
+tool:'select',placing:null,
+camX:0,camY:0,dragStart:null,isDrag:false,
+totalHarvest:0,totalSales:0,cropTypes:0,learnCount:0,
+achieveUnlocked:[],
+cropTypesPlanted:new Set(),
+feedStock:100,
+marketBonus:1,
+storageBonus:0,
+hasGreenhouse:false,
+tick:0,
+miniActive:false
+};
+
+// Audio
+const AU={
+ctx:null,
+init(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)()},
+play(freq,dur=.1,type='sine',vol=.15){
+if(!this.ctx)return;
+try{
+const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+o.type=type;o.frequency.value=freq;g.gain.value=vol;
+o.connect(g);g.connect(this.ctx.destination);
+o.start();g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+dur);
+o.stop(this.ctx.currentTime+dur);
+}catch(e){}
+},
+coin(){this.play(880,.08);setTimeout(()=>this.play(1320,.1),80)},
+place(){this.play(440,.1,'triangle')},
+harvest(){this.play(660,.1);setTimeout(()=>this.play(880,.1),100);setTimeout(()=>this.play(1100,.15),200)},
+error(){this.play(220,.2,'sawtooth')},
+achieve(){this.play(523,.1);setTimeout(()=>this.play(659,.1),120);setTimeout(()=>this.play(784,.15),240);setTimeout(()=>this.play(1047,.2),360)},
+ambient(){
+if(!this.ctx)return;
+// bird chirp
+setInterval(()=>{if(G.hour>=6&&G.hour<=18&&Math.random()<.3)this.play(1800+Math.random()*800,.05,'sine',.03)},3000);
+}
+};
+
+// Utility
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
+function showAchieve(a){const el=document.getElementById('achieve');el.innerHTML=a.icon+'<br>'+a.name+'<br><small>'+a.desc+'</small>';el.style.display='block';AU.achieve();setTimeout(()=>el.style.display='none',3000)}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+function openModal(html){document.getElementById('mcontent').innerHTML=html;document.getElementById('modal').classList.add('show')}
+
+// ISO projection
+const TILE=32,HALFTILE=16;
+function isoX(gx,gy){return(gx-gy)*HALFTILE+W/2+G.camX}
+function isoY(gx,gy){return(gx+gy)*(HALFTILE/2)+80+G.camY}
+function screenToGrid(sx,sy){
+const rx=sx-W/2-G.camX,ry=sy-80-G.camY;
+const gx=(rx/HALFTILE+ry/(HALFTILE/2))/2;
+const gy=(ry/(HALFTILE/2)-rx/HALFTILE)/2;
+return[Math.floor(gx),Math.floor(gy)];
+}
+
+// Rendering
+function drawTile(gx,gy,color,border){
+const x=isoX(gx,gy),y=isoY(gx,gy);
+X.beginPath();
+X.moveTo(x,y);X.lineTo(x+HALFTILE,y+HALFTILE/2);
+X.lineTo(x,y+HALFTILE);X.lineTo(x-HALFTILE,y+HALFTILE/2);
+X.closePath();
+X.fillStyle=color;X.fill();
+if(border){X.strokeStyle=border;X.lineWidth=1;X.stroke()}
+}
+
+function getTileColor(gx,gy){
+const cell=G.grid[gy]?.[gx];
+if(!cell)return G.season===3?'#a8c9a0':'#5a8a3c';
+if(cell.type==='crop'){
+const stages=['#8B4513','#7cb342','#4caf50','#ff9800'];
+return stages[Math.min(cell.stage,3)];
+}
+if(cell.type==='building')return '#c9a96e';
+if(cell.type==='animal')return '#d4c89a';
+if(cell.type==='water')return '#4fc3f7';
+return '#5a8a3c';
+}
+
+function drawGrid(){
+for(let gy=0;gy<16;gy++)for(let gx=0;gx<16;gx++){
+const col=getTileColor(gx,gy);
+const bdr=(gx+gy)%2===0?'rgba(255,255,255,.08)':'rgba(0,0,0,.08)';
+drawTile(gx,gy,col,bdr);
+}
+}
+
+function drawEntities(){
+for(let gy=0;gy<16;gy++)for(let gx=0;gx<16;gx++){
+const cell=G.grid[gy]?.[gx];
+if(!cell)continue;
+const x=isoX(gx,gy),y=isoY(gx,gy);
+X.font='18px serif';X.textAlign='center';
+if(cell.type==='animal'){
+const ad=ANIMALS[cell.key];
+const bounce=Math.sin(G.tick*.05+gx*3+gy*2)*2;
+X.fillText(ad.icon,x,y+HALFTILE/2+bounce-2);
+if(cell.hasProduct){X.font='12px serif';X.fillText('❗',x+10,y)}
+}else if(cell.type==='crop'){
+const cd=CROPS[cell.key];
+const icons=['🌱','🌿','🪴',cd.icon];
+X.fillText(icons[Math.min(cell.stage,3)],x,y+HALFTILE/2-2);
+if(cell.stage>=3){X.font='10px sans-serif';X.fillStyle='#fff';X.fillText('수확!',x,y+HALFTILE+4);X.fillStyle='#000'}
+}else if(cell.type==='building'){
+const bd=BUILDINGS[cell.key];
+X.font='22px serif';X.fillText(bd.icon,x,y+HALFTILE/2-2);
+}
+}
+}
+
+function drawWeather(){
+if(G.weather===1){// rain
+for(let i=0;i<30;i++){
+const rx=Math.random()*W,ry=(G.tick*3+i*40)%H;
+X.strokeStyle='rgba(120,180,255,.5)';X.lineWidth=1;
+X.beginPath();X.moveTo(rx,ry);X.lineTo(rx-2,ry+10);X.stroke();
+}
+}else if(G.weather===3){// snow
+X.fillStyle='rgba(255,255,255,.7)';
+for(let i=0;i<20;i++){
+const sx=(Math.sin(G.tick*.02+i)*50+i*67)%W;
+const sy=(G.tick*1.5+i*35)%H;
+X.beginPath();X.arc(sx,sy,2,0,Math.PI*2);X.fill();
+}
+}
+// Day/night overlay
+if(G.hour>=20||G.hour<5){
+X.fillStyle='rgba(10,10,40,.35)';X.fillRect(0,0,W,H);
+}else if(G.hour>=18){
+X.fillStyle=`rgba(40,20,60,${(G.hour-18)*0.1})`;X.fillRect(0,0,W,H);
+}
+}
+
+function render(){
+X.clearRect(0,0,W,H);
+// sky gradient
+const skyColors=[['#87ceeb','#4a90d9'],['#ffcc02','#ff8c00'],['#d4740f','#8b4513'],['#b0c4de','#778899']];
+const sc=skyColors[G.season];
+const grad=X.createLinearGradient(0,0,0,H);
+grad.addColorStop(0,sc[0]);grad.addColorStop(1,sc[1]);
+X.fillStyle=grad;X.fillRect(0,0,W,H);
+
+drawGrid();
+drawEntities();
+drawWeather();
+}
+
+// Update UI
+function updateUI(){
+document.getElementById('season').textContent=SEASON_KR[G.season];
+document.getElementById('season').style.color=SEASON_CLR[G.season];
+document.getElementById('day').textContent=G.day+'일차';
+document.getElementById('weather').textContent=WEATHER_ICONS[G.weather];
+document.getElementById('money').textContent='💰 '+G.money.toLocaleString();
+document.getElementById('time').textContent=String(G.hour).padStart(2,'0')+':00';
+}
+
+// Game Logic
+function gameTick(){
+G.tick++;
+if(G.tick%((60/G.speed)|0)===0){
+G.hour++;
+if(G.hour>=24){
+G.hour=0;G.day++;
+dailyUpdate();
+}
+if(G.hour%6===0)updateWeather();
+updateAnimals();
+updateCrops();
+checkAchievements();
+}
+updateUI();
+render();
+requestAnimationFrame(gameTick);
+}
+
+function dailyUpdate(){
+// Feed costs
+let feedCost=0;
+G.animals.forEach(a=>{const ad=ANIMALS[a.type];feedCost+=ad.feedCost});
+if(G.money>=feedCost){G.money-=feedCost}
+else{showToast('사료비 부족! 동물들이 배고파요 😢')}
+
+// Season change every 7 days
+if(G.day%7===0){
+G.season=(G.season+1)%4;
+if(G.season===0)G.year++;
+showToast(SEASON_KR[G.season]+' 시즌이 시작됐어요!');
+}
+}
+
+function updateWeather(){
+const r=Math.random();
+if(G.season===3)G.weather=r<.3?3:r<.6?2:0;
+else if(G.season===1)G.weather=r<.4?0:r<.7?1:2;
+else G.weather=r<.5?0:r<.8?2:1;
+}
+
+function updateAnimals(){
+G.animals.forEach(a=>{
+const ad=ANIMALS[a.type];
+if(ad.prodTime>0){
+a.prodTimer=(a.prodTimer||0)+1;
+const bonus=G.weather===0?1.2:G.weather===1?1.1:1;
+if(a.prodTimer>=ad.prodTime/bonus){
+a.prodTimer=0;
+const cell=G.grid[a.gy]?.[a.gx];
+if(cell)cell.hasProduct=true;
+}
+}
+a.age=(a.age||0)+1;
+});
+}
+
+function updateCrops(){
+G.crops.forEach((cr,i)=>{
+if(cr.stage>=3)return;
+const cd=CROPS[cr.key];
+const seasonMatch=SEASONS[G.season]===cd.season||G.hasGreenhouse;
+if(!seasonMatch&&G.season!==(SEASONS.indexOf(cd.season)))return;
+const rainBonus=G.weather===1?1.5:1;
+const snowPenalty=G.weather===3&&!G.hasGreenhouse?.3:1;
+cr.growTimer=(cr.growTimer||0)+rainBonus*snowPenalty;
+if(cr.growTimer>=cd.growTime){
+cr.growTimer=0;cr.stage=Math.min(cr.stage+1,3);
+const cell=G.grid[cr.gy]?.[cr.gx];
+if(cell)cell.stage=cr.stage;
+}
+});
+}
+
+function checkAchievements(){
+ACHIEVEMENTS.forEach(a=>{
+if(!G.achieveUnlocked.includes(a.id)&&a.check(G)){
+G.achieveUnlocked.push(a.id);
+showAchieve(a);
+}
+});
+}
+
+// Tools & Placement
+G.setTool=function(t){
+G.tool=t;G.placing=null;
+document.querySelectorAll('.bb').forEach(b=>b.classList.remove('sel'));
+const btn=document.querySelector(`[data-tool="${t}"]`);
+if(btn)btn.classList.add('sel');
+};
+
+G.toggleSpeed=function(){
+G.speed=G.speed>=4?1:G.speed*2;
+showToast('속도: x'+G.speed);
+};
+
+G.openShop=function(type){
+let html='<h2>'+(type==='animal'?'🐄 동물 구매':type==='crop'?'🌱 씨앗 구매':'🏠 건물 짓기')+'</h2>';
+html+='<div class="item-grid">';
+const items=type==='animal'?ANIMALS:type==='crop'?CROPS:BUILDINGS;
+for(const[k,v]of Object.entries(items)){
+const canGrow=type==='crop'?(SEASONS[G.season]===v.season||G.hasGreenhouse?'':'❌ 계절 안 맞음'):'';
+html+=`<div class="item-card" onclick="G.selectItem('${type}','${k}')">
+<div class="icon">${v.icon}</div><div>${v.name}</div>
+<div class="price">${v.cost}원</div>
+${canGrow?'<div style="color:red;font-size:10px">'+canGrow+'</div>':''}
+</div>`;
+}
+html+='</div>';
+openModal(html);
+};
+
+G.selectItem=function(type,key){
+closeModal();
+const items=type==='animal'?ANIMALS:type==='crop'?CROPS:BUILDINGS;
+const item=items[key];
+// Show fact
+let html=`<h2>${item.icon} ${item.name}</h2>`;
+html+=`<div class="fact-box">💡 ${item.fact||item.desc}</div>`;
+html+=`<p>가격: <b>${item.cost}원</b></p>`;
+if(item.product)html+=`<p>생산물: ${item.product} (${item.prodVal}원)</p>`;
+if(item.feed)html+=`<p>먹이: ${item.feed} (하루 ${item.feedCost}원)</p>`;
+if(item.growTime)html+=`<p>성장 시간: ${item.growTime}시간</p>`;
+if(item.sellPrice)html+=`<p>수확 판매가: ${item.sellPrice}원</p>`;
+html+=`<br><button class="bb" style="width:100%" onclick="G.startPlace('${type}','${key}');closeModal()">🏗️ 배치하기</button>`;
+openModal(html);
+};
+
+G.startPlace=function(type,key){
+const items=type==='animal'?ANIMALS:type==='crop'?CROPS:BUILDINGS;
+const item=items[key];
+if(G.money<item.cost){showToast('돈이 부족해요!');AU.error();return}
+G.placing={type,key};
+G.tool='place';
+showToast('원하는 위치를 터치하세요!');
+};
+
+function placeItem(gx,gy){
+if(gx<0||gx>15||gy<0||gy>15)return;
+if(G.grid[gy][gx]){showToast('이미 무언가 있어요!');AU.error();return}
+const p=G.placing;if(!p)return;
+const items=p.type==='animal'?ANIMALS:p.type==='crop'?CROPS:BUILDINGS;
+const item=items[p.key];
+if(G.money<item.cost){showToast('돈이 부족해요!');AU.error();return}
+
+if(p.type==='crop'){
+const cd=CROPS[p.key];
+if(SEASONS[G.season]!==cd.season&&!G.hasGreenhouse){
+showToast('이 계절에는 심을 수 없어요!');AU.error();return;
+}
+}
+
+G.money-=item.cost;
+AU.place();
+
+if(p.type==='animal'){
+const a={type:p.key,gx,gy,age:0,prodTimer:0};
+G.animals.push(a);
+G.grid[gy][gx]={type:'animal',key:p.key,hasProduct:false};
+}else if(p.type==='crop'){
+const cr={key:p.key,gx,gy,stage:0,growTimer:0};
+G.crops.push(cr);
+G.grid[gy][gx]={type:'crop',key:p.key,stage:0};
+G.cropTypesPlanted.add(p.key);
+G.cropTypes=G.cropTypesPlanted.size;
+}else if(p.type==='building'){
+G.buildings.push({key:p.key,gx,gy});
+G.grid[gy][gx]={type:p.type==='building'&&p.key==='pond'?'water':'building',key:p.key};
+if(p.key==='greenhouse')G.hasGreenhouse=true;
+if(p.key==='market_b')G.marketBonus=1.2;
+if(p.key==='silo')G.storageBonus+=50;
+}
+
+G.placing=null;G.tool='select';
+document.querySelectorAll('.bb').forEach(b=>b.classList.remove('sel'));
+document.querySelector('[data-tool="select"]').classList.add('sel');
+showToast(item.name+' 배치 완료!');
+}
+
+function handleSelect(gx,gy){
+if(gx<0||gx>15||gy<0||gy>15)return;
+const cell=G.grid[gy]?.[gx];
+if(!cell)return;
+
+if(cell.type==='animal'){
+const ad=ANIMALS[cell.key];
+let html=`<h2>${ad.icon} ${ad.name}</h2>`;
+html+=`<div class="fact-box">💡 ${ad.fact}</div>`;
+const anim=G.animals.find(a=>a.gx===gx&&a.gy===gy);
+if(anim)html+=`<p>나이: ${anim.age}일</p>`;
+if(cell.hasProduct){
+html+=`<br><button class="bb" style="width:100%" onclick="G.collectProduct(${gx},${gy});closeModal()">📦 ${ad.product} 수확 (+${Math.round(ad.prodVal*G.marketBonus)}원)</button>`;
+}
+if(ad.prodTime>0&&!cell.hasProduct){
+const mg=cell.key==='chicken'?'egg':cell.key==='cow'?'milk':cell.key==='sheep'?'wool':null;
+if(mg)html+=`<br><button class="bb" style="width:100%" onclick="G.startMini('${mg}');closeModal()">🎮 미니게임</button>`;
+}
+html+=`<br><button class="bb" style="width:100%;background:#c62828;border-color:#e53935;margin-top:6px" onclick="G.removeEntity(${gx},${gy});closeModal()">❌ 제거</button>`;
+openModal(html);
+}else if(cell.type==='crop'){
+const cd=CROPS[cell.key];
+const stages=['씨앗','새싹','성장중','수확 가능!'];
+let html=`<h2>${cd.icon} ${cd.name}</h2>`;
+html+=`<p>상태: ${stages[Math.min(cell.stage,3)]}</p>`;
+html+=`<div class="fact-box">💡 ${cd.fact}</div>`;
+if(cell.stage>=3){
+html+=`<br><button class="bb" style="width:100%" onclick="G.harvestCrop(${gx},${gy});closeModal()">🌾 수확 (+${Math.round(cd.sellPrice*G.marketBonus)}원)</button>`;
+}
+openModal(html);
+}else if(cell.type==='building'||cell.type==='water'){
+const bd=BUILDINGS[cell.key];
+let html=`<h2>${bd.icon} ${bd.name}</h2><p>${bd.desc}</p>`;
+openModal(html);
+}
+}
+
+G.collectProduct=function(gx,gy){
+const cell=G.grid[gy]?.[gx];
+if(!cell||!cell.hasProduct)return;
+const ad=ANIMALS[cell.key];
+const val=Math.round(ad.prodVal*G.marketBonus);
+G.money+=val;
+cell.hasProduct=false;
+G.totalSales++;
+AU.coin();
+showToast(ad.product+' 수확! +'+val+'원');
+};
+
+G.harvestCrop=function(gx,gy){
+const cell=G.grid[gy]?.[gx];
+if(!cell||cell.stage<3)return;
+const cd=CROPS[cell.key];
+const val=Math.round(cd.sellPrice*G.marketBonus);
+G.money+=val;
+G.totalHarvest++;G.totalSales++;
+G.grid[gy][gx]=null;
+G.crops=G.crops.filter(c=>!(c.gx===gx&&c.gy===gy));
+AU.harvest();
+showToast(cd.name+' 수확! +'+val+'원');
+};
+
+G.removeEntity=function(gx,gy){
+G.grid[gy][gx]=null;
+G.animals=G.animals.filter(a=>!(a.gx===gx&&a.gy===gy));
+G.crops=G.crops.filter(c=>!(c.gx===gx&&c.gy===gy));
+G.buildings=G.buildings.filter(b=>!(b.gx===gx&&b.gy===gy));
+showToast('제거했어요');
+};
+
+// Market
+G.openMarket=function(){
+let html='<h2>🏪 시장</h2><p>현재 가격 (수요에 따라 변동)</p>';
+html+='<div style="max-height:50vh;overflow-y:auto">';
+// Products from animals
+html+='<h3>🐄 축산물</h3>';
+for(const[k,v]of Object.entries(ANIMALS)){
+if(v.prodVal>0){
+const price=Math.round(v.prodVal*(0.8+Math.random()*0.4)*G.marketBonus);
+html+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ddd">
+<span>${v.icon} ${v.product}</span><span style="color:#d4760a;font-weight:bold">${price}원</span></div>`;
+}
+}
+html+='<h3>🌱 농산물</h3>';
+for(const[k,v]of Object.entries(CROPS)){
+const price=Math.round(v.sellPrice*(0.8+Math.random()*0.4)*G.marketBonus);
+html+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ddd">
+<span>${v.icon} ${v.name}</span><span style="color:#d4760a;font-weight:bold">${price}원</span></div>`;
+}
+html+='</div>';
+html+=`<div class="eco-box">💡 비가 오면 작물이 빨리 자라요! 맑은 날에는 동물이 더 많이 생산해요.</div>`;
+if(G.marketBonus>1)html+='<p style="color:green">✅ 직판장 보너스: 판매가 +20%</p>';
+openModal(html);
+};
+
+// Learning
+G.openLearn=function(){
+let html='<h2>📚 생태계 학습</h2>';
+ECO_LESSONS.forEach((l,i)=>{
+html+=`<div class="eco-box" style="cursor:pointer" onclick="G.showLesson(${i})">
+${l.icon} <b>${l.title}</b></div>`;
+});
+// Achievements
+html+='<h2 style="margin-top:12px">🏆 업적</h2>';
+ACHIEVEMENTS.forEach(a=>{
+const done=G.achieveUnlocked.includes(a.id);
+html+=`<div style="padding:4px 0;opacity:${done?1:.4}">${done?'✅':'⬜'} ${a.icon} ${a.name} - ${a.desc}</div>`;
+});
+openModal(html);
+};
+
+G.showLesson=function(i){
+const l=ECO_LESSONS[i];
+G.learnCount=(G.learnCount||0)+1;
+let html=`<h2>${l.icon} ${l.title}</h2>`;
+html+=`<div class="eco-box" style="font-size:14px;line-height:1.8">${l.content}</div>`;
+html+='<br><button class="bb" style="width:100%" onclick="G.openLearn()">← 돌아가기</button>';
+openModal(html);
+};
+
+// Mini-games
+G.startMini=function(type){
+G.miniActive=true;G.miniType=type;G.miniScore=0;G.miniTime=15;G.miniItems=[];
+document.getElementById('minigame').classList.add('show');
+G.miniTick();
+};
+
+G.closeMini=function(){
+G.miniActive=false;
+document.getElementById('minigame').classList.remove('show');
+if(G.miniScore>0){
+const bonus=G.miniScore*5;
+G.money+=bonus;
+showToast('미니게임 보너스: +'+bonus+'원!');
+AU.coin();
+}
+};
+
+G.miniTick=function(){
+if(!G.miniActive)return;
+const mw=MC.width,mh=MC.height;
+MX.clearRect(0,0,mw,mh);
+
+G.miniTime-=1/60;
+if(G.miniTime<=0){G.closeMini();return}
+
+document.getElementById('mginfo').textContent=
+(G.miniType==='egg'?'🥚 달걀 줍기':G.miniType==='milk'?'🥛 우유 짜기':'🐑 양털 깎기')+
+' | 점수: '+G.miniScore+' | 시간: '+Math.ceil(G.miniTime)+'초';
+
+if(G.miniType==='egg'){
+// Spawn eggs
+if(Math.random()<.05)G.miniItems.push({x:Math.random()*(mw-30)+15,y:10,vy:1+Math.random()*2});
+MX.fillStyle='#8BC34A';MX.fillRect(0,0,mw,mh);
+// ground
+MX.fillStyle='#5D4037';MX.fillRect(0,mh-40,mw,40);
+MX.font='14px sans-serif';MX.fillStyle='#333';MX.textAlign='center';
+MX.fillText('🐔',mw/2,30);
+G.miniItems.forEach(e=>{
+e.y+=e.vy;e.x+=Math.sin(e.y*.05)*0.5;
+MX.font='24px serif';MX.fillText('🥚',e.x,e.y);
+});
+G.miniItems=G.miniItems.filter(e=>e.y<mh-10);
+}else if(G.miniType==='milk'){
+MX.fillStyle='#E8F5E9';MX.fillRect(0,0,mw,mh);
+MX.font='40px serif';MX.textAlign='center';
+MX.fillText('🐄',mw/2,mh/2-30);
+// rhythm circles
+const t=Date.now()*.003;
+const cx=mw/2,cy=mh/2+50;
+const radius=40+Math.sin(t)*20;
+MX.beginPath();MX.arc(cx,cy,radius,0,Math.PI*2);
+MX.strokeStyle=radius<25?'#4CAF50':'#ccc';MX.lineWidth=3;MX.stroke();
+MX.beginPath();MX.arc(cx,cy,20,0,Math.PI*2);
+MX.fillStyle='#4CAF50';MX.fill();
+MX.font='12px sans-serif';MX.fillStyle='#333';MX.fillText('원이 작아질 때 터치!',cx,mh-20);
+}else if(G.miniType==='wool'){
+MX.fillStyle='#FFF9C4';MX.fillRect(0,0,mw,mh);
+MX.font='50px serif';MX.textAlign='center';
+MX.fillText('🐑',mw/2,mh/2);
+// draw path to trace
+if(G.miniItems.length===0){
+for(let i=0;i<6;i++)G.miniItems.push({x:50+i*(mw-100)/5,y:mh/2+60+Math.sin(i)*30,hit:false});
+}
+MX.strokeStyle='#9E9E9E';MX.lineWidth=2;MX.setLineDash([5,5]);
+MX.beginPath();G.miniItems.forEach((p,i)=>{i===0?MX.moveTo(p.x,p.y):MX.lineTo(p.x,p.y)});MX.stroke();
+MX.setLineDash([]);
+G.miniItems.forEach(p=>{
+MX.beginPath();MX.arc(p.x,p.y,12,0,Math.PI*2);
+MX.fillStyle=p.hit?'#4CAF50':'#FF9800';MX.fill();
+});
+MX.font='12px sans-serif';MX.fillStyle='#333';MX.fillText('점을 순서대로 터치!',mw/2,mh-10);
+}
+
+requestAnimationFrame(G.miniTick);
+};
+
+// Mini-game touch
+MC.addEventListener('pointerdown',e=>{
+if(!G.miniActive)return;
+AU.init();
+const rect=MC.getBoundingClientRect();
+const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+
+if(G.miniType==='egg'){
+for(let i=G.miniItems.length-1;i>=0;i--){
+const egg=G.miniItems[i];
+if(Math.abs(mx-egg.x)<20&&Math.abs(my-egg.y)<20){
+G.miniItems.splice(i,1);G.miniScore++;AU.play(660,.05);break;
+}
+}
+}else if(G.miniType==='milk'){
+const cx=MC.width/2,cy=MC.height/2+50;
+const d=Math.sqrt((mx-cx)**2+(my-cy)**2);
+const t=Date.now()*.003;
+const radius=40+Math.sin(t)*20;
+if(radius<28&&d<40){G.miniScore++;AU.play(880,.05)}
+}else if(G.miniType==='wool'){
+const next=G.miniItems.find(p=>!p.hit);
+if(next&&Math.abs(mx-next.x)<20&&Math.abs(my-next.y)<20){
+next.hit=true;G.miniScore++;AU.play(550,.05);
+if(G.miniItems.every(p=>p.hit)){G.miniScore+=3;G.miniItems=[];}
+}
+}
+});
+
+// Input handling
+let touchId=null;
+function onDown(sx,sy){
+AU.init();
+G.dragStart={x:sx,y:sy,cx:G.camX,cy:G.camY};
+G.isDrag=false;
+}
+function onMove(sx,sy){
+if(!G.dragStart)return;
+const dx=sx-G.dragStart.x,dy=sy-G.dragStart.y;
+if(Math.abs(dx)>5||Math.abs(dy)>5)G.isDrag=true;
+if(G.isDrag){G.camX=G.dragStart.cx+dx;G.camY=G.dragStart.cy+dy}
+}
+function onUp(sx,sy){
+if(!G.isDrag&&G.dragStart){
+const[gx,gy]=screenToGrid(sx,sy);
+if(G.tool==='place'&&G.placing){placeItem(gx,gy)}
+else if(G.tool==='select'){handleSelect(gx,gy)}
+}
+G.dragStart=null;
+}
+
+C.addEventListener('pointerdown',e=>{e.preventDefault();onDown(e.clientX,e.clientY)});
+C.addEventListener('pointermove',e=>{e.preventDefault();onMove(e.clientX,e.clientY)});
+C.addEventListener('pointerup',e=>{e.preventDefault();onUp(e.clientX,e.clientY)});
+
+// Save/Load
+G.saveGame=function(){
+const sv={
+money:G.money,day:G.day,hour:G.hour,season:G.season,year:G.year,
+weather:G.weather,animals:G.animals,crops:G.crops,buildings:G.buildings,
+grid:G.grid,totalHarvest:G.totalHarvest,totalSales:G.totalSales,
+cropTypes:G.cropTypes,learnCount:G.learnCount,achieveUnlocked:G.achieveUnlocked,
+cropTypesPlanted:[...G.cropTypesPlanted],feedStock:G.feedStock,
+marketBonus:G.marketBonus,storageBonus:G.storageBonus,hasGreenhouse:G.hasGreenhouse
+};
+localStorage.setItem('animalFarmSave',JSON.stringify(sv));
+};
+
+G.loadGame=function(){
+const d=localStorage.getItem('animalFarmSave');
+if(!d)return false;
+try{
+const sv=JSON.parse(d);
+Object.assign(G,sv);
+G.cropTypesPlanted=new Set(sv.cropTypesPlanted||[]);
+G.tick=0;G.tool='select';G.placing=null;G.miniActive=false;
+return true;
+}catch(e){return false}
+};
+
+// Init
+function init(){
+const loaded=G.loadGame();
+if(!loaded){
+// Place starting items
+G.grid[7][7]={type:'building',key:'barn'};
+G.buildings.push({key:'barn',gx:7,gy:7});
+G.grid[8][8]={type:'animal',key:'chicken',hasProduct:false};
+G.animals.push({type:'chicken',gx:8,gy:8,age:0,prodTimer:0});
+}
+AU.init();
+AU.ambient();
+updateUI();
+gameTick();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>한국사 영웅전 v4 — 1부 고조선 · 챕터1 환웅편 + 챕터2 단군편</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none}
+body{overflow:hidden;background:#0a0608;font-family:'Segoe UI',sans-serif;color:#e8dcc8;touch-action:none}
+canvas{display:block;position:absolute;top:0;left:0}
+#ui{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+#ui>*{pointer-events:auto}
+#hud{position:absolute;top:0;left:0;right:0;padding:4px 8px;background:linear-gradient(180deg,#0a0608ee,#0a060800);display:none;pointer-events:none}
+#hud-stage{font-size:10px;color:#c4956a;font-weight:700;letter-spacing:2px}
+#hud-info{font-size:9px;color:#888;cursor:pointer;pointer-events:auto}
+.hud-party{display:flex;gap:4px;margin-top:2px;flex-wrap:wrap}
+.hud-char{background:#1a1428cc;border:1px solid #5a4a3a;border-radius:4px;padding:2px 6px;font-size:9px;min-width:72px}
+.hud-char-name{color:#FFD700;font-weight:700;font-size:10px}
+.hud-bar{height:4px;background:#1a1a2e;border-radius:2px;overflow:hidden;margin:1px 0}
+.hud-bar-hp{height:100%;background:#4a2;border-radius:2px;transition:width .3s}
+.hud-bar-mp{height:100%;background:#26a;border-radius:2px;transition:width .3s}
+#minimap{position:absolute;top:4px;right:4px;width:90px;height:90px;border:1px solid #5a4a3a;border-radius:4px;background:#0a0608cc;display:none}
+#dlg{position:fixed;bottom:0;left:0;right:0;display:none;padding:6px;z-index:50}
+#dlg-box{background:linear-gradient(180deg,#1a1428ee,#0e0a18f8);border:2px solid #8a7a5a;border-radius:8px;padding:10px 12px;max-width:520px;margin:0 auto;display:flex;gap:10px;align-items:flex-start}
+#dlg-portrait{width:48px;height:48px;border-radius:6px;border:2px solid #c4956a;background:#1a1428;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+#dlg-content{flex:1}
+#dlg-speaker{font-size:12px;font-weight:700;color:#FFD700;margin-bottom:2px}
+#dlg-text{font-size:13px;line-height:1.8;min-height:32px}
+#dlg-next{font-size:9px;color:#888;text-align:right;margin-top:2px;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+#battle-ui{position:fixed;bottom:0;left:0;right:0;display:none;z-index:40;padding:4px}
+#battle-actions{display:flex;gap:3px;max-width:520px;margin:0 auto;flex-wrap:wrap}
+#battle-actions button{flex:1;min-width:60px;padding:8px 4px;border:1px solid #5a3a1a;border-radius:5px;font-family:inherit;font-size:11px;font-weight:700;color:#e8dcc8;cursor:pointer;transition:all .1s}
+#battle-actions button:active{transform:scale(.95)}
+#battle-actions button:disabled{opacity:.3}
+.btn-atk{background:#6B1A0A}.btn-def{background:#1a3a5c}.btn-skill{background:#5a3a6a}.btn-item{background:#2a5a2a}
+#battle-info{text-align:center;font-size:10px;color:#c4956a;max-width:520px;margin:0 auto 4px}
+#battle-turn-order{display:flex;gap:2px;justify-content:center;margin-bottom:4px;max-width:520px;margin:0 auto 4px;flex-wrap:wrap}
+.turn-marker{font-size:10px;padding:1px 4px;border-radius:3px;background:#1a1428;border:1px solid #5a4a3a}
+.turn-marker.active{border-color:#FFD700;background:#2a2438}
+.turn-marker.ally{color:#4af}.turn-marker.enemy{color:#f66}
+#skill-menu,#item-menu{display:none;position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#1a1428ee;border:1px solid #8a7a5a;border-radius:8px;padding:8px;z-index:45;max-width:300px;width:90%}
+#skill-menu h4,#item-menu h4{color:#c4956a;font-size:11px;margin-bottom:4px}
+.skill-btn,.item-btn{display:block;width:100%;padding:6px 8px;margin:2px 0;border:1px solid #5a3a1a;border-radius:4px;background:#2a2438;font-family:inherit;font-size:11px;color:#e8dcc8;cursor:pointer;text-align:left}
+.skill-btn:hover,.item-btn:hover{background:#3a3448}
+.skill-btn:disabled{opacity:.3}
+.item-btn{border-color:#2a5a2a;background:#1a2a1a}
+#status-screen,#save-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0608f0;z-index:60;overflow-y:auto;padding:16px}
+#status-screen h2,#save-screen h2{color:#c4956a;text-align:center;margin-bottom:12px}
+.status-card{background:#1a1428;border:1px solid #5a4a3a;border-radius:8px;padding:10px;margin:8px auto;max-width:400px}
+.status-card h3{color:#FFD700;font-size:14px;margin-bottom:6px}
+.stat-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px solid #2a2438}
+.equip-row{font-size:10px;color:#aaa;padding:2px 0}
+.save-slot{background:#1a1428;border:1px solid #5a4a3a;border-radius:8px;padding:12px;margin:8px auto;max-width:400px;cursor:pointer}
+.save-slot:hover{border-color:#c4956a}
+.save-slot h4{color:#FFD700;font-size:13px}.save-slot p{color:#888;font-size:10px}
+#victory-screen,#defeat-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0608ee;z-index:70;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+#victory-screen.on,#defeat-screen.on{display:flex}
+.victory-rewards{background:#1a1428;border:1px solid #5a4a3a;border-radius:8px;padding:12px;margin:12px auto;max-width:300px;text-align:left}
+.reward-item{font-size:11px;padding:2px 0;color:#aaa}
+.reward-item span{color:#FFD700}
+#menu-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0608dd;z-index:55;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+#menu-overlay.on{display:flex}
+.menu-btn{padding:10px 40px;border:1px solid #5a3a1a;border-radius:6px;font-family:inherit;font-size:14px;font-weight:700;color:#e8dcc8;background:#2a2438;cursor:pointer;min-width:180px}
+.menu-btn:hover{background:#3a3448;border-color:#c4956a}
+#title-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 40%,#2a1a0a,#0a0608);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+@keyframes glow{0%,100%{text-shadow:0 0 20px #c4956a33}50%{text-shadow:0 0 50px #c4956aaa}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.title-text{font-size:clamp(22px,6vw,42px);font-weight:900;background:linear-gradient(180deg,#f4e4c1,#c4956a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:glow 3s infinite}
+.title-sub{font-size:14px;color:#8a7a6a;margin-top:6px;font-style:italic}
+.title-btn{padding:12px 30px;border:1px solid #5a3a1a;border-radius:8px;font-family:inherit;font-size:15px;font-weight:700;color:#e8dcc8;background:#6B1A0A;cursor:pointer;letter-spacing:2px;margin-top:10px}
+.title-btn:active{transform:scale(.96)}
+.title-btn2{background:#2a2a3e;font-size:11px;padding:8px 18px;margin-top:8px}
+.title-info{margin-top:16px;font-size:9px;color:#555;line-height:2.2;max-width:280px}
+.float-dmg{position:absolute;font-weight:900;pointer-events:none;z-index:30;animation:floatUp .8s ease-out forwards;text-shadow:0 1px 3px #000}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}60%{opacity:1;transform:translateY(-30px) scale(1.1)}100%{opacity:0;transform:translateY(-50px) scale(.8)}}
+.dmg-phys{color:#ff6644;font-size:16px}.dmg-magic{color:#aa66ff;font-size:16px}.dmg-heal{color:#44ff66;font-size:16px}.dmg-crit{color:#ffdd00;font-size:20px}.dmg-miss{color:#888;font-size:14px}
+#endurance-game{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0608ee;z-index:65;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+#endurance-game.on{display:flex}
+#endurance-bar{width:200px;height:20px;background:#1a1a2e;border-radius:10px;overflow:hidden;margin:12px auto;border:1px solid #5a4a3a}
+#endurance-fill{height:100%;background:linear-gradient(90deg,#c4956a,#FFD700);border-radius:10px;transition:width .3s;width:0%}
+#cinematic{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:80;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#cinematic.on{display:flex}
+#cin-text{font-size:16px;line-height:2.2;color:#c4956a;max-width:400px;animation:fadeUp 1s ease}
+#cin-sub{font-size:12px;color:#888;margin-top:8px}
+#episode-banner{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0608ee;z-index:75;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#episode-banner.on{display:flex}
+.ep-num{font-size:12px;color:#c4956a;letter-spacing:5px}
+.ep-title{font-size:clamp(20px,5vw,36px);font-weight:900;color:#FFD700;margin:8px 0;animation:fadeUp .8s ease}
+.ep-desc{font-size:12px;color:#8a7a6a;max-width:300px}
+#dpad{display:none;position:fixed;bottom:80px;left:16px;z-index:35;pointer-events:auto}
+.dpad-btn{position:absolute;width:40px;height:40px;border-radius:8px;background:rgba(200,150,100,0.25);border:1px solid rgba(200,150,100,0.4);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.dpad-btn:active{background:rgba(200,150,100,0.5)}
+#chapter-select{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 40%,#1a1408,#0a0608);z-index:90;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px}
+#chapter-select.on{display:flex}
+.ch-card{background:#1a1428;border:2px solid #5a4a3a;border-radius:12px;padding:16px 24px;max-width:320px;width:85%;cursor:pointer;transition:all .2s}
+.ch-card:hover{border-color:#FFD700;background:#2a2438}
+.ch-card.locked{opacity:.4;cursor:not-allowed}
+.ch-card h3{color:#FFD700;font-size:16px;margin-bottom:4px}
+.ch-card p{color:#888;font-size:11px;line-height:1.6}
+.ch-card .ch-status{font-size:10px;margin-top:6px;padding:2px 8px;border-radius:4px;display:inline-block}
+.ch-status.done{background:#2a5a2a;color:#4f4}
+.ch-status.new{background:#5a3a1a;color:#fa0}
+.ch-status.lock{background:#3a2a2a;color:#888}
+#quiz-screen{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0608ee;z-index:65;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+#quiz-screen.on{display:flex}
+.quiz-box{background:#1a1428;border:1px solid #8a7a5a;border-radius:8px;padding:16px;max-width:400px;width:90%}
+.quiz-q{font-size:14px;color:#FFD700;margin-bottom:12px;line-height:1.8}
+.quiz-btn{display:block;width:100%;padding:10px;margin:4px 0;border:1px solid #5a3a1a;border-radius:6px;background:#2a2438;color:#e8dcc8;font-family:inherit;font-size:12px;cursor:pointer;text-align:left}
+.quiz-btn:hover{background:#3a3448;border-color:#c4956a}
+.quiz-btn.correct{background:#2a5a2a;border-color:#4f4}
+.quiz-btn.wrong{background:#5a2a2a;border-color:#f44}
+#ritual-game{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0608ee;z-index:65;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+#ritual-game.on{display:flex}
+.ritual-circle{width:160px;height:160px;border-radius:50%;border:3px solid #c4956a;position:relative;margin:16px auto}
+.ritual-marker{position:absolute;width:16px;height:16px;border-radius:50%;background:#FFD700;top:50%;left:50%;transform:translate(-50%,-50%)}
+.ritual-target{position:absolute;width:24px;height:24px;border-radius:50%;border:2px solid #4f4;top:-12px;left:50%;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<div id="ui">
+  <div id="hud">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span id="hud-stage">1-1 환웅의 강림</span>
+      <span id="hud-info" onclick="toggleMenu()">&#9776; 메뉴</span>
+    </div>
+    <div class="hud-party" id="hud-party"></div>
+  </div>
+  <canvas id="minimap" width="90" height="90"></canvas>
+  <div id="dlg"><div id="dlg-box"><div id="dlg-portrait"></div><div id="dlg-content"><div id="dlg-speaker"></div><div id="dlg-text"></div><div id="dlg-next">&#9660; 터치</div></div></div></div>
+  <div id="battle-ui"><div id="battle-turn-order"></div><div id="battle-info">전투 시작!</div><div id="battle-actions"></div></div>
+  <div id="skill-menu"><h4>기술 선택</h4><div id="skill-list"></div></div>
+  <div id="item-menu"><h4>아이템 사용</h4><div id="item-list"></div></div>
+  <div id="float-container" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden"></div>
+  <div id="victory-screen"><div style="animation:fadeUp .8s ease"><div style="font-size:36px;margin-bottom:6px">&#127942;</div><h2 style="font-size:24px;font-weight:900;background:linear-gradient(180deg,#f4d03f,#c4956a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">전투 승리!</h2><div class="victory-rewards" id="victory-rewards"></div><button class="title-btn" id="victory-btn" onclick="onVictoryContinue()">계속</button></div></div>
+  <div id="defeat-screen"><div><div style="font-size:36px;margin-bottom:6px">&#128128;</div><h2 style="font-size:24px;font-weight:900;color:#e74c3c">패배</h2><p style="color:#888;font-size:12px;margin:8px 0">아군이 모두 쓰러졌습니다...</p><button class="title-btn" onclick="retryStage()">재도전</button><button class="title-btn title-btn2" style="margin-left:8px" onclick="backToTitle()">타이틀로</button></div></div>
+  <div id="menu-overlay"><h3 style="color:#c4956a;margin-bottom:12px">메뉴</h3><button class="menu-btn" onclick="openStatusScreen()">상태 확인</button><button class="menu-btn" onclick="openSaveScreen('save')">저장</button><button class="menu-btn" onclick="openSaveScreen('load')">불러오기</button><button class="menu-btn" onclick="toggleMenu()">닫기</button></div>
+  <div id="status-screen"><h2>파티 상태</h2><div id="status-content"></div><div style="text-align:center;margin-top:12px"><button class="menu-btn" onclick="closeStatusScreen()">닫기</button></div></div>
+  <div id="save-screen"><h2 id="save-title">저장</h2><div id="save-slots"></div><div style="text-align:center;margin-top:12px"><button class="menu-btn" onclick="closeSaveScreen()">닫기</button></div></div>
+  <div id="endurance-game"><h3 style="color:#c4956a">21일 시련</h3><p style="font-size:12px;color:#aaa;margin:8px 0">쑥과 마늘만 먹으며 동굴에서 버텨라!<br>타이밍에 맞춰 터치하여 인내하라!</p><div id="endurance-day" style="font-size:18px;font-weight:900;color:#FFD700;margin:8px 0">1일차</div><div id="endurance-bar"><div id="endurance-fill"></div></div><div id="endurance-prompt" style="font-size:14px;color:#c4956a;margin:8px 0"></div><button class="title-btn" id="endurance-btn" style="display:none">인내!</button></div>
+  <div id="cinematic"><div id="cin-text"></div><div id="cin-sub">터치하여 계속</div></div>
+  <div id="episode-banner"><div class="ep-num"></div><div class="ep-title"></div><div class="ep-desc"></div></div>
+  <div id="chapter-select">
+    <h2 style="color:#c4956a;font-size:18px;letter-spacing:3px">챕터 선택</h2>
+    <div class="ch-card" id="ch1-card" onclick="selectChapter(1)">
+      <h3>챕터 1: 환웅편</h3>
+      <p>환인의 뜻을 받들어 인간 세상으로 내려온 환웅.<br>신시 건설, 범족과의 전쟁, 웅녀와의 만남.</p>
+      <div class="ch-status new" id="ch1-status">시작</div>
+    </div>
+    <div class="ch-card" id="ch2-card" onclick="selectChapter(2)">
+      <h3>챕터 2: 단군편</h3>
+      <p>환웅과 웅녀의 아들 단군왕검.<br>고조선 건국, 아사달 건설, 팔조법금 제정.</p>
+      <div class="ch-status lock" id="ch2-status">&#128274; 챕터1 클리어 필요</div>
+    </div>
+    <button class="title-btn title-btn2" onclick="closeChapterSelect()">뒤로</button>
+  </div>
+  <div id="quiz-screen">
+    <div class="quiz-box">
+      <h3 style="color:#c4956a;margin-bottom:8px">현자의 시험</h3>
+      <div class="quiz-q" id="quiz-question"></div>
+      <div id="quiz-answers"></div>
+    </div>
+  </div>
+  <div id="ritual-game">
+    <h3 style="color:#c4956a">제천의식</h3>
+    <p style="font-size:12px;color:#aaa;margin:8px 0">하늘에 제사를 올려라!<br>빛이 과녁에 올 때 터치하라!</p>
+    <div id="ritual-round" style="font-size:16px;font-weight:900;color:#FFD700;margin:8px 0">1 / 5</div>
+    <div class="ritual-circle" id="ritual-circle">
+      <div class="ritual-target" id="ritual-target"></div>
+      <div class="ritual-marker" id="ritual-marker"></div>
+    </div>
+    <div id="ritual-score" style="font-size:12px;color:#aaa;margin:8px 0">성공: 0</div>
+    <button class="title-btn" id="ritual-btn" onclick="ritualTap()">제사!</button>
+  </div>
+  <div id="title-screen">
+    <div style="animation:fadeUp .8s ease">
+      <div style="font-size:9px;letter-spacing:5px;color:#8a7a6a;margin-bottom:6px">TURN-BASED RPG &middot; BC 2400~2333</div>
+      <h1 class="title-text">한국사 영웅전</h1>
+      <div class="title-sub">v4 &mdash; 1부 고조선 &middot; 환웅편 + 단군편</div>
+      <div style="margin-top:16px"><button class="title-btn" onclick="openChapterSelect()">새 게임</button></div>
+      <div><button class="title-btn title-btn2" onclick="openSaveScreen('load');document.getElementById('title-screen').style.display='none'">이어하기</button></div>
+      <div class="title-info">
+        &#9656; 2개 챕터 &middot; 9개 에피소드 &middot; 보스전<br>
+        &#9656; 병종 상성: 궁병 &gt; 보병 &gt; 기마병 &gt; 궁병<br>
+        &#9656; 레벨 계승 시스템<br>
+        &#9656; 이동: 방향키/WASD/터치<br>
+        &#9656; 역사 고증: 청동기 시대 무기/갑옷
+      </div>
+    </div>
+  </div>
+  <div id="dpad">
+    <div class="dpad-btn" style="top:0;left:40px" onclick="tryMove(0,-1)">&#9650;</div>
+    <div class="dpad-btn" style="top:40px;left:0" onclick="tryMove(-1,0)">&#9664;</div>
+    <div class="dpad-btn" style="top:40px;left:80px" onclick="tryMove(1,0)">&#9654;</div>
+    <div class="dpad-btn" style="top:80px;left:40px" onclick="tryMove(0,1)">&#9660;</div>
+    <div class="dpad-btn" style="top:40px;left:40px;font-size:10px" onclick="interactNearby()">&#9673;</div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// 한국사 영웅전 v4 — 1부 고조선
+// Ch1 환웅편 (5 Episodes) + Ch2 단군편 (4 Episodes)
+// 레벨 계승 시스템
+// =============================================
+const C=document.getElementById('gameCanvas'),X=C.getContext('2d');
+const mmC=document.getElementById('minimap'),mmX=mmC.getContext('2d');
+const T=40;
+const AC=window.AudioContext||window.webkitAudioContext;
+let ac=null,mGain=null,sGain=null;
+function initAudio(){if(ac)return;ac=new AC();mGain=ac.createGain();mGain.gain.value=0.12;mGain.connect(ac.destination);sGain=ac.createGain();sGain.gain.value=0.25;sGain.connect(ac.destination)}
+function pn(f,d,t='square',g=sGain){if(!ac)return;const o=ac.createOscillator(),gn=ac.createGain();o.type=t;o.frequency.setValueAtTime(f,ac.currentTime);gn.gain.setValueAtTime(.25,ac.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(gn);gn.connect(g);o.start();o.stop(ac.currentTime+d)}
+function sfx(t){if(!ac)return;switch(t){case'hit':pn(200,.1,'sawtooth');pn(100,.15);break;case'crit':pn(400,.05,'sawtooth');pn(600,.1);pn(300,.15,'sawtooth');break;case'heal':pn(400,.1,'sine');pn(500,.1,'sine');pn(600,.15,'sine');break;case'miss':pn(150,.2,'sine');break;case'lvl':[400,500,600,800].forEach((f,i)=>setTimeout(()=>pn(f,.2,'sine'),i*100));break;case'vic':[523,659,784,1047].forEach((f,i)=>setTimeout(()=>pn(f,.3,'sine'),i*150));break;case'def':pn(300,.15,'triangle');pn(400,.1,'triangle');break;case'skill':pn(500,.05,'sine');pn(700,.1,'sine');pn(900,.15,'sine');break;case'menu':pn(800,.05,'sine');break;case'sel':pn(600,.08,'sine');pn(900,.08,'sine');break;case'lose':[300,250,200,150].forEach((f,i)=>setTimeout(()=>pn(f,.4,'sawtooth'),i*200));break;case'build':pn(300,.1,'triangle');pn(400,.1,'triangle');pn(500,.15,'triangle');break;case'quest':[600,700,800,900,1000].forEach((f,i)=>setTimeout(()=>pn(f,.15,'sine'),i*80));break}}
+let bgmI=null;
+const BGMP={map:[262,294,330,349,330,294,262,247],battle:[330,330,392,392,440,392,330,262],boss:[220,220,262,220,196,220,262,220],peace:[349,330,294,262,294,330,349,392],kingdom:[262,330,392,523,392,330,262,196],epic:[392,440,523,587,523,440,392,330]};
+function startBGM(p){stopBGM();if(!ac)return;const n=BGMP[p]||BGMP.map;let i=0;bgmI=setInterval(()=>{pn(n[i%n.length],.25,'sine',mGain);i++},300)}
+function stopBGM(){if(bgmI){clearInterval(bgmI);bgmI=null}}
+
+function typeAdv(a,d){const m={'궁병':'a','보병':'i','기마병':'c'};const x=m[a],y=m[d];if(!x||!y)return 1;if((x==='a'&&y==='i')||(x==='i'&&y==='c')||(x==='c'&&y==='a'))return 1.5;if((x==='i'&&y==='a')||(x==='c'&&y==='i')||(x==='a'&&y==='c'))return .75;return 1}
+
+// --- Class Data (v4 expanded) ---
+const CLS={
+'궁병':{e:'🏹',c:'#2a6a3a',sk:[{n:'연사',d:'3회 연속 공격',mp:8,t:'multi',h:3,pw:.6,tg:'single'},{n:'화살비',d:'적 전체 공격',mp:15,t:'aoe',pw:.7,tg:'all'}]},
+'보병':{e:'⚔️',c:'#6a3a2a',sk:[{n:'강타',d:'강력한 일격',mp:6,t:'single',pw:2,tg:'single'},{n:'방패막기',d:'아군 전체 방어+50%',mp:10,t:'buff_def',pw:1.5,tg:'party'}]},
+'기마병':{e:'🐴',c:'#5a4a2a',sk:[{n:'돌진',d:'돌격+기절',mp:10,t:'charge',pw:1.8,st:true,tg:'single'},{n:'기동',d:'아군 속도+30%',mp:8,t:'buff_spd',pw:1.3,tg:'party'}]},
+'신장':{e:'👑',c:'#8a6a2a',sk:[{n:'천부인·뇌',d:'번개 전체 공격',mp:20,t:'aoe',pw:1.5,tg:'all'},{n:'홍익신광',d:'아군 전체 회복',mp:15,t:'heal_all',pw:1,tg:'party'},{n:'천부인·화',d:'단일 강력 공격',mp:12,t:'single',pw:2.5,tg:'single'}]},
+'풍백':{e:'🌬️',c:'#3a5a6a',sk:[{n:'폭풍',d:'적 전체 공격',mp:12,t:'aoe',pw:1.2,tg:'all'},{n:'바람막이',d:'아군 회피 증가',mp:8,t:'buff_eva',pw:1,tg:'party'}]},
+'우사':{e:'🌧️',c:'#2a3a6a',sk:[{n:'폭우',d:'적 전체+속도감소',mp:14,t:'aoe',pw:1,tg:'all'},{n:'치유의 비',d:'아군 회복',mp:10,t:'heal_all',pw:.8,tg:'party'}]},
+'운사':{e:'☁️',c:'#5a5a6a',sk:[{n:'뇌운',d:'강력 단일 공격',mp:10,t:'single',pw:2.2,tg:'single'},{n:'안개',d:'적 명중률 감소',mp:8,t:'debuff_acc',pw:1,tg:'all'}]},
+'웅녀':{e:'🌸',c:'#8a4a6a',sk:[{n:'대지의 축복',d:'아군 전체 회복',mp:12,t:'heal_all',pw:1.2,tg:'party'},{n:'곰의 힘',d:'강력 일격',mp:10,t:'single',pw:2.3,tg:'single'},{n:'생명의 빛',d:'부활+회복',mp:25,t:'revive_skill',pw:1,tg:'single'}]},
+// === 단군편 새 클래스 ===
+'단군':{e:'🏛️',c:'#aa8a2a',sk:[{n:'홍익인간',d:'아군 전체 HP+MP 대회복',mp:25,t:'heal_all',pw:1.8,tg:'party'},{n:'천부인의 힘',d:'적 전체 강력 공격',mp:30,t:'aoe',pw:1.8,tg:'all'},{n:'왕의 명령',d:'아군 ATK/DEF/SPD 버프',mp:20,t:'king_buff',pw:1,tg:'party'}]},
+'신하장군':{e:'⚔️',c:'#6a5a2a',sk:[{n:'진격',d:'강력 돌격',mp:8,t:'charge',pw:2,st:true,tg:'single'},{n:'호령',d:'아군 전체 공격력 증가',mp:12,t:'buff_atk',pw:1.4,tg:'party'}]}
+};
+
+// --- Items (v4 expanded) ---
+const ITEMS={
+'bronze_sword':{n:'동검(비파형)',t:'weapon',atk:5,d:'고조선 대표 무기'},
+'bronze_spear':{n:'동창',t:'weapon',atk:7,def:-1,d:'긴 창'},
+'horn_bow':{n:'각궁',t:'weapon',atk:6,spd:2,d:'뿔로 만든 활'},
+'cheonbuin':{n:'천부인',t:'weapon',atk:12,def:3,spd:3,d:'환인이 내린 신물'},
+'sehyung_sword':{n:'세형동검',t:'weapon',atk:10,spd:1,d:'세형동검'},
+'bronze_axe':{n:'청동도끼',t:'weapon',atk:14,spd:-2,d:'무거운 청동 도끼'},
+'spirit_bow':{n:'신궁',t:'weapon',atk:11,spd:3,d:'신시의 명궁'},
+'leather_armor':{n:'가죽갑',t:'armor',def:4,d:'가죽 갑옷'},
+'wood_armor':{n:'나무갑',t:'armor',def:6,spd:-2,d:'나무 갑옷'},
+'scale_armor':{n:'찰갑',t:'armor',def:8,spd:-3,d:'청동 찰갑'},
+'bear_armor':{n:'곰가죽갑',t:'armor',def:7,atk:2,d:'웅족 전통 갑옷'},
+'divine_robe':{n:'신의',t:'armor',def:5,hp:30,mp:20,d:'천상의 옷'},
+'wolf_fang':{n:'늑대이빨 목걸이',t:'accessory',atk:3,d:'야수의 기운'},
+'jade_ring':{n:'옥반지',t:'accessory',hp:20,mp:10,d:'신비한 옥'},
+'tiger_claw':{n:'호랑이 발톱',t:'accessory',atk:5,spd:2,d:'범족의 전리품'},
+'garlic_charm':{n:'마늘 부적',t:'accessory',def:4,hp:15,d:'시련의 증표'},
+'hp_pot':{n:'회복약',t:'cons',heal:60,d:'HP 60 회복'},
+'hp_pot2':{n:'고급 회복약',t:'cons',heal:150,d:'HP 150 회복'},
+'mp_pot':{n:'마력약',t:'cons',hmp:30,d:'MP 30 회복'},
+'revive':{n:'부활초',t:'cons',rev:true,rpct:.3,d:'부활(HP 30%)'},
+'antidote':{n:'해독제',t:'cons',cure:true,d:'상태이상 해제'},
+'ssuk':{n:'쑥',t:'cons',heal:30,d:'쑥으로 만든 약'},
+'garlic_medicine':{n:'마늘환',t:'cons',heal:20,hmp:15,d:'마늘 정제'},
+// === Ch2 새 아이템 ===
+'cb_mirror':{n:'천부인 거울',t:'accessory',def:8,hp:30,mp:15,d:'마법 방어의 신물. 천부인 3종 중 하나'},
+'cb_sword':{n:'천부인 검',t:'weapon',atk:18,spd:2,def:2,d:'최강의 신물 무기. 천부인 3종 중 하나'},
+'cb_bell':{n:'천부인 방울',t:'accessory',hp:40,mp:25,d:'치유의 신물. 천부인 3종 중 하나'},
+'asadal_armor':{n:'아사달 왕갑',t:'armor',def:12,hp:20,d:'고조선 왕의 갑옷'},
+'trade_silk':{n:'명주',t:'cons',heal:0,d:'교역품 - 비단'},
+'stone_resource':{n:'건설 석재',t:'cons',heal:0,d:'아사달 건설용 석재'},
+'wood_resource':{n:'건설 목재',t:'cons',heal:0,d:'아사달 건설용 목재'},
+'iron_ore':{n:'철광석',t:'cons',heal:0,d:'귀한 광물 자원'},
+'hp_pot3':{n:'최고급 회복약',t:'cons',heal:300,d:'HP 300 회복'},
+'mp_pot2':{n:'고급 마력약',t:'cons',hmp:60,d:'MP 60 회복'},
+'elixir':{n:'영약',t:'cons',heal:9999,hmp:9999,d:'HP+MP 전체 회복'},
+'king_seal':{n:'왕의 옥새',t:'accessory',atk:4,def:4,spd:2,hp:25,mp:15,d:'단군의 인장'}
+};
+
+const TC={0:'#556B2F',1:'#6B8E23',2:'#A08050',3:'#2244aa',4:'#8B6B3A',5:'#3a2510',6:'#4a3560',7:'#f4e4c1',8:'#8B1A0A',9:'#5a4a3a',10:'#2a1a30',11:'#c4956a',12:'#FFD700',13:'#44aa44',14:'#ddeeff',15:'#6a4a2a',16:'#8a7a5a'};
+const TP={0:1,1:1,2:1,3:0,4:0,5:1,6:1,7:1,8:1,9:0,10:0,11:1,12:1,13:1,14:1,15:1,16:1};
+
+function mkCh(id,nm,cl,lv,ally,ex={}){
+  const b={id,nm,cl,lv,exp:0,exn:lv*30+50,mhp:50+lv*12+(ex.hp||0),hp:0,mmp:20+lv*5+(ex.mp||0),mp:0,atk:10+lv*3+(ex.atk||0),def:5+lv*2+(ex.def||0),spd:8+lv+(ex.spd||0),ally,alive:true,defending:false,stunned:false,buffs:[],weapon:ex.weapon||null,armor:ex.armor||null,acc:ex.acc||null,portrait:(CLS[cl]||{}).e||'🧑',_bx:0,_by:0};
+  const w=ITEMS[b.weapon],a=ITEMS[b.armor],c=ITEMS[b.acc];
+  if(w){b.atk+=(w.atk||0);b.def+=(w.def||0);b.spd+=(w.spd||0)}
+  if(a){b.atk+=(a.atk||0);b.def+=(a.def||0);b.spd+=(a.spd||0);b.mhp+=(a.hp||0);b.mmp+=(a.mp||0)}
+  if(c){b.atk+=(c.atk||0);b.def+=(c.def||0);b.spd+=(c.spd||0);b.mhp+=(c.hp||0);b.mmp+=(c.mp||0)}
+  b.hp=b.mhp;b.mp=b.mmp;return b
+}
+function getSk(ch){return(CLS[ch.cl]||{}).sk||[]}
+
+let G={
+  mode:'title',stage:0,party:[],inv:[],gold:0,
+  cleared:[],episode:1,areaIdx:0,chapter:1,
+  mapData:null,mapW:0,mapH:0,px:5,py:5,pdir:0,
+  npcs:[],chests:[],heals:[],
+  camX:0,camY:0,
+  bp:[],be:[],turnOrd:[],tIdx:0,
+  bAction:null,bTarget:null,selSkill:null,selItem:null,
+  bPhase:'select',bAnimT:0,bShake:{x:0,y:0,t:0},
+  waveIdx:0,waves:null,
+  dlgQ:[],dlgI:0,dlgCb:null,dlgTyping:false,dlgLen:0,dlgTimer:0,
+  endDay:0,endHP:100,
+  saveMode:'save',_pm:null,
+  quizCb:null,ritualCb:null,ritualRound:0,ritualSuccess:0,ritualAngle:0
+};
+
+const isMobile='ontouchstart'in window||navigator.maxTouchPoints>0;
+
+// ============================================================
+// EPISODE / AREA DATA
+// ============================================================
+function mkMap(rows){return rows.map(r=>[...r])}
+function E(nm,cl,lv,hp,mp,atk,def,spd,port,sk=[],exp=20,gold=25,boss=false,enrage=0){
+  return{nm,cl,lv,hp,mhp:hp,mp,mmp:mp,atk,def,spd,portrait:port,skills:sk,exp,gold,isBoss:boss,enrageAt:enrage}
+}
+
+const EPISODES=[
+// ═══════════════════════════════════════
+// CH1 EP 1-1: 환웅의 강림
+// ═══════════════════════════════════════
+{
+  ch:1,ep:1,sub:1,title:'환웅의 강림',desc:'환인의 뜻을 받들어 인간 세상으로 내려가다',
+  areas:[
+  {
+    id:'1-1a',name:'천상 궁전',bg:'#0a0828',mus:'peace',bmus:'battle',
+    map:[[9,9,9,9,9,9,9,9,9,9,9,9],[9,14,14,14,14,14,14,14,14,14,14,9],[9,14,11,11,14,14,14,14,11,11,14,9],[9,14,11,7,14,14,14,14,7,11,14,9],[9,14,14,14,14,14,14,14,14,14,14,9],[9,14,14,14,14,11,11,14,14,14,14,9],[9,14,14,14,14,11,11,14,14,14,14,9],[9,14,14,14,14,14,2,14,14,14,14,9],[9,14,14,14,14,14,2,14,14,14,14,9],[9,14,14,14,14,14,13,14,14,14,14,9],[9,9,9,9,9,9,9,9,9,9,9,9]],
+    ps:{x:6,y:9},
+    npcs:[{x:5,y:5,nm:'환인',e:'👴',lines:[
+      {s:'환인',t:'환웅아... 너는 항상 아래 세상을 내려다보는구나.'},
+      {s:'환웅',t:'아버지! 인간들이 곡식을 기를 줄 모르고, 병을 고칠 줄 모르며, 선악을 분별하지 못합니다.'},
+      {s:'환웅',t:'360가지 일을 주관하여 인간을 이롭게 하고 싶습니다!'},
+      {s:'환인',t:'삼위태백을 내려다보니, 가히 홍익인간할 만하구나.'},
+      {s:'환인',t:'이 천부인 셋을 가져가거라. 풍백, 우사, 운사와 함께 내려가라.'},
+      {s:'환인',t:'하지만 먼저, 네 힘을 보여라. 하늘의 시험을 통과해야 한다!'}
+    ],battle:true}],
+    chests:[{x:3,y:3,item:'hp_pot',qty:3}],
+    heals:[{x:6,y:9}],
+    enemies:[[E('천상 수호병','보병',2,40,10,8,3,5,'⚔️',[],15,20),E('천상 수호병','보병',2,40,10,8,3,5,'⚔️',[],15,20),E('천상 궁수','궁병',3,35,10,10,2,7,'🏹',[],18,25)]],
+    rewards:{exp:40,gold:80,items:[{id:'cheonbuin',q:1}]},
+    pre:[{s:'',t:'BC 2400년... 아득히 먼 옛날, 하늘나라.'},{s:'',t:'환인천제의 서자 환웅은 늘 인간 세상을 굽어보았다.'}],
+    post:[{s:'환인',t:'잘 싸웠다! 천부인을 가져가라.'},{s:'환웅',t:'감사합니다, 아버지!'}],
+    recruit:null,initParty:()=>[mkCh('hw','환웅','신장',5,true,{hp:20,mp:10,atk:5,def:3,spd:2,weapon:'bronze_sword',armor:'leather_armor'})]
+  },
+  {
+    id:'1-1b',name:'태백산 강림',bg:'#081828',mus:'map',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,14,14,14,14,14,14,14,14,14,14,4],[4,14,14,2,14,14,14,14,2,14,14,4],[4,14,14,2,14,14,14,14,2,14,14,4],[4,0,0,2,0,0,0,0,2,0,0,4],[4,0,5,2,5,0,0,5,2,5,0,4],[4,0,0,2,0,0,0,0,2,0,0,4],[4,0,5,2,2,2,2,2,2,5,0,4],[4,0,0,0,5,0,0,5,0,0,0,4],[4,0,0,0,0,13,0,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:5,y:1},
+    npcs:[{x:5,y:7,nm:'풍백',e:'🌬️',lines:[
+      {s:'풍백',t:'환웅님! 드디어 인간 세상입니다. 태백산 꼭대기에 도착했습니다.'},
+      {s:'우사',t:'비의 기운이 느껴집니다. 이 땅은 풍요롭겠습니다.'},
+      {s:'운사',t:'하지만 산 아래에 야수의 기운이... 조심하셔야 합니다.'},
+      {s:'환웅',t:'신단수 아래에 신시를 세우자. 먼저 길을 열어라!'}
+    ],battle:true}],
+    chests:[{x:1,y:4,item:'mp_pot',qty:2}],heals:[{x:5,y:9}],
+    enemies:[[E('산신령 수호수','보병',3,50,5,10,5,4,'🌲',[],18,22),E('야생 독수리','기마병',4,40,5,12,3,10,'🦅',[],20,28),E('야생 독수리','기마병',4,40,5,12,3,10,'🦅',[],20,28)]],
+    rewards:{exp:50,gold:100,items:[{id:'horn_bow',q:1}]},
+    pre:[{s:'',t:'환웅은 풍백, 우사, 운사와 무리 3000을 이끌고 태백산 신단수 아래에 내려왔다.'}],
+    post:[{s:'환웅',t:'여기다! 신단수 아래, 이곳에 신시를 세우자!'},{s:'풍백',t:'바람으로 길을 열겠습니다!'}],
+    recruit:['pb','us','un'],initParty:null
+  },
+  {
+    id:'1-1c',name:'신시 건설',bg:'#0a1808',mus:'peace',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,0,0,0,5,0,0,5,0,0,0,4],[4,0,11,11,0,0,0,0,11,11,0,4],[4,0,11,2,2,2,2,2,2,11,0,4],[4,5,0,2,16,16,16,16,2,0,5,4],[4,0,0,2,16,11,11,16,2,0,0,4],[4,0,0,2,16,11,11,16,2,0,0,4],[4,5,0,2,2,2,2,2,2,0,5,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:9},
+    npcs:[{x:5,y:5,nm:'마을 어른',e:'👨‍🌾',lines:[
+      {s:'마을 어른',t:'환웅님! 하늘에서 내려오신 분이시라 들었습니다.'},
+      {s:'마을 어른',t:'저희를 가르쳐 주십시오. 곡식 기르는 법, 병 고치는 법을...'},
+      {s:'환웅',t:'물론이다. 이곳에 신시를 세워 360여 가지 일을 주관하겠다.'},
+      {s:'환웅',t:'하지만 먼저 이 일대의 야수를 정리해야 한다.'},
+      {s:'풍백',t:'북쪽 숲에서 늑대 무리가 내려오고 있습니다!'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'leather_armor',q:1},{x:9,y:2,item:'hp_pot',q:2}],heals:[{x:5,y:9}],
+    enemies:[[E('야생 늑대','기마병',4,45,5,11,3,9,'🐺',[],18,22),E('야생 늑대','기마병',4,45,5,11,3,9,'🐺',[],18,22),E('산돼지','보병',5,65,5,13,6,5,'🐗',[],22,28),E('산돼지','보병',5,65,5,13,6,5,'🐗',[],22,28)]],
+    rewards:{exp:70,gold:120,items:[{id:'wolf_fang',q:1}]},
+    pre:[{s:'',t:'태백산에 신시가 세워지기 시작했다.'},{s:'',t:'하지만 야수 무리가 건설을 방해하고 있었다...'}],
+    post:[{s:'환웅',t:'야수를 물리쳤다! 이제 본격적으로 신시를 세우자.'},{s:'우사',t:'비를 내려 농사를 돕겠습니다.'},{s:'운사',t:'구름으로 날씨를 조절하겠습니다.'},{s:'',t:'이리하여 환웅은 곡식, 생명, 형벌, 질병, 선악 등 360여 가지 일을 주관하며 인간 세상을 다스리기 시작했다.'}],
+    recruit:null,initParty:null
+  }
+  ]
+},
+// ═══════════════════════════════════════
+// CH1 EP 1-2: 범족과의 충돌
+// ═══════════════════════════════════════
+{
+  ch:1,ep:1,sub:2,title:'범족의 위협',desc:'호랑이 부족이 신시를 위협하다',
+  areas:[
+  {
+    id:'1-2a',name:'범족 영토 경계',bg:'#081808',mus:'map',bmus:'battle',
+    map:[[5,5,5,5,5,5,5,5,5,5,5,5],[5,0,0,5,0,0,0,5,0,0,0,5],[5,0,1,0,0,5,0,0,0,1,0,5],[5,5,0,2,2,0,5,0,5,0,2,5],[5,0,0,2,0,0,0,0,0,0,2,5],[5,0,5,2,0,0,0,0,0,5,2,5],[5,0,0,2,2,2,2,2,2,0,2,5],[5,0,0,0,0,0,2,0,0,0,0,5],[5,5,0,0,5,0,2,0,5,0,0,5],[5,0,0,0,0,0,2,0,0,0,0,5],[5,0,0,0,0,13,2,0,0,0,0,5],[5,5,5,5,5,5,5,5,5,5,5,5]],
+    ps:{x:6,y:10},
+    npcs:[{x:6,y:4,nm:'범족 정찰병',e:'🐯',lines:[
+      {s:'범족 정찰병',t:'멈춰라! 여기서부터 범족의 영토다!'},
+      {s:'환웅',t:'우리는 평화를 원한다. 대화로 해결하자.'},
+      {s:'범족 정찰병',t:'대화? 웃기는 소리! 밖에서 온 놈이 우리 땅을 빼앗으려 한다!'},
+      {s:'풍백',t:'환웅님, 대화가 통하지 않습니다!'}
+    ],battle:true}],
+    chests:[{x:1,y:2,item:'mp_pot',qty:2}],heals:[{x:5,y:10}],
+    enemies:[[E('범족 전사','보병',6,75,10,15,6,7,'🐯',[],28,32),E('범족 전사','보병',6,75,10,15,6,7,'🐯',[],28,32),E('범족 전사','보병',6,75,10,15,6,7,'🐯',[],28,32)]],
+    rewards:{exp:80,gold:140,items:[{id:'bronze_spear',q:1}]},
+    pre:[{s:'',t:'신시가 번성하자, 주변 부족들이 움직이기 시작했다.'},{s:'',t:'그 중 범족(호랑이 부족)이 가장 먼저 영토를 주장하며 위협했다.'}],
+    post:[{s:'환웅',t:'정찰병을 물리쳤지만, 이건 시작에 불과하다.'},{s:'운사',t:'더 안쪽에서 범족 병사들이 모이고 있습니다.'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'1-2b',name:'범족 전초기지',bg:'#101808',mus:'battle',bmus:'battle',
+    map:[[5,5,5,5,5,5,5,5,5,5,5,5],[5,8,8,8,5,0,0,5,8,8,8,5],[5,8,15,8,0,0,0,0,8,15,8,5],[5,8,8,2,2,2,2,2,2,8,8,5],[5,0,0,2,0,0,0,0,2,0,0,5],[5,0,0,2,0,8,8,0,2,0,0,5],[5,0,0,2,0,8,8,0,2,0,0,5],[5,0,0,2,2,2,2,2,2,0,0,5],[5,5,0,0,0,0,2,0,0,0,5,5],[5,0,0,0,5,0,2,0,5,0,0,5],[5,0,0,0,0,13,2,0,0,0,0,5],[5,5,5,5,5,5,5,5,5,5,5,5]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'범족 대장',e:'🐅',lines:[
+      {s:'범족 대장',t:'환웅이란 놈이 우리 정찰병을 쓰러뜨렸다고?'},
+      {s:'범족 대장',t:'내가 직접 상대해주겠다!'},
+      {s:'환웅',t:'전쟁을 원하지 않는다. 함께 살 수는 없는가?'},
+      {s:'범족 대장',t:'약한 소리! 이 산은 우리 것이다!'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'sehyung_sword',q:1},{x:9,y:2,item:'hp_pot',q:3}],heals:[{x:5,y:10}],
+    enemies:[[E('범족 전사','보병',7,85,10,17,7,7,'🐯',[],30,35),E('범족 전사','보병',7,85,10,17,7,7,'🐯',[],30,35),E('범족 사냥꾼','궁병',7,65,15,18,5,10,'🏹',[],32,38),E('범족 사냥꾼','궁병',7,65,15,18,5,10,'🏹',[],32,38)],[E('범족 대장','기마병',9,140,20,22,10,9,'🐅',[{n:'맹수의 발톱',t:'single',pw:2,mp:8}],65,80,true,.3)]],
+    rewards:{exp:110,gold:200,items:[{id:'tiger_claw',q:1}]},
+    pre:[{s:'',t:'범족의 전초기지에 도달했다. 대장이 기다리고 있다.'}],
+    post:[{s:'환웅',t:'범족 대장을 물리쳤다!'},{s:'범족 대장',t:'으으... 하지만 부족장님이 가만 두지 않을 것이다...'},{s:'우사',t:'환웅님, 이 근처에 또 다른 부족이 있습니다. 곰 부족이라 합니다.'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'1-2c',name:'범족 약탈 마을',bg:'#0a1008',mus:'map',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,0,0,15,0,0,0,0,15,0,0,4],[4,0,15,0,0,0,0,0,0,15,0,4],[4,0,0,2,2,2,2,2,2,0,0,4],[4,0,0,2,0,0,0,0,2,0,0,4],[4,0,0,2,0,15,15,0,2,0,0,4],[4,0,0,2,0,15,15,0,2,0,0,4],[4,0,0,2,2,2,2,2,2,0,0,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'마을 주민',e:'👩',lines:[
+      {s:'마을 주민',t:'환웅님! 범족이 우리 마을을 약탈하고 갔습니다...'},
+      {s:'마을 주민',t:'아이들이 무서워 떨고 있어요.'},
+      {s:'환웅',t:'걱정마라. 반드시 범족의 횡포를 막겠다.'},
+      {s:'풍백',t:'환웅님! 범족 잔당이 아직 마을 근처에 있습니다!'}
+    ],battle:true}],
+    chests:[{x:1,y:1,item:'hp_pot2',q:1},{x:10,y:1,item:'wood_armor',q:1}],heals:[{x:5,y:10}],
+    enemies:[[E('범족 약탈병','보병',7,70,10,16,5,8,'🐯',[],25,30),E('범족 약탈병','보병',7,70,10,16,5,8,'🐯',[],25,30),E('범족 약탈병','기마병',7,60,10,14,4,11,'🐯',[],25,30)]],
+    rewards:{exp:70,gold:130,items:[{id:'ssuk',q:5}]},
+    pre:[{s:'',t:'범족에게 약탈당한 마을이 보인다.'}],
+    post:[{s:'마을 주민',t:'감사합니다! 환웅님은 정말 하늘이 보내신 분입니다.'},{s:'환웅',t:'범족 부족장을 만나기 전에, 곰 부족과 먼저 만나야 할 것 같다.'},{s:'',t:'에피소드 1-2 완료. 범족의 위협은 여전하다...'}],
+    recruit:null,initParty:null
+  }
+  ]
+},
+// ═══════════════════════════════════════
+// CH1 EP 1-3: 웅족과 동맹
+// ═══════════════════════════════════════
+{
+  ch:1,ep:1,sub:3,title:'웅족의 시련',desc:'곰 부족과의 동맹, 쑥과 마늘의 21일',
+  areas:[
+  {
+    id:'1-3a',name:'웅족 마을',bg:'#0a1410',mus:'peace',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,0,0,0,5,0,0,5,0,0,0,4],[4,0,15,15,0,0,0,0,15,15,0,4],[4,0,15,2,2,2,2,2,2,15,0,4],[4,5,0,2,0,0,0,0,2,0,5,4],[4,0,0,2,0,1,1,0,2,0,0,4],[4,0,0,2,0,1,1,0,2,0,0,4],[4,5,0,2,2,2,2,2,2,0,5,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'웅족 족장',e:'🐻',lines:[
+      {s:'웅족 족장',t:'환웅님... 하늘에서 오신 분이시라 들었습니다.'},
+      {s:'웅족 족장',t:'저희 웅족은 오래전부터 인간이 되고 싶었습니다.'},
+      {s:'환웅',t:'진심인가? 인간이 된다는 것은 쉽지 않은 일이다.'},
+      {s:'웅족 족장',t:'무엇이든 하겠습니다! 시련이 있다면 받아들이겠습니다.'},
+      {s:'환웅',t:'좋다. 하지만 먼저 너희의 결의를 보여라.'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'bear_armor',q:1}],heals:[{x:5,y:10}],
+    enemies:[[E('시험의 환영','보병',8,80,10,16,6,7,'👻',[],30,35),E('시험의 환영','기마병',8,60,10,14,4,10,'👻',[],30,35),E('시험의 환영','궁병',8,55,10,18,3,11,'👻',[],30,35)]],
+    rewards:{exp:85,gold:150,items:[{id:'garlic_medicine',q:5}]},
+    pre:[{s:'',t:'웅족(곰 부족)의 마을에 도착했다.'},{s:'',t:'웅족은 환웅에게 인간이 되고 싶다고 간청한다.'}],
+    post:[{s:'환웅',t:'좋다. 너희의 결의를 확인했다.'},{s:'환웅',t:'이제 진정한 시련을 줄 것이다. 동굴로 가자.'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'1-3b',name:'시련의 동굴',bg:'#0a0818',mus:'map',bmus:'battle',
+    map:[[10,10,10,10,10,10,10,10,10,10,10,10],[10,6,6,6,10,6,6,6,10,6,6,10],[10,6,6,6,6,6,10,6,6,6,10,10],[10,6,10,6,6,6,10,6,6,10,6,10],[10,6,6,2,2,2,6,6,6,6,6,10],[10,6,6,2,6,6,6,6,6,6,10,10],[10,10,6,2,6,6,6,6,6,6,6,10],[10,6,6,2,2,2,2,2,6,6,6,10],[10,6,6,6,6,6,6,2,6,6,10,10],[10,6,6,6,10,6,6,2,6,6,6,10],[10,6,6,6,6,6,13,2,6,6,6,10],[10,10,10,10,10,10,10,10,10,10,10,10]],
+    ps:{x:7,y:10},
+    npcs:[{x:3,y:4,nm:'웅녀(곰)',e:'🐻',lines:[
+      {s:'웅녀(곰)',t:'환웅님... 저는 준비되었습니다.'},
+      {s:'환웅',t:'이 쑥 한 다발과 마늘 스무 쪽을 주겠다.'},
+      {s:'환웅',t:'이것만 먹으며 21일을 이 동굴에서 견뎌라.'},
+      {s:'환웅',t:'햇빛을 보지 말고, 동굴 밖으로 나가지 마라.'},
+      {s:'웅녀(곰)',t:'반드시 해내겠습니다!'},
+      {s:'환웅',t:'호랑이도 같은 시련을 받을 것이다.'}
+    ],endurance:true}],
+    chests:[{x:1,y:1,item:'revive',q:1},{x:10,y:1,item:'mp_pot',q:3}],heals:[{x:6,y:10}],
+    enemies:[],rewards:{exp:50,gold:80,items:[{id:'garlic_charm',q:1}]},
+    pre:[{s:'',t:'깊은 동굴 안... 시련이 시작된다.'},{s:'',t:'쑥과 마늘만 먹으며 21일을 버텨야 한다.'}],
+    post:[{s:'',t:'21일의 시련이 끝났다!'},{s:'',t:'곰은 아름다운 여인으로 변했다. 이가 웅녀이다.'},{s:'',t:'호랑이는 참지 못하고 동굴을 뛰쳐나갔다.'},{s:'웅녀',t:'환웅님... 감사합니다. 저는 드디어 인간이 되었습니다!'},{s:'환웅',t:'웅녀... 너의 인내에 감탄한다. 함께 이 세상을 지키자.'}],
+    recruit:'ung',initParty:null,hasEndurance:true
+  },
+  {
+    id:'1-3c',name:'웅녀의 시험전',bg:'#0a1418',mus:'battle',bmus:'battle',
+    map:[[10,10,10,10,10,10,10,10,10,10,10,10],[10,6,6,6,6,6,6,6,6,6,6,10],[10,6,6,6,6,6,6,6,6,6,6,10],[10,6,6,8,8,8,8,8,8,6,6,10],[10,6,6,8,6,6,6,6,8,6,6,10],[10,6,6,8,6,6,6,6,8,6,6,10],[10,6,6,8,6,6,6,6,8,6,6,10],[10,6,6,8,8,8,2,8,8,6,6,10],[10,6,6,6,6,6,2,6,6,6,6,10],[10,6,6,6,6,6,2,6,6,6,6,10],[10,6,6,6,6,13,2,6,6,6,6,10],[10,10,10,10,10,10,10,10,10,10,10,10]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'동굴 마물',e:'💀',lines:[
+      {s:'',t:'동굴 깊은 곳에서 마물의 기운이 느껴진다...'},{s:'웅녀',t:'제가 함께 싸우겠습니다! 곰의 힘은 아직 남아 있습니다!'},{s:'풍백',t:'조심하십시오!'}
+    ],battle:true}],
+    chests:[{x:3,y:3,item:'hp_pot2',q:2}],heals:[{x:5,y:10}],
+    enemies:[[E('동굴 박쥐','기마병',8,45,5,14,3,12,'🦇',[],20,20),E('동굴 박쥐','기마병',8,45,5,14,3,12,'🦇',[],20,20),E('거대 거미','보병',9,95,10,17,8,6,'🕷️',[{n:'독 물기',t:'single',pw:1.5,mp:5}],35,40),E('거대 거미','보병',9,95,10,17,8,6,'🕷️',[{n:'독 물기',t:'single',pw:1.5,mp:5}],35,40)]],
+    rewards:{exp:100,gold:170,items:[{id:'jade_ring',q:1}]},
+    pre:[{s:'',t:'웅녀가 동료로 합류했다. 동굴 깊은 곳의 마물을 처치하자.'}],
+    post:[{s:'환웅',t:'웅녀, 훌륭하다. 이제 함께 범족에 맞서자.'},{s:'웅녀',t:'네! 저의 대지의 힘으로 아군을 지키겠습니다.'},{s:'풍백',t:'환웅님! 범족 부족장이 대군을 이끌고 움직이기 시작했습니다!'},{s:'환웅',t:'마지막 결전을 준비하자.'}],
+    recruit:null,initParty:null
+  }
+  ]
+},
+// ═══════════════════════════════════════
+// CH1 EP 1-4: 최종 결전
+// ═══════════════════════════════════════
+{
+  ch:1,ep:1,sub:4,title:'범족과의 최종 결전',desc:'환웅+웅녀+동료 vs 범족 부족장',
+  areas:[
+  {
+    id:'1-4a',name:'신시 방어전',bg:'#180808',mus:'boss',bmus:'boss',
+    map:[[9,9,9,9,9,9,9,9,9,9,9,9],[9,8,8,8,0,0,0,0,8,8,8,9],[9,8,0,0,0,0,0,0,0,0,8,9],[9,8,0,2,2,2,2,2,2,0,8,9],[9,0,0,2,8,8,8,8,2,0,0,9],[9,0,0,2,8,11,11,8,2,0,0,9],[9,0,0,2,8,11,11,8,2,0,0,9],[9,8,0,2,2,2,2,2,2,0,8,9],[9,8,0,0,0,0,2,0,0,0,8,9],[9,8,8,0,0,0,2,0,0,8,8,9],[9,8,8,8,0,13,2,0,8,8,8,9],[9,9,9,9,9,9,9,9,9,9,9,9]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'범족 선봉대장',e:'🐅',lines:[
+      {s:'범족 선봉대장',t:'범족 대군이 왔다! 신시를 불태워라!'},{s:'환웅',t:'신시를 지켜라! 모두 전투 태세!'},{s:'웅녀',t:'제가 함께 싸우겠습니다!'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'hp_pot2',q:3}],heals:[{x:5,y:10}],
+    enemies:[[E('범족 돌격병','기마병',10,100,10,20,8,10,'🐯',[],35,40),E('범족 돌격병','기마병',10,100,10,20,8,10,'🐯',[],35,40),E('범족 전사','보병',10,110,10,22,10,7,'🐯',[],35,40),E('범족 궁수','궁병',10,80,15,24,5,12,'🏹',[{n:'독화살',t:'single',pw:1.5,mp:6}],38,45)],[E('범족 선봉대장','기마병',12,180,25,26,12,10,'🐅',[{n:'호랑이 돌진',t:'single',pw:2,mp:10,st:true},{n:'포효',t:'aoe',pw:1.2,mp:15}],80,120,true,.3)]],
+    rewards:{exp:140,gold:250,items:[{id:'scale_armor',q:1}]},
+    pre:[{s:'',t:'범족 대군이 신시를 포위했다!'},{s:'',t:'최후의 결전이 시작된다!'}],
+    post:[{s:'환웅',t:'선봉대를 물리쳤다! 하지만 부족장이 아직 남았다.'},{s:'운사',t:'부족장이 정예병과 함께 산 정상에서 내려오고 있습니다!'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'1-4b',name:'태백산 결전장',bg:'#200808',mus:'boss',bmus:'boss',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,8,8,8,8,8,8,8,8,8,8,4],[4,8,0,0,0,0,0,0,0,0,8,4],[4,8,0,8,8,2,2,8,8,0,8,4],[4,8,0,8,0,0,0,0,8,0,8,4],[4,8,0,2,0,0,0,0,2,0,8,4],[4,8,0,2,0,0,0,0,2,0,8,4],[4,8,0,8,8,2,2,8,8,0,8,4],[4,8,0,0,0,0,2,0,0,0,8,4],[4,8,8,0,0,0,2,0,0,8,8,4],[4,8,8,8,0,13,2,0,8,8,8,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'범족 부족장',e:'🐯',lines:[
+      {s:'범족 부족장',t:'환웅! 드디어 만났구나!'},{s:'범족 부족장',t:'이 산의 주인은 오직 범족이다! 호랑이의 분노를 받아라!'},{s:'환웅',t:'무력으로는 아무것도 얻을 수 없다.'},{s:'환웅',t:'하지만 평화를 지키기 위해서라면, 싸우겠다!'},{s:'웅녀',t:'환웅님, 함께합니다!'},{s:'풍백',t:'최종 결전입니다!'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'hp_pot2',q:2},{x:9,y:2,item:'revive',q:1}],heals:[{x:5,y:10}],
+    enemies:[
+      [E('범족 정예','기마병',11,120,15,24,10,11,'🐅',[{n:'맹수 돌진',t:'single',pw:1.8,mp:8}],45,55),E('범족 정예','보병',11,130,15,22,12,8,'🐅',[],45,55),E('범족 정예','궁병',11,100,15,26,7,12,'🏹',[{n:'독화살',t:'single',pw:1.5,mp:6}],45,55)],
+      [E('범족 부족장','기마병',14,350,50,32,15,11,'🐯',[{n:'호왕의 포효',t:'aoe',pw:1.4,mp:15},{n:'맹호 돌격',t:'single',pw:2.5,mp:12},{n:'야수의 분노',t:'single',pw:3,mp:20}],180,350,true,.3)]
+    ],
+    rewards:{exp:220,gold:400,items:[{id:'bronze_axe',q:1}]},
+    pre:[{s:'',t:'태백산 정상... 범족 부족장이 기다리고 있다.'},{s:'',t:'이것이 최후의 결전이다!'}],
+    post:[{s:'',t:'범족 부족장이 쓰러졌다!'},{s:'범족 부족장',t:'으으... 이것이 호랑이의 한계란 말인가...'},{s:'범족 부족장',t:'시련을 견디지 못한 내가... 부끄럽구나.'},{s:'환웅',t:'범족이여, 더 이상 싸움은 없다. 함께 살자.'},{s:'',t:'범족은 흩어져 산 속으로 사라졌다. 전쟁이 끝났다.'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'1-4c',name:'승리의 신시',bg:'#0a1808',mus:'peace',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,0,1,1,0,0,0,0,1,1,0,4],[4,1,11,11,1,0,0,1,11,11,1,4],[4,1,11,7,2,2,2,2,7,11,1,4],[4,0,1,2,16,16,16,16,2,1,0,4],[4,0,0,2,16,11,11,16,2,0,0,4],[4,0,0,2,16,11,11,16,2,0,0,4],[4,0,1,2,2,2,2,2,2,1,0,4],[4,1,1,0,0,0,2,0,0,1,1,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'웅녀',e:'🌸',lines:[
+      {s:'웅녀',t:'환웅님... 전쟁이 끝났습니다.'},{s:'환웅',t:'그래. 이제 진정한 평화가 왔다.'},{s:'웅녀',t:'저와 함께... 이 땅을 지켜주시겠습니까?'},{s:'환웅',t:'웅녀... 함께 이 세상을 다스리자.'},{s:'',t:'환웅과 웅녀는 혼인하였다.'}
+    ]}],
+    chests:[{x:2,y:2,item:'divine_robe',q:1},{x:9,y:2,item:'spirit_bow',q:1}],heals:[{x:5,y:10}],
+    enemies:[],rewards:{exp:100,gold:200,items:[]},
+    pre:[{s:'',t:'전쟁이 끝나고 신시에 평화가 찾아왔다.'},{s:'',t:'환웅과 웅녀 사이에 깊은 유대가 생겼다.'}],
+    post:[{s:'',t:'환웅과 웅녀의 혼인으로 신시는 더욱 번성했다.'},{s:'',t:'그리고 얼마 후...'}],
+    recruit:null,initParty:null,noFight:true
+  }
+  ]
+},
+// ═══════════════════════════════════════
+// CH1 EP 1-5: 단군 탄생
+// ═══════════════════════════════════════
+{
+  ch:1,ep:1,sub:5,title:'단군왕검의 탄생',desc:'고조선 건국, 홍익인간의 시작',
+  areas:[
+  {
+    id:'1-5a',name:'신시 궁전',bg:'#181008',mus:'peace',bmus:'battle',
+    map:[[9,9,9,9,9,9,9,9,9,9,9,9],[9,11,11,11,11,11,11,11,11,11,11,9],[9,11,7,7,11,11,11,11,7,7,11,9],[9,11,7,11,2,2,2,2,11,7,11,9],[9,11,11,2,11,11,11,11,2,11,11,9],[9,11,11,2,11,7,7,11,2,11,11,9],[9,11,11,2,11,7,7,11,2,11,11,9],[9,11,11,2,2,2,2,2,2,11,11,9],[9,11,11,11,0,0,2,0,11,11,11,9],[9,11,11,11,0,0,2,0,11,11,11,9],[9,11,11,11,0,13,2,0,11,11,11,9],[9,9,9,9,9,9,9,9,9,9,9,9]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'웅녀',e:'🌸',lines:[
+      {s:'웅녀',t:'환웅님... 기쁜 소식이 있습니다.'},{s:'환웅',t:'무슨 소식인가?'},{s:'웅녀',t:'저희에게 아이가 생겼습니다!'},{s:'환웅',t:'정말인가! 이 아이가 새 시대를 열 것이다!'},{s:'풍백',t:'하늘의 축복입니다!'},{s:'우사',t:'비가 내려 대지를 적시듯, 아이에게 축복을!'},{s:'운사',t:'구름이 보호하듯, 이 아이를 지키겠습니다.'}
+    ]}],
+    chests:[{x:2,y:2,item:'hp_pot2',q:3},{x:9,y:2,item:'mp_pot',q:3}],heals:[{x:5,y:10}],
+    enemies:[],rewards:{exp:50,gold:100,items:[]},
+    pre:[{s:'',t:'혼인 후 시간이 흘렀다...'},{s:'',t:'신시는 번성하고, 환웅의 다스림 아래 평화가 계속되었다.'}],
+    post:[{s:'',t:'아이가 태어나기 전, 마지막 시련이 찾아왔다.'}],
+    recruit:null,initParty:null,noFight:true
+  },
+  {
+    id:'1-5b',name:'마지막 마물',bg:'#100818',mus:'boss',bmus:'boss',
+    map:[[10,10,10,10,10,10,10,10,10,10,10,10],[10,6,6,6,6,6,6,6,6,6,6,10],[10,6,8,8,6,6,6,6,8,8,6,10],[10,6,8,6,2,2,2,2,6,8,6,10],[10,6,6,2,6,6,6,6,2,6,6,10],[10,6,6,2,6,8,8,6,2,6,6,10],[10,6,6,2,6,8,8,6,2,6,6,10],[10,6,6,2,2,2,2,2,2,6,6,10],[10,6,6,6,6,6,2,6,6,6,6,10],[10,6,6,6,6,6,2,6,6,6,6,10],[10,6,6,6,6,13,2,6,6,6,6,10],[10,10,10,10,10,10,10,10,10,10,10,10]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'혼돈의 마물',e:'👹',lines:[
+      {s:'',t:'동굴 깊은 곳에서 거대한 마물이 나타났다!'},{s:'혼돈의 마물',t:'새로운 생명이 태어나기 전에... 이 세상을 혼돈에 빠뜨리겠다!'},{s:'환웅',t:'그럴 수 없다! 내 아이와 이 세상을 지키겠다!'},{s:'웅녀',t:'함께 싸우겠습니다!'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'revive',q:2}],heals:[{x:5,y:10}],
+    enemies:[[E('혼돈의 하수인','보병',12,100,15,22,10,8,'👻',[],40,50),E('혼돈의 하수인','기마병',12,85,15,20,7,12,'👻',[],40,50),E('혼돈의 하수인','궁병',12,75,15,24,6,13,'👻',[],40,50)],[E('혼돈의 마물','보병',16,400,60,35,16,10,'👹',[{n:'혼돈의 파동',t:'aoe',pw:1.5,mp:18},{n:'암흑 일격',t:'single',pw:2.8,mp:14},{n:'생명 흡수',t:'drain',pw:2,mp:20}],200,400,true,.25)]],
+    rewards:{exp:250,gold:500,items:[]},
+    pre:[{s:'',t:'아이가 태어나기 직전, 태백산 깊은 곳에서 마물이 나타났다.'},{s:'',t:'새 시대의 시작을 막으려는 혼돈의 존재...'}],
+    post:[{s:'',t:'혼돈의 마물이 소멸했다!'},{s:'환웅',t:'이 세상에 어둠은 더 이상 없다.'},{s:'웅녀',t:'환웅님... 아이가...!'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'1-5c',name:'단군왕검 탄생',bg:'#181408',mus:'peace',bmus:'battle',
+    map:[[9,9,9,9,9,9,9,9,9,9,9,9],[9,11,11,11,11,11,11,11,11,11,11,9],[9,11,7,7,7,11,11,7,7,7,11,9],[9,11,7,12,7,2,2,7,12,7,11,9],[9,11,7,7,2,11,11,2,7,7,11,9],[9,11,11,2,11,7,7,11,2,11,11,9],[9,11,11,2,11,7,7,11,2,11,11,9],[9,11,11,2,2,2,2,2,2,11,11,9],[9,11,11,11,11,11,2,11,11,11,11,9],[9,11,11,11,11,11,2,11,11,11,11,9],[9,11,11,11,11,13,2,11,11,11,11,9],[9,9,9,9,9,9,9,9,9,9,9,9]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'단군왕검',e:'👶',lines:[
+      {s:'',t:'환웅과 웅녀 사이에서 아들이 태어났다.'},{s:'',t:'이름하여 단군왕검.'},{s:'환웅',t:'이 아이가 새 나라를 세울 것이다.'},{s:'웅녀',t:'홍익인간... 널리 인간 세상을 이롭게 하라.'},{s:'풍백',t:'하늘과 땅의 뜻이 이 아이에게 깃들었습니다.'},{s:'',t:'BC 2333년, 단군왕검은 자라서 아사달에 도읍을 정하리라.'},{s:'',t:'— 챕터1 환웅편 완 —'},{s:'',t:'레벨과 장비는 챕터2 단군편으로 계승됩니다.'}
+    ]}],
+    chests:[],heals:[{x:5,y:10}],
+    enemies:[],rewards:{exp:0,gold:0,items:[]},
+    pre:[],post:[],
+    recruit:null,initParty:null,noFight:true,isFinal:true,finalChapter:1
+  }
+  ]
+},
+
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// CHAPTER 2: 단군편 — 4 Episodes
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════
+// CH2 EP 2-1: 단군의 성장
+// ═══════════════════════════════════════
+{
+  ch:2,ep:2,sub:1,title:'단군의 성장',desc:'환웅과 웅녀의 아들, 태백산에서 성장하다',
+  areas:[
+  {
+    id:'2-1a',name:'태백산 수련장',bg:'#0a1818',mus:'peace',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,0,5,0,0,1,1,0,0,5,0,4],[4,5,0,0,1,0,0,1,0,0,5,4],[4,0,0,2,2,2,2,2,2,0,0,4],[4,0,1,2,0,0,0,0,2,1,0,4],[4,1,0,2,0,1,1,0,2,0,1,4],[4,1,0,2,0,1,1,0,2,0,1,4],[4,0,1,2,2,2,2,2,2,1,0,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,5,0,0,0,0,2,0,0,0,5,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'환웅',e:'👑',lines:[
+      {s:'',t:'세월이 흘러, 단군왕검은 태백산에서 성장했다.'},
+      {s:'환웅',t:'왕검아, 네가 이 땅의 왕이 될 것이다.'},
+      {s:'단군',t:'아버지, 저에게 부족한 점이 많습니다.'},
+      {s:'환웅',t:'아니다. 너에게는 하늘의 피와 땅의 의지가 있다.'},
+      {s:'환웅',t:'오늘 너의 실력을 시험하겠다. 무예를 보여라!'},
+      {s:'웅녀',t:'왕검아, 힘만이 아닌 지혜로 다스리는 법을 기억하렴.'},
+      {s:'단군',t:'네, 어머니. 홍익인간의 뜻을 잊지 않겠습니다!'}
+    ],battle:true}],
+    chests:[{x:1,y:1,item:'hp_pot2',q:2},{x:10,y:1,item:'mp_pot',q:3}],heals:[{x:5,y:10}],
+    enemies:[[E('수련용 허수아비','보병',12,80,0,12,5,4,'🎯',[],20,15),E('수련용 허수아비','궁병',12,60,0,10,3,6,'🎯',[],20,15),E('수련용 허수아비','기마병',12,70,0,11,4,8,'🎯',[],20,15)]],
+    rewards:{exp:60,gold:80,items:[{id:'cb_sword',q:1}]},
+    pre:[{s:'',t:'BC 2370년... 단군왕검이 성인이 되었다.'},{s:'',t:'환웅은 아들에게 천부인 3종을 물려주기로 결심한다.'}],
+    post:[{s:'환웅',t:'훌륭하다, 왕검! 너는 내 뒤를 이을 자격이 있다.'},{s:'환웅',t:'이 천부인 3종을 너에게 물려주겠다.'},{s:'환웅',t:'천부인 거울 — 적의 마법을 막는 신물.'},{s:'환웅',t:'천부인 검 — 정의를 집행하는 최강의 무기.'},{s:'환웅',t:'천부인 방울 — 생명을 치유하는 신물.'},{s:'단군',t:'아버지의 뜻을 받들어, 이 땅에 나라를 세우겠습니다!'}],
+    recruit:null,
+    initParty:null, // Will be set by chapter inheritance
+    ch2Init:true // Flag for Ch2 party initialization
+  },
+  {
+    id:'2-1b',name:'신하 합류',bg:'#081820',mus:'map',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,0,0,5,0,0,0,0,5,0,0,4],[4,0,0,0,1,0,0,1,0,0,0,4],[4,5,0,2,2,2,2,2,2,0,5,4],[4,0,0,2,0,0,0,0,2,0,0,4],[4,0,0,2,0,11,11,0,2,0,0,4],[4,0,0,2,0,11,11,0,2,0,0,4],[4,5,0,2,2,2,2,2,2,0,5,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'비왕장군',e:'⚔️',lines:[
+      {s:'비왕장군',t:'단군님! 저는 비왕이라 합니다. 환웅님의 명으로 섬기겠습니다.'},
+      {s:'단군',t:'반갑다, 비왕. 함께 새 나라를 세우자.'},
+      {s:'비왕장군',t:'산 아래에서 도적들이 마을을 노리고 있습니다!'},
+      {s:'비왕장군',t:'먼저 그들을 처리해야 합니다.'},
+      {s:'단군',t:'좋다. 백성을 지키는 것이 왕의 첫 임무다!'}
+    ],battle:true}],
+    chests:[{x:1,y:1,item:'cb_mirror',q:1},{x:10,y:1,item:'cb_bell',q:1}],heals:[{x:5,y:10}],
+    enemies:[[E('산적 두목','보병',14,130,15,26,10,8,'🗡️',[{n:'흉칼',t:'single',pw:1.8,mp:6}],40,50),E('산적','보병',13,100,10,22,8,7,'🗡️',[],30,35),E('산적','궁병',13,80,10,24,5,10,'🏹',[],30,35),E('산적','기마병',13,90,10,20,6,12,'🗡️',[],30,35)]],
+    rewards:{exp:120,gold:200,items:[{id:'king_seal',q:1}]},
+    pre:[{s:'',t:'환웅의 부하들이 단군의 신하로 합류한다.'}],
+    post:[{s:'단군',t:'산적을 물리쳤다! 이제 백성들이 안전하다.'},{s:'비왕장군',t:'단군님의 무력은 환웅님에 못지않습니다!'},{s:'단군',t:'새 나라의 수도를 세울 곳을 찾아야 한다. 아사달로 가자!'}],
+    recruit:'biwang',initParty:null
+  },
+  {
+    id:'2-1c',name:'아사달 가는 길',bg:'#081018',mus:'map',bmus:'battle',
+    map:[[5,5,5,5,5,5,5,5,5,5,5,5],[5,0,0,5,0,0,0,0,5,0,0,5],[5,0,1,0,1,0,0,1,0,1,0,5],[5,0,0,2,2,2,2,2,2,0,0,5],[5,5,0,2,0,0,0,0,2,0,5,5],[5,0,0,2,0,5,5,0,2,0,0,5],[5,0,0,2,0,0,0,0,2,0,0,5],[5,0,0,2,2,2,2,2,2,0,0,5],[5,0,1,0,0,0,2,0,0,1,0,5],[5,0,0,0,0,0,2,0,0,0,0,5],[5,0,0,0,0,13,2,0,0,0,0,5],[5,5,5,5,5,5,5,5,5,5,5,5]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'예맥족 전사',e:'🛡️',lines:[
+      {s:'예맥족 전사',t:'누구냐! 이곳은 예맥족의 땅이다!'},
+      {s:'단군',t:'나는 단군왕검이다. 평화를 원한다.'},
+      {s:'예맥족 전사',t:'환웅의 아들? 너의 힘을 보여라!'},
+      {s:'비왕장군',t:'단군님, 전투 준비 완료입니다!'}
+    ],battle:true}],
+    chests:[{x:1,y:2,item:'hp_pot2',q:2}],heals:[{x:5,y:10}],
+    enemies:[[E('예맥족 전사','보병',14,120,15,25,10,8,'🛡️',[],35,40),E('예맥족 전사','보병',14,120,15,25,10,8,'🛡️',[],35,40),E('예맥족 궁수','궁병',14,90,15,28,6,12,'🏹',[{n:'독화살',t:'single',pw:1.5,mp:6}],35,40)],[E('예맥족 족장','기마병',16,200,30,30,12,10,'🛡️',[{n:'돌격',t:'charge',pw:2,mp:10,st:true},{n:'전쟁의 함성',t:'aoe',pw:1.2,mp:15}],100,150,true,.3)]],
+    rewards:{exp:160,gold:300,items:[{id:'asadal_armor',q:1}]},
+    pre:[{s:'',t:'아사달로 향하는 길... 예맥족의 영토를 지나야 한다.'}],
+    post:[{s:'예맥족 족장',t:'대단하다... 환웅의 아들답다.'},{s:'단군',t:'함께 하지 않겠는가? 모든 부족이 하나 되는 나라를 만들 것이다.'},{s:'예맥족 족장',t:'홍익인간... 좋다. 함께하겠다.'},{s:'',t:'예맥족이 단군에게 복속했다. 아사달이 눈앞이다!'}],
+    recruit:null,initParty:null
+  }
+  ]
+},
+// ═══════════════════════════════════════
+// CH2 EP 2-2: 아사달 건설
+// ═══════════════════════════════════════
+{
+  ch:2,ep:2,sub:2,title:'아사달 건설',desc:'새 수도를 건설하고 영토를 넓히다',
+  areas:[
+  {
+    id:'2-2a',name:'아사달 터',bg:'#101808',mus:'kingdom',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,1,1,0,0,0,0,0,0,1,1,4],[4,1,0,0,0,0,0,0,0,0,1,4],[4,0,0,2,2,2,2,2,2,0,0,4],[4,0,0,2,16,16,16,16,2,0,0,4],[4,0,0,2,16,7,7,16,2,0,0,4],[4,0,0,2,16,7,7,16,2,0,0,4],[4,0,0,2,2,2,2,2,2,0,0,4],[4,1,0,0,0,0,2,0,0,0,1,4],[4,1,1,0,0,0,2,0,0,1,1,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'건설 감독',e:'👷',lines:[
+      {s:'건설 감독',t:'단군님! 아사달의 터를 잡았습니다!'},
+      {s:'단군',t:'좋다. 이곳에 궁전과 제단을 세우겠다.'},
+      {s:'건설 감독',t:'하지만 석재와 목재가 부족합니다.'},
+      {s:'비왕장군',t:'북쪽 산에서 자원을 모아와야 합니다.'},
+      {s:'건설 감독',t:'그리고... 산에 야수들이 있어 일꾼들이 위험합니다!'},
+      {s:'단군',t:'내가 직접 가서 길을 열겠다!'}
+    ],battle:true}],
+    chests:[{x:1,y:1,item:'stone_resource',q:5},{x:10,y:1,item:'wood_resource',q:5}],heals:[{x:5,y:10}],
+    enemies:[[E('거대 멧돼지','보병',15,150,10,28,12,6,'🐗',[{n:'돌진',t:'single',pw:2,mp:8}],40,45),E('산 독수리','기마병',15,100,10,26,6,14,'🦅',[],35,40),E('산 독수리','기마병',15,100,10,26,6,14,'🦅',[],35,40),E('산곰','보병',16,180,10,30,14,5,'🐻',[{n:'곰의 일격',t:'single',pw:2.2,mp:10}],50,60)]],
+    rewards:{exp:140,gold:250,items:[{id:'stone_resource',q:3},{id:'wood_resource',q:3}]},
+    pre:[{s:'',t:'아사달... 새 나라의 수도가 될 곳.'},{s:'',t:'건설을 위해 자원을 모으고 야수를 처리해야 한다.'}],
+    post:[{s:'',t:'야수를 물리치고 자원을 확보했다!'},{s:'건설 감독',t:'건설을 시작합니다! 아사달이 세워지고 있습니다!'},{s:'단군',t:'궁전과 제단, 그리고 성벽을 세워라.'},{s:'',t:'아사달 건설이 본격적으로 시작되었다.'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'2-2b',name:'부족장 설득',bg:'#0a1408',mus:'map',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,0,0,5,0,0,0,0,5,0,0,4],[4,0,15,0,0,0,0,0,0,15,0,4],[4,5,0,2,2,2,2,2,2,0,5,4],[4,0,0,2,1,1,1,1,2,0,0,4],[4,0,0,2,1,15,15,1,2,0,0,4],[4,0,0,2,1,15,15,1,2,0,0,4],[4,5,0,2,2,2,2,2,2,0,5,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'한족 부족장',e:'🏘️',lines:[
+      {s:'한족 부족장',t:'단군이라... 환웅의 아들이 왕이 되겠다고?'},
+      {s:'단군',t:'나는 모든 부족이 함께 번영하는 나라를 만들고 싶다.'},
+      {s:'한족 부족장',t:'말은 쉽지. 힘으로 증명해라!'},
+      {s:'한족 부족장',t:'우리 전사들을 이기면 복속하겠다!'},
+      {s:'비왕장군',t:'단군님, 이건 외교적 시험입니다. 이기되 멸하지 마십시오.'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'hp_pot2',q:3},{x:9,y:2,item:'mp_pot2',q:2}],heals:[{x:5,y:10}],
+    enemies:[[E('한족 전사','보병',16,140,15,28,12,8,'🛡️',[],40,45),E('한족 전사','보병',16,140,15,28,12,8,'🛡️',[],40,45),E('한족 궁수','궁병',16,100,15,30,7,13,'🏹',[],40,45),E('한족 기마','기마병',16,120,15,26,8,14,'🐴',[{n:'돌진',t:'charge',pw:1.8,mp:8,st:true}],40,45)]],
+    rewards:{exp:160,gold:300,items:[{id:'trade_silk',q:3}]},
+    pre:[{s:'',t:'주변 부족들과의 외교가 시작된다.'},{s:'',t:'한족 부족을 설득하거나 정복해야 한다.'}],
+    post:[{s:'한족 부족장',t:'대단하다... 인정하겠다. 단군의 나라에 합류한다.'},{s:'단군',t:'환영한다. 함께 번영하자!'},{s:'',t:'한족이 고조선에 합류했다. 영토가 넓어졌다!'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'2-2c',name:'아사달 완공',bg:'#181808',mus:'kingdom',bmus:'battle',
+    map:[[9,9,9,9,9,9,9,9,9,9,9,9],[9,11,11,11,11,11,11,11,11,11,11,9],[9,11,7,7,11,12,12,11,7,7,11,9],[9,11,7,12,2,2,2,2,12,7,11,9],[9,11,11,2,16,16,16,16,2,11,11,9],[9,11,12,2,16,7,7,16,2,12,11,9],[9,11,12,2,16,7,7,16,2,12,11,9],[9,11,11,2,2,2,2,2,2,11,11,9],[9,11,11,11,0,0,2,0,11,11,11,9],[9,11,11,11,0,0,2,0,11,11,11,9],[9,11,11,11,0,13,2,0,11,11,11,9],[9,9,9,9,9,9,9,9,9,9,9,9]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'대신',e:'📜',lines:[
+      {s:'대신',t:'단군님! 아사달 궁성이 완공되었습니다!'},
+      {s:'단군',t:'드디어... 이곳에서 고조선을 다스리겠다.'},
+      {s:'비왕장군',t:'축하드립니다! 백성들이 환호하고 있습니다!'},
+      {s:'대신',t:'건국 축제를 열겠습니다. 하늘에 제사를 올려야 합니다.'},
+      {s:'단군',t:'좋다. 제천의식을 거행하겠다!'},
+      {s:'',t:'BC 2333년, 단군왕검이 아사달에 도읍을 정하고 나라를 세우니, 이름을 조선이라 하였다.'}
+    ]}],
+    chests:[{x:2,y:2,item:'elixir',q:2},{x:9,y:2,item:'hp_pot3',q:3}],heals:[{x:5,y:10}],
+    enemies:[],rewards:{exp:100,gold:300,items:[]},
+    pre:[{s:'',t:'아사달이 완공되었다!'},{s:'',t:'고조선 건국의 순간이 찾아왔다.'}],
+    post:[{s:'',t:'고조선이 건국되었다!'},{s:'',t:'단군왕검은 이제 명실상부한 왕이 되었다.'}],
+    recruit:null,initParty:null,noFight:true
+  }
+  ]
+},
+// ═══════════════════════════════════════
+// CH2 EP 2-3: 고조선 전성기
+// ═══════════════════════════════════════
+{
+  ch:2,ep:2,sub:3,title:'고조선 전성기',desc:'팔조법금 제정, 교역, 반란 진압',
+  areas:[
+  {
+    id:'2-3a',name:'팔조법금 제정',bg:'#181408',mus:'kingdom',bmus:'battle',
+    map:[[9,9,9,9,9,9,9,9,9,9,9,9],[9,11,11,11,11,11,11,11,11,11,11,9],[9,11,7,7,11,11,11,11,7,7,11,9],[9,11,7,11,2,2,2,2,11,7,11,9],[9,11,11,2,11,11,11,11,2,11,11,9],[9,11,11,2,11,12,12,11,2,11,11,9],[9,11,11,2,11,12,12,11,2,11,11,9],[9,11,11,2,2,2,2,2,2,11,11,9],[9,11,11,11,0,0,2,0,11,11,11,9],[9,11,11,11,0,0,2,0,11,11,11,9],[9,11,11,11,0,13,2,0,11,11,11,9],[9,9,9,9,9,9,9,9,9,9,9,9]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'법관',e:'⚖️',lines:[
+      {s:'법관',t:'단군님, 나라가 커지면서 법이 필요합니다.'},
+      {s:'단군',t:'그래. 팔조법금을 제정하겠다.'},
+      {s:'법관',t:'제1조: 사람을 죽인 자는 즉시 사형에 처한다.'},
+      {s:'법관',t:'제2조: 남의 몸을 다치게 한 자는 곡식으로 배상한다.'},
+      {s:'법관',t:'제3조: 남의 물건을 훔친 자는 노비가 되거나 50만 전을 배상한다.'},
+      {s:'단군',t:'이 법으로 백성들이 안전하게 살 수 있을 것이다.'},
+      {s:'비왕장군',t:'단군님! 남쪽에서 교역 사절단이 왔습니다!'},
+      {s:'단군',t:'연(燕)나라와의 교역이로군. 만나보겠다.'}
+    ]}],
+    chests:[{x:2,y:2,item:'trade_silk',q:5}],heals:[{x:5,y:10}],
+    enemies:[],rewards:{exp:80,gold:400,items:[{id:'iron_ore',q:3}]},
+    pre:[{s:'',t:'고조선이 번성하고 있다.'},{s:'',t:'이제 법과 질서를 세울 때가 왔다.'}],
+    post:[{s:'',t:'팔조법금이 반포되었다!'},{s:'',t:'3조만 전해지고 나머지 5조는 유실되었다고 한다...'},{s:'',t:'하지만 반란의 기미가...'}],
+    recruit:null,initParty:null,noFight:true
+  },
+  {
+    id:'2-3b',name:'교역로 방어',bg:'#081418',mus:'map',bmus:'battle',
+    map:[[5,5,5,5,5,5,5,5,5,5,5,5],[5,0,0,0,0,0,0,0,0,0,0,5],[5,0,1,0,2,2,2,2,0,1,0,5],[5,0,0,2,0,0,0,0,2,0,0,5],[5,0,2,0,0,5,5,0,0,2,0,5],[5,0,2,0,5,0,0,5,0,2,0,5],[5,0,2,0,0,5,5,0,0,2,0,5],[5,0,0,2,0,0,0,0,2,0,0,5],[5,0,1,0,2,2,2,2,0,1,0,5],[5,0,0,0,0,0,2,0,0,0,0,5],[5,0,0,0,0,13,2,0,0,0,0,5],[5,5,5,5,5,5,5,5,5,5,5,5]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'도적단 수장',e:'💀',lines:[
+      {s:'',t:'교역로에 도적단이 출현했다!'},{s:'도적단 수장',t:'하하하! 교역품은 모두 우리 것이다!'},{s:'단군',t:'백성의 재산을 빼앗는 자는 용서하지 않겠다!'},{s:'비왕장군',t:'교역로를 지켜야 합니다!'}
+    ],battle:true}],
+    chests:[{x:1,y:1,item:'hp_pot3',q:2},{x:10,y:1,item:'mp_pot2',q:2}],heals:[{x:5,y:10}],
+    enemies:[[E('도적','보병',16,120,10,26,8,9,'💀',[],35,40),E('도적','기마병',16,100,10,24,6,13,'💀',[],35,40),E('도적','궁병',16,90,15,28,5,12,'🏹',[],35,40)],[E('도적단 수장','보병',18,280,40,34,14,10,'💀',[{n:'독칼',t:'single',pw:2.2,mp:8},{n:'도적의 함성',t:'aoe',pw:1.3,mp:14}],120,200,true,.3)]],
+    rewards:{exp:180,gold:350,items:[{id:'trade_silk',q:5}]},
+    pre:[{s:'',t:'연나라와의 교역로가 도적단에 의해 위협받고 있다.'}],
+    post:[{s:'',t:'도적단을 소탕했다! 교역로가 안전해졌다.'},{s:'비왕장군',t:'단군님! 급보입니다! 동쪽에서 반란이 일어났습니다!'},{s:'단군',t:'무엇? 누가 반란을...'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'2-3c',name:'반란 진압',bg:'#200810',mus:'boss',bmus:'boss',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,8,8,0,0,0,0,0,0,8,8,4],[4,8,0,0,8,0,0,8,0,0,8,4],[4,0,0,2,2,2,2,2,2,0,0,4],[4,0,8,2,8,0,0,8,2,8,0,4],[4,0,0,2,0,8,8,0,2,0,0,4],[4,0,0,2,0,8,8,0,2,0,0,4],[4,0,8,2,2,2,2,2,2,8,0,4],[4,0,0,0,0,0,2,0,0,0,0,4],[4,8,8,0,0,0,2,0,0,8,8,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'반란군 수장',e:'🔥',lines:[
+      {s:'반란군 수장',t:'단군! 네 놈의 법이 우리를 옭아맨다!'},{s:'반란군 수장',t:'팔조법금 따위 필요 없다! 강한 자가 다스리는 법이다!'},{s:'단군',t:'법 없이는 약자가 보호받지 못한다.'},{s:'단군',t:'너의 야망을 여기서 끝내겠다!'},{s:'비왕장군',t:'반란군 주력입니다! 결전입니다!'}
+    ],battle:true}],
+    chests:[{x:1,y:1,item:'revive',q:2},{x:10,y:1,item:'elixir',q:1}],heals:[{x:5,y:10}],
+    enemies:[
+      [E('반란군 정예','보병',18,160,15,30,12,8,'🔥',[{n:'불화살',t:'single',pw:1.8,mp:8}],50,55),E('반란군 정예','기마병',18,140,15,28,10,12,'🔥',[{n:'돌격',t:'charge',pw:1.8,mp:8,st:true}],50,55),E('반란군 궁수','궁병',18,110,15,32,7,14,'🏹',[{n:'화살비',t:'aoe',pw:.9,mp:12}],50,55)],
+      [E('반란군 수장','보병',20,450,60,38,16,11,'🔥',[{n:'분노의 검',t:'single',pw:2.8,mp:14},{n:'반란의 함성',t:'aoe',pw:1.5,mp:18},{n:'결사 돌격',t:'single',pw:3.2,mp:22}],250,500,true,.25)]
+    ],
+    rewards:{exp:300,gold:600,items:[]},
+    pre:[{s:'',t:'동쪽 변경에서 대규모 반란이 일어났다!'},{s:'',t:'반란군 수장이 팔조법금 폐지를 요구하고 있다.'}],
+    post:[{s:'',t:'반란군 수장이 쓰러졌다!'},{s:'반란군 수장',t:'으... 이것이 왕의 힘인가...'},{s:'단군',t:'너의 불만은 이해한다. 하지만 법은 모두를 위한 것이다.'},{s:'단군',t:'항복한 자는 용서하겠다. 함께 나라를 만들자.'},{s:'',t:'반란이 진압되었다. 고조선의 영토가 최대로 확장되었다!'},{s:'',t:'동쪽으로 동해, 서쪽으로 연나라 경계까지 이르렀다.'}],
+    recruit:null,initParty:null
+  }
+  ]
+},
+// ═══════════════════════════════════════
+// CH2 EP 2-4: 시련과 지혜
+// ═══════════════════════════════════════
+{
+  ch:2,ep:2,sub:4,title:'시련과 지혜',desc:'자연재해, 제천의식, 현자의 시험, 단군의 최후',
+  areas:[
+  {
+    id:'2-4a',name:'가뭄의 땅',bg:'#201808',mus:'map',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,2,2,2,0,0,0,0,2,2,2,4],[4,2,0,0,0,0,0,0,0,0,2,4],[4,2,0,0,2,2,2,2,0,0,2,4],[4,0,0,2,0,0,0,0,2,0,0,4],[4,0,0,2,0,8,8,0,2,0,0,4],[4,0,0,2,0,8,8,0,2,0,0,4],[4,0,0,0,2,2,2,2,0,0,0,4],[4,2,0,0,0,0,2,0,0,0,2,4],[4,2,2,0,0,0,2,0,0,2,2,4],[4,0,0,0,0,13,2,0,0,0,0,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'농부',e:'🌾',lines:[
+      {s:'농부',t:'단군님! 큰 가뭄이 닥쳤습니다! 곡식이 모두 말랐습니다!'},
+      {s:'단군',t:'하늘에 제사를 올려야 한다. 제천의식을 거행하겠다.'},
+      {s:'비왕장군',t:'제단으로 가시겠습니까?'},
+      {s:'단군',t:'그래. 하지만 제천의식 전에 마물들이 대지를 황폐화시키고 있다. 먼저 처리하겠다.'}
+    ],battle:true}],
+    chests:[{x:1,y:1,item:'hp_pot3',q:3},{x:10,y:1,item:'mp_pot2',q:2}],heals:[{x:5,y:10}],
+    enemies:[[E('가뭄의 정령','보병',19,180,20,32,13,8,'🔥',[{n:'열사의 숨결',t:'aoe',pw:1.2,mp:12}],50,55),E('메마른 괴수','기마병',19,150,15,30,10,12,'🏜️',[],45,50),E('메마른 괴수','기마병',19,150,15,30,10,12,'🏜️',[],45,50)]],
+    rewards:{exp:150,gold:250,items:[]},
+    pre:[{s:'',t:'고조선에 큰 가뭄이 닥쳤다.'},{s:'',t:'백성들이 굶주리고 있다. 왕으로서 해결해야 한다.'}],
+    post:[{s:'',t:'마물을 물리쳤다. 이제 하늘에 제사를 올리자.'},{s:'단군',t:'제천의식으로 비를 내리게 하겠다!'}],
+    recruit:null,initParty:null,afterBattle:'ritual'
+  },
+  {
+    id:'2-4b',name:'현자의 동굴',bg:'#0a0828',mus:'peace',bmus:'battle',
+    map:[[10,10,10,10,10,10,10,10,10,10,10,10],[10,6,6,6,6,6,6,6,6,6,6,10],[10,6,6,6,6,12,12,6,6,6,6,10],[10,6,6,2,2,2,2,2,2,6,6,10],[10,6,6,2,6,6,6,6,2,6,6,10],[10,6,6,2,6,7,7,6,2,6,6,10],[10,6,6,2,6,7,7,6,2,6,6,10],[10,6,6,2,2,2,2,2,2,6,6,10],[10,6,6,6,6,6,2,6,6,6,6,10],[10,6,6,6,6,6,2,6,6,6,6,10],[10,6,6,6,6,13,2,6,6,6,6,10],[10,10,10,10,10,10,10,10,10,10,10,10]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'현자',e:'🧙',lines:[
+      {s:'현자',t:'단군왕검... 네가 진정한 왕인지 시험하겠다.'},
+      {s:'현자',t:'무력이 아닌 지혜로 답하라. 세 가지 질문을 하겠다.'},
+      {s:'단군',t:'좋다. 어떤 시험이든 받아들이겠다.'},
+      {s:'현자',t:'준비되었느냐?'}
+    ],quiz:true}],
+    chests:[{x:3,y:2,item:'elixir',q:1},{x:8,y:2,item:'revive',q:2}],heals:[{x:5,y:10}],
+    enemies:[],rewards:{exp:200,gold:300,items:[]},
+    pre:[{s:'',t:'태백산 깊은 곳, 현자의 동굴.'},{s:'',t:'진정한 왕이 되기 위한 지혜의 시험이 기다린다.'}],
+    post:[{s:'현자',t:'훌륭하다. 너는 지혜로운 왕이로다.'},{s:'현자',t:'하지만 마지막 시련이 남아 있다.'},{s:'현자',t:'태백산 정상에서 너를 기다리는 자가 있다...'}],
+    recruit:null,initParty:null,hasQuiz:true
+  },
+  {
+    id:'2-4c',name:'태백산 정상 - 최후의 전투',bg:'#100020',mus:'epic',bmus:'boss',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,12,12,12,12,12,12,12,12,12,12,4],[4,12,0,0,0,0,0,0,0,0,12,4],[4,12,0,8,8,2,2,8,8,0,12,4],[4,12,0,8,0,0,0,0,8,0,12,4],[4,12,0,2,0,12,12,0,2,0,12,4],[4,12,0,2,0,12,12,0,2,0,12,4],[4,12,0,8,8,2,2,8,8,0,12,4],[4,12,0,0,0,0,2,0,0,0,12,4],[4,12,12,0,0,0,2,0,0,12,12,4],[4,12,12,12,0,13,2,0,12,12,12,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'혼돈의 군주',e:'👿',lines:[
+      {s:'',t:'태백산 정상에서 거대한 어둠이 출현했다!'},{s:'혼돈의 군주',t:'단군왕검... 1500년의 통치가 끝날 때가 왔다.'},{s:'혼돈의 군주',t:'네 아버지를 쓰러뜨리지 못한 한이... 오늘 풀리겠구나!'},{s:'단군',t:'홍익인간의 뜻은 영원하다. 이 어둠을 물리치겠다!'},{s:'비왕장군',t:'최후의 전투입니다!'}
+    ],battle:true}],
+    chests:[{x:2,y:2,item:'hp_pot3',q:3},{x:9,y:2,item:'elixir',q:1}],heals:[{x:5,y:10}],
+    enemies:[
+      [E('혼돈의 사도','보병',20,180,20,34,14,9,'👻',[{n:'암흑파',t:'aoe',pw:1.3,mp:14}],60,65),E('혼돈의 사도','기마병',20,150,20,32,10,14,'👻',[{n:'돌격',t:'charge',pw:2,mp:10,st:true}],60,65),E('혼돈의 사도','궁병',20,130,20,36,8,15,'👻',[],60,65)],
+      [E('혼돈의 군주','보병',24,600,80,42,20,12,'👿',[{n:'혼돈의 파멸',t:'aoe',pw:1.8,mp:22},{n:'암흑 참격',t:'single',pw:3,mp:16},{n:'생명 착취',t:'drain',pw:2.5,mp:24},{n:'공포의 포효',t:'aoe',pw:1.4,mp:18}],400,800,true,.2)]
+    ],
+    rewards:{exp:500,gold:1000,items:[]},
+    pre:[{s:'',t:'태백산 정상... 고조선의 운명을 건 최후의 전투.'},{s:'',t:'혼돈의 군주가 기다리고 있다.'}],
+    post:[{s:'',t:'혼돈의 군주가 소멸했다!'},{s:'단군',t:'이 땅의 어둠은 물러갔다.'},{s:'비왕장군',t:'단군님... 대왕 폐하...'},{s:'단군',t:'이제 내 역할은 끝났다.'},{s:'단군',t:'홍익인간의 뜻을 이어갈 자가 나타날 것이다.'}],
+    recruit:null,initParty:null
+  },
+  {
+    id:'2-4d',name:'산신이 되다',bg:'#0a1428',mus:'peace',bmus:'battle',
+    map:[[4,4,4,4,4,4,4,4,4,4,4,4],[4,1,1,1,1,12,12,1,1,1,1,4],[4,1,13,13,1,1,1,1,13,13,1,4],[4,1,13,1,2,2,2,2,1,13,1,4],[4,1,1,2,1,1,1,1,2,1,1,4],[4,12,1,2,1,7,7,1,2,1,12,4],[4,12,1,2,1,7,7,1,2,1,12,4],[4,1,1,2,2,2,2,2,2,1,1,4],[4,1,13,1,0,0,2,0,1,13,1,4],[4,1,1,1,0,0,2,0,1,1,1,4],[4,1,1,1,0,13,2,0,1,1,1,4],[4,4,4,4,4,4,4,4,4,4,4,4]],
+    ps:{x:6,y:10},
+    npcs:[{x:5,y:5,nm:'단군왕검',e:'🏔️',lines:[
+      {s:'',t:'1500년의 세월이 흘렀다...'},{s:'',t:'단군왕검은 고조선을 번영시키고, 백성들을 가르쳤다.'},{s:'',t:'홍익인간 — 널리 인간 세상을 이롭게 하라.'},{s:'',t:'마침내 단군은 아사달에 숨어 산신이 되었다.'},{s:'',t:'나이 1908세였다고 전한다.'},{s:'',t:'— 챕터2 단군편 완 —'},{s:'',t:'그리고 세월이 흘러...'},{s:'',t:'위만이라는 자가 중국에서 건너와 고조선의 왕위를 빼앗으니...'},{s:'',t:'이것이 위만조선의 시작이었다.'},{s:'',t:'챕터3 위만조선편에서 계속됩니다...'}
+    ]}],
+    chests:[],heals:[{x:5,y:10}],
+    enemies:[],rewards:{exp:0,gold:0,items:[]},
+    pre:[],post:[],
+    recruit:null,initParty:null,noFight:true,isFinal:true,finalChapter:2
+  }
+  ]
+}
+];
+
+// Flatten
+const STAGES=[];
+EPISODES.forEach(ep=>{ep.areas.forEach(a=>{a._ep=ep;STAGES.push(a)})});
+const CH1_STAGES=STAGES.filter((_,i)=>EPISODES.find(ep=>ep.areas.includes(_))?.ch===1);
+const CH2_START=STAGES.findIndex(s=>s.id==='2-1a');
+
+function resize(){C.width=innerWidth;C.height=innerHeight}
+addEventListener('resize',resize);resize();
+
+function iX(gx,gy){return(gx-gy)*T*.5}
+function iY(gx,gy){return(gx+gy)*T*.25}
+function s2g(sx,sy){const cx=sx-C.width/2+G.camX,cy=sy-C.height/2+G.camY;return{x:Math.round((cx/(T*.5)+cy/(T*.25))/2),y:Math.round((cy/(T*.25)-cx/(T*.5))/2)}}
+function g2s(gx,gy){return{x:iX(gx,gy)-G.camX+C.width/2,y:iY(gx,gy)-G.camY+C.height/2}}
+
+function dTile(gx,gy,col,hl=null){
+  const s=g2s(gx,gy),hw=T*.5,hh=T*.25;
+  X.beginPath();X.moveTo(s.x,s.y-hh);X.lineTo(s.x+hw,s.y);X.lineTo(s.x,s.y+hh);X.lineTo(s.x-hw,s.y);X.closePath();
+  X.fillStyle=col;X.fill();X.strokeStyle='rgba(255,255,255,0.06)';X.lineWidth=.5;X.stroke();
+  if(hl){X.fillStyle=hl;X.fill()}
+}
+
+function dChar(sx,sy,ch,sc=1,fl=false){
+  const s=sc*.8,isE=!ch.ally;
+  if(fl)X.globalAlpha=.5+Math.sin(Date.now()*.02)*.5;
+  X.fillStyle='rgba(0,0,0,0.3)';X.beginPath();X.ellipse(sx,sy+8*s,10*s,4*s,0,0,Math.PI*2);X.fill();
+  const bc=isE?'#8B1A1A':((CLS[ch.cl]||{}).c||'#5a4a3a');
+  X.fillStyle=isE?'#4a1a1a':'#6B4226';X.fillRect(sx-6*s,sy-2*s,4*s,10*s);X.fillRect(sx+2*s,sy-2*s,4*s,10*s);
+  X.fillStyle=bc;X.fillRect(sx-8*s,sy-18*s,16*s,18*s);
+  X.fillStyle='#DEB887';X.beginPath();X.arc(sx,sy-24*s,6*s,0,Math.PI*2);X.fill();
+  X.fillStyle='#111';X.fillRect(sx-3*s,sy-25*s,2*s,2*s);X.fillRect(sx+1*s,sy-25*s,2*s,2*s);
+  if(ch.cl==='궁병'){X.strokeStyle='#5a3a1a';X.lineWidth=2*s;X.beginPath();X.arc(sx+12*s,sy-14*s,8*s,-Math.PI*.6,Math.PI*.6);X.stroke();X.strokeStyle='#aaa';X.lineWidth=s;X.beginPath();X.moveTo(sx+12*s,sy-22*s);X.lineTo(sx+12*s,sy-6*s);X.stroke()}
+  else if(ch.cl==='기마병'){X.fillStyle='#8a7a5a';X.fillRect(sx+10*s,sy-30*s,2*s,28*s);X.fillStyle='#ccc';X.beginPath();X.moveTo(sx+11*s,sy-34*s);X.lineTo(sx+8*s,sy-28*s);X.lineTo(sx+14*s,sy-28*s);X.closePath();X.fill()}
+  else if(ch.cl==='보병'){X.fillStyle='#B87333';X.fillRect(sx+10*s,sy-22*s,3*s,16*s);X.fillStyle='#8B5A2B';X.fillRect(sx-14*s,sy-18*s,4*s,12*s)}
+  else if(ch.cl==='웅녀'){X.fillStyle='#c4956a';X.fillRect(sx-12*s,sy-28*s,2*s,22*s);X.fillStyle='#FFaacc';X.beginPath();X.arc(sx-11*s,sy-30*s,3*s,0,Math.PI*2);X.fill()}
+  else if(ch.cl==='단군'){X.fillStyle='#FFD700';X.fillRect(sx-7*s,sy-32*s,14*s,3*s);X.fillRect(sx-4*s,sy-35*s,8*s,3*s);X.fillStyle='#aa2222';X.fillRect(sx-10*s,sy-20*s,20*s,3*s)}
+  else{X.fillStyle='#5a3a1a';X.fillRect(sx-12*s,sy-32*s,2*s,30*s);X.fillStyle='#FFD700';X.beginPath();X.arc(sx-11*s,sy-34*s,3*s,0,Math.PI*2);X.fill()}
+  if(ch.alive){const bw=20*s,bh=3*s,hp=ch.hp/ch.mhp;X.fillStyle='#111';X.fillRect(sx-bw/2,sy-36*s,bw,bh);X.fillStyle=hp>.5?'#4a2':hp>.25?'#aa4':'#a22';X.fillRect(sx-bw/2,sy-36*s,bw*hp,bh)}
+  if(isE){X.fillStyle='#CC2222';X.fillRect(sx-8*s,sy-19*s,16*s,2*s)}
+  if(ch.cl==='신장'||ch.cl==='단군'||ch.isBoss){X.fillStyle='#FFD700';X.beginPath();X.moveTo(sx-5*s,sy-30*s);X.lineTo(sx-3*s,sy-34*s);X.lineTo(sx,sy-31*s);X.lineTo(sx+3*s,sy-34*s);X.lineTo(sx+5*s,sy-30*s);X.closePath();X.fill()}
+  if(ch.stunned){X.fillStyle='#FFD700';X.font=`${10*s}px serif`;X.textAlign='center';X.fillText('💫',sx,sy-38*s)}
+  if(ch.defending){X.fillStyle='rgba(100,150,255,0.3)';X.beginPath();X.arc(sx,sy-10*s,14*s,0,Math.PI*2);X.fill();X.strokeStyle='#88aaff';X.lineWidth=1.5*s;X.stroke()}
+  X.globalAlpha=1
+}
+
+function rMap(){
+  const st=STAGES[G.stage],map=G.mapData;if(!map)return;
+  const mh=map.length,mw=map[0].length;
+  X.fillStyle=st.bg||'#0a0608';X.fillRect(0,0,C.width,C.height);
+  const ps={x:iX(G.px,G.py),y:iY(G.px,G.py)};
+  G.camX+=(ps.x-G.camX)*.1;G.camY+=(ps.y-G.camY)*.1;
+  for(let gy=0;gy<mh;gy++)for(let gx=0;gx<mw;gx++){
+    let col=TC[map[gy][gx]]||'#333';
+    const r=((gx*7+gy*13)%17)/17;const br=parseInt(col.slice(1,3),16),bg2=parseInt(col.slice(3,5),16),bb=parseInt(col.slice(5,7),16);
+    col=`rgb(${Math.max(0,Math.min(255,br+((r-.5)*12)|0))},${Math.max(0,Math.min(255,bg2+((r-.5)*12)|0))},${Math.max(0,Math.min(255,bb+((r-.5)*12)|0))})`;
+    let hl=null;
+    if(G.heals?.some(h=>h.x===gx&&h.y===gy))hl='rgba(100,255,100,0.15)';
+    if(G.chests?.find(c=>c.x===gx&&c.y===gy&&!c.opened))hl='rgba(255,215,0,0.2)';
+    dTile(gx,gy,col,hl);
+    const t=map[gy][gx],sv=g2s(gx,gy);
+    if(t===5){X.fillStyle='#2a5020';X.beginPath();X.moveTo(sv.x,sv.y-14);X.lineTo(sv.x-7,sv.y-2);X.lineTo(sv.x+7,sv.y-2);X.closePath();X.fill();X.fillStyle='#3a2010';X.fillRect(sv.x-1,sv.y-3,2,5)}
+    if(t===4){X.fillStyle='#6a5a3a';X.beginPath();X.moveTo(sv.x,sv.y-10);X.lineTo(sv.x-9,sv.y+2);X.lineTo(sv.x+9,sv.y+2);X.closePath();X.fill()}
+    if(t===9||t===10){X.fillStyle=t===9?'#4a3a2a':'#2a1a20';X.fillRect(sv.x-T*.25,sv.y-8,T*.5,8)}
+  }
+  G.chests?.forEach(c=>{if(c.opened)return;const sv=g2s(c.x,c.y);X.fillStyle='#8B6914';X.fillRect(sv.x-5,sv.y-7,10,7);X.fillStyle='#FFD700';X.fillRect(sv.x-1,sv.y-5,2,2)});
+  G.heals?.forEach(h=>{const sv=g2s(h.x,h.y);X.fillStyle=`rgba(100,255,100,${.3+Math.sin(Date.now()*.003)*.2})`;X.beginPath();X.arc(sv.x,sv.y,5,0,Math.PI*2);X.fill()});
+  G.npcs?.forEach(n=>{if(n.gone)return;const sv=g2s(n.x,n.y);X.font='18px serif';X.textAlign='center';X.fillText(n.e,sv.x,sv.y-2);X.font='9px sans-serif';X.fillStyle='#FFD700';X.fillText(n.nm,sv.x,sv.y+11)});
+  const ps2=g2s(G.px,G.py);
+  if(G.party[0]){dChar(ps2.x,ps2.y-4,G.party[0],.85);X.font='9px sans-serif';X.textAlign='center';X.fillStyle='#FFD700';X.fillText(G.party[0].nm,ps2.x,ps2.y+14)}
+  rMini(map,mw,mh)
+}
+
+function rMini(map,mw,mh){
+  mmX.fillStyle='#0a0608';mmX.fillRect(0,0,90,90);
+  const tw=90/mw,th=90/mh;
+  for(let y=0;y<mh;y++)for(let x=0;x<mw;x++){mmX.fillStyle=TC[map[y][x]]||'#333';mmX.fillRect(x*tw,y*th,tw+.5,th+.5)}
+  mmX.fillStyle='#FFD700';mmX.fillRect(G.px*tw-1,G.py*th-1,3,3);
+  G.npcs?.forEach(n=>{if(n.gone)return;mmX.fillStyle='#f66';mmX.fillRect(n.x*tw,n.y*th,2,2)})
+}
+
+function rBattle(){
+  const st=STAGES[G.stage];
+  X.fillStyle=st.bg||'#0a0608';X.fillRect(0,0,C.width,C.height);
+  const gr=X.createLinearGradient(0,C.height*.3,0,C.height);
+  gr.addColorStop(0,'rgba(30,20,10,0.5)');gr.addColorStop(1,'rgba(20,15,8,0.8)');X.fillStyle=gr;X.fillRect(0,C.height*.3,C.width,C.height*.7);
+  X.save();
+  if(G.bShake.t>0){X.translate(G.bShake.x,G.bShake.y);G.bShake.t-=16;G.bShake.x=(Math.random()-.5)*G.bShake.t*.3;G.bShake.y=(Math.random()-.5)*G.bShake.t*.2}
+  const cw=C.width,ch=C.height;
+  const pa=G.bp.filter(c=>c.alive),ea=G.be.filter(c=>c.alive);
+  pa.forEach((c,i)=>{const x=cw*.12+i*(cw*.08),y=ch*.32+i*(ch*.12);c._bx=x;c._by=y;const isA=G.turnOrd[G.tIdx]===c;if(isA&&G.bPhase==='select'){X.fillStyle='rgba(255,215,0,0.15)';X.beginPath();X.ellipse(x,y+8,16,7,0,0,Math.PI*2);X.fill()}dChar(x,y,c,1.05,G.bAnimT>0&&G.bTarget===c)});
+  ea.forEach((c,i)=>{const tot=ea.length;const x=cw*.75+(i-tot/2)*(cw*.08),y=ch*.32+(i%2)*(ch*.14);c._bx=x;c._by=y;const isA=G.turnOrd[G.tIdx]===c;if(isA){X.fillStyle='rgba(255,50,50,0.15)';X.beginPath();X.ellipse(x,y+8,16,7,0,0,Math.PI*2);X.fill()}dChar(x,y,c,c.isBoss?1.35:1.05,G.bAnimT>0&&G.bTarget===c);if(c.isBoss&&c.enraged){X.fillStyle=`rgba(255,50,0,${.3+Math.sin(Date.now()*.005)*.2})`;X.beginPath();X.arc(x,y-10,18,0,Math.PI*2);X.fill()}X.font='9px sans-serif';X.textAlign='center';X.fillStyle='#f88';X.fillText(`${c.nm} Lv.${c.lv}`,x,y+18)});
+  X.restore();
+  if(G.waves&&G.waves.length>1){X.font='10px sans-serif';X.textAlign='center';X.fillStyle='#c4956a';X.fillText(`Wave ${G.waveIdx+1}/${G.waves.length}`,cw/2,18)}
+}
+
+// --- Battle System ---
+function initBattle(){
+  const st=STAGES[G.stage];G.waves=st.enemies;G.waveIdx=0;
+  G.bp=G.party.filter(c=>c.alive).map(c=>{c.defending=false;c.stunned=false;c.buffs=[];return c});
+  loadWave(0);startBGM(st.bmus||'battle')
+}
+function loadWave(i){
+  G.waveIdx=i;G.be=G.waves[i].map(e=>({...e,alive:true,defending:false,stunned:false,buffs:[],ally:false,_bx:0,_by:0,enraged:false}));
+  G.bp.forEach(c=>{c._bx=0;c._by=0});calcTO();G.bPhase='select';G.mode='battle';showBUI();updTO();advTurn()
+}
+function calcTO(){
+  const all=[...G.bp.filter(c=>c.alive),...G.be.filter(c=>c.alive)];
+  all.sort((a,b)=>{const sa=a.spd*(a.buffs.find(b2=>b2.t==='spd')?.v||1),sb=b.spd*(b.buffs.find(b2=>b2.t==='spd')?.v||1);return sb-sa});
+  G.turnOrd=all;G.tIdx=-1
+}
+function advTurn(){
+  G.tIdx++;while(G.tIdx<G.turnOrd.length&&!(G.turnOrd[G.tIdx]?.alive))G.tIdx++;
+  if(G.tIdx>=G.turnOrd.length){eor();calcTO();G.tIdx=0;while(G.tIdx<G.turnOrd.length&&!G.turnOrd[G.tIdx]?.alive)G.tIdx++}
+  const c=G.turnOrd[G.tIdx];if(!c||!c.alive){chkEnd();return}
+  if(c.stunned){c.stunned=false;sBI(`${c.nm} 기절! 턴 건너뜀`);setTimeout(advTurn,800);return}
+  c.defending=false;updTO();
+  if(c.ally){G.bPhase='select';showBA(c);sBI(`${c.nm}의 차례`)}
+  else{G.bPhase='enemyTurn';hideBA();sBI(`${c.nm}의 차례...`);setTimeout(()=>eAI(c),600)}
+}
+function eor(){[...G.bp,...G.be].forEach(c=>{c.buffs=c.buffs.filter(b=>{b.turns--;return b.turns>0})})}
+function showBA(ch){
+  const sk=getSk(ch),hi=G.inv.some(i=>ITEMS[i.id]?.t==='cons'&&i.q>0);
+  $('battle-actions').innerHTML=`<button class="btn-atk" onclick="bAct('atk')">&#9876; 공격</button><button class="btn-def" onclick="bAct('def')">&#128737; 방어</button><button class="btn-skill" ${sk.length===0?'disabled':''} onclick="bAct('sk')">&#10024; 기술${ch.mp>0?' ('+ch.mp+')':''}</button><button class="btn-item" ${!hi?'disabled':''} onclick="bAct('item')">&#127891; 아이템</button>`
+}
+function hideBA(){$('battle-actions').innerHTML=''}
+function showBUI(){$('battle-ui').style.display='block'}
+function hideBUI(){$('battle-ui').style.display='none'}
+function $(id){return document.getElementById(id)}
+
+window.bAct=function(a){
+  const c=G.turnOrd[G.tIdx];if(!c||!c.ally)return;sfx('sel');
+  if(a==='atk'){G.bAction='atk';sBI('공격 대상 선택 (적 클릭)');G.bPhase='target';hideBA()}
+  else if(a==='def'){c.defending=true;sfx('def');sBI(`${c.nm} 방어 태세!`);hideBA();setTimeout(advTurn,500)}
+  else if(a==='sk')showSM(c);
+  else if(a==='item')showIM(c)
+};
+
+function showSM(ch){
+  const sk=getSk(ch);
+  $('skill-list').innerHTML=sk.map((s,i)=>`<button class="skill-btn" ${ch.mp<s.mp?'disabled':''} onclick="selSk(${i})">${s.n} <span style="color:#88aaff">MP ${s.mp}</span><br><span style="font-size:9px;color:#888">${s.d}</span></button>`).join('')+`<button class="skill-btn" onclick="$('skill-menu').style.display='none'" style="border-color:#888">취소</button>`;
+  $('skill-menu').style.display='block'
+}
+window.selSk=function(i){
+  const c=G.turnOrd[G.tIdx],sk=getSk(c);G.selSkill=sk[i];$('skill-menu').style.display='none';
+  if(G.selSkill.tg==='all'){G.bAction='sk_aoe';exSkAoE(c,G.selSkill)}
+  else if(G.selSkill.tg==='party'){G.bAction='sk_party';exSkParty(c,G.selSkill)}
+  else{G.bAction='sk';sBI('기술 대상 선택');G.bPhase='target';hideBA()}
+};
+function showIM(ch){
+  const cons=G.inv.filter(i=>ITEMS[i.id]?.t==='cons'&&i.q>0&&(ITEMS[i.id].heal||ITEMS[i.id].hmp||ITEMS[i.id].rev));
+  $('item-list').innerHTML=cons.map(i=>`<button class="item-btn" onclick="selIt('${i.id}')">${ITEMS[i.id].n} x${i.q}<br><span style="font-size:9px;color:#888">${ITEMS[i.id].d}</span></button>`).join('')+`<button class="item-btn" onclick="$('item-menu').style.display='none'" style="border-color:#888">취소</button>`;
+  $('item-menu').style.display='block'
+}
+window.selIt=function(id){
+  const it=ITEMS[id];$('item-menu').style.display='none';G.selItem=id;
+  if(it.rev){sBI('부활 대상 선택');G.bAction='it_rev';G.bPhase='target_ally';hideBA()}
+  else{sBI('사용 대상 선택');G.bAction='it_use';G.bPhase='target_ally';hideBA()}
+};
+
+function calcDmg(a,d,pw=1){
+  const ta=typeAdv(a.cl,d.cl),ab=a.buffs.find(b=>b.t==='atk')?.v||1,db=d.buffs.find(b=>b.t==='def')?.v||1;
+  const dm=d.defending?.5:1,base=a.atk*(1+a.lv*.1)*ab*pw,red=d.def*.5*db/dm;
+  const v=.9+Math.random()*.2,cr=Math.random()<.1;
+  return{dmg:Math.max(1,Math.floor((base-red)*ta*v*(cr?1.8:1))),crit:cr,ta}
+}
+function apDmg(t,d){t.hp=Math.max(0,t.hp-d);if(t.hp<=0){t.alive=false;t.hp=0}}
+function fDmg(t,d,tp='phys',cr=false){
+  const el=document.createElement('div');el.className=`float-dmg ${cr?'dmg-crit':'dmg-'+tp}`;
+  el.textContent=tp==='heal'?`+${d}`:(tp==='miss'?'MISS':`-${d}`);
+  el.style.left=(t._bx||C.width/2)+(Math.random()-.5)*20+'px';el.style.top=(t._by||C.height/2)-40+'px';
+  $('float-container').appendChild(el);setTimeout(()=>el.remove(),800)
+}
+function shake(i=200){G.bShake={x:0,y:0,t:i}}
+
+function exAtk(a,t){
+  const{dmg,crit,ta}=calcDmg(a,t);sfx(crit?'crit':'hit');shake(crit?300:150);apDmg(t,dmg);fDmg(t,dmg,'phys',crit);
+  G.bTarget=t;G.bAnimT=300;let m=`${a.nm}의 공격! ${t.nm}에게 ${dmg} 피해!`;if(crit)m+=' [크리티컬!]';if(ta>1)m+=' [유리!]';if(ta<1)m+=' [불리]';sBI(m);
+  chkEnrage(t);setTimeout(()=>{G.bAnimT=0;G.bTarget=null;chkEnd()||advTurn()},700)
+}
+function exSkSingle(a,t,sk){
+  a.mp-=sk.mp;sfx('skill');
+  if(sk.t==='charge'||sk.t==='single'){const{dmg,crit}=calcDmg(a,t,sk.pw);shake(300);apDmg(t,dmg);fDmg(t,dmg,'magic',crit);G.bTarget=t;G.bAnimT=400;let m=`${a.nm}의 ${sk.n}! ${t.nm}에게 ${dmg} 피해!`;if(sk.st&&t.alive){t.stunned=true;m+=' [기절!]'}sBI(m);chkEnrage(t)}
+  else if(sk.t==='multi'){for(let h=0;h<sk.h;h++)setTimeout(()=>{if(!t.alive)return;const{dmg}=calcDmg(a,t,sk.pw);apDmg(t,dmg);fDmg(t,dmg,'phys');sfx('hit');shake(100)},h*200);G.bAnimT=sk.h*200+200;sBI(`${a.nm}의 ${sk.n}! ${sk.h}연타!`)}
+  else if(sk.t==='drain'){const{dmg}=calcDmg(a,t,sk.pw);shake(300);apDmg(t,dmg);fDmg(t,dmg,'magic');const hl=Math.floor(dmg*.3);a.hp=Math.min(a.mhp,a.hp+hl);fDmg(a,hl,'heal');G.bAnimT=400;sBI(`${a.nm}의 ${sk.n}! ${dmg} 피해+${hl} 흡수!`)}
+  setTimeout(()=>{G.bAnimT=0;G.bTarget=null;chkEnd()||advTurn()},Math.max(700,G.bAnimT))
+}
+function exSkAoE(a,sk){
+  a.mp-=sk.mp;sfx('skill');shake(400);hideBA();
+  const ts=G.be.filter(e=>e.alive);
+  ts.forEach((t,i)=>setTimeout(()=>{const{dmg}=calcDmg(a,t,sk.pw);apDmg(t,dmg);fDmg(t,dmg,'magic')},i*150));
+  sBI(`${a.nm}의 ${sk.n}! 적 전체 피해!`);setTimeout(()=>{chkEnd()||advTurn()},ts.length*150+500)
+}
+function exSkParty(a,sk){
+  a.mp-=sk.mp;sfx('skill');hideBA();
+  if(sk.t==='heal_all'){G.bp.filter(c=>c.alive).forEach((c,i)=>setTimeout(()=>{const hl=Math.floor(a.atk*sk.pw*.5+a.lv*3);c.hp=Math.min(c.mhp,c.hp+hl);c.mp=Math.min(c.mmp,c.mp+Math.floor(hl*.3));fDmg(c,hl,'heal');sfx('heal')},i*150));sBI(`${a.nm}의 ${sk.n}! 아군 회복!`)}
+  else if(sk.t==='buff_def'){G.bp.filter(c=>c.alive).forEach(c=>c.buffs.push({t:'def',turns:2,v:sk.pw}));sBI(`${a.nm}의 ${sk.n}! 방어력 증가!`);sfx('def')}
+  else if(sk.t==='buff_spd'){G.bp.filter(c=>c.alive).forEach(c=>c.buffs.push({t:'spd',turns:3,v:sk.pw}));sBI(`${a.nm}의 ${sk.n}! 속도 증가!`)}
+  else if(sk.t==='buff_eva'){G.bp.filter(c=>c.alive).forEach(c=>c.buffs.push({t:'eva',turns:2,v:sk.pw}));sBI(`${a.nm}의 ${sk.n}! 회피 증가!`)}
+  else if(sk.t==='buff_atk'){G.bp.filter(c=>c.alive).forEach(c=>c.buffs.push({t:'atk',turns:3,v:sk.pw}));sBI(`${a.nm}의 ${sk.n}! 공격력 증가!`);sfx('skill')}
+  else if(sk.t==='king_buff'){G.bp.filter(c=>c.alive).forEach(c=>{c.buffs.push({t:'atk',turns:3,v:1.3});c.buffs.push({t:'def',turns:3,v:1.3});c.buffs.push({t:'spd',turns:3,v:1.2})});sBI(`${a.nm}의 ${sk.n}! 아군 전체 능력 강화!`);sfx('quest')}
+  else if(sk.t==='debuff_acc'){G.be.filter(c=>c.alive).forEach(c=>c.buffs.push({t:'acc_down',turns:2,v:.7}));sBI(`${a.nm}의 ${sk.n}! 적 명중률 감소!`)}
+  else if(sk.t==='revive_skill'){const dead=G.bp.find(c=>!c.alive);if(dead){dead.alive=true;dead.hp=Math.floor(dead.mhp*.5);fDmg(dead,dead.hp,'heal');sfx('heal');sBI(`${a.nm}의 ${sk.n}! ${dead.nm} 부활!`);if(!G.turnOrd.includes(dead))G.turnOrd.push(dead)}}
+  setTimeout(advTurn,800)
+}
+function useItem(id,t){
+  const it=ITEMS[id],inv=G.inv.find(i=>i.id===id);if(!inv||inv.q<=0)return;inv.q--;
+  if(it.heal){t.hp=Math.min(t.mhp,t.hp+it.heal);fDmg(t,it.heal,'heal');sfx('heal');sBI(`${it.n} 사용! HP ${it.heal} 회복!`)}
+  if(it.hmp){t.mp=Math.min(t.mmp,t.mp+(it.hmp||0));if(it.hmp)fDmg(t,it.hmp,'heal')}
+  if(it.rev){t.alive=true;t.hp=Math.floor(t.mhp*it.rpct);fDmg(t,t.hp,'heal');sfx('heal');sBI(`${t.nm} 부활!`);if(!G.turnOrd.includes(t))G.turnOrd.push(t)}
+  setTimeout(advTurn,600)
+}
+function chkEnrage(t){if(t.isBoss&&t.enrageAt&&t.alive&&t.hp/t.mhp<=t.enrageAt&&!t.enraged){t.enraged=true;t.atk=Math.floor(t.atk*1.5);t.spd+=3;setTimeout(()=>sBI(`${t.nm} 분노! 공격력 대폭 증가!`),600)}}
+
+function eAI(en){
+  if(!en.alive){advTurn();return}
+  const al=G.bp.filter(c=>c.alive);if(!al.length){chkEnd();return}
+  if(en.enraged&&en.skills?.length){const sk=en.skills[Math.floor(Math.random()*en.skills.length)];if(en.mp>=(sk.mp||0)){if(sk.t==='aoe'){en.mp-=sk.mp;sfx('skill');shake(400);al.forEach((t,i)=>setTimeout(()=>{const{dmg}=calcDmg(en,t,sk.pw);apDmg(t,dmg);fDmg(t,dmg,'magic')},i*150));sBI(`${en.nm}의 ${sk.n}!`);setTimeout(()=>{chkEnd()||advTurn()},al.length*150+500);return}else{exSkE(en,al[Math.floor(Math.random()*al.length)],sk);return}}}
+  if(en.skills?.length&&Math.random()<.3){const sk=en.skills[Math.floor(Math.random()*en.skills.length)];if(en.mp>=(sk.mp||0)){if(sk.t==='aoe'){en.mp-=sk.mp;sfx('skill');shake(300);al.forEach((t,i)=>setTimeout(()=>{const{dmg}=calcDmg(en,t,sk.pw);apDmg(t,dmg);fDmg(t,dmg,'magic')},i*150));sBI(`${en.nm}의 ${sk.n}!`);setTimeout(()=>{chkEnd()||advTurn()},al.length*150+500);return}else if(sk.t==='drain'){exSkE(en,al[Math.floor(Math.random()*al.length)],sk);return}else{exSkE(en,al[Math.floor(Math.random()*al.length)],sk);return}}}
+  const t=al.reduce((b,c)=>(!b||c.hp<b.hp)?c:b,null);exAtk(en,t)
+}
+function exSkE(a,t,sk){
+  a.mp-=sk.mp||0;sfx('skill');
+  if(sk.t==='drain'){const{dmg}=calcDmg(a,t,sk.pw);shake(300);apDmg(t,dmg);fDmg(t,dmg,'magic');const hl=Math.floor(dmg*.3);a.hp=Math.min(a.mhp,a.hp+hl);fDmg(a,hl,'heal');G.bAnimT=400;sBI(`${a.nm}의 ${sk.n}! ${dmg} 피해+${hl} 흡수!`)}
+  else{const{dmg,crit}=calcDmg(a,t,sk.pw);shake(250);apDmg(t,dmg);fDmg(t,dmg,'magic',crit);G.bTarget=t;G.bAnimT=400;let m=`${a.nm}의 ${sk.n}! ${t.nm}에게 ${dmg} 피해!`;if(sk.st&&t.alive){t.stunned=true;m+=' [기절!]'}sBI(m)}
+  setTimeout(()=>{G.bAnimT=0;G.bTarget=null;chkEnd()||advTurn()},700)
+}
+
+function chkEnd(){
+  const ap=G.bp.filter(c=>c.alive),ae=G.be.filter(c=>c.alive);
+  if(!ae.length){if(G.waves&&G.waveIdx<G.waves.length-1){sBI('Wave 클리어!');setTimeout(()=>{loadWave(G.waveIdx+1);sBI(`Wave ${G.waveIdx+1} 시작!`)},1000);return true}setTimeout(showVic,500);return true}
+  if(!ap.length){setTimeout(showDef,500);return true}return false
+}
+function showVic(){
+  const st=STAGES[G.stage];stopBGM();sfx('vic');G.mode='victory';hideBUI();
+  let te=st.rewards.exp,tg=st.rewards.gold;G.gold+=tg;
+  let rh=`<div class="reward-item"><span>경험치:</span> +${te}</div><div class="reward-item"><span>골드:</span> +${tg}G</div>`;
+  G.party.filter(c=>c.alive).forEach(c=>{c.exp+=te;while(c.exp>=c.exn){c.exp-=c.exn;c.lv++;c.exn=c.lv*30+50;c.mhp+=12;c.hp=c.mhp;c.mmp+=5;c.mp=c.mmp;c.atk+=3;c.def+=2;c.spd+=1;rh+=`<div class="reward-item" style="color:#FFD700">${c.nm} 레벨업! Lv.${c.lv}</div>`;sfx('lvl')}});
+  st.rewards.items?.forEach(ri=>{addInv(ri.id,ri.q);rh+=`<div class="reward-item"><span>${ITEMS[ri.id].n}</span> x${ri.q} 획득!</div>`});
+  $('victory-rewards').innerHTML=rh;$('victory-screen').classList.add('on')
+}
+function showDef(){stopBGM();sfx('lose');G.mode='defeat';hideBUI();$('defeat-screen').classList.add('on')}
+
+window.onVictoryContinue=function(){
+  $('victory-screen').classList.remove('on');const st=STAGES[G.stage];
+  G.party.forEach(c=>{if(c.alive){c.hp=c.mhp;c.mp=c.mmp}});
+  // Check for special after-battle events
+  if(st.afterBattle==='ritual'){
+    startDlg(st.post||[],()=>{doRecruit(st);startRitual(()=>completeArea())});return;
+  }
+  if(st.post?.length)startDlg(st.post,()=>{doRecruit(st);completeArea()});
+  else{doRecruit(st);completeArea()}
+};
+window.retryStage=function(){$('defeat-screen').classList.remove('on');G.party.forEach(c=>{c.alive=true;c.hp=c.mhp;c.mp=c.mmp;c.defending=false;c.stunned=false;c.buffs=[]});startArea(G.stage)};
+window.backToTitle=function(){$('defeat-screen').classList.remove('on');stopBGM();G.mode='title';$('title-screen').style.display='flex';resetTitleHTML()};
+
+function doRecruit(st){
+  if(st.recruit==='ung'&&!G.party.find(c=>c.id==='ung')){
+    G.party.push(mkCh('ung','웅녀','웅녀',G.party[0]?.lv||10,true,{hp:25,mp:15,atk:3,def:4,weapon:'bronze_sword',armor:'bear_armor'}))
+  }
+  if(st.recruit==='biwang'&&!G.party.find(c=>c.id==='biwang')){
+    G.party.push(mkCh('biwang','비왕장군','신하장군',G.party[0]?.lv||15,true,{hp:15,mp:5,atk:8,def:5,spd:3,weapon:'sehyung_sword',armor:'scale_armor'}))
+  }
+  if(st.recruit&&Array.isArray(st.recruit)){
+    st.recruit.forEach(id=>{
+      if(id==='pb'&&!G.party.find(c=>c.id==='pb'))G.party.push(mkCh('pb','풍백','풍백',5,true,{hp:10,atk:3,spd:4,weapon:'horn_bow'}));
+      if(id==='us'&&!G.party.find(c=>c.id==='us'))G.party.push(mkCh('us','우사','우사',5,true,{hp:15,def:3,weapon:'bronze_sword',armor:'leather_armor'}));
+      if(id==='un'&&!G.party.find(c=>c.id==='un'))G.party.push(mkCh('un','운사','운사',5,true,{atk:3,spd:5,weapon:'bronze_spear'}))
+    })
+  }
+  if(G.party.length>4)G.party=G.party.slice(0,4)
+}
+function completeArea(){
+  if(!G.cleared.includes(G.stage))G.cleared.push(G.stage);
+  const st=STAGES[G.stage];
+  if(st.isFinal){saveChapterData(st.finalChapter);showEnding(st.finalChapter);return}
+  G.stage++;
+  const next=STAGES[G.stage];const prev=st;
+  if(next&&next._ep!==prev._ep){showEpBanner(next._ep,()=>startArea(G.stage))}
+  else startArea(G.stage)
+}
+
+function showEpBanner(ep,cb){
+  const el=$('episode-banner');
+  el.querySelector('.ep-num').textContent=`에피소드 ${ep.ep}-${ep.sub}`;
+  el.querySelector('.ep-title').textContent=ep.title;
+  el.querySelector('.ep-desc').textContent=ep.desc;
+  el.classList.add('on');G.mode='banner';
+  const handler=()=>{el.classList.remove('on');el.removeEventListener('click',handler);cb()};
+  setTimeout(()=>el.addEventListener('click',handler),500)
+}
+
+// --- Dialogue ---
+function startDlg(lines,cb){G.dlgQ=lines;G.dlgI=0;G.dlgCb=cb;G.dlgLen=0;G.dlgTyping=true;G.mode='dialogue';showDL();$('dlg').style.display='block'}
+function showDL(){
+  const l=G.dlgQ[G.dlgI];$('dlg-speaker').textContent=l.s||'';$('dlg-text').textContent='';G.dlgLen=0;G.dlgTyping=true;$('dlg-next').style.display='none';
+  const p=$('dlg-portrait');
+  const pm={'환웅':'👑','환인':'👴','풍백':'🌬️','우사':'🌧️','운사':'☁️','웅녀':'🌸','웅녀(곰)':'🐻','범족 부족장':'🐯','범족 선봉대장':'🐅','웅족 족장':'🐻','단군왕검':'👶','단군':'🏛️','마을 어른':'👨‍🌾','마을 주민':'👩','혼돈의 마물':'👹','혼돈의 군주':'👿','비왕장군':'⚔️','건설 감독':'👷','대신':'📜','법관':'⚖️','현자':'🧙','농부':'🌾','한족 부족장':'🏘️','예맥족 전사':'🛡️','예맥족 족장':'🛡️','도적단 수장':'💀','반란군 수장':'🔥'};
+  p.textContent=pm[l.s]||(l.s?'🧑':'📜')
+}
+function updDT(dt){
+  if(!G.dlgTyping)return;const l=G.dlgQ[G.dlgI];G.dlgTimer+=dt;
+  if(G.dlgTimer>30){G.dlgTimer=0;G.dlgLen++;$('dlg-text').textContent=l.t.substring(0,G.dlgLen);if(G.dlgLen>=l.t.length){G.dlgTyping=false;$('dlg-next').style.display='block'}}
+}
+function advDlg(){
+  if(G.dlgTyping){const l=G.dlgQ[G.dlgI];$('dlg-text').textContent=l.t;G.dlgTyping=false;$('dlg-next').style.display='block';return}
+  G.dlgI++;if(G.dlgI<G.dlgQ.length)showDL();
+  else{$('dlg').style.display='none';if(G.dlgCb){const cb=G.dlgCb;G.dlgCb=null;cb()}}
+}
+$('dlg').addEventListener('click',()=>{if(G.mode==='dialogue')advDlg()});
+
+// --- Map Movement ---
+const keys={};
+addEventListener('keydown',e=>{keys[e.key]=true;e.preventDefault()});
+addEventListener('keyup',e=>{keys[e.key]=false});
+let mvT=0;
+function updMove(dt){
+  if(G.mode!=='map')return;mvT+=dt;if(mvT<150)return;
+  let dx=0,dy=0;
+  if(keys.ArrowUp||keys.w||keys.W)dy=-1;if(keys.ArrowDown||keys.s||keys.S)dy=1;
+  if(keys.ArrowLeft||keys.a||keys.A)dx=-1;if(keys.ArrowRight||keys.d||keys.D)dx=1;
+  if(dx||dy){mvT=0;tryMove(dx,dy)}
+}
+window.tryMove=function(dx,dy){
+  if(G.mode!=='map')return;
+  const nx=G.px+dx,ny=G.py+dy,map=G.mapData;if(!map)return;
+  if(ny<0||ny>=map.length||nx<0||nx>=map[0].length)return;
+  if(!TP[map[ny][nx]])return;
+  G.px=nx;G.py=ny;
+  const ch=G.chests?.find(c=>c.x===nx&&c.y===ny&&!c.opened);
+  if(ch){ch.opened=true;const it=ITEMS[ch.item];addInv(ch.item,ch.qty||ch.q||1);sfx('sel');startDlg([{s:'',t:`보물 상자! ${it.n} x${ch.qty||ch.q||1} 획득!`}],()=>{G.mode='map'});return}
+  const hs=G.heals?.find(h=>h.x===nx&&h.y===ny);
+  if(hs){G.party.forEach(c=>{c.hp=c.mhp;c.mp=c.mmp;c.alive=true});sfx('heal')}
+};
+window.interactNearby=function(){
+  if(G.mode!=='map')return;
+  const n=G.npcs?.find(n=>!n.gone&&Math.abs(n.x-G.px)+Math.abs(n.y-G.py)<=2);
+  if(n)interactNPC(n)
+};
+function interactNPC(n){
+  sfx('menu');
+  startDlg(n.lines,()=>{
+    if(n.battle){n.gone=true;initBattle()}
+    else if(n.endurance){n.gone=true;startEndurance()}
+    else if(n.quiz){n.gone=true;startQuiz(()=>{const st=STAGES[G.stage];if(st.post?.length)startDlg(st.post,()=>{doRecruit(st);completeArea()});else{doRecruit(st);completeArea()}})}
+    else{
+      const st=STAGES[G.stage];
+      if(st.noFight){n.gone=true;
+        if(st.post?.length)startDlg(st.post,()=>{doRecruit(st);completeArea()});
+        else{doRecruit(st);completeArea()}}
+      else if(st.isFinal){n.gone=true;saveChapterData(st.finalChapter);showEnding(st.finalChapter)}
+      else G.mode='map'
+    }
+  })
+}
+
+// --- Touch/Click ---
+let tSX=0,tSY=0;
+C.addEventListener('click',e=>{
+  initAudio();const r=C.getBoundingClientRect(),cx=e.clientX-r.left,cy=e.clientY-r.top;
+  if(G.mode==='map'){
+    const gr=s2g(cx,cy);const n=G.npcs?.find(n=>!n.gone&&n.x===gr.x&&n.y===gr.y);
+    if(n&&Math.abs(n.x-G.px)+Math.abs(n.y-G.py)<=2)interactNPC(n);
+    else if(gr.x>=0&&gr.y>=0){const dx=Math.sign(gr.x-G.px),dy=Math.sign(gr.y-G.py);tryMove(dx,dy)}
+  }
+  if(G.mode==='battle'&&G.bPhase==='target'){
+    const en=G.be.find(e2=>e2.alive&&e2._bx&&Math.abs(cx-e2._bx)<25&&Math.abs(cy-e2._by)<30);
+    if(en){const c=G.turnOrd[G.tIdx];if(G.bAction==='atk')exAtk(c,en);else if(G.bAction==='sk')exSkSingle(c,en,G.selSkill);G.bPhase='animate'}
+  }
+  if(G.mode==='battle'&&G.bPhase==='target_ally'){
+    const al=G.bp.find(c=>c._bx&&Math.abs(cx-c._bx)<25&&Math.abs(cy-c._by)<30);
+    if(al){if(G.bAction==='it_rev'&&!al.alive){useItem(G.selItem,al);G.bPhase='animate'}else if(G.bAction==='it_use'&&al.alive){useItem(G.selItem,al);G.bPhase='animate'}}
+  }
+});
+C.addEventListener('touchstart',e=>{initAudio();tSX=e.touches[0].clientX;tSY=e.touches[0].clientY});
+C.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tSX,dy=e.changedTouches[0].clientY-tSY;if(Math.abs(dx)<10&&Math.abs(dy)<10)return;if(G.mode==='map'){Math.abs(dx)>Math.abs(dy)?tryMove(dx>0?1:-1,0):tryMove(0,dy>0?1:-1)}});
+addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){if(G.mode==='map')interactNearby();else if(G.mode==='dialogue')advDlg()}if(e.key==='Escape'){if(G.mode==='map'||G.mode==='menu')toggleMenu()}});
+
+function addInv(id,q){const ex=G.inv.find(i=>i.id===id);if(ex)ex.q+=q;else G.inv.push({id,q})}
+
+// --- Area Init ---
+function startArea(idx){
+  G.stage=idx;const st=STAGES[idx];if(!st)return;
+  // Ch2 init party from inheritance
+  if(st.ch2Init&&(!G.party.length||G.chapter===2)){
+    initCh2Party();
+  }
+  if(st.initParty&&(idx===0||!G.party.length)){G.party=st.initParty();G.inv=[{id:'hp_pot',q:3},{id:'mp_pot',q:2},{id:'ssuk',q:3}];G.gold=100}
+  G.mapData=st.map.map(r=>[...r]);G.mapH=st.map.length;G.mapW=st.map[0].length;
+  G.px=st.ps.x;G.py=st.ps.y;
+  G.npcs=st.npcs.map(n=>({...n,gone:false,lines:[...n.lines]}));
+  G.chests=(st.chests||[]).map(c=>({...c,opened:false,qty:c.qty||c.q||1}));
+  G.heals=[...(st.heals||[])];
+  G.camX=iX(G.px,G.py);G.camY=iY(G.px,G.py);
+  $('hud').style.display='block';$('minimap').style.display='block';
+  $('hud-stage').textContent=`${st.id} ${st.name}`;
+  if(isMobile)$('dpad').style.display='block';
+  if(st.pre?.length)startDlg(st.pre,()=>{G.mode='map';startBGM(st.mus||'map')});
+  else{G.mode='map';startBGM(st.mus||'map')}
+  updHUD()
+}
+
+// --- Ch2 Party Initialization (Level Inheritance) ---
+function initCh2Party(){
+  const saved=localStorage.getItem('krpg4_ch1_done');
+  let baseLv=15,baseGold=500,baseInv=[];
+  if(saved){
+    try{
+      const d=JSON.parse(saved);
+      baseLv=d.lv||15;baseGold=d.gold||500;
+      baseInv=d.inv||[];
+    }catch(e){}
+  }
+  // 단군 inherits parent's level
+  const dangun=mkCh('dg','단군','단군',baseLv,true,{hp:30,mp:20,atk:8,def:5,spd:3,weapon:'cb_sword',armor:'asadal_armor',acc:'cb_mirror'});
+  G.party=[dangun];
+  G.gold=baseGold;
+  G.inv=[{id:'hp_pot2',q:5},{id:'mp_pot',q:5},{id:'hp_pot3',q:2},{id:'mp_pot2',q:2},{id:'revive',q:2},{id:'ssuk',q:5},...baseInv.filter(i=>ITEMS[i.id]?.t==='cons'&&i.q>0)];
+  // Deduplicate inventory
+  const merged={};G.inv.forEach(i=>{if(merged[i.id])merged[i.id].q+=i.q;else merged[i.id]={...i}});
+  G.inv=Object.values(merged);
+}
+
+// --- Save chapter completion data for inheritance ---
+function saveChapterData(ch){
+  if(ch===1){
+    const leader=G.party[0];
+    const d={lv:leader?.lv||15,gold:G.gold,inv:G.inv.filter(i=>ITEMS[i.id]?.t==='cons'&&i.q>0).map(i=>({id:i.id,q:i.q}))};
+    localStorage.setItem('krpg4_ch1_done',JSON.stringify(d));
+    localStorage.setItem('krpg4_ch1_cleared','true');
+  }
+  if(ch===2){
+    localStorage.setItem('krpg4_ch2_cleared','true');
+  }
+}
+
+// --- Endurance ---
+function startEndurance(){G.mode='endurance';G.endDay=0;G.endHP=100;$('endurance-game').classList.add('on');nextED()}
+function nextED(){
+  G.endDay++;if(G.endDay>7){$('endurance-game').classList.remove('on');const st=STAGES[G.stage];
+    startDlg(st.post||[{s:'',t:'21일 시련 완료!'}],()=>{doRecruit(st);
+      const bn=G.npcs?.find(n=>n.battle&&!n.gone);
+      if(bn)G.mode='map';else completeArea()});return}
+  const dd=G.endDay*3;$('endurance-day').textContent=`${dd}일차 / 21일`;
+  $('endurance-fill').style.width=(G.endDay/7*100)+'%';
+  const evts=[{p:'배가 고프다... 쑥을 먹어 인내하라!',l:10},{p:'동굴이 춥다... 마늘을 먹어 버텨라!',l:12},{p:'밖에서 새소리가... 참아라!',l:8},{p:'호랑이가 유혹: "나가자!"',l:15},{p:'어둠이 무섭다... 신념을 지켜라!',l:10},{p:'물이 떨어진다... 절약하라!',l:11},{p:'근육이 굳었다... 움직이고 싶다!',l:9}];
+  const ev=evts[Math.floor(Math.random()*evts.length)];
+  $('endurance-prompt').textContent=ev.p;
+  const btn=$('endurance-btn');btn.style.display='none';
+  setTimeout(()=>{btn.style.display='block';btn.onclick=()=>{G.endHP-=ev.l*(.5+Math.random()*.5);if(G.endHP<0)G.endHP=0;sfx('def');$('endurance-prompt').textContent='인내 성공!';btn.style.display='none';setTimeout(nextED,800)}},500+Math.random()*800)
+}
+
+// --- Quiz System ---
+const QUIZZES=[
+  {q:'고조선의 건국 연도는?',a:['BC 2333년','BC 1000년','BC 500년','BC 108년'],c:0},
+  {q:'단군왕검의 어머니는?',a:['선녀','웅녀','호녀','학녀'],c:1},
+  {q:'고조선의 법률 "팔조법금"에서 전해지는 조항은 몇 개?',a:['8개','5개','3개','1개'],c:2},
+  {q:'환웅이 하늘에서 가져온 신물의 이름은?',a:['삼신기','천부인','천부경','삼태극'],c:1},
+  {q:'고조선의 수도는?',a:['평양','서울','아사달','개경'],c:2}
+];
+let quizIdx=0,quizCorrect=0,quizTotal=3;
+
+function startQuiz(cb){
+  G.quizCb=cb;quizIdx=0;quizCorrect=0;
+  // Pick 3 random questions
+  const shuffled=[...QUIZZES].sort(()=>Math.random()-.5);
+  G._quizSet=shuffled.slice(0,quizTotal);
+  showQuizQuestion();
+  $('quiz-screen').classList.add('on');G.mode='quiz';
+}
+function showQuizQuestion(){
+  if(quizIdx>=quizTotal){
+    $('quiz-screen').classList.remove('on');
+    const passed=quizCorrect>=2;
+    if(passed){
+      sfx('quest');
+      startDlg([{s:'현자',t:`${quizCorrect}/${quizTotal} 정답! 지혜로운 자이다.`}],()=>{if(G.quizCb)G.quizCb()});
+    }else{
+      startDlg([{s:'현자',t:`${quizCorrect}/${quizTotal} 정답... 아직 부족하다. 다시 도전하라.`}],()=>{startQuiz(G.quizCb)});
+    }
+    return;
+  }
+  const q=G._quizSet[quizIdx];
+  $('quiz-question').textContent=`문제 ${quizIdx+1}/${quizTotal}: ${q.q}`;
+  $('quiz-answers').innerHTML=q.a.map((a,i)=>`<button class="quiz-btn" onclick="answerQuiz(${i})">${a}</button>`).join('');
+}
+window.answerQuiz=function(i){
+  const q=G._quizSet[quizIdx];
+  const btns=$('quiz-answers').querySelectorAll('.quiz-btn');
+  btns.forEach((b,j)=>{b.disabled=true;if(j===q.c)b.classList.add('correct');if(j===i&&j!==q.c)b.classList.add('wrong')});
+  if(i===q.c){quizCorrect++;sfx('sel')}else sfx('miss');
+  setTimeout(()=>{quizIdx++;showQuizQuestion()},1000)
+};
+
+// --- Ritual Minigame (제천의식) ---
+function startRitual(cb){
+  G.ritualCb=cb;G.ritualRound=0;G.ritualSuccess=0;G.ritualAngle=0;
+  $('ritual-game').classList.add('on');G.mode='ritual';
+  $('ritual-round').textContent=`1 / 5`;$('ritual-score').textContent='성공: 0';
+  animateRitual();
+}
+let ritualAF=null;
+function animateRitual(){
+  G.ritualAngle+=0.03;
+  if(G.ritualAngle>Math.PI*2)G.ritualAngle-=Math.PI*2;
+  const marker=$('ritual-marker');
+  const r=60;
+  const mx=80+Math.cos(G.ritualAngle)*r-8;
+  const my=80+Math.sin(G.ritualAngle)*r-8;
+  marker.style.left=mx+'px';marker.style.top=my+'px';
+  if(G.mode==='ritual')ritualAF=requestAnimationFrame(animateRitual);
+}
+window.ritualTap=function(){
+  if(G.mode!=='ritual')return;
+  // Target is at top (angle ~= -PI/2 = 4.71)
+  const targetAngle=-Math.PI/2;
+  let diff=Math.abs(G.ritualAngle-((targetAngle+Math.PI*2)%(Math.PI*2)));
+  if(diff>Math.PI)diff=Math.PI*2-diff;
+  if(diff<0.4){G.ritualSuccess++;sfx('sel')}else sfx('miss');
+  G.ritualRound++;
+  $('ritual-round').textContent=`${G.ritualRound+1} / 5`;
+  $('ritual-score').textContent=`성공: ${G.ritualSuccess}`;
+  if(G.ritualRound>=5){
+    cancelAnimationFrame(ritualAF);
+    $('ritual-game').classList.remove('on');
+    const passed=G.ritualSuccess>=3;
+    if(passed){
+      sfx('quest');
+      startDlg([{s:'',t:'제천의식 성공! 하늘이 비를 내려주었다!'},{s:'',t:'가뭄이 끝나고 풍년이 찾아왔다!'}],()=>{if(G.ritualCb)G.ritualCb()});
+    }else{
+      startDlg([{s:'',t:'제천의식이 부족했다... 다시 시도한다.'},{s:'단군',t:'한 번 더 정성을 다하겠다!'}],()=>{startRitual(G.ritualCb)});
+    }
+  }
+};
+
+// --- HUD ---
+function updHUD(){
+  $('hud-party').innerHTML=G.party.map(c=>{
+    const hp=(c.hp/c.mhp*100).toFixed(0),mp=(c.mp/c.mmp*100).toFixed(0);
+    return`<div class="hud-char" ${c.alive?'':'style="opacity:.4"'}><div class="hud-char-name">${c.portrait} ${c.nm} ${c.lv}</div><div class="hud-bar"><div class="hud-bar-hp" style="width:${hp}%"></div></div><div class="hud-bar"><div class="hud-bar-mp" style="width:${mp}%"></div></div></div>`
+  }).join('')
+}
+function updTO(){
+  $('battle-turn-order').innerHTML=G.turnOrd.filter(c=>c.alive).map((c,i)=>`<span class="turn-marker ${c.ally?'ally':'enemy'} ${i===G.tIdx?'active':''}">${c.portrait} ${c.nm}</span>`).join('')
+}
+function sBI(t){$('battle-info').textContent=t}
+
+// --- Menu ---
+window.toggleMenu=function(){
+  const m=$('menu-overlay');if(m.classList.contains('on')){m.classList.remove('on');if(G.mode==='menu')G.mode=G._pm||'map'}
+  else{G._pm=G.mode;G.mode='menu';m.classList.add('on');sfx('menu')}
+};
+window.openStatusScreen=function(){
+  $('menu-overlay').classList.remove('on');$('status-screen').style.display='block';G.mode='status';
+  $('status-content').innerHTML=G.party.map(c=>{
+    const sk=getSk(c);return`<div class="status-card"><h3>${c.portrait} ${c.nm} (${c.cl}) Lv.${c.lv}</h3><div class="stat-row"><span>HP</span><span>${c.hp}/${c.mhp}</span></div><div class="stat-row"><span>MP</span><span>${c.mp}/${c.mmp}</span></div><div class="stat-row"><span>ATK</span><span>${c.atk}</span></div><div class="stat-row"><span>DEF</span><span>${c.def}</span></div><div class="stat-row"><span>SPD</span><span>${c.spd}</span></div><div class="stat-row"><span>EXP</span><span>${c.exp}/${c.exn}</span></div><div class="equip-row">무기: ${c.weapon?ITEMS[c.weapon]?.n:'없음'}</div><div class="equip-row">갑옷: ${c.armor?ITEMS[c.armor]?.n:'없음'}</div><div class="equip-row">장신구: ${c.acc?ITEMS[c.acc]?.n:'없음'}</div><div class="equip-row">기술: ${sk.map(s=>s.n).join(', ')||'없음'}</div></div>`
+  }).join('')+`<div class="status-card"><h3>소지금: ${G.gold}G</h3><h4 style="color:#c4956a;margin-top:4px">인벤토리</h4>${G.inv.filter(i=>i.q>0).map(i=>`<div class="stat-row"><span>${ITEMS[i.id]?.n}</span><span>x${i.q}</span></div>`).join('')||'<div style="color:#666;font-size:10px">비어있음</div>'}</div>`
+};
+window.closeStatusScreen=function(){$('status-screen').style.display='none';G.mode=G._pm||'map'};
+window.openSaveScreen=function(mode){
+  G.saveMode=mode;$('menu-overlay').classList.remove('on');$('save-screen').style.display='block';$('save-title').textContent=mode==='save'?'저장':'불러오기';G.mode='save';
+  const c=$('save-slots');c.innerHTML='';
+  for(let i=1;i<=5;i++){const d=localStorage.getItem(`krpg4_${i}`),sl=document.createElement('div');sl.className='save-slot';
+    if(d){const p=JSON.parse(d);sl.innerHTML=`<h4>슬롯 ${i}</h4><p>Ch${p.chapter||1} ${p.sid||'?'} ${p.pn||'?'} Lv.${p.plv||'?'} ${p.date||''}</p>`}
+    else sl.innerHTML=`<h4>슬롯 ${i}</h4><p>비어있음</p>`;
+    sl.onclick=()=>{if(mode==='save'){saveGame(i);closeSaveScreen();startDlg([{s:'',t:'저장 완료!'}],()=>{G.mode=G._pm||'map'})}else if(d){loadGame(i);closeSaveScreen()}};c.appendChild(sl)}
+};
+window.closeSaveScreen=function(){$('save-screen').style.display='none';if(G.mode==='save')G.mode=G._pm||'map'};
+
+function saveGame(s){
+  const d={stage:G.stage,chapter:G.chapter,sid:STAGES[G.stage]?.id,party:G.party.map(c=>({id:c.id,nm:c.nm,cl:c.cl,lv:c.lv,exp:c.exp,exn:c.exn,mhp:c.mhp,hp:c.hp,mmp:c.mmp,mp:c.mp,atk:c.atk,def:c.def,spd:c.spd,weapon:c.weapon,armor:c.armor,acc:c.acc,alive:c.alive})),inv:G.inv,gold:G.gold,cleared:G.cleared,pn:G.party.map(c=>c.nm).join(','),plv:G.party[0]?.lv,date:new Date().toLocaleString('ko-KR')};
+  localStorage.setItem(`krpg4_${s}`,JSON.stringify(d))
+}
+function loadGame(s){
+  const r=localStorage.getItem(`krpg4_${s}`);if(!r)return;const d=JSON.parse(r);
+  G.chapter=d.chapter||1;
+  G.party=d.party.map(c=>{const ch=mkCh(c.id,c.nm,c.cl,c.lv,true,{weapon:c.weapon,armor:c.armor,acc:c.acc});ch.exp=c.exp;ch.exn=c.exn;ch.hp=c.hp;ch.mp=c.mp;ch.alive=c.alive!==false;ch.atk=c.atk;ch.def=c.def;ch.spd=c.spd;ch.mhp=c.mhp;ch.mmp=c.mmp;return ch});
+  G.inv=d.inv||[];G.gold=d.gold||0;G.cleared=d.cleared||[];
+  $('title-screen').style.display='none';startArea(d.stage)
+}
+
+// --- Chapter Select ---
+window.openChapterSelect=function(){
+  initAudio();
+  $('title-screen').style.display='none';
+  const ch1Done=localStorage.getItem('krpg4_ch1_cleared')==='true';
+  const ch1s=$('ch1-status'),ch2s=$('ch2-status'),ch2c=$('ch2-card');
+  ch1s.className='ch-status new';ch1s.textContent='시작';
+  if(ch1Done){ch1s.className='ch-status done';ch1s.textContent='클리어 완료'}
+  if(ch1Done){ch2c.classList.remove('locked');ch2s.className='ch-status new';ch2s.textContent='시작'}
+  else{ch2c.classList.add('locked');ch2s.className='ch-status lock';ch2s.innerHTML='&#128274; 챕터1 클리어 필요'}
+  $('chapter-select').classList.add('on');
+};
+window.closeChapterSelect=function(){
+  $('chapter-select').classList.remove('on');$('title-screen').style.display='flex';resetTitleHTML()
+};
+window.selectChapter=function(ch){
+  if(ch===2){
+    const ch1Done=localStorage.getItem('krpg4_ch1_cleared')==='true';
+    if(!ch1Done){sfx('miss');return}
+  }
+  $('chapter-select').classList.remove('on');
+  G.cleared=[];G.party=[];G.inv=[];G.gold=0;G.chapter=ch;
+  if(ch===1){
+    G.stage=0;showEpBanner(EPISODES[0],()=>startArea(0))
+  }else{
+    G.stage=CH2_START;showEpBanner(EPISODES[CH2_START>=0?5:0],()=>startArea(CH2_START))
+  }
+};
+
+// --- Final Endings ---
+function showEnding(ch){
+  stopBGM();G.mode='title';const t=$('title-screen');t.style.display='flex';
+  if(ch===1){
+    t.innerHTML=`<div style="animation:fadeUp .8s ease;text-align:center"><div style="font-size:9px;letter-spacing:5px;color:#8a7a6a;margin-bottom:6px">CHAPTER 1 COMPLETE</div><h1 class="title-text">환웅편 완결</h1><div class="title-sub">환웅과 웅녀의 아들, 단군왕검</div><div style="font-size:12px;color:#aaa;margin:20px auto;max-width:320px;line-height:2.2">BC 2333년<br>단군왕검이 자라서<br>아사달에 도읍을 정하리라.<br><br>홍익인간<br>널리 인간 세상을 이롭게 하라<br><br><span style="color:#FFD700">레벨과 장비가 저장되었습니다.</span><br><span style="color:#aaa;font-size:11px">챕터2 단군편이 해금됩니다!</span></div><button class="title-btn" onclick="location.reload()">타이틀로</button></div>`
+  }else{
+    t.innerHTML=`<div style="animation:fadeUp .8s ease;text-align:center"><div style="font-size:9px;letter-spacing:5px;color:#8a7a6a;margin-bottom:6px">CHAPTER 2 COMPLETE</div><h1 class="title-text">단군편 완결</h1><div class="title-sub">1500년의 통치, 산신이 되다</div><div style="font-size:12px;color:#aaa;margin:20px auto;max-width:320px;line-height:2.2">단군왕검은<br>홍익인간의 뜻으로 1500년을 다스리고<br>아사달에 숨어 산신이 되었다.<br><br>그리고 세월이 흘러...<br>위만이 중국에서 건너와<br>고조선의 왕위를 빼앗으니...<br><br><span style="color:#FFD700">위만조선편 — Coming Soon</span></div><button class="title-btn" onclick="location.reload()">타이틀로</button></div>`
+  }
+}
+
+function resetTitleHTML(){
+  const t=$('title-screen');
+  t.innerHTML=`<div style="animation:fadeUp .8s ease">
+    <div style="font-size:9px;letter-spacing:5px;color:#8a7a6a;margin-bottom:6px">TURN-BASED RPG &middot; BC 2400~2333</div>
+    <h1 class="title-text">한국사 영웅전</h1>
+    <div class="title-sub">v4 &mdash; 1부 고조선 &middot; 환웅편 + 단군편</div>
+    <div style="margin-top:16px"><button class="title-btn" onclick="openChapterSelect()">새 게임</button></div>
+    <div><button class="title-btn title-btn2" onclick="openSaveScreen('load');document.getElementById('title-screen').style.display='none'">이어하기</button></div>
+    <div class="title-info">
+      &#9656; 2개 챕터 &middot; 9개 에피소드 &middot; 보스전<br>
+      &#9656; 병종 상성: 궁병 &gt; 보병 &gt; 기마병 &gt; 궁병<br>
+      &#9656; 레벨 계승 시스템<br>
+      &#9656; 이동: 방향키/WASD/터치<br>
+      &#9656; 역사 고증: 청동기 시대 무기/갑옷
+    </div></div>`;
+}
+
+// --- Start ---
+window.startNewGame=function(){openChapterSelect()};
+
+// --- Game Loop ---
+let lt=0;
+function loop(t){
+  const dt=t-lt;lt=t;X.clearRect(0,0,C.width,C.height);
+  if(G.mode==='map'){updMove(dt);rMap();updHUD()}
+  else if(G.mode==='battle'||G.mode==='battle_anim'){rBattle();updHUD()}
+  else if(G.mode==='dialogue'){
+    if(G.bp?.length>0&&$('battle-ui').style.display==='block')rBattle();
+    else if(G.mapData)rMap();
+    else{X.fillStyle='#0a0608';X.fillRect(0,0,C.width,C.height);for(let i=0;i<50;i++){const x=(Math.sin(i*127.1+t*.0001)*.5+.5)*C.width,y=(Math.cos(i*311.7+t*.00008)*.5+.5)*C.height*.6;X.fillStyle=`rgba(255,220,180,${.3+Math.sin(t*.002+i)*.3})`;X.fillRect(x,y,1.5,1.5)}}
+    updDT(dt);updHUD()
+  }
+  else if(G.mode==='title'){
+    X.fillStyle='#0a0608';X.fillRect(0,0,C.width,C.height);
+    for(let i=0;i<80;i++){const x=(Math.sin(i*127.1+t*.00005)*.5+.5)*C.width,y=(Math.cos(i*311.7+t*.00004)*.5+.5)*C.height;X.fillStyle=`rgba(255,220,180,${.2+Math.sin(t*.001+i*.5)*.3})`;X.fillRect(x,y,2,2)}
+    X.fillStyle='#1a0e08';X.beginPath();X.moveTo(0,C.height);for(let x=0;x<=C.width;x+=20){const h=C.height*.7+Math.sin(x*.008)*40+Math.sin(x*.003)*80;X.lineTo(x,h)}X.lineTo(C.width,C.height);X.closePath();X.fill()
+  }
+  else if(G.mode==='menu'||G.mode==='status'||G.mode==='save'){if(G.mapData)rMap();else{X.fillStyle='#0a0608';X.fillRect(0,0,C.width,C.height)}}
+  else if(G.mode==='victory'||G.mode==='defeat')rBattle();
+  else if(G.mode==='endurance'){
+    X.fillStyle='#0a0818';X.fillRect(0,0,C.width,C.height);
+    for(let i=0;i<30;i++){const x=(Math.sin(i*73+t*.0003)*.5+.5)*C.width,y=(Math.cos(i*137+t*.0002)*.5+.5)*C.height;X.fillStyle=`rgba(100,50,150,${.05+Math.sin(t*.002+i)*.03})`;X.beginPath();X.arc(x,y,20+Math.sin(i)*10,0,Math.PI*2);X.fill()}
+  }
+  else if(G.mode==='banner'){X.fillStyle='#0a0608';X.fillRect(0,0,C.width,C.height);for(let i=0;i<40;i++){const x=(Math.sin(i*97+t*.0001)*.5+.5)*C.width,y=(Math.cos(i*211+t*.00007)*.5+.5)*C.height;X.fillStyle=`rgba(255,200,100,${.15+Math.sin(t*.003+i)*.1})`;X.fillRect(x,y,2,2)}}
+  else if(G.mode==='quiz'||G.mode==='ritual'){X.fillStyle='#0a0618';X.fillRect(0,0,C.width,C.height);for(let i=0;i<30;i++){const x=(Math.sin(i*73+t*.0002)*.5+.5)*C.width,y=(Math.cos(i*137+t*.00015)*.5+.5)*C.height;X.fillStyle=`rgba(200,150,100,${.05+Math.sin(t*.002+i)*.04})`;X.beginPath();X.arc(x,y,15+Math.sin(i)*8,0,Math.PI*2);X.fill()}}
+  if(G.bAnimT>0)G.bAnimT-=dt;
+  requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

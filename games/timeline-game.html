@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>시간여행 타임라인</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:520px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 16px;margin-bottom:10px;font-size:16px;font-weight:700;flex-wrap:wrap;gap:4px}
+.hud .sc{color:#FFD700}.hud .rnd{color:#7FDBFF}.hud .cat{color:#FF6B9D}.hud .df{color:#CE93D8}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu p{color:#aaa;font-size:15px;text-align:center;max-width:360px}
+.diff-btn{width:300px;padding:14px;font-size:18px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.diff-btn:active{transform:scale(0.95)}
+.diff-btn.d1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.diff-btn.d2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.diff-btn.d3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.diff-btn.d4{background:linear-gradient(135deg,#E53935,#EF5350)}
+.diff-btn.d5{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+.diff-btn.lock{opacity:0.5}
+.diff-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
+.cat-row{display:flex;gap:8px;margin-bottom:8px}
+.cat-btn{padding:8px 20px;font-size:15px;font-weight:700;border:2px solid #555;border-radius:12px;background:transparent;color:#aaa;cursor:pointer;transition:all 0.15s}
+.cat-btn.active{background:#FF6B9D;color:#fff;border-color:#FF6B9D}
+.back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
+.timeline-area{flex:1;display:flex;flex-direction:column;gap:0;position:relative;padding:10px 0}
+.slot{min-height:64px;border:2px dashed #333;border-radius:14px;margin:4px 0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;position:relative}
+.slot.over{border-color:#FFD700;background:rgba(255,215,0,0.08)}
+.slot .slot-num{position:absolute;left:10px;color:#555;font-size:13px;font-weight:700}
+.card-pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 0;min-height:80px;border-top:2px solid #333;margin-top:auto}
+.card{padding:10px 14px;background:#1e2a45;border:2px solid #444;border-radius:14px;font-size:15px;font-weight:600;cursor:grab;user-select:none;touch-action:none;transition:transform 0.15s,box-shadow 0.15s;max-width:200px;text-align:center}
+.card:active{transform:scale(1.05);box-shadow:0 4px 20px rgba(255,215,0,0.3)}
+.card.placed{opacity:0.5;pointer-events:none}
+.card.dragging{opacity:0.8;z-index:100;position:fixed;pointer-events:none}
+.slot .card{cursor:pointer;margin:0}
+.slot .card.placed{opacity:1;pointer-events:auto}
+.check-btn{width:100%;padding:14px;font-size:20px;font-weight:700;border:none;border-radius:14px;background:linear-gradient(135deg,#FFD700,#FFA000);color:#1a1a2e;cursor:pointer;margin-top:8px;transition:transform 0.15s}
+.check-btn:active{transform:scale(0.97)}
+.check-btn:disabled{opacity:0.4;cursor:default}
+.slot.correct{border-color:#4CAF50;background:rgba(76,175,80,0.1)}
+.slot.correct .card{border-color:#4CAF50;color:#4CAF50}
+.slot.wrong{border-color:#E53935;background:rgba(229,57,53,0.1)}
+.slot.wrong .card{border-color:#E53935;color:#E53935}
+.year-label{font-size:12px;color:#888;margin-top:2px;text-align:center}
+.info-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e2a45;border:2px solid #FFD700;border-radius:16px;padding:20px;max-width:360px;width:90%;z-index:100;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.6);max-height:80vh;overflow-y:auto}
+.info-popup h3{color:#FFD700;font-size:20px;margin-bottom:10px}
+.info-popup .ev{text-align:left;padding:6px 0;border-bottom:1px solid #333;font-size:14px}
+.info-popup .ev .yr{color:#FFD700;font-weight:700;margin-right:6px}
+.info-popup .ev .desc{color:#aaa;font-size:13px;display:block;margin-top:2px}
+.info-popup button{margin-top:14px;padding:10px 30px;font-size:16px;font-weight:700;border:none;border-radius:12px;background:linear-gradient(135deg,#FFD700,#FFA000);color:#1a1a2e;cursor:pointer}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
+.result{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center}
+.result .big{font-size:72px}.result h2{font-size:28px;color:#FFD700}
+.result p{font-size:18px;color:#ccc}
+.retry{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.next-btn{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#81C784);color:#fff;cursor:pointer;margin-top:4px}
+.menu-link{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:4px}
+.stars{font-size:36px;margin:4px 0}
+.best-record{font-size:14px;color:#888}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+const KOREA_EVENTS=[
+{year:668,title:'삼국통일 (신라)',desc:'신라가 백제와 고구려를 멸망시키고 한반도를 통일했습니다.',era:'고대'},
+{year:918,title:'고려 건국',desc:'왕건이 고려를 세우고 후삼국을 통일했습니다.',era:'고려'},
+{year:1234,title:'금속활자 발명',desc:'세계 최초의 금속활자 인쇄술이 고려에서 발명되었습니다.',era:'고려'},
+{year:1392,title:'조선 건국',desc:'이성계가 조선을 건국하고 한양으로 천도했습니다.',era:'조선'},
+{year:1443,title:'한글 창제',desc:'세종대왕이 훈민정음(한글)을 창제했습니다.',era:'조선'},
+{year:1592,title:'임진왜란',desc:'일본의 침략으로 7년간의 전쟁이 시작되었습니다.',era:'조선'},
+{year:1636,title:'병자호란',desc:'청나라의 침략으로 조선이 굴욕적 항복을 했습니다.',era:'조선'},
+{year:1876,title:'강화도 조약',desc:'일본과 최초의 근대적 불평등 조약을 맺었습니다.',era:'근대'},
+{year:1897,title:'대한제국 선포',desc:'고종이 황제로 즉위하고 대한제국을 선포했습니다.',era:'근대'},
+{year:1910,title:'경술국치',desc:'일본에 의해 국권이 강제로 피탈되었습니다.',era:'일제'},
+{year:1919,title:'3·1 운동',desc:'전국적 독립 만세 운동이 일어났습니다.',era:'일제'},
+{year:1945,title:'광복',desc:'일본 패망으로 해방을 맞이했습니다.',era:'현대'},
+{year:1950,title:'6·25 전쟁',desc:'북한의 남침으로 한국전쟁이 발발했습니다.',era:'현대'},
+{year:1960,title:'4·19 혁명',desc:'이승만 독재에 항거한 학생 혁명이 일어났습니다.',era:'현대'},
+{year:1980,title:'5·18 민주화운동',desc:'광주에서 민주화를 요구하는 시민 항쟁이 일어났습니다.',era:'현대'},
+{year:1988,title:'서울 올림픽',desc:'대한민국 서울에서 하계 올림픽이 개최되었습니다.',era:'현대'},
+{year:1997,title:'IMF 외환위기',desc:'외환 부족으로 IMF 구제금융을 신청했습니다.',era:'현대'},
+{year:2002,title:'한일 월드컵',desc:'한국과 일본이 공동으로 FIFA 월드컵을 개최했습니다.',era:'현대'},
+{year:2018,title:'평창 동계올림픽',desc:'강원도 평창에서 동계 올림픽이 개최되었습니다.',era:'현대'},
+{year:2020,title:'코로나19 대응',desc:'K-방역으로 세계적 주목을 받았습니다.',era:'현대'}
+];
+
+const WORLD_EVENTS=[
+{year:776,title:'고대 올림픽 (그리스)',desc:'그리스 올림피아에서 최초의 올림픽 경기가 열렸습니다. (BC 776)',era:'고대'},
+{year:1066,title:'노르만 정복 (영국)',desc:'윌리엄 1세가 영국을 정복했습니다.',era:'중세'},
+{year:1215,title:'마그나카르타',desc:'영국에서 왕권을 제한하는 대헌장이 만들어졌습니다.',era:'중세'},
+{year:1453,title:'동로마 제국 멸망',desc:'오스만 튀르크가 콘스탄티노플을 점령했습니다.',era:'중세'},
+{year:1492,title:'콜럼버스 신대륙 발견',desc:'콜럼버스가 아메리카 대륙에 도착했습니다.',era:'근세'},
+{year:1517,title:'종교개혁 (루터)',desc:'마르틴 루터가 95개조 반박문을 발표했습니다.',era:'근세'},
+{year:1776,title:'미국 독립선언',desc:'미국이 영국으로부터 독립을 선언했습니다.',era:'근대'},
+{year:1789,title:'프랑스 대혁명',desc:'프랑스에서 시민 혁명이 일어나 왕정이 무너졌습니다.',era:'근대'},
+{year:1804,title:'나폴레옹 황제 즉위',desc:'나폴레옹이 프랑스 황제로 즉위했습니다.',era:'근대'},
+{year:1861,title:'미국 남북전쟁',desc:'노예제 등을 둘러싼 미국 내전이 시작되었습니다.',era:'근대'},
+{year:1869,title:'수에즈 운하 개통',desc:'지중해와 홍해를 연결하는 운하가 개통되었습니다.',era:'근대'},
+{year:1903,title:'라이트 형제 비행',desc:'최초의 동력 비행에 성공했습니다.',era:'현대'},
+{year:1914,title:'제1차 세계대전',desc:'유럽 열강 간의 대규모 전쟁이 시작되었습니다.',era:'현대'},
+{year:1939,title:'제2차 세계대전',desc:'독일의 폴란드 침공으로 2차 세계대전이 시작되었습니다.',era:'현대'},
+{year:1945,title:'UN 창설',desc:'국제 평화를 위한 국제연합이 설립되었습니다.',era:'현대'},
+{year:1961,title:'유리 가가린 우주비행',desc:'인류 최초로 우주 비행에 성공했습니다.',era:'현대'},
+{year:1969,title:'달 착륙 (아폴로 11)',desc:'닐 암스트롱이 인류 최초로 달에 발을 디뎠습니다.',era:'현대'},
+{year:1989,title:'베를린 장벽 붕괴',desc:'동서독을 가르던 베를린 장벽이 무너졌습니다.',era:'현대'},
+{year:1991,title:'소련 해체',desc:'소비에트 연방이 해체되고 러시아 등 독립 국가가 탄생했습니다.',era:'현대'},
+{year:2001,title:'9·11 테러',desc:'미국 뉴욕 세계무역센터가 테러 공격을 받았습니다.',era:'현대'}
+];
+
+const DIFFS=[
+  {name:'쉬움',emoji:'🟢',desc:'5개 시대 구분만',count:5,rounds:3},
+  {name:'보통',emoji:'🟡',desc:'8개 사건 배치',count:8,rounds:3},
+  {name:'어려움',emoji:'🟠',desc:'12개 사건 배치',count:12,rounds:2},
+  {name:'고급',emoji:'🔴',desc:'연도 순서 맞히기 (10개)',count:10,rounds:3},
+  {name:'마스터',emoji:'🟣',desc:'한국사+세계사 혼합 15개',count:15,rounds:2}
+];
+
+let category='korea',diffIdx=0,score=0,round=0,totalRounds=3;
+let currentEvents=[],slots=[],dragCard=null,dragIdx=-1,screen='menu',totalCorrect=0,totalPossible=0;
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[b[i],b[j]]=[b[j],b[i]];}return b;}
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'timeline-game'},'*');}catch(e){}}
+function getBest(d){try{return JSON.parse(localStorage.getItem('timeline_best_'+d))||{stars:0,score:0};}catch(e){return{stars:0,score:0};}}
+function saveBest(d,stars,sc){const p=getBest(d);if(stars>p.stars||sc>p.score)localStorage.setItem('timeline_best_'+d,JSON.stringify({stars:Math.max(stars,p.stars),score:Math.max(sc,p.score)}));}
+function getStars(sc,max){const pct=max>0?Math.round(sc/max*100):0;return pct>=80?3:pct>=50?2:pct>=20?1:0;}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function isUnlocked(d){if(d===0)return true;return getBest(d-1).stars>=1;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu') renderMenu(app);
+  else if(screen==='play') renderPlay(app);
+  else if(screen==='result') renderResult(app);
+}
+
+function renderMenu(app){
+  let btns=DIFFS.map((d,i)=>{
+    const b=getBest(i);
+    const ul=isUnlocked(i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} 최고: ${b.score}점</span>`:'';
+    return `<button class="diff-btn d${i+1} ${ul?'':'lock'}" onclick="${ul?`startDiff(${i})`:''}">${d.emoji} ${d.name}: ${d.desc}${bst}</button>`;
+  }).join('');
+  app.innerHTML=`
+    <h1>⏳ 시간여행 타임라인</h1>
+    <div class="menu">
+      <p>역사적 사건을 시간순으로 올바르게 배치하세요!</p>
+      <div class="cat-row">
+        <button class="cat-btn ${category==='korea'?'active':''}" onclick="setCat('korea')">🇰🇷 한국사</button>
+        <button class="cat-btn ${category==='world'?'active':''}" onclick="setCat('world')">🌍 세계사</button>
+      </div>
+      ${btns}
+      <p style="font-size:13px;color:#666">별 1개 이상으로 다음 난이도 해금!</p>
+    </div>`;
+}
+
+function setCat(c){category=c;render();}
+
+function startDiff(d){
+  diffIdx=d;score=0;round=0;totalCorrect=0;totalPossible=0;
+  totalRounds=DIFFS[d].rounds;
+  screen='play';nextRound();
+}
+
+function getPool(){
+  if(diffIdx===4){
+    // Master: always mixed
+    return shuffle([...KOREA_EVENTS,...WORLD_EVENTS]);
+  }
+  if(category==='korea') return shuffle([...KOREA_EVENTS]);
+  return shuffle([...WORLD_EVENTS]);
+}
+
+function nextRound(){
+  let pool=getPool();
+  const count=DIFFS[diffIdx].count;
+  currentEvents=pool.slice(0,count).sort((a,b)=>a.year-b.year);
+  slots=new Array(count).fill(null);
+  render();
+}
+
+function renderPlay(app){
+  const count=DIFFS[diffIdx].count;
+  const df=DIFFS[diffIdx];
+  const shuffled=shuffle(currentEvents);
+  const placed=slots.filter(s=>s!==null).length;
+
+  let slotLabel='';
+  if(diffIdx===0){
+    // Easy: show era hints
+    slotLabel='(시대순: 고대 → 고려 → 조선 → 근대 → 현대)';
+  }
+
+  app.innerHTML=`
+    <div class="hud">
+      <span class="sc">⭐ ${score}</span>
+      <span class="df">${df.emoji} ${df.name}</span>
+      <span class="rnd">📋 라운드 ${round+1}/${totalRounds}</span>
+      <span class="cat">${diffIdx===4?'🔀':category==='korea'?'🇰🇷':'🌍'}</span>
+    </div>
+    <h1 style="font-size:16px;margin:4px 0;color:#aaa">사건을 오래된 순서대로 슬롯에 넣으세요 ${slotLabel}</h1>
+    <div class="timeline-area" id="timeline">
+      ${slots.map((s,i)=>`
+        <div class="slot" id="slot${i}" onclick="slotClick(${i})" ondragover="ev(event)" ondrop="dropSlot(event,${i})">
+          <span class="slot-num">${i+1}</span>
+          ${s!==null?`<div class="card placed" draggable="false" onclick="removeFromSlot(event,${i})">${currentEvents[s].title}${diffIdx>=3?' ('+currentEvents[s].year+'년)':''}</div>`:''}
+        </div>`).join('')}
+    </div>
+    <div class="card-pool" id="pool">
+      ${shuffled.map((e,si)=>{
+        const oi=currentEvents.indexOf(e);
+        const isPlaced=slots.includes(oi);
+        return `<div class="card ${isPlaced?'placed':''}" draggable="${!isPlaced}" id="card${oi}"
+          onclick="cardClick(${oi})" ondragstart="dragStart(event,${oi})">${e.title}${diffIdx>=3?' ('+e.year+'년)':''}</div>`;
+      }).join('')}
+    </div>
+    <button class="check-btn" id="checkBtn" onclick="checkAnswer()" ${placed<count?'disabled':''}>✅ 정답 확인</button>`;
+}
+
+let selectedCard=-1;
+function cardClick(idx){
+  if(slots.includes(idx)) return;
+  selectedCard=idx;
+  document.querySelectorAll('.card-pool .card').forEach(c=>c.style.borderColor='#444');
+  const el=document.getElementById('card'+idx);
+  if(el) el.style.borderColor='#FFD700';
+}
+function slotClick(si){
+  if(selectedCard===-1) return;
+  if(slots[si]!==null) return;
+  slots[si]=selectedCard;
+  selectedCard=-1;
+  renderPlay(document.getElementById('app'));
+}
+function removeFromSlot(ev,si){
+  ev.stopPropagation();
+  slots[si]=null;
+  selectedCard=-1;
+  renderPlay(document.getElementById('app'));
+}
+function dragStart(ev,idx){dragIdx=idx;ev.dataTransfer.setData('text/plain',idx);}
+function ev(e){e.preventDefault();}
+function dropSlot(e,si){
+  e.preventDefault();
+  if(slots[si]!==null) return;
+  const idx=parseInt(e.dataTransfer.getData('text/plain'));
+  if(isNaN(idx)) return;
+  slots[si]=idx;dragIdx=-1;
+  renderPlay(document.getElementById('app'));
+}
+
+function checkAnswer(){
+  let correct=0;
+  const slotsEl=document.querySelectorAll('.slot');
+  for(let i=0;i<slots.length;i++){
+    const s=slotsEl[i];
+    if(slots[i]===i){s.classList.add('correct');correct++;}
+    else{s.classList.add('wrong');}
+  }
+  const pts=correct*10;
+  score+=pts;totalCorrect+=correct;totalPossible+=slots.length;
+  if(correct>0) sendXP(pts);
+  setTimeout(()=>{showRoundInfo(correct);},800);
+}
+
+function showRoundInfo(correct){
+  const overlay=document.createElement('div');overlay.className='overlay';
+  const popup=document.createElement('div');popup.className='info-popup';
+  let evHtml=currentEvents.map(e=>`<div class="ev"><span class="yr">${e.year}년</span>${e.title}<span class="desc">${e.desc}</span></div>`).join('');
+  popup.innerHTML=`
+    <h3>${correct===currentEvents.length?'🎉 완벽!':'📖 정답 순서'}</h3>
+    <p style="color:#FFD700;font-size:16px;margin-bottom:8px">${correct}/${currentEvents.length} 정답 (+${correct*10}점)</p>
+    ${evHtml}
+    <button onclick="nextRoundOrEnd()">다음 →</button>`;
+  document.body.appendChild(overlay);document.body.appendChild(popup);
+}
+
+function nextRoundOrEnd(){
+  document.querySelectorAll('.overlay,.info-popup').forEach(e=>e.remove());
+  round++;
+  if(round>=totalRounds){screen='result';render();}
+  else nextRound();
+}
+
+function renderResult(app){
+  const max=totalPossible*10;
+  const pct=max>0?Math.round(score/max*100):0;
+  const stars=getStars(score,max);
+  saveBest(diffIdx,stars,score);
+  const emoji=stars>=3?'🏆':stars>=2?'👍':'📚';
+  const canNext=diffIdx<4&&stars>=1;
+  app.innerHTML=`
+    <div class="result">
+      <div class="big">${emoji}</div>
+      <h2>${DIFFS[diffIdx].emoji} ${DIFFS[diffIdx].name} 완료!</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>총 점수: ${score}점 / ${max}점</p>
+      <p>정답: ${totalCorrect}/${totalPossible} (${pct}%)</p>
+      <p class="best-record">최고 기록: ${getBest(diffIdx).score}점</p>
+      <button class="retry" onclick="startDiff(${diffIdx})">다시 하기</button>
+      ${canNext?`<button class="next-btn" onclick="startDiff(${diffIdx+1})">다음 난이도 →</button>`:''}
+      <button class="menu-link" onclick="goMenu()">메뉴로</button>
+    </div>`;
+  sendXP(score);
+}
+
+function goMenu(){screen='menu';render();}
+window.setCat=setCat;window.startDiff=startDiff;window.checkAnswer=checkAnswer;
+window.cardClick=cardClick;window.slotClick=slotClick;window.removeFromSlot=removeFromSlot;
+window.dragStart=dragStart;window.ev=ev;window.dropSlot=dropSlot;
+window.nextRoundOrEnd=nextRoundOrEnd;window.goMenu=goMenu;
+render();
+</script>
+</body></html>

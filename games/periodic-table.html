@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>원소 주기율표 퀴즈</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:520px;margin:0 auto;padding:10px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:22px;margin:6px 0;color:#FFD700}
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 14px;margin-bottom:8px;font-size:14px;font-weight:700;flex-wrap:wrap;gap:4px}
+.hud .sc{color:#FFD700}.hud .lv{color:#7FDBFF}.hud .qn{color:#FF6B9D}.hud .tm{color:#FFB74D}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px}
+.menu p{color:#aaa;font-size:14px;text-align:center;max-width:380px}
+.menu h2{color:#7FDBFF;font-size:18px;margin-top:8px}
+.mode-btn{width:300px;padding:12px;font-size:16px;font-weight:700;border:none;border-radius:14px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.mode-btn:active{transform:scale(0.95)}
+.mode-btn.m1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.mode-btn.m2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.mode-btn.m3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.lv-btn{width:280px;padding:10px;font-size:15px;font-weight:700;border:2px solid #444;border-radius:12px;cursor:pointer;color:#ccc;background:rgba(255,255,255,0.05);transition:all 0.15s;text-align:center}
+.lv-btn:active{transform:scale(0.95)}
+.lv-btn.sel{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,0.1)}
+.lv-btn .best-info{font-size:11px;display:block;margin-top:2px;opacity:0.7}
+.start-btn{padding:14px 48px;font-size:18px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px}
+.progress{width:100%;height:6px;background:#333;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#FF6B9D,#FFD700);transition:width 0.3s;border-radius:4px}
+.question-box{text-align:center;padding:16px;background:rgba(0,0,0,0.3);border-radius:14px;width:100%;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.question-box .symbol{font-size:48px;font-weight:700;color:#FFD700}
+.question-box .name{font-size:28px;font-weight:700;color:#7FDBFF}
+.question-box .sub{font-size:14px;color:#888}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:8px}
+.opt-btn{padding:14px 8px;font-size:16px;font-weight:700;border:2px solid #444;border-radius:14px;background:rgba(255,255,255,0.05);color:#fff;cursor:pointer;transition:all 0.15s;text-align:center}
+.opt-btn:active{transform:scale(0.93)}
+.opt-btn.correct{border-color:#4CAF50;background:rgba(76,175,80,0.2);color:#4CAF50}
+.opt-btn.wrong{border-color:#E53935;background:rgba(229,57,53,0.2);color:#E53935}
+.opt-btn.disabled{pointer-events:none;opacity:0.7}
+.feedback{text-align:center;font-size:16px;font-weight:700;min-height:28px}
+.feedback.ok{color:#4CAF50}.feedback.no{color:#E53935}
+
+/* Periodic table grid for mode 3 */
+.pt-grid{display:grid;gap:2px;width:100%;overflow-x:auto}
+.pt-cell{width:100%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;border-radius:4px;cursor:pointer;transition:all 0.15s;border:2px solid transparent;user-select:none}
+.pt-cell.empty{background:transparent;cursor:default;border:none}
+.pt-cell.alkali{background:rgba(255,107,107,0.3)}
+.pt-cell.alkaline{background:rgba(255,165,0,0.3)}
+.pt-cell.transition{background:rgba(100,181,246,0.3)}
+.pt-cell.post-trans{background:rgba(76,175,80,0.3)}
+.pt-cell.metalloid{background:rgba(156,39,176,0.3)}
+.pt-cell.nonmetal{background:rgba(255,235,59,0.3)}
+.pt-cell.halogen{background:rgba(0,188,212,0.3)}
+.pt-cell.noble{background:rgba(233,30,99,0.3)}
+.pt-cell.highlight{border-color:#FFD700;box-shadow:0 0 8px rgba(255,215,0,0.5)}
+.pt-cell.correct-cell{border-color:#4CAF50;box-shadow:0 0 8px rgba(76,175,80,0.5)}
+.pt-cell.wrong-cell{border-color:#E53935;box-shadow:0 0 8px rgba(229,57,53,0.5)}
+.pt-cell .num{font-size:7px;color:#aaa}.pt-cell .sym{font-size:12px}
+.pt-hint{text-align:center;font-size:18px;font-weight:700;color:#FFD700;padding:10px;background:rgba(0,0,0,0.3);border-radius:12px}
+
+.result{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center}
+.result .big{font-size:72px}.result h2{font-size:28px;color:#FFD700}
+.result p{font-size:18px;color:#ccc}
+.stars{font-size:36px;margin:4px 0}
+.retry{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
+.best-record{font-size:14px;color:#888}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+// Elements 1-36 (Period 1-4)
+const ELEMENTS=[
+  {n:1,sym:'H',name:'수소',mass:1.008,cat:'nonmetal',row:1,col:1},
+  {n:2,sym:'He',name:'헬륨',mass:4.003,cat:'noble',row:1,col:18},
+  {n:3,sym:'Li',name:'리튬',mass:6.941,cat:'alkali',row:2,col:1},
+  {n:4,sym:'Be',name:'베릴륨',mass:9.012,cat:'alkaline',row:2,col:2},
+  {n:5,sym:'B',name:'붕소',mass:10.81,cat:'metalloid',row:2,col:13},
+  {n:6,sym:'C',name:'탄소',mass:12.01,cat:'nonmetal',row:2,col:14},
+  {n:7,sym:'N',name:'질소',mass:14.01,cat:'nonmetal',row:2,col:15},
+  {n:8,sym:'O',name:'산소',mass:16.00,cat:'nonmetal',row:2,col:16},
+  {n:9,sym:'F',name:'플루오린',mass:19.00,cat:'halogen',row:2,col:17},
+  {n:10,sym:'Ne',name:'네온',mass:20.18,cat:'noble',row:2,col:18},
+  {n:11,sym:'Na',name:'나트륨',mass:22.99,cat:'alkali',row:3,col:1},
+  {n:12,sym:'Mg',name:'마그네슘',mass:24.31,cat:'alkaline',row:3,col:2},
+  {n:13,sym:'Al',name:'알루미늄',mass:26.98,cat:'post-trans',row:3,col:13},
+  {n:14,sym:'Si',name:'규소',mass:28.09,cat:'metalloid',row:3,col:14},
+  {n:15,sym:'P',name:'인',mass:30.97,cat:'nonmetal',row:3,col:15},
+  {n:16,sym:'S',name:'황',mass:32.07,cat:'nonmetal',row:3,col:16},
+  {n:17,sym:'Cl',name:'염소',mass:35.45,cat:'halogen',row:3,col:17},
+  {n:18,sym:'Ar',name:'아르곤',mass:39.95,cat:'noble',row:3,col:18},
+  {n:19,sym:'K',name:'칼륨',mass:39.10,cat:'alkali',row:4,col:1},
+  {n:20,sym:'Ca',name:'칼슘',mass:40.08,cat:'alkaline',row:4,col:2},
+  {n:21,sym:'Sc',name:'스칸듐',mass:44.96,cat:'transition',row:4,col:3},
+  {n:22,sym:'Ti',name:'타이타늄',mass:47.87,cat:'transition',row:4,col:4},
+  {n:23,sym:'V',name:'바나듐',mass:50.94,cat:'transition',row:4,col:5},
+  {n:24,sym:'Cr',name:'크로뮴',mass:52.00,cat:'transition',row:4,col:6},
+  {n:25,sym:'Mn',name:'망가니즈',mass:54.94,cat:'transition',row:4,col:7},
+  {n:26,sym:'Fe',name:'철',mass:55.85,cat:'transition',row:4,col:8},
+  {n:27,sym:'Co',name:'코발트',mass:58.93,cat:'transition',row:4,col:9},
+  {n:28,sym:'Ni',name:'니켈',mass:58.69,cat:'transition',row:4,col:10},
+  {n:29,sym:'Cu',name:'구리',mass:63.55,cat:'transition',row:4,col:11},
+  {n:30,sym:'Zn',name:'아연',mass:65.38,cat:'transition',row:4,col:12},
+  {n:31,sym:'Ga',name:'갈륨',mass:69.72,cat:'post-trans',row:4,col:13},
+  {n:32,sym:'Ge',name:'저마늄',mass:72.63,cat:'metalloid',row:4,col:14},
+  {n:33,sym:'As',name:'비소',mass:74.92,cat:'metalloid',row:4,col:15},
+  {n:34,sym:'Se',name:'셀레늄',mass:78.97,cat:'nonmetal',row:4,col:16},
+  {n:35,sym:'Br',name:'브로민',mass:79.90,cat:'halogen',row:4,col:17},
+  {n:36,sym:'Kr',name:'크립톤',mass:83.80,cat:'noble',row:4,col:18}
+];
+
+const DIFF_LEVELS=[
+  {name:'1단계',desc:'1~10번 (1~2주기)',range:[1,10],qCount:10,emoji:'🟢'},
+  {name:'2단계',desc:'1~18번 (1~3주기)',range:[1,18],qCount:12,emoji:'🔵'},
+  {name:'3단계',desc:'1~36번 (전체)',range:[1,36],qCount:15,emoji:'🟡'},
+  {name:'4단계',desc:'전이금속 집중',range:'transition',qCount:12,emoji:'🟠'},
+  {name:'5단계',desc:'전체 랜덤 혼합',range:[1,36],qCount:20,emoji:'🔴'}
+];
+
+let screen='menu',mode=0,diffLv=0,qIdx=0,score=0,correct=0,totalQ=10;
+let currentEl=null,options=[],feedbackText='',answered=false,selectedOpt=-1;
+let startTime=0,elapsed=0,timerInterval=null;
+
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'periodic-table'},'*');}catch(e){}}
+function getBest(m,d){try{return JSON.parse(localStorage.getItem('periodic_best_'+m+'_'+d))||{stars:0,score:0};}catch(e){return{stars:0,score:0};}}
+function saveBest(m,d,stars,sc){const p=getBest(m,d);if(stars>p.stars||sc>p.score)localStorage.setItem('periodic_best_'+m+'_'+d,JSON.stringify({stars:Math.max(stars,p.stars),score:Math.max(sc,p.score)}));}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[b[i],b[j]]=[b[j],b[i]];}return b;}
+function fmtTime(s){return Math.floor(s/60)+'분 '+Math.floor(s%60)+'초';}
+
+function getPool(){
+  const d=DIFF_LEVELS[diffLv];
+  if(d.range==='transition')return ELEMENTS.filter(e=>e.cat==='transition');
+  return ELEMENTS.filter(e=>e.n>=d.range[0]&&e.n<=d.range[1]);
+}
+
+function genQuestion(){
+  const pool=getPool();
+  currentEl=pool[Math.random()*pool.length|0];
+  answered=false;selectedOpt=-1;feedbackText='';
+  if(mode===1||mode===2){
+    // mode1: symbol->name, mode2: name->symbol
+    const wrongPool=ELEMENTS.filter(e=>e.n!==currentEl.n);
+    const wrongs=shuffle(wrongPool).slice(0,3);
+    const allOpts=[currentEl,...wrongs];
+    options=shuffle(allOpts);
+  }
+}
+
+function selectOpt(idx){
+  if(answered)return;
+  answered=true;selectedOpt=idx;
+  const chosen=options[idx];
+  if(chosen.n===currentEl.n){
+    correct++;score+=(diffLv+1)*10;
+    feedbackText=`✅ 정답! ${currentEl.sym} = ${currentEl.name} (${currentEl.mass})`;
+  }else{
+    feedbackText=`❌ 오답! 정답: ${currentEl.sym} = ${currentEl.name}`;
+  }
+  render();
+  setTimeout(()=>{qIdx++;if(qIdx>=totalQ){finishGame();}else{genQuestion();render();}},1500);
+}
+
+function selectPTCell(n){
+  if(answered)return;
+  answered=true;
+  const el=ELEMENTS.find(e=>e.n===n);
+  if(el&&el.n===currentEl.n){
+    correct++;score+=(diffLv+1)*10;
+    feedbackText=`✅ 정답! ${currentEl.name}의 위치를 찾았습니다!`;
+  }else{
+    feedbackText=`❌ 오답! ${currentEl.name}은(는) ${currentEl.row}주기 ${currentEl.col}족입니다.`;
+  }
+  render();
+  setTimeout(()=>{qIdx++;if(qIdx>=totalQ){finishGame();}else{genQuestion();render();}},1800);
+}
+
+function finishGame(){
+  if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+  elapsed=Math.floor((Date.now()-startTime)/1000);
+  screen='result';render();
+}
+
+function startGame(){
+  const d=DIFF_LEVELS[diffLv];
+  totalQ=d.qCount;qIdx=0;score=0;correct=0;
+  startTime=Date.now();elapsed=0;
+  if(timerInterval)clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{elapsed=Math.floor((Date.now()-startTime)/1000);const el=document.getElementById('timer');if(el)el.textContent='⏱️ '+fmtTime(elapsed);},1000);
+  genQuestion();screen='play';render();
+}
+
+function getStars(){const pct=correct/totalQ*100;return pct>=90?3:pct>=60?2:pct>=30?1:0;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu')renderMenu(app);
+  else if(screen==='modeSelect')renderModeSelect(app);
+  else if(screen==='play')renderPlay(app);
+  else if(screen==='result')renderResult(app);
+}
+
+function renderMenu(app){
+  app.innerHTML=`
+    <h1>⚛️ 원소 주기율표 퀴즈</h1>
+    <div class="menu">
+      <p>원소 1~36번 (4주기)까지!<br>기호, 이름, 위치를 맞혀보세요</p>
+      <button class="mode-btn m1" onclick="mode=1;screen='modeSelect';render()">🔬 모드1: 기호 → 이름 맞히기</button>
+      <button class="mode-btn m2" onclick="mode=2;screen='modeSelect';render()">📝 모드2: 이름 → 기호 맞히기</button>
+      <button class="mode-btn m3" onclick="mode=3;screen='modeSelect';render()">🗺️ 모드3: 주기율표 위치 찾기</button>
+      ${renderMiniPT()}
+    </div>`;
+}
+
+function renderMiniPT(){
+  let html='<div style="margin-top:12px;width:100%;overflow-x:auto"><div class="pt-grid" style="grid-template-columns:repeat(18,1fr);width:100%;min-width:360px">';
+  for(let r=1;r<=4;r++){
+    for(let c=1;c<=18;c++){
+      const el=ELEMENTS.find(e=>e.row===r&&e.col===c);
+      if(el){
+        html+=`<div class="pt-cell ${el.cat}" title="${el.name}"><span class="num">${el.n}</span><span class="sym">${el.sym}</span></div>`;
+      }else{
+        html+=`<div class="pt-cell empty"></div>`;
+      }
+    }
+  }
+  html+='</div></div>';
+  return html;
+}
+
+function renderModeSelect(app){
+  const modeNames=['','기호 → 이름','이름 → 기호','위치 찾기'];
+  const btns=DIFF_LEVELS.map((d,i)=>{
+    const b=getBest(mode,i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} ${b.score}점</span>`:'';
+    return `<button class="lv-btn ${diffLv===i?'sel':''}" onclick="diffLv=${i};render()">${d.emoji} ${d.name}: ${d.desc}${bst}</button>`;
+  }).join('');
+  app.innerHTML=`
+    <h1>⚛️ ${modeNames[mode]}</h1>
+    <div class="menu">
+      <h2>난이도 선택</h2>
+      ${btns}
+      <button class="start-btn" onclick="startGame()">🚀 시작!</button>
+      <button class="back-btn" onclick="screen='menu';render()">← 뒤로</button>
+    </div>`;
+}
+
+function renderPlay(app){
+  const fbCls=feedbackText.startsWith('✅')?'ok':feedbackText.startsWith('❌')?'no':'';
+  let content='';
+  if(mode===1){
+    // Show symbol, guess name
+    const optBtns=options.map((o,i)=>{
+      let cls='opt-btn';
+      if(answered){
+        cls+=' disabled';
+        if(o.n===currentEl.n)cls+=' correct';
+        else if(i===selectedOpt)cls+=' wrong';
+      }
+      return `<button class="${cls}" onclick="selectOpt(${i})">${o.name}</button>`;
+    }).join('');
+    content=`
+      <div class="question-box">
+        <div class="sub">#${currentEl.n} 원소</div>
+        <div class="symbol">${currentEl.sym}</div>
+        <div class="sub">이 기호의 이름은?</div>
+      </div>
+      <div class="options">${optBtns}</div>`;
+  }else if(mode===2){
+    // Show name, guess symbol
+    const optBtns=options.map((o,i)=>{
+      let cls='opt-btn';
+      if(answered){
+        cls+=' disabled';
+        if(o.n===currentEl.n)cls+=' correct';
+        else if(i===selectedOpt)cls+=' wrong';
+      }
+      return `<button class="${cls}" onclick="selectOpt(${i})">${o.sym}</button>`;
+    }).join('');
+    content=`
+      <div class="question-box">
+        <div class="sub">#${currentEl.n} 원소</div>
+        <div class="name">${currentEl.name}</div>
+        <div class="sub">이 원소의 기호는?</div>
+      </div>
+      <div class="options">${optBtns}</div>`;
+  }else{
+    // Mode 3: find on periodic table
+    content=`
+      <div class="pt-hint">🔍 "${currentEl.name}" (${currentEl.sym})의 위치를 찾으세요!</div>
+      <div style="width:100%;overflow-x:auto">
+        <div class="pt-grid" style="grid-template-columns:repeat(18,1fr);width:100%;min-width:360px">
+          ${renderPTGame()}
+        </div>
+      </div>`;
+  }
+  app.innerHTML=`
+    <div class="hud">
+      <span class="sc">⭐ ${score}</span>
+      <span class="lv">${DIFF_LEVELS[diffLv].emoji} ${DIFF_LEVELS[diffLv].name}</span>
+      <span class="qn">${qIdx+1}/${totalQ}</span>
+      <span class="tm" id="timer">⏱️ ${fmtTime(elapsed)}</span>
+    </div>
+    <div class="progress"><div class="progress-fill" style="width:${qIdx/totalQ*100}%"></div></div>
+    <div class="game-area">
+      ${content}
+      <div class="feedback ${fbCls}">${feedbackText}</div>
+    </div>
+    <button class="back-btn" onclick="if(timerInterval)clearInterval(timerInterval);timerInterval=null;screen='menu';render()">← 메뉴로</button>`;
+}
+
+function renderPTGame(){
+  let html='';
+  for(let r=1;r<=4;r++){
+    for(let c=1;c<=18;c++){
+      const el=ELEMENTS.find(e=>e.row===r&&e.col===c);
+      if(el){
+        let extra='';
+        if(answered&&el.n===currentEl.n)extra=' correct-cell';
+        else if(answered&&el.n!==currentEl.n&&selectedOpt===el.n)extra=' wrong-cell';
+        html+=`<div class="pt-cell ${el.cat}${extra}" onclick="selectPTCell(${el.n})"><span class="num">${el.n}</span><span class="sym">${el.sym}</span></div>`;
+      }else{
+        html+=`<div class="pt-cell empty"></div>`;
+      }
+    }
+  }
+  return html;
+}
+
+function renderResult(app){
+  const stars=getStars();
+  const xp=(diffLv+1)*15*stars;
+  saveBest(mode,diffLv,stars,score);
+  sendXP(xp);
+  const modeNames=['','기호→이름','이름→기호','위치 찾기'];
+  app.innerHTML=`
+    <div class="result">
+      <div class="big">⚛️</div>
+      <h2>퀴즈 완료!</h2>
+      <p>${modeNames[mode]} / ${DIFF_LEVELS[diffLv].name}</p>
+      <div class="stars">${starStr(stars)}</div>
+      <p>정답: ${correct}/${totalQ}</p>
+      <p>점수: ${score}점 | ⏱️ ${fmtTime(elapsed)}</p>
+      <p style="color:#FFD700;font-weight:700">+${xp} XP</p>
+      <div class="best-record">최고: ${starStr(getBest(mode,diffLv).stars)} / ${getBest(mode,diffLv).score}점</div>
+      <button class="retry" onclick="startGame()">다시 도전</button>
+      <button class="back-btn" onclick="screen='menu';render()">← 메뉴로</button>
+    </div>`;
+}
+
+render();
+</script>
+</body></html>

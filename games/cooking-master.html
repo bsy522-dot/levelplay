@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>요리왕 - 어린이 요리 교육 게임</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',sans-serif;background:#FFF8F0;overflow:hidden;touch-action:none;user-select:none}
+canvas{display:block}
+#ui{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+#ui>*{pointer-events:auto}
+.btn{background:linear-gradient(180deg,#FF8C42,#E6692E);color:#fff;border:none;border-radius:12px;padding:10px 20px;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 3px 0 #C4501A;text-shadow:1px 1px 1px rgba(0,0,0,.3);transition:transform .1s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #C4501A}
+.btn-sm{padding:6px 14px;font-size:13px;border-radius:8px}
+.btn-green{background:linear-gradient(180deg,#6BCB77,#4AA856);box-shadow:0 3px 0 #3A8A45}
+.btn-blue{background:linear-gradient(180deg,#4ECDC4,#36B5AD);box-shadow:0 3px 0 #2A9A93}
+.panel{background:rgba(255,248,240,.97);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.15);border:2px solid #FFD4A8}
+.overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:100}
+.hidden{display:none!important}
+#hud{position:absolute;top:0;left:0;width:100%;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(139,69,19,.85),rgba(139,69,19,.6));color:#FFE4C4;font-size:14px;font-weight:bold;z-index:10}
+#hud span{display:flex;align-items:center;gap:4px}
+.info-popup{position:absolute;background:#FFFBF0;border:2px solid #FFB347;border-radius:12px;padding:12px;max-width:260px;font-size:12px;color:#5D4037;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.info-popup h4{color:#E65100;margin-bottom:6px}
+.stars{color:#FFD700;font-size:24px;letter-spacing:4px}
+.nutrition-bar{height:8px;border-radius:4px;margin:2px 0}
+</style>
+</head>
+<body>
+<canvas id="gc"></canvas>
+<div id="ui">
+<div id="hud" class="hidden">
+<span id="hud-coins">🪙 0</span>
+<span id="hud-level">Lv.1</span>
+<span id="hud-stars">⭐ 0</span>
+<span id="hud-timer" class="hidden">⏱ 0:00</span>
+</div>
+</div>
+
+<script>
+'use strict';
+const C=document.getElementById('gc'),X=C.getContext('2d'),UI=document.getElementById('ui');
+let W,H,dpr=1,state='menu',frame=0,touching=false,tx=0,ty=0,tapX=0,tapY=0,tapped=false;
+let coins=0,totalStars=0,playerLevel=1,equipment={stove:1,knife:1,pan:1};
+let currentRecipe=null,cookStep=0,cookScore=0,selectedIngredients=[],stepTimer=0,stepTarget=0;
+let dragItem=null,dragOX=0,dragOY=0,particles=[],steamPs=[];
+let restaurantMode=false,customers=[],orderTimer=0,servedCount=0;
+let earnedStars={},scrollY=0,infoPopup=null,animT=0;
+
+// Audio
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function playSound(type){
+ if(AC.state==='suspended')AC.resume();
+ const o=AC.createOscillator(),g=AC.createGain(),n=AC.createBufferSource();
+ g.connect(AC.destination);
+ if(type==='chop'){
+  const buf=AC.createBuffer(1,AC.sampleRate*.08,AC.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/800);
+  n.buffer=buf;n.connect(g);g.gain.value=.3;n.start();
+ }else if(type==='sizzle'){
+  const buf=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*.15*Math.exp(-i/8000);
+  n.buffer=buf;n.connect(g);g.gain.value=.25;n.start();
+ }else if(type==='boil'){
+  const buf=AC.createBuffer(1,AC.sampleRate*.4,AC.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++){const t=i/AC.sampleRate;d[i]=Math.sin(t*200+Math.sin(t*50)*5)*.1*Math.exp(-i/15000)+(Math.random()-.5)*.05;}
+  n.buffer=buf;n.connect(g);g.gain.value=.2;n.start();
+ }else if(type==='ding'){
+  o.connect(g);o.frequency.value=880;g.gain.setValueAtTime(.3,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.3);o.start();o.stop(AC.currentTime+.3);
+ }else if(type==='star'){
+  o.connect(g);o.frequency.setValueAtTime(523,AC.currentTime);o.frequency.setValueAtTime(659,AC.currentTime+.1);o.frequency.setValueAtTime(784,AC.currentTime+.2);g.gain.setValueAtTime(.2,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.4);o.start();o.stop(AC.currentTime+.4);
+ }else if(type==='click'){
+  o.connect(g);o.frequency.value=600;g.gain.setValueAtTime(.15,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.05);o.start();o.stop(AC.currentTime+.05);
+ }
+}
+
+// Recipes
+const RECIPES=[
+{id:'egg_fry',name:'계란후라이',level:'초급',cat:0,emoji:'🍳',
+ ingredients:['달걀','식용유','소금'],
+ allIngredients:['달걀','식용유','소금','후추','버터','간장'],
+ steps:['프라이팬에 기름을 두르세요','달걀을 깨서 넣으세요','약불에서 익혀주세요 (3초 홀드)','소금으로 간을 하세요','접시에 담아주세요'],
+ stepTypes:['tap','tap','hold','drag','tap'],
+ science:'달걀을 가열하면 단백질이 변성되어 투명한 흰자가 하얗게 굳어요!',
+ nutrients:{탄수화물:2,단백질:35,지방:25,비타민:15,무기질:10},
+ time:60},
+{id:'ramen',name:'라면',level:'초급',cat:0,emoji:'🍜',
+ ingredients:['라면','물','계란','파'],
+ allIngredients:['라면','물','계란','파','김치','치즈','떡'],
+ steps:['냄비에 물을 넣으세요','물이 끓을 때까지 기다리세요 (3초 홀드)','면과 스프를 넣으세요','계란과 파를 넣으세요','맛있게 완성!'],
+ stepTypes:['tap','hold','tap','drag','tap'],
+ science:'면을 끓이면 전분이 물을 흡수해서 부드러워져요. 이것을 호화라고 해요!',
+ nutrients:{탄수화물:45,단백질:15,지방:20,비타민:8,무기질:12},
+ time:90},
+{id:'jumeokbap',name:'주먹밥',level:'초급',cat:0,emoji:'🍙',
+ ingredients:['밥','참기름','소금','김'],
+ allIngredients:['밥','참기름','소금','김','참깨','햄','치즈'],
+ steps:['밥에 참기름을 넣으세요','소금으로 간을 하세요','잘 섞어주세요 (3초 홀드)','동그랗게 빚어주세요','김으로 감싸주세요'],
+ stepTypes:['drag','drag','hold','tap','tap'],
+ science:'참기름의 고소한 향은 리놀레산 덕분이에요. 참깨를 볶으면 더 향이 강해져요!',
+ nutrients:{탄수화물:50,단백질:8,지방:15,비타민:5,무기질:10},
+ time:60},
+{id:'toast',name:'토스트',level:'초급',cat:0,emoji:'🍞',
+ ingredients:['식빵','버터','잼','딸기'],
+ allIngredients:['식빵','버터','잼','딸기','계란','치즈','햄'],
+ steps:['식빵을 토스터에 넣으세요','노릇하게 구워주세요 (3초 홀드)','버터를 발라주세요','잼과 딸기를 올려주세요','완성!'],
+ stepTypes:['tap','hold','drag','drag','tap'],
+ science:'빵을 구우면 마이야르 반응으로 갈색이 되고 고소한 맛이 나요!',
+ nutrients:{탄수화물:40,단백질:8,지방:18,비타민:12,무기질:8},
+ time:60},
+{id:'fruit_salad',name:'과일샐러드',level:'초급',cat:0,emoji:'🥗',
+ ingredients:['사과','바나나','요거트','꿀'],
+ allIngredients:['사과','바나나','요거트','꿀','딸기','키위','블루베리'],
+ steps:['과일을 깨끗이 씻으세요','먹기 좋게 잘라주세요 (3초 홀드)','그릇에 담아주세요','요거트를 뿌려주세요','꿀을 뿌려 완성!'],
+ stepTypes:['tap','hold','tap','drag','drag'],
+ science:'과일의 비타민C는 열에 약해요. 그래서 샐러드로 먹으면 영양소를 더 많이 섭취해요!',
+ nutrients:{탄수화물:35,단백질:5,지방:3,비타민:45,무기질:15},
+ time:60},
+{id:'kimchi_rice',name:'김치볶음밥',level:'중급',cat:1,emoji:'🍛',
+ ingredients:['밥','김치','돼지고기','참기름','계란'],
+ allIngredients:['밥','김치','돼지고기','참기름','계란','파','간장','설탕'],
+ steps:['팬에 기름을 두르세요','돼지고기를 볶아주세요 (3초 홀드)','김치를 넣고 볶아주세요','밥을 넣고 잘 섞으세요 (3초 홀드)','계란후라이를 올려 완성!'],
+ stepTypes:['tap','hold','tap','hold','tap'],
+ science:'김치의 유산균은 장 건강에 좋아요. 볶으면 유산균은 죽지만 식이섬유는 남아요!',
+ nutrients:{탄수화물:40,단백질:20,지방:20,비타민:10,무기질:15},
+ time:120},
+{id:'tteokbokki',name:'떡볶이',level:'중급',cat:1,emoji:'🌶️',
+ ingredients:['떡','고추장','설탕','어묵','물'],
+ allIngredients:['떡','고추장','설탕','어묵','물','파','계란','라면'],
+ steps:['냄비에 물을 넣으세요','고추장과 설탕으로 양념을 만드세요','떡과 어묵을 넣으세요','끓여주세요 (4초 홀드)','파를 넣어 완성!'],
+ stepTypes:['tap','drag','tap','hold','tap'],
+ science:'떡은 쌀의 전분으로 만들어요. 찰쌀떡은 아밀로펙틴이 많아서 쫄깃해요!',
+ nutrients:{탄수화물:50,단백질:12,지방:8,비타민:8,무기질:10},
+ time:120},
+{id:'egg_roll',name:'계란말이',level:'중급',cat:1,emoji:'🥚',
+ ingredients:['달걀','당근','파','소금','식용유'],
+ allIngredients:['달걀','당근','파','소금','식용유','햄','치즈','우유'],
+ steps:['달걀을 풀어주세요 (3초 홀드)','당근과 파를 잘게 썰어주세요','달걀물에 채소를 넣고 섞으세요','팬에 얇게 펴서 구워주세요 (3초 홀드)','돌돌 말아 완성!'],
+ stepTypes:['hold','tap','drag','hold','tap'],
+ science:'달걀에 우유를 넣으면 더 부드러워져요. 단백질 사이에 수분이 채워지거든요!',
+ nutrients:{탄수화물:5,단백질:35,지방:25,비타민:15,무기질:12},
+ time:120},
+{id:'doenjang',name:'된장찌개',level:'중급',cat:1,emoji:'🥘',
+ ingredients:['된장','두부','감자','애호박','고추'],
+ allIngredients:['된장','두부','감자','애호박','고추','파','마늘','양파','멸치'],
+ steps:['냄비에 멸치육수를 넣으세요','된장을 풀어주세요 (3초 홀드)','감자와 호박을 넣으세요','두부와 고추를 넣으세요','팔팔 끓여 완성! (4초 홀드)'],
+ stepTypes:['tap','hold','tap','drag','hold'],
+ science:'된장은 콩을 발효시켜 만들어요. 발효 과정에서 유익한 미생물이 생겨요!',
+ nutrients:{탄수화물:20,단백질:25,지방:12,비타민:18,무기질:25},
+ time:150},
+{id:'bibimbap',name:'비빔밥',level:'중급',cat:1,emoji:'🍚',
+ ingredients:['밥','시금치','당근','고추장','계란'],
+ allIngredients:['밥','시금치','당근','고추장','계란','콩나물','버섯','소고기','참기름'],
+ steps:['나물을 데쳐서 준비하세요','밥 위에 나물을 올려주세요','계란후라이를 올려주세요','고추장을 넣으세요','쓱쓱 비벼 완성! (3초 홀드)'],
+ stepTypes:['tap','drag','tap','drag','hold'],
+ science:'비빔밥은 5가지 색(오방색)으로 영양 균형을 맞춰요. 색깔별로 다른 영양소가 있어요!',
+ nutrients:{탄수화물:35,단백질:20,지방:15,비타민:25,무기질:20},
+ time:150},
+{id:'bulgogi',name:'불고기',level:'고급',cat:2,emoji:'🥩',
+ ingredients:['소고기','간장','설탕','배','마늘','양파'],
+ allIngredients:['소고기','간장','설탕','배','마늘','양파','참기름','후추','파'],
+ steps:['양념장을 만드세요 (3초 홀드)','고기에 양념을 재워주세요','30분 숙성시키세요 (4초 홀드)','팬에서 구워주세요 (3초 홀드)','접시에 예쁘게 담아 완성!'],
+ stepTypes:['hold','drag','hold','hold','tap'],
+ science:'배에는 프로테아제라는 효소가 있어서 고기를 부드럽게 만들어줘요!',
+ nutrients:{탄수화물:15,단백질:40,지방:25,비타민:8,무기질:12},
+ time:180},
+{id:'japchae',name:'잡채',level:'고급',cat:2,emoji:'🍝',
+ ingredients:['당면','시금치','당근','버섯','소고기','간장'],
+ allIngredients:['당면','시금치','당근','버섯','소고기','간장','참기름','설탕','계란'],
+ steps:['당면을 삶아주세요 (3초 홀드)','채소를 각각 볶아주세요','고기를 양념에 볶아주세요 (3초 홀드)','모든 재료를 섞어주세요','참기름을 넣어 완성! (3초 홀드)'],
+ stepTypes:['hold','tap','hold','drag','hold'],
+ science:'당면은 고구마 전분으로 만들어요. 삶으면 투명해지는 이유는 전분이 호화되기 때문이에요!',
+ nutrients:{탄수화물:35,단백질:20,지방:18,비타민:15,무기질:12},
+ time:180},
+{id:'kimbap',name:'김밥',level:'고급',cat:2,emoji:'🍱',
+ ingredients:['밥','김','단무지','햄','시금치','당근','계란'],
+ allIngredients:['밥','김','단무지','햄','시금치','당근','계란','참기름','소금','우엉'],
+ steps:['밥에 참기름과 소금을 넣으세요','김 위에 밥을 펴주세요','재료를 올려주세요','꽉 말아주세요 (4초 홀드)','먹기 좋게 잘라 완성!'],
+ stepTypes:['drag','tap','drag','hold','tap'],
+ science:'김에는 요오드가 풍부해서 갑상선 건강에 좋아요. 바다에서 자라는 해조류예요!',
+ nutrients:{탄수화물:35,단백질:18,지방:15,비타민:15,무기질:20},
+ time:180},
+{id:'dakgalbi',name:'닭갈비',level:'고급',cat:2,emoji:'🍗',
+ ingredients:['닭고기','고추장','고춧가루','양배추','고구마'],
+ allIngredients:['닭고기','고추장','고춧가루','양배추','고구마','떡','양파','간장','마늘'],
+ steps:['양념장을 만드세요 (3초 홀드)','닭고기에 양념을 재워주세요','야채를 큼직하게 썰어주세요','큰 팬에서 볶아주세요 (4초 홀드)','치즈를 뿌려 완성!'],
+ stepTypes:['hold','drag','tap','hold','tap'],
+ science:'고추의 매운맛은 캡사이신이라는 성분 때문이에요. 우유를 마시면 매운맛이 줄어들어요!',
+ nutrients:{탄수화물:25,단백질:35,지방:18,비타민:12,무기질:15},
+ time:180},
+{id:'pajeon',name:'파전',level:'고급',cat:2,emoji:'🥞',
+ ingredients:['밀가루','파','계란','물','소금'],
+ allIngredients:['밀가루','파','계란','물','소금','식용유','해물','고추','양파'],
+ steps:['반죽을 만드세요 (3초 홀드)','파를 길게 잘라주세요','반죽에 파를 넣으세요','팬에서 노릇하게 구워주세요 (4초 홀드)','뒤집어서 한번 더! (3초 홀드)'],
+ stepTypes:['hold','tap','drag','hold','hold'],
+ science:'밀가루의 글루텐이 반죽을 쫄깃하게 만들어요. 물을 넣고 섞을수록 글루텐이 형성돼요!',
+ nutrients:{탄수화물:40,단백질:15,지방:20,비타민:10,무기질:12},
+ time:150}
+];
+
+const INGREDIENT_INFO={
+'달걀':{origin:'국내산',season:'연중',group:'단백질',emoji:'🥚',desc:'완전식품! 단백질과 비타민이 풍부해요'},
+'식용유':{origin:'국내산',season:'연중',group:'지방',emoji:'🫗',desc:'식물에서 짠 기름이에요'},
+'소금':{origin:'신안',season:'연중',group:'무기질',emoji:'🧂',desc:'나트륨이 들어있어요. 적당히!'},
+'후추':{origin:'베트남',season:'연중',group:'기타',emoji:'🌶️',desc:'피페린 성분이 소화를 도와요'},
+'버터':{origin:'뉴질랜드',season:'연중',group:'지방',emoji:'🧈',desc:'우유의 지방으로 만들어요'},
+'간장':{origin:'국내산',season:'연중',group:'무기질',emoji:'🫙',desc:'콩을 발효시켜 만든 조미료예요'},
+'라면':{origin:'국내산',season:'연중',group:'탄수화물',emoji:'🍜',desc:'밀가루 면을 튀겨 만들어요'},
+'물':{origin:'-',season:'연중',group:'기타',emoji:'💧',desc:'우리 몸의 70%는 물이에요'},
+'계란':{origin:'국내산',season:'연중',group:'단백질',emoji:'🥚',desc:'달걀과 같아요!'},
+'파':{origin:'국내산',season:'봄',group:'비타민',emoji:'🧅',desc:'알리신 성분이 면역력을 높여요'},
+'김치':{origin:'국내산',season:'겨울',group:'비타민',emoji:'🥬',desc:'유산균의 보고! 세계적 건강식품'},
+'치즈':{origin:'미국',season:'연중',group:'단백질',emoji:'🧀',desc:'우유를 발효시켜 만들어요'},
+'떡':{origin:'국내산',season:'연중',group:'탄수화물',emoji:'🍡',desc:'쌀로 만든 한국 전통 음식'},
+'밥':{origin:'국내산',season:'가을',group:'탄수화물',emoji:'🍚',desc:'쌀에는 탄수화물이 풍부해요'},
+'참기름':{origin:'국내산',season:'가을',group:'지방',emoji:'🫗',desc:'참깨를 볶아서 짠 기름이에요'},
+'김':{origin:'완도',season:'겨울',group:'무기질',emoji:'🟫',desc:'요오드와 철분이 풍부한 해조류'},
+'참깨':{origin:'국내산',season:'가을',group:'지방',emoji:'🫘',desc:'칼슘이 우유의 10배!'},
+'햄':{origin:'국내산',season:'연중',group:'단백질',emoji:'🥓',desc:'돼지고기를 가공한 식품이에요'},
+'식빵':{origin:'국내산',season:'연중',group:'탄수화물',emoji:'🍞',desc:'밀가루를 발효시켜 구워요'},
+'잼':{origin:'국내산',season:'연중',group:'탄수화물',emoji:'🍯',desc:'과일을 설탕에 졸인 것이에요'},
+'딸기':{origin:'논산',season:'봄',group:'비타민',emoji:'🍓',desc:'비타민C가 레몬보다 많아요!'},
+'사과':{origin:'청송',season:'가을',group:'비타민',emoji:'🍎',desc:'식이섬유 펙틴이 장 건강에 좋아요'},
+'바나나':{origin:'필리핀',season:'연중',group:'탄수화물',emoji:'🍌',desc:'칼륨이 풍부해 근육에 좋아요'},
+'요거트':{origin:'국내산',season:'연중',group:'단백질',emoji:'🥛',desc:'유산균이 장 건강을 지켜요'},
+'꿀':{origin:'국내산',season:'봄',group:'탄수화물',emoji:'🍯',desc:'벌이 꽃에서 모은 천연 감미료'},
+'키위':{origin:'뉴질랜드',season:'가을',group:'비타민',emoji:'🥝',desc:'비타민C의 왕!'},
+'블루베리':{origin:'칠레',season:'여름',group:'비타민',emoji:'🫐',desc:'안토시아닌이 눈 건강에 좋아요'},
+'돼지고기':{origin:'국내산',season:'연중',group:'단백질',emoji:'🥩',desc:'비타민B1이 풍부해요'},
+'설탕':{origin:'국내산',season:'연중',group:'탄수화물',emoji:'🍬',desc:'사탕수수에서 추출해요. 적당히!'},
+'고추장':{origin:'순창',season:'연중',group:'기타',emoji:'🫙',desc:'한국 대표 발효 양념!'},
+'어묵':{origin:'부산',season:'연중',group:'단백질',emoji:'🍢',desc:'생선살을 갈아서 만들어요'},
+'당근':{origin:'제주',season:'가을',group:'비타민',emoji:'🥕',desc:'베타카로틴이 눈 건강에 좋아요'},
+'우유':{origin:'국내산',season:'연중',group:'단백질',emoji:'🥛',desc:'칼슘의 대표 식품!'},
+'된장':{origin:'국내산',season:'연중',group:'단백질',emoji:'🫙',desc:'콩 발효식품, 항암 효과!'},
+'두부':{origin:'국내산',season:'연중',group:'단백질',emoji:'🧊',desc:'콩으로 만든 식물성 단백질'},
+'감자':{origin:'강원도',season:'여름',group:'탄수화물',emoji:'🥔',desc:'비타민C가 사과의 2배!'},
+'애호박':{origin:'국내산',season:'여름',group:'비타민',emoji:'🥒',desc:'칼로리가 낮고 식이섬유가 풍부'},
+'고추':{origin:'국내산',season:'여름',group:'비타민',emoji:'🌶️',desc:'캡사이신이 신진대사를 촉진!'},
+'마늘':{origin:'의성',season:'여름',group:'무기질',emoji:'🧄',desc:'알리신이 면역력을 강화해요'},
+'양파':{origin:'무안',season:'봄',group:'비타민',emoji:'🧅',desc:'퀘르세틴이 혈관을 건강하게!'},
+'멸치':{origin:'남해',season:'봄',group:'단백질',emoji:'🐟',desc:'칼슘의 보고! 뼈 건강에 최고'},
+'시금치':{origin:'포항',season:'겨울',group:'비타민',emoji:'🥬',desc:'철분과 엽산이 풍부해요'},
+'콩나물':{origin:'국내산',season:'연중',group:'비타민',emoji:'🌱',desc:'아스파라긴산이 해독에 도와요'},
+'버섯':{origin:'국내산',season:'가을',group:'비타민',emoji:'🍄',desc:'비타민D가 풍부해요'},
+'소고기':{origin:'한우',season:'연중',group:'단백질',emoji:'🥩',desc:'철분과 아연이 풍부해요'},
+'배':{origin:'나주',season:'가을',group:'비타민',emoji:'🍐',desc:'소화효소가 고기를 부드럽게!'},
+'당면':{origin:'국내산',season:'연중',group:'탄수화물',emoji:'🍝',desc:'고구마 전분으로 만들어요'},
+'해물':{origin:'국내산',season:'연중',group:'단백질',emoji:'🦐',desc:'타우린이 피로회복에 좋아요'},
+'단무지':{origin:'국내산',season:'연중',group:'탄수화물',emoji:'💛',desc:'무를 절여서 만들어요'},
+'우엉':{origin:'국내산',season:'가을',group:'탄수화물',emoji:'🌿',desc:'식이섬유가 매우 풍부해요'},
+'밀가루':{origin:'미국',season:'연중',group:'탄수화물',emoji:'🌾',desc:'밀을 빻아 만든 가루예요'},
+'닭고기':{origin:'국내산',season:'연중',group:'단백질',emoji:'🍗',desc:'고단백 저지방 식품!'},
+'고춧가루':{origin:'영양',season:'가을',group:'비타민',emoji:'🌶️',desc:'매운맛의 캡사이신!'},
+'양배추':{origin:'국내산',season:'봄',group:'비타민',emoji:'🥬',desc:'비타민U가 위를 보호해요'},
+'고구마':{origin:'해남',season:'가을',group:'탄수화물',emoji:'🍠',desc:'식이섬유와 베타카로틴이 풍부!'},
+};
+
+const EQUIP_NAMES={stove:['가스렌지','인덕션','프로 오븐'],knife:['부엌칼','전문 칼세트','명장 칼'],pan:['알루미늄팬','스텐 팬','프로 코팅팬']};
+const EQUIP_COST=[0,200,500];
+
+// Save/Load
+function save(){
+ localStorage.setItem('cookingMaster',JSON.stringify({coins,totalStars,playerLevel,equipment,earnedStars}));
+}
+function load(){
+ const d=localStorage.getItem('cookingMaster');
+ if(d){const p=JSON.parse(d);coins=p.coins||0;totalStars=p.totalStars||0;playerLevel=p.playerLevel||1;equipment=p.equipment||{stove:1,knife:1,pan:1};earnedStars=p.earnedStars||{};}
+}
+
+// Resize
+function resize(){
+ dpr=window.devicePixelRatio||1;
+ W=window.innerWidth;H=window.innerHeight;
+ C.width=W*dpr;C.height=H*dpr;
+ C.style.width=W+'px';C.style.height=H+'px';
+ X.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize',resize);
+
+// Input
+function getXY(e){
+ const t=e.touches?e.touches[0]:e;
+ return{x:t.clientX,y:t.clientY};
+}
+C.addEventListener('touchstart',e=>{e.preventDefault();const p=getXY(e);tx=tapX=p.x;ty=tapY=p.y;touching=true;tapped=true;},{passive:false});
+C.addEventListener('touchmove',e=>{e.preventDefault();const p=getXY(e);tx=p.x;ty=p.y;},{passive:false});
+C.addEventListener('touchend',e=>{e.preventDefault();touching=false;},{passive:false});
+C.addEventListener('mousedown',e=>{const p=getXY(e);tx=tapX=p.x;ty=tapY=p.y;touching=true;tapped=true;});
+C.addEventListener('mousemove',e=>{if(touching){tx=e.clientX;ty=e.clientY;}});
+C.addEventListener('mouseup',()=>{touching=false;});
+
+// Drawing helpers
+function fillRect(x,y,w,h,c){X.fillStyle=c;X.fillRect(x,y,w,h);}
+function drawText(txt,x,y,size,color,align='center',bold=false){
+ X.font=(bold?'bold ':'')+size+'px "Segoe UI",sans-serif';
+ X.fillStyle=color;X.textAlign=align;X.textBaseline='middle';
+ X.fillText(txt,x,y);
+}
+function drawRoundRect(x,y,w,h,r,fill,stroke){
+ X.beginPath();X.roundRect(x,y,w,h,r);
+ if(fill){X.fillStyle=fill;X.fill();}
+ if(stroke){X.strokeStyle=stroke;X.lineWidth=2;X.stroke();}
+}
+function drawBtn(x,y,w,h,txt,color='#FF8C42'){
+ const g=X.createLinearGradient(x,y,x,y+h);
+ g.addColorStop(0,color);g.addColorStop(1,shadeColor(color,-.2));
+ drawRoundRect(x,y,w,h,12,g);
+ drawRoundRect(x,y+3,w,h-3,12,null,shadeColor(color,-.3));
+ drawText(txt,x+w/2,y+h/2,Math.min(16,h*.4),'#fff','center',true);
+ return{x,y,w,h};
+}
+function shadeColor(c,p){
+ const n=parseInt(c.slice(1),16);
+ const r=Math.min(255,Math.max(0,((n>>16)&0xFF)+((n>>16)&0xFF)*p));
+ const g=Math.min(255,Math.max(0,((n>>8)&0xFF)+((n>>8)&0xFF)*p));
+ const b=Math.min(255,Math.max(0,(n&0xFF)+(n&0xFF)*p));
+ return '#'+(0x1000000+((r|0)<<16)+((g|0)<<8)+(b|0)).toString(16).slice(1);
+}
+function hitTest(bx,by,bw,bh,px,py){return px>=bx&&px<=bx+bw&&py>=by&&py<=by+bh;}
+
+// Particles
+function addParticle(x,y,type){
+ for(let i=0;i<(type==='star'?8:4);i++){
+  particles.push({x,y,vx:(Math.random()-.5)*4,vy:-Math.random()*3-1,life:1,type,
+   color:type==='star'?['#FFD700','#FFA500','#FF6347'][i%3]:type==='steam'?'#ddd':'#FF6347',
+   size:type==='star'?6:type==='steam'?8:4});
+ }
+}
+function updateParticles(){
+ for(let i=particles.length-1;i>=0;i--){
+  const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.life-=.02;
+  if(p.type==='steam')p.vy-=.02;else p.vy+=.1;
+  if(p.life<=0)particles.splice(i,1);
+ }
+}
+function drawParticles(){
+ particles.forEach(p=>{
+  X.globalAlpha=p.life;X.fillStyle=p.color;
+  X.beginPath();X.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);X.fill();
+ });
+ X.globalAlpha=1;
+}
+
+// Buttons tracking
+let btns=[];
+function clearBtns(){btns=[];}
+function regBtn(x,y,w,h,action,label){
+ btns.push({x,y,w,h,action,label});
+ return drawBtn(x,y,w,h,label);
+}
+function checkBtns(){
+ if(!tapped)return;
+ for(const b of btns){
+  if(hitTest(b.x,b.y,b.w,b.h,tapX,tapY)){
+   playSound('click');b.action();tapped=false;return;
+  }
+ }
+}
+
+// ===== SCREENS =====
+let menuAnim=0;
+
+function drawMenu(){
+ menuAnim+=.02;
+ // Background
+ const bg=X.createLinearGradient(0,0,0,H);
+ bg.addColorStop(0,'#FFF3E0');bg.addColorStop(.5,'#FFE0B2');bg.addColorStop(1,'#FFCC80');
+ fillRect(0,0,W,H,bg);
+
+ // Kitchen counter
+ fillRect(0,H*.65,W,H*.35,'#8D6E63');
+ fillRect(0,H*.65,W,6,'#5D4037');
+ // Tiles
+ for(let i=0;i<W;i+=40){
+  for(let j=H*.15;j<H*.65;j+=40){
+   const c=(Math.floor(i/40)+Math.floor(j/40))%2===0?'#FFF8E1':'#FFECB3';
+   drawRoundRect(i+2,j+2,36,36,2,c,'#FFD54F');
+  }
+ }
+
+ // Animated food emojis
+ const foods=['🍳','🍜','🍛','🥘','🍱','🥩','🍝','🌶️','🍙','🍞'];
+ for(let i=0;i<foods.length;i++){
+  const fx=W*.1+i*(W*.08);
+  const fy=H*.45+Math.sin(menuAnim+i)*15;
+  drawText(foods[i],fx,fy,28,'#000');
+ }
+
+ // Title
+ drawText('👨‍🍳',W/2,H*.15,60,'#000');
+ drawText('요 리 왕',W/2,H*.28,42,'#D84315','center',true);
+ drawText('어린이 요리 교육 게임',W/2,H*.34,16,'#8D6E63');
+
+ const bw=Math.min(220,W*.6),bh=48,bx=W/2-bw/2;
+ regBtn(bx,H*.52,bw,bh,'레시피 선택','#FF8C42');
+ regBtn(bx,H*.52+bh+12,bw,bh,'레스토랑 모드','#4ECDC4');
+ regBtn(bx,H*.52+(bh+12)*2,bw,bh,'주방 업그레이드','#6BCB77');
+ regBtn(bx,H*.52+(bh+12)*3,bw,bh,'도감','#9C27B0');
+
+ drawText(`🪙 ${coins}  ⭐ ${totalStars}  Lv.${playerLevel}`,W/2,H*.95,14,'#5D4037','center',true);
+
+ // Set button actions
+ btns[btns.length-4].action=()=>{state='recipes';scrollY=0;};
+ btns[btns.length-3].action=()=>{startRestaurant();};
+ btns[btns.length-2].action=()=>{state='upgrade';};
+ btns[btns.length-1].action=()=>{state='encyclopedia';scrollY=0;};
+}
+
+function drawRecipeList(){
+ fillRect(0,0,W,H,'#FFF3E0');
+ drawText('📖 레시피 선택',W/2,30,22,'#D84315','center',true);
+ regBtn(10,10,60,30,'← 뒤로','#8D6E63');
+ btns[btns.length-1].action=()=>{state='menu';};
+
+ const cats=['🌱 초급','🔥 중급','⭐ 고급'];
+ let cy=65-scrollY;
+ for(let c=0;c<3;c++){
+  if(cy>-30&&cy<H+30){
+   drawText(cats[c],W/2,cy,18,'#5D4037','center',true);
+   fillRect(20,cy+12,W-40,2,'#FFCC80');
+  }
+  cy+=35;
+  const catRecipes=RECIPES.filter(r=>r.cat===c);
+  for(const r of catRecipes){
+   if(cy>-60&&cy<H+30){
+    const locked=c>0&&totalStars<c*5;
+    const bgc=locked?'#E0E0E0':'#FFFDE7';
+    drawRoundRect(20,cy,W-40,55,10,bgc,'#FFB74D');
+    drawText(r.emoji,50,cy+28,24,'#000');
+    drawText(r.name,80,cy+18,16,locked?'#999':'#3E2723','left',true);
+    const st=earnedStars[r.id]||0;
+    drawText('⭐'.repeat(st)+'☆'.repeat(3-st),80,cy+40,12,'#FFB300','left');
+    if(locked){
+     drawText(`🔒 ⭐${c*5}개 필요`,W-30,cy+28,12,'#999','right');
+    }else{
+     drawText('도전 →',W-30,cy+28,13,'#E65100','right',true);
+    }
+    if(!locked&&tapped&&hitTest(20,cy,W-40,55,tapX,tapY)){
+     playSound('click');startCooking(r);tapped=false;
+    }
+   }
+   cy+=65;
+  }
+  cy+=10;
+ }
+ // Scroll
+ if(touching){scrollY=Math.max(0,scrollY-(ty-tapY)*.3);}
+}
+
+// Cooking
+let holdProgress=0,holdTarget=3,ingredientSlots=[],stepComplete=false,ingredientPhase=true;
+let correctCount=0,totalPossible=0;
+
+function startCooking(recipe){
+ currentRecipe=recipe;cookStep=0;cookScore=0;
+ selectedIngredients=[];stepTimer=0;holdProgress=0;
+ stepComplete=false;ingredientPhase=true;correctCount=0;
+ totalPossible=recipe.ingredients.length;dragItem=null;
+ particles=[];state='cooking';
+ document.getElementById('hud').classList.remove('hidden');
+ updateHUD();
+}
+
+function updateHUD(){
+ document.getElementById('hud-coins').textContent='🪙 '+coins;
+ document.getElementById('hud-level').textContent='Lv.'+playerLevel;
+ document.getElementById('hud-stars').textContent='⭐ '+totalStars;
+}
+
+function drawCooking(){
+ if(ingredientPhase){drawIngredientSelect();}
+ else{drawCookingStep();}
+}
+
+function drawIngredientSelect(){
+ // Kitchen bg
+ const bg=X.createLinearGradient(0,0,0,H);
+ bg.addColorStop(0,'#EFEBE9');bg.addColorStop(1,'#D7CCC8');
+ fillRect(0,0,W,H,bg);
+
+ // Counter
+ fillRect(0,H*.55,W,H*.45,'#6D4C41');fillRect(0,H*.55,W,4,'#4E342E');
+
+ drawText(`🧊 재료를 골라주세요: ${currentRecipe.name}`,W/2,55,16,'#3E2723','center',true);
+ drawText(`${selectedIngredients.length}/${currentRecipe.ingredients.length}개 선택됨`,W/2,78,13,'#795548');
+
+ // Ingredient grid
+ const items=currentRecipe.allIngredients;
+ const cols=Math.min(4,items.length);
+ const iw=Math.min(75,(W-40)/cols);
+ const startX=(W-cols*iw)/2;
+ let row=0,col=0;
+ for(let i=0;i<items.length;i++){
+  const ix=startX+col*iw;
+  const iy=100+row*(iw+5);
+  const sel=selectedIngredients.includes(items[i]);
+  const correct=currentRecipe.ingredients.includes(items[i]);
+  const info=INGREDIENT_INFO[items[i]];
+  const emoji=info?info.emoji:'🍽️';
+
+  drawRoundRect(ix+3,iy+3,iw-6,iw-6,10,sel?'#C8E6C9':'#FFF8E1',sel?'#4CAF50':'#FFCC80');
+  drawText(emoji,ix+iw/2,iy+iw/2-8,24,'#000');
+  drawText(items[i],ix+iw/2,iy+iw/2+16,10,'#5D4037','center',true);
+  if(sel)drawText('✓',ix+iw-12,iy+12,14,'#4CAF50');
+
+  if(tapped&&hitTest(ix+3,iy+3,iw-6,iw-6,tapX,tapY)){
+   tapped=false;
+   if(sel){selectedIngredients=selectedIngredients.filter(x=>x!==items[i]);playSound('click');}
+   else if(selectedIngredients.length<currentRecipe.ingredients.length+2){
+    selectedIngredients.push(items[i]);playSound('chop');
+    // Show info popup briefly
+    if(info)infoPopup={txt:`${emoji} ${items[i]}\n원산지: ${info.origin}\n제철: ${info.season}\n분류: ${info.group}\n${info.desc}`,timer:120,x:ix,y:iy};
+   }
+  }
+  col++;if(col>=cols){col=0;row++;}
+ }
+
+ // Info popup
+ if(infoPopup&&infoPopup.timer>0){
+  infoPopup.timer--;
+  const lines=infoPopup.txt.split('\n');
+  const pw=220,ph=lines.length*18+16;
+  let px=Math.min(W-pw-10,Math.max(10,infoPopup.x));
+  let py=Math.min(H-ph-10,infoPopup.y-ph-5);
+  X.globalAlpha=Math.min(1,infoPopup.timer/20);
+  drawRoundRect(px,py,pw,ph,10,'#FFFDE7','#FFB74D');
+  lines.forEach((l,i)=>drawText(l,px+10,py+14+i*18,12,i===0?'#E65100':'#5D4037','left',i===0));
+  X.globalAlpha=1;
+ }
+
+ // Confirm button
+ if(selectedIngredients.length>=currentRecipe.ingredients.length){
+  const bw=180,bh=44;
+  regBtn(W/2-bw/2,H-70,bw,bh,'요리 시작! 🍳','#4CAF50');
+  btns[btns.length-1].action=()=>{
+   // Score ingredient selection
+   correctCount=selectedIngredients.filter(x=>currentRecipe.ingredients.includes(x)).length;
+   ingredientPhase=false;cookStep=0;holdProgress=0;stepComplete=false;
+   playSound('sizzle');
+  };
+ }
+
+ // Back
+ regBtn(10,H-45,60,30,'← 취소','#8D6E63');
+ btns[btns.length-1].action=()=>{state='recipes';scrollY=0;document.getElementById('hud').classList.add('hidden');currentRecipe=null;};
+}
+
+function drawCookingStep(){
+ const recipe=currentRecipe;
+ const step=recipe.steps[cookStep];
+ const stype=recipe.stepTypes[cookStep];
+ const isLast=cookStep>=recipe.steps.length-1;
+
+ // Kitchen bg
+ fillRect(0,0,W,H,'#EFEBE9');
+ // Stove area
+ const stoveY=H*.3;
+ fillRect(0,stoveY,W,H*.4,'#78909C');
+ fillRect(0,stoveY,W,4,'#546E7A');
+ // Burner
+ const bx=W/2,by=stoveY+H*.2;
+ X.beginPath();X.arc(bx,by,50,0,Math.PI*2);
+ X.fillStyle=stype==='hold'&&touching?'#FF5722':'#37474F';X.fill();
+ X.beginPath();X.arc(bx,by,35,0,Math.PI*2);X.fillStyle='#263238';X.fill();
+
+ // Pan on stove
+ const panY=by-20;
+ X.beginPath();X.ellipse(bx,panY,65,25,0,0,Math.PI*2);X.fillStyle='#424242';X.fill();
+ X.beginPath();X.ellipse(bx,panY-5,58,20,0,0,Math.PI*2);X.fillStyle='#616161';X.fill();
+
+ // Recipe emoji in pan
+ drawText(recipe.emoji,bx,panY-5,30,'#000');
+
+ // Counter
+ fillRect(0,H*.7,W,H*.3,'#6D4C41');fillRect(0,H*.7,W,4,'#4E342E');
+
+ // Step info
+ drawRoundRect(10,H*.72,W-20,H*.12,10,'rgba(255,253,231,.95)','#FFB74D');
+ drawText(`단계 ${cookStep+1}/${recipe.steps.length}`,W/2,H*.75,12,'#E65100','center',true);
+ drawText(step,W/2,H*.79,14,'#3E2723','center',true);
+
+ // Step type instruction
+ let instrText='';
+ if(stype==='hold')instrText='꾹 누르고 있으세요!';
+ else if(stype==='drag')instrText='재료를 냄비로 드래그!';
+ else instrText='화면을 터치하세요!';
+ drawText(instrText,W/2,H*.84,12,'#FF6D00');
+
+ // Progress bar for hold
+ if(stype==='hold'){
+  holdTarget=step.includes('4초')?4:3;
+  if(touching&&!stepComplete){
+   holdProgress+=1/60;
+   // Fire effect
+   if(frame%3===0)addParticle(bx+Math.random()*40-20,panY+10,'fire');
+   if(frame%10===0)addParticle(bx+Math.random()*30-15,panY-20,'steam');
+  }
+  const pct=Math.min(1,holdProgress/holdTarget);
+  drawRoundRect(W*.15,H*.87,W*.7,14,7,'#E0E0E0');
+  drawRoundRect(W*.15,H*.87,W*.7*pct,14,7,pct>=1?'#4CAF50':'#FF9800');
+  drawText(Math.floor(pct*100)+'%',W/2,H*.875+7,11,'#fff','center',true);
+
+  if(holdProgress>=holdTarget&&!stepComplete){
+   stepComplete=true;cookScore+=20;playSound('ding');
+   addParticle(W/2,H*.5,'star');
+  }
+ }else if(stype==='drag'){
+  // Drag zone
+  if(!stepComplete){
+   const dzx=W*.1,dzy=H*.05,dzw=70,dzh=70;
+   drawRoundRect(dzx,dzy,dzw,dzh,10,'#FFF9C4','#FFC107');
+   const dragIngr=selectedIngredients[Math.min(cookStep,selectedIngredients.length-1)]||'재료';
+   const info=INGREDIENT_INFO[dragIngr];
+   drawText(info?info.emoji:'🍽️',dzx+dzw/2,dzy+dzh/2,28,'#000');
+
+   if(tapped&&hitTest(dzx,dzy,dzw,dzh,tapX,tapY)){
+    dragItem={x:dzx,y:dzy};tapped=false;
+   }
+   if(dragItem&&touching){
+    drawText(info?info.emoji:'🍽️',tx,ty,32,'#000');
+    // Arrow
+    X.strokeStyle='#FF9800';X.lineWidth=2;X.setLineDash([5,5]);
+    X.beginPath();X.moveTo(tx,ty+20);X.lineTo(bx,panY);X.stroke();X.setLineDash([]);
+   }
+   if(dragItem&&!touching){
+    if(Math.abs(tx-bx)<80&&Math.abs(ty-panY)<60){
+     stepComplete=true;cookScore+=20;playSound('sizzle');
+     addParticle(bx,panY,'star');
+    }
+    dragItem=null;
+   }
+  }
+ }else{
+  // Tap
+  if(tapped&&!stepComplete){
+   stepComplete=true;cookScore+=20;playSound('chop');
+   addParticle(tapX,tapY,'star');
+   tapped=false;
+  }
+ }
+
+ // Steam/fire particles
+ if(!stepComplete&&frame%8===0){
+  addParticle(bx+Math.random()*60-30,panY-25,'steam');
+ }
+
+ // Next step button
+ if(stepComplete){
+  drawText('✅ 완료!',W/2,H*.15,20,'#4CAF50','center',true);
+  const nbw=160,nbh=40;
+  regBtn(W/2-nbw/2,H*.18,nbw,nbh,isLast?'요리 완성!':'다음 단계 →','#4CAF50');
+  btns[btns.length-1].action=()=>{
+   if(isLast){finishCooking();}
+   else{cookStep++;holdProgress=0;stepComplete=false;dragItem=null;}
+  };
+ }
+
+ drawParticles();
+ updateParticles();
+}
+
+function finishCooking(){
+ state='result';
+ const recipe=currentRecipe;
+ // Ingredient score (50%)
+ const ingScore=Math.round((correctCount/totalPossible)*50);
+ // Cooking score (30%) - from steps
+ const stepScore=Math.round((cookScore/(recipe.steps.length*20))*30);
+ // Presentation (20%) - bonus
+ const presScore=15+Math.floor(Math.random()*6);
+ const total=ingScore+stepScore+presScore;
+ const stars=total>=90?3:total>=70?2:total>=40?1:0;
+ const earned=coins+stars*10+total;
+ const prevStars=earnedStars[recipe.id]||0;
+ if(stars>prevStars){totalStars+=stars-prevStars;earnedStars[recipe.id]=stars;}
+ coins+=stars*10+Math.floor(total/5);
+ playerLevel=1+Math.floor(totalStars/5);
+ cookScore=total;
+ save();
+ playSound('star');
+}
+
+function drawResult(){
+ fillRect(0,0,W,H,'rgba(0,0,0,.6)');
+ const pw=Math.min(340,W-30),ph=420,px=(W-pw)/2,py=(H-ph)/2;
+ drawRoundRect(px,py,pw,ph,20,'#FFF8E1','#FFB74D');
+
+ drawText('🎉 요리 완성!',W/2,py+30,22,'#E65100','center',true);
+ drawText(currentRecipe.emoji,W/2,py+70,48,'#000');
+ drawText(currentRecipe.name,W/2,py+105,20,'#3E2723','center',true);
+
+ const stars=earnedStars[currentRecipe.id]||0;
+ drawText('⭐'.repeat(stars)+'☆'.repeat(3-stars),W/2,py+135,28,'#FFB300');
+ drawText(`맛 점수: ${cookScore}점`,W/2,py+165,16,'#5D4037','center',true);
+
+ // Nutrition
+ drawText('📊 영양 분석',W/2,py+195,14,'#E65100','center',true);
+ const nt=currentRecipe.nutrients;
+ const nkeys=['탄수화물','단백질','지방','비타민','무기질'];
+ const ncolors=['#FF9800','#F44336','#FFC107','#4CAF50','#2196F3'];
+ nkeys.forEach((k,i)=>{
+  const bx=px+20,by=py+210+i*22,bw=pw-40;
+  drawText(k,bx+35,by+6,11,'#5D4037','right');
+  drawRoundRect(bx+40,by,bw-40,12,6,'#E0E0E0');
+  drawRoundRect(bx+40,by,(bw-40)*nt[k]/50,12,6,ncolors[i]);
+ });
+
+ // Science fact
+ drawRoundRect(px+10,py+325,pw-20,45,8,'#E3F2FD','#42A5F5');
+ drawText('🔬 '+currentRecipe.science.substring(0,25),W/2,py+338,11,'#1565C0');
+ drawText(currentRecipe.science.substring(25,55),W/2,py+354,11,'#1565C0');
+
+ const bw2=140,bh2=40;
+ regBtn(W/2-bw2/2,py+ph-50,bw2,bh2,'확인','#FF8C42');
+ btns[btns.length-1].action=()=>{state='menu';currentRecipe=null;document.getElementById('hud').classList.add('hidden');};
+}
+
+// Restaurant Mode
+function startRestaurant(){
+ if(totalStars<3){alert('⭐ 3개 이상 모아야 레스토랑을 열 수 있어요!');return;}
+ restaurantMode=true;state='restaurant';customers=[];servedCount=0;orderTimer=180*60;
+ spawnCustomer();
+ document.getElementById('hud').classList.remove('hidden');
+ document.getElementById('hud-timer').classList.remove('hidden');
+}
+
+function spawnCustomer(){
+ const available=RECIPES.filter(r=>earnedStars[r.id]>=1);
+ if(available.length===0)return;
+ const r=available[Math.floor(Math.random()*available.length)];
+ const emojis=['👦','👧','👨','👩','👴','👵','🧑'];
+ customers.push({recipe:r,emoji:emojis[Math.floor(Math.random()*emojis.length)],patience:100,x:W+60,targetX:60+customers.length*90});
+}
+
+function drawRestaurant(){
+ fillRect(0,0,W,H,'#EFEBE9');
+ // Restaurant bg
+ fillRect(0,0,W,H*.15,'#D84315');
+ drawText('🍴 레스토랑 모드',W/2,H*.08,20,'#FFF','center',true);
+ drawText(`주문 완료: ${servedCount}  남은시간: ${Math.ceil(orderTimer/3600)}분`,W/2,H*.13,12,'#FFCC80');
+
+ // Counter
+ fillRect(0,H*.55,W,8,'#5D4037');
+ fillRect(0,H*.56,W,H*.44,'#8D6E63');
+
+ orderTimer--;
+ if(orderTimer<=0){endRestaurant();return;}
+
+ // Customers
+ for(let i=customers.length-1;i>=0;i--){
+  const c=customers[i];
+  if(c.x>c.targetX)c.x-=2;
+  c.patience-=.015;
+
+  const cy=H*.45;
+  // Customer
+  drawText(c.emoji,c.x,cy,36,'#000');
+  // Speech bubble
+  drawRoundRect(c.x-35,cy-60,70,35,10,'#fff','#FFB74D');
+  drawText(c.recipe.emoji+' '+c.recipe.name,c.x,cy-42,10,'#3E2723','center',true);
+  // Patience bar
+  drawRoundRect(c.x-25,cy+25,50,6,3,'#E0E0E0');
+  const pc=c.patience/100;
+  drawRoundRect(c.x-25,cy+25,50*pc,6,3,pc>.5?'#4CAF50':pc>.25?'#FF9800':'#F44336');
+
+  if(c.patience<=0){customers.splice(i,1);continue;}
+
+  // Tap to cook
+  if(tapped&&Math.abs(tapX-c.x)<40&&Math.abs(tapY-cy)<50){
+   tapped=false;
+   currentRecipe=c.recipe;
+   selectedIngredients=[...c.recipe.ingredients];
+   correctCount=c.recipe.ingredients.length;
+   totalPossible=c.recipe.ingredients.length;
+   ingredientPhase=false;cookStep=0;holdProgress=0;stepComplete=false;
+   cookScore=0;dragItem=null;
+   state='cooking_restaurant';customers.splice(i,1);
+   break;
+  }
+ }
+
+ // Spawn timer
+ if(frame%300===0&&customers.length<4)spawnCustomer();
+
+ // Back
+ regBtn(10,H-45,70,30,'나가기','#8D6E63');
+ btns[btns.length-1].action=()=>endRestaurant();
+}
+
+function endRestaurant(){
+ const bonus=servedCount*15;coins+=bonus;
+ restaurantMode=false;state='menu';
+ document.getElementById('hud').classList.add('hidden');
+ document.getElementById('hud-timer').classList.add('hidden');
+ save();
+ alert(`레스토랑 종료! ${servedCount}명에게 서빙!\n보너스: 🪙 ${bonus}`);
+}
+
+// Upgrade
+function drawUpgrade(){
+ fillRect(0,0,W,H,'#FFF3E0');
+ drawText('🔧 주방 업그레이드',W/2,35,22,'#D84315','center',true);
+ drawText(`🪙 ${coins}`,W/2,60,16,'#795548');
+
+ regBtn(10,10,60,30,'← 뒤로','#8D6E63');
+ btns[btns.length-1].action=()=>{state='menu';};
+
+ const items=[
+  {key:'stove',emoji:'🔥',name:'화구'},
+  {key:'knife',emoji:'🔪',name:'칼'},
+  {key:'pan',emoji:'🍳',name:'팬'}
+ ];
+
+ items.forEach((item,i)=>{
+  const ey=100+i*110;
+  const lv=equipment[item.key];
+  drawRoundRect(20,ey,W-40,95,12,'#FFFDE7','#FFB74D');
+  drawText(item.emoji,55,ey+25,28,'#000');
+  drawText(item.name,90,ey+20,16,'#3E2723','left',true);
+  drawText(`Lv.${lv} - ${EQUIP_NAMES[item.key][lv-1]}`,90,ey+42,13,'#795548','left');
+
+  if(lv<3){
+   const cost=EQUIP_COST[lv];
+   const canBuy=coins>=cost;
+   const bw=100,bh=32;
+   drawRoundRect(W-130,ey+20,bw,bh,8,canBuy?'#4CAF50':'#9E9E9E');
+   drawText(`🪙 ${cost}`,W-80,ey+36,13,'#fff','center',true);
+   if(tapped&&hitTest(W-130,ey+20,bw,bh,tapX,tapY)&&canBuy){
+    tapped=false;coins-=cost;equipment[item.key]=lv+1;save();playSound('star');
+   }
+  }else{
+   drawText('MAX',W-80,ey+36,14,'#4CAF50','center',true);
+  }
+
+  // Bonus info
+  const bonuses=['요리 시간 -10%','재료 점수 +5','맛 점수 +5'];
+  drawText(`효과: ${bonuses[i]}`,60,ey+70,11,'#FF6D00','left');
+ });
+}
+
+// Encyclopedia
+function drawEncyclopedia(){
+ fillRect(0,0,W,H,'#FFF3E0');
+ drawText('📚 재료 도감',W/2,30,22,'#D84315','center',true);
+ regBtn(10,10,60,30,'← 뒤로','#8D6E63');
+ btns[btns.length-1].action=()=>{state='menu';};
+
+ const keys=Object.keys(INGREDIENT_INFO);
+ let cy=60-scrollY;
+ const groups=['탄수화물','단백질','지방','비타민','무기질','기타'];
+ const gcolors={'탄수화물':'#FF9800','단백질':'#F44336','지방':'#FFC107','비타민':'#4CAF50','무기질':'#2196F3','기타':'#9E9E9E'};
+
+ for(const g of groups){
+  const items=keys.filter(k=>INGREDIENT_INFO[k].group===g);
+  if(items.length===0)continue;
+  if(cy>-20&&cy<H+20){
+   drawRoundRect(15,cy,W-30,22,5,gcolors[g]);
+   drawText(g,W/2,cy+11,13,'#fff','center',true);
+  }
+  cy+=30;
+  for(const k of items){
+   if(cy>-50&&cy<H+20){
+    const info=INGREDIENT_INFO[k];
+    drawRoundRect(20,cy,W-40,42,8,'#FFFDE7','#FFE0B2');
+    drawText(info.emoji,44,cy+21,20,'#000');
+    drawText(k,70,cy+13,13,'#3E2723','left',true);
+    drawText(`${info.origin} | ${info.season}`,70,cy+30,10,'#8D6E63','left');
+    drawText(info.desc.substring(0,18),W-25,cy+21,10,'#5D4037','right');
+   }
+   cy+=48;
+  }
+  cy+=5;
+ }
+ if(touching){scrollY=Math.max(0,scrollY-(ty-tapY)*.3);}
+}
+
+// Main loop
+function gameLoop(){
+ frame++;clearBtns();animT+=.016;
+ X.clearRect(0,0,W,H);
+
+ switch(state){
+  case'menu':drawMenu();break;
+  case'recipes':drawRecipeList();break;
+  case'cooking':drawCooking();break;
+  case'cooking_restaurant':
+   drawCooking();
+   // After finishing in restaurant
+   break;
+  case'result':drawResult();break;
+  case'restaurant':drawRestaurant();break;
+  case'upgrade':drawUpgrade();break;
+  case'encyclopedia':drawEncyclopedia();break;
+ }
+
+ checkBtns();
+ tapped=false;
+ requestAnimationFrame(gameLoop);
+}
+
+// Handle restaurant cooking completion override
+const origFinish=finishCooking;
+finishCooking=function(){
+ if(state==='cooking_restaurant'){
+  const recipe=currentRecipe;
+  const ingScore=Math.round((correctCount/totalPossible)*50);
+  const stepScore=Math.round((cookScore/(recipe.steps.length*20))*30);
+  const total=ingScore+stepScore+15;
+  const reward=Math.floor(total/5)+5;
+  coins+=reward;servedCount++;
+  save();playSound('star');
+  state='restaurant';currentRecipe=null;
+  document.getElementById('hud-timer').classList.remove('hidden');
+ }else{
+  state='result';
+  const recipe=currentRecipe;
+  const ingScore=Math.round((correctCount/totalPossible)*50);
+  const stepScore=Math.round((cookScore/(recipe.steps.length*20))*30);
+  const presScore=15+Math.floor(Math.random()*6);
+  const total=ingScore+stepScore+presScore;
+  const stars=total>=90?3:total>=70?2:total>=40?1:0;
+  const prevStars=earnedStars[recipe.id]||0;
+  if(stars>prevStars){totalStars+=stars-prevStars;earnedStars[recipe.id]=stars;}
+  coins+=stars*10+Math.floor(total/5);
+  playerLevel=1+Math.floor(totalStars/5);
+  cookScore=total;
+  save();playSound('star');
+ }
+};
+
+// Init
+load();resize();
+gameLoop();
+</script>
+</body>
+</html>

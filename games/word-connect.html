@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>단어 연결 게임</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:480px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.4);border-radius:12px;font-size:15px;font-weight:700;margin-bottom:8px;flex-wrap:wrap;gap:4px}
+.hud .sc{color:#FFD700}.hud .stg{color:#7FDBFF}.hud .tm{color:#FF6B9D}
+.hint-area{text-align:center;margin:12px 0}
+.hint-emoji{font-size:56px;margin-bottom:4px}
+.hint-text{font-size:16px;color:#aaa}
+.answer-slots{display:flex;justify-content:center;gap:8px;margin:16px 0;flex-wrap:wrap}
+.slot{width:48px;height:56px;border:3px solid #444;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;background:rgba(255,255,255,0.05);transition:all 0.2s}
+.slot.filled{border-color:#7FDBFF;background:rgba(127,219,255,0.1);color:#7FDBFF}
+.slot.correct{border-color:#4CAF50;background:rgba(76,175,80,0.15);color:#4CAF50;animation:pop 0.3s}
+.slot.wrong{border-color:#E53935;background:rgba(229,57,53,0.15);color:#E53935;animation:shake 0.3s}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pieces{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0;padding:8px}
+.piece{min-width:44px;height:48px;padding:0 12px;border:2px solid #555;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;background:rgba(255,255,255,0.08);cursor:pointer;transition:all 0.15s;user-select:none;-webkit-user-select:none}
+.piece:active{transform:scale(0.9)}
+.piece.selected{border-color:#FF6B9D;background:rgba(255,107,157,0.2);color:#FF6B9D}
+.piece.used{opacity:0.3;pointer-events:none}
+.actions{display:flex;justify-content:center;gap:12px;margin:8px 0}
+.act-btn{padding:10px 24px;font-size:16px;font-weight:700;border:2px solid #555;border-radius:12px;background:transparent;color:#aaa;cursor:pointer;transition:all 0.15s}
+.act-btn:active{transform:scale(0.95)}
+.act-btn.submit{border-color:#4CAF50;color:#4CAF50;background:rgba(76,175,80,0.1)}
+.act-btn.clear{border-color:#E53935;color:#E53935}
+
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu h1{font-size:32px;color:#FFD700;margin-bottom:4px}
+.menu p{font-size:15px;color:#aaa;text-align:center;max-width:320px}
+.menu-btn{width:280px;padding:14px;font-size:18px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s}
+.menu-btn:active{transform:scale(0.95)}
+.menu-btn.play{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.menu-btn.cont{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.stage-info{font-size:14px;color:#888;text-align:center}
+
+.result{text-align:center;margin:auto 0;padding:16px}
+.result h2{font-size:32px;color:#FFD700;margin-bottom:8px}
+.result p{font-size:20px;margin-bottom:6px}
+.result .big{font-size:72px;margin-bottom:8px}
+.stars{font-size:36px;margin:4px 0}
+.best-record{font-size:14px;color:#888;margin-top:4px}
+.retry{padding:14px 40px;font-size:22px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.menu-link{padding:10px 30px;font-size:18px;font-weight:700;border:2px solid #555;border-radius:14px;background:transparent;color:#aaa;cursor:pointer;margin-top:8px}
+.bonus-text{font-size:18px;color:#FFD700;font-weight:700;animation:pop 0.5s}
+.game-area{flex:1;display:flex;flex-direction:column}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+// 한글 자모 분리
+const CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+function decompose(ch){
+  const code=ch.charCodeAt(0)-0xAC00;
+  if(code<0||code>11171)return [ch];
+  const cho=Math.floor(code/588);
+  const jung=Math.floor((code%588)/28);
+  const jong=code%28;
+  const parts=[CHO[cho],JUNG[jung]];
+  if(jong>0)parts.push(JONG[jong]);
+  return parts;
+}
+
+function decomposeWord(word){
+  const parts=[];
+  for(const ch of word) parts.push(...decompose(ch));
+  return parts;
+}
+
+// 스테이지 데이터: [단어, 힌트이모지, 힌트설명]
+const STAGES=[
+  // 3글자 (스테이지 1-8)
+  ['사과','🍎','빨간 과일'],
+  ['바나나','🍌','노란 과일'],
+  ['나비','🦋','꽃에 앉는 곤충'],
+  ['구름','☁️','하늘에 떠 있는'],
+  ['하늘','🌤️','머리 위 파란 것'],
+  ['바다','🌊','넓고 짠 물'],
+  ['별빛','⭐','밤하늘에 반짝'],
+  ['노래','🎵','음악을 부르다'],
+  // 4글자 (스테이지 9-15)
+  ['고양이','🐱','야옹 하는 동물'],
+  ['강아지','🐶','멍멍 하는 동물'],
+  ['자동차','🚗','도로 위 탈것'],
+  ['비행기','✈️','하늘을 나는 탈것'],
+  ['아이스','🍦','차갑고 달콤한'],
+  ['해바라기','🌻','해를 따라 도는 꽃'],
+  ['무지개','🌈','비 온 뒤 일곱 색'],
+  // 5글자 (스테이지 16-20)
+  ['코끼리','🐘','코가 긴 동물'],
+  ['냉장고','🧊','음식 보관 가전'],
+  ['도서관','📚','책 빌리는 곳'],
+  ['운동장','⚽','뛰어 노는 넓은 곳'],
+  ['크리스마스','🎄','12월 25일'],
+];
+
+let screen='menu',stageIdx=0,selectedPieces=[],pieces=[],answer='',timerStart=0,timerInterval=null;
+
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'word-connect'},'*');}catch(e){}}
+function getProgress(){try{return parseInt(localStorage.getItem('wordcon_progress'))||0;}catch(e){return 0;}}
+function saveProgress(s){localStorage.setItem('wordcon_progress',s);}
+function getBest(){try{return JSON.parse(localStorage.getItem('wordcon_best'))||{stars:0,score:0,cleared:0};}catch(e){return{stars:0,score:0,cleared:0};}}
+function saveBest(stars,sc,cleared){const p=getBest();localStorage.setItem('wordcon_best',JSON.stringify({stars:Math.max(stars,p.stars),score:Math.max(sc,p.score),cleared:Math.max(cleared,p.cleared)}));}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu'){
+    const prog=getProgress();
+    const best=getBest();
+    app.innerHTML=`
+      <div class="menu">
+        <h1>🔤 단어 연결</h1>
+        <p>자음과 모음을 조합해서 단어를 만드세요!<br>힌트를 보고 어떤 단어인지 맞혀보세요.</p>
+        <div class="stage-info">진행: ${prog}/${STAGES.length} 스테이지${best.score>0?' | 최고: '+best.score+'점':''}</div>
+        <button class="menu-btn play" onclick="startFromBeginning()">🎮 처음부터 시작</button>
+        ${prog>0?`<button class="menu-btn cont" onclick="continueGame()">▶ 이어하기 (${prog+1}스테이지)</button>`:''}
+      </div>`;
+  } else if(screen==='game'){
+    renderGame();
+  } else if(screen==='result'){
+    renderResult();
+  }
+}
+
+function startFromBeginning(){
+  stageIdx=0;totalScore=0;screen='game';timerStart=Date.now();initStage();render();
+}
+
+function continueGame(){
+  stageIdx=getProgress();totalScore=0;screen='game';timerStart=Date.now();initStage();render();
+}
+
+let totalScore=0;
+
+function initStage(){
+  if(stageIdx>=STAGES.length){showFinalResult();return;}
+  const [word]=STAGES[stageIdx];
+  answer=word;
+  const correctPieces=decomposeWord(word);
+  // Add some distractors
+  const allJamo=[...CHO,...JUNG];
+  let distractors=[];
+  while(distractors.length<Math.min(4,correctPieces.length)){
+    const r=allJamo[Math.random()*allJamo.length|0];
+    if(!correctPieces.includes(r)||distractors.includes(r)){
+      distractors.push(r);
+    }
+  }
+  pieces=shuffle([...correctPieces,...distractors]).map((p,i)=>({char:p,id:i,used:false}));
+  selectedPieces=[];
+  timerStart=Date.now();
+}
+
+function renderGame(){
+  const [word,emoji,hint]=STAGES[stageIdx];
+  const correctPieces=decomposeWord(word);
+  const elapsed=((Date.now()-timerStart)/1000)|0;
+  const app=document.getElementById('app');
+
+  let slotsHTML='';
+  for(let i=0;i<correctPieces.length;i++){
+    const filled=i<selectedPieces.length;
+    slotsHTML+=`<div class="slot ${filled?'filled':''}">${filled?selectedPieces[i].char:''}</div>`;
+  }
+
+  let piecesHTML=pieces.map(p=>`<div class="piece ${p.used?'used':''}" onclick="selectPiece(${p.id})">${p.char}</div>`).join('');
+
+  app.innerHTML=`
+    <div class="hud">
+      <span class="sc">⭐ ${totalScore}</span>
+      <span class="stg">📖 ${stageIdx+1}/${STAGES.length}</span>
+      <span class="tm">⏱ ${elapsed}초</span>
+    </div>
+    <div class="game-area">
+      <div class="hint-area">
+        <div class="hint-emoji">${emoji}</div>
+        <div class="hint-text">${hint} (${word.length}글자)</div>
+      </div>
+      <div class="answer-slots">${slotsHTML}</div>
+      <div class="pieces">${piecesHTML}</div>
+      <div class="actions">
+        <button class="act-btn clear" onclick="clearSelection()">↩ 지우기</button>
+        <button class="act-btn submit" onclick="submitAnswer()">✓ 확인</button>
+      </div>
+    </div>`;
+
+  // Update timer
+  if(screen==='game'){
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{
+      const t=document.querySelector('.tm');
+      if(t)t.textContent='⏱ '+((Date.now()-timerStart)/1000|0)+'초';
+    },1000);
+  }
+}
+
+function selectPiece(id){
+  const p=pieces.find(x=>x.id===id);
+  if(!p||p.used)return;
+  const correctPieces=decomposeWord(answer);
+  if(selectedPieces.length>=correctPieces.length)return;
+  p.used=true;
+  selectedPieces.push(p);
+  render();
+}
+
+function clearSelection(){
+  for(const p of selectedPieces)p.used=false;
+  selectedPieces=[];
+  render();
+}
+
+function submitAnswer(){
+  const correctPieces=decomposeWord(answer);
+  if(selectedPieces.length<correctPieces.length)return;
+
+  const isCorrect=selectedPieces.every((p,i)=>p.char===correctPieces[i]);
+
+  if(isCorrect){
+    const elapsed=(Date.now()-timerStart)/1000;
+    const timeBonus=Math.max(0,Math.round((30-elapsed)*10));
+    const stageScore=100+timeBonus;
+    totalScore+=stageScore;
+
+    // Flash correct
+    document.querySelectorAll('.slot').forEach(s=>{s.classList.remove('filled');s.classList.add('correct');});
+
+    saveProgress(stageIdx+1);
+
+    setTimeout(()=>{
+      stageIdx++;
+      if(stageIdx>=STAGES.length){
+        showFinalResult();
+      } else {
+        initStage();
+        render();
+      }
+    },800);
+  } else {
+    document.querySelectorAll('.slot.filled').forEach(s=>{s.classList.remove('filled');s.classList.add('wrong');});
+    setTimeout(()=>{
+      for(const p of selectedPieces)p.used=false;
+      selectedPieces=[];
+      render();
+    },500);
+  }
+}
+
+function showFinalResult(){
+  clearInterval(timerInterval);
+  screen='result';
+  const cleared=stageIdx;
+  const stars=cleared>=20?3:cleared>=14?2:cleared>=8?1:0;
+  saveBest(stars,totalScore,cleared);
+  const xp=stars>=3?50:stars>=2?30:stars>=1?15:5;
+  sendXP(xp);
+  render();
+}
+
+function renderResult(){
+  const best=getBest();
+  const cleared=Math.min(stageIdx,STAGES.length);
+  const stars=cleared>=20?3:cleared>=14?2:cleared>=8?1:0;
+  const xp=stars>=3?50:stars>=2?30:stars>=1?15:5;
+
+  document.getElementById('app').innerHTML=`
+    <div class="result" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div class="big">🎉</div>
+      <h2>${cleared>=STAGES.length?'전체 클리어!':'게임 완료!'}</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>⭐ 점수: ${totalScore}</p>
+      <p>📖 클리어: ${cleared}/${STAGES.length} 스테이지</p>
+      <p style="font-size:16px;color:#7FDBFF">+${xp} XP 획득!</p>
+      <div class="best-record">최고 기록: ${best.score}점 (${best.cleared}스테이지)</div>
+      <button class="retry" onclick="startFromBeginning()">🔄 다시 하기</button>
+      <button class="menu-link" onclick="backToMenu()">🏠 메뉴</button>
+    </div>`;
+}
+
+function backToMenu(){
+  clearInterval(timerInterval);
+  screen='menu';render();
+}
+
+render();
+</script>
+</body></html>

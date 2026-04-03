@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>과학 실험 시뮬레이터</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:520px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu p{color:#aaa;font-size:15px;text-align:center;max-width:360px}
+.exp-btn{width:300px;padding:16px;font-size:18px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left;display:flex;align-items:center;gap:12px}
+.exp-btn:active{transform:scale(0.95)}
+.exp-btn .icon{font-size:32px}
+.exp-btn.e1{background:linear-gradient(135deg,#E53935,#EF5350)}
+.exp-btn.e2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.exp-btn.e3{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+.back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:12px}
+.back-btn:hover{border-color:#aaa;color:#fff}
+
+.lab{flex:1;display:flex;flex-direction:column}
+.canvas-wrap{background:#0a1628;border-radius:12px;overflow:hidden;margin-bottom:10px;position:relative}
+.canvas-wrap canvas{width:100%;display:block}
+.controls{background:rgba(0,0,0,0.4);border-radius:12px;padding:14px;margin-bottom:10px}
+.ctrl-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.ctrl-row label{font-size:14px;font-weight:700;color:#aaa;min-width:70px}
+.ctrl-row input[type=range]{flex:1;accent-color:#FFD700;height:6px}
+.ctrl-row .val{font-size:14px;color:#FFD700;min-width:50px;text-align:right;font-weight:700}
+.action-row{display:flex;gap:8px;justify-content:center;margin:8px 0;flex-wrap:wrap}
+.act-btn{padding:10px 24px;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;color:#fff;transition:transform 0.15s}
+.act-btn:active{transform:scale(0.95)}
+.act-btn.start{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.act-btn.reset{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.act-btn.back{background:rgba(255,255,255,0.1);border:2px solid #555;color:#aaa}
+.act-btn.challenge{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+
+.explain{background:rgba(255,215,0,0.06);border:1px solid #333;border-radius:12px;padding:14px;margin-top:auto}
+.explain h3{font-size:16px;color:#FFD700;margin-bottom:6px}
+.explain p{font-size:14px;color:#bbb;line-height:1.6}
+.explain .formula{color:#7FDBFF;font-weight:700;font-family:monospace;font-size:15px;margin:6px 0;display:block}
+
+.challenge-box{background:rgba(156,39,176,0.15);border:2px solid #9C27B0;border-radius:12px;padding:14px;margin-bottom:10px;text-align:center}
+.challenge-box h3{color:#CE93D8;font-size:16px;margin-bottom:6px}
+.challenge-box p{font-size:14px;color:#ccc}
+.challenge-box .target{font-size:20px;font-weight:700;color:#FFD700;margin:6px 0}
+.challenge-box .result-msg{font-size:18px;font-weight:700;margin-top:8px}
+.challenge-box .result-msg.ok{color:#4CAF50}
+.challenge-box .result-msg.fail{color:#E53935}
+
+.best-record{font-size:13px;color:#888;text-align:center;margin-top:4px}
+.challenge-star{font-size:24px;text-align:center;margin:4px 0}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+let screen='menu',currentExp=0,animId=null,challengeMode=false;
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'science-lab'},'*');}catch(e){}}
+
+function getChallengeRecord(exp){
+  try{return JSON.parse(localStorage.getItem('science_challenge_'+exp))||{completed:false,best:null};}catch(e){return{completed:false,best:null};}
+}
+function saveChallengeRecord(exp,val){
+  const prev=getChallengeRecord(exp);
+  localStorage.setItem('science_challenge_'+exp,JSON.stringify({completed:true,best:prev.best===null?val:Math.min(prev.best,val)}));
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  if(screen==='menu') renderMenu(app);
+  else if(screen==='exp1') renderExp1(app);
+  else if(screen==='exp2') renderExp2(app);
+  else if(screen==='exp3') renderExp3(app);
+}
+
+function renderMenu(app){
+  const c1=getChallengeRecord(1),c2=getChallengeRecord(2),c3=getChallengeRecord(3);
+  app.innerHTML=`
+    <h1>🔬 과학 실험 시뮬레이터</h1>
+    <div class="menu">
+      <p>슬라이더를 조절하고 실험 결과를 관찰하세요!<br>각 실험에 도전 과제가 있습니다!</p>
+      <button class="exp-btn e1" onclick="startExp(1,false)"><span class="icon">🍎</span><div>실험1: 자유낙하<br><small style="font-weight:400;color:rgba(255,255,255,0.7)">중력과 질량의 관계</small>${c1.completed?'<br><small style="color:#4CAF50">✅ 도전 완료</small>':''}</div></button>
+      <button class="exp-btn e2" onclick="startExp(2,false)"><span class="icon">🔔</span><div>실험2: 진자 운동<br><small style="font-weight:400;color:rgba(255,255,255,0.7)">길이와 주기의 관계</small>${c2.completed?'<br><small style="color:#4CAF50">✅ 도전 완료</small>':''}</div></button>
+      <button class="exp-btn e3" onclick="startExp(3,false)"><span class="icon">🎨</span><div>실험3: 색 혼합<br><small style="font-weight:400;color:rgba(255,255,255,0.7)">RGB 빛의 삼원색</small>${c3.completed?'<br><small style="color:#4CAF50">✅ 도전 완료</small>':''}</div></button>
+    </div>`;
+}
+
+function startExp(n,chal){currentExp=n;challengeMode=chal;screen='exp'+n;render();sendXP(5);}
+function goMenu(){screen='menu';render();}
+
+// ========== Experiment 1: Free Fall ==========
+let ff={mass:1,gravity:9.8,y:0,vy:0,running:false,ground:false,t:0};
+// Challenge: land exactly at 2.0 seconds
+const FF_CHALLENGE_TARGET=2.0;
+const FF_CHALLENGE_TOLERANCE=0.15;
+
+function renderExp1(app){
+  ff={mass:1,gravity:9.8,y:30,vy:0,running:false,ground:false,t:0};
+  const cr=getChallengeRecord(1);
+  app.innerHTML=`
+    <h1 style="font-size:20px">🍎 실험1: 자유낙하</h1>
+    ${challengeMode?`
+    <div class="challenge-box">
+      <h3>🏆 도전 과제</h3>
+      <p>중력(g)을 조절해서 정확히 <b>2초</b>에 땅에 닿게 하세요!</p>
+      <div class="target">목표: ${FF_CHALLENGE_TARGET}초 (±${FF_CHALLENGE_TOLERANCE}초)</div>
+      <div id="challengeResult"></div>
+    </div>`:`
+    <div style="text-align:center;margin-bottom:8px">
+      <button class="act-btn challenge" onclick="startExp(1,true)">🏆 도전 과제 모드</button>
+      ${cr.completed?'<div class="challenge-star">✅ 최고: '+cr.best?.toFixed(2)+'초</div>':''}
+    </div>`}
+    <div class="canvas-wrap"><canvas id="c1" width="480" height="320"></canvas></div>
+    <div class="controls">
+      <div class="ctrl-row"><label>중력 (g)</label><input type="range" id="gSlider" min="1" max="30" value="10" step="0.5" oninput="ffUpdate()"><span class="val" id="gVal">9.8 m/s²</span></div>
+      <div class="ctrl-row"><label>질량 (m)</label><input type="range" id="mSlider" min="1" max="20" value="5" step="1" oninput="ffUpdate()"><span class="val" id="mVal">5 kg</span></div>
+      <div class="action-row">
+        <button class="act-btn start" onclick="ffStart()">▶ 떨어뜨리기</button>
+        <button class="act-btn reset" onclick="ffReset()">🔄 초기화</button>
+        <button class="act-btn back" onclick="goMenu()">← 메뉴</button>
+      </div>
+    </div>
+    <div class="explain">
+      <h3>📖 자유낙하 원리</h3>
+      <p>물체가 중력만 받아 떨어지는 운동입니다. 질량과 관계없이 모든 물체는 같은 속도로 떨어집니다! (공기 저항 무시)</p>
+      <span class="formula">v = g × t, h = ½ × g × t²</span>
+      <p>갈릴레오가 피사의 사탑에서 실험했다는 이야기가 유명하죠. 중력(g)을 바꿔서 달(1.6)이나 목성(24.8)에서 떨어뜨려 보세요!</p>
+    </div>`;
+  ffUpdate();drawFF();
+}
+
+function ffUpdate(){
+  const g=parseFloat(document.getElementById('gSlider').value);
+  const m=parseInt(document.getElementById('mSlider').value);
+  ff.gravity=g;ff.mass=m;
+  document.getElementById('gVal').textContent=g+' m/s²';
+  document.getElementById('mVal').textContent=m+' kg';
+  if(!ff.running) drawFF();
+}
+
+function ffReset(){
+  ff.y=30;ff.vy=0;ff.running=false;ff.ground=false;ff.t=0;
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  const cr=document.getElementById('challengeResult');
+  if(cr) cr.innerHTML='';
+  drawFF();
+}
+
+function ffStart(){
+  if(ff.running) return;
+  ff.y=30;ff.vy=0;ff.t=0;ff.running=true;ff.ground=false;
+  ffLoop();
+}
+
+function ffLoop(){
+  if(!ff.running) return;
+  const dt=0.03;
+  ff.t+=dt;
+  ff.vy+=ff.gravity*dt*8;
+  ff.y+=ff.vy*dt;
+  const canvas=document.getElementById('c1');
+  if(!canvas) return;
+  const groundY=canvas.height-40;
+  if(ff.y>=groundY-ff.mass*1.5){
+    ff.y=groundY-ff.mass*1.5;
+    ff.running=false;ff.ground=true;
+    sendXP(5);
+    if(challengeMode) checkFFChallenge();
+  }
+  drawFF();
+  if(ff.running) animId=requestAnimationFrame(ffLoop);
+}
+
+function checkFFChallenge(){
+  const cr=document.getElementById('challengeResult');
+  if(!cr)return;
+  const diff=Math.abs(ff.t-FF_CHALLENGE_TARGET);
+  if(diff<=FF_CHALLENGE_TOLERANCE){
+    cr.innerHTML=`<div class="result-msg ok">🎉 성공! ${ff.t.toFixed(2)}초 (목표 대비 ±${diff.toFixed(2)}초)</div>`;
+    saveChallengeRecord(1,diff);
+    sendXP(20);
+  }else{
+    cr.innerHTML=`<div class="result-msg fail">❌ ${ff.t.toFixed(2)}초 - 목표와 ${diff.toFixed(2)}초 차이. 다시 시도!</div>`;
+  }
+}
+
+function drawFF(){
+  const canvas=document.getElementById('c1');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'#0a1628');grad.addColorStop(1,'#16213e');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#2d5016';ctx.fillRect(0,H-40,W,40);
+  ctx.fillStyle='#3a6b1e';ctx.fillRect(0,H-40,W,3);
+  const r=8+ff.mass*1.2;
+  ctx.beginPath();ctx.arc(W/2,ff.y,r,0,Math.PI*2);
+  ctx.fillStyle='#E53935';ctx.fill();
+  ctx.strokeStyle='#B71C1C';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(W/2-r*0.3,ff.y-r*0.3,r*0.25,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fill();
+  ctx.fillStyle='#FFD700';ctx.font='bold 14px Segoe UI';ctx.textAlign='left';
+  ctx.fillText(`시간: ${ff.t.toFixed(2)}s`,12,24);
+  ctx.fillText(`속도: ${ff.vy.toFixed(1)} px/s`,12,44);
+  ctx.fillText(`g = ${ff.gravity} m/s²`,12,64);
+  ctx.fillText(`질량 = ${ff.mass} kg`,12,84);
+  if(challengeMode){
+    ctx.fillStyle='#CE93D8';ctx.font='bold 13px Segoe UI';
+    ctx.fillText(`🏆 목표: ${FF_CHALLENGE_TARGET}초`,W-140,24);
+  }
+  if(ff.ground){
+    ctx.fillStyle='#4CAF50';ctx.font='bold 20px Segoe UI';ctx.textAlign='center';
+    ctx.fillText('💥 착지! ('+ff.t.toFixed(2)+'초)',W/2,H/2);
+  }
+}
+
+// ========== Experiment 2: Pendulum ==========
+let pd={length:200,angle:45,angleRad:0,omega:0,running:false,t:0,trail:[],periods:[],lastCross:0,crossCount:0};
+// Challenge: make period exactly 1.0 second
+const PD_CHALLENGE_TARGET=1.0;
+const PD_CHALLENGE_TOLERANCE=0.08;
+
+function renderExp2(app){
+  pd={length:200,angle:45,angleRad:Math.PI/4,omega:0,running:false,t:0,trail:[],periods:[],lastCross:0,crossCount:0};
+  const cr=getChallengeRecord(2);
+  app.innerHTML=`
+    <h1 style="font-size:20px">🔔 실험2: 진자 운동</h1>
+    ${challengeMode?`
+    <div class="challenge-box">
+      <h3>🏆 도전 과제</h3>
+      <p>줄 길이를 조절해서 주기를 정확히 <b>1.00초</b>로 맞추세요!</p>
+      <div class="target">목표: ${PD_CHALLENGE_TARGET}초 (±${PD_CHALLENGE_TOLERANCE}초)</div>
+      <div id="challengeResult"></div>
+    </div>`:`
+    <div style="text-align:center;margin-bottom:8px">
+      <button class="act-btn challenge" onclick="startExp(2,true)">🏆 도전 과제 모드</button>
+      ${cr.completed?'<div class="challenge-star">✅ 도전 완료</div>':''}
+    </div>`}
+    <div class="canvas-wrap"><canvas id="c2" width="480" height="360"></canvas></div>
+    <div class="controls">
+      <div class="ctrl-row"><label>줄 길이</label><input type="range" id="lSlider" min="60" max="280" value="200" step="1" oninput="pdUpdate()"><span class="val" id="lVal">200</span></div>
+      <div class="ctrl-row"><label>초기 각도</label><input type="range" id="aSlider" min="5" max="80" value="45" step="1" oninput="pdUpdate()"><span class="val" id="aVal">45°</span></div>
+      <div class="action-row">
+        <button class="act-btn start" onclick="pdStart()">▶ 시작</button>
+        <button class="act-btn reset" onclick="pdReset()">🔄 초기화</button>
+        <button class="act-btn back" onclick="goMenu()">← 메뉴</button>
+      </div>
+    </div>
+    <div class="explain">
+      <h3>📖 진자 운동 원리</h3>
+      <p>진자의 주기는 줄의 길이에만 의존하고, 질량이나 초기 각도(작은 각도)와 무관합니다!</p>
+      <span class="formula">T = 2π × √(L/g)</span>
+      <p>줄 길이가 길수록 주기가 길어집니다. 갈릴레오가 성당의 샹들리에를 보고 발견했다고 해요.</p>
+    </div>`;
+  pdUpdate();drawPD();
+}
+
+function pdUpdate(){
+  pd.length=parseInt(document.getElementById('lSlider').value);
+  pd.angle=parseInt(document.getElementById('aSlider').value);
+  document.getElementById('lVal').textContent=pd.length;
+  document.getElementById('aVal').textContent=pd.angle+'°';
+  if(!pd.running){pd.angleRad=pd.angle*Math.PI/180;pd.omega=0;pd.trail=[];pd.periods=[];pd.lastCross=0;pd.crossCount=0;drawPD();}
+}
+
+function pdReset(){
+  pd.running=false;pd.t=0;pd.omega=0;pd.trail=[];pd.periods=[];pd.lastCross=0;pd.crossCount=0;
+  pd.angleRad=pd.angle*Math.PI/180;
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  const cr=document.getElementById('challengeResult');
+  if(cr) cr.innerHTML='';
+  drawPD();
+}
+
+function pdStart(){
+  if(pd.running) return;
+  pd.running=true;pd.t=0;pd.trail=[];pd.periods=[];pd.lastCross=0;pd.crossCount=0;
+  pd.angleRad=pd.angle*Math.PI/180;pd.omega=0;
+  pdLoop();
+}
+
+let prevAngle=0;
+function pdLoop(){
+  if(!pd.running) return;
+  const dt=0.03;
+  const g=9.8;
+  const L=pd.length/100;
+  const alpha=-(g/L)*Math.sin(pd.angleRad);
+  pd.omega+=alpha*dt;
+  pd.omega*=0.999;
+  prevAngle=pd.angleRad;
+  pd.angleRad+=pd.omega*dt;
+  pd.t+=dt;
+
+  // Detect zero crossing for period measurement
+  if(prevAngle>0&&pd.angleRad<=0||prevAngle<0&&pd.angleRad>=0){
+    pd.crossCount++;
+    if(pd.crossCount%2===0&&pd.lastCross>0){
+      const period=pd.t-pd.lastCross;
+      pd.periods.push(period);
+      if(challengeMode&&pd.periods.length>=2) checkPDChallenge();
+    }
+    if(pd.crossCount%2===0) pd.lastCross=pd.t;
+  }
+
+  drawPD();
+  animId=requestAnimationFrame(pdLoop);
+}
+
+function checkPDChallenge(){
+  const cr=document.getElementById('challengeResult');
+  if(!cr||pd.periods.length<2)return;
+  const avgPeriod=pd.periods.slice(-3).reduce((a,b)=>a+b,0)/Math.min(pd.periods.length,3);
+  const diff=Math.abs(avgPeriod-PD_CHALLENGE_TARGET);
+  if(diff<=PD_CHALLENGE_TOLERANCE){
+    cr.innerHTML=`<div class="result-msg ok">🎉 성공! 주기: ${avgPeriod.toFixed(3)}초</div>`;
+    saveChallengeRecord(2,diff);
+    sendXP(20);
+  }else{
+    cr.innerHTML=`<div class="result-msg fail">현재 주기: ${avgPeriod.toFixed(3)}초 (목표와 ${diff.toFixed(3)}초 차이)</div>`;
+  }
+}
+
+function drawPD(){
+  const canvas=document.getElementById('c2');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0a1628';ctx.fillRect(0,0,W,H);
+  const pivotX=W/2,pivotY=30;
+  const scale=pd.length/280*250;
+  const bobX=pivotX+Math.sin(pd.angleRad)*scale;
+  const bobY=pivotY+Math.cos(pd.angleRad)*scale;
+  pd.trail.push({x:bobX,y:bobY});
+  if(pd.trail.length>120) pd.trail.shift();
+  if(pd.trail.length>1){
+    ctx.beginPath();ctx.moveTo(pd.trail[0].x,pd.trail[0].y);
+    for(let i=1;i<pd.trail.length;i++) ctx.lineTo(pd.trail[i].x,pd.trail[i].y);
+    ctx.strokeStyle='rgba(33,150,243,0.3)';ctx.lineWidth=2;ctx.stroke();
+  }
+  ctx.fillStyle='#888';ctx.fillRect(pivotX-30,pivotY-6,60,6);
+  ctx.beginPath();ctx.arc(pivotX,pivotY,5,0,Math.PI*2);
+  ctx.fillStyle='#aaa';ctx.fill();
+  ctx.beginPath();ctx.moveTo(pivotX,pivotY);ctx.lineTo(bobX,bobY);
+  ctx.strokeStyle='#ccc';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(bobX,bobY,16,0,Math.PI*2);
+  ctx.fillStyle='#2196F3';ctx.fill();
+  ctx.strokeStyle='#1565C0';ctx.lineWidth=2;ctx.stroke();
+  ctx.beginPath();ctx.arc(bobX-4,bobY-4,4,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fill();
+  const T=2*Math.PI*Math.sqrt((pd.length/100)/9.8);
+  ctx.fillStyle='#FFD700';ctx.font='bold 14px Segoe UI';ctx.textAlign='left';
+  ctx.fillText(`줄 길이: ${pd.length}`,12,24);
+  ctx.fillText(`이론 주기: ${T.toFixed(2)}s`,12,44);
+  ctx.fillText(`시간: ${pd.t.toFixed(1)}s`,12,64);
+  ctx.fillText(`각도: ${(pd.angleRad*180/Math.PI).toFixed(1)}°`,12,84);
+  if(pd.periods.length>0){
+    const lastP=pd.periods[pd.periods.length-1];
+    ctx.fillText(`측정 주기: ${lastP.toFixed(3)}s`,12,104);
+  }
+  if(challengeMode){
+    ctx.fillStyle='#CE93D8';ctx.font='bold 13px Segoe UI';
+    ctx.fillText(`🏆 목표 주기: ${PD_CHALLENGE_TARGET}초`,W-170,24);
+  }
+}
+
+// ========== Experiment 3: Color Mixing ==========
+let cm={r:255,g:0,b:0};
+// Challenge: match a randomly generated target color
+let cmTarget={r:0,g:0,b:0};
+function genColorTarget(){
+  cmTarget={r:Math.floor(Math.random()*256),g:Math.floor(Math.random()*256),b:Math.floor(Math.random()*256)};
+}
+
+function renderExp3(app){
+  cm={r:255,g:0,b:0};
+  if(challengeMode) genColorTarget();
+  const cr=getChallengeRecord(3);
+  app.innerHTML=`
+    <h1 style="font-size:20px">🎨 실험3: 색 혼합 (빛의 삼원색)</h1>
+    ${challengeMode?`
+    <div class="challenge-box">
+      <h3>🏆 도전 과제</h3>
+      <p>슬라이더를 조절해서 아래 색을 정확히 만드세요!</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:8px 0">
+        <div>
+          <div style="width:60px;height:60px;border-radius:12px;background:rgb(${cmTarget.r},${cmTarget.g},${cmTarget.b});border:2px solid #555;margin:0 auto"></div>
+          <div style="font-size:12px;color:#aaa;margin-top:4px">목표</div>
+        </div>
+        <div style="font-size:24px;color:#555">→</div>
+        <div>
+          <div id="myColorBox" style="width:60px;height:60px;border-radius:12px;background:rgb(${cm.r},${cm.g},${cm.b});border:2px solid #555;margin:0 auto"></div>
+          <div style="font-size:12px;color:#aaa;margin-top:4px">내 색</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:#888">목표: RGB(${cmTarget.r}, ${cmTarget.g}, ${cmTarget.b})</div>
+      <div id="challengeResult"></div>
+      <button class="act-btn challenge" onclick="checkCMChallenge()" style="margin-top:8px">✅ 제출</button>
+      <button class="act-btn reset" onclick="genColorTarget();renderExp3(document.getElementById('app'))" style="margin-top:4px">🔄 새 색상</button>
+    </div>`:`
+    <div style="text-align:center;margin-bottom:8px">
+      <button class="act-btn challenge" onclick="startExp(3,true)">🏆 도전 과제 모드</button>
+      ${cr.completed?'<div class="challenge-star">✅ 도전 완료</div>':''}
+    </div>`}
+    <div class="canvas-wrap"><canvas id="c3" width="480" height="300"></canvas></div>
+    <div class="controls">
+      <div class="ctrl-row"><label style="color:#E53935">빨강 (R)</label><input type="range" id="rSlider" min="0" max="255" value="${cm.r}" style="accent-color:#E53935" oninput="cmUpdate()"><span class="val" id="rVal" style="color:#E53935">${cm.r}</span></div>
+      <div class="ctrl-row"><label style="color:#4CAF50">초록 (G)</label><input type="range" id="gSlider2" min="0" max="255" value="${cm.g}" style="accent-color:#4CAF50" oninput="cmUpdate()"><span class="val" id="gVal2" style="color:#4CAF50">${cm.g}</span></div>
+      <div class="ctrl-row"><label style="color:#2196F3">파랑 (B)</label><input type="range" id="bSlider" min="0" max="255" value="${cm.b}" style="accent-color:#2196F3" oninput="cmUpdate()"><span class="val" id="bVal" style="color:#2196F3">${cm.b}</span></div>
+      <div class="action-row">
+        <button class="act-btn start" onclick="cmPreset('red')" style="background:#E53935">빨강</button>
+        <button class="act-btn start" onclick="cmPreset('yellow')" style="background:#F9A825;color:#333">노랑</button>
+        <button class="act-btn start" onclick="cmPreset('cyan')" style="background:#00BCD4">시안</button>
+        <button class="act-btn start" onclick="cmPreset('purple')" style="background:#9C27B0">보라</button>
+        <button class="act-btn start" onclick="cmPreset('white')" style="background:#eee;color:#333">흰색</button>
+        <button class="act-btn back" onclick="goMenu()">← 메뉴</button>
+      </div>
+    </div>
+    <div class="explain">
+      <h3>📖 빛의 삼원색 (가산혼합)</h3>
+      <p>빛은 빨강(R), 초록(G), 파랑(B) 세 가지 기본 색을 섞어 모든 색을 만듭니다. 색을 더할수록 밝아져요!</p>
+      <span class="formula">R + G = 노랑 | R + B = 보라(마젠타) | G + B = 시안 | R + G + B = 흰색</span>
+      <p>TV, 스마트폰, 컴퓨터 모니터가 모두 이 원리를 사용합니다. 물감의 혼합(감산혼합)과는 반대예요!</p>
+    </div>`;
+  cmUpdate();
+}
+
+function cmUpdate(){
+  cm.r=parseInt(document.getElementById('rSlider').value);
+  cm.g=parseInt(document.getElementById('gSlider2').value);
+  cm.b=parseInt(document.getElementById('bSlider').value);
+  document.getElementById('rVal').textContent=cm.r;
+  document.getElementById('gVal2').textContent=cm.g;
+  document.getElementById('bVal').textContent=cm.b;
+  const box=document.getElementById('myColorBox');
+  if(box) box.style.background=`rgb(${cm.r},${cm.g},${cm.b})`;
+  drawCM();
+}
+
+function cmPreset(c){
+  const presets={red:[255,0,0],yellow:[255,255,0],cyan:[0,255,255],purple:[255,0,255],white:[255,255,255]};
+  const p=presets[c];
+  document.getElementById('rSlider').value=p[0];
+  document.getElementById('gSlider2').value=p[1];
+  document.getElementById('bSlider').value=p[2];
+  cmUpdate();
+  sendXP(2);
+}
+
+function checkCMChallenge(){
+  const cr=document.getElementById('challengeResult');
+  if(!cr)return;
+  const dist=Math.sqrt(Math.pow(cm.r-cmTarget.r,2)+Math.pow(cm.g-cmTarget.g,2)+Math.pow(cm.b-cmTarget.b,2));
+  const tolerance=30;
+  if(dist<=tolerance){
+    cr.innerHTML=`<div class="result-msg ok">🎉 완벽! 색상 차이: ${dist.toFixed(1)} (허용: ${tolerance})</div>`;
+    saveChallengeRecord(3,dist);
+    sendXP(20);
+  }else{
+    cr.innerHTML=`<div class="result-msg fail">❌ 색상 차이: ${dist.toFixed(1)} (허용: ${tolerance} 이하). 더 조절해보세요!</div>`;
+  }
+}
+
+function drawCM(){
+  const canvas=document.getElementById('c3');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  const cx=W/2,cy=H/2-10;
+  const radius=70;
+  ctx.globalCompositeOperation='lighter';
+  ctx.beginPath();ctx.arc(cx-35,cy-20,radius,0,Math.PI*2);
+  ctx.fillStyle=`rgb(${cm.r},0,0)`;ctx.fill();
+  ctx.beginPath();ctx.arc(cx+35,cy-20,radius,0,Math.PI*2);
+  ctx.fillStyle=`rgb(0,${cm.g},0)`;ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy+30,radius,0,Math.PI*2);
+  ctx.fillStyle=`rgb(0,0,${cm.b})`;ctx.fill();
+  ctx.globalCompositeOperation='source-over';
+  const col=`rgb(${cm.r},${cm.g},${cm.b})`;
+  ctx.fillStyle=col;
+  ctx.beginPath();ctx.roundRect(W-90,10,76,76,12);ctx.fill();
+  ctx.strokeStyle='#555';ctx.lineWidth=2;ctx.stroke();
+  const name=getColorName(cm.r,cm.g,cm.b);
+  ctx.fillStyle='#fff';ctx.font='bold 14px Segoe UI';ctx.textAlign='center';
+  ctx.fillText(name,W-52,106);
+  const hex='#'+[cm.r,cm.g,cm.b].map(v=>v.toString(16).padStart(2,'0')).join('');
+  ctx.fillStyle='#FFD700';ctx.font='bold 16px monospace';ctx.textAlign='left';
+  ctx.fillText(`HEX: ${hex.toUpperCase()}`,12,24);
+  ctx.fillText(`RGB(${cm.r}, ${cm.g}, ${cm.b})`,12,44);
+  ctx.font='bold 13px Segoe UI';ctx.textAlign='center';
+  ctx.fillStyle='#E53935';ctx.fillText(`R:${cm.r}`,cx-55,cy-75);
+  ctx.fillStyle='#4CAF50';ctx.fillText(`G:${cm.g}`,cx+55,cy-75);
+  ctx.fillStyle='#2196F3';ctx.fillText(`B:${cm.b}`,cx,cy+110);
+}
+
+function getColorName(r,g,b){
+  if(r>200&&g<50&&b<50) return '빨강';
+  if(r<50&&g>200&&b<50) return '초록';
+  if(r<50&&g<50&&b>200) return '파랑';
+  if(r>200&&g>200&&b<50) return '노랑';
+  if(r>200&&g<50&&b>200) return '마젠타(보라)';
+  if(r<50&&g>200&&b>200) return '시안';
+  if(r>200&&g>200&&b>200) return '흰색';
+  if(r<50&&g<50&&b<50) return '검정';
+  if(r>200&&g>100&&b<50) return '주황';
+  if(r>150&&g>100&&b>100) return '분홍/살구';
+  return '혼합색';
+}
+
+if(!CanvasRenderingContext2D.prototype.roundRect){
+  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+    this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);
+    this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath();
+  };
+}
+
+window.startExp=startExp;window.goMenu=goMenu;
+window.ffUpdate=ffUpdate;window.ffStart=ffStart;window.ffReset=ffReset;
+window.pdUpdate=pdUpdate;window.pdStart=pdStart;window.pdReset=pdReset;
+window.cmUpdate=cmUpdate;window.cmPreset=cmPreset;window.checkCMChallenge=checkCMChallenge;
+window.genColorTarget=genColorTarget;
+render();
+</script>
+</body></html>

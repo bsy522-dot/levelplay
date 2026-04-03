@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>한글 학습 게임</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#FFF8E7;font-family:'Segoe UI',sans-serif;color:#333}
+.wrap{max-width:480px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:28px;margin:8px 0;color:#FF6B9D}
+.score-bar{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:16px;padding:8px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:18px;font-weight:700}
+.score-bar .pts{color:#FF6B9D}
+.score-bar .streak{color:#FFB347}
+.mode-select{display:flex;flex-direction:column;gap:12px;margin:auto 0}
+.mode-btn{background:linear-gradient(135deg,#FF9A9E,#FAD0C4);border:none;border-radius:20px;padding:20px;font-size:22px;font-weight:700;color:#fff;cursor:pointer;text-align:left;box-shadow:0 4px 12px rgba(255,154,158,0.3);transition:transform 0.15s}
+.mode-btn:active{transform:scale(0.96)}
+.mode-btn:nth-child(2){background:linear-gradient(135deg,#A8EDEA,#FED6E3)}
+.mode-btn:nth-child(3){background:linear-gradient(135deg,#FFECD2,#FCB69F)}
+.mode-btn small{display:block;font-size:14px;font-weight:400;margin-top:4px;opacity:0.9}
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.big-char{font-size:120px;text-align:center;margin:16px 0;line-height:1.2;color:#5B2C6F;text-shadow:2px 2px 0 rgba(0,0,0,0.05)}
+.hint-text{font-size:20px;color:#888;margin-bottom:16px;text-align:center}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px}
+.opt-btn{min-height:64px;font-size:24px;font-weight:700;border:3px solid #E8E8E8;border-radius:16px;background:#fff;cursor:pointer;transition:all 0.15s;color:#333;padding:8px}
+.opt-btn:active{transform:scale(0.95)}
+.opt-btn.correct{background:#A8F0A0;border-color:#4CAF50;color:#2E7D32}
+.opt-btn.wrong{background:#FFCDD2;border-color:#E53935;color:#C62828}
+.flash-card{background:#fff;border-radius:24px;padding:32px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.1);width:100%;max-width:360px;cursor:pointer;transition:transform 0.3s;position:relative}
+.flash-card:active{transform:scale(0.97)}
+.flash-emoji{font-size:80px;line-height:1.2}
+.flash-word{font-size:48px;font-weight:700;margin:12px 0;color:#5B2C6F}
+.flash-cat{font-size:14px;color:#999;margin-bottom:4px}
+.flash-counter{font-size:14px;color:#aaa;margin-top:12px}
+.nav-row{display:flex;gap:12px;margin-top:16px;width:100%;max-width:360px}
+.nav-btn{flex:1;min-height:52px;font-size:20px;font-weight:700;border:none;border-radius:14px;cursor:pointer;color:#fff}
+.nav-btn.prev{background:#B0BEC5}
+.nav-btn.next{background:#FF6B9D}
+.back-btn{background:none;border:none;font-size:18px;color:#999;cursor:pointer;margin-bottom:8px;padding:8px 0}
+.back-btn:hover{color:#333}
+.result{text-align:center;margin:auto 0}
+.result h2{font-size:32px;color:#FF6B9D;margin-bottom:12px}
+.result p{font-size:20px;margin-bottom:8px}
+.result .big-emoji{font-size:80px;margin-bottom:12px}
+.retry-btn{background:linear-gradient(135deg,#FF9A9E,#FAD0C4);border:none;border-radius:16px;padding:16px 40px;font-size:22px;font-weight:700;color:#fff;cursor:pointer;margin-top:12px}
+.next-btn{background:linear-gradient(135deg,#4CAF50,#81C784);border:none;border-radius:16px;padding:16px 40px;font-size:22px;font-weight:700;color:#fff;cursor:pointer;margin-top:8px}
+.diff-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.diff-btn{padding:8px 16px;font-size:14px;font-weight:700;border:2px solid #ddd;border-radius:12px;background:#fff;cursor:pointer;transition:all 0.15s}
+.diff-btn.active{background:#FF6B9D;color:#fff;border-color:#FF6B9D}
+.diff-btn.lock{opacity:0.5;cursor:default}
+.diff-btn .best-star{font-size:11px;display:block;color:#FFB347}
+.stars{font-size:36px;margin:8px 0}
+.best-record{font-size:14px;color:#999;margin-top:4px}
+.diff-badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:700;color:#fff;margin-bottom:8px}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+const CONSONANTS = [
+  {char:'ㄱ',name:'기역',sound:'g/k'},{char:'ㄴ',name:'니은',sound:'n'},
+  {char:'ㄷ',name:'디귿',sound:'d/t'},{char:'ㄹ',name:'리을',sound:'r/l'},
+  {char:'ㅁ',name:'미음',sound:'m'},{char:'ㅂ',name:'비읍',sound:'b/p'},
+  {char:'ㅅ',name:'시옷',sound:'s'},{char:'ㅇ',name:'이응',sound:'ng'},
+  {char:'ㅈ',name:'지읒',sound:'j'},{char:'ㅊ',name:'치읓',sound:'ch'},
+  {char:'ㅋ',name:'키읔',sound:'k'},{char:'ㅌ',name:'티읕',sound:'t'},
+  {char:'ㅍ',name:'피읖',sound:'p'},{char:'ㅎ',name:'히읗',sound:'h'}
+];
+const VOWELS = [
+  {char:'ㅏ',name:'아',sound:'a'},{char:'ㅑ',name:'야',sound:'ya'},
+  {char:'ㅓ',name:'어',sound:'eo'},{char:'ㅕ',name:'여',sound:'yeo'},
+  {char:'ㅗ',name:'오',sound:'o'},{char:'ㅛ',name:'요',sound:'yo'},
+  {char:'ㅜ',name:'우',sound:'u'},{char:'ㅠ',name:'유',sound:'yu'},
+  {char:'ㅡ',name:'으',sound:'eu'},{char:'ㅣ',name:'이',sound:'i'}
+];
+const WORDS = [
+  {emoji:'🍎',word:'사과',initial:'ㅅ',cat:'과일',batchim:''},
+  {emoji:'🍌',word:'바나나',initial:'ㅂ',cat:'과일',batchim:''},
+  {emoji:'🍇',word:'포도',initial:'ㅍ',cat:'과일',batchim:''},
+  {emoji:'🍊',word:'귤',initial:'ㄱ',cat:'과일',batchim:'ㄹ'},
+  {emoji:'🍑',word:'복숭아',initial:'ㅂ',cat:'과일',batchim:''},
+  {emoji:'🍓',word:'딸기',initial:'ㄷ',cat:'과일',batchim:''},
+  {emoji:'🍉',word:'수박',initial:'ㅅ',cat:'과일',batchim:'ㄱ'},
+  {emoji:'🥝',word:'키위',initial:'ㅋ',cat:'과일',batchim:''},
+  {emoji:'🍋',word:'레몬',initial:'ㄹ',cat:'과일',batchim:'ㄴ'},
+  {emoji:'🫐',word:'블루베리',initial:'ㅂ',cat:'과일',batchim:''},
+  {emoji:'🐶',word:'강아지',initial:'ㄱ',cat:'동물',batchim:''},
+  {emoji:'🐱',word:'고양이',initial:'ㄱ',cat:'동물',batchim:''},
+  {emoji:'🐰',word:'토끼',initial:'ㅌ',cat:'동물',batchim:''},
+  {emoji:'🐻',word:'곰',initial:'ㄱ',cat:'동물',batchim:'ㅁ'},
+  {emoji:'🦁',word:'사자',initial:'ㅅ',cat:'동물',batchim:''},
+  {emoji:'🐘',word:'코끼리',initial:'ㅋ',cat:'동물',batchim:''},
+  {emoji:'🐧',word:'펭귄',initial:'ㅍ',cat:'동물',batchim:'ㄴ'},
+  {emoji:'🐸',word:'개구리',initial:'ㄱ',cat:'동물',batchim:''},
+  {emoji:'🦋',word:'나비',initial:'ㄴ',cat:'동물',batchim:''},
+  {emoji:'🐢',word:'거북이',initial:'ㄱ',cat:'동물',batchim:''},
+  {emoji:'🔴',word:'빨강',initial:'ㅂ',cat:'색깔',batchim:'ㅇ'},
+  {emoji:'🟡',word:'노랑',initial:'ㄴ',cat:'색깔',batchim:'ㅇ'},
+  {emoji:'🔵',word:'파랑',initial:'ㅍ',cat:'색깔',batchim:'ㅇ'},
+  {emoji:'🟢',word:'초록',initial:'ㅊ',cat:'색깔',batchim:'ㄱ'},
+  {emoji:'⚫',word:'검정',initial:'ㄱ',cat:'색깔',batchim:'ㅇ'},
+  {emoji:'⚪',word:'하양',initial:'ㅎ',cat:'색깔',batchim:'ㅇ'},
+  {emoji:'👨',word:'아빠',initial:'ㅇ',cat:'가족',batchim:''},
+  {emoji:'👩',word:'엄마',initial:'ㅇ',cat:'가족',batchim:''},
+  {emoji:'👶',word:'아기',initial:'ㅇ',cat:'가족',batchim:''},
+  {emoji:'👧',word:'누나',initial:'ㄴ',cat:'가족',batchim:''},
+  {emoji:'👦',word:'형',initial:'ㅎ',cat:'가족',batchim:'ㅇ'},
+  {emoji:'👴',word:'할아버지',initial:'ㅎ',cat:'가족',batchim:''},
+  {emoji:'👵',word:'할머니',initial:'ㅎ',cat:'가족',batchim:''},
+  {emoji:'🚗',word:'자동차',initial:'ㅈ',cat:'탈것',batchim:''},
+  {emoji:'🚌',word:'버스',initial:'ㅂ',cat:'탈것',batchim:''},
+  {emoji:'🚂',word:'기차',initial:'ㄱ',cat:'탈것',batchim:''},
+  {emoji:'✈️',word:'비행기',initial:'ㅂ',cat:'탈것',batchim:''},
+  {emoji:'🚢',word:'배',initial:'ㅂ',cat:'탈것',batchim:''},
+  {emoji:'🚲',word:'자전거',initial:'ㅈ',cat:'탈것',batchim:''},
+  {emoji:'🚁',word:'헬리콥터',initial:'ㅎ',cat:'탈것',batchim:''},
+  {emoji:'🏍️',word:'오토바이',initial:'ㅇ',cat:'탈것',batchim:''},
+  {emoji:'🏠',word:'집',initial:'ㅈ',cat:'기타',batchim:'ㅂ'},
+  {emoji:'📚',word:'책',initial:'ㅊ',cat:'기타',batchim:'ㄱ'},
+  {emoji:'🌈',word:'무지개',initial:'ㅁ',cat:'기타',batchim:''},
+  {emoji:'⭐',word:'별',initial:'ㅂ',cat:'기타',batchim:'ㄹ'},
+  {emoji:'🌙',word:'달',initial:'ㄷ',cat:'기타',batchim:'ㄹ'},
+  {emoji:'☀️',word:'해',initial:'ㅎ',cat:'기타',batchim:''},
+  {emoji:'🌸',word:'꽃',initial:'ㄱ',cat:'기타',batchim:'ㅅ'},
+  {emoji:'🎵',word:'노래',initial:'ㄴ',cat:'기타',batchim:''},
+  {emoji:'🎂',word:'케이크',initial:'ㅋ',cat:'기타',batchim:''},
+  {emoji:'💧',word:'물',initial:'ㅁ',cat:'기타',batchim:'ㄹ'}
+];
+
+const BATCHIM_WORDS = WORDS.filter(w=>w.batchim!=='');
+const ALL_BATCHIM = ['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+const DIFFICULTIES = [
+  {name:'쉬움',desc:'자음만 (이름 맞히기)',questions:14,color:'#4CAF50'},
+  {name:'보통',desc:'모음만 (이름 맞히기)',questions:10,color:'#2196F3'},
+  {name:'어려움',desc:'자음+모음 혼합',questions:24,color:'#FF9800'},
+  {name:'고급',desc:'단어 첫글자 자음 맞히기',questions:20,color:'#E53935'},
+  {name:'마스터',desc:'받침(종성) 맞히기',questions:15,color:'#9C27B0'}
+];
+
+let score=0, streak=0, total=0, correct=0, mode='menu', modeType=0, qIdx=0, questions=[], flashIdx=0;
+let currentDiff=0;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.random()*i+1|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function sendXP(amount){try{window.parent.postMessage({type:'xp',amount:amount,source:'hangul-game'},'*');}catch(e){}}
+function getBest(m,d){try{return JSON.parse(localStorage.getItem('hangul_best_'+m+'_'+d))||{stars:0,score:0};}catch(e){return{stars:0,score:0};}}
+function saveBest(m,d,stars,sc){
+  const prev=getBest(m,d);
+  if(stars>prev.stars||sc>prev.score){
+    localStorage.setItem('hangul_best_'+m+'_'+d,JSON.stringify({stars:Math.max(stars,prev.stars),score:Math.max(sc,prev.score)}));
+  }
+}
+function getStars(pct){return pct>=90?3:pct>=70?2:pct>=40?1:0;}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function isDiffUnlocked(mt,d){
+  if(d===0)return true;
+  return getBest(mt,d-1).stars>=1;
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(mode==='menu') return renderMenu(app);
+  if(mode==='diffSelect') return renderDiffSelect(app);
+  if(mode==='quiz') return renderQuiz(app);
+  if(mode==='flash') return renderFlash(app);
+  if(mode==='result') return renderResult(app);
+}
+
+function renderMenu(app){
+  app.innerHTML=`
+    <h1>🎓 한글 학습</h1>
+    <div class="mode-select">
+      <button class="mode-btn" onclick="selectMode(1)">📝 자음·모음 퀴즈<small>5단계 난이도로 글자 이름 맞히기</small></button>
+      <button class="mode-btn" onclick="selectMode(2)">🔤 단어 퀴즈<small>단어 첫 글자 / 받침 맞히기</small></button>
+      <button class="mode-btn" onclick="startFlash()">📖 단어 플래시카드<small>50개 단어를 넘기며 학습해요</small></button>
+    </div>`;
+}
+
+function selectMode(mt){
+  modeType=mt;mode='diffSelect';render();
+}
+
+function renderDiffSelect(app){
+  const diffs = modeType===1 ? DIFFICULTIES.slice(0,3) : [DIFFICULTIES[3],DIFFICULTIES[4]];
+  const startIdx = modeType===1 ? 0 : 3;
+  let btns=diffs.map((d,i)=>{
+    const di=startIdx+i;
+    const unlocked=isDiffUnlocked(modeType,i);
+    const b=getBest(modeType,i);
+    const bestStr=b.stars>0?`<span class="best-star">${starStr(b.stars)} ${b.score}점</span>`:'';
+    return `<button class="diff-btn ${unlocked?'':'lock'}" onclick="${unlocked?`startQuiz(${modeType},${i})`:''}">
+      ${['🟢','🟡','🟠','🔴','🟣'][di]} ${d.name}: ${d.desc}${bestStr}</button>`;
+  }).join('');
+  app.innerHTML=`
+    <button class="back-btn" onclick="mode='menu';render()">← 메뉴로</button>
+    <h1>🎓 ${modeType===1?'자음·모음 퀴즈':'단어 퀴즈'}</h1>
+    <div class="mode-select">${btns}
+      <p style="font-size:14px;color:#888;text-align:center">별 1개 이상으로 다음 난이도 열기!</p>
+    </div>`;
+}
+
+function startQuiz(mt,di){
+  modeType=mt;currentDiff=di;
+  mode='quiz';score=0;streak=0;total=0;correct=0;qIdx=0;
+  questions=[];
+
+  if(mt===1){
+    if(di===0){
+      // Easy: consonants only
+      questions=shuffle(CONSONANTS.map(c=>({char:c.char,answer:c.name,type:'자음',pool:CONSONANTS.map(x=>x.name)})));
+    }else if(di===1){
+      // Normal: vowels only
+      questions=shuffle(VOWELS.map(v=>({char:v.char,answer:v.name,type:'모음',pool:VOWELS.map(x=>x.name)})));
+    }else{
+      // Hard: mixed
+      const cons=CONSONANTS.map(c=>({char:c.char,answer:c.name,type:'자음',pool:CONSONANTS.map(x=>x.name)}));
+      const vows=VOWELS.map(v=>({char:v.char,answer:v.name,type:'모음',pool:VOWELS.map(x=>x.name)}));
+      questions=shuffle([...cons,...vows]);
+    }
+  }else{
+    if(di===0){
+      // Advanced: word initial consonant
+      questions=shuffle([...WORDS]).slice(0,DIFFICULTIES[3].questions);
+    }else{
+      // Master: batchim
+      questions=shuffle([...BATCHIM_WORDS]).slice(0,Math.min(BATCHIM_WORDS.length,DIFFICULTIES[4].questions));
+    }
+  }
+  render();
+}
+
+function renderQuiz(app){
+  if(qIdx>=questions.length) return showResult();
+  const q=questions[qIdx];
+  const diffIdx = modeType===1?currentDiff:currentDiff+3;
+  const d=DIFFICULTIES[diffIdx];
+  let optionsHtml='',hintHtml='',charHtml='';
+
+  if(modeType===1){
+    charHtml=`<div class="big-char">${q.char}</div>`;
+    hintHtml=`<div class="hint-text">${q.type} - 이 글자의 이름은?</div>`;
+    const wrongs=shuffle(q.pool.filter(x=>x!==q.answer)).slice(0,3);
+    const opts=shuffle([q.answer,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="ansQuiz(this,'${o}','${q.answer}')">${o}</button>`).join('');
+  }else if(currentDiff===0){
+    charHtml=`<div class="big-char" style="font-size:80px">${q.emoji}</div><div style="font-size:36px;font-weight:700;margin-bottom:16px;color:#5B2C6F">${q.word}</div>`;
+    hintHtml=`<div class="hint-text">첫 글자의 자음은?</div>`;
+    const wrongs=shuffle(CONSONANTS.map(c=>c.char).filter(x=>x!==q.initial)).slice(0,3);
+    const opts=shuffle([q.initial,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" style="font-size:36px" onclick="ansQuiz(this,'${o}','${q.initial}')">${o}</button>`).join('');
+  }else{
+    charHtml=`<div class="big-char" style="font-size:80px">${q.emoji}</div><div style="font-size:36px;font-weight:700;margin-bottom:16px;color:#5B2C6F">${q.word}</div>`;
+    hintHtml=`<div class="hint-text">이 단어의 받침(종성)은?</div>`;
+    const wrongs=shuffle(ALL_BATCHIM.filter(x=>x!==q.batchim)).slice(0,3);
+    const opts=shuffle([q.batchim,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" style="font-size:36px" onclick="ansQuiz(this,'${o}','${q.batchim}')">${o}</button>`).join('');
+  }
+
+  app.innerHTML=`
+    <button class="back-btn" onclick="mode='menu';render()">← 메뉴로</button>
+    <div class="diff-badge" style="background:${d.color}">${d.name}</div>
+    <div class="score-bar"><span class="pts">⭐ ${score}점</span><span class="streak">🔥 ${streak}연속</span><span>${qIdx+1}/${questions.length}</span></div>
+    <div class="game-area">
+      ${hintHtml}${charHtml}
+      <div class="options">${optionsHtml}</div>
+    </div>`;
+}
+
+function ansQuiz(btn,sel,ans){
+  if(btn.parentElement.querySelector('.correct,.wrong'))return;
+  total++;
+  if(sel===ans){
+    btn.classList.add('correct');correct++;streak++;score+=10+(streak>1?streak*2:0);
+    sendXP(3);
+  }else{
+    btn.classList.add('wrong');streak=0;
+    [...btn.parentElement.children].forEach(b=>{if(b.textContent===ans)b.classList.add('correct');});
+  }
+  setTimeout(()=>{qIdx++;render();},sel===ans?600:1200);
+}
+
+// Flash card mode (unchanged from original)
+function startFlash(){
+  mode='flash';flashIdx=0;score=0;
+  questions=shuffle([...WORDS]).slice(0,50);
+  render();
+}
+
+function renderFlash(app){
+  const q=questions[flashIdx];
+  app.innerHTML=`
+    <button class="back-btn" onclick="goMenu()">← 메뉴로</button>
+    <div class="game-area">
+      <div class="flash-card" onclick="flipCard()">
+        <div class="flash-cat">${q.cat}</div>
+        <div class="flash-emoji">${q.emoji}</div>
+        <div class="flash-word">${q.word}</div>
+        <div id="flashDetail" style="display:none;font-size:20px;color:#888;margin-top:8px">첫소리: <b style="font-size:28px;color:#FF6B9D">${q.initial}</b>${q.batchim?` | 받침: <b style="font-size:28px;color:#2196F3">${q.batchim}</b>`:''}</div>
+        <div class="flash-counter">${flashIdx+1} / ${questions.length}</div>
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn prev" onclick="flashPrev()" ${flashIdx===0?'disabled style="opacity:0.4"':''}>◀ 이전</button>
+        <button class="nav-btn next" onclick="flashNext()">${flashIdx>=questions.length-1?'🏠 완료':'다음 ▶'}</button>
+      </div>
+    </div>`;
+}
+
+function flipCard(){const d=document.getElementById('flashDetail');if(d)d.style.display=d.style.display==='none'?'block':'none';}
+function flashPrev(){if(flashIdx>0){flashIdx--;render();}}
+function flashNext(){
+  if(flashIdx>=questions.length-1){sendXP(20);mode='result';correct=questions.length;total=questions.length;score=100;modeType=0;currentDiff=-1;render();return;}
+  flashIdx++;render();
+}
+
+function showResult(){mode='result';render();}
+function renderResult(app){
+  const pct=total?Math.round(correct/total*100):0;
+  const stars=getStars(pct);
+  const emoji=stars>=3?'🏆':stars>=2?'🎉':stars>=1?'😊':'💪';
+  if(modeType>0&&currentDiff>=0) saveBest(modeType,currentDiff,stars,score);
+
+  const diffIdx=modeType===1?currentDiff:modeType===2?currentDiff+3:-1;
+  const canNext=diffIdx>=0&&currentDiff<(modeType===1?2:1)&&stars>=1;
+  const nextDiff=currentDiff+1;
+  const nextBtn=canNext?`<button class="next-btn" onclick="startQuiz(${modeType},${nextDiff})">다음 난이도 →</button>`:'';
+
+  app.innerHTML=`
+    <div class="result">
+      <div class="big-emoji">${emoji}</div>
+      <h2>학습 완료!</h2>
+      ${diffIdx>=0?`<div class="stars">${starStr(stars)}</div>`:''}
+      <p>정답률: ${correct}/${total} (${pct}%)</p>
+      <p>획득 점수: ⭐ ${score}점</p>
+      <p style="color:#FF6B9D;font-weight:700">+${Math.min(score,50)} XP</p>
+      ${diffIdx>=0?`<p class="best-record">최고 기록: ${getBest(modeType,currentDiff).score}점</p>`:''}
+      <button class="retry-btn" onclick="${modeType>0&&currentDiff>=0?`startQuiz(${modeType},${currentDiff})`:'goMenu()'}">다시 하기</button>
+      ${nextBtn}
+      <button class="retry-btn" style="background:linear-gradient(135deg,#aaa,#ccc);margin-top:8px;font-size:18px;padding:12px 30px" onclick="goMenu()">메뉴로</button>
+    </div>`;
+}
+
+function goMenu(){mode='menu';render();}
+
+render();
+</script>
+</body></html>

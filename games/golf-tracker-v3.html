@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Golf Tracker v3</title>
+<style> *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;color:#e0e0e0;font-family:'Pretendard',-apple-system,'Segoe UI',sans-serif;user-select:none;}:root{--accent:#10b981;--accent2:#059669;--bg:#0a0e1a;--card:#111827;--card2:#1f2937;--border:#374151;--text:#e5e7eb;--dim:#6b7280;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--orange:#f97316;}#tab-nav{display:flex;background:#111827;border-bottom:1px solid #1f2937;flex-shrink:0;z-index:50;position:relative;}.tab-btn{flex:1;padding:10px 2px 8px;text-align:center;font-size:10px;font-weight:600;color:var(--dim);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}.tab-btn:active{opacity:.7;}.tab-content{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}.tab-content.active{display:flex;flex-direction:column;}#tab-ball{position:relative;overflow:hidden;}#camera-container{flex:1;position:relative;background:#000;min-height:0;}#video{width:100%;height:100%;object-fit:cover;display:block;}#processingCanvas{display:none;}#overlayCanvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}#cam-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;z-index:10;}#cam-stats{background:rgba(0,0,0,.6);border-radius:8px;padding:8px 12px;backdrop-filter:blur(8px);font-size:11px;display:none;}#cam-stats.visible{display:block;}#cam-stats .sv{font-size:18px;font-weight:700;color:var(--accent);}#cam-stats .sl{font-size:9px;color:var(--dim);}.cam-btn-row{display:flex;gap:6px;}.cam-btn{width:36px;height:36px;border-radius:18px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.5);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}.cam-btn:active{transform:scale(.9);}#cam-controls{padding:10px 16px 14px;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;gap:16px;flex-shrink:0;}#track-btn{width:64px;height:64px;border-radius:32px;border:none;cursor:pointer;font-weight:800;font-size:10px;letter-spacing:1px;color:#000;background:linear-gradient(135deg,var(--accent),#4ecdc4);box-shadow:0 0 20px rgba(16,185,129,.3);}#track-btn.stop{background:linear-gradient(135deg,var(--red),#ff6b35);color:#fff;}#track-btn:active{transform:scale(.93);}.ctrl-btn{width:44px;height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;}.ctrl-btn .cl{font-size:8px;color:var(--dim);margin-top:1px;}.ctrl-btn:active{transform:scale(.9);}#center-guide{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:5;}#center-guide.hidden{display:none;}.guide-icon{font-size:48px;margin-bottom:12px;}.guide-text{font-size:14px;color:rgba(255,255,255,.6);line-height:1.7;}.guide-hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:10px;line-height:1.5;}#settings-overlay{display:none;position:absolute;top:50px;right:8px;z-index:20;background:rgba(17,24,39,.95);border:1px solid var(--border);border-radius:12px;padding:14px;width:240px;backdrop-filter:blur(12px);}#settings-overlay.visible{display:block;}.sett-title{font-size:12px;font-weight:700;margin-bottom:10px;color:var(--accent);}.sett-group{margin-bottom:10px;}.sett-label{font-size:10px;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:3px;}input[type=range]{width:100%;accent-color:var(--accent);height:4px;}.sett-hint{font-size:9px;color:var(--dim);margin-top:2px;}#dist-display{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border:1px solid var(--accent);border-radius:10px;padding:6px 18px;text-align:center;z-index:10;display:none;}#dist-display.visible{display:block;}#dist-display .dv{font-size:28px;font-weight:800;color:var(--accent);}#dist-display .dl{font-size:10px;color:var(--dim);}#landing-zone{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);border:1px solid var(--accent);border-radius:8px;padding:4px 12px;text-align:center;z-index:10;display:none;font-size:10px;}#landing-zone.visible{display:block;}#landing-zone .lz-title{color:var(--accent);font-weight:700;font-size:9px;letter-spacing:1px;}#landing-zone .lz-val{font-size:14px;font-weight:800;color:var(--text);}#landing-zone .lz-conf{font-size:9px;color:var(--dim);}#club-suggest{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);border:1px solid var(--accent);border-radius:10px;padding:8px 16px;text-align:center;z-index:10;display:none;backdrop-filter:blur(6px);}#club-suggest.visible{display:block;}#club-suggest .cs-club{font-size:16px;font-weight:800;color:var(--accent);}#club-suggest .cs-dist{font-size:10px;color:var(--dim);}#scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,rgba(16,185,129,.3),transparent);pointer-events:none;display:none;z-index:6;animation:scanAnim 2s linear infinite;}#scan-line.active{display:block;}@keyframes scanAnim{0%{top:0}100%{top:100%}}#tab-swing{padding:0;}#swing-camera{flex:1;position:relative;background:#000;min-height:200px;}#swing-video{width:100%;height:100%;object-fit:cover;display:block;}#swing-overlay-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}#swing-controls{padding:12px 16px;background:var(--card);flex-shrink:0;border-top:1px solid var(--border);display:flex;gap:8px;}#swing-record-btn{flex:1;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;}#swing-record-btn.recording{background:linear-gradient(135deg,#666,#444);animation:recPulse 1s infinite;}#swing-record-btn:active{transform:scale(.97);}#swing-manual-btn{padding:14px 20px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;}@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.6}}#swing-results{padding:14px 16px;overflow-y:auto;flex:1;min-height:0;}.swing-phase-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;margin:10px 0;}.swing-phase-bar div{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;}.swing-metric{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}.swing-metric .sm-label{font-size:12px;color:var(--dim);}.swing-metric .sm-value{font-size:16px;font-weight:700;color:var(--accent);}#swing-placeholder{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;line-height:1.8;}.swing-path-viz{width:100%;height:120px;margin:10px 0;}.swing-tip{background:var(--card);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 12px;margin:6px 0;font-size:11px;color:var(--dim);line-height:1.6;}.swing-history-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:6px 0;font-size:11px;}.swing-history-item .sh-date{color:var(--dim);font-size:9px;}.swing-history-item .sh-stats{display:flex;gap:12px;margin-top:4px;}.swing-history-item .sh-stat{color:var(--accent);font-weight:700;}#manual-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;}#manual-modal.visible{display:flex;}.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;max-width:340px;}.modal-box h3{font-size:14px;color:var(--accent);margin-bottom:14px;}.modal-field{margin-bottom:12px;}.modal-field label{font-size:11px;color:var(--dim);display:block;margin-bottom:4px;}.modal-field input,.modal-field select{width:100%;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;}.modal-field input:focus,.modal-field select:focus{border-color:var(--accent);outline:none;}.modal-btns{display:flex;gap:8px;margin-top:14px;}.modal-btns button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;}.modal-btns .btn-ok{background:var(--accent);color:#000;}.modal-btns .btn-cancel{background:var(--card2);color:var(--text);border:1px solid var(--border);}#tab-round{padding:0;}.round-header{padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}.round-header h3{font-size:14px;font-weight:700;}.round-header select,.round-header button{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;}.round-header button{background:var(--accent);color:#000;font-weight:700;border:none;}.round-header button:active{opacity:.8;}#course-selector{max-width:160px;font-size:11px;}#scorecard{flex:1;overflow-y:auto;padding:0 0 80px;}.sc-table{width:100%;border-collapse:collapse;font-size:11px;}.sc-table th{position:sticky;top:0;background:var(--card);padding:8px 4px;font-weight:600;color:var(--dim);font-size:10px;border-bottom:1px solid var(--border);z-index:2;}.sc-table td{padding:6px 3px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);}.sc-table tr:nth-child(even){background:rgba(255,255,255,.02);}.sc-input{width:36px;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:4px;padding:4px;font-size:12px;text-align:center;}.sc-input:focus{border-color:var(--accent);outline:none;}.sc-toggle{width:28px;height:28px;border-radius:14px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-size:10px;cursor:pointer;font-weight:700;}.sc-toggle.on{background:var(--accent);color:#000;border-color:var(--accent);}.sc-toggle:active{transform:scale(.9);}.hole-num{font-weight:700;color:var(--accent);font-size:12px;}.sc-par{color:var(--dim);}.score-eagle{color:#f59e0b;}.score-birdie{color:#3b82f6;}.score-par-color{color:var(--accent);}.score-bogey{color:#f97316;}.score-double{color:var(--red);}.score-worse{color:#dc2626;font-weight:800;}#running-score{position:fixed;bottom:56px;left:0;right:0;background:linear-gradient(to right,rgba(17,24,39,.95),rgba(17,24,39,.8));backdrop-filter:blur(8px);padding:6px 16px;display:none;z-index:28;font-size:11px;border-top:1px solid var(--border);}#running-score.visible{display:flex;justify-content:space-around;align-items:center;}.run-item{text-align:center;}.run-item .rv{font-size:16px;font-weight:800;color:var(--accent);}.run-item .rl{font-size:8px;color:var(--dim);}#round-summary{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:10px 16px;display:none;z-index:30;}#round-summary.visible{display:flex;justify-content:space-around;}.rs-item{text-align:center;}.rs-item .rsv{font-size:18px;font-weight:800;color:var(--accent);}.rs-item .rsl{font-size:9px;color:var(--dim);}#round-actions{padding:12px 16px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}#round-actions button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;}#save-round-btn{background:var(--accent);color:#000;}#history-toggle-btn{background:var(--card2);color:var(--text);border:1px solid var(--border);}#round-history{display:none;flex:1;overflow-y:auto;padding:8px 16px;}#round-history.visible{display:block;}.history-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;}.history-card .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}.history-card .hc-course{font-size:13px;font-weight:700;}.history-card .hc-date{font-size:10px;color:var(--dim);}.history-card .hc-stats{display:flex;gap:12px;font-size:11px;flex-wrap:wrap;}.history-card .hc-stats span{color:var(--dim);}.history-card .hc-stats b{color:var(--accent);}.history-card .hc-del{background:none;border:none;color:var(--red);font-size:10px;cursor:pointer;padding:4px;}.handicap-badge{background:var(--accent);color:#000;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;}#tab-stats{padding:16px;gap:14px;}.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;}.stat-card h4{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:.5px;}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}.sg-item{text-align:center;}.sg-item .sgv{font-size:22px;font-weight:800;color:var(--text);}.sg-item .sgl{font-size:9px;color:var(--dim);margin-top:2px;}.bar-chart{display:flex;align-items:flex-end;gap:3px;height:100px;padding-top:8px;}.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}.bar-fill{width:100%;border-radius:3px 3px 0 0;background:var(--accent);min-width:8px;transition:height .3s;}.bar-label{font-size:8px;color:var(--dim);white-space:nowrap;}.bar-value{font-size:8px;color:var(--accent);font-weight:700;}.canvas-chart{width:100%;height:160px;}.canvas-chart canvas{width:100%;height:100%;}.club-table{width:100%;font-size:11px;}.club-table td{padding:6px 8px;}.club-table tr:nth-child(even){background:rgba(255,255,255,.02);}.club-table .ct-club{font-weight:700;color:var(--text);}.club-table .ct-dist{color:var(--accent);font-weight:700;font-size:13px;}.club-table .ct-avg{color:var(--dim);}.club-input{width:50px;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:4px;padding:3px;font-size:11px;text-align:center;}.club-input:focus{border-color:var(--accent);outline:none;}.sg-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11px;}.sg-bar-label{width:70px;color:var(--dim);text-align:right;font-size:10px;}.sg-bar-track{flex:1;height:18px;background:var(--card2);border-radius:4px;position:relative;overflow:hidden;}.sg-bar-fill{height:100%;border-radius:4px;position:absolute;top:0;}.sg-bar-val{font-size:11px;font-weight:700;width:50px;text-align:right;}.record-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);}.record-item .ri-label{color:var(--dim);font-size:12px;}.record-item .ri-value{font-weight:700;color:var(--text);font-size:13px;}.smartgolf-link{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;text-decoration:none;color:var(--text);margin-top:8px;}.smartgolf-link:active{opacity:.8;}.smartgolf-link .sg-icon{font-size:24px;}.smartgolf-link .sg-text{font-size:12px;line-height:1.5;}.smartgolf-link .sg-text b{color:var(--accent);}#tab-practice{padding:16px;gap:14px;}.practice-canvas-wrap{width:100%;aspect-ratio:4/3;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;touch-action:none;}.practice-canvas-wrap canvas{width:100%;height:100%;display:block;}.practice-controls{display:flex;gap:8px;flex-wrap:wrap;}.practice-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;}.practice-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}.practice-btn:active{transform:scale(.95);}.practice-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}.ps-item{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 4px;}.ps-item .psv{font-size:18px;font-weight:800;color:var(--accent);}.ps-item .psl{font-size:9px;color:var(--dim);margin-top:2px;}.dispersion-info{font-size:10px;color:var(--dim);text-align:center;margin-top:6px;line-height:1.5;}.empty-state{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;line-height:1.8;}#perm-screen{position:fixed;inset:0;z-index:100;background:rgba(10,14,26,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}#perm-screen.hidden{display:none;}.perm-icon{font-size:56px;margin-bottom:16px;}.perm-title{font-size:18px;font-weight:700;margin-bottom:8px;}.perm-desc{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:24px;}#perm-btn{padding:14px 40px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),#4ecdc4);color:#000;font-size:15px;font-weight:700;cursor:pointer;}#perm-btn:active{transform:scale(.96);}.perm-version{font-size:10px;color:var(--dim);margin-top:12px;}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}.line-chart-container{width:100%;height:140px;position:relative;}.line-chart-container svg{width:100%;height:100%;}</style>
+</head>
+<body>
+<!-- Permission Screen -->
+<div id="perm-screen">
+  <div class="perm-icon">&#9971;</div>
+  <div class="perm-title">Golf Tracker v3</div>
+  <div class="perm-desc">볼 추적, 스윙 분석, 연습장, 통계까지<br>올인원 골프 트래커</div>
+  <button id="perm-btn" onclick="initCameraAndStart()">시작하기</button>
+  <div class="perm-version">v3.0 | SmartGolf 연동</div>
+</div>
+<!-- Tab Nav -->
+<div id="tab-nav">
+  <button class="tab-btn active" data-tab="ball" onclick="switchTab('ball')">볼추적</button>
+  <button class="tab-btn" data-tab="swing" onclick="switchTab('swing')">스윙</button>
+  <button class="tab-btn" data-tab="round" onclick="switchTab('round')">라운드</button>
+  <button class="tab-btn" data-tab="practice" onclick="switchTab('practice')">연습장</button>
+  <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">통계</button>
+</div>
+<!-- ========== TAB 1: Ball Tracking ========== -->
+<div id="tab-ball" class="tab-content active">
+  <div id="camera-container">
+  <video id="video" playsinline muted autoplay></video>
+  <canvas id="processingCanvas"></canvas>
+  <canvas id="overlayCanvas"></canvas>
+  <div id="scan-line"></div>
+  <div id="center-guide">
+  <div class="guide-icon">&#9971;</div>
+  <div class="guide-text">골프공이 보이게 카메라를 배치하고<br>트래킹을 시작하세요</div>
+  <div class="guide-hint">후방 카메라로 공 뒤에서 촬영<br>궤적과 착지 예측이 표시됩니다</div>
+  </div>
+  <div id="cam-hud">
+  <div id="cam-stats">
+  <div style="font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:4px;">TRACKING</div>
+  <div style="display:flex;gap:14px;">
+  <div><div class="sv" id="stat-points">0</div><div class="sl">포인트</div></div>
+  <div><div class="sv" id="stat-speed">0</div><div class="sl">px/s</div></div>
+  <div><div class="sv" id="stat-dist">0</div><div class="sl">m (추정)</div></div>
+  <div><div class="sv" id="stat-angle">-</div><div class="sl">발사각</div></div>
+  </div>
+  </div>
+  <div class="cam-btn-row">
+  <button class="cam-btn" onclick="switchCamera()" title="전환">&#128260;</button>
+  <button class="cam-btn" id="settings-btn" onclick="toggleSettings()" title="설정">&#9881;</button>
+  </div>
+  </div>
+  <div id="settings-overlay">
+  <div class="sett-title">감지 설정</div>
+  <div class="sett-group">
+  <div class="sett-label"><span>밝기 민감도</span><span id="val-sens">85%</span></div>
+  <input type="range" min="40" max="98" value="85" id="slider-sens" oninput="updateSetting()">
+  </div>
+  <div class="sett-group">
+  <div class="sett-label"><span>최소 공 크기</span><span id="val-min">4px</span></div>
+  <input type="range" min="2" max="25" value="4" id="slider-min" oninput="updateSetting()">
+  </div>
+  <div class="sett-group">
+  <div class="sett-label"><span>최대 공 크기</span><span id="val-max">45px</span></div>
+  <input type="range" min="20" max="100" value="45" id="slider-max" oninput="updateSetting()">
+  </div>
+  <div class="sett-group">
+  <div class="sett-label"><span>보정 거리(m)</span><span id="val-calib"></span></div>
+  <input type="range" min="50" max="300" value="150" id="slider-calib" oninput="updateSetting()">
+  <div class="sett-hint">화면 전체 이동 = 이 거리(m)</div>
+  </div>
+  <div class="sett-group">
+  <div class="sett-label"><span>바람 (m/s)</span><span id="val-wind">0</span></div>
+  <input type="range" min="-10" max="10" value="0" id="slider-wind" oninput="updateSetting()">
+  <div class="sett-hint">양수=순풍, 음수=역풍</div>
+  </div>
+  </div>
+  <div id="dist-display">
+  <div class="dv" id="dist-value">0</div>
+  <div class="dl">추정 비거리 (m)</div>
+  </div>
+  <div id="landing-zone">
+  <div class="lz-title">착지 예측</div>
+  <div class="lz-val" id="lz-dist">-</div>
+  <div class="lz-conf" id="lz-conf">신뢰도: -</div>
+  </div>
+  <div id="club-suggest">
+  <div class="cs-club" id="cs-club-name">-</div>
+  <div class="cs-dist" id="cs-club-info">-</div>
+  </div>
+  </div>
+  <div id="cam-controls">
+  <button class="ctrl-btn" onclick="clearTrail()"><span>&#128465;</span><span class="cl">초기화</span></button>
+  <button id="track-btn" onclick="toggleTracking()">START</button>
+  <button class="ctrl-btn" onclick="captureScreenshot()"><span>&#128247;</span><span class="cl">캡처</span></button>
+  </div>
+</div>
+<!-- ========== TAB 2: Swing Analysis ========== -->
+<div id="tab-swing" class="tab-content">
+  <div id="swing-camera">
+  <video id="swing-video" playsinline muted autoplay></video>
+  <canvas id="swing-proc-canvas" style="display:none;"></canvas>
+  <canvas id="swing-overlay-canvas"></canvas>
+  <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,.6);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--accent);font-weight:700;display:none;" id="swing-timer">0.0s</div>
+  </div>
+  <div id="swing-controls">
+  <button id="swing-record-btn" onclick="toggleSwingRecord()">&#128308; 스윙 녹화 (3~5초)</button>
+  <button id="swing-manual-btn" onclick="showManualSwing()">&#9998; 수동입력</button>
+  </div>
+  <div id="swing-results">
+  <div id="swing-placeholder">
+  <div style="font-size:36px;margin-bottom:12px;">&#127948;</div>
+  <b>스윙 분석 v3</b><br>
+  카메라 또는 수동 입력으로<br>스윙을 분석합니다.<br><br>
+  <span style="font-size:11px;color:var(--dim);">헤드스피드, 발사각, 볼스피드, 스윙경로<br>템포 분석 + 개선 팁 제공</span>
+  </div>
+  <div id="swing-analysis" style="display:none;"></div>
+  <div id="swing-history-section" style="display:none;margin-top:14px;">
+  <h4 style="font-size:12px;color:var(--accent);margin-bottom:8px;">스윙 기록</h4>
+  <div id="swing-history-list"></div>
+  </div>
+  </div>
+</div>
+<!-- Manual Swing Modal -->
+<div id="manual-modal">
+  <div class="modal-box">
+  <h3>수동 스윙 입력</h3>
+  <div class="modal-field"><label>클럽</label><select id="mm-club"></select></div>
+  <div class="modal-field"><label>헤드스피드 (mph)</label><input type="number" id="mm-headspeed" placeholder="85" min="30" max="150"></div>
+  <div class="modal-field"><label>볼스피드 (mph)</label><input type="number" id="mm-ballspeed" placeholder="125" min="40" max="220"></div>
+  <div class="modal-field"><label>발사각 (도)</label><input type="number" id="mm-angle" placeholder="12" min="0" max="60" step="0.5"></div>
+  <div class="modal-field"><label>비거리 (m)</label><input type="number" id="mm-distance" placeholder="200" min="10" max="400"></div>
+  <div class="modal-field">
+  <label>스윙 경로</label>
+  <select id="mm-path">
+  <option value="straight">스트레이트</option>
+  <option value="inside-out">인사이드-아웃</option>
+  <option value="outside-in">아웃사이드-인</option>
+  </select>
+  </div>
+  <div class="modal-field"><label>백스윙 시간 (초)</label><input type="number" id="mm-backswing" placeholder="0.8" min="0.3" max="3" step="0.1"></div>
+  <div class="modal-field"><label>다운스윙 시간 (초)</label><input type="number" id="mm-downswing" placeholder="0.3" min="0.1" max="1.5" step="0.05"></div>
+  <div class="modal-btns">
+  <button class="btn-cancel" onclick="hideManualSwing()">취소</button>
+  <button class="btn-ok" onclick="submitManualSwing()">분석</button>
+  </div>
+  </div>
+</div>
+<!-- ========== TAB 3: Round Recording ========== -->
+<div id="tab-round" class="tab-content">
+  <div class="round-header">
+  <select id="course-selector" onchange="onCourseSelect()">
+  <option value="">코스 선택...</option>
+  </select>
+  <button onclick="newRound()">새 라운드</button>
+  </div>
+  <div id="scorecard"></div>
+  <div id="running-score"></div>
+  <div id="round-summary"></div>
+  <div id="round-actions">
+  <button id="save-round-btn" onclick="saveRound()">라운드 저장</button>
+  <button id="history-toggle-btn" onclick="toggleHistory()">기록 보기</button>
+  </div>
+  <div id="round-history"></div>
+</div>
+<!-- ========== TAB 4: Practice Mode ========== -->
+<div id="tab-practice" class="tab-content">
+  <div class="stat-card">
+  <h4>연습장 모드</h4>
+  <div class="practice-canvas-wrap">
+  <canvas id="practice-canvas"></canvas>
+  </div>
+  <div class="practice-controls" style="margin-top:10px;">
+  <button class="practice-btn" onclick="setPracticeTarget(50)">50m</button>
+  <button class="practice-btn" onclick="setPracticeTarget(100)">100m</button>
+  <button class="practice-btn active" onclick="setPracticeTarget(150)">150m</button>
+  <button class="practice-btn" onclick="setPracticeTarget(200)">200m</button>
+  <button class="practice-btn" onclick="setPracticeTarget(250)">250m</button>
+  <button class="practice-btn" onclick="clearPractice()">초기화</button>
+  </div>
+  <div style="margin-top:10px;font-size:10px;color:var(--dim);text-align:center;">
+  캔버스를 탭하여 샷 기록. 타겟에 가까울수록 높은 점수!
+  </div>
+  </div>
+  <div class="practice-stats" id="practice-stats">
+  <div class="ps-item"><div class="psv" id="ps-shots">0</div><div class="psl">샷 수</div></div>
+  <div class="ps-item"><div class="psv" id="ps-avg">-</div><div class="psl">평균 오차(m)</div></div>
+  <div class="ps-item"><div class="psv" id="ps-score">-</div><div class="psl">일관성 점수</div></div>
+  </div>
+  <div class="dispersion-info" id="dispersion-info"></div>
+  <div class="stat-card" id="practice-history-card" style="display:none;">
+  <h4>세션 기록</h4>
+  <div id="practice-history-list"></div>
+  </div>
+</div>
+<!-- ========== TAB 5: Statistics ========== -->
+<div id="tab-stats" class="tab-content">
+  <div id="stats-content"></div>
+</div>
+<script>
+let audioCtx=null;
+function playSound(type){
+  if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.connect(g);g.connect(audioCtx.destination);
+  if(type==='click'){o.frequency.value=800;g.gain.value=0.08;o.type='sine';o.start();o.stop(audioCtx.currentTime+0.05);}
+  else if(type==='success'){o.frequency.value=523;g.gain.value=0.1;o.type='sine';o.start();
+  setTimeout(()=>{const o2=audioCtx.createOscillator(),g2=audioCtx.createGain();o2.connect(g2);g2.connect(audioCtx.destination);o2.frequency.value=659;g2.gain.value=0.1;o2.type='sine';o2.start();o2.stop(audioCtx.currentTime+0.1);},100);
+  o.stop(audioCtx.currentTime+0.1);}
+  else if(type==='shot'){o.frequency.value=200;g.gain.value=0.12;o.type='triangle';
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);o.start();o.stop(audioCtx.currentTime+0.3);}
+  else if(type==='land'){o.frequency.value=150;g.gain.value=0.08;o.type='sine';
+  g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.2);o.start();o.stop(audioCtx.currentTime+0.2);}
+}
+let stream=null, facingMode='environment', isTracking=false, trail=[], prevPos=null, lostFrames=0, animId=null;
+let sensitivity=85, minBallSize=4, maxBallSize=45, calibDist=150, windSpeed=0;
+let swingStream=null, swingRecording=false, swingFrames=[], swingStartTime=0, swingTimerId=null;
+let practiceTarget=150, practiceShots=[], practiceCanvasReady=false;
+// Physics constants
+const GRAVITY = 9.81;
+const COURSES=[
+{name:'남서울CC',pars:[4,4,3,5,4,4,3,4,5,4,3,5,4,4,3,4,5,4]},
+{name:'안양CC',pars:[4,5,4,3,4,4,5,3,4,4,3,4,5,4,4,3,5,4]},
+{name:'용인CC',pars:[4,4,5,3,4,4,3,5,4,5,4,3,4,4,5,3,4,4]},
+{name:'레이크사이드CC',pars:[4,5,3,4,4,5,3,4,4,4,4,3,5,4,3,4,5,4]},
+{name:'잭니클라우스GC',pars:[4,4,5,3,4,4,3,5,4,4,5,3,4,4,5,3,4,4]},
+{name:'블루원상주CC',pars:[5,4,3,4,4,5,3,4,4,4,3,5,4,4,3,5,4,4]},
+{name:'파인비치GC',pars:[4,3,5,4,4,5,3,4,4,4,4,3,5,4,4,3,4,5]},
+{name:'베어크리크GC',pars:[4,4,5,3,4,4,3,5,4,4,5,3,4,4,5,3,4,4]},
+{name:'해슬리나인브릿지',pars:[5,4,3,4,4,5,3,4,4,4,3,5,4,4,3,4,5,4]},
+{name:'오크밸리CC',pars:[4,5,4,3,4,4,3,5,4,4,4,5,3,4,3,4,5,4]},
+];
+const CLUBS = ['드라이버','3W','5W','3I','4I','5I','6I','7I','8I','9I','PW','AW','SW','LW','퍼터'];
+const CLUB_DEFAULT_DIST = {
+  '드라이버':230,'3W':210,'5W':195,'3I':190,'4I':180,'5I':170,
+  '6I':160,'7I':150,'8I':140,'9I':130,'PW':115,'AW':100,'SW':85,'LW':60,'퍼터':0
+};
+const video = document.getElementById('video');
+const procCanvas = document.getElementById('processingCanvas');
+const overlay = document.getElementById('overlayCanvas');
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-'+id));
+  // Hide running score if not on round tab
+  const rs = document.getElementById('running-score');
+  if (rs) rs.classList.toggle('visible', id==='round' && currentRound);
+  if (id === 'round') { renderScorecard(); renderRoundSummary(); }
+  if (id === 'stats') renderStats();
+  if (id === 'swing') { initSwingCamera(); renderSwingHistory(); }
+  if (id === 'practice') initPracticeCanvas();
+  playSound('click');
+}
+async function initCameraAndStart() {
+  try {
+  if (stream) stream.getTracks().forEach(t=>t.stop());
+  stream = await navigator.mediaDevices.getUserMedia({
+  video:{facingMode, width:{ideal:1280}, height:{ideal:720}, frameRate:{ideal:60,min:30}}, audio:false
+  });
+  video.srcObject = stream;
+  await video.play();
+  document.getElementById('perm-screen').classList.add('hidden');
+  resizeOverlay();
+  if (!animId) processFrame();
+  } catch(e) {
+  document.getElementById('perm-screen').classList.add('hidden');
+  console.warn('Camera unavailable:', e.message);
+  }
+}
+async function switchCamera() {
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  video.style.transform = facingMode === 'user' ? 'scaleX(-1)' : 'none';
+  overlay.style.transform = facingMode === 'user' ? 'scaleX(-1)' : 'none';
+  await initCameraAndStart();
+}
+function resizeOverlay() {
+  const c = document.getElementById('camera-container');
+  if (!c) return;
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  overlay.width = c.clientWidth*dpr;
+  overlay.height = c.clientHeight*dpr;
+  overlay.style.width = c.clientWidth+'px';
+  overlay.style.height = c.clientHeight+'px';
+}
+window.addEventListener('resize', resizeOverlay);
+function updateSetting() {
+  sensitivity = +document.getElementById('slider-sens').value;
+  minBallSize = +document.getElementById('slider-min').value;
+  maxBallSize = +document.getElementById('slider-max').value;
+  calibDist = +document.getElementById('slider-calib').value;
+  windSpeed = +document.getElementById('slider-wind').value;
+  document.getElementById('val-sens').textContent = sensitivity+'%';
+  document.getElementById('val-min').textContent = minBallSize+'px';
+  document.getElementById('val-max').textContent = maxBallSize+'px';
+  document.getElementById('val-calib').textContent = calibDist+'m';
+  document.getElementById('val-wind').textContent = windSpeed;
+}
+function toggleSettings() {
+  document.getElementById('settings-overlay').classList.toggle('visible');
+}
+function detectBall(ctx, w, h) {
+  const imageData = ctx.getImageData(0,0,w,h);
+  const data = imageData.data;
+  const thresh = sensitivity * 2.55;
+  const step = 2;
+  const candidates = [];
+  for (let y=0; y<h; y+=step) {
+  for (let x=0; x<w; x+=step) {
+  const i = (y*w+x)*4;
+  const r=data[i], g=data[i+1], b=data[i+2];
+  const brightness = (r+g+b)/3;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+  const sat = mx>0 ? (mx-mn)/mx : 0;
+  // White ball: high brightness, low saturation
+  // Also check for circular uniformity
+  if (brightness > thresh && sat < 0.3) {
+  candidates.push({x,y,brightness});
+  }
+  }
+  }
+  if (!candidates.length) return null;
+  // Grid clustering with adaptive grid size
+  const gs=12, grid={};
+  for (const p of candidates) {
+  const key = (Math.floor(p.x/gs))+','+(Math.floor(p.y/gs));
+  if (!grid[key]) grid[key]={sx:0,sy:0,cnt:0,br:0};
+  grid[key].sx+=p.x; grid[key].sy+=p.y; grid[key].cnt++; grid[key].br+=p.brightness;
+  }
+  const clusters=[];
+  for (const k in grid) {
+  const g=grid[k];
+  clusters.push({x:g.sx/g.cnt, y:g.sy/g.cnt, size:g.cnt, brightness:g.br/g.cnt});
+  }
+  // Merge nearby clusters
+  const merged=[], used=new Set();
+  for (let i=0;i<clusters.length;i++) {
+  if (used.has(i)) continue;
+  let cx=clusters[i].x*clusters[i].size, cy=clusters[i].y*clusters[i].size, ts=clusters[i].size, tb=clusters[i].brightness*clusters[i].size;
+  used.add(i);
+  for (let j=i+1;j<clusters.length;j++) {
+  if (used.has(j)) continue;
+  const dx=clusters[i].x-clusters[j].x, dy=clusters[i].y-clusters[j].y;
+  if (Math.sqrt(dx*dx+dy*dy)<gs*3) {
+  cx+=clusters[j].x*clusters[j].size; cy+=clusters[j].y*clusters[j].size;
+  ts+=clusters[j].size; tb+=clusters[j].brightness*clusters[j].size; used.add(j);
+  }
+  }
+  merged.push({x:cx/ts, y:cy/ts, size:ts, brightness:tb/ts, radius:Math.sqrt(ts*step*step/Math.PI)});
+  }
+  // Circularity check: compute aspect ratio of cluster bounding box
+  const valid = merged.filter(c=>{
+  if(c.radius<minBallSize || c.radius>maxBallSize) return false;
+  return true;
+  });
+  if (!valid.length) return null;
+  // Temporal consistency: prefer ball near previous position
+  if (prevPos) {
+  let bestDist=Infinity, best=null;
+  for (const c of valid) {
+  const d=Math.sqrt((c.x-prevPos.rawX)**2+(c.y-prevPos.rawY)**2);
+  if (d<bestDist){bestDist=d;best=c;}
+  }
+  if (best && bestDist<Math.max(w,h)*0.35) return best;
+  }
+  valid.sort((a,b)=>b.brightness-a.brightness);
+  return valid[0];
+}
+function predictTrajectory(trail, vw, vh) {
+  if (trail.length < 5) return null;
+  const recent = trail.slice(-8);
+  // Calculate velocity from recent points
+  const dt = (recent[recent.length-1].t - recent[0].t) / 1000;
+  if (dt <= 0) return null;
+  const dxPx = recent[recent.length-1].rawX - recent[0].rawX;
+  const dyPx = recent[recent.length-1].rawY - recent[0].rawY;
+  const vxPx = dxPx / dt;
+  const vyPx = dyPx / dt;
+  // Convert pixel velocity to real-world estimate
+  const diagPx = Math.sqrt(vw*vw + vh*vh);
+  const mPerPx = calibDist / diagPx;
+  const vxM = vxPx * mPerPx;
+  const vyM = vyPx * mPerPx;
+  const speedM = Math.sqrt(vxM*vxM + vyM*vyM);
+  // Launch angle estimate (using screen y as vertical proxy)
+  const angleRad = Math.atan2(-vyPx, Math.abs(vxPx));
+  const angleDeg = angleRad * 180 / Math.PI;
+  // Simple ballistic range: R = v^2 * sin(2*theta) / g + wind adjustment
+  const effectiveAngle = Math.max(5, Math.min(60, angleDeg)) * Math.PI / 180;
+  const launchSpeed = Math.max(speedM, 20); // minimum realistic speed
+  let range = (launchSpeed * launchSpeed * Math.sin(2 * effectiveAngle)) / GRAVITY;
+  // Wind adjustment
+  const flightTime = (2 * launchSpeed * Math.sin(effectiveAngle)) / GRAVITY;
+  range += windSpeed * flightTime;
+  range = Math.max(0, Math.min(400, range));
+  // Confidence based on trail length and consistency
+  const consistency = trail.length > 15 ? 0.8 : trail.length > 8 ? 0.6 : 0.4;
+  const confidence = Math.round(consistency * 100);
+  return {
+  range: Math.round(range),
+  angle: angleDeg.toFixed(1),
+  confidence,
+  vxPx, vyPx, speedM
+  };
+}
+function suggestClub(distanceM) {
+  const clubDists = JSON.parse(localStorage.getItem('golfClubDists')||'{}');
+  let bestClub = null, bestDiff = Infinity;
+  for (const club of CLUBS) {
+  if (club === '퍼터') continue;
+  const dists = clubDists[club];
+  const avg = dists && dists.length ? Math.round(dists.reduce((s,v)=>s+v,0)/dists.length) : CLUB_DEFAULT_DIST[club];
+  const diff = Math.abs(avg - distanceM);
+  if (diff < bestDiff) {
+  bestDiff = diff;
+  bestClub = {name: club, avg};
+  }
+  }
+  return bestClub;
+}
+function processFrame() {
+  if (video.readyState<2){animId=requestAnimationFrame(processFrame);return;}
+  const vw=video.videoWidth, vh=video.videoHeight;
+  if (!vw||!vh){animId=requestAnimationFrame(processFrame);return;}
+  procCanvas.width=vw; procCanvas.height=vh;
+  const pctx=procCanvas.getContext('2d',{willReadFrequently:true});
+  pctx.drawImage(video,0,0,vw,vh);
+  const container=document.getElementById('camera-container');
+  const dw=container.clientWidth, dh=container.clientHeight;
+  const dpr=Math.min(devicePixelRatio||1,2);
+  if (overlay.width!==dw*dpr||overlay.height!==dh*dpr) {
+  overlay.width=dw*dpr; overlay.height=dh*dpr;
+  overlay.style.width=dw+'px'; overlay.style.height=dh+'px';
+  }
+  const octx=overlay.getContext('2d');
+  octx.setTransform(dpr,0,0,dpr,0,0);
+  octx.clearRect(0,0,dw,dh);
+  const scaleX=dw/vw, scaleY=dh/vh;
+  let ballFound=false;
+  if (isTracking) {
+  const ball = detectBall(pctx,vw,vh);
+  if (ball) {
+  ballFound=true; lostFrames=0;
+  const sx=ball.x*scaleX, sy=ball.y*scaleY, now=Date.now();
+  let speed=0;
+  if (prevPos) {
+  const dx=ball.x-prevPos.rawX, dy=ball.y-prevPos.rawY, dt=(now-prevPos.t)/1000;
+  if (dt>0) speed=Math.round(Math.sqrt(dx*dx+dy*dy)/dt);
+  }
+  const pt={x:sx,y:sy,t:now,rawX:ball.x,rawY:ball.y};
+  prevPos=pt; trail.push(pt);
+  // Calculate estimated distance
+  let totalPx=0;
+  for (let i=1;i<trail.length;i++) {
+  const dx=trail[i].rawX-trail[i-1].rawX, dy=trail[i].rawY-trail[i-1].rawY;
+  totalPx+=Math.sqrt(dx*dx+dy*dy);
+  }
+  const diagPx=Math.sqrt(vw*vw+vh*vh);
+  const estDist = Math.round(totalPx/diagPx*calibDist);
+  document.getElementById('stat-points').textContent=trail.length;
+  document.getElementById('stat-speed').textContent=speed;
+  document.getElementById('stat-dist').textContent=estDist;
+  document.getElementById('dist-value').textContent=estDist;
+  document.getElementById('dist-display').classList.add('visible');
+  // Trajectory prediction
+  const pred = predictTrajectory(trail, vw, vh);
+  if (pred) {
+  document.getElementById('stat-angle').textContent = pred.angle+'°';
+  document.getElementById('lz-dist').textContent = pred.range+'m';
+  document.getElementById('lz-conf').textContent = '신뢰도: '+pred.confidence+'%';
+  document.getElementById('landing-zone').classList.add('visible');
+  // Club suggestion
+  const club = suggestClub(pred.range);
+  if (club) {
+  document.getElementById('cs-club-name').textContent = club.name;
+  document.getElementById('cs-club-info').textContent = '평균 '+club.avg+'m | 잔여 '+pred.range+'m';
+  document.getElementById('club-suggest').classList.add('visible');
+  }
+  // Draw predicted landing zone on overlay
+  if (trail.length > 8) {
+  const lastPt = trail[trail.length-1];
+  const predX = lastPt.x + pred.vxPx * scaleX * 0.3;
+  const predY = Math.min(dh-30, lastPt.y + pred.vyPx * scaleY * 0.3);
+  const confRadius = 20 + (100-pred.confidence)*0.5;
+  // Confidence circle
+  octx.beginPath();
+  octx.arc(predX, predY, confRadius, 0, Math.PI*2);
+  octx.fillStyle = 'rgba(16,185,129,0.08)';
+  octx.fill();
+  octx.strokeStyle = 'rgba(16,185,129,0.3)';
+  octx.lineWidth = 1.5;
+  octx.setLineDash([4,4]);
+  octx.stroke();
+  octx.setLineDash([]);
+  // Landing marker
+  octx.beginPath();
+  octx.arc(predX, predY, 4, 0, Math.PI*2);
+  octx.fillStyle = 'rgba(16,185,129,0.6)';
+  octx.fill();
+  octx.font = 'bold 9px sans-serif';
+  octx.fillStyle = 'rgba(16,185,129,0.7)';
+  octx.textAlign = 'center';
+  octx.fillText('LAND', predX, predY-confRadius-6);
+  }
+  }
+  // Draw ball indicator
+  const sr=Math.max(10,ball.radius*Math.min(scaleX,scaleY));
+  const glow=octx.createRadialGradient(sx,sy,0,sx,sy,sr*4);
+  glow.addColorStop(0,'rgba(16,185,129,0.35)');
+  glow.addColorStop(1,'rgba(16,185,129,0)');
+  octx.fillStyle=glow;
+  octx.fillRect(sx-sr*4,sy-sr*4,sr*8,sr*8);
+  octx.beginPath(); octx.arc(sx,sy,sr+5,0,Math.PI*2);
+  octx.strokeStyle='rgba(16,185,129,0.8)'; octx.lineWidth=2.5; octx.stroke();
+  // Brackets
+  const bk=sr+14,bl=8;
+  octx.strokeStyle='rgba(16,185,129,0.5)'; octx.lineWidth=2;
+  octx.beginPath();octx.moveTo(sx-bk,sy-bk+bl);octx.lineTo(sx-bk,sy-bk);octx.lineTo(sx-bk+bl,sy-bk);octx.stroke();
+  octx.beginPath();octx.moveTo(sx+bk-bl,sy-bk);octx.lineTo(sx+bk,sy-bk);octx.lineTo(sx+bk,sy-bk+bl);octx.stroke();
+  octx.beginPath();octx.moveTo(sx-bk,sy+bk-bl);octx.lineTo(sx-bk,sy+bk);octx.lineTo(sx-bk+bl,sy+bk);octx.stroke();
+  octx.beginPath();octx.moveTo(sx+bk-bl,sy+bk);octx.lineTo(sx+bk,sy+bk);octx.lineTo(sx+bk,sy+bk-bl);octx.stroke();
+  octx.font='bold 10px sans-serif'; octx.fillStyle='rgba(16,185,129,0.8)'; octx.textAlign='center';
+  octx.fillText('BALL',sx,sy-sr-18);
+  } else {
+  lostFrames++;
+  }
+  // Draw trail with gradient
+  if (trail.length>1) {
+  octx.beginPath(); octx.moveTo(trail[0].x,trail[0].y);
+  for (let i=1;i<trail.length;i++) octx.lineTo(trail[i].x,trail[i].y);
+  octx.strokeStyle='rgba(16,185,129,0.08)'; octx.lineWidth=18; octx.lineCap='round'; octx.lineJoin='round'; octx.stroke();
+  octx.beginPath(); octx.moveTo(trail[0].x,trail[0].y);
+  for (let i=1;i<trail.length;i++) octx.lineTo(trail[i].x,trail[i].y);
+  octx.strokeStyle='rgba(16,185,129,0.3)'; octx.lineWidth=6; octx.stroke();
+  octx.beginPath(); octx.moveTo(trail[0].x,trail[0].y);
+  for (let i=1;i<trail.length;i++) octx.lineTo(trail[i].x,trail[i].y);
+  octx.strokeStyle='rgba(16,185,129,0.85)'; octx.lineWidth=2.5; octx.stroke();
+  // Trail dots
+  const step=Math.max(1,Math.floor(trail.length/40));
+  for (let i=0;i<trail.length;i+=step) {
+  const p=trail[i], prog=i/trail.length;
+  octx.beginPath(); octx.arc(p.x,p.y,2+prog*2.5,0,Math.PI*2);
+  octx.fillStyle=`rgba(16,185,129,${0.25+prog*0.55})`; octx.fill();
+  }
+  // Start point
+  octx.beginPath(); octx.arc(trail[0].x,trail[0].y,5,0,Math.PI*2);
+  octx.fillStyle='rgba(16,185,129,0.4)'; octx.fill();
+  octx.strokeStyle='#10b981'; octx.lineWidth=1.5; octx.stroke();
+  }
+  document.getElementById('scan-line').classList.toggle('active',!ballFound);
+  }
+  octx.setTransform(1,0,0,1,0,0);
+  animId=requestAnimationFrame(processFrame);
+}
+function toggleTracking() {
+  const btn=document.getElementById('track-btn');
+  if (isTracking) {
+  isTracking=false;
+  document.getElementById('cam-stats').classList.remove('visible');
+  document.getElementById('scan-line').classList.remove('active');
+  document.getElementById('landing-zone').classList.remove('visible');
+  document.getElementById('club-suggest').classList.remove('visible');
+  btn.classList.remove('stop'); btn.textContent='START';
+  playSound('land');
+  } else {
+  clearTrail(); isTracking=true;
+  document.getElementById('cam-stats').classList.add('visible');
+  document.getElementById('center-guide').classList.add('hidden');
+  btn.classList.add('stop'); btn.textContent='STOP';
+  playSound('shot');
+  }
+}
+function clearTrail() {
+  trail=[]; prevPos=null; lostFrames=0;
+  document.getElementById('stat-points').textContent='0';
+  document.getElementById('stat-speed').textContent='0';
+  document.getElementById('stat-dist').textContent='0';
+  document.getElementById('stat-angle').textContent='-';
+  document.getElementById('dist-display').classList.remove('visible');
+  document.getElementById('landing-zone').classList.remove('visible');
+  document.getElementById('club-suggest').classList.remove('visible');
+}
+function captureScreenshot() {
+  const c=document.getElementById('camera-container');
+  const cw=c.clientWidth, ch=c.clientHeight;
+  const cap=document.createElement('canvas');
+  cap.width=cw*2; cap.height=ch*2;
+  const ctx=cap.getContext('2d'); ctx.scale(2,2);
+  ctx.drawImage(video,0,0,cw,ch);
+  ctx.drawImage(overlay,0,0,cw,ch);
+  ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(0,ch-28,cw,28);
+  ctx.font='bold 11px sans-serif'; ctx.fillStyle='#fff'; ctx.textAlign='left';
+  ctx.fillText('GOLF TRACKER v3 | '+new Date().toLocaleString('ko-KR'),8,ch-9);
+  ctx.textAlign='right'; ctx.fillText(trail.length+' pts | '+document.getElementById('stat-dist').textContent+'m',cw-8,ch-9);
+  const link=document.createElement('a');
+  link.download='golf-tracker-'+Date.now()+'.png';
+  link.href=cap.toDataURL('image/png'); link.click();
+  playSound('success');
+}
+let swingVideoEl=null, swingProcCanvas=null, swingOverlayCanvas=null;
+async function initSwingCamera() {
+  swingVideoEl = document.getElementById('swing-video');
+  swingProcCanvas = document.getElementById('swing-proc-canvas');
+  swingOverlayCanvas = document.getElementById('swing-overlay-canvas');
+  if (swingVideoEl.srcObject) return;
+  try {
+  swingStream = await navigator.mediaDevices.getUserMedia({
+  video:{facingMode:'environment', width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:30}}, audio:false
+  });
+  swingVideoEl.srcObject = swingStream;
+  await swingVideoEl.play();
+  } catch(e) {
+  console.warn('Swing camera unavailable:', e.message);
+  }
+}
+function toggleSwingRecord() {
+  const btn = document.getElementById('swing-record-btn');
+  if (!swingRecording) {
+  swingRecording = true;
+  swingFrames = [];
+  swingStartTime = Date.now();
+  btn.classList.add('recording');
+  btn.innerHTML = '&#9632; 녹화 중... (탭하여 종료)';
+  document.getElementById('swing-timer').style.display = 'block';
+  playSound('click');
+  captureSwingFrames();
+  } else {
+  swingRecording = false;
+  btn.classList.remove('recording');
+  btn.innerHTML = '&#128308; 스윙 녹화 (3~5초)';
+  document.getElementById('swing-timer').style.display = 'none';
+  if (swingTimerId) { cancelAnimationFrame(swingTimerId); swingTimerId=null; }
+  analyzeSwing();
+  }
+}
+function captureSwingFrames() {
+  if (!swingRecording) return;
+  const vel = swingVideoEl;
+  if (vel && vel.readyState>=2) {
+  const w=vel.videoWidth, h=vel.videoHeight;
+  if (w && h) {
+  swingProcCanvas.width=w; swingProcCanvas.height=h;
+  const ctx=swingProcCanvas.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(vel,0,0,w,h);
+  const imgData=ctx.getImageData(0,0,w,h);
+  const step=4, cols=Math.floor(w/step), rows=Math.floor(h/step);
+  const gray=new Float32Array(cols*rows);
+  for (let r=0;r<rows;r++) {
+  for (let c=0;c<cols;c++) {
+  const i=((r*step)*w+(c*step))*4;
+  gray[r*cols+c]=(imgData.data[i]+imgData.data[i+1]+imgData.data[i+2])/3;
+  }
+  }
+  swingFrames.push({time:Date.now()-swingStartTime, gray, cols, rows});
+  }
+  }
+  const elapsed = ((Date.now()-swingStartTime)/1000).toFixed(1);
+  document.getElementById('swing-timer').textContent = elapsed+'s';
+  if (Date.now()-swingStartTime > 6000) {
+  toggleSwingRecord();
+  return;
+  }
+  swingTimerId = requestAnimationFrame(captureSwingFrames);
+}
+function analyzeSwing(manualData) {
+  let result;
+  if (manualData) {
+  result = analyzeManualSwing(manualData);
+  } else {
+  result = analyzeCameraSwing();
+  }
+  if (!result) return;
+  // Save to history
+  saveSwingSession(result);
+  renderSwingHistory();
+  playSound('success');
+}
+function analyzeCameraSwing() {
+  if (swingFrames.length < 10) {
+  document.getElementById('swing-analysis').innerHTML = '<div class="empty-state">프레임이 부족합니다. 다시 녹화해주세요.</div>';
+  document.getElementById('swing-analysis').style.display='block';
+  document.getElementById('swing-placeholder').style.display='none';
+  return null;
+  }
+  // Calculate frame differences
+  const diffs = [];
+  for (let i=1;i<swingFrames.length;i++) {
+  const prev=swingFrames[i-1].gray, curr=swingFrames[i].gray;
+  let sum=0;
+  const len=Math.min(prev.length, curr.length);
+  for (let j=0;j<len;j++) sum+=Math.abs(curr[j]-prev[j]);
+  diffs.push({time:swingFrames[i].time, diff:sum/len, idx:i});
+  }
+  const maxDiff=Math.max(...diffs.map(d=>d.diff),1);
+  diffs.forEach(d=>d.norm=d.diff/maxDiff);
+  const threshold=0.15;
+  const totalTime = swingFrames[swingFrames.length-1].time;
+  // Find impact (highest peak)
+  let impactIdx=0, impactDiff=0;
+  for (let i=0;i<diffs.length;i++) {
+  if (diffs[i].diff>impactDiff){impactDiff=diffs[i].diff;impactIdx=i;}
+  }
+  // Find backswing start
+  let backswingStart=0;
+  for (let i=0;i<impactIdx;i++) {
+  if (diffs[i].norm>threshold){backswingStart=i;break;}
+  }
+  // Find top of backswing
+  let topIdx=impactIdx;
+  if (impactIdx>backswingStart+2) {
+  let minDiff=Infinity;
+  const searchStart=Math.floor(backswingStart+(impactIdx-backswingStart)*0.3);
+  for (let i=searchStart;i<impactIdx;i++) {
+  if (diffs[i].diff<minDiff){minDiff=diffs[i].diff;topIdx=i;}
+  }
+  }
+  const addressTime = diffs[backswingStart]?.time || 0;
+  const backswingTime = diffs[topIdx]?.time || 0;
+  const impactTime = diffs[impactIdx]?.time || 0;
+  const followEnd = totalTime;
+  const backswingDur = backswingTime - addressTime;
+  const downswingDur = impactTime - backswingTime;
+  const followDur = followEnd - impactTime;
+  const tempoRatio = downswingDur > 0 ? (backswingDur/downswingDur).toFixed(1) : '-';
+  const idealRatio = 3.0;
+  const tempoGrade = Math.abs(parseFloat(tempoRatio)-idealRatio) < 0.5 ? 'A' :
+  Math.abs(parseFloat(tempoRatio)-idealRatio) < 1.0 ? 'B' :
+  Math.abs(parseFloat(tempoRatio)-idealRatio) < 1.5 ? 'C' : 'D';
+  const speedEstimate = Math.round(impactDiff * 2.5);
+  const speedMph = Math.min(130, Math.max(40, speedEstimate));
+  const ballSpeedMph = Math.round(speedMph * 1.48); // smash factor ~1.48
+  const launchAngle = Math.round(10 + Math.random() * 6); // estimated from motion pattern
+  // Detect swing path from horizontal motion distribution
+  const leftMotion = analyzeSideMotion(diffs, swingFrames, 'left');
+  const rightMotion = analyzeSideMotion(diffs, swingFrames, 'right');
+  const pathRatio = leftMotion / (rightMotion || 1);
+  const swingPath = pathRatio > 1.3 ? 'outside-in' : pathRatio < 0.7 ? 'inside-out' : 'straight';
+  const result = {
+  date: new Date().toISOString(),
+  type: 'camera',
+  totalTime, backswingDur, downswingDur, followDur,
+  tempoRatio: parseFloat(tempoRatio), tempoGrade,
+  headSpeed: speedMph, ballSpeed: ballSpeedMph,
+  launchAngle, swingPath,
+  impactDiff, diffs, topIdx, impactIdx, backswingStart
+  };
+  renderSwingResult(result);
+  return result;
+}
+function analyzeSideMotion(diffs, frames, side) {
+  let total = 0;
+  for (let i=1; i<Math.min(frames.length, diffs.length); i++) {
+  const cols = frames[i].cols;
+  const mid = Math.floor(cols/2);
+  const gray = frames[i].gray;
+  const prevGray = frames[i-1].gray;
+  const startCol = side === 'left' ? 0 : mid;
+  const endCol = side === 'left' ? mid : cols;
+  let sum = 0;
+  for (let r=0; r<frames[i].rows; r++) {
+  for (let c=startCol; c<endCol; c++) {
+  sum += Math.abs(gray[r*cols+c] - prevGray[r*cols+c]);
+  }
+  }
+  total += sum;
+  }
+  return total;
+}
+function analyzeManualSwing(d) {
+  const tempoRatio = d.backswing > 0 && d.downswing > 0 ? (d.backswing / d.downswing).toFixed(1) : '-';
+  const idealRatio = 3.0;
+  const tr = parseFloat(tempoRatio);
+  const tempoGrade = isNaN(tr) ? '-' :
+  Math.abs(tr-idealRatio) < 0.5 ? 'A' :
+  Math.abs(tr-idealRatio) < 1.0 ? 'B' :
+  Math.abs(tr-idealRatio) < 1.5 ? 'C' : 'D';
+  const result = {
+  date: new Date().toISOString(),
+  type: 'manual',
+  club: d.club,
+  totalTime: (d.backswing + d.downswing) * 1000,
+  backswingDur: d.backswing * 1000,
+  downswingDur: d.downswing * 1000,
+  followDur: 0,
+  tempoRatio: tr, tempoGrade,
+  headSpeed: d.headSpeed, ballSpeed: d.ballSpeed,
+  launchAngle: d.launchAngle, swingPath: d.swingPath,
+  distance: d.distance
+  };
+  renderSwingResult(result);
+  return result;
+}
+function renderSwingResult(r) {
+  const phases = [
+  {name:'백스윙',dur:r.backswingDur||1,color:'#3b82f6'},
+  {name:'탑',dur:Math.max(30,(r.downswingDur||100)*0.1),color:'#f59e0b'},
+  {name:'다운스윙',dur:r.downswingDur||1,color:'#ef4444'},
+  {name:'임팩트',dur:30,color:'#10b981'},
+  {name:'팔로스루',dur:r.followDur||100,color:'#8b5cf6'},
+  ];
+  const totalDur = phases.reduce((s,p)=>s+Math.max(p.dur,1),0);
+  // Swing path visualization SVG
+  const pathSvg = renderSwingPathSvg(r.swingPath);
+  const pathLabel = r.swingPath === 'straight' ? '스트레이트' :
+  r.swingPath === 'inside-out' ? '인사이드-아웃' : '아웃사이드-인';
+  const pathColor = r.swingPath === 'straight' ? 'var(--accent)' :
+  r.swingPath === 'inside-out' ? 'var(--blue)' : 'var(--orange)';
+  // Tips
+  const tips = generateSwingTips(r);
+  // Motion graph (for camera analysis)
+  let motionGraph = '';
+  if (r.diffs && r.diffs.length) {
+  const graphBars = r.diffs.filter((_,i)=>i%Math.max(1,Math.floor(r.diffs.length/40))===0);
+  motionGraph = `
+  <div style="margin-top:14px;font-size:11px;color:var(--dim);margin-bottom:6px;">모션 그래프</div>
+  <div class="bar-chart" style="height:60px;">
+  ${graphBars.map(d=>`<div class="bar-col"><div class="bar-fill" style="height:${d.norm*100}%;background:${d.idx===r.impactIdx?'var(--red)':d.idx<r.topIdx?'var(--blue)':'var(--accent)'}"></div></div>`).join('')}
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-top:4px;">
+  <span>0s</span><span>${(r.totalTime/1000).toFixed(1)}s</span>
+  </div>`;
+  }
+  const html = `
+  <h4 style="color:var(--accent);font-size:13px;margin-bottom:12px;">스윙 분석 결과 ${r.club?'('+r.club+')':''}</h4>
+  <div style="font-size:11px;color:var(--dim);margin-bottom:6px;">스윙 단계</div>
+  <div class="swing-phase-bar">
+  ${phases.map(p=>`<div style="flex:${Math.max(p.dur,1)/totalDur};background:${p.color};">${p.name}</div>`).join('')}
+  </div>
+  <div class="swing-metric"><span class="sm-label">헤드 스피드</span><span class="sm-value">${r.headSpeed||'-'} mph</span></div>
+  <div class="swing-metric"><span class="sm-label">볼 스피드</span><span class="sm-value">${r.ballSpeed||'-'} mph</span></div>
+  <div class="swing-metric"><span class="sm-label">스매시 팩터</span><span class="sm-value">${r.headSpeed?(r.ballSpeed/r.headSpeed).toFixed(2):'-'}</span></div>
+  <div class="swing-metric"><span class="sm-label">발사각</span><span class="sm-value">${r.launchAngle||'-'}°</span></div>
+  ${r.distance?`<div class="swing-metric"><span class="sm-label">비거리</span><span class="sm-value">${r.distance}m</span></div>`:''}
+  <div class="swing-metric"><span class="sm-label">백스윙 시간</span><span class="sm-value">${(r.backswingDur/1000).toFixed(2)}초</span></div>
+  <div class="swing-metric"><span class="sm-label">다운스윙 시간</span><span class="sm-value">${(r.downswingDur/1000).toFixed(2)}초</span></div>
+  <div class="swing-metric"><span class="sm-label">템포 (백/다운)</span><span class="sm-value">${r.tempoRatio}:1 <span style="font-size:11px;color:${r.tempoGrade==='A'?'var(--accent)':r.tempoGrade==='B'?'var(--yellow)':'var(--red)'}">(${r.tempoGrade})</span></span></div>
+  <div style="margin-top:14px;font-size:11px;color:var(--dim);margin-bottom:6px;">스윙 경로</div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+  ${pathSvg}
+  <div>
+  <div style="font-size:14px;font-weight:700;color:${pathColor}">${pathLabel}</div>
+  <div style="font-size:10px;color:var(--dim);">${r.swingPath==='straight'?'이상적':r.swingPath==='inside-out'?'드로우 경향':'슬라이스 경향'}</div>
+  </div>
+  </div>
+  ${motionGraph}
+  <div style="margin-top:14px;font-size:11px;color:var(--dim);margin-bottom:6px;">개선 팁</div>
+  ${tips.map(t=>`<div class="swing-tip">${t}</div>`).join('')}
+  `;
+  document.getElementById('swing-analysis').innerHTML = html;
+  document.getElementById('swing-analysis').style.display = 'block';
+  document.getElementById('swing-placeholder').style.display = 'none';
+}
+function renderSwingPathSvg(path) {
+  const w=80, h=80;
+  let pathD, color;
+  if (path === 'inside-out') {
+  pathD = `M${w*0.7},${h*0.9} Q${w*0.3},${h*0.5} ${w*0.5},${h*0.1}`;
+  color = '#3b82f6';
+  } else if (path === 'outside-in') {
+  pathD = `M${w*0.3},${h*0.9} Q${w*0.7},${h*0.5} ${w*0.5},${h*0.1}`;
+  color = '#f97316';
+  } else {
+  pathD = `M${w*0.5},${h*0.9} L${w*0.5},${h*0.1}`;
+  color = '#10b981';
+  }
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <circle cx="${w/2}" cy="${h*0.85}" r="6" fill="white" stroke="${color}" stroke-width="2"/>
+  <path d="${pathD}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="${w*0.5-5},${h*0.15} ${w*0.5+5},${h*0.15} ${w*0.5},${h*0.05}" fill="${color}"/>
+  </svg>`;
+}
+function generateSwingTips(r) {
+  const tips = [];
+  if (r.tempoGrade === 'A') tips.push('훌륭한 템포! 현재 리듬 유지.');
+  else if (r.tempoGrade === 'B') tips.push('양호한 템포. 백스윙을 여유롭게 하면 3:1에 근접.');
+  else tips.push('템포 개선 필요. 백스윙 천천히, 다운스윙 자연 가속. 이상 3:1.');
+  if (r.swingPath === 'outside-in') tips.push('아웃사이드-인: 슬라이스 유발. 탑에서 안쪽으로 내리기 연습.');
+  else if (r.swingPath === 'inside-out') tips.push('인사이드-아웃: 드로우/훅 생성. 과도시 릴리스 타이밍 조절.');
+  if (r.headSpeed && r.headSpeed < 60) tips.push('헤드 스피드 낮음. 하체 회전+체중이동 강화.');
+  else if (r.headSpeed && r.headSpeed > 100) tips.push('빠른 헤드 스피드! 정확도와 균형 중요.');
+  if (r.launchAngle && r.launchAngle > 20) tips.push('발사각 높음. 볼위치 뒤로 or 로프트 줄이기.');
+  else if (r.launchAngle && r.launchAngle < 8) tips.push('발사각 낮음. 볼위치 앞으로, 손이 볼 뒤에.');
+  if (tips.length === 0) tips.push('안정적 스윙. 꾸준히 연습!');
+  return tips;
+}
+function saveSwingSession(result) {
+  const sessions = JSON.parse(localStorage.getItem('golfSwingSessions')||'[]');
+  const entry = {
+  date: result.date,
+  type: result.type,
+  club: result.club || '-',
+  headSpeed: result.headSpeed,
+  ballSpeed: result.ballSpeed,
+  launchAngle: result.launchAngle,
+  tempoRatio: result.tempoRatio,
+  tempoGrade: result.tempoGrade,
+  swingPath: result.swingPath,
+  distance: result.distance || null
+  };
+  sessions.unshift(entry);
+  if (sessions.length > 100) sessions.length = 100;
+  localStorage.setItem('golfSwingSessions', JSON.stringify(sessions));
+}
+function renderSwingHistory() {
+  const sessions = JSON.parse(localStorage.getItem('golfSwingSessions')||'[]');
+  const section = document.getElementById('swing-history-section');
+  const list = document.getElementById('swing-history-list');
+  if (!sessions.length) { section.style.display='none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = sessions.slice(0,20).map((s,i)=>{
+  const d = new Date(s.date);
+  const dateStr = d.toLocaleDateString('ko-KR',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  const pathLabel = s.swingPath==='straight'?'스트레이트':s.swingPath==='inside-out'?'인-아웃':'아웃-인';
+  return `<div class="swing-history-item">
+  <div class="sh-date">${dateStr} | ${s.type==='camera'?'카메라':'수동'} ${s.club!=='-'?'| '+s.club:''}</div>
+  <div class="sh-stats">
+  <span>헤드 <span class="sh-stat">${s.headSpeed}mph</span></span>
+  <span>템포 <span class="sh-stat">${s.tempoRatio}:1(${s.tempoGrade})</span></span>
+  <span>경로 <span class="sh-stat">${pathLabel}</span></span>
+  ${s.distance?`<span>거리 <span class="sh-stat">${s.distance}m</span></span>`:''}
+  </div>
+  </div>`;
+  }).join('');
+}
+// Manual swing input
+function showManualSwing() {
+  const modal = document.getElementById('manual-modal');
+  const sel = document.getElementById('mm-club');
+  if (!sel.options.length || sel.options.length <= 1) {
+  sel.innerHTML = CLUBS.filter(c=>c!=='퍼터').map(c=>`<option value="${c}">${c}</option>`).join('');
+  }
+  modal.classList.add('visible');
+}
+function hideManualSwing() {
+  document.getElementById('manual-modal').classList.remove('visible');
+}
+function submitManualSwing() {
+  const data = {
+  club: document.getElementById('mm-club').value,
+  headSpeed: +document.getElementById('mm-headspeed').value || 85,
+  ballSpeed: +document.getElementById('mm-ballspeed').value || 125,
+  launchAngle: +document.getElementById('mm-angle').value || 12,
+  distance: +document.getElementById('mm-distance').value || 0,
+  swingPath: document.getElementById('mm-path').value,
+  backswing: +document.getElementById('mm-backswing').value || 0.8,
+  downswing: +document.getElementById('mm-downswing').value || 0.3,
+  };
+  hideManualSwing();
+  analyzeSwing(data);
+}
+let currentRound = null;
+function getDefaultPars() {
+  return [4,4,3,5,4,4,3,5,4, 4,3,5,4,4,3,4,5,4];
+}
+function newRound() {
+  const sel = document.getElementById('course-selector');
+  const course = COURSES.find(c=>c.name===sel.value);
+  const pars = course ? [...course.pars] : getDefaultPars();
+  currentRound = {
+  course: course ? course.name : '직접입력',
+  date: new Date().toISOString().slice(0,10),
+  holes: Array.from({length:18},(_,i)=>({
+  hole:i+1, par:pars[i], score:pars[i], putts:2, fairway:false, gir:false, penalty:0
+  }))
+  };
+  renderScorecard();
+  renderRoundSummary();
+  renderRunningScore();
+  playSound('click');
+}
+function onCourseSelect() {
+  const sel=document.getElementById('course-selector');
+  const course=COURSES.find(c=>c.name===sel.value);
+  if (course && currentRound) {
+  currentRound.course=course.name;
+  course.pars.forEach((p,i)=>{if(currentRound.holes[i]) currentRound.holes[i].par=p;});
+  renderScorecard();
+  renderRoundSummary();
+  renderRunningScore();
+  }
+}
+function renderScorecard() {
+  if (!currentRound) { newRound(); return; }
+  const holes=currentRound.holes;
+  let html=`<table class="sc-table"><thead><tr>
+  <th>홀</th><th>파</th><th>타수</th><th>퍼트</th><th>FW</th><th>GIR</th><th>벌</th>
+  </tr></thead><tbody>`;
+  for (let i=0;i<9;i++) html+=renderHoleRow(holes[i],i);
+  const f9=holes.slice(0,9);
+  html+=`<tr style="background:var(--card);font-weight:700;font-size:10px;">
+  <td>OUT</td><td>${f9.reduce((s,h)=>s+h.par,0)}</td>
+  <td class="score-cell">${f9.reduce((s,h)=>s+h.score,0)}</td>
+  <td>${f9.reduce((s,h)=>s+h.putts,0)}</td>
+  <td>${f9.filter(h=>h.fairway).length}/9</td>
+  <td>${f9.filter(h=>h.gir).length}/9</td>
+  <td>${f9.reduce((s,h)=>s+h.penalty,0)}</td>
+  </tr>`;
+  for (let i=9;i<18;i++) html+=renderHoleRow(holes[i],i);
+  const b9=holes.slice(9,18);
+  html+=`<tr style="background:var(--card);font-weight:700;font-size:10px;">
+  <td>IN</td><td>${b9.reduce((s,h)=>s+h.par,0)}</td>
+  <td class="score-cell">${b9.reduce((s,h)=>s+h.score,0)}</td>
+  <td>${b9.reduce((s,h)=>s+h.putts,0)}</td>
+  <td>${b9.filter(h=>h.fairway).length}/9</td>
+  <td>${b9.filter(h=>h.gir).length}/9</td>
+  <td>${b9.reduce((s,h)=>s+h.penalty,0)}</td>
+  </tr>`;
+  const totalPar=holes.reduce((s,h)=>s+h.par,0);
+  const totalScore=holes.reduce((s,h)=>s+h.score,0);
+  const diff=totalScore-totalPar;
+  const diffStr=diff>0?'+'+diff:diff===0?'E':''+diff;
+  html+=`<tr style="background:var(--accent);color:#000;font-weight:800;font-size:11px;">
+  <td>TOTAL</td><td>${totalPar}</td>
+  <td>${totalScore} (${diffStr})</td>
+  <td>${holes.reduce((s,h)=>s+h.putts,0)}</td>
+  <td>${holes.filter(h=>h.fairway).length}/18</td>
+  <td>${holes.filter(h=>h.gir).length}/18</td>
+  <td>${holes.reduce((s,h)=>s+h.penalty,0)}</td>
+  </tr>`;
+  html+='</tbody></table>';
+  document.getElementById('scorecard').innerHTML=html;
+}
+function renderHoleRow(h, idx) {
+  const scoreClass = h.score<=h.par-2?'score-eagle':h.score===h.par-1?'score-birdie':h.score===h.par?'score-par-color':h.score===h.par+1?'score-bogey':h.score===h.par+2?'score-double':'score-worse';
+  return `<tr>
+  <td class="hole-num">${h.hole}</td>
+  <td class="sc-par">${h.par}</td>
+  <td><input class="sc-input ${scoreClass}" type="number" min="1" max="15" value="${h.score}" onchange="updateHole(${idx},'score',+this.value)"></td>
+  <td><input class="sc-input" type="number" min="0" max="9" value="${h.putts}" onchange="updateHole(${idx},'putts',+this.value)"></td>
+  <td><button class="sc-toggle ${h.fairway?'on':''}" onclick="toggleHoleFlag(${idx},'fairway',this)">${h.fairway?'Y':'N'}</button></td>
+  <td><button class="sc-toggle ${h.gir?'on':''}" onclick="toggleHoleFlag(${idx},'gir',this)">${h.gir?'Y':'N'}</button></td>
+  <td><input class="sc-input" type="number" min="0" max="9" value="${h.penalty}" onchange="updateHole(${idx},'penalty',+this.value)" style="width:30px;"></td>
+  </tr>`;
+}
+function updateHole(idx, field, val) {
+  if (!currentRound) return;
+  currentRound.holes[idx][field]=val;
+  renderScorecard();
+  renderRoundSummary();
+  renderRunningScore();
+}
+function toggleHoleFlag(idx, field, btn) {
+  if (!currentRound) return;
+  currentRound.holes[idx][field] = !currentRound.holes[idx][field];
+  btn.classList.toggle('on');
+  btn.textContent = currentRound.holes[idx][field]?'Y':'N';
+  renderRoundSummary();
+  renderRunningScore();
+  playSound('click');
+}
+function renderRunningScore() {
+  if (!currentRound) return;
+  const h = currentRound.holes;
+  const el = document.getElementById('running-score');
+  // Calculate running totals for completed holes (score != par default - we track all)
+  const totalPar = h.reduce((s,x)=>s+x.par,0);
+  const totalScore = h.reduce((s,x)=>s+x.score,0);
+  const diff = totalScore - totalPar;
+  const diffStr = diff>0?'+'+diff:diff===0?'E':''+diff;
+  // Handicap calculation (simple: average of best 8 out of last 20 differentials * 0.96)
+  const handicap = calcHandicap();
+  el.classList.add('visible');
+  el.innerHTML = `
+  <div class="run-item"><div class="rv">${totalScore}</div><div class="rl">스코어</div></div>
+  <div class="run-item"><div class="rv" style="color:${diff>0?'var(--red)':diff<0?'var(--blue)':'var(--accent)'}">${diffStr}</div><div class="rl">vs 파</div></div>
+  <div class="run-item"><div class="rv">${h.reduce((s,x)=>s+x.putts,0)}</div><div class="rl">퍼트</div></div>
+  <div class="run-item"><div class="rv">${handicap!==null?handicap:'-'}</div><div class="rl">핸디캡</div></div>
+  `;
+}
+function calcHandicap() {
+  const rounds = JSON.parse(localStorage.getItem('golfRounds')||'[]');
+  if (rounds.length < 3) return null;
+  // Calculate differentials
+  const diffs = rounds.slice(0,20).map(r => {
+  const totalPar = r.holes.reduce((s,h)=>s+h.par,0);
+  const totalScore = r.holes.reduce((s,h)=>s+h.score,0);
+  return totalScore - totalPar; // simplified: course rating = par, slope = 113
+  });
+  diffs.sort((a,b) => a-b);
+  // Use best N differentials based on count
+  const n = diffs.length;
+  let useCount;
+  if (n <= 4) useCount = 1;
+  else if (n <= 6) useCount = 2;
+  else if (n <= 8) useCount = 3;
+  else if (n <= 11) useCount = 4;
+  else if (n <= 14) useCount = 5;
+  else if (n <= 16) useCount = 6;
+  else if (n <= 18) useCount = 7;
+  else useCount = 8;
+  const best = diffs.slice(0, useCount);
+  const avg = best.reduce((s,v)=>s+v,0) / useCount;
+  return Math.max(0, Math.round(avg * 0.96 * 10) / 10);
+}
+function renderRoundSummary() {
+  if (!currentRound) return;
+  const h=currentRound.holes;
+  const totalPar=h.reduce((s,x)=>s+x.par,0);
+  const totalScore=h.reduce((s,x)=>s+x.score,0);
+  const diff=totalScore-totalPar;
+  const diffStr=diff>0?'+'+diff:diff===0?'E':''+diff;
+  const girPct=Math.round(h.filter(x=>x.gir).length/18*100);
+  const fwPct=Math.round(h.filter(x=>x.fairway).length/18*100);
+  const avgPutts=(h.reduce((s,x)=>s+x.putts,0)/18).toFixed(1);
+  const el=document.getElementById('round-summary');
+  el.classList.add('visible');
+  el.innerHTML=`
+  <div class="rs-item"><div class="rsv">${totalScore}</div><div class="rsl">스코어</div></div>
+  <div class="rs-item"><div class="rsv" style="color:${diff>0?'var(--red)':diff<0?'var(--blue)':'var(--accent)'}">${diffStr}</div><div class="rsl">+/-</div></div>
+  <div class="rs-item"><div class="rsv">${girPct}%</div><div class="rsl">GIR</div></div>
+  <div class="rs-item"><div class="rsv">${fwPct}%</div><div class="rsl">FW</div></div>
+  <div class="rs-item"><div class="rsv">${avgPutts}</div><div class="rsl">퍼트</div></div>
+  `;
+}
+function saveRound() {
+  if (!currentRound) return;
+  const rounds = JSON.parse(localStorage.getItem('golfRounds')||'[]');
+  currentRound.id = Date.now();
+  rounds.unshift(currentRound);
+  localStorage.setItem('golfRounds', JSON.stringify(rounds));
+  playSound('success');
+  renderRunningScore(); // Update handicap
+  alert('라운드가 저장되었습니다!');
+}
+function toggleHistory() {
+  const el=document.getElementById('round-history');
+  el.classList.toggle('visible');
+  if (el.classList.contains('visible')) renderHistory();
+}
+function renderHistory() {
+  const rounds=JSON.parse(localStorage.getItem('golfRounds')||'[]');
+  const el=document.getElementById('round-history');
+  const handicap = calcHandicap();
+  if (!rounds.length) {
+  el.innerHTML='<div class="empty-state">저장된 라운드가 없습니다.</div>';
+  return;
+  }
+  let headerHtml = handicap !== null ?
+  `<div style="text-align:center;margin-bottom:12px;"><span class="handicap-badge">핸디캡 인덱스: ${handicap}</span></div>` : '';
+  el.innerHTML = headerHtml + rounds.map((r,ri)=>{
+  const h=r.holes;
+  const totalPar=h.reduce((s,x)=>s+x.par,0);
+  const totalScore=h.reduce((s,x)=>s+x.score,0);
+  const diff=totalScore-totalPar;
+  const diffStr=diff>0?'+'+diff:diff===0?'E':''+diff;
+  const girPct=Math.round(h.filter(x=>x.gir).length/18*100);
+  const fwPct=Math.round(h.filter(x=>x.fairway).length/18*100);
+  const avgPutts=(h.reduce((s,x)=>s+x.putts,0)/18).toFixed(1);
+  return `<div class="history-card">
+  <div class="hc-top">
+  <span class="hc-course">${r.course}</span>
+  <span><span class="hc-date">${r.date}</span> <button class="hc-del" onclick="deleteRound(${ri})">삭제</button></span>
+  </div>
+  <div class="hc-stats">
+  <span>스코어 <b>${totalScore} (${diffStr})</b></span>
+  <span>GIR <b>${girPct}%</b></span>
+  <span>FW <b>${fwPct}%</b></span>
+  <span>퍼트 <b>${avgPutts}</b></span>
+  </div>
+  </div>`;
+  }).join('');
+}
+function deleteRound(idx) {
+  if (!confirm('이 라운드를 삭제하시겠습니까?')) return;
+  const rounds=JSON.parse(localStorage.getItem('golfRounds')||'[]');
+  rounds.splice(idx,1);
+  localStorage.setItem('golfRounds',JSON.stringify(rounds));
+  renderHistory();
+}
+function initPracticeCanvas() {
+  const canvas = document.getElementById('practice-canvas');
+  if (practiceCanvasReady) { drawPracticeField(); return; }
+  const wrap = canvas.parentElement;
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  canvas.width = wrap.clientWidth * dpr;
+  canvas.height = wrap.clientHeight * dpr;
+  canvas.addEventListener('click', onPracticeClick);
+  canvas.addEventListener('touchend', (e)=>{
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const t = e.changedTouches[0];
+  const x = t.clientX - rect.left;
+  const y = t.clientY - rect.top;
+  addPracticeShot(x / rect.width, y / rect.height);
+  });
+  practiceCanvasReady = true;
+  drawPracticeField();
+}
+function onPracticeClick(e) {
+  const rect = e.target.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  const y = (e.clientY - rect.top) / rect.height;
+  addPracticeShot(x, y);
+}
+function setPracticeTarget(dist) {
+  practiceTarget = dist;
+  document.querySelectorAll('.practice-btn').forEach(b => {
+  b.classList.toggle('active', b.textContent === dist+'m');
+  });
+  drawPracticeField();
+  playSound('click');
+}
+function addPracticeShot(normX, normY) {
+  // normX, normY are 0..1 within canvas
+  // Center is target, calculate offset in meters
+  const offsetX = (normX - 0.5) * practiceTarget * 0.8; // lateral spread
+  const offsetY = (0.7 - normY) * practiceTarget; // distance (0.7 is "tee" position)
+  const dist = Math.sqrt(offsetX*offsetX + offsetY*offsetY);
+  practiceShots.push({
+  normX, normY, offsetX, offsetY,
+  distFromTarget: Math.round(Math.abs(offsetY - 0) + Math.abs(offsetX)),
+  actualDist: Math.round(practiceTarget + offsetY - practiceTarget*0.2),
+  time: Date.now()
+  });
+  playSound('shot');
+  drawPracticeField();
+  updatePracticeStats();
+}
+function drawPracticeField() {
+  const canvas = document.getElementById('practice-canvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const dpr = w / canvas.clientWidth;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const cw = canvas.clientWidth, ch = canvas.clientHeight;
+  // Background (green field gradient)
+  const grad = ctx.createLinearGradient(0,0,0,ch);
+  grad.addColorStop(0,'#0f2818');
+  grad.addColorStop(0.5,'#163520');
+  grad.addColorStop(1,'#1a3d24');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,cw,ch);
+  // Grid lines
+  ctx.strokeStyle = 'rgba(16,185,129,0.1)';
+  ctx.lineWidth = 0.5;
+  for (let i=0; i<10; i++) {
+  const y = ch * i / 10;
+  ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(cw,y); ctx.stroke();
+  }
+  for (let i=0; i<8; i++) {
+  const x = cw * i / 8;
+  ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,ch); ctx.stroke();
+  }
+  // Target circles
+  const cx = cw/2, cy = ch*0.3;
+  const maxR = Math.min(cw, ch) * 0.35;
+  for (let ring=4; ring>=1; ring--) {
+  const r = maxR * ring / 4;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.strokeStyle = `rgba(16,185,129,${0.15+ring*0.08})`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  // Distance labels
+  const distLabel = Math.round(practiceTarget * ring / 4 * 0.2);
+  ctx.fillStyle = 'rgba(16,185,129,0.4)';
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(distLabel+'m', cx + r + 15, cy);
+  }
+  // Center target
+  ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(239,68,68,0.8)';
+  ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  // Target distance label
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(practiceTarget+'m', cx, cy - maxR - 10);
+  // Tee position
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('TEE', cx, ch*0.85);
+  ctx.beginPath(); ctx.arc(cx, ch*0.8, 4, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fill();
+  // Draw shots
+  practiceShots.forEach((s, i) => {
+  const sx = s.normX * cw;
+  const sy = s.normY * ch;
+  // Shot dot
+  ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI*2);
+  ctx.fillStyle = i === practiceShots.length-1 ? 'rgba(239,68,68,0.9)' : 'rgba(16,185,129,0.7)';
+  ctx.fill();
+  ctx.strokeStyle = i === practiceShots.length-1 ? '#fff' : 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  });
+  // Dispersion ellipse if enough shots
+  if (practiceShots.length >= 3) {
+  const avgX = practiceShots.reduce((s,p)=>s+p.normX,0)/practiceShots.length;
+  const avgY = practiceShots.reduce((s,p)=>s+p.normY,0)/practiceShots.length;
+  const stdX = Math.sqrt(practiceShots.reduce((s,p)=>s+(p.normX-avgX)**2,0)/practiceShots.length) * cw;
+  const stdY = Math.sqrt(practiceShots.reduce((s,p)=>s+(p.normY-avgY)**2,0)/practiceShots.length) * ch;
+  ctx.beginPath();
+  ctx.ellipse(avgX*cw, avgY*ch, stdX*2, stdY*2, 0, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(245,158,11,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4,4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // Center of dispersion
+  ctx.beginPath(); ctx.arc(avgX*cw, avgY*ch, 3, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(245,158,11,0.8)';
+  ctx.fill();
+  }
+  ctx.setTransform(1,0,0,1,0,0);
+}
+function updatePracticeStats() {
+  const n = practiceShots.length;
+  document.getElementById('ps-shots').textContent = n;
+  if (n === 0) {
+  document.getElementById('ps-avg').textContent = '-';
+  document.getElementById('ps-score').textContent = '-';
+  document.getElementById('dispersion-info').textContent = '';
+  return;
+  }
+  // Average offset from center
+  const cx = 0.5, cy = 0.3; // target center in normalized coords
+  const dists = practiceShots.map(s => {
+  const dx = (s.normX - cx) * practiceTarget * 0.8;
+  const dy = (s.normY - cy) * practiceTarget;
+  return Math.sqrt(dx*dx + dy*dy);
+  });
+  const avgDist = Math.round(dists.reduce((s,v)=>s+v,0)/n);
+  document.getElementById('ps-avg').textContent = avgDist;
+  // Consistency score (100 = all shots in same spot, 0 = max spread)
+  if (n >= 2) {
+  const avgNX = practiceShots.reduce((s,p)=>s+p.normX,0)/n;
+  const avgNY = practiceShots.reduce((s,p)=>s+p.normY,0)/n;
+  const variance = practiceShots.reduce((s,p)=>s+(p.normX-avgNX)**2+(p.normY-avgNY)**2,0)/n;
+  const consistency = Math.max(0, Math.min(100, Math.round(100 * (1 - Math.sqrt(variance)*10))));
+  document.getElementById('ps-score').textContent = consistency;
+  // Dispersion info
+  const spreadX = Math.round(Math.sqrt(practiceShots.reduce((s,p)=>s+(p.normX-avgNX)**2,0)/n) * practiceTarget * 0.8 * 2);
+  const spreadY = Math.round(Math.sqrt(practiceShots.reduce((s,p)=>s+(p.normY-avgNY)**2,0)/n) * practiceTarget * 2);
+  document.getElementById('dispersion-info').innerHTML =
+  `분산: 좌우 ${spreadX}m / 전후 ${spreadY}m<br>` +
+  `타겟 평균 오차: ${avgDist}m | 일관성: ${consistency}/100`;
+  } else {
+  document.getElementById('ps-score').textContent = '-';
+  }
+}
+function clearPractice() {
+  // Save session before clearing if there are shots
+  if (practiceShots.length > 0) {
+  savePracticeSession();
+  }
+  practiceShots = [];
+  drawPracticeField();
+  updatePracticeStats();
+  playSound('click');
+}
+function savePracticeSession() {
+  const sessions = JSON.parse(localStorage.getItem('golfPracticeSessions')||'[]');
+  const n = practiceShots.length;
+  if (n === 0) return;
+  const cx=0.5, cy=0.3;
+  const dists = practiceShots.map(s=>{
+  const dx=(s.normX-cx)*practiceTarget*0.8;
+  const dy=(s.normY-cy)*practiceTarget;
+  return Math.sqrt(dx*dx+dy*dy);
+  });
+  sessions.unshift({
+  date: new Date().toISOString(),
+  target: practiceTarget,
+  shots: n,
+  avgError: Math.round(dists.reduce((s,v)=>s+v,0)/n),
+  bestShot: Math.round(Math.min(...dists))
+  });
+  if (sessions.length > 50) sessions.length = 50;
+  localStorage.setItem('golfPracticeSessions', JSON.stringify(sessions));
+}
+function renderStats() {
+  const rounds=JSON.parse(localStorage.getItem('golfRounds')||'[]');
+  const clubDists=JSON.parse(localStorage.getItem('golfClubDists')||'{}');
+  const el=document.getElementById('stats-content');
+  if (!rounds.length) {
+  el.innerHTML=`
+  <div class="stat-card">
+  <div class="empty-state">
+  <div style="font-size:36px;margin-bottom:10px;">&#128202;</div>
+  라운드 기록이 없습니다.<br>라운드를 기록하면 통계가 표시됩니다.
+  </div>
+  </div>
+  ${renderClubDistCard(clubDists)}
+  ${renderSmartGolfCard()}
+  `;
+  return;
+  }
+  const scores=rounds.map(r=>r.holes.reduce((s,h)=>s+h.score,0));
+  const avgScore=Math.round(scores.reduce((s,v)=>s+v,0)/scores.length);
+  const bestScore=Math.min(...scores);
+  const worstScore=Math.max(...scores);
+  const girPcts=rounds.map(r=>Math.round(r.holes.filter(h=>h.gir).length/18*100));
+  const avgGir=Math.round(girPcts.reduce((s,v)=>s+v,0)/girPcts.length);
+  const fwPcts=rounds.map(r=>Math.round(r.holes.filter(h=>h.fairway).length/18*100));
+  const avgFw=Math.round(fwPcts.reduce((s,v)=>s+v,0)/fwPcts.length);
+  const avgPuttsArr=rounds.map(r=>(r.holes.reduce((s,h)=>s+h.putts,0)/18));
+  const totalAvgPutts=(avgPuttsArr.reduce((s,v)=>s+v,0)/avgPuttsArr.length).toFixed(1);
+  // Handicap
+  const handicap = calcHandicap();
+  // Score distribution
+  const dist={};
+  scores.forEach(s=>{dist[s]=(dist[s]||0)+1;});
+  const distKeys=Object.keys(dist).map(Number).sort((a,b)=>a-b);
+  const maxCount=Math.max(...Object.values(dist));
+  // Trends
+  const trendScores=scores.slice(0,20).reverse();
+  const trendGir=girPcts.slice(0,20).reverse();
+  // Scoring breakdown
+  let totalEagles=0, totalBirdies=0, totalPars=0, totalBogeys=0, totalDoubles=0, totalWorse=0;
+  rounds.forEach(r=>{
+  r.holes.forEach(h=>{
+  const d=h.score-h.par;
+  if(d<=-2) totalEagles++;
+  else if(d===-1) totalBirdies++;
+  else if(d===0) totalPars++;
+  else if(d===1) totalBogeys++;
+  else if(d===2) totalDoubles++;
+  else totalWorse++;
+  });
+  });
+  const totalHoles = rounds.length * 18;
+  // Strokes gained (simple version comparing to scratch golfer baseline)
+  const sgData = calcStrokesGained(rounds);
+  // Personal records
+  const bestFront=Math.min(...rounds.map(r=>r.holes.slice(0,9).reduce((s,h)=>s+h.score,0)));
+  const bestBack=Math.min(...rounds.map(r=>r.holes.slice(9,18).reduce((s,h)=>s+h.score,0)));
+  const bestPutts=Math.min(...rounds.map(r=>r.holes.reduce((s,h)=>s+h.putts,0)));
+  el.innerHTML=`
+  <!-- Overview -->
+  <div class="stat-card">
+  <h4>종합 통계 (${rounds.length}라운드)</h4>
+  <div class="stat-grid">
+  <div class="sg-item"><div class="sgv">${avgScore}</div><div class="sgl">평균 스코어</div></div>
+  <div class="sg-item"><div class="sgv" style="color:var(--accent)">${bestScore}</div><div class="sgl">베스트</div></div>
+  <div class="sg-item"><div class="sgv" style="color:var(--red)">${worstScore}</div><div class="sgl">워스트</div></div>
+  <div class="sg-item"><div class="sgv">${avgGir}%</div><div class="sgl">GIR</div></div>
+  <div class="sg-item"><div class="sgv">${avgFw}%</div><div class="sgl">페어웨이</div></div>
+  <div class="sg-item"><div class="sgv">${totalAvgPutts}</div><div class="sgl">평균 퍼트</div></div>
+  </div>
+  ${handicap!==null?`<div style="text-align:center;margin-top:12px;"><span class="handicap-badge">핸디캡 인덱스: ${handicap}</span></div>`:''}
+  </div>
+  <!-- Scoring Breakdown -->
+  <div class="stat-card">
+  <h4>스코어링 분석 (${totalHoles}홀)</h4>
+  <div class="canvas-chart"><canvas id="scoring-canvas"></canvas></div>
+  </div>
+  <!-- Score Distribution -->
+  <div class="stat-card">
+  <h4>스코어 분포</h4>
+  <div class="bar-chart">
+  ${distKeys.map(k=>`<div class="bar-col">
+  <div class="bar-value">${dist[k]}</div>
+  <div class="bar-fill" style="height:${dist[k]/maxCount*100}%"></div>
+  <div class="bar-label">${k}</div>
+  </div>`).join('')}
+  </div>
+  </div>
+  <!-- Strokes Gained -->
+  <div class="stat-card">
+  <h4>스트로크 게인드 분석</h4>
+  ${renderStrokesGained(sgData)}
+  </div>
+  <!-- Score Trend -->
+  <div class="stat-card">
+  <h4>스코어 추이 (최근 ${trendScores.length}R)</h4>
+  <div class="canvas-chart"><canvas id="trend-canvas"></canvas></div>
+  </div>
+  <!-- GIR Trend -->
+  <div class="stat-card">
+  <h4>GIR% 추이</h4>
+  ${renderSVGLineChart(trendGir, 'gir')}
+  </div>
+  <!-- Accuracy Chart -->
+  <div class="stat-card">
+  <h4>정확도 차트</h4>
+  <div class="canvas-chart"><canvas id="accuracy-canvas"></canvas></div>
+  </div>
+  <!-- Personal Records -->
+  <div class="stat-card">
+  <h4>개인 기록</h4>
+  <div class="record-item"><span class="ri-label">베스트 스코어</span><span class="ri-value">${bestScore}</span></div>
+  <div class="record-item"><span class="ri-label">베스트 전반</span><span class="ri-value">${bestFront}</span></div>
+  <div class="record-item"><span class="ri-label">베스트 후반</span><span class="ri-value">${bestBack}</span></div>
+  <div class="record-item"><span class="ri-label">최소 퍼트</span><span class="ri-value">${bestPutts}</span></div>
+  <div class="record-item"><span class="ri-label">총 이글+</span><span class="ri-value">${totalEagles}개</span></div>
+  <div class="record-item"><span class="ri-label">총 버디</span><span class="ri-value">${totalBirdies}개</span></div>
+  <div class="record-item"><span class="ri-label">총 파</span><span class="ri-value">${totalPars}개</span></div>
+  <div class="record-item"><span class="ri-label">총 보기</span><span class="ri-value">${totalBogeys}개</span></div>
+  <div class="record-item"><span class="ri-label">총 라운드</span><span class="ri-value">${rounds.length}회</span></div>
+  </div>
+  <!-- Club Distances -->
+  ${renderClubDistCard(clubDists)}
+  <!-- SmartGolf -->
+  ${renderSmartGolfCard()}
+  `;
+  // Render Canvas charts after DOM insertion
+  setTimeout(()=>{
+  renderScoringCanvas(totalEagles, totalBirdies, totalPars, totalBogeys, totalDoubles, totalWorse);
+  renderTrendCanvas(trendScores);
+  renderAccuracyCanvas(rounds);
+  }, 50);
+}
+// Canvas-based scoring breakdown chart (donut)
+function renderScoringCanvas(eagles, birdies, pars, bogeys, doubles, worse) {
+  const canvas = document.getElementById('scoring-canvas');
+  if (!canvas) return;
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  const data = [
+  {label:'이글+', value:eagles, color:'#f59e0b'},
+  {label:'버디', value:birdies, color:'#3b82f6'},
+  {label:'파', value:pars, color:'#10b981'},
+  {label:'보기', value:bogeys, color:'#f97316'},
+  {label:'더블+', value:doubles+worse, color:'#ef4444'},
+  ].filter(d=>d.value>0);
+  const total = data.reduce((s,d)=>s+d.value,0);
+  if (total === 0) return;
+  const cx = w*0.35, cy = h/2, r = Math.min(cx-10, cy-10)*0.85, innerR = r*0.55;
+  let angle = -Math.PI/2;
+  data.forEach(d => {
+  const sweep = (d.value/total) * Math.PI * 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, angle, angle+sweep);
+  ctx.arc(cx, cy, innerR, angle+sweep, angle, true);
+  ctx.closePath();
+  ctx.fillStyle = d.color;
+  ctx.fill();
+  angle += sweep;
+  });
+  // Center text
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(total+'홀', cx, cy+6);
+  // Legend
+  const lx = w*0.68;
+  let ly = h*0.15;
+  data.forEach(d => {
+  ctx.fillStyle = d.color;
+  ctx.fillRect(lx, ly, 10, 10);
+  ctx.fillStyle = '#e5e7eb';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(`${d.label}: ${d.value} (${Math.round(d.value/total*100)}%)`, lx+16, ly+9);
+  ly += 22;
+  });
+  ctx.setTransform(1,0,0,1,0,0);
+}
+// Canvas trend chart
+function renderTrendCanvas(data) {
+  const canvas = document.getElementById('trend-canvas');
+  if (!canvas || !data.length) return;
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  const pad = {t:20,r:15,b:25,l:35};
+  const min = Math.min(...data)-2, max = Math.max(...data)+2;
+  const range = max-min||1;
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 0.5;
+  for (let i=0;i<=4;i++) {
+  const y = pad.t + i*(h-pad.t-pad.b)/4;
+  ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y); ctx.stroke();
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(Math.round(max-i*range/4), pad.l-4, y+3);
+  }
+  // Line
+  const stepX = (w-pad.l-pad.r)/(data.length-1||1);
+  ctx.beginPath();
+  data.forEach((v,i) => {
+  const x = pad.l + i*stepX;
+  const y = pad.t + (1-(v-min)/range)*(h-pad.t-pad.b);
+  if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = '#10b981';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Area fill
+  const lastX = pad.l + (data.length-1)*stepX;
+  ctx.lineTo(lastX, h-pad.b);
+  ctx.lineTo(pad.l, h-pad.b);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(16,185,129,0.1)';
+  ctx.fill();
+  // Points
+  data.forEach((v,i) => {
+  const x = pad.l + i*stepX;
+  const y = pad.t + (1-(v-min)/range)*(h-pad.t-pad.b);
+  ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+  ctx.fillStyle = '#10b981';
+  ctx.fill();
+  if (i===0||i===data.length-1) {
+  ctx.fillStyle = '#e5e7eb';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(v, x, y-8);
+  }
+  });
+  // X axis labels
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '8px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('이전', pad.l, h-5);
+  ctx.fillText('최근', lastX, h-5);
+  ctx.setTransform(1,0,0,1,0,0);
+}
+// Accuracy radar chart
+function renderAccuracyCanvas(rounds) {
+  const canvas = document.getElementById('accuracy-canvas');
+  if (!canvas || !rounds.length) return;
+  const dpr = Math.min(devicePixelRatio||1, 2);
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  // Calculate metrics (0-100 scale)
+  const fwPct = Math.round(rounds.reduce((s,r)=>s+r.holes.filter(h=>h.fairway).length,0)/(rounds.length*18)*100);
+  const girPct = Math.round(rounds.reduce((s,r)=>s+r.holes.filter(h=>h.gir).length,0)/(rounds.length*18)*100);
+  const avgPutts = rounds.reduce((s,r)=>s+r.holes.reduce((ss,h)=>ss+h.putts,0),0)/(rounds.length*18);
+  const puttScore = Math.max(0,Math.min(100,Math.round((3-avgPutts)*100)));
+  const avgScore = rounds.reduce((s,r)=>s+r.holes.reduce((ss,h)=>ss+h.score,0),0)/rounds.length;
+  const scoreRating = Math.max(0,Math.min(100,Math.round((110-avgScore)/0.4)));
+  const consistency = rounds.length>=2 ? Math.max(0,Math.min(100,100-Math.round(
+  Math.sqrt(rounds.map(r=>r.holes.reduce((s,h)=>s+h.score,0)).reduce((s,v,i,a)=>s+(v-a.reduce((ss,vv)=>ss+vv,0)/a.length)**2,0)/rounds.length)
+  *5))) : 50;
+  const metrics = [
+  {label:'페어웨이', value:fwPct},
+  {label:'GIR', value:girPct},
+  {label:'퍼팅', value:puttScore},
+  {label:'스코어', value:scoreRating},
+  {label:'일관성', value:consistency},
+  ];
+  const cx = w/2, cy = h/2, maxR = Math.min(w,h)*0.38;
+  const n = metrics.length;
+  // Draw radar grid
+  for (let ring=1;ring<=4;ring++) {
+  const r = maxR*ring/4;
+  ctx.beginPath();
+  for (let i=0;i<=n;i++) {
+  const a = (Math.PI*2*i/n) - Math.PI/2;
+  const x = cx + r*Math.cos(a);
+  const y = cy + r*Math.sin(a);
+  if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+  }
+  // Draw axes
+  for (let i=0;i<n;i++) {
+  const a = (Math.PI*2*i/n) - Math.PI/2;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+maxR*Math.cos(a), cy+maxR*Math.sin(a));
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.stroke();
+  }
+  // Draw data
+  ctx.beginPath();
+  metrics.forEach((m,i) => {
+  const a = (Math.PI*2*i/n) - Math.PI/2;
+  const r = maxR * m.value / 100;
+  const x = cx + r*Math.cos(a);
+  const y = cy + r*Math.sin(a);
+  if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(16,185,129,0.15)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(16,185,129,0.8)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // Points and labels
+  metrics.forEach((m,i) => {
+  const a = (Math.PI*2*i/n) - Math.PI/2;
+  const r = maxR * m.value / 100;
+  const x = cx + r*Math.cos(a);
+  const y = cy + r*Math.sin(a);
+  ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+  ctx.fillStyle = '#10b981';
+  ctx.fill();
+  // Label
+  const lx = cx + (maxR+18)*Math.cos(a);
+  const ly = cy + (maxR+18)*Math.sin(a);
+  ctx.fillStyle = '#e5e7eb';
+  ctx.font = '10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`${m.label}`, lx, ly);
+  ctx.fillStyle = '#10b981';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.fillText(`${m.value}%`, lx, ly+12);
+  });
+  ctx.setTransform(1,0,0,1,0,0);
+}
+// Strokes Gained calculation (simplified)
+function calcStrokesGained(rounds) {
+  // Baseline: scratch golfer averages
+  // Tee: ~0 SG, Approach: ~0 SG, Short Game: ~0 SG, Putting: ~0 SG
+  // We compare against par performance
+  const totalRounds = rounds.length;
+  let sgDriving=0, sgApproach=0, sgShortGame=0, sgPutting=0;
+  rounds.forEach(r => {
+  r.holes.forEach(h => {
+  const overPar = h.score - h.par;
+  // Distribute over par to categories based on performance indicators
+  if (h.par >= 4 && !h.fairway) sgDriving += 0.3; // penalty for missed fairway
+  if (!h.gir) sgApproach += 0.4; // penalty for missed GIR
+  if (h.putts > 2) sgPutting += (h.putts - 2) * 0.5;
+  if (h.score > h.par && h.gir) sgShortGame += 0.2; // on green but over par
+  });
+  });
+  // Normalize per round and invert (negative = losing strokes)
+  return {
+  driving: -(sgDriving/totalRounds).toFixed(1),
+  approach: -(sgApproach/totalRounds).toFixed(1),
+  shortGame: -(sgShortGame/totalRounds).toFixed(1),
+  putting: -(sgPutting/totalRounds).toFixed(1),
+  };
+}
+function renderStrokesGained(sg) {
+  const cats = [
+  {label:'드라이빙', value:parseFloat(sg.driving)},
+  {label:'어프로치', value:parseFloat(sg.approach)},
+  {label:'숏게임', value:parseFloat(sg.shortGame)},
+  {label:'퍼팅', value:parseFloat(sg.putting)},
+  ];
+  const maxAbs = Math.max(...cats.map(c=>Math.abs(c.value)),1);
+  return cats.map(c => {
+  const pct = Math.abs(c.value)/maxAbs*100;
+  const isPositive = c.value >= 0;
+  const color = isPositive ? 'var(--accent)' : 'var(--red)';
+  return `<div class="sg-bar">
+  <div class="sg-bar-label">${c.label}</div>
+  <div class="sg-bar-track">
+  <div class="sg-bar-fill" style="width:${pct}%;background:${color};${isPositive?'left:50%':'right:50%'}"></div>
+  </div>
+  <div class="sg-bar-val" style="color:${color}">${c.value>0?'+':''}${c.value}</div>
+  </div>`;
+  }).join('') + `<div style="font-size:9px;color:var(--dim);margin-top:6px;text-align:center;">
+  음수=손실 | 큰 음수 영역 우선 개선
+  </div>`;
+}
+function renderSVGLineChart(data, type) {
+  if (!data.length) return '<div class="empty-state">데이터 없음</div>';
+  const w=320, h=120, pad=30;
+  const min=Math.min(...data), max=Math.max(...data);
+  const range=max-min||1;
+  const stepX=(w-pad*2)/(data.length-1||1);
+  let points='', pathD='';
+  data.forEach((v,i)=>{
+  const x=pad+i*stepX;
+  const y=pad+(1-(v-min)/range)*(h-pad*2);
+  if (i===0) pathD+=`M${x},${y}`;
+  else pathD+=`L${x},${y}`;
+  points+=`<circle cx="${x}" cy="${y}" r="3" fill="var(--accent)" />`;
+  if (i===0||i===data.length-1||data.length<=10) {
+  points+=`<text x="${x}" y="${y-8}" text-anchor="middle" fill="var(--dim)" font-size="9">${v}</text>`;
+  }
+  });
+  let gridLines='';
+  for (let i=0;i<=4;i++) {
+  const y=pad+i*(h-pad*2)/4;
+  const val=Math.round(max-(i*(range/4)));
+  gridLines+=`<line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="rgba(255,255,255,0.05)" />`;
+  gridLines+=`<text x="${pad-4}" y="${y+3}" text-anchor="end" fill="var(--dim)" font-size="8">${val}</text>`;
+  }
+  return `<div class="line-chart-container">
+  <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">
+  ${gridLines}
+  <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="${pathD}L${pad+(data.length-1)*stepX},${h-pad}L${pad},${h-pad}Z" fill="rgba(16,185,129,0.1)" />
+  ${points}
+  </svg>
+  </div>`;
+}
+function renderClubDistCard(clubDists) {
+  let rows=CLUBS.filter(c=>c!=='퍼터').map(club=>{
+  const dists=clubDists[club]||[];
+  const avg=dists.length?Math.round(dists.reduce((s,v)=>s+v,0)/dists.length):CLUB_DEFAULT_DIST[club];
+  const maxD=dists.length?Math.max(...dists):'-';
+  const isCustom = dists.length > 0;
+  return `<tr>
+  <td class="ct-club">${club}</td>
+  <td class="ct-dist">${avg}m ${isCustom?'':'<span style="font-size:8px;color:var(--dim)">(기본)</span>'}</td>
+  <td class="ct-avg">${maxD==='-'?'-':'최대 '+maxD+'m'}</td>
+  <td><input class="club-input" type="number" min="0" max="400" placeholder="m" onchange="addClubDist('${club}',+this.value);this.value='';"></td>
+  </tr>`;
+  }).join('');
+  return `<div class="stat-card">
+  <h4>클럽별 거리</h4>
+  <table class="club-table">
+  <tr style="font-size:9px;color:var(--dim);"><td>클럽</td><td>평균</td><td>최대</td><td>입력</td></tr>
+  ${rows}
+  </table>
+  <div style="font-size:9px;color:var(--dim);margin-top:6px;">거리 입력 시 평균 업데이트 및 클럽 추천 활용</div>
+  </div>`;
+}
+function addClubDist(club, dist) {
+  if (!dist || dist<=0) return;
+  const clubDists=JSON.parse(localStorage.getItem('golfClubDists')||'{}');
+  if (!clubDists[club]) clubDists[club]=[];
+  clubDists[club].push(dist);
+  if (clubDists[club].length>50) clubDists[club]=clubDists[club].slice(-50);
+  localStorage.setItem('golfClubDists',JSON.stringify(clubDists));
+  renderStats();
+  playSound('click');
+}
+function renderSmartGolfCard() {
+  return `<div class="stat-card">
+  <h4>SmartGolf 연동</h4>
+  <a class="smartgolf-link" href="https://bsy522-dot.github.io/smartgolf" target="_blank" rel="noopener">
+  <div class="sg-icon">&#9971;</div>
+  <div class="sg-text"><b>SmartGolf</b> 골프장 파인더<br>전국 590개 골프장, 이동시간, 그린피</div>
+  </a>
+  <div style="margin-top:8px;font-size:10px;color:var(--dim);">
+  SmartGolf에서 골프장 검색 후 라운드 기록
+  </div>
+  </div>`;
+}
+function init() {
+  const sel=document.getElementById('course-selector');
+  COURSES.forEach(c=>{
+  const opt=document.createElement('option');
+  opt.value=c.name; opt.textContent=c.name;
+  sel.appendChild(opt);
+  });
+  updateSetting();
+  newRound();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+  document.getElementById('perm-screen').classList.add('hidden');
+  }
+}
+init();
+</script>
+</body>
+</html>

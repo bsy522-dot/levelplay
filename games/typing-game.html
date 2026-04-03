@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>타이핑 게임 - 떨어지는 단어</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:480px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.4);font-size:16px;font-weight:700;z-index:10;flex-wrap:wrap;gap:4px}
+.hud .sc{color:#FFD700}.hud .sp{color:#7FDBFF}.hud .lv{color:#FF6B9D}
+.field{flex:1;position:relative;overflow:hidden;background:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
+.word-fall{position:absolute;font-size:28px;font-weight:700;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.5);white-space:nowrap;transition:none;padding:4px 12px;border-radius:12px;background:rgba(255,255,255,0.1)}
+.word-fall.hit{color:#4CAF50;transform:scale(1.3);opacity:0;transition:all 0.3s}
+.word-fall.miss{color:#E53935;opacity:0;transition:opacity 0.3s}
+.input-area{padding:12px;background:rgba(0,0,0,0.5);z-index:10}
+.input-area input{width:100%;font-size:24px;padding:12px 16px;border:3px solid #444;border-radius:16px;background:#222;color:#fff;text-align:center;outline:none}
+.input-area input:focus{border-color:#FF6B9D}
+.danger-line{position:absolute;bottom:0;left:0;right:0;height:3px;background:#E53935;opacity:0.6}
+.menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(26,26,46,0.97);z-index:20;gap:12px;padding:16px}
+.menu h1{font-size:32px;color:#FFD700;margin-bottom:8px}
+.menu p{font-size:16px;color:#aaa;text-align:center;max-width:300px}
+.diff-btn{width:280px;padding:14px;font-size:20px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.diff-btn:active{transform:scale(0.95)}
+.diff-btn.d1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.diff-btn.d2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.diff-btn.d3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.diff-btn.d4{background:linear-gradient(135deg,#E53935,#EF5350)}
+.diff-btn.d5{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+.diff-btn.lock{opacity:0.5}
+.diff-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
+.result{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(26,26,46,0.97);z-index:20;gap:12px;display:none;padding:16px}
+.result h2{font-size:32px;color:#FFD700}.result p{font-size:20px}.result .big{font-size:72px}
+.retry{padding:14px 40px;font-size:22px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.next-btn{padding:14px 40px;font-size:22px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#81C784);color:#fff;cursor:pointer;margin-top:4px}
+.menu-link{padding:10px 30px;font-size:18px;font-weight:700;border:2px solid #555;border-radius:14px;background:transparent;color:#aaa;cursor:pointer;margin-top:4px}
+.lives{display:flex;gap:4px}
+.lives span{font-size:18px}
+.stars{font-size:36px;margin:4px 0}
+.best-record{font-size:14px;color:#888}
+</style>
+</head><body>
+<div class="wrap" id="app">
+  <div class="menu" id="menuScreen">
+    <h1>⌨️ 타이핑 게임</h1>
+    <p>위에서 떨어지는 단어를 타이핑해서 없애세요!</p>
+    <div id="diffBtns"></div>
+  </div>
+  <div class="hud">
+    <span class="sc" id="scoreDisp">⭐ 0</span>
+    <span class="sp" id="speedDisp">⚡ 0 WPM</span>
+    <span class="lv" id="diffDisp"></span>
+    <div class="lives" id="livesDisp"></div>
+  </div>
+  <div class="field" id="field"><div class="danger-line"></div></div>
+  <div class="input-area"><input id="inp" type="text" placeholder="여기에 입력..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
+  <div class="result" id="resultScreen"></div>
+</div>
+<script>
+'use strict';
+
+const WORDS_2=['사과','바다','하늘','구름','나무','꽃잎','별빛','달빛','아기','엄마','아빠','친구','학교','공원','노래','춤','책','집','물','불','바람','눈','비','산','강','돌','풀','새','벌','꿀','밥','국','빵','우유','사탕','과자','모자','양말','신발','가방'];
+const WORDS_3=['사과나무','무지개','코끼리','자동차','비행기','해바라기','고양이','강아지','거북이','개구리','토끼풀','수박씨','딸기잼','포도씨','복숭아','블루베리','아이스','초콜릿','크레파스','색연필','운동장','도서관','놀이터','미끄럼','그네줄','시소놀이','달리기','수영장','축구공','야구공','농구공','배드민턴','태권도','피아노','기타줄','북소리'];
+const WORDS_4=['아이스크림','크리스마스','컴퓨터게임','롤러코스터','텔레비전','냉장고안','세탁기소리','전자레인지','에어컨바람','청소기소리','도서관에서','동물원구경','수족관물고기','박물관관람','놀이공원','자전거타기','킥보드타기','인라인스케이트','스케이트보드','트램펄린','방방이놀이','색종이접기','종이비행기','레고블록','퍼즐맞추기','보드게임'];
+const WORDS_SENTENCE=['오늘 날씨가 좋다','나는 학교에 간다','사과는 빨간색이다','친구와 놀이터에서','강아지가 뛰어간다','하늘에 구름이 많다','엄마가 밥을 한다','아빠가 집에 왔다','무지개가 떴어요','별이 반짝반짝해요','꽃이 예쁘게 피었다','새가 노래를 한다','바다가 넓고 푸르다','산이 높고 웅장하다','비가 주룩주룩 온다'];
+const WORDS_MIXED=['apple사과','hello안녕','school학교','water물','star별','moon달','sun해','car자동차','bus버스','book책','dog강아지','cat고양이','rain비','snow눈','tree나무','red빨강','blue파랑','green초록','one하나','two둘'];
+
+const DIFFS=[
+  {name:'쉬움',emoji:'🟢',words:WORDS_2,spawnMs:2500,speed:0.35,lives:7,desc:'2글자, 느리게'},
+  {name:'보통',emoji:'🟡',words:WORDS_3,spawnMs:2100,speed:0.45,lives:6,desc:'3글자'},
+  {name:'어려움',emoji:'🟠',words:WORDS_4,spawnMs:1800,speed:0.55,lives:5,desc:'4글자+, 빠르게'},
+  {name:'고급',emoji:'🔴',words:WORDS_SENTENCE,spawnMs:2200,speed:0.4,lives:4,desc:'문장 타이핑'},
+  {name:'마스터',emoji:'🟣',words:WORDS_MIXED,spawnMs:1600,speed:0.6,lives:4,desc:'영어+한글 혼합'}
+];
+
+let words=[], fallingWords=[], score=0, lives=5, gameActive=false, diffIdx=0;
+let wordsTyped=0, startTime=0, animId=null, spawnTimer=0;
+let fieldH=0, spawnInterval=2000, fallSpeed=0.5;
+
+function sendXP(amount){try{window.parent.postMessage({type:'xp',amount:amount,source:'typing-game'},'*');}catch(e){}}
+function getBest(d){try{return JSON.parse(localStorage.getItem('typing_best_'+d))||{stars:0,score:0,wpm:0};}catch(e){return{stars:0,score:0,wpm:0};}}
+function saveBest(d,stars,sc,wpm){
+  const p=getBest(d);
+  if(stars>p.stars||sc>p.score) localStorage.setItem('typing_best_'+d,JSON.stringify({stars:Math.max(stars,p.stars),score:Math.max(sc,p.score),wpm:Math.max(wpm,p.wpm)}));
+}
+function getStars(sc){return sc>=500?3:sc>=300?2:sc>=100?1:0;}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function isUnlocked(d){if(d===0)return true;return getBest(d-1).stars>=1;}
+
+function buildMenu(){
+  const cont=document.getElementById('diffBtns');
+  cont.innerHTML=DIFFS.map((d,i)=>{
+    const b=getBest(i);
+    const ul=isUnlocked(i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} 최고: ${b.score}점 / ${b.wpm} WPM</span>`:'';
+    return `<button class="diff-btn d${i+1} ${ul?'':'lock'}" onclick="${ul?`startGame(${i})`:''}">${d.emoji} ${d.name} (${d.desc})${bst}</button>`;
+  }).join('');
+}
+
+function showMenu(){
+  buildMenu();
+  document.getElementById('menuScreen').style.display='flex';
+  document.getElementById('resultScreen').style.display='none';
+  gameActive=false;
+  if(animId)cancelAnimationFrame(animId);
+  fallingWords=[];
+  document.getElementById('field').querySelectorAll('.word-fall').forEach(e=>e.remove());
+}
+
+function startGame(d){
+  diffIdx=d;
+  const df=DIFFS[d];
+  words=[...df.words];spawnInterval=df.spawnMs;fallSpeed=df.speed;lives=df.lives;
+
+  score=0;wordsTyped=0;fallingWords=[];startTime=Date.now();spawnTimer=0;
+  gameActive=true;
+  document.getElementById('menuScreen').style.display='none';
+  document.getElementById('resultScreen').style.display='none';
+  document.getElementById('field').querySelectorAll('.word-fall').forEach(e=>e.remove());
+  document.getElementById('diffDisp').textContent=df.emoji+' '+df.name;
+  updateHUD();
+  document.getElementById('inp').value='';
+  document.getElementById('inp').focus();
+  fieldH=document.getElementById('field').offsetHeight;
+  if(animId)cancelAnimationFrame(animId);
+  lastTime=performance.now();
+  animId=requestAnimationFrame(gameLoop);
+}
+
+let lastTime=0;
+function gameLoop(now){
+  if(!gameActive)return;
+  const dt=now-lastTime;
+  lastTime=now;
+
+  spawnTimer+=dt;
+  if(spawnTimer>=spawnInterval){
+    spawnTimer=0;
+    spawnWord();
+    if(spawnInterval>800) spawnInterval-=8;
+    if(fallSpeed<1.2) fallSpeed+=0.003;
+  }
+
+  for(let i=fallingWords.length-1;i>=0;i--){
+    const fw=fallingWords[i];
+    fw.y+=fallSpeed*dt/16;
+    fw.el.style.top=fw.y+'px';
+    if(fw.y>=fieldH-10){
+      fw.el.classList.add('miss');
+      setTimeout(()=>fw.el.remove(),300);
+      fallingWords.splice(i,1);
+      lives--;
+      updateHUD();
+      if(lives<=0){endGame();return;}
+    }
+  }
+  animId=requestAnimationFrame(gameLoop);
+}
+
+function spawnWord(){
+  const w=words[Math.random()*words.length|0];
+  const field=document.getElementById('field');
+  const el=document.createElement('div');
+  el.className='word-fall';
+  el.textContent=w;
+  const fontSize=diffIdx>=3?20:28;
+  el.style.fontSize=fontSize+'px';
+  const maxX=field.offsetWidth-w.length*(fontSize*0.7)-24;
+  const x=Math.max(8,Math.random()*maxX);
+  el.style.left=x+'px';
+  el.style.top='-40px';
+  field.appendChild(el);
+  fallingWords.push({word:w,el:el,y:-40,x:x});
+}
+
+document.getElementById('inp').addEventListener('input',function(e){
+  if(!gameActive)return;
+  const val=this.value.trim();
+  for(let i=0;i<fallingWords.length;i++){
+    if(fallingWords[i].word===val){
+      fallingWords[i].el.classList.add('hit');
+      const el=fallingWords[i].el;
+      setTimeout(()=>el.remove(),300);
+      fallingWords.splice(i,1);
+      score+=val.length*10;
+      wordsTyped++;
+      sendXP(2);
+      this.value='';
+      updateHUD();
+      return;
+    }
+  }
+});
+
+document.getElementById('inp').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){this.value='';}
+});
+
+function updateHUD(){
+  document.getElementById('scoreDisp').textContent='⭐ '+score;
+  const elapsed=(Date.now()-startTime)/60000;
+  const wpm=elapsed>0?Math.round(wordsTyped/elapsed):0;
+  document.getElementById('speedDisp').textContent='⚡ '+wpm+' WPM';
+  const maxLives=DIFFS[diffIdx].lives;
+  let hearts='';
+  for(let i=0;i<maxLives;i++) hearts+='<span>'+(i<lives?'❤️':'🖤')+'</span>';
+  document.getElementById('livesDisp').innerHTML=hearts;
+}
+
+function endGame(){
+  gameActive=false;
+  if(animId)cancelAnimationFrame(animId);
+  const elapsed=(Date.now()-startTime)/60000;
+  const wpm=elapsed>0?Math.round(wordsTyped/elapsed):0;
+  const stars=getStars(score);
+  saveBest(diffIdx,stars,score,wpm);
+  const emoji=stars>=3?'🏆':stars>=2?'🎉':stars>=1?'😊':'💪';
+  const canNext=diffIdx<4&&stars>=1;
+
+  const rs=document.getElementById('resultScreen');
+  rs.innerHTML=`
+    <div class="big">${emoji}</div>
+    <h2>${DIFFS[diffIdx].emoji} ${DIFFS[diffIdx].name} 종료!</h2>
+    <div class="stars">${starStr(stars)}</div>
+    <p>점수: ⭐ ${score}</p>
+    <p>속도: ⚡ ${wpm} WPM</p>
+    <p>맞힌 단어: ${wordsTyped}개</p>
+    <p class="best-record">최고 기록: ${getBest(diffIdx).score}점 / ${getBest(diffIdx).wpm} WPM</p>
+    <button class="retry" onclick="startGame(${diffIdx})">다시 하기</button>
+    ${canNext?`<button class="next-btn" onclick="startGame(${diffIdx+1})">다음 난이도 →</button>`:''}
+    <button class="menu-link" onclick="showMenu()">메뉴로</button>`;
+  rs.style.display='flex';
+  sendXP(Math.min(score/5|0,50));
+}
+
+showMenu();
+</script>
+</body></html>

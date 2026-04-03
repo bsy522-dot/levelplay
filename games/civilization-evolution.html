@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>문명진화 - 원소재에서 완제품까지</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕',sans-serif;overflow:hidden;height:100vh;width:100vw;user-select:none}
+#gameCanvas{display:block;cursor:pointer}
+#ui-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+#ui-layer>*{pointer-events:auto}
+#era-bar{position:absolute;top:0;left:0;right:0;height:40px;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:13px;z-index:10}
+#era-bar .era-name{font-size:16px;font-weight:bold;color:#ffd700}
+#era-bar .stats{display:flex;gap:14px}
+#era-bar .stat{display:flex;align-items:center;gap:4px}
+#objectives{position:absolute;top:48px;right:8px;width:200px;background:rgba(0,0,0,.75);border-radius:8px;padding:10px;font-size:12px;max-height:250px;overflow-y:auto}
+#objectives h3{color:#ffd700;margin-bottom:6px;font-size:13px}
+.obj-item{margin:3px 0;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.obj-done{color:#4caf50;text-decoration:line-through}
+#inventory-bar{position:absolute;bottom:0;left:0;right:0;height:64px;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;gap:4px;padding:4px;z-index:10}
+.inv-slot{width:52px;height:52px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px;position:relative;cursor:pointer}
+.inv-slot.selected{border-color:#ffd700;background:rgba(255,215,0,.15)}
+.inv-slot .count{position:absolute;bottom:1px;right:3px;font-size:10px;color:#fff;text-shadow:1px 1px 1px #000}
+.inv-slot .iname{font-size:7px;color:#ccc;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48px}
+#minimap{position:absolute;top:48px;left:8px;width:140px;height:140px;background:rgba(0,0,0,.7);border-radius:8px;border:1px solid rgba(255,255,255,.2);overflow:hidden}
+#minimap canvas{width:100%;height:100%}
+#craft-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;max-width:92vw;max-height:80vh;background:rgba(20,20,40,.95);border:2px solid #ffd700;border-radius:12px;padding:16px;display:none;z-index:100;overflow-y:auto}
+#craft-panel h2{color:#ffd700;text-align:center;margin-bottom:10px}
+.craft-recipe{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px;margin:6px 0;cursor:pointer;transition:.2s}
+.craft-recipe:hover{background:rgba(255,215,0,.1);border-color:#ffd700}
+.craft-recipe.disabled{opacity:.4;cursor:not-allowed}
+.craft-flow{text-align:center;font-size:13px;margin:4px 0;color:#aaa}
+.craft-flow .arrow{color:#ffd700;margin:0 4px}
+.craft-result{text-align:center;font-size:20px}
+.craft-btn{display:block;margin:4px auto 0;padding:4px 16px;background:#ffd700;color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:bold}
+#edu-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:380px;max-width:90vw;background:rgba(10,30,60,.95);border:2px solid #4fc3f7;border-radius:12px;padding:20px;display:none;z-index:110;text-align:center}
+#edu-popup h3{color:#4fc3f7;margin-bottom:10px}
+#edu-popup p{font-size:13px;line-height:1.6;margin:6px 0}
+#edu-popup .close-btn{margin-top:12px;padding:6px 24px;background:#4fc3f7;color:#000;border:none;border-radius:6px;cursor:pointer;font-weight:bold}
+#era-transition{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:none;z-index:200;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#era-transition h1{font-size:36px;color:#ffd700;margin-bottom:16px}
+#era-transition p{font-size:16px;max-width:500px;line-height:1.8;margin:6px 0}
+#era-transition .continue-btn{margin-top:24px;padding:10px 40px;background:#ffd700;color:#000;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold}
+#build-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;max-width:90vw;max-height:80vh;background:rgba(20,20,40,.95);border:2px solid #8bc34a;border-radius:12px;padding:16px;display:none;z-index:100;overflow-y:auto}
+#build-panel h2{color:#8bc34a;text-align:center;margin-bottom:10px}
+.build-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px;margin:6px 0;cursor:pointer;transition:.2s}
+.build-item:hover{background:rgba(139,195,74,.1);border-color:#8bc34a}
+.build-item.disabled{opacity:.4;cursor:not-allowed}
+#recipe-book{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:440px;max-width:92vw;max-height:80vh;background:rgba(20,15,10,.95);border:2px solid #a1887f;border-radius:12px;padding:16px;display:none;z-index:100;overflow-y:auto}
+#recipe-book h2{color:#a1887f;text-align:center;margin-bottom:10px}
+#save-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:360px;max-width:90vw;background:rgba(20,20,40,.95);border:2px solid #ab47bc;border-radius:12px;padding:16px;display:none;z-index:100}
+#save-panel h2{color:#ab47bc;text-align:center;margin-bottom:10px}
+.save-slot{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:12px;margin:8px 0;cursor:pointer;transition:.2s;display:flex;justify-content:space-between;align-items:center}
+.save-slot:hover{background:rgba(171,71,188,.1);border-color:#ab47bc}
+#action-buttons{position:absolute;bottom:72px;right:8px;display:flex;gap:6px;z-index:10}
+.action-btn{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(0,0,0,.6);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.action-btn:hover{background:rgba(255,255,255,.15)}
+#toast{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#ffd700;padding:8px 20px;border-radius:20px;font-size:13px;display:none;z-index:50;white-space:nowrap}
+#day-night{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;transition:background .5s}
+.panel-close{position:absolute;top:8px;right:12px;font-size:20px;cursor:pointer;color:#fff;background:none;border:none}
+#menu-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300}
+#menu-screen h1{font-size:42px;color:#ffd700;margin-bottom:8px;text-shadow:2px 2px 4px rgba(0,0,0,.5)}
+#menu-screen .subtitle{font-size:14px;color:#aaa;margin-bottom:32px}
+#menu-screen button{width:200px;padding:12px;margin:6px;background:rgba(255,215,0,.15);border:2px solid #ffd700;color:#ffd700;border-radius:8px;font-size:16px;cursor:pointer;font-family:inherit;transition:.2s}
+#menu-screen button:hover{background:rgba(255,215,0,.3)}
+</style>
+</head>
+<body>
+<div id="menu-screen">
+<h1>문명진화</h1>
+<div class="subtitle">원소재에서 완제품까지 - 인류 문명의 여정</div>
+<button onclick="startNewGame()">새 게임</button>
+<button onclick="showLoadMenu()">불러오기</button>
+</div>
+<canvas id="gameCanvas"></canvas>
+<div id="day-night"></div>
+<div id="ui-layer">
+<div id="era-bar">
+<div class="era-name" id="era-name">석기시대</div>
+<div class="stats">
+<div class="stat">👤 <span id="pop-count">1</span></div>
+<div class="stat">🌾 <span id="food-count">0</span></div>
+<div class="stat">🕐 <span id="day-count">1일차</span></div>
+<div class="stat" id="season-display">🌸 봄</div>
+</div>
+</div>
+<div id="minimap"><canvas id="minimapCanvas" width="140" height="140"></canvas></div>
+<div id="objectives"><h3>📋 목표</h3><div id="obj-list"></div></div>
+<div id="inventory-bar"></div>
+<div id="action-buttons">
+<div class="action-btn" onclick="toggleCraftPanel()" title="제작">🔨</div>
+<div class="action-btn" onclick="toggleBuildPanel()" title="건설">🏗</div>
+<div class="action-btn" onclick="toggleRecipeBook()" title="레시피북">📖</div>
+<div class="action-btn" onclick="toggleSavePanel()" title="저장/불러오기">💾</div>
+</div>
+<div id="toast"></div>
+<div id="craft-panel"><button class="panel-close" onclick="toggleCraftPanel()">✕</button><h2>🔨 제작</h2><div id="craft-list"></div></div>
+<div id="build-panel"><button class="panel-close" onclick="toggleBuildPanel()">✕</button><h2>🏗 건설</h2><div id="build-list"></div></div>
+<div id="recipe-book"><button class="panel-close" onclick="toggleRecipeBook()">✕</button><h2>📖 레시피북</h2><div id="recipe-list"></div></div>
+<div id="edu-popup"><h3 id="edu-title"></h3><div id="edu-body"></div><button class="close-btn" onclick="closeEdu()">확인!</button></div>
+<div id="era-transition"><h1 id="era-trans-title"></h1><p id="era-trans-desc"></p><button class="continue-btn" onclick="closeEraTransition()">계속하기</button></div>
+<div id="save-panel"><button class="panel-close" onclick="toggleSavePanel()">✕</button><h2>💾 저장/불러오기</h2><div id="save-list"></div></div>
+</div>
+
+<script>
+// ========== GAME DATA ==========
+const ERAS=[
+{id:0,name:'석기시대',nameEn:'Stone Age',color:'#2d5016',bgColors:['#1a3a0a','#2d5016','#1a1a2e'],desc:'인류 최초의 시대. 돌과 나무로 도구를 만들어 생존하세요.',fact:'인류는 약 250만 년 전부터 돌을 깨뜨려 도구를 만들기 시작했습니다. 이것이 인류 문명의 첫 걸음이었습니다.'},
+{id:1,name:'신석기시대',nameEn:'Neolithic',color:'#5d4037',bgColors:['#3e2723','#5d4037','#1a1a2e'],desc:'농경과 목축의 시작! 토기를 빚고, 직물을 짜고, 정착 생활을 시작하세요.',fact:'약 1만 년 전, 인류는 야생 밀과 보리를 재배하기 시작했습니다. 이 "신석기 혁명"으로 정착 생활이 가능해졌습니다.'},
+{id:2,name:'청동기시대',nameEn:'Bronze Age',color:'#bf8040',bgColors:['#8d6e63','#bf8040','#2e1a00'],desc:'구리와 주석을 합금하여 청동을 만드세요! 금속 문명의 시작입니다.',fact:'청동은 구리에 주석을 약 10% 섞어 만듭니다. 순수한 구리보다 훨씬 단단하여 혁명적인 소재였습니다.'},
+{id:3,name:'철기시대',nameEn:'Iron Age',color:'#616161',bgColors:['#424242','#616161','#1a1a2e'],desc:'철광석을 제련하여 더 강한 도구와 무기를 만드세요.',fact:'철은 청동보다 녹는점이 높아 제련이 어렵지만, 훨씬 단단하고 원료가 풍부합니다. 철기의 보급은 농업 생산성을 획기적으로 높였습니다.'},
+{id:4,name:'중세',nameEn:'Medieval',color:'#5c6bc0',bgColors:['#283593','#5c6bc0','#1a237e'],desc:'성을 쌓고, 강철을 만들고, 유리를 제작하세요.',fact:'중세 유럽의 대장장이들은 철에 탄소를 첨가하여 강철을 만드는 법을 발전시켰습니다. 스테인드글라스는 금속 산화물로 색을 냈습니다.'},
+{id:5,name:'산업혁명',nameEn:'Industrial',color:'#78909c',bgColors:['#455a64','#78909c','#263238'],desc:'증기기관을 발명하고, 공장을 세우고, 대량생산을 시작하세요!',fact:'1769년 제임스 와트의 증기기관은 인류 역사를 바꿨습니다. 석탄의 열에너지를 운동에너지로 변환하는 원리입니다.'},
+{id:6,name:'현대',nameEn:'Modern',color:'#0288d1',bgColors:['#01579b','#0288d1','#0d47a1'],desc:'전기, 컴퓨터, 마천루! 현대 문명을 완성하세요.',fact:'실리콘(모래의 주성분)에서 반도체를 만들고, 석유에서 플라스틱을 만드는 기술이 현대 문명의 기초입니다.'}
+];
+
+const RESOURCES={
+stick:{name:'나뭇가지',icon:'🪵',era:0},stone:{name:'돌',icon:'🪨',era:0},flint:{name:'부싯돌',icon:'💎',era:0},
+wood:{name:'목재',icon:'🪓',era:0},fiber:{name:'식물섬유',icon:'🌿',era:0},meat:{name:'고기',icon:'🥩',era:0},
+berry:{name:'열매',icon:'🫐',era:0},hide:{name:'가죽',icon:'🟤',era:0},
+clay:{name:'점토',icon:'🟫',era:1},wheat:{name:'밀',icon:'🌾',era:1},rice:{name:'쌀',icon:'🍚',era:1},
+cotton:{name:'목화',icon:'☁',era:1},seed:{name:'씨앗',icon:'🌱',era:1},
+copperOre:{name:'구리광석',icon:'🟧',era:2},tinOre:{name:'주석광석',icon:'⬜',era:2},gold:{name:'금',icon:'✨',era:2},
+ironOre:{name:'철광석',icon:'⬛',era:3},coal:{name:'석탄',icon:'◼',era:3},limestone:{name:'석회석',icon:'🔲',era:3},
+sand:{name:'모래',icon:'🟡',era:4},saltpeter:{name:'초석',icon:'💠',era:4},
+oil:{name:'석유',icon:'🛢',era:5},rubber:{name:'고무',icon:'⚫',era:5},
+silicon:{name:'실리콘',icon:'💜',era:6},uranium:{name:'우라늄',icon:'☢',era:6}
+};
+
+const ITEMS={
+stoneAxe:{name:'돌도끼',icon:'🪓',era:0},stoneKnife:{name:'돌칼',icon:'🔪',era:0},spear:{name:'창',icon:'🗡',era:0},
+stoneHammer:{name:'돌망치',icon:'🔨',era:0},rope:{name:'밧줄',icon:'🪢',era:0},
+pottery:{name:'토기',icon:'🏺',era:1},fabric:{name:'직물',icon:'🧶',era:1},bread:{name:'빵',icon:'🍞',era:1},
+loom:{name:'베틀',icon:'🪡',era:1},sickle:{name:'낫',icon:'🌙',era:1},
+bronze:{name:'청동',icon:'🟠',era:2},bronzeAxe:{name:'청동도끼',icon:'🪓',era:2},bronzeSword:{name:'청동검',icon:'⚔',era:2},
+bronzeShield:{name:'청동방패',icon:'🛡',era:2},
+iron:{name:'철',icon:'⚙',era:3},ironSword:{name:'철검',icon:'⚔',era:3},ironPlow:{name:'철제쟁기',icon:'🔧',era:3},
+ironArmor:{name:'철갑옷',icon:'🛡',era:3},anvil:{name:'모루',icon:'⚒',era:3},
+steel:{name:'강철',icon:'🔩',era:4},glass:{name:'유리',icon:'🔮',era:4},steelSword:{name:'강철검',icon:'⚔',era:4},
+crossbow:{name:'석궁',icon:'🏹',era:4},
+steamEngine:{name:'증기기관',icon:'♨',era:5},rail:{name:'철도레일',icon:'🛤',era:5},
+factoryGoods:{name:'공산품',icon:'📦',era:5},textile:{name:'섬유제품',icon:'👔',era:5},
+electricity:{name:'전기',icon:'⚡',era:6},computer:{name:'컴퓨터',icon:'💻',era:6},
+plastic:{name:'플라스틱',icon:'🧪',era:6},semiconductor:{name:'반도체',icon:'🔬',era:6}
+};
+
+const RECIPES=[
+{result:'stoneAxe',qty:1,ingredients:{stick:2,stone:1,fiber:1},process:'돌을 깨서 날을 만들고 나뭇가지에 식물섬유로 묶기',edu:{title:'석기 가공법',body:'구석기인들은 돌을 다른 돌로 쳐서 날카로운 면을 만들었습니다. 이것을 "타제석기"라고 합니다. 흑요석이나 부싯돌이 가장 좋은 재료였습니다.'},era:0},
+{result:'stoneKnife',qty:1,ingredients:{flint:2,stick:1},process:'부싯돌을 깨서 날카로운 칼날 만들기',edu:{title:'부싯돌의 비밀',body:'부싯돌(플린트)은 조개껍데기가 변한 암석으로, 깨지면 유리처럼 날카로운 면이 생깁니다. 현대 수술용 메스보다 날카로울 수 있습니다!'},era:0},
+{result:'spear',qty:1,ingredients:{stick:3,flint:1,fiber:1},process:'긴 막대에 뾰족한 부싯돌 끼우기',edu:{title:'최초의 무기',body:'창은 인류 최초의 원거리 무기입니다. 약 40만 년 전부터 사용된 것으로 추정됩니다.'},era:0},
+{result:'stoneHammer',qty:1,ingredients:{stone:2,stick:1,fiber:1},process:'둥근 돌을 막대에 고정',edu:{title:'망치의 원리',body:'망치는 운동에너지를 한 점에 집중시키는 도구입니다. 같은 힘이라도 접촉 면적이 작을수록 압력이 커집니다.'},era:0},
+{result:'rope',qty:1,ingredients:{fiber:4},process:'식물섬유를 꼬아서 밧줄 만들기',edu:{title:'꼬임의 힘',body:'섬유를 꼬면 마찰력이 생겨 풀리지 않습니다. 이 원리는 현대 강철 와이어로프에도 동일하게 적용됩니다.'},era:0},
+{result:'pottery',qty:1,ingredients:{clay:3},process:'점토를 빚어 불에 구우면 단단한 토기 완성',edu:{title:'흙→토기 변환',body:'점토(고령토)를 600~1000°C로 구우면 화학적 변화가 일어나 물에 녹지 않는 단단한 그릇이 됩니다. 이것이 인류 최초의 화학 공정입니다!'},era:1},
+{result:'fabric',qty:1,ingredients:{cotton:3,fiber:2},process:'목화에서 실을 뽑아 베틀로 직물 짜기',edu:{title:'식물→직물',body:'목화 열매의 솜에서 실을 뽑고(방적), 실을 교차시켜 천을 만듭니다(직조). 한 벌의 청바지에 목화 약 680g이 필요합니다.'},era:1},
+{result:'bread',qty:2,ingredients:{wheat:3},process:'밀을 빻아 반죽하고 구워서 빵 만들기',edu:{title:'제빵의 과학',body:'밀가루의 글루텐 단백질이 반죽할 때 그물 구조를 만들고, 효모가 CO2를 내뿜어 빵이 부풀어 오릅니다.'},era:1},
+{result:'sickle',qty:1,ingredients:{stone:2,stick:1,fiber:1},process:'초승달 모양 돌날을 막대에 부착',edu:{title:'농업의 도구',body:'낫은 신석기 혁명의 상징입니다. 밀이나 벼를 효율적으로 수확할 수 있게 해주었습니다.'},era:1},
+{result:'bronze',qty:2,ingredients:{copperOre:3,tinOre:1},process:'구리와 주석을 용광로에서 녹여 합금',edu:{title:'구리+주석→청동',body:'청동은 구리 약 88%와 주석 약 12%의 합금입니다. 순수 구리(녹는점 1085°C)보다 낮은 온도(약 950°C)에서 녹아 주조가 쉽고, 훨씬 단단합니다. 구리는 주로 칠레, 페루, 호주에서 채굴됩니다.'},era:2},
+{result:'bronzeAxe',qty:1,ingredients:{bronze:2,stick:2},process:'청동을 녹여 도끼날 주조 → 자루에 장착',edu:{title:'주조 기술',body:'틀(거푸집)에 녹인 금속을 부어 원하는 모양을 만드는 것을 주조라고 합니다. 청동기 시대의 핵심 기술이었습니다.'},era:2},
+{result:'bronzeSword',qty:1,ingredients:{bronze:3,hide:1},process:'청동 주괴를 두드려 검 형태로 단조',edu:{title:'단조 vs 주조',body:'단조는 금속을 두드려 모양을 만드는 것이고, 주조는 녹여서 틀에 붓는 것입니다. 단조하면 금속 입자가 치밀해져 더 강해집니다.'},era:2},
+{result:'bronzeShield',qty:1,ingredients:{bronze:4,hide:2},process:'청동판을 망치로 두드려 방패 형태로 제작',edu:{title:'방어구의 진화',body:'청동 방패는 가죽 방패보다 화살과 칼날을 훨씬 잘 막았습니다. 무게는 약 3~5kg이었습니다.'},era:2},
+{result:'iron',qty:2,ingredients:{ironOre:3,coal:2},process:'철광석을 숯불 용광로에서 제련하여 선철 생산',edu:{title:'철광석→철 제련',body:'철광석(Fe2O3)을 탄소(숯/코크스)와 함께 1538°C 이상으로 가열하면, 탄소가 산소를 빼앗아 순수한 철이 남습니다: Fe2O3 + 3C → 2Fe + 3CO2'},era:3},
+{result:'ironSword',qty:1,ingredients:{iron:3,hide:1,wood:1},process:'철을 달궈 두드려 검 형태로 단조',edu:{title:'대장장이의 기술',body:'철은 청동보다 녹는점이 높지만(1538°C vs 950°C), 단단하고 원료가 풍부합니다. 숯불에 풀무로 바람을 불어넣어 온도를 높였습니다.'},era:3},
+{result:'ironPlow',qty:1,ingredients:{iron:2,wood:3},process:'철제 보습을 나무 쟁기에 장착',edu:{title:'철제 쟁기의 혁명',body:'철제 쟁기는 나무 쟁기보다 깊이 땅을 갈 수 있어 농업 생산성을 2~3배 높였습니다. 이는 인구 증가의 핵심 요인이었습니다.'},era:3},
+{result:'ironArmor',qty:1,ingredients:{iron:5,hide:2},process:'철판을 이어붙여 갑옷 제작',edu:{title:'갑옷의 무게',body:'중세 판금 갑옷의 무게는 약 15~25kg. 현대 방탄조끼(약 4kg)보다 훨씬 무거웠지만, 무게가 전신에 분산되어 의외로 민첩하게 움직일 수 있었습니다.'},era:3},
+{result:'anvil',qty:1,ingredients:{iron:4},process:'큰 철 덩어리를 단조하여 모루 제작',edu:{title:'대장장이의 필수품',body:'모루는 금속을 두드릴 때 반발력을 제공합니다. 좋은 모루는 망치 에너지의 90% 이상을 반환합니다.'},era:3},
+{result:'steel',qty:2,ingredients:{iron:2,coal:3},process:'철에 탄소를 첨가하여 강철 제조',edu:{title:'철→강철',body:'강철은 철에 탄소 0.2~2.1%를 첨가한 합금입니다. 탄소 원자가 철 격자 사이에 끼어 변형을 막아 더 단단해집니다. 현대 세계에서 연간 약 19억 톤의 강철이 생산됩니다.'},era:4},
+{result:'glass',qty:2,ingredients:{sand:3,limestone:1,coal:1},process:'모래+석회석을 1700°C로 녹여 유리 제조',edu:{title:'모래→유리',body:'유리의 주성분은 이산화규소(SiO2), 즉 모래입니다! 석회석(CaCO3)을 첨가하면 내구성이 높아지고, 소다회(Na2CO3)를 넣으면 녹는점이 낮아집니다.'},era:4},
+{result:'steelSword',qty:1,ingredients:{steel:3,hide:1,wood:1},process:'강철을 접어 단조하여 명검 제작',edu:{title:'다마스커스 강철',body:'중세 대장장이들은 강철을 수천 번 접어 단조했습니다. 이렇게 만든 다마스커스검은 아름다운 물결무늬와 놀라운 강도를 자랑했습니다.'},era:4},
+{result:'crossbow',qty:1,ingredients:{steel:2,wood:3},process:'강철 활대와 목재 몸체로 석궁 제작',edu:{title:'석궁의 위력',body:'석궁은 기사의 갑옷도 뚫을 수 있는 강력한 무기였습니다. 당기는 힘이 최대 350kg에 달했습니다.'},era:4},
+{result:'steamEngine',qty:1,ingredients:{iron:5,coal:5,copperOre:3},process:'보일러+피스톤+크랭크로 증기기관 조립',edu:{title:'석탄→증기력',body:'석탄을 태워 물을 끓이면 증기가 발생하고, 이 증기의 압력으로 피스톤을 움직입니다. 열에너지→운동에너지 변환! 제임스 와트(1769년)가 효율을 획기적으로 개선했습니다.'},era:5},
+{result:'rail',qty:2,ingredients:{steel:4,wood:4},process:'강철을 압연하여 레일 형태로 가공',edu:{title:'철도의 시대',body:'최초의 증기 기관차(1804년)는 시속 8km로 달렸습니다. 철도는 물류 혁명을 일으켜 산업혁명의 핵심 인프라가 되었습니다.'},era:5},
+{result:'factoryGoods',qty:5,ingredients:{iron:2,coal:2,cotton:2},process:'공장에서 기계로 대량 생산',edu:{title:'대량생산의 시작',body:'수공업 시대에는 옷 한 벌에 며칠이 걸렸지만, 방적기와 역직기가 발명되면서 시간당 수십 벌을 생산할 수 있게 되었습니다.'},era:5},
+{result:'textile',qty:3,ingredients:{cotton:4,coal:1},process:'면화→방적→직조→염색 자동화 공정',edu:{title:'면화→옷 대량생산',body:'영국의 면직물 산업이 산업혁명을 촉발했습니다. 1764년 방적기, 1785년 역직기 발명으로 생산성이 수백 배 증가했습니다.'},era:5},
+{result:'electricity',qty:1,ingredients:{copperOre:5,iron:3,coal:3},process:'발전기(자석+코일)로 전기 생산',edu:{title:'전자기 유도',body:'패러데이(1831년)가 발견한 전자기 유도: 자석 옆에서 코일을 움직이면 전류가 흐릅니다! 현대 발전소의 99%가 이 원리를 사용합니다.'},era:6},
+{result:'plastic',qty:3,ingredients:{oil:3,coal:1},process:'석유를 분해(크래킹)하여 폴리머 합성',edu:{title:'석유→플라스틱',body:'석유의 나프타 성분을 열분해하면 에틸렌, 프로필렌 등 단위체가 나옵니다. 이 분자들을 길게 연결(중합)하면 폴리에틸렌(PE), 폴리프로필렌(PP) 등 플라스틱이 됩니다.'},era:6},
+{result:'semiconductor',qty:1,ingredients:{silicon:3,gold:1,copperOre:2},process:'실리콘 웨이퍼에 회로 새기기',edu:{title:'실리콘→반도체',body:'모래에서 추출한 순도 99.9999999%의 실리콘 결정을 얇게 잘라(웨이퍼) 자외선으로 나노미터 단위의 회로를 새깁니다. 최신 칩에는 트랜지스터 수백억 개가 들어갑니다!'},era:6},
+{result:'computer',qty:1,ingredients:{semiconductor:2,plastic:2,copperOre:3,glass:1},process:'CPU+메모리+디스플레이 조립',edu:{title:'컴퓨터의 구성',body:'CPU(실리콘 반도체), RAM(실리콘+금), 디스플레이(유리+액정), 기판(구리+유리섬유), 케이스(플라스틱). 하나의 컴퓨터에 60가지 이상의 원소가 사용됩니다!'},era:6}
+];
+
+const BUILDINGS=[
+{id:'pitDwelling',name:'움집',icon:'🏚',era:0,cost:{stick:5,stone:3,fiber:3},pop:2,desc:'땅을 파고 나뭇가지로 지붕을 얹은 원시 주거'},
+{id:'campfire',name:'모닥불',icon:'🔥',era:0,cost:{stick:4,stone:2},pop:0,desc:'음식을 굽고 맹수를 쫓는 불'},
+{id:'hut',name:'오두막',icon:'🛖',era:1,cost:{wood:8,clay:4,fiber:4},pop:3,desc:'흙과 나무로 만든 정착민의 집'},
+{id:'granary',name:'곡물창고',icon:'🏪',era:1,cost:{wood:6,clay:6},pop:0,desc:'수확한 곡물을 보관하는 창고'},
+{id:'kiln',name:'가마',icon:'🏭',era:1,cost:{clay:8,stone:4,wood:4},pop:0,desc:'토기를 굽는 가마'},
+{id:'thatchHouse',name:'초가집',icon:'🏠',era:2,cost:{wood:10,clay:6,fiber:6},pop:4,desc:'볏짚 지붕의 따뜻한 집'},
+{id:'smelter',name:'용광로',icon:'🔥',era:2,cost:{stone:12,clay:8},pop:0,desc:'광석을 녹여 금속을 추출하는 용광로'},
+{id:'tileHouse',name:'기와집',icon:'🏯',era:3,cost:{wood:12,iron:4,clay:8},pop:5,desc:'기와 지붕의 견고한 한옥'},
+{id:'forge',name:'대장간',icon:'⚒',era:3,cost:{stone:10,iron:6,wood:6},pop:0,desc:'철을 달구고 두드리는 대장간'},
+{id:'castle',name:'성',icon:'🏰',era:4,cost:{stone:30,steel:10,wood:15},pop:10,desc:'적의 침입을 막는 거대한 성'},
+{id:'waterMill',name:'물레방아',icon:'⚙',era:4,cost:{wood:12,stone:8,iron:4},pop:0,desc:'물의 힘으로 곡물을 빻는 시설'},
+{id:'glassWorkshop',name:'유리공방',icon:'🔮',era:4,cost:{stone:10,sand:8,iron:4},pop:0,desc:'모래를 녹여 유리를 만드는 공방'},
+{id:'factory',name:'공장',icon:'🏭',era:5,cost:{iron:20,steel:10,coal:10},pop:8,desc:'기계로 물건을 대량 생산하는 공장'},
+{id:'trainStation',name:'기차역',icon:'🚉',era:5,cost:{steel:15,wood:10,rail:4},pop:0,desc:'철도 교통의 중심'},
+{id:'skyscraper',name:'마천루',icon:'🏙',era:6,cost:{steel:30,glass:15,electricity:2},pop:20,desc:'하늘을 찌르는 현대 건물'},
+{id:'powerPlant',name:'발전소',icon:'⚡',era:6,cost:{iron:15,copperOre:10,coal:8},pop:0,desc:'전기를 생산하는 발전소'},
+{id:'techCenter',name:'기술연구소',icon:'🔬',era:6,cost:{steel:10,glass:8,computer:2},pop:0,desc:'최첨단 기술을 연구하는 시설'}
+];
+
+const OBJECTIVES=[
+[{text:'돌도끼 제작',check:s=>s.crafted.stoneAxe>=1},{text:'창 제작',check:s=>s.crafted.spear>=1},{text:'움집 건설',check:s=>s.built.pitDwelling>=1},{text:'고기 5개 수집',check:s=>(s.inv.meat||0)>=5}],
+[{text:'토기 2개 제작',check:s=>s.crafted.pottery>=2},{text:'직물 제작',check:s=>s.crafted.fabric>=1},{text:'빵 만들기',check:s=>s.crafted.bread>=1},{text:'오두막 건설',check:s=>s.built.hut>=1}],
+[{text:'청동 제련',check:s=>s.crafted.bronze>=1},{text:'청동도끼 제작',check:s=>s.crafted.bronzeAxe>=1},{text:'청동검 제작',check:s=>s.crafted.bronzeSword>=1},{text:'초가집 건설',check:s=>s.built.thatchHouse>=1}],
+[{text:'철 제련',check:s=>s.crafted.iron>=1},{text:'철검 제작',check:s=>s.crafted.ironSword>=1},{text:'철제쟁기 제작',check:s=>s.crafted.ironPlow>=1},{text:'기와집 건설',check:s=>s.built.tileHouse>=1}],
+[{text:'강철 제조',check:s=>s.crafted.steel>=1},{text:'유리 제작',check:s=>s.crafted.glass>=1},{text:'성 건설',check:s=>s.built.castle>=1},{text:'인구 15명',check:s=>s.population>=15}],
+[{text:'증기기관 제작',check:s=>s.crafted.steamEngine>=1},{text:'철도레일 제작',check:s=>s.crafted.rail>=1},{text:'공장 건설',check:s=>s.built.factory>=1},{text:'공산품 5개 생산',check:s=>s.crafted.factoryGoods>=5}],
+[{text:'전기 생산',check:s=>s.crafted.electricity>=1},{text:'반도체 제작',check:s=>s.crafted.semiconductor>=1},{text:'컴퓨터 조립',check:s=>s.crafted.computer>=1},{text:'마천루 건설',check:s=>s.built.skyscraper>=1}]
+];
+
+// ========== GAME STATE ==========
+let G={
+era:0,day:1,time:0,season:0,population:1,
+inv:{},crafted:{},built:{},discoveredRecipes:[],
+px:400,py:300,
+worldResources:[],buildings:[],villagers:[],
+camX:0,camY:0,
+selectedSlot:0
+};
+
+let canvas,ctx,mmCanvas,mmCtx;
+let W=800,H=600;
+let keys={};
+let animFrame=0;
+let toastTimer=null;
+let gameStarted=false;
+let panelOpen=null;
+
+const TILE=40;
+const WORLD_W=50,WORLD_H=50;
+const SEASONS=['봄','여름','가을','겨울'];
+const SEASON_ICONS=['🌸','☀','🍂','❄'];
+const DAY_LENGTH=600; // frames per day
+
+// ========== INIT ==========
+function init(){
+canvas=document.getElementById('gameCanvas');
+ctx=canvas.getContext('2d');
+mmCanvas=document.getElementById('minimapCanvas');
+mmCtx=mmCanvas.getContext('2d');
+resize();
+window.addEventListener('resize',resize);
+window.addEventListener('keydown',e=>{keys[e.key]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault()});
+window.addEventListener('keyup',e=>keys[e.key]=false);
+canvas.addEventListener('click',onCanvasClick);
+canvas.addEventListener('touchstart',onCanvasTouch,{passive:false});
+}
+
+function resize(){
+W=window.innerWidth;H=window.innerHeight;
+canvas.width=W;canvas.height=H;
+}
+
+function startNewGame(){
+G={era:0,day:1,time:0,season:0,population:1,
+inv:{stick:3,stone:2},crafted:{},built:{},discoveredRecipes:['stoneAxe','spear'],
+px:WORLD_W*TILE/2,py:WORLD_H*TILE/2,
+worldResources:[],buildings:[],villagers:[],
+camX:0,camY:0,selectedSlot:0};
+generateWorld();
+document.getElementById('menu-screen').style.display='none';
+gameStarted=true;
+showToast('석기시대에 오신 것을 환영합니다! 자원을 모아 도구를 만드세요.');
+gameLoop();
+}
+
+function generateWorld(){
+G.worldResources=[];
+const rTypes=getEraResources(G.era);
+for(let i=0;i<120;i++){
+const rt=rTypes[Math.floor(Math.random()*rTypes.length)];
+G.worldResources.push({
+type:rt,
+x:Math.random()*WORLD_W*TILE,
+y:Math.random()*WORLD_H*TILE,
+hp:3
+});
+}
+}
+
+function getEraResources(era){
+const base=['stick','stone','wood','fiber','berry'];
+if(era>=0) base.push('flint','meat','hide');
+if(era>=1) base.push('clay','wheat','rice','cotton','seed');
+if(era>=2) base.push('copperOre','tinOre','gold');
+if(era>=3) base.push('ironOre','coal','limestone');
+if(era>=4) base.push('sand','saltpeter');
+if(era>=5) base.push('oil','rubber','cotton');
+if(era>=6) base.push('silicon','uranium');
+return base;
+}
+
+function addEraResources(){
+const rTypes=getEraResources(G.era);
+const newTypes=rTypes.filter(r=>RESOURCES[r].era===G.era);
+for(let i=0;i<40;i++){
+const rt=newTypes.length>0?newTypes[Math.floor(Math.random()*newTypes.length)]:rTypes[Math.floor(Math.random()*rTypes.length)];
+G.worldResources.push({type:rt,x:Math.random()*WORLD_W*TILE,y:Math.random()*WORLD_H*TILE,hp:3});
+}
+}
+
+// ========== GAME LOOP ==========
+function gameLoop(){
+if(!gameStarted)return;
+update();
+render();
+animFrame++;
+requestAnimationFrame(gameLoop);
+}
+
+function update(){
+// Movement
+const spd=3;
+if(keys['ArrowUp']||keys['w'])G.py-=spd;
+if(keys['ArrowDown']||keys['s'])G.py+=spd;
+if(keys['ArrowLeft']||keys['a'])G.px-=spd;
+if(keys['ArrowRight']||keys['d'])G.px+=spd;
+G.px=Math.max(10,Math.min(WORLD_W*TILE-10,G.px));
+G.py=Math.max(10,Math.min(WORLD_H*TILE-10,G.py));
+
+// Camera follow
+G.camX=G.px-W/2;
+G.camY=G.py-H/2;
+
+// Day/night cycle
+G.time++;
+if(G.time>=DAY_LENGTH){
+G.time=0;G.day++;
+if(G.day%30===0){
+G.season=(G.season+1)%4;
+document.getElementById('season-display').textContent=SEASON_ICONS[G.season]+' '+SEASONS[G.season];
+}
+// Spawn resources periodically
+if(G.day%5===0 && G.worldResources.length<200){
+const rTypes=getEraResources(G.era);
+for(let i=0;i<10;i++){
+const rt=rTypes[Math.floor(Math.random()*rTypes.length)];
+G.worldResources.push({type:rt,x:Math.random()*WORLD_W*TILE,y:Math.random()*WORLD_H*TILE,hp:3});
+}
+}
+// Food consumption
+const foodNeeded=Math.ceil(G.population/3);
+const totalFood=(G.inv.meat||0)+(G.inv.berry||0)+(G.inv.bread||0)+(G.inv.wheat||0)+(G.inv.rice||0);
+if(totalFood>=foodNeeded){
+for(const f of['bread','meat','berry','wheat','rice']){
+if(G.inv[f]&&G.inv[f]>0){const take=Math.min(G.inv[f],foodNeeded);G.inv[f]-=take;break;}
+}
+}
+document.getElementById('day-count').textContent=G.day+'일차';
+}
+
+// Day/night visual
+const dayProgress=G.time/DAY_LENGTH;
+let nightAlpha=0;
+if(dayProgress<0.25)nightAlpha=0.3*(1-dayProgress/0.25);
+else if(dayProgress>0.75)nightAlpha=0.3*((dayProgress-0.75)/0.25);
+document.getElementById('day-night').style.background=`rgba(0,0,40,${nightAlpha})`;
+
+// Update food display
+const totalFood=(G.inv.meat||0)+(G.inv.berry||0)+(G.inv.bread||0)+(G.inv.wheat||0)+(G.inv.rice||0);
+document.getElementById('food-count').textContent=totalFood;
+document.getElementById('pop-count').textContent=G.population;
+document.getElementById('era-name').textContent=ERAS[G.era].name;
+
+// Check objectives
+updateObjectives();
+
+// Villager AI
+G.villagers.forEach(v=>{
+v.moveTimer=(v.moveTimer||0)+1;
+if(v.moveTimer>120){
+v.moveTimer=0;
+v.tx=v.x+(Math.random()-0.5)*100;
+v.ty=v.y+(Math.random()-0.5)*100;
+}
+if(v.tx!==undefined){
+const dx=v.tx-v.x,dy=v.ty-v.y;
+const d=Math.sqrt(dx*dx+dy*dy);
+if(d>2){v.x+=dx/d*1.5;v.y+=dy/d*1.5;}
+}
+});
+
+// Keyboard shortcuts
+if(keys['c']){keys['c']=false;toggleCraftPanel();}
+if(keys['b']){keys['b']=false;toggleBuildPanel();}
+if(keys['r']){keys['r']=false;toggleRecipeBook();}
+if(keys[' ']){keys[' ']=false;gatherNearest();}
+for(let i=1;i<=9;i++){if(keys[String(i)]){keys[String(i)]=false;G.selectedSlot=i-1;updateInventoryBar();}}
+}
+
+// ========== RENDERING ==========
+function render(){
+ctx.clearRect(0,0,W,H);
+
+// Background
+const era=ERAS[G.era];
+const grad=ctx.createLinearGradient(0,0,0,H);
+grad.addColorStop(0,era.bgColors[0]);
+grad.addColorStop(0.5,era.bgColors[1]);
+grad.addColorStop(1,era.bgColors[2]);
+ctx.fillStyle=grad;
+ctx.fillRect(0,0,W,H);
+
+// Ground tiles
+const startTX=Math.max(0,Math.floor(G.camX/TILE));
+const startTY=Math.max(0,Math.floor(G.camY/TILE));
+const endTX=Math.min(WORLD_W,Math.ceil((G.camX+W)/TILE));
+const endTY=Math.min(WORLD_H,Math.ceil((G.camY+H)/TILE));
+
+for(let tx=startTX;tx<endTX;tx++){
+for(let ty=startTY;ty<endTY;ty++){
+const sx=tx*TILE-G.camX;
+const sy=ty*TILE-G.camY;
+ctx.fillStyle=((tx+ty)%2===0)?'rgba(255,255,255,.03)':'rgba(0,0,0,.03)';
+ctx.fillRect(sx,sy,TILE,TILE);
+// Grid lines
+ctx.strokeStyle='rgba(255,255,255,.04)';
+ctx.strokeRect(sx,sy,TILE,TILE);
+}
+}
+
+// Buildings
+G.buildings.forEach(b=>{
+const bDef=BUILDINGS.find(bd=>bd.id===b.type);
+if(!bDef)return;
+const sx=b.x-G.camX;
+const sy=b.y-G.camY;
+if(sx<-60||sx>W+60||sy<-60||sy>H+60)return;
+ctx.fillStyle='rgba(0,0,0,.3)';
+ctx.fillRect(sx-18,sy-18,36,36);
+ctx.font='28px serif';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+ctx.fillText(bDef.icon,sx,sy);
+ctx.font='9px sans-serif';
+ctx.fillStyle='#aaa';
+ctx.fillText(bDef.name,sx,sy+22);
+});
+
+// Resources
+G.worldResources.forEach(r=>{
+const res=RESOURCES[r.type];
+if(!res)return;
+const sx=r.x-G.camX;
+const sy=r.y-G.camY;
+if(sx<-30||sx>W+30||sy<-30||sy>H+30)return;
+// Hover glow
+const dx=G.px-r.x,dy=G.py-r.y;
+const dist=Math.sqrt(dx*dx+dy*dy);
+if(dist<50){
+ctx.fillStyle='rgba(255,215,0,.15)';
+ctx.beginPath();
+ctx.arc(sx,sy,18,0,Math.PI*2);
+ctx.fill();
+}
+ctx.font='20px serif';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+ctx.fillText(res.icon,sx,sy);
+if(dist<80){
+ctx.font='9px sans-serif';
+ctx.fillStyle='#ddd';
+ctx.fillText(res.name,sx,sy+16);
+}
+});
+
+// Villagers
+G.villagers.forEach(v=>{
+const sx=v.x-G.camX;
+const sy=v.y-G.camY;
+if(sx<-20||sx>W+20||sy<-20||sy>H+20)return;
+ctx.font='16px serif';
+ctx.textAlign='center';
+ctx.fillText('👤',sx,sy);
+});
+
+// Player
+const px=G.px-G.camX;
+const py=G.py-G.camY;
+// Shadow
+ctx.fillStyle='rgba(0,0,0,.3)';
+ctx.beginPath();
+ctx.ellipse(px,py+12,10,4,0,0,Math.PI*2);
+ctx.fill();
+// Body
+ctx.font='24px serif';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+const bobY=Math.sin(animFrame*0.1)*2;
+ctx.fillText('🧑',px,py+bobY);
+// Name
+ctx.font='10px sans-serif';
+ctx.fillStyle='#ffd700';
+ctx.fillText('플레이어',px,py-18);
+
+// Gather range indicator
+ctx.strokeStyle='rgba(255,215,0,.15)';
+ctx.setLineDash([4,4]);
+ctx.beginPath();
+ctx.arc(px,py,50,0,Math.PI*2);
+ctx.stroke();
+ctx.setLineDash([]);
+
+// Minimap
+renderMinimap();
+updateInventoryBar();
+}
+
+function renderMinimap(){
+mmCtx.fillStyle='#111';
+mmCtx.fillRect(0,0,140,140);
+const scale=140/(WORLD_W*TILE);
+// Resources as dots
+G.worldResources.forEach(r=>{
+const res=RESOURCES[r.type];
+mmCtx.fillStyle=getResColor(r.type);
+mmCtx.fillRect(r.x*scale,r.y*scale,2,2);
+});
+// Buildings
+G.buildings.forEach(b=>{
+mmCtx.fillStyle='#ffd700';
+mmCtx.fillRect(b.x*scale-1,b.y*scale-1,3,3);
+});
+// Player
+mmCtx.fillStyle='#ff0000';
+mmCtx.fillRect(G.px*scale-2,G.py*scale-2,4,4);
+// Camera view
+mmCtx.strokeStyle='rgba(255,255,255,.4)';
+mmCtx.strokeRect(G.camX*scale,G.camY*scale,W*scale,H*scale);
+}
+
+function getResColor(type){
+const colors={stick:'#8B4513',stone:'#808080',flint:'#B0C4DE',wood:'#A0522D',fiber:'#228B22',
+meat:'#DC143C',berry:'#4B0082',hide:'#8B7355',clay:'#CD853F',wheat:'#DAA520',rice:'#FFFFF0',
+cotton:'#F5F5DC',seed:'#32CD32',copperOre:'#FF8C00',tinOre:'#C0C0C0',gold:'#FFD700',
+ironOre:'#2F4F4F',coal:'#1C1C1C',limestone:'#D3D3D3',sand:'#F0E68C',saltpeter:'#00CED1',
+oil:'#1a1a1a',rubber:'#333',silicon:'#9370DB',uranium:'#00FF00'};
+return colors[type]||'#888';
+}
+
+// ========== INVENTORY ==========
+function updateInventoryBar(){
+const bar=document.getElementById('inventory-bar');
+const allItems=Object.entries(G.inv).filter(([k,v])=>v>0);
+let html='';
+for(let i=0;i<10;i++){
+const item=allItems[i];
+const sel=i===G.selectedSlot?'selected':'';
+if(item){
+const[key,qty]=item;
+const def=RESOURCES[key]||ITEMS[key]||{icon:'?',name:key};
+html+=`<div class="inv-slot ${sel}" onclick="G.selectedSlot=${i};updateInventoryBar()"><span>${def.icon}</span><span class="count">${qty}</span><span class="iname">${def.name}</span></div>`;
+}else{
+html+=`<div class="inv-slot ${sel}" onclick="G.selectedSlot=${i}"></div>`;
+}
+}
+bar.innerHTML=html;
+}
+
+function addItem(key,qty){
+G.inv[key]=(G.inv[key]||0)+qty;
+}
+function hasItems(recipe){
+for(const[k,v] of Object.entries(recipe)){
+if((G.inv[k]||0)<v)return false;
+}
+return true;
+}
+function removeItems(recipe){
+for(const[k,v] of Object.entries(recipe)){
+G.inv[k]-=v;
+if(G.inv[k]<=0)delete G.inv[k];
+}
+}
+
+// ========== GATHERING ==========
+function gatherNearest(){
+let closest=null,minD=50;
+G.worldResources.forEach(r=>{
+const dx=G.px-r.x,dy=G.py-r.y;
+const d=Math.sqrt(dx*dx+dy*dy);
+if(d<minD){minD=d;closest=r;}
+});
+if(closest){
+closest.hp--;
+const res=RESOURCES[closest.type];
+if(closest.hp<=0){
+addItem(closest.type,1);
+showToast(`${res.icon} ${res.name} 획득!`);
+G.worldResources=G.worldResources.filter(r=>r!==closest);
+// Discover recipes
+discoverRecipesFor(closest.type);
+}else{
+showToast(`${res.icon} 채집 중... (${3-closest.hp}/3)`);
+}
+}else{
+showToast('근처에 수집할 자원이 없습니다. (이동: 방향키/WASD, 수집: 스페이스/클릭)');
+}
+}
+
+function discoverRecipesFor(resourceType){
+RECIPES.forEach(r=>{
+if(r.era<=G.era && !G.discoveredRecipes.includes(r.result)){
+if(r.ingredients[resourceType]){
+G.discoveredRecipes.push(r.result);
+const item=ITEMS[r.result];
+if(item)showToast(`📖 새 레시피 발견: ${item.name}!`);
+}
+}
+});
+}
+
+function onCanvasClick(e){
+if(!gameStarted)return;
+const mx=e.clientX+G.camX;
+const my=e.clientY+G.camY;
+
+// Check if clicked on resource
+let clicked=null,minD=30;
+G.worldResources.forEach(r=>{
+const dx=mx-r.x,dy=my-r.y;
+const d=Math.sqrt(dx*dx+dy*dy);
+if(d<minD){minD=d;clicked=r;}
+});
+
+if(clicked){
+const dx=G.px-clicked.x,dy=G.py-clicked.y;
+const d=Math.sqrt(dx*dx+dy*dy);
+if(d<80){
+// Gather
+clicked.hp--;
+const res=RESOURCES[clicked.type];
+if(clicked.hp<=0){
+addItem(clicked.type,1);
+showToast(`${res.icon} ${res.name} 획득!`);
+G.worldResources=G.worldResources.filter(r=>r!==clicked);
+discoverRecipesFor(clicked.type);
+}else{
+showToast(`${res.icon} 채집 중... (${3-clicked.hp}/3)`);
+}
+}else{
+// Move toward resource
+G.px+=(clicked.x-G.px)*0.3;
+G.py+=(clicked.y-G.py)*0.3;
+}
+}else{
+// Move to click position
+const tx=e.clientX+G.camX;
+const ty=e.clientY+G.camY;
+G.px+=(tx-G.px)*0.3;
+G.py+=(ty-G.py)*0.3;
+}
+}
+
+function onCanvasTouch(e){
+e.preventDefault();
+const t=e.touches[0];
+onCanvasClick({clientX:t.clientX,clientY:t.clientY});
+}
+
+// ========== CRAFTING ==========
+function toggleCraftPanel(){
+if(panelOpen==='craft'){
+document.getElementById('craft-panel').style.display='none';
+panelOpen=null;return;
+}
+closeAllPanels();
+panelOpen='craft';
+const panel=document.getElementById('craft-panel');
+panel.style.display='block';
+renderCraftList();
+}
+
+function renderCraftList(){
+const list=document.getElementById('craft-list');
+const available=RECIPES.filter(r=>r.era<=G.era);
+let html='';
+available.forEach((r,idx)=>{
+const item=ITEMS[r.result];
+if(!item)return;
+const canCraft=hasItems(r.ingredients);
+const ingStr=Object.entries(r.ingredients).map(([k,v])=>{
+const def=RESOURCES[k]||ITEMS[k]||{icon:'?',name:k};
+const have=G.inv[k]||0;
+const color=have>=v?'#4caf50':'#f44336';
+return `<span style="color:${color}">${def.icon}${def.name}×${v}(${have})</span>`;
+}).join(' + ');
+html+=`<div class="craft-recipe ${canCraft?'':'disabled'}" onclick="${canCraft?`craftItem(${idx})`:''}">
+<div style="font-size:11px;color:#999">${r.process}</div>
+<div class="craft-flow">${ingStr} <span class="arrow">→</span></div>
+<div class="craft-result">${item.icon} ${item.name} ×${r.qty}</div>
+${canCraft?`<button class="craft-btn">제작</button>`:'<div style="text-align:center;font-size:11px;color:#f44336">재료 부족</div>'}
+</div>`;
+});
+if(!html)html='<p style="text-align:center;color:#888">현재 시대에서 제작할 수 있는 레시피가 없습니다.</p>';
+list.innerHTML=html;
+}
+
+function craftItem(idx){
+const r=RECIPES.filter(r=>r.era<=G.era)[idx];
+if(!r||!hasItems(r.ingredients))return;
+removeItems(r.ingredients);
+addItem(r.result,r.qty);
+G.crafted[r.result]=(G.crafted[r.result]||0)+r.qty;
+if(!G.discoveredRecipes.includes(r.result))G.discoveredRecipes.push(r.result);
+const item=ITEMS[r.result];
+showToast(`✅ ${item.icon} ${item.name} 제작 완료!`);
+// Play sound
+playSound(600,0.1,0.1);
+setTimeout(()=>playSound(800,0.1,0.1),100);
+// Show educational popup
+if(r.edu){
+setTimeout(()=>showEdu(r.edu.title,r.edu.body),500);
+}
+renderCraftList();
+updateObjectives();
+}
+
+// ========== BUILDING ==========
+function toggleBuildPanel(){
+if(panelOpen==='build'){
+document.getElementById('build-panel').style.display='none';
+panelOpen=null;return;
+}
+closeAllPanels();
+panelOpen='build';
+document.getElementById('build-panel').style.display='block';
+renderBuildList();
+}
+
+function renderBuildList(){
+const list=document.getElementById('build-list');
+const available=BUILDINGS.filter(b=>b.era<=G.era);
+let html='';
+available.forEach((b,idx)=>{
+const costItems={};
+Object.entries(b.cost).forEach(([k,v])=>costItems[k]=v);
+const canBuild=hasItems(costItems);
+const costStr=Object.entries(b.cost).map(([k,v])=>{
+const def=RESOURCES[k]||ITEMS[k]||{icon:'?',name:k};
+const have=G.inv[k]||0;
+const color=have>=v?'#4caf50':'#f44336';
+return `<span style="color:${color}">${def.icon}${v}(${have})</span>`;
+}).join(' ');
+html+=`<div class="build-item ${canBuild?'':'disabled'}" onclick="${canBuild?`buildItem('${b.id}')`:''}">
+<div style="font-size:20px">${b.icon} ${b.name}</div>
+<div style="font-size:11px;color:#aaa;margin:4px 0">${b.desc}</div>
+<div style="font-size:12px">필요: ${costStr}</div>
+${b.pop>0?`<div style="font-size:11px;color:#4caf50">인구 +${b.pop}</div>`:''}
+${canBuild?`<button class="craft-btn" style="background:#8bc34a">건설</button>`:'<div style="text-align:center;font-size:11px;color:#f44336">재료 부족</div>'}
+</div>`;
+});
+list.innerHTML=html;
+}
+
+function buildItem(id){
+const b=BUILDINGS.find(bd=>bd.id===id);
+if(!b)return;
+const costItems={};
+Object.entries(b.cost).forEach(([k,v])=>costItems[k]=v);
+if(!hasItems(costItems))return;
+removeItems(costItems);
+// Place near player
+const bx=G.px+(Math.random()-0.5)*80;
+const by=G.py+(Math.random()-0.5)*80;
+G.buildings.push({type:id,x:bx,y:by});
+G.built[id]=(G.built[id]||0)+1;
+// Add population
+if(b.pop>0){
+G.population+=b.pop;
+for(let i=0;i<b.pop;i++){
+G.villagers.push({x:bx+(Math.random()-0.5)*40,y:by+(Math.random()-0.5)*40});
+}
+}
+showToast(`🏗 ${b.icon} ${b.name} 건설 완료!`);
+playSound(400,0.15,0.15);
+setTimeout(()=>playSound(500,0.1,0.1),150);
+renderBuildList();
+updateObjectives();
+}
+
+// ========== RECIPE BOOK ==========
+function toggleRecipeBook(){
+if(panelOpen==='recipe'){
+document.getElementById('recipe-book').style.display='none';
+panelOpen=null;return;
+}
+closeAllPanels();
+panelOpen='recipe';
+document.getElementById('recipe-book').style.display='block';
+renderRecipeBook();
+}
+
+function renderRecipeBook(){
+const list=document.getElementById('recipe-list');
+let html=`<p style="font-size:12px;color:#aaa;margin-bottom:8px">발견한 레시피: ${G.discoveredRecipes.length}/${RECIPES.length}</p>`;
+RECIPES.forEach(r=>{
+const item=ITEMS[r.result];
+if(!item)return;
+const discovered=G.discoveredRecipes.includes(r.result);
+if(discovered){
+const ingStr=Object.entries(r.ingredients).map(([k,v])=>{
+const def=RESOURCES[k]||ITEMS[k]||{icon:'?',name:k};
+return `${def.icon}${def.name}×${v}`;
+}).join(' + ');
+html+=`<div class="craft-recipe" style="cursor:default">
+<div style="font-size:11px;color:#a1887f">${ERAS[r.era].name}</div>
+<div class="craft-flow">${ingStr} <span class="arrow">→</span> ${item.icon}${item.name}</div>
+<div style="font-size:11px;color:#999">${r.process}</div>
+</div>`;
+}else{
+html+=`<div class="craft-recipe" style="cursor:default;opacity:.3"><div class="craft-result">❓ ???</div><div style="font-size:11px;color:#666">아직 발견하지 못한 레시피</div></div>`;
+}
+});
+list.innerHTML=html;
+}
+
+// ========== SAVE/LOAD ==========
+function toggleSavePanel(){
+if(panelOpen==='save'){
+document.getElementById('save-panel').style.display='none';
+panelOpen=null;return;
+}
+closeAllPanels();
+panelOpen='save';
+document.getElementById('save-panel').style.display='block';
+renderSaveSlots();
+}
+
+function renderSaveSlots(){
+const list=document.getElementById('save-list');
+let html='';
+for(let i=0;i<3;i++){
+const data=localStorage.getItem('civevo_save_'+i);
+let info='빈 슬롯';
+if(data){
+try{
+const s=JSON.parse(data);
+info=`${ERAS[s.era].name} | ${s.day}일차 | 인구 ${s.population}`;
+}catch(e){info='손상된 데이터';}
+}
+html+=`<div class="save-slot">
+<div><strong>슬롯 ${i+1}</strong><br><span style="font-size:11px;color:#aaa">${info}</span></div>
+<div style="display:flex;gap:6px">
+<button onclick="saveGame(${i})" style="padding:4px 10px;background:#ab47bc;color:#fff;border:none;border-radius:4px;cursor:pointer">저장</button>
+<button onclick="loadGame(${i})" style="padding:4px 10px;background:#7b1fa2;color:#fff;border:none;border-radius:4px;cursor:pointer" ${data?'':'disabled'}>불러오기</button>
+</div></div>`;
+}
+list.innerHTML=html;
+}
+
+function saveGame(slot){
+const data=JSON.stringify(G);
+localStorage.setItem('civevo_save_'+slot,data);
+showToast(`💾 슬롯 ${slot+1}에 저장 완료!`);
+renderSaveSlots();
+}
+
+function loadGame(slot){
+const data=localStorage.getItem('civevo_save_'+slot);
+if(!data)return;
+try{
+G=JSON.parse(data);
+document.getElementById('menu-screen').style.display='none';
+closeAllPanels();
+gameStarted=true;
+showToast(`✅ 슬롯 ${slot+1} 불러오기 완료!`);
+if(!gameStarted)gameLoop();
+}catch(e){showToast('저장 데이터가 손상되었습니다.');}
+}
+
+function showLoadMenu(){
+document.getElementById('menu-screen').style.display='none';
+gameStarted=false;
+toggleSavePanel();
+// Show menu again if canceled
+const panel=document.getElementById('save-panel');
+panel.querySelector('.panel-close').onclick=()=>{
+panel.style.display='none';
+panelOpen=null;
+if(!gameStarted)document.getElementById('menu-screen').style.display='flex';
+};
+}
+
+// ========== OBJECTIVES ==========
+function updateObjectives(){
+const objs=OBJECTIVES[G.era];
+if(!objs)return;
+const list=document.getElementById('obj-list');
+let html='';
+let allDone=true;
+objs.forEach(o=>{
+const done=o.check(G);
+if(!done)allDone=false;
+html+=`<div class="obj-item ${done?'obj-done':''}">
+${done?'✅':'⬜'} ${o.text}
+</div>`;
+});
+list.innerHTML=html;
+if(allDone && G.era<6){
+advanceEra();
+}
+if(allDone && G.era===6){
+list.innerHTML+='<div style="color:#ffd700;margin-top:8px;font-weight:bold">🎉 모든 시대를 완료했습니다!</div>';
+}
+}
+
+function advanceEra(){
+G.era++;
+const era=ERAS[G.era];
+// Show transition
+const trans=document.getElementById('era-transition');
+trans.style.display='flex';
+document.getElementById('era-trans-title').textContent=`🎉 ${era.name} 진입!`;
+document.getElementById('era-trans-desc').innerHTML=`${era.desc}<br><br><strong>역사적 사실:</strong><br>${era.fact}`;
+addEraResources();
+// Discover era recipes
+RECIPES.filter(r=>r.era===G.era).forEach(r=>{
+if(!G.discoveredRecipes.includes(r.result)){
+G.discoveredRecipes.push(r.result);
+}
+});
+playSound(523,0.15,0.2);
+setTimeout(()=>playSound(659,0.15,0.2),200);
+setTimeout(()=>playSound(784,0.15,0.3),400);
+}
+
+function closeEraTransition(){
+document.getElementById('era-transition').style.display='none';
+}
+
+// ========== EDUCATIONAL POPUP ==========
+function showEdu(title,body){
+document.getElementById('edu-title').textContent='💡 알고 있나요? - '+title;
+document.getElementById('edu-body').innerHTML=`<p>${body}</p>`;
+document.getElementById('edu-popup').style.display='block';
+}
+function closeEdu(){
+document.getElementById('edu-popup').style.display='none';
+}
+
+// ========== UI HELPERS ==========
+function closeAllPanels(){
+['craft-panel','build-panel','recipe-book','save-panel','edu-popup'].forEach(id=>{
+document.getElementById(id).style.display='none';
+});
+panelOpen=null;
+}
+
+function showToast(msg){
+const t=document.getElementById('toast');
+t.textContent=msg;
+t.style.display='block';
+if(toastTimer)clearTimeout(toastTimer);
+toastTimer=setTimeout(()=>{t.style.display='none';},2500);
+}
+
+// ========== WEB AUDIO ==========
+let audioCtx=null;
+function getAudioCtx(){
+if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+return audioCtx;
+}
+function playSound(freq,dur,vol){
+try{
+const ac=getAudioCtx();
+const osc=ac.createOscillator();
+const gain=ac.createGain();
+osc.type='sine';
+osc.frequency.value=freq;
+gain.gain.value=vol||0.1;
+gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+osc.connect(gain);
+gain.connect(ac.destination);
+osc.start();
+osc.stop(ac.currentTime+dur);
+}catch(e){}
+}
+
+// ========== START ==========
+init();
+</script>
+</body>
+</html>

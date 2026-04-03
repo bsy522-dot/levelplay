@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>스도쿠</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:480px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 16px;margin-bottom:10px;font-size:16px;font-weight:700;flex-wrap:wrap;gap:4px}
+.hud .tm{color:#FFB74D}.hud .ht{color:#81C784}.hud .lv{color:#7FDBFF}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu p{color:#aaa;font-size:15px;text-align:center;max-width:360px}
+.lv-btn{width:300px;padding:14px;font-size:18px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.lv-btn:active{transform:scale(0.95)}
+.lv-btn.l1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.lv-btn.l2{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.lv-btn.l3{background:linear-gradient(135deg,#E53935,#EF5350)}
+.lv-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px}
+.board{display:inline-grid;gap:0;border:3px solid #FFD700;border-radius:4px;background:#FFD700}
+.cell{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;background:#1e1e3a;cursor:pointer;transition:all 0.15s;position:relative;user-select:none}
+.cell.fixed{color:#aaa;cursor:default}
+.cell.selected{background:#2a2a5a;box-shadow:inset 0 0 0 2px #FFD700}
+.cell.filled{color:#7FDBFF}
+.cell.error{color:#E53935;background:rgba(229,57,53,0.1)}
+.cell .memo{position:absolute;inset:0;display:grid;font-size:9px;color:#888;padding:1px}
+.numpad{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:8px}
+.num-btn{width:48px;height:48px;font-size:22px;font-weight:700;border:2px solid #444;border-radius:12px;background:rgba(255,255,255,0.05);color:#fff;cursor:pointer;transition:all 0.15s}
+.num-btn:active{transform:scale(0.93);background:rgba(255,255,255,0.1)}
+.num-btn.hint-btn{background:linear-gradient(135deg,#FFD700,#FFA000);border-color:#FFD700;color:#1a1a2e;font-size:14px}
+.num-btn.memo-btn{background:rgba(156,39,176,0.2);border-color:#9C27B0;color:#CE93D8;font-size:14px}
+.num-btn.del-btn{background:rgba(229,57,53,0.2);border-color:#E53935;color:#E53935}
+.actions{display:flex;gap:8px;margin-top:4px}
+.result{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center}
+.result .big{font-size:72px}.result h2{font-size:28px;color:#FFD700}
+.result p{font-size:18px;color:#ccc}
+.stars{font-size:36px;margin:4px 0}
+.retry{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
+.best-record{font-size:14px;color:#888}
+.memo-mode-indicator{font-size:13px;color:#CE93D8;font-weight:700;min-height:20px}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+const DIFFICULTIES=[
+  {name:'쉬움',size:4,boxW:2,boxH:2,blanks:6,emoji:'🟢',cls:'l1'},
+  {name:'보통',size:6,boxW:3,boxH:2,blanks:14,emoji:'🟡',cls:'l2'},
+  {name:'어려움',size:9,boxW:3,boxH:3,blanks:40,emoji:'🔴',cls:'l3'}
+];
+
+let screen='menu',diff=0,board=[],solution=[],fixed=[],memos=[],selected=null,hints=3,hintsUsed=0,memoMode=false;
+let startTime=0,elapsed=0,timerInterval=null;
+
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'sudoku'},'*');}catch(e){}}
+function getBest(d){try{return JSON.parse(localStorage.getItem('sudoku_best_'+d))||{stars:0,time:Infinity};}catch(e){return{stars:0,time:Infinity};}}
+function saveBest(d,stars,t){const p=getBest(d);if(stars>p.stars||(stars===p.stars&&t<p.time))localStorage.setItem('sudoku_best_'+d,JSON.stringify({stars:Math.max(stars,p.stars),time:Math.min(t,p.time)}));}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function fmtTime(s){const m=Math.floor(s/60);const sec=Math.floor(s%60);return m+'분 '+sec+'초';}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function generateSolution(size,boxW,boxH){
+  const grid=Array.from({length:size},()=>Array(size).fill(0));
+  function isValid(r,c,n){
+    for(let i=0;i<size;i++){if(grid[r][i]===n||grid[i][c]===n)return false;}
+    const br=Math.floor(r/boxH)*boxH,bc=Math.floor(c/boxW)*boxW;
+    for(let i=br;i<br+boxH;i++)for(let j=bc;j<bc+boxW;j++)if(grid[i][j]===n)return false;
+    return true;
+  }
+  function fill(pos){
+    if(pos>=size*size)return true;
+    const r=Math.floor(pos/size),c=pos%size;
+    const nums=shuffle(Array.from({length:size},(_,i)=>i+1));
+    for(const n of nums){
+      if(isValid(r,c,n)){grid[r][c]=n;if(fill(pos+1))return true;grid[r][c]=0;}
+    }
+    return false;
+  }
+  fill(0);
+  return grid;
+}
+
+function generatePuzzle(d){
+  const cfg=DIFFICULTIES[d];
+  const sol=generateSolution(cfg.size,cfg.boxW,cfg.boxH);
+  const puzzle=sol.map(r=>[...r]);
+  const fix=sol.map(r=>r.map(()=>true));
+  const positions=[];
+  for(let i=0;i<cfg.size;i++)for(let j=0;j<cfg.size;j++)positions.push([i,j]);
+  shuffle(positions);
+  for(let i=0;i<cfg.blanks&&i<positions.length;i++){
+    const [r,c]=positions[i];puzzle[r][c]=0;fix[r][c]=false;
+  }
+  return {solution:sol,board:puzzle,fixed:fix};
+}
+
+function startGame(d){
+  diff=d;const cfg=DIFFICULTIES[d];
+  const p=generatePuzzle(d);
+  solution=p.solution;board=p.board;fixed=p.fixed;
+  memos=Array.from({length:cfg.size},()=>Array.from({length:cfg.size},()=>new Set()));
+  selected=null;hints=3;hintsUsed=0;memoMode=false;
+  startTime=Date.now();elapsed=0;
+  if(timerInterval)clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{elapsed=Math.floor((Date.now()-startTime)/1000);updateTimer();},1000);
+  screen='play';render();
+}
+
+function updateTimer(){const el=document.getElementById('timer');if(el)el.textContent='⏱️ '+fmtTime(elapsed);}
+
+function checkWin(){
+  const cfg=DIFFICULTIES[diff];
+  for(let i=0;i<cfg.size;i++)for(let j=0;j<cfg.size;j++)if(board[i][j]!==solution[i][j])return false;
+  return true;
+}
+
+function selectCell(r,c){if(fixed[r][c])return;selected=[r,c];render();}
+
+function placeNumber(n){
+  if(!selected)return;
+  const [r,c]=selected;
+  if(fixed[r][c])return;
+  if(memoMode){
+    if(n===0){memos[r][c].clear();}
+    else{if(memos[r][c].has(n))memos[r][c].delete(n);else memos[r][c].add(n);}
+    render();return;
+  }
+  board[r][c]=n;memos[r][c].clear();
+  render();
+  if(n>0&&checkWin()){
+    clearInterval(timerInterval);timerInterval=null;
+    elapsed=Math.floor((Date.now()-startTime)/1000);
+    screen='result';render();
+  }
+}
+
+function useHint(){
+  if(hints<=0||!selected)return;
+  const [r,c]=selected;
+  if(fixed[r][c]||board[r][c]===solution[r][c])return;
+  board[r][c]=solution[r][c];memos[r][c].clear();
+  hints--;hintsUsed++;
+  render();
+  if(checkWin()){clearInterval(timerInterval);timerInterval=null;elapsed=Math.floor((Date.now()-startTime)/1000);screen='result';render();}
+}
+
+function getStars(){
+  const cfg=DIFFICULTIES[diff];
+  const baseTime=cfg.size===4?60:cfg.size===6?180:600;
+  let s=3;
+  if(elapsed>baseTime*2)s=1;else if(elapsed>baseTime)s=2;
+  if(hintsUsed>=3)s=Math.max(1,s-1);
+  else if(hintsUsed>=1)s=Math.max(1,s);
+  return s;
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu')renderMenu(app);
+  else if(screen==='play')renderPlay(app);
+  else if(screen==='result')renderResult(app);
+}
+
+function renderMenu(app){
+  const btns=DIFFICULTIES.map((d,i)=>{
+    const b=getBest(i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} 최고: ${fmtTime(b.time)}</span>`:'';
+    return `<button class="lv-btn ${d.cls}" onclick="startGame(${i})">${d.emoji} ${d.name} (${d.size}x${d.size})${bst}</button>`;
+  }).join('');
+  app.innerHTML=`
+    <h1>🔢 스도쿠</h1>
+    <div class="menu">
+      <p>빈칸에 숫자를 채워 모든 행, 열, 박스에 중복 없이 완성하세요!<br>힌트 3회, 메모 기능 사용 가능</p>
+      ${btns}
+    </div>`;
+}
+
+function renderPlay(app){
+  const cfg=DIFFICULTIES[diff];
+  const sz=cfg.size;
+  const cellPx=Math.min(Math.floor((480-40)/sz),52);
+  const gridGap=1;
+  let gridHtml='';
+  for(let r=0;r<sz;r++){for(let c=0;c<sz;c++){
+    const v=board[r][c];
+    const isSel=selected&&selected[0]===r&&selected[1]===c;
+    const isFix=fixed[r][c];
+    const isErr=v>0&&!isFix&&v!==solution[r][c];
+    let cls='cell';
+    if(isFix)cls+=' fixed';
+    if(isSel)cls+=' selected';
+    if(v>0&&!isFix)cls+=' filled';
+    if(isErr)cls+=' error';
+    let borderR=(c+1)%cfg.boxW===0&&c<sz-1?'2px solid #FFD700':'1px solid #333';
+    let borderB=(r+1)%cfg.boxH===0&&r<sz-1?'2px solid #FFD700':'1px solid #333';
+    let memoHtml='';
+    if(v===0&&memos[r][c].size>0){
+      const cols=cfg.size<=4?2:3;
+      memoHtml=`<div class="memo" style="grid-template-columns:repeat(${cols},1fr)">`;
+      for(let n=1;n<=sz;n++)memoHtml+=`<span>${memos[r][c].has(n)?n:''}</span>`;
+      memoHtml+='</div>';
+    }
+    gridHtml+=`<div class="${cls}" style="width:${cellPx}px;height:${cellPx}px;border-right:${borderR};border-bottom:${borderB}" onclick="selectCell(${r},${c})">${v>0?v:''}${memoHtml}</div>`;
+  }}
+  const nums=[];
+  for(let i=1;i<=sz;i++)nums.push(`<button class="num-btn" onclick="placeNumber(${i})">${i}</button>`);
+  app.innerHTML=`
+    <div class="hud">
+      <span class="lv">${DIFFICULTIES[diff].emoji} ${DIFFICULTIES[diff].name}</span>
+      <span class="ht">💡 ${hints}</span>
+      <span class="tm" id="timer">⏱️ ${fmtTime(elapsed)}</span>
+    </div>
+    <div class="memo-mode-indicator">${memoMode?'📝 메모 모드 ON':''}</div>
+    <div class="game-area">
+      <div class="board" style="grid-template-columns:repeat(${sz},${cellPx}px);display:grid;gap:${gridGap}px">
+        ${gridHtml}
+      </div>
+      <div class="numpad">
+        ${nums.join('')}
+        <button class="num-btn del-btn" onclick="placeNumber(0)">⌫</button>
+        <button class="num-btn memo-btn" onclick="memoMode=!memoMode;render()">📝</button>
+        <button class="num-btn hint-btn" onclick="useHint()">💡</button>
+      </div>
+    </div>
+    <button class="back-btn" onclick="if(timerInterval)clearInterval(timerInterval);timerInterval=null;screen='menu';render()">← 메뉴로</button>`;
+}
+
+function renderResult(app){
+  const stars=getStars();
+  const xp=[20,40,80][diff]*stars;
+  saveBest(diff,stars,elapsed);
+  sendXP(xp);
+  app.innerHTML=`
+    <div class="result">
+      <div class="big">🎉</div>
+      <h2>퍼즐 완성!</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>⏱️ ${fmtTime(elapsed)}</p>
+      <p>💡 힌트 사용: ${hintsUsed}회</p>
+      <p style="color:#FFD700;font-weight:700">+${xp} XP</p>
+      <div class="best-record">최고: ${starStr(getBest(diff).stars)} / ${fmtTime(getBest(diff).time)}</div>
+      <button class="retry" onclick="startGame(${diff})">다시 도전</button>
+      <button class="back-btn" onclick="screen='menu';render()">← 메뉴로</button>
+    </div>`;
+}
+
+render();
+</script>
+</body></html>

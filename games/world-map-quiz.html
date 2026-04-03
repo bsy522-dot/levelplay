@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>세계지도 퀴즈</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:600px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 16px;margin-bottom:10px;font-size:16px;font-weight:700;flex-wrap:wrap;gap:4px}
+.hud .sc{color:#FFD700}.hud .qn{color:#7FDBFF}.hud .st{color:#FF6B9D}.hud .df{color:#CE93D8}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu h1{font-size:30px;margin-bottom:4px}
+.menu p{color:#aaa;font-size:15px;text-align:center;max-width:360px}
+.diff-btn{width:300px;padding:14px;font-size:18px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.diff-btn:active{transform:scale(0.95)}
+.diff-btn.d1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.diff-btn.d2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.diff-btn.d3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.diff-btn.d4{background:linear-gradient(135deg,#E53935,#EF5350)}
+.diff-btn.d5{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+.diff-btn.lock{opacity:0.5}
+.diff-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
+.back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
+.back-btn:hover{border-color:#aaa;color:#fff}
+.map-container{position:relative;width:100%;aspect-ratio:2/1;background:#16213e;border-radius:12px;overflow:hidden;margin-bottom:10px;border:2px solid #333}
+.map-container svg{width:100%;height:100%}
+.country-dot{cursor:pointer;transition:all 0.2s}
+.country-dot:hover{r:8;fill:#FFD700}
+.country-dot.correct{fill:#4CAF50;r:10}
+.country-dot.wrong{fill:#E53935;r:10}
+.continent-label{fill:#555;font-size:9px;font-weight:700;pointer-events:none}
+.coastline{fill:#0f3460;stroke:#1a5276;stroke-width:0.5}
+.question-box{text-align:center;background:rgba(0,0,0,0.4);border-radius:12px;padding:14px;margin-bottom:10px}
+.question-box .q-text{font-size:22px;font-weight:700;color:#FFD700}
+.question-box .q-sub{font-size:14px;color:#aaa;margin-top:4px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.ch-btn{padding:14px;font-size:18px;font-weight:700;border:2px solid #444;border-radius:14px;background:rgba(255,255,255,0.05);color:#fff;cursor:pointer;transition:all 0.15s}
+.ch-btn:active{transform:scale(0.95)}
+.ch-btn.correct{background:#4CAF50;border-color:#4CAF50;color:#fff}
+.ch-btn.wrong{background:#E53935;border-color:#E53935;color:#fff}
+.info-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e2a45;border:2px solid #FFD700;border-radius:16px;padding:20px;max-width:340px;width:90%;z-index:100;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.6)}
+.info-popup h3{color:#FFD700;font-size:20px;margin-bottom:8px}
+.info-popup p{font-size:14px;color:#ccc;margin:4px 0}
+.info-popup .tag{display:inline-block;background:rgba(255,215,0,0.15);color:#FFD700;padding:3px 10px;border-radius:8px;font-size:12px;margin:2px}
+.info-popup button{margin-top:12px;padding:10px 30px;font-size:16px;font-weight:700;border:none;border-radius:12px;background:linear-gradient(135deg,#FFD700,#FFA000);color:#1a1a2e;cursor:pointer}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
+.result{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center}
+.result .big{font-size:72px}.result h2{font-size:28px;color:#FFD700}
+.result p{font-size:18px;color:#ccc}
+.retry{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.next-btn{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#81C784);color:#fff;cursor:pointer;margin-top:4px}
+.menu-link{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:4px}
+.hidden{display:none!important}
+.stars{font-size:36px;margin:4px 0}
+.best-record{font-size:14px;color:#888}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+const CONTINENTS=[
+  {name:'아시아',x:70,y:30},{name:'유럽',x:48,y:20},{name:'북미',x:18,y:28},
+  {name:'남미',x:27,y:62},{name:'아프리카',x:50,y:52},{name:'오세아니아',x:85,y:67},{name:'남극',x:50,y:82}
+];
+
+const COUNTRIES=[
+{name:'한국',capital:'서울',continent:'아시아',pop:'5,200만',product:'반도체',gdp:'1.8조$',flag:'🇰🇷',x:78.5,y:32},
+{name:'일본',capital:'도쿄',continent:'아시아',pop:'1억 2,600만',product:'자동차',gdp:'4.2조$',flag:'🇯🇵',x:82,y:30},
+{name:'중국',capital:'베이징',continent:'아시아',pop:'14억',product:'전자제품',gdp:'18조$',flag:'🇨🇳',x:72,y:30},
+{name:'미국',capital:'워싱턴 D.C.',continent:'북미',pop:'3억 3,000만',product:'IT 기술',gdp:'25조$',flag:'🇺🇸',x:18,y:32},
+{name:'영국',capital:'런던',continent:'유럽',pop:'6,700만',product:'금융',gdp:'3.1조$',flag:'🇬🇧',x:46,y:22},
+{name:'프랑스',capital:'파리',continent:'유럽',pop:'6,700만',product:'와인',gdp:'2.8조$',flag:'🇫🇷',x:47,y:27},
+{name:'독일',capital:'베를린',continent:'유럽',pop:'8,300만',product:'자동차',gdp:'4.1조$',flag:'🇩🇪',x:49,y:24},
+{name:'이탈리아',capital:'로마',continent:'유럽',pop:'6,000만',product:'패션',gdp:'2.0조$',flag:'🇮🇹',x:50,y:29},
+{name:'스페인',capital:'마드리드',continent:'유럽',pop:'4,700만',product:'올리브유',gdp:'1.4조$',flag:'🇪🇸',x:45,y:30},
+{name:'러시아',capital:'모스크바',continent:'유럽',pop:'1억 4,400만',product:'천연가스',gdp:'1.8조$',flag:'🇷🇺',x:60,y:18},
+{name:'브라질',capital:'브라질리아',continent:'남미',pop:'2억 1,000만',product:'커피',gdp:'1.9조$',flag:'🇧🇷',x:30,y:62},
+{name:'호주',capital:'캔버라',continent:'오세아니아',pop:'2,600만',product:'철광석',gdp:'1.7조$',flag:'🇦🇺',x:84,y:70},
+{name:'인도',capital:'뉴델리',continent:'아시아',pop:'14억',product:'IT서비스',gdp:'3.5조$',flag:'🇮🇳',x:67,y:38},
+{name:'캐나다',capital:'오타와',continent:'북미',pop:'3,800만',product:'메이플시럽',gdp:'2.1조$',flag:'🇨🇦',x:18,y:20},
+{name:'멕시코',capital:'멕시코시티',continent:'북미',pop:'1억 3,000만',product:'아보카도',gdp:'1.3조$',flag:'🇲🇽',x:14,y:40},
+{name:'이집트',capital:'카이로',continent:'아프리카',pop:'1억',product:'면화',gdp:'0.4조$',flag:'🇪🇬',x:53,y:37},
+{name:'남아공',capital:'프리토리아',continent:'아프리카',pop:'6,000만',product:'금',gdp:'0.4조$',flag:'🇿🇦',x:52,y:72},
+{name:'터키',capital:'앙카라',continent:'아시아',pop:'8,500만',product:'직물',gdp:'0.9조$',flag:'🇹🇷',x:55,y:30},
+{name:'사우디',capital:'리야드',continent:'아시아',pop:'3,500만',product:'석유',gdp:'1.1조$',flag:'🇸🇦',x:58,y:38},
+{name:'태국',capital:'방콕',continent:'아시아',pop:'7,000만',product:'쌀',gdp:'0.5조$',flag:'🇹🇭',x:73.5,y:43},
+{name:'베트남',capital:'하노이',continent:'아시아',pop:'9,800만',product:'커피',gdp:'0.4조$',flag:'🇻🇳',x:74.5,y:40},
+{name:'인도네시아',capital:'자카르타',continent:'아시아',pop:'2억 7,000만',product:'팜유',gdp:'1.3조$',flag:'🇮🇩',x:77,y:55},
+{name:'필리핀',capital:'마닐라',continent:'아시아',pop:'1억 1,000만',product:'바나나',gdp:'0.4조$',flag:'🇵🇭',x:80,y:43},
+{name:'아르헨티나',capital:'부에노스아이레스',continent:'남미',pop:'4,500만',product:'소고기',gdp:'0.6조$',flag:'🇦🇷',x:26,y:75},
+{name:'칠레',capital:'산티아고',continent:'남미',pop:'1,900만',product:'구리',gdp:'0.3조$',flag:'🇨🇱',x:24,y:73},
+{name:'스웨덴',capital:'스톡홀름',continent:'유럽',pop:'1,000만',product:'가구(IKEA)',gdp:'0.6조$',flag:'🇸🇪',x:50.5,y:16},
+{name:'노르웨이',capital:'오슬로',continent:'유럽',pop:'540만',product:'연어',gdp:'0.5조$',flag:'🇳🇴',x:48.5,y:15},
+{name:'그리스',capital:'아테네',continent:'유럽',pop:'1,050만',product:'올리브',gdp:'0.2조$',flag:'🇬🇷',x:52,y:31},
+{name:'폴란드',capital:'바르샤바',continent:'유럽',pop:'3,800만',product:'사과',gdp:'0.7조$',flag:'🇵🇱',x:51.5,y:23},
+{name:'네덜란드',capital:'암스테르담',continent:'유럽',pop:'1,740만',product:'튤립',gdp:'1.0조$',flag:'🇳🇱',x:47.5,y:23}
+];
+
+const DIFFS=[
+  {name:'쉬움',emoji:'🟢',desc:'대륙 맞히기 (7개)',count:7,type:'continent'},
+  {name:'보통',emoji:'🟡',desc:'주요국 15개 위치 찾기',count:15,type:'location'},
+  {name:'어려움',emoji:'🟠',desc:'30개국 수도 맞히기',count:30,type:'capital'},
+  {name:'고급',emoji:'🔴',desc:'수도 + 국기 맞히기',count:20,type:'flag_capital'},
+  {name:'마스터',emoji:'🟣',desc:'인구/GDP 퀴즈',count:15,type:'stats'}
+];
+
+let diffIdx=0,score=0,streak=0,qIdx=0,questions=[],answered=false,screen='menu',correctCount=0;
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[b[i],b[j]]=[b[j],b[i]];}return b;}
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'world-map-quiz'},'*');}catch(e){}}
+function getBest(d){try{return JSON.parse(localStorage.getItem('worldmap_best_'+d))||{stars:0,score:0};}catch(e){return{stars:0,score:0};}}
+function saveBest(d,stars,sc){const p=getBest(d);if(stars>p.stars||sc>p.score)localStorage.setItem('worldmap_best_'+d,JSON.stringify({stars:Math.max(stars,p.stars),score:Math.max(sc,p.score)}));}
+function getStars(sc,max){const pct=Math.round(sc/max*100);return pct>=80?3:pct>=50?2:pct>=20?1:0;}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function isUnlocked(d){if(d===0)return true;return getBest(d-1).stars>=1;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu') renderMenu(app);
+  else if(screen==='play') renderPlay(app);
+  else if(screen==='result') renderResult(app);
+}
+
+function renderMenu(app){
+  let btns=DIFFS.map((d,i)=>{
+    const b=getBest(i);
+    const ul=isUnlocked(i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} 최고: ${b.score}점</span>`:'';
+    return `<button class="diff-btn d${i+1} ${ul?'':'lock'}" onclick="${ul?`startDiff(${i})`:''}">${d.emoji} ${d.name}: ${d.desc}${bst}</button>`;
+  }).join('');
+  app.innerHTML=`
+    <h1>🌍 세계지도 퀴즈</h1>
+    <div class="menu">
+      <p>30개 주요 국가의 위치, 수도, 국기, 경제 지표를 배워보세요!</p>
+      ${btns}
+      <p style="font-size:13px;color:#666">별 1개 이상으로 다음 난이도 해금!</p>
+    </div>`;
+}
+
+function startDiff(d){
+  diffIdx=d;score=0;streak=0;qIdx=0;answered=false;correctCount=0;
+  const df=DIFFS[d];
+  if(df.type==='continent'){
+    questions=shuffle(CONTINENTS).slice(0,df.count);
+  }else{
+    questions=shuffle(COUNTRIES).slice(0,Math.min(df.count,COUNTRIES.length));
+  }
+  screen='play';render();
+}
+
+function renderPlay(app){
+  if(qIdx>=questions.length){screen='result';render();return;}
+  const df=DIFFS[diffIdx];
+  const q=questions[qIdx];
+  let html=`
+    <div class="hud">
+      <span class="sc">⭐ ${score}</span>
+      <span class="df">${df.emoji} ${df.name}</span>
+      <span class="qn">📋 ${qIdx+1}/${questions.length}</span>
+      <span class="st">🔥 ${streak}</span>
+    </div>`;
+
+  if(df.type==='continent'){
+    // Easy: identify continent on map
+    html+=`<div class="question-box"><div class="q-text">${q.name}</div><div class="q-sub">이 대륙의 위치를 지도에서 클릭하세요!</div></div>`;
+    html+=renderMapContinent();
+  }else if(df.type==='location'){
+    html+=`<div class="question-box"><div class="q-text">${q.name} ${q.flag}</div><div class="q-sub">이 나라의 위치를 지도에서 클릭하세요!</div></div>`;
+    html+=renderMap(true);
+  }else if(df.type==='capital'){
+    html+=`<div class="question-box"><div class="q-text">${q.name} ${q.flag}의 수도는?</div><div class="q-sub">${q.continent} · 인구 ${q.pop}</div></div>`;
+    html+=renderMap(false);
+    const opts=genCapitalChoices(q);
+    html+=`<div class="choices">${opts.map((o,i)=>`<button class="ch-btn" id="ch${i}" onclick="answerChoice(${i},'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('')}</div>`;
+  }else if(df.type==='flag_capital'){
+    // Show flag, guess country name + capital
+    html+=`<div class="question-box"><div class="q-text" style="font-size:48px">${q.flag}</div><div class="q-sub">이 국기의 나라와 수도는?</div></div>`;
+    const opts=genFlagChoices(q);
+    html+=`<div class="choices">${opts.map((o,i)=>`<button class="ch-btn" id="ch${i}" onclick="answerChoice(${i},'${o.n.replace(/'/g,"\\'")}')" style="font-size:15px">${o.n} (${o.c})</button>`).join('')}</div>`;
+  }else if(df.type==='stats'){
+    // GDP/Pop quiz
+    const qType=Math.random()>0.5?'pop':'gdp';
+    const label=qType==='pop'?'인구가 더 많은':'GDP가 더 큰';
+    const pair=getTwoDifferent();
+    html+=`<div class="question-box"><div class="q-text">${label} 나라는?</div><div class="q-sub">${pair[0].flag} ${pair[0].name} vs ${pair[1].flag} ${pair[1].name}</div></div>`;
+    const ans=qType==='pop'?comparePop(pair[0],pair[1]):compareGdp(pair[0],pair[1]);
+    html+=`<div class="choices">
+      <button class="ch-btn" id="ch0" onclick="answerStats(0,${ans===0?'true':'false'})">${pair[0].flag} ${pair[0].name}<br><small>${qType==='pop'?pair[0].pop:pair[0].gdp}</small></button>
+      <button class="ch-btn" id="ch1" onclick="answerStats(1,${ans===1?'true':'false'})">${pair[1].flag} ${pair[1].name}<br><small>${qType==='pop'?pair[1].pop:pair[1].gdp}</small></button>
+    </div>`;
+  }
+  app.innerHTML=html;
+  answered=false;
+}
+
+function getTwoDifferent(){
+  const s=shuffle(COUNTRIES);
+  return [s[0],s[1]];
+}
+function parsePop(s){return parseFloat(s.replace(/[^0-9.]/g,''))*(s.includes('억')?10000:1);}
+function parseGdp(s){return parseFloat(s.replace(/[^0-9.]/g,''));}
+function comparePop(a,b){return parsePop(a.pop)>=parsePop(b.pop)?0:1;}
+function compareGdp(a,b){return parseGdp(a.gdp)>=parseGdp(b.gdp)?0:1;}
+
+function renderMapContinent(){
+  let svg=`<div class="map-container"><svg viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg">`;
+  svg+=`<rect x="0" y="0" width="100" height="85" fill="#0a1628"/>`;
+  svg+=`<path class="coastline" d="M5,10 L30,8 L32,15 L28,22 L30,30 L25,35 L20,42 L12,42 L8,35 L5,25Z"/>`;
+  svg+=`<path class="coastline" d="M20,48 L32,45 L35,55 L33,65 L28,75 L22,80 L20,70 L18,60Z"/>`;
+  svg+=`<path class="coastline" d="M43,10 L55,8 L56,15 L54,22 L52,28 L48,32 L44,30 L42,22 L43,15Z"/>`;
+  svg+=`<path class="coastline" d="M42,34 L56,33 L58,42 L57,55 L55,65 L52,75 L48,75 L44,65 L42,50Z"/>`;
+  svg+=`<path class="coastline" d="M56,8 L88,6 L90,15 L85,22 L88,30 L82,35 L78,40 L70,45 L62,42 L57,35 L55,25 L56,15Z"/>`;
+  svg+=`<path class="coastline" d="M70,46 L82,44 L85,50 L80,55 L74,52Z"/>`;
+  svg+=`<path class="coastline" d="M78,60 L92,58 L94,65 L90,73 L82,74 L78,68Z"/>`;
+  CONTINENTS.forEach((c,i)=>{
+    svg+=`<circle cx="${c.x}" cy="${c.y}" r="8" fill="rgba(127,219,255,0.3)" stroke="#7FDBFF" stroke-width="1" style="cursor:pointer" onclick="answerContinent(${i})"/>`;
+    svg+=`<text x="${c.x}" y="${c.y+3}" fill="#7FDBFF" font-size="4" text-anchor="middle" font-weight="700" style="pointer-events:none">${c.name}</text>`;
+  });
+  svg+=`</svg></div>`;
+  return svg;
+}
+
+function answerContinent(idx){
+  if(answered)return;
+  answered=true;
+  const q=questions[qIdx];
+  if(CONTINENTS[idx].name===q.name){
+    score+=10+streak*2;streak++;correctCount++;sendXP(5);
+    showSimpleInfo(q.name,'✅ 정답!',true);
+  }else{
+    streak=0;
+    showSimpleInfo(q.name+' (오답: '+CONTINENTS[idx].name+')','❌ 오답!',false);
+  }
+}
+
+function showSimpleInfo(text,title,ok){
+  const overlay=document.createElement('div');overlay.className='overlay';
+  const popup=document.createElement('div');popup.className='info-popup';
+  popup.innerHTML=`<h3>${title}</h3><p style="font-size:18px;color:#fff">${text}</p><button onclick="nextQ()">다음 →</button>`;
+  document.body.appendChild(overlay);document.body.appendChild(popup);
+}
+
+function renderMap(clickable){
+  let svg=`<div class="map-container"><svg viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg">`;
+  svg+=`<rect x="0" y="0" width="100" height="85" fill="#0a1628"/>`;
+  svg+=`<path class="coastline" d="M5,10 L30,8 L32,15 L28,22 L30,30 L25,35 L20,42 L12,42 L8,35 L5,25Z"/>`;
+  svg+=`<path class="coastline" d="M20,48 L32,45 L35,55 L33,65 L28,75 L22,80 L20,70 L18,60Z"/>`;
+  svg+=`<path class="coastline" d="M43,10 L55,8 L56,15 L54,22 L52,28 L48,32 L44,30 L42,22 L43,15Z"/>`;
+  svg+=`<path class="coastline" d="M42,34 L56,33 L58,42 L57,55 L55,65 L52,75 L48,75 L44,65 L42,50Z"/>`;
+  svg+=`<path class="coastline" d="M56,8 L88,6 L90,15 L85,22 L88,30 L82,35 L78,40 L70,45 L62,42 L57,35 L55,25 L56,15Z"/>`;
+  svg+=`<path class="coastline" d="M70,46 L82,44 L85,50 L80,55 L74,52Z"/>`;
+  svg+=`<path class="coastline" d="M78,60 L92,58 L94,65 L90,73 L82,74 L78,68Z"/>`;
+  svg+=`<text class="continent-label" x="16" y="28">북미</text>`;
+  svg+=`<text class="continent-label" x="25" y="62">남미</text>`;
+  svg+=`<text class="continent-label" x="47" y="20">유럽</text>`;
+  svg+=`<text class="continent-label" x="48" y="55">아프리카</text>`;
+  svg+=`<text class="continent-label" x="68" y="25">아시아</text>`;
+  svg+=`<text class="continent-label" x="83" y="68">오세아니아</text>`;
+  COUNTRIES.forEach((ct,i)=>{
+    const clk=clickable?`onclick="answerMap(${i})" style="cursor:pointer"`:'';
+    const col=clickable?'#7FDBFF':'#FFD700';
+    const r=clickable?4:3;
+    svg+=`<circle class="country-dot" id="dot${i}" cx="${ct.x}" cy="${ct.y}" r="${r}" fill="${col}" ${clk}/>`;
+    if(!clickable) svg+=`<text x="${ct.x}" y="${ct.y-4}" fill="#aaa" font-size="3" text-anchor="middle">${ct.name}</text>`;
+  });
+  svg+=`</svg></div>`;
+  return svg;
+}
+
+function genCapitalChoices(c){
+  const caps=COUNTRIES.map(x=>x.capital);
+  let opts=[c.capital];
+  while(opts.length<4){const r=caps[Math.random()*caps.length|0];if(!opts.includes(r))opts.push(r);}
+  return shuffle(opts);
+}
+
+function genFlagChoices(c){
+  let opts=[{n:c.name,c:c.capital}];
+  const pool=shuffle(COUNTRIES.filter(x=>x.name!==c.name));
+  for(let i=0;opts.length<4&&i<pool.length;i++) opts.push({n:pool[i].name,c:pool[i].capital});
+  return shuffle(opts);
+}
+
+function answerMap(idx){
+  if(answered)return;
+  answered=true;
+  const c=questions[qIdx];
+  const clicked=COUNTRIES[idx];
+  const dot=document.getElementById('dot'+idx);
+  if(clicked.name===c.name){
+    dot.classList.add('correct');score+=10+streak*2;streak++;correctCount++;sendXP(10);showInfo(c,true);
+  }else{
+    dot.classList.add('wrong');
+    const ci=COUNTRIES.findIndex(x=>x.name===c.name);
+    document.getElementById('dot'+ci).classList.add('correct');
+    streak=0;showInfo(c,false);
+  }
+}
+
+function answerChoice(idx,val){
+  if(answered)return;
+  answered=true;
+  const c=questions[qIdx];
+  const btn=document.getElementById('ch'+idx);
+  const df=DIFFS[diffIdx];
+  let isCorrect=false;
+  if(df.type==='capital') isCorrect=(val===c.capital);
+  else if(df.type==='flag_capital') isCorrect=(val===c.name);
+
+  if(isCorrect){
+    btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;sendXP(10);showInfo(c,true);
+  }else{
+    btn.classList.add('wrong');
+    document.querySelectorAll('.ch-btn').forEach(b=>{
+      if(df.type==='capital'&&b.textContent===c.capital) b.classList.add('correct');
+      if(df.type==='flag_capital'&&b.textContent.startsWith(c.name)) b.classList.add('correct');
+    });
+    streak=0;showInfo(c,false);
+  }
+}
+
+function answerStats(idx,isCorrect){
+  if(answered)return;
+  answered=true;
+  const btn=document.getElementById('ch'+idx);
+  if(isCorrect){
+    btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;sendXP(10);
+  }else{
+    btn.classList.add('wrong');
+    document.getElementById('ch'+(1-idx)).classList.add('correct');
+    streak=0;
+  }
+  setTimeout(()=>{qIdx++;render();},1200);
+}
+
+function showInfo(c,isCorrect){
+  const overlay=document.createElement('div');overlay.className='overlay';
+  const popup=document.createElement('div');popup.className='info-popup';
+  popup.innerHTML=`
+    <h3>${isCorrect?'✅ 정답!':'❌ 오답!'}</h3>
+    <p style="font-size:18px;font-weight:700;color:#fff;margin:6px 0">${c.flag||''} ${c.name} (${c.capital||''})</p>
+    <p><span class="tag">${c.continent||''}</span> <span class="tag">인구 ${c.pop||''}</span></p>
+    <p><span class="tag">특산물: ${c.product||''}</span> <span class="tag">GDP: ${c.gdp||''}</span></p>
+    <button onclick="nextQ()">다음 →</button>`;
+  document.body.appendChild(overlay);document.body.appendChild(popup);
+}
+
+function nextQ(){
+  document.querySelectorAll('.overlay,.info-popup').forEach(e=>e.remove());
+  qIdx++;screen='play';render();
+}
+
+function renderResult(app){
+  const max=questions.length*10;
+  const pct=Math.round(score/max*100);
+  const stars=getStars(score,max);
+  saveBest(diffIdx,stars,score);
+  const emoji=stars>=3?'🏆':stars>=2?'👍':'📚';
+  const canNext=diffIdx<4&&stars>=1;
+  app.innerHTML=`
+    <div class="result">
+      <div class="big">${emoji}</div>
+      <h2>${DIFFS[diffIdx].emoji} ${DIFFS[diffIdx].name} 완료!</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>점수: ${score}점</p>
+      <p>정답: ${correctCount}/${questions.length} (${questions.length>0?Math.round(correctCount/questions.length*100):0}%)</p>
+      <p class="best-record">최고 기록: ${getBest(diffIdx).score}점</p>
+      <button class="retry" onclick="startDiff(${diffIdx})">다시 하기</button>
+      ${canNext?`<button class="next-btn" onclick="startDiff(${diffIdx+1})">다음 난이도 →</button>`:''}
+      <button class="menu-link" onclick="goMenu()">메뉴로</button>
+    </div>`;
+  sendXP(score);
+}
+
+function goMenu(){screen='menu';render();}
+window.startDiff=startDiff;window.answerMap=answerMap;window.answerChoice=answerChoice;
+window.answerContinent=answerContinent;window.answerStats=answerStats;
+window.nextQ=nextQ;window.goMenu=goMenu;
+render();
+</script>
+</body></html>

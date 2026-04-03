@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>색깔 맞히기 게임</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#FFF8E7;font-family:'Segoe UI',sans-serif;color:#333}
+.wrap{max-width:480px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:28px;margin:8px 0;color:#FF6B9D}
+.score-bar{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:16px;padding:8px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-size:18px;font-weight:700}
+.score-bar .pts{color:#FF6B9D}
+.score-bar .streak{color:#FFB347}
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.color-circle{width:180px;height:180px;border-radius:50%;margin:20px auto;box-shadow:0 8px 24px rgba(0,0,0,0.15);border:6px solid #fff}
+.hint{font-size:20px;color:#888;margin-bottom:16px;text-align:center}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:400px}
+.opt-btn{min-height:64px;font-size:22px;font-weight:700;border:3px solid #E8E8E8;border-radius:16px;background:#fff;cursor:pointer;transition:all 0.15s;color:#333;padding:8px;word-break:break-all}
+.opt-btn:active{transform:scale(0.95)}
+.opt-btn.correct{background:#A8F0A0;border-color:#4CAF50;color:#2E7D32}
+.opt-btn.wrong{background:#FFCDD2;border-color:#E53935;color:#C62828}
+.toggle-row{display:flex;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.toggle-btn{padding:8px 20px;font-size:16px;font-weight:700;border:2px solid #ddd;border-radius:12px;background:#fff;cursor:pointer;transition:all 0.15s}
+.toggle-btn.active{background:#FF6B9D;color:#fff;border-color:#FF6B9D}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu-btn{width:280px;padding:14px;font-size:18px;font-weight:700;border:none;border-radius:20px;cursor:pointer;color:#fff;box-shadow:0 4px 12px rgba(255,154,158,0.3);transition:transform 0.15s}
+.menu-btn:active{transform:scale(0.96)}
+.menu-btn.d1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.menu-btn.d2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.menu-btn.d3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.menu-btn.d4{background:linear-gradient(135deg,#E53935,#EF5350)}
+.menu-btn.d5{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+.back-btn{background:none;border:none;font-size:18px;color:#999;cursor:pointer;margin-bottom:8px;padding:8px 0}
+.result{text-align:center;margin:auto 0}
+.result h2{font-size:32px;color:#FF6B9D;margin-bottom:12px}
+.result p{font-size:20px;margin-bottom:8px}
+.result .big{font-size:80px;margin-bottom:12px}
+.retry{background:linear-gradient(135deg,#FF9A9E,#FAD0C4);border:none;border-radius:16px;padding:16px 40px;font-size:22px;font-weight:700;color:#fff;cursor:pointer;margin-top:12px}
+.next-btn{background:linear-gradient(135deg,#4CAF50,#81C784);border:none;border-radius:16px;padding:16px 40px;font-size:22px;font-weight:700;color:#fff;cursor:pointer;margin-top:8px}
+.stars{font-size:36px;margin:8px 0}
+.best-record{font-size:14px;color:#999;margin-top:4px}
+.diff-info{font-size:14px;color:#aaa;text-align:center;margin-bottom:12px}
+.diff-badge{display:inline-block;padding:4px 12px;border-radius:8px;font-size:13px;font-weight:700;color:#fff;margin-bottom:8px}
+.lock{opacity:0.5}
+.lock::after{content:' 🔒'}
+.best-star{font-size:12px;color:#FFB347;display:block;margin-top:2px}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+const COLORS = [
+  {hex:'#E53935',ko:'빨강',en:'Red',rgb:'229,57,53'},
+  {hex:'#FF9800',ko:'주황',en:'Orange',rgb:'255,152,0'},
+  {hex:'#FFEB3B',ko:'노랑',en:'Yellow',rgb:'255,235,59'},
+  {hex:'#4CAF50',ko:'초록',en:'Green',rgb:'76,175,80'},
+  {hex:'#2196F3',ko:'파랑',en:'Blue',rgb:'33,150,243'},
+  {hex:'#9C27B0',ko:'보라',en:'Purple',rgb:'156,39,176'},
+  {hex:'#E91E63',ko:'분홍',en:'Pink',rgb:'233,30,99'},
+  {hex:'#795548',ko:'갈색',en:'Brown',rgb:'121,85,72'},
+  {hex:'#212121',ko:'검정',en:'Black',rgb:'33,33,33'},
+  {hex:'#FAFAFA',ko:'흰색',en:'White',rgb:'250,250,250'},
+  {hex:'#9E9E9E',ko:'회색',en:'Gray',rgb:'158,158,158'},
+  {hex:'#03A9F4',ko:'하늘색',en:'Sky Blue',rgb:'3,169,244'}
+];
+
+// Similar colors for master mode
+const SIMILAR_PAIRS = [
+  [{hex:'#E53935',name:'빨강'},{hex:'#C62828',name:'진한 빨강'},{hex:'#EF5350',name:'연한 빨강'},{hex:'#FF5722',name:'주황빨강'}],
+  [{hex:'#2196F3',name:'파랑'},{hex:'#1565C0',name:'진한 파랑'},{hex:'#42A5F5',name:'연한 파랑'},{hex:'#03A9F4',name:'하늘색'}],
+  [{hex:'#4CAF50',name:'초록'},{hex:'#2E7D32',name:'진한 초록'},{hex:'#66BB6A',name:'연한 초록'},{hex:'#8BC34A',name:'연두'}],
+  [{hex:'#9C27B0',name:'보라'},{hex:'#6A1B9A',name:'진한 보라'},{hex:'#AB47BC',name:'연한 보라'},{hex:'#E91E63',name:'분홍'}],
+  [{hex:'#FF9800',name:'주황'},{hex:'#E65100',name:'진한 주황'},{hex:'#FFB74D',name:'연한 주황'},{hex:'#FFC107',name:'황금색'}],
+];
+
+const DIFFICULTIES = [
+  {name:'쉬움',emoji:'🟢',questions:10,desc:'기본 6색 맞히기'},
+  {name:'보통',emoji:'🟡',questions:15,desc:'12색 전체 맞히기'},
+  {name:'어려움',emoji:'🟠',questions:20,desc:'영어 이름으로만 맞히기'},
+  {name:'고급',emoji:'🔴',questions:20,desc:'RGB 값으로 맞히기'},
+  {name:'마스터',emoji:'🟣',questions:25,desc:'유사한 색 구분하기'}
+];
+
+let score=0, streak=0, total=0, correct=0, qIdx=0, lang='ko', screen='menu';
+let questions=[], currentDiff=0;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.random()*i+1|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function sendXP(amount){try{window.parent.postMessage({type:'xp',amount:amount,source:'color-game'},'*');}catch(e){}}
+
+function getBest(diff){
+  try{return JSON.parse(localStorage.getItem('color_best_'+diff))||{stars:0,score:0,pct:0};}catch(e){return{stars:0,score:0,pct:0};}
+}
+function saveBest(diff,stars,sc,pct){
+  const prev=getBest(diff);
+  if(stars>prev.stars||sc>prev.score){
+    localStorage.setItem('color_best_'+diff,JSON.stringify({stars:Math.max(stars,prev.stars),score:Math.max(sc,prev.score),pct:Math.max(pct,prev.pct)}));
+  }
+}
+function getStars(pct){return pct>=90?3:pct>=70?2:pct>=40?1:0;}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function isUnlocked(diff){
+  if(diff===0) return true;
+  const prev=getBest(diff-1);
+  return prev.stars>=1;
+}
+
+function getName(c){return lang==='ko'?c.ko:c.en;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu') return renderMenu(app);
+  if(screen==='play') return renderPlay(app);
+  if(screen==='result') return renderResult(app);
+}
+
+function renderMenu(app){
+  let btns=DIFFICULTIES.map((d,i)=>{
+    const b=getBest(i);
+    const unlocked=isUnlocked(i);
+    const bestStr=b.stars>0?`<span class="best-star">${starStr(b.stars)} 최고: ${b.score}점</span>`:'';
+    return `<button class="menu-btn d${i+1} ${unlocked?'':'lock'}" onclick="${unlocked?`startGame(${i})`:''}">
+      ${d.emoji} ${d.name}: ${d.desc}${bestStr}</button>`;
+  }).join('');
+
+  app.innerHTML=`
+    <h1>🎨 색깔 맞히기</h1>
+    <div class="menu">
+      <div class="toggle-row">
+        <button class="toggle-btn ${lang==='ko'?'active':''}" onclick="setLang('ko')">한국어</button>
+        <button class="toggle-btn ${lang==='en'?'active':''}" onclick="setLang('en')">English</button>
+      </div>
+      ${btns}
+      <p style="font-size:14px;color:#888;text-align:center;max-width:300px;margin-top:8px">각 난이도에서 별 1개 이상 획득 시<br>다음 난이도가 열립니다!</p>
+    </div>`;
+}
+
+function setLang(l){lang=l;render();}
+
+function startGame(diff){
+  currentDiff=diff;
+  score=0;streak=0;total=0;correct=0;qIdx=0;screen='play';
+  const d=DIFFICULTIES[diff];
+  questions=[];
+
+  if(diff===0){
+    // Easy: 6 basic colors
+    const basic=COLORS.slice(0,6);
+    for(let i=0;i<d.questions;i++) questions.push({type:'name',color:basic[Math.random()*basic.length|0]});
+  } else if(diff===1){
+    // Normal: all 12 colors
+    for(let i=0;i<d.questions;i++) questions.push({type:'name',color:COLORS[Math.random()*COLORS.length|0]});
+  } else if(diff===2){
+    // Hard: English names only
+    for(let i=0;i<d.questions;i++) questions.push({type:'english',color:COLORS[Math.random()*COLORS.length|0]});
+  } else if(diff===3){
+    // Advanced: RGB values
+    for(let i=0;i<d.questions;i++) questions.push({type:'rgb',color:COLORS[Math.random()*COLORS.length|0]});
+  } else {
+    // Master: similar color discrimination
+    for(let i=0;i<d.questions;i++){
+      const pair=SIMILAR_PAIRS[Math.random()*SIMILAR_PAIRS.length|0];
+      const target=pair[Math.random()*pair.length|0];
+      questions.push({type:'similar',target:target,options:shuffle([...pair])});
+    }
+  }
+  render();
+}
+
+function renderPlay(app){
+  if(qIdx>=questions.length){screen='result';render();return;}
+  const q=questions[qIdx];
+  const d=DIFFICULTIES[currentDiff];
+  let optionsHtml='', hintText='', circleHex='';
+
+  if(q.type==='name'){
+    circleHex=q.color.hex;
+    hintText=lang==='ko'?'이 색깔의 이름은?':'What color is this?';
+    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const opts=shuffle([q.color,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${getName(o)}</button>`).join('');
+  } else if(q.type==='english'){
+    circleHex=q.color.hex;
+    hintText='What is this color? (English only)';
+    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const opts=shuffle([q.color,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${o.en}</button>`).join('');
+  } else if(q.type==='rgb'){
+    circleHex=q.color.hex;
+    hintText='이 색의 RGB 값은?';
+    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const opts=shuffle([q.color,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" style="font-size:16px" onclick="answer(this,'${o.hex}','${q.color.hex}')">RGB(${o.rgb})</button>`).join('');
+  } else if(q.type==='similar'){
+    circleHex=q.target.hex;
+    hintText='이 색의 정확한 이름은?';
+    const opts=q.options;
+    optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.target.hex}')" style="font-size:18px">${o.name}<br><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${o.hex};vertical-align:middle;border:2px solid #ddd"></span></button>`).join('');
+  }
+
+  const circleBorder = circleHex==='#FAFAFA'?'border:6px solid #ddd':'border:6px solid #fff';
+
+  app.innerHTML=`
+    <button class="back-btn" onclick="screen='menu';render()">← 메뉴로</button>
+    <div class="diff-badge" style="background:${['#4CAF50','#2196F3','#FF9800','#E53935','#9C27B0'][currentDiff]}">${d.emoji} ${d.name}</div>
+    <div class="score-bar">
+      <span class="pts">⭐ ${score}점</span>
+      <span class="streak">🔥 ${streak}연속</span>
+      <span>${qIdx+1}/${d.questions}</span>
+    </div>
+    <div class="game-area">
+      <div class="hint">${hintText}</div>
+      <div class="color-circle" style="background:${circleHex};${circleBorder}"></div>
+      <div class="options">${optionsHtml}</div>
+    </div>`;
+}
+
+function answer(btn,sel,ans){
+  if(btn.parentElement.querySelector('.correct,.wrong'))return;
+  total++;
+  const isCorrect = sel===ans;
+  if(isCorrect){
+    btn.classList.add('correct');correct++;streak++;score+=10+(streak>1?streak*2:0);
+    sendXP(3);
+  }else{
+    btn.classList.add('wrong');streak=0;
+    [...btn.parentElement.children].forEach(b=>{
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+ans+"'")) b.classList.add('correct');
+    });
+  }
+  setTimeout(()=>{qIdx++;render();},isCorrect?600:1200);
+}
+
+function renderResult(app){
+  const pct=total?Math.round(correct/total*100):0;
+  const stars=getStars(pct);
+  const emoji=stars>=3?'🏆':stars>=2?'🎉':stars>=1?'😊':'💪';
+  const xpEarned=Math.min(score,50);
+  saveBest(currentDiff,stars,score,pct);
+  sendXP(xpEarned);
+
+  const canNext=currentDiff<4&&stars>=1;
+  const nextBtn=canNext?`<button class="next-btn" onclick="startGame(${currentDiff+1})">다음 난이도 →</button>`:'';
+
+  app.innerHTML=`
+    <div class="result">
+      <div class="big">${emoji}</div>
+      <h2>${DIFFICULTIES[currentDiff].emoji} ${DIFFICULTIES[currentDiff].name} 완료!</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>정답률: ${correct}/${total} (${pct}%)</p>
+      <p>점수: ⭐ ${score}점</p>
+      <p style="color:#FF6B9D;font-weight:700">+${xpEarned} XP</p>
+      <p class="best-record">최고 기록: ${getBest(currentDiff).score}점</p>
+      <button class="retry" onclick="startGame(${currentDiff})">다시 하기</button>
+      ${nextBtn}
+      <button class="retry" style="background:linear-gradient(135deg,#aaa,#ccc);margin-top:8px;font-size:18px;padding:12px 30px" onclick="screen='menu';render()">메뉴로</button>
+    </div>`;
+}
+
+render();
+</script>
+</body></html>

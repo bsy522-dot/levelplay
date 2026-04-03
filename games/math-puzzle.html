@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>수학 퍼즐</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:480px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 16px;margin-bottom:10px;font-size:16px;font-weight:700;flex-wrap:wrap;gap:4px}
+.hud .sc{color:#FFD700}.hud .lv{color:#7FDBFF}.hud .qn{color:#FF6B9D}.hud .ht{color:#81C784}.hud .tm{color:#FFB74D}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu p{color:#aaa;font-size:15px;text-align:center;max-width:360px}
+.lv-btn{width:300px;padding:14px;font-size:18px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.lv-btn:active{transform:scale(0.95)}
+.lv-btn.l1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.lv-btn.l2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.lv-btn.l3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.lv-btn.l4{background:linear-gradient(135deg,#E53935,#EF5350)}
+.lv-btn.l5{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
+.lv-btn.lock{opacity:0.5}
+.lv-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
+.timer-toggle{display:flex;gap:8px;margin-bottom:8px}
+.timer-toggle button{padding:8px 20px;font-size:14px;font-weight:700;border:2px solid #555;border-radius:12px;background:transparent;color:#aaa;cursor:pointer;transition:all 0.15s}
+.timer-toggle button.active{background:#FFD700;color:#1a1a2e;border-color:#FFD700}
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.equation{font-size:32px;font-weight:700;text-align:center;padding:20px;background:rgba(0,0,0,0.3);border-radius:16px;width:100%;min-height:80px;display:flex;align-items:center;justify-content:center;letter-spacing:2px;flex-wrap:wrap;gap:4px}
+.equation .blank{display:inline-block;width:55px;height:50px;border-bottom:3px solid #FFD700;text-align:center;color:#FFD700;font-size:32px;margin:0 4px;line-height:50px}
+.numpad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:380px}
+.num-btn{height:60px;font-size:24px;font-weight:700;border:2px solid #444;border-radius:14px;background:rgba(255,255,255,0.05);color:#fff;cursor:pointer;transition:all 0.15s}
+.num-btn:active{transform:scale(0.93);background:rgba(255,255,255,0.1)}
+.num-btn.submit{background:linear-gradient(135deg,#4CAF50,#81C784);border-color:#4CAF50;color:#fff}
+.num-btn.hint{background:linear-gradient(135deg,#FFD700,#FFA000);border-color:#FFD700;color:#1a1a2e}
+.num-btn.del{background:rgba(229,57,53,0.2);border-color:#E53935;color:#E53935}
+.num-btn.neg{background:rgba(156,39,176,0.2);border-color:#9C27B0;color:#CE93D8}
+.feedback{text-align:center;font-size:22px;font-weight:700;min-height:36px;transition:all 0.3s}
+.feedback.ok{color:#4CAF50}.feedback.no{color:#E53935}
+.hint-box{text-align:center;font-size:15px;color:#FFD700;min-height:24px;background:rgba(255,215,0,0.08);border-radius:8px;padding:6px 12px;display:none}
+.hint-box.show{display:block}
+.progress{width:100%;height:8px;background:#333;border-radius:4px;overflow:hidden;margin-bottom:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#FF6B9D,#FFD700);transition:width 0.3s;border-radius:4px}
+.timer-bar{width:100%;height:6px;background:#333;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.timer-fill{height:100%;background:linear-gradient(90deg,#4CAF50,#FFD700,#E53935);transition:width 0.1s;border-radius:4px}
+.result{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center}
+.result .big{font-size:72px}.result h2{font-size:28px;color:#FFD700}
+.result p{font-size:18px;color:#ccc}
+.retry{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.next-btn{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#81C784);color:#fff;cursor:pointer;margin-top:4px}
+.back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
+.stars{font-size:36px;margin:4px 0}
+.best-record{font-size:14px;color:#888}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+let level=1,score=0,qIdx=0,answer=0,answer2=0,input='',input2='',activeInput=1,hints=3,hintUsed=false,screen='menu';
+let correct=0,wrong=0,equation='',eqDisplay='';
+const TOTAL_Q=15;
+let timerMode=false,timerSec=0,timerMax=0,timerInterval=null;
+
+const LEVELS=[
+  {name:'덧셈',desc:'□ + 3 = 7',color:'l1',emoji:'🟢',timeLimit:15},
+  {name:'곱셈',desc:'□ x 4 = 24',color:'l2',emoji:'🟡',timeLimit:12},
+  {name:'복합',desc:'(□+5)x2 = 18',color:'l3',emoji:'🟠',timeLimit:20},
+  {name:'제곱',desc:'□² + 3 = 12',color:'l4',emoji:'🔴',timeLimit:25},
+  {name:'연립방정식',desc:'□+○=10, □-○=2',color:'l5',emoji:'🟣',timeLimit:30}
+];
+
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'math-puzzle'},'*');}catch(e){}}
+function getBest(lv){try{return JSON.parse(localStorage.getItem('math_best_'+lv))||{stars:0,score:0};}catch(e){return{stars:0,score:0};}}
+function saveBest(lv,stars,sc){
+  const p=getBest(lv);
+  if(stars>p.stars||sc>p.score) localStorage.setItem('math_best_'+lv,JSON.stringify({stars:Math.max(stars,p.stars),score:Math.max(sc,p.score)}));
+}
+function getStars(sc,max){const pct=Math.round(sc/max*100);return pct>=80?3:pct>=50?2:pct>=20?1:0;}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function isUnlocked(lv){if(lv===0)return true;return getBest(lv-1).stars>=1;}
+
+function genProblem(){
+  hintUsed=false;activeInput=1;input='';input2='';
+  if(level===1){
+    const a=rnd(1,20),b=rnd(1,20);
+    answer=a;eqDisplay=`□ + ${b} = ${a+b}`;
+  } else if(level===2){
+    const a=rnd(2,12),b=rnd(2,12);
+    answer=a;eqDisplay=`□ × ${b} = ${a*b}`;
+  } else if(level===3){
+    const a=rnd(1,10),b=rnd(2,6),x=rnd(1,15);
+    answer=x;eqDisplay=`(□ + ${a}) × ${b} = ${(x+a)*b}`;
+  } else if(level===4){
+    const x=rnd(2,10),a=rnd(1,20);
+    answer=x;eqDisplay=`□² + ${a} = ${x*x+a}`;
+  } else {
+    // Level 5: simultaneous equations □+○=S, □-○=D
+    const x=rnd(1,15),y=rnd(1,x);
+    answer=x;answer2=y;
+    eqDisplay=`□ + ○ = ${x+y}\n□ - ○ = ${x-y}`;
+  }
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu') renderMenu(app);
+  else if(screen==='play') renderPlay(app);
+  else if(screen==='result') renderResult(app);
+}
+
+function renderMenu(app){
+  let btns=LEVELS.map((lv,i)=>{
+    const b=getBest(i);
+    const ul=isUnlocked(i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} 최고: ${b.score}점</span>`:'';
+    return `<button class="lv-btn ${lv.color} ${ul?'':'lock'}" onclick="${ul?`startLevel(${i+1})`:''}">
+      ${lv.emoji} 레벨${i+1}: ${lv.name} (${lv.desc})${bst}</button>`;
+  }).join('');
+  app.innerHTML=`
+    <h1>🧮 수학 퍼즐</h1>
+    <div class="menu">
+      <p>빈칸에 알맞은 숫자를 넣어 수식을 완성하세요!<br>각 레벨 ${TOTAL_Q}문제, 힌트 3번 사용 가능</p>
+      <div class="timer-toggle">
+        <button class="${!timerMode?'active':''}" onclick="timerMode=false;render()">일반 모드</button>
+        <button class="${timerMode?'active':''}" onclick="timerMode=true;render()">⏱️ 시간제한 모드</button>
+      </div>
+      ${btns}
+      <p style="font-size:13px;color:#666">별 1개 이상으로 다음 레벨 해금!</p>
+    </div>`;
+}
+
+function startLevel(lv){
+  level=lv;score=0;qIdx=0;correct=0;wrong=0;hints=3;input='';input2='';activeInput=1;
+  genProblem();
+  screen='play';
+  if(timerMode) startTimer();
+  render();
+}
+
+function startTimer(){
+  timerSec=LEVELS[level-1].timeLimit;
+  timerMax=timerSec;
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    timerSec-=0.1;
+    const bar=document.getElementById('timerFill');
+    if(bar) bar.style.width=(timerSec/timerMax*100)+'%';
+    const disp=document.getElementById('timerDisp');
+    if(disp) disp.textContent='⏱️ '+Math.ceil(timerSec)+'s';
+    if(timerSec<=0){
+      clearInterval(timerInterval);timerInterval=null;
+      wrong++;qIdx++;input='';input2='';
+      if(qIdx>=TOTAL_Q){screen='result';render();}
+      else{genProblem();if(timerMode)startTimer();render();}
+    }
+  },100);
+}
+
+function renderPlay(app){
+  if(qIdx>=TOTAL_Q){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}screen='result';render();return;}
+
+  let eqHtml='';
+  if(level===5){
+    const lines=eqDisplay.split('\n');
+    const line1=lines[0].replace('□',`<span class="blank" style="border-color:#FFD700;${activeInput===1?'background:rgba(255,215,0,0.15)':''}" onclick="activeInput=1;render()">${input||'□'}</span>`).replace('○',`<span class="blank" style="border-color:#7FDBFF;${activeInput===2?'background:rgba(127,219,255,0.15)':''}" onclick="activeInput=2;render()">${input2||'○'}</span>`);
+    const line2=lines[1].replace('□',`<span class="blank" style="border-color:#FFD700">${input||'□'}</span>`).replace('○',`<span class="blank" style="border-color:#7FDBFF">${input2||'○'}</span>`);
+    eqHtml=`<div>${line1}</div><div style="margin-top:8px">${line2}</div>`;
+  }else{
+    eqHtml=eqDisplay.replace('□',`<span class="blank" id="blankVal">${input||'?'}</span>`);
+  }
+
+  app.innerHTML=`
+    <div class="hud">
+      <span class="sc">⭐ ${score}</span>
+      <span class="lv">${LEVELS[level-1].emoji} Lv.${level}</span>
+      <span class="qn">${qIdx+1}/${TOTAL_Q}</span>
+      <span class="ht">💡 ${hints}</span>
+      ${timerMode?`<span class="tm" id="timerDisp">⏱️ ${Math.ceil(timerSec)}s</span>`:''}
+    </div>
+    <div class="progress"><div class="progress-fill" style="width:${qIdx/TOTAL_Q*100}%"></div></div>
+    ${timerMode?`<div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:${timerSec/timerMax*100}%"></div></div>`:''}
+    <div class="game-area">
+      <div class="equation">${eqHtml}</div>
+      <div class="hint-box" id="hintBox"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="numpad">
+        ${[1,2,3,'DEL',4,5,6,'±',7,8,9,'💡',0,'00','','✅'].map(n=>{
+          if(n==='DEL') return `<button class="num-btn del" onclick="pressKey('del')">⌫</button>`;
+          if(n==='±') return `<button class="num-btn neg" onclick="pressKey('neg')">±</button>`;
+          if(n==='💡') return `<button class="num-btn hint" onclick="useHint()">💡힌트</button>`;
+          if(n==='✅') return `<button class="num-btn submit" onclick="submitAnswer()">✅확인</button>`;
+          if(n==='') return `<div></div>`;
+          return `<button class="num-btn" onclick="pressKey('${n}')">${n}</button>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function pressKey(k){
+  if(level===5){
+    let cur=activeInput===1?input:input2;
+    if(k==='del') cur=cur.slice(0,-1);
+    else if(k==='neg'){cur=cur.startsWith('-')?cur.slice(1):'-'+cur;}
+    else{if(cur.length<5) cur+=k;}
+    if(activeInput===1) input=cur; else input2=cur;
+  }else{
+    if(k==='del') input=input.slice(0,-1);
+    else if(k==='neg'){input=input.startsWith('-')?input.slice(1):'-'+input;}
+    else{if(input.length<5) input+=k;}
+  }
+  render();
+}
+
+function submitAnswer(){
+  const fb=document.getElementById('feedback');
+  if(level===5){
+    const v1=parseInt(input),v2=parseInt(input2);
+    if(isNaN(v1)||isNaN(v2)){fb.textContent='□와 ○ 모두 입력하세요!';fb.className='feedback no';return;}
+    if(v1===answer&&v2===answer2){
+      fb.textContent='✅ 정답!';fb.className='feedback ok';
+      const pts=hintUsed?5:10+(timerMode?Math.ceil(timerSec):0);
+      score+=pts;correct++;sendXP(pts);
+      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+      setTimeout(()=>{qIdx++;input='';input2='';genProblem();if(timerMode&&qIdx<TOTAL_Q)startTimer();render();},800);
+    }else{
+      fb.textContent='❌ 틀렸습니다!';fb.className='feedback no';wrong++;input='';input2='';
+    }
+  }else{
+    const val=parseInt(input);
+    if(isNaN(val)){fb.textContent='숫자를 입력하세요!';fb.className='feedback no';return;}
+    if(val===answer){
+      fb.textContent='✅ 정답!';fb.className='feedback ok';
+      const pts=hintUsed?5:10+(timerMode?Math.ceil(timerSec):0);
+      score+=pts;correct++;sendXP(pts);
+      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+      setTimeout(()=>{qIdx++;input='';genProblem();if(timerMode&&qIdx<TOTAL_Q)startTimer();render();},800);
+    }else{
+      fb.textContent='❌ 틀렸습니다!';fb.className='feedback no';wrong++;input='';
+      const el=document.getElementById('blankVal');if(el)el.textContent='?';
+    }
+  }
+}
+
+function useHint(){
+  if(hints<=0) return;
+  hints--;hintUsed=true;
+  const hb=document.getElementById('hintBox');
+  hb.className='hint-box show';
+  if(level===5){
+    if(hints===2) hb.textContent=`💡 힌트: □는 ${answer>5?'5보다 큰':'5 이하인'} 수입니다.`;
+    else if(hints===1) hb.textContent=`💡 힌트: ○는 ${answer2>5?'5보다 큰':'5 이하인'} 수입니다.`;
+    else hb.textContent=`💡 마지막 힌트: □=${answer}에 가깝고, ○=${answer2}에 가깝습니다. (±1)`;
+  }else{
+    if(answer>0) hb.textContent=`💡 힌트: 정답은 ${answer>10?'10보다 큰':'10 이하인'} 양수입니다.`;
+    else hb.textContent=`💡 힌트: 정답은 음수입니다.`;
+    if(hints===0) hb.textContent=`💡 마지막 힌트: 정답은 ${answer}에 가까운 수입니다. (±2)`;
+  }
+  render();
+}
+
+function renderResult(app){
+  const max=TOTAL_Q*10;
+  const pct=Math.round(score/max*100);
+  const stars=getStars(score,max);
+  saveBest(level-1,stars,score);
+  const emoji=stars>=3?'🏆':stars>=2?'👍':'📚';
+  const canNext=level<5&&stars>=1;
+  app.innerHTML=`
+    <div class="result">
+      <div class="big">${emoji}</div>
+      <h2>${LEVELS[level-1].emoji} 레벨 ${level} 완료!</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>점수: ${score}점 / ${max}점${timerMode?' (시간제한)':''}</p>
+      <p>정답: ${correct} / 오답: ${wrong}</p>
+      <p>정답률: ${total>0?Math.round(correct/(correct+wrong)*100):pct}%</p>
+      <p class="best-record">최고 기록: ${getBest(level-1).score}점</p>
+      <button class="retry" onclick="startLevel(${level})">다시 도전</button>
+      ${canNext?`<button class="next-btn" onclick="startLevel(${level+1})">다음 레벨 →</button>`:''}
+      <button class="back-btn" onclick="goMenu()">메뉴로</button>
+    </div>`;
+  sendXP(score);
+}
+
+function goMenu(){if(timerInterval){clearInterval(timerInterval);timerInterval=null;}screen='menu';render();}
+window.startLevel=startLevel;window.pressKey=pressKey;window.submitAnswer=submitAnswer;
+window.useHint=useHint;window.goMenu=goMenu;
+render();
+</script>
+</body></html>

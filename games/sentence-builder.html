@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>영어 문장 만들기</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:480px;margin:0 auto;padding:12px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:24px;margin:8px 0;color:#FFD700}
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);border-radius:12px;padding:8px 16px;margin-bottom:10px;font-size:15px;font-weight:700;flex-wrap:wrap;gap:4px}
+.hud .sc{color:#FFD700}.hud .lv{color:#7FDBFF}.hud .qn{color:#FF6B9D}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
+.menu p{color:#aaa;font-size:15px;text-align:center;max-width:360px}
+.lv-btn{width:300px;padding:14px;font-size:18px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
+.lv-btn:active{transform:scale(0.95)}
+.lv-btn.l1{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.lv-btn.l2{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.lv-btn.l3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
+.lv-btn.l4{background:linear-gradient(135deg,#E53935,#EF5350)}
+.lv-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
+.game-area{flex:1;display:flex;flex-direction:column;gap:12px}
+.progress{width:100%;height:8px;background:#333;border-radius:4px;overflow:hidden;margin-bottom:4px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#FF6B9D,#FFD700);transition:width 0.3s;border-radius:4px}
+.kr-hint{text-align:center;font-size:18px;color:#aaa;background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;min-height:48px;display:flex;align-items:center;justify-content:center}
+.answer-zone{min-height:70px;background:rgba(0,0,0,0.3);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;border:2px dashed #444;transition:border-color 0.3s}
+.answer-zone.active{border-color:#7FDBFF}
+.word-block{padding:8px 16px;font-size:17px;font-weight:700;border:2px solid #555;border-radius:12px;background:rgba(255,255,255,0.08);cursor:pointer;transition:all 0.15s;user-select:none;-webkit-user-select:none}
+.word-block:active{transform:scale(0.93)}
+.word-block.placed{opacity:0.3;pointer-events:none}
+.word-block.in-answer{border-color:#7FDBFF;background:rgba(127,219,255,0.12);color:#7FDBFF}
+.word-pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px;min-height:60px}
+.actions{display:flex;justify-content:center;gap:12px;margin-top:8px}
+.act-btn{padding:10px 28px;font-size:16px;font-weight:700;border:2px solid #555;border-radius:12px;background:transparent;color:#aaa;cursor:pointer;transition:all 0.15s}
+.act-btn:active{transform:scale(0.95)}
+.act-btn.submit{border-color:#4CAF50;color:#4CAF50;background:rgba(76,175,80,0.1)}
+.act-btn.clear{border-color:#E53935;color:#E53935}
+.feedback{text-align:center;font-size:18px;font-weight:700;min-height:30px;transition:all 0.3s;padding:8px}
+.feedback.ok{color:#4CAF50;background:rgba(76,175,80,0.1);border-radius:12px}
+.feedback.no{color:#E53935;background:rgba(229,57,53,0.1);border-radius:12px}
+.translation{text-align:center;font-size:16px;color:#FFD700;min-height:24px;margin-top:4px}
+.result{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center}
+.result .big{font-size:72px}.result h2{font-size:28px;color:#FFD700}
+.result p{font-size:18px;color:#ccc}
+.stars{font-size:36px;margin:4px 0}
+.retry{padding:14px 40px;font-size:20px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
+.back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
+.best-record{font-size:14px;color:#888}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<script>
+'use strict';
+
+const LEVELS=[
+  {name:'3단어',words:3,emoji:'🟢',cls:'l1'},
+  {name:'5단어',words:5,emoji:'🔵',cls:'l2'},
+  {name:'7단어',words:7,emoji:'🟠',cls:'l3'},
+  {name:'10단어',words:10,emoji:'🔴',cls:'l4'}
+];
+
+const SENTENCES=[
+  // 3-word (20)
+  [["I","am","happy"],"나는 행복하다"],
+  [["She","is","smart"],"그녀는 똑똑하다"],
+  [["He","likes","music"],"그는 음악을 좋아한다"],
+  [["We","are","friends"],"우리는 친구다"],
+  [["They","play","soccer"],"그들은 축구를 한다"],
+  [["I","love","pizza"],"나는 피자를 사랑한다"],
+  [["She","reads","books"],"그녀는 책을 읽는다"],
+  [["He","runs","fast"],"그는 빨리 달린다"],
+  [["We","eat","breakfast"],"우리는 아침을 먹는다"],
+  [["Dogs","are","loyal"],"개는 충성스럽다"],
+  [["Cats","like","fish"],"고양이는 생선을 좋아한다"],
+  [["Birds","can","fly"],"새는 날 수 있다"],
+  [["Time","flies","quickly"],"시간은 빨리 간다"],
+  [["I","need","water"],"나는 물이 필요하다"],
+  [["She","speaks","English"],"그녀는 영어를 말한다"],
+  [["He","drives","carefully"],"그는 조심히 운전한다"],
+  [["We","study","math"],"우리는 수학을 공부한다"],
+  [["They","sing","well"],"그들은 노래를 잘 한다"],
+  [["I","feel","tired"],"나는 피곤하다"],
+  [["Life","is","beautiful"],"인생은 아름답다"],
+  // 5-word (20)
+  [["I","go","to","school","today"],"나는 오늘 학교에 간다"],
+  [["She","has","a","red","car"],"그녀는 빨간 차가 있다"],
+  [["He","wants","to","learn","Korean"],"그는 한국어를 배우고 싶다"],
+  [["We","live","in","a","city"],"우리는 도시에 산다"],
+  [["They","are","playing","a","game"],"그들은 게임을 하고 있다"],
+  [["The","cat","sat","on","mat"],"고양이가 매트 위에 앉았다"],
+  [["I","can","speak","three","languages"],"나는 세 언어를 말할 수 있다"],
+  [["She","always","wakes","up","early"],"그녀는 항상 일찍 일어난다"],
+  [["He","is","good","at","cooking"],"그는 요리를 잘한다"],
+  [["We","had","a","great","time"],"우리는 좋은 시간을 보냈다"],
+  [["The","weather","is","very","cold"],"날씨가 매우 춥다"],
+  [["I","drink","coffee","every","morning"],"나는 매일 아침 커피를 마신다"],
+  [["She","bought","a","new","dress"],"그녀는 새 옷을 샀다"],
+  [["He","finished","his","homework","quickly"],"그는 숙제를 빨리 끝냈다"],
+  [["We","should","help","each","other"],"우리는 서로 도와야 한다"],
+  [["They","went","to","the","park"],"그들은 공원에 갔다"],
+  [["I","like","to","read","novels"],"나는 소설 읽기를 좋아한다"],
+  [["She","is","the","best","teacher"],"그녀는 최고의 선생님이다"],
+  [["He","plays","guitar","very","well"],"그는 기타를 매우 잘 친다"],
+  [["We","need","to","study","harder"],"우리는 더 열심히 공부해야 한다"],
+  // 7-word (20)
+  [["I","want","to","eat","something","for","lunch"],"나는 점심에 뭔가 먹고 싶다"],
+  [["She","is","going","to","visit","her","grandmother"],"그녀는 할머니를 방문할 예정이다"],
+  [["He","told","me","a","very","funny","story"],"그는 나에게 매우 재밌는 이야기를 했다"],
+  [["We","have","been","waiting","for","an","hour"],"우리는 한 시간째 기다리고 있다"],
+  [["They","decided","to","travel","around","the","world"],"그들은 세계 여행을 결심했다"],
+  [["The","children","are","playing","in","the","garden"],"아이들이 정원에서 놀고 있다"],
+  [["I","always","try","to","do","my","best"],"나는 항상 최선을 다한다"],
+  [["She","studies","hard","to","get","good","grades"],"그녀는 좋은 성적을 위해 열심히 공부한다"],
+  [["He","works","at","a","big","tech","company"],"그는 큰 기술 회사에서 일한다"],
+  [["We","should","not","waste","our","precious","time"],"우리는 소중한 시간을 낭비하면 안 된다"],
+  [["The","movie","was","much","better","than","expected"],"그 영화는 예상보다 훨씬 좋았다"],
+  [["I","need","to","finish","this","project","soon"],"나는 이 프로젝트를 곧 끝내야 한다"],
+  [["She","can","run","faster","than","her","brother"],"그녀는 오빠보다 빨리 달릴 수 있다"],
+  [["He","gave","her","a","beautiful","gold","necklace"],"그는 그녀에게 아름다운 금 목걸이를 주었다"],
+  [["We","are","going","to","have","a","party"],"우리는 파티를 할 예정이다"],
+  [["They","built","a","house","near","the","lake"],"그들은 호수 근처에 집을 지었다"],
+  [["I","really","enjoy","listening","to","classical","music"],"나는 클래식 음악 듣기를 정말 즐긴다"],
+  [["She","found","a","wallet","on","the","street"],"그녀는 거리에서 지갑을 발견했다"],
+  [["He","has","never","been","to","another","country"],"그는 다른 나라에 가본 적이 없다"],
+  [["We","must","protect","the","environment","for","future"],"우리는 미래를 위해 환경을 보호해야 한다"],
+  // 10-word (20)
+  [["I","think","that","learning","a","new","language","is","very","important"],"나는 새 언어를 배우는 것이 매우 중요하다고 생각한다"],
+  [["She","has","been","studying","English","for","more","than","five","years"],"그녀는 5년 넘게 영어를 공부하고 있다"],
+  [["He","said","that","he","would","come","to","the","meeting","tomorrow"],"그는 내일 회의에 오겠다고 말했다"],
+  [["We","are","planning","to","go","on","a","trip","next","month"],"우리는 다음 달에 여행을 계획하고 있다"],
+  [["They","could","not","find","the","keys","that","they","had","lost"],"그들은 잃어버린 열쇠를 찾을 수 없었다"],
+  [["The","students","were","excited","about","the","field","trip","to","museum"],"학생들은 박물관 현장학습에 신이 났다"],
+  [["I","would","like","to","order","a","large","pepperoni","pizza","please"],"큰 페퍼로니 피자 하나 주문하고 싶습니다"],
+  [["She","always","makes","sure","that","everyone","feels","welcome","and","comfortable"],"그녀는 항상 모두가 환영받고 편안하게 느끼도록 한다"],
+  [["He","is","one","of","the","most","talented","players","on","team"],"그는 팀에서 가장 재능 있는 선수 중 하나다"],
+  [["We","believe","that","hard","work","will","lead","to","great","success"],"우리는 노력이 큰 성공으로 이어진다고 믿는다"],
+  [["The","weather","forecast","says","it","will","rain","all","day","tomorrow"],"일기예보에 의하면 내일 하루 종일 비가 온다"],
+  [["I","have","never","seen","such","a","beautiful","sunset","in","life"],"나는 이렇게 아름다운 일몰을 본 적이 없다"],
+  [["She","decided","to","change","her","career","path","and","start","fresh"],"그녀는 새 커리어를 시작하기로 결심했다"],
+  [["He","promised","that","he","would","never","make","the","same","mistake"],"그는 같은 실수를 절대 하지 않겠다고 약속했다"],
+  [["We","need","to","find","a","better","way","to","solve","this"],"우리는 이것을 해결할 더 나은 방법을 찾아야 한다"],
+  [["They","have","lived","in","this","neighborhood","for","over","twenty","years"],"그들은 이 동네에서 20년 넘게 살았다"],
+  [["The","teacher","asked","the","students","to","open","their","books","quietly"],"선생님은 학생들에게 조용히 책을 펴라고 했다"],
+  [["I","am","really","looking","forward","to","seeing","you","again","soon"],"나는 곧 다시 만나기를 정말 기대하고 있다"],
+  [["She","told","me","that","she","was","going","to","move","abroad"],"그녀는 해외로 이사할 거라고 나에게 말했다"],
+  [["He","spent","the","whole","weekend","working","on","his","science","project"],"그는 주말 내내 과학 프로젝트 작업을 했다"]
+];
+
+let screen='menu',lvl=0,qIdx=0,score=0,correct=0,total=20;
+let currentWords=[],placedOrder=[],placed=new Set(),currentAnswer=[],currentKR='',feedbackText='',showTranslation=false;
+
+function sendXP(n){try{window.parent.postMessage({type:'xp',amount:n,source:'sentence-builder'},'*');}catch(e){}}
+function getBest(l){try{return JSON.parse(localStorage.getItem('sentbuild_best_'+l))||{stars:0,score:0};}catch(e){return{stars:0,score:0};}}
+function saveBest(l,stars,sc){const p=getBest(l);if(stars>p.stars||sc>p.score)localStorage.setItem('sentbuild_best_'+l,JSON.stringify({stars:Math.max(stars,p.stars),score:Math.max(sc,p.score)}));}
+function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function getSentences(lvlIdx){
+  const offset=lvlIdx*20;
+  return SENTENCES.slice(offset,offset+20);
+}
+
+function startLevel(l){
+  lvl=l;qIdx=0;score=0;correct=0;feedbackText='';showTranslation=false;
+  loadQuestion();screen='play';render();
+}
+
+function loadQuestion(){
+  const sents=getSentences(lvl);
+  if(qIdx>=sents.length){screen='result';render();return;}
+  const [words,kr]=sents[qIdx];
+  currentAnswer=words;currentKR=kr;
+  currentWords=shuffle(words.map((w,i)=>({id:i,text:w})));
+  placedOrder=[];placed=new Set();feedbackText='';showTranslation=false;
+}
+
+function tapWord(id){
+  if(placed.has(id))return;
+  placed.add(id);placedOrder.push(id);
+  render();
+}
+
+function tapPlaced(idx){
+  if(showTranslation)return;
+  const id=placedOrder[idx];
+  placed.delete(id);placedOrder.splice(idx,1);
+  render();
+}
+
+function clearAll(){
+  placed.clear();placedOrder=[];feedbackText='';showTranslation=false;render();
+}
+
+function submitAnswer(){
+  if(placedOrder.length!==currentAnswer.length)return;
+  const attempt=placedOrder.map(id=>currentWords.find(w=>w.id===id).text);
+  const isCorrect=attempt.every((w,i)=>w===currentAnswer[i]);
+  if(isCorrect){
+    correct++;score+=LEVELS[lvl].words*10;
+    feedbackText='✅ 정답!';showTranslation=true;
+    render();
+    setTimeout(()=>{qIdx++;loadQuestion();render();},2000);
+  }else{
+    feedbackText='❌ 틀렸습니다. 다시 시도하세요!';showTranslation=false;
+    render();
+  }
+}
+
+function getStars(){const pct=correct/total*100;return pct>=90?3:pct>=60?2:pct>=30?1:0;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(screen==='menu')renderMenu(app);
+  else if(screen==='play')renderPlay(app);
+  else if(screen==='result')renderResult(app);
+}
+
+function renderMenu(app){
+  const btns=LEVELS.map((l,i)=>{
+    const b=getBest(i);
+    const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} 최고: ${b.score}점</span>`:'';
+    return `<button class="lv-btn ${l.cls}" onclick="startLevel(${i})">${l.emoji} ${l.name} (${l.words}단어)${bst}</button>`;
+  }).join('');
+  app.innerHTML=`
+    <h1>🔤 영어 문장 만들기</h1>
+    <div class="menu">
+      <p>영어 단어 블록을 올바른 순서로 배치하여 문장을 완성하세요!<br>각 난이도 20문장</p>
+      ${btns}
+    </div>`;
+}
+
+function renderPlay(app){
+  const sents=getSentences(lvl);
+  if(qIdx>=sents.length){screen='result';render();return;}
+  const answerBlocks=placedOrder.map((id,idx)=>{
+    const w=currentWords.find(x=>x.id===id);
+    return `<div class="word-block in-answer" onclick="tapPlaced(${idx})">${w.text}</div>`;
+  }).join('');
+  const poolBlocks=currentWords.map(w=>{
+    const used=placed.has(w.id);
+    return `<div class="word-block ${used?'placed':''}" onclick="tapWord(${w.id})">${w.text}</div>`;
+  }).join('');
+  const fbCls=feedbackText.startsWith('✅')?'ok':feedbackText.startsWith('❌')?'no':'';
+  app.innerHTML=`
+    <div class="hud">
+      <span class="sc">⭐ ${score}</span>
+      <span class="lv">${LEVELS[lvl].emoji} ${LEVELS[lvl].name}</span>
+      <span class="qn">${qIdx+1}/${total}</span>
+    </div>
+    <div class="progress"><div class="progress-fill" style="width:${qIdx/total*100}%"></div></div>
+    <div class="game-area">
+      <div class="kr-hint">🇰🇷 ${currentKR}</div>
+      <div class="answer-zone ${placedOrder.length>0?'active':''}">${answerBlocks||'<span style="color:#555">여기에 단어를 배치하세요</span>'}</div>
+      <div class="word-pool">${poolBlocks}</div>
+      <div class="feedback ${fbCls}">${feedbackText}</div>
+      ${showTranslation?`<div class="translation">📖 ${currentAnswer.join(' ')}</div>`:''}
+      <div class="actions">
+        <button class="act-btn clear" onclick="clearAll()">초기화</button>
+        <button class="act-btn submit" onclick="submitAnswer()">✅ 확인</button>
+      </div>
+    </div>
+    <button class="back-btn" onclick="screen='menu';render()">← 메뉴로</button>`;
+}
+
+function renderResult(app){
+  const stars=getStars();
+  const xp=[15,30,50,80][lvl]*stars;
+  saveBest(lvl,stars,score);
+  sendXP(xp);
+  app.innerHTML=`
+    <div class="result">
+      <div class="big">📝</div>
+      <h2>레벨 완료!</h2>
+      <div class="stars">${starStr(stars)}</div>
+      <p>정답: ${correct}/${total}</p>
+      <p>점수: ${score}점</p>
+      <p style="color:#FFD700;font-weight:700">+${xp} XP</p>
+      <div class="best-record">최고: ${starStr(getBest(lvl).stars)} / ${getBest(lvl).score}점</div>
+      <button class="retry" onclick="startLevel(${lvl})">다시 도전</button>
+      <button class="back-btn" onclick="screen='menu';render()">← 메뉴로</button>
+    </div>`;
+}
+
+render();
+</script>
+</body></html>
