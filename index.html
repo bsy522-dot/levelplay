@@ -849,7 +849,7 @@ const UTS=[{id:'calc',ic:'🧮',nm:'계산기'},{id:'unit',ic:'📏',nm:'단위�
 const pgs=['p0','p1','p2','p3','p4'];let cur=0;
 function go(i){const prev=cur;pgs.forEach((p,j)=>{const el=document.getElementById(p);el.classList.remove('slide-left');if(j!==i&&j<i)el.classList.add('slide-left');el.classList.toggle('on',i===j);});document.querySelectorAll('nav button[role="tab"]').forEach((b,j)=>{b.classList.toggle('on',i===j);b.setAttribute('aria-selected',i===j?'true':'false');b.setAttribute('tabindex',i===j?'0':'-1');});cur=i;document.getElementById('fab').classList.toggle('sh',i===3);if(U.tabsVisited&&!U.tabsVisited.includes(i)){U.tabsVisited.push(i);sv();checkBadges();}}
 function ckNk(){if(!U.nk)document.getElementById('nkM').style.display='flex';}
-function setNk(){const n=document.getElementById('nkI').value.trim();if(!n)return;U.nk=n;sv();document.getElementById('nkM').style.display='none';uN();toast('환영!');}
+function setNk(){const n=document.getElementById('nkI').value.trim();if(!n)return;U.nk=n;sv();document.getElementById('nkM').style.display='none';uN();toast('환영!');showOnboarding();}
 function uN(){document.getElementById('hLv').textContent='Lv.'+U.lv+' '+(U.nk||'탐험가');const _pN=document.getElementById('pN');if(_pN)_pN.textContent=U.nk||'탐험가';const _pTi=document.getElementById('pTi');if(_pTi)_pTi.textContent='Lv.'+U.lv;const rb=document.getElementById('navReviewBadge');if(rb){const rc=getTodayReviews().length;if(rc>0){rb.textContent=rc;rb.style.display='block';}else{rb.style.display='none';}}}
 
 function isBm(type,id){return U.bookmarks.some(b=>b.type===type&&b.id===id);}
@@ -2611,6 +2611,7 @@ const _obSteps=[
 let _obStep=0;
 function showOnboarding(){
   if(U.onboarded)return;
+  if(!U.nk)return;
   _obStep=0;
   document.getElementById('onboardOverlay').style.display='flex';
   renderOnboardStep();
