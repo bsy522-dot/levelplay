@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v5';
+const CACHE_NAME = 'levelplay-v6';
 const STATIC_ASSETS = [
   './',
   './index.html',
