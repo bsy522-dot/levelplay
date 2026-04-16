@@ -33,7 +33,7 @@ html,body{width:100%;height:100%;overflow:hidden;touch-action:none;
 .mtab:active{transform:scale(.96);}
 
 /* Fingerboard zone */
-#fb{flex:0 0 auto;position:relative;z-index:3;padding:2px 0 4px 8%;
+#fb{flex:0 0 auto;position:relative;z-index:3;padding:2px 0 4px 13%;
   display:flex;flex-direction:row;align-items:stretch;}
 
 /* Open string buttons — LEFT column inside fingerboard */
@@ -1687,13 +1687,18 @@ const sctx=sheetCv.getContext('2d');
 
 function showPerformSongSelect(){
   const panel=document.getElementById('panel');
+  const progress=loadProgress();
   let html='<h2>🎶 곡연주 - 곡 선택</h2>';
   html+='<div style="padding:4px 0;font-size:10px;color:rgba(201,169,110,.5);text-align:center;">반주와 함께 악보를 보며 연주하세요!</div>';
 
   Object.keys(SONGS).forEach(key=>{
     const song=SONGS[key];
+    const best=progress['perform_'+key]||0;
+    const starCount=progress['perform_stars_'+key]||0;
+    const starStr=starCount>=3?'★★★':starCount>=2?'★★☆':starCount>=1?'★☆☆':'';
     html+=`<div class="pBtn" data-song="${key}">
       <span style="color:rgba(201,169,110,.4);font-size:9px">${song.category}</span> ${song.name}
+      ${best>0?'<span class="stars">'+starStr+' '+best+'점</span>':''}
       <div class="sub">BPM ${song.bpm} · ${song.notes.filter(n=>n.note!=='R').length}개 노트</div>
     </div>`;
   });
@@ -1724,12 +1729,13 @@ function startPerformance(songKey){
     beatPos+=n.dur;
   });
   performState={active:true,songKey,song,bpm,beatMs,timeline,totalMs:beatPos*beatMs,
-    startTime:performance.now(),chordIdx:0,lastChordTime:0,accompaniment:true,noteIdx:0};
+    startTime:performance.now(),chordIdx:0,lastChordTime:0,accompaniment:true,noteIdx:0,
+    score:0,correct:0,partial:0,miss:0,combo:0,maxCombo:0,bowStr:-1,bowTime:0,lastNote:null};
   document.getElementById('sheetArea').style.display='block';
   resizeSheetCv();
   document.getElementById('gameHud').style.display='block';
   document.getElementById('hudSong').textContent=song.name;
-  document.getElementById('hudScore').textContent='';
+  document.getElementById('hudScore').textContent='0점';
   document.getElementById('hudCombo').textContent='';
   scheduleChords();
 }
@@ -1753,8 +1759,51 @@ function scheduleChords(){
   }
 }
 
-function performHit(si,sm){}
-function performBow(si){}
+function performHit(si,sm){
+  if(!performState||!performState.active)return;
+  const st=performState;
+  const n=st.timeline[st.noteIdx];
+  if(!n||n.note==='R'||n.hit)return;
+  const elapsed=performance.now()-st.startTime;
+  if(elapsed<n.startMs-200||elapsed>n.endMs+200)return;
+  st.lastNote={s:si,f:sm};
+  checkPerformNote(si,sm);
+}
+function performBow(si){
+  if(!performState||!performState.active)return;
+  const st=performState;
+  st.bowTime=performance.now();st.bowStr=si;
+  checkPerformNote(si,semi[si]);
+}
+function checkPerformNote(si,sm){
+  if(!performState||!performState.active)return;
+  const st=performState;const now=performance.now();
+  const n=st.timeline[st.noteIdx];
+  if(!n||n.note==='R'||n.hit)return;
+  const elapsed=now-st.startTime;
+  if(elapsed<n.startMs-200||elapsed>n.endMs+200)return;
+  const hasBow=st.bowStr===n.s&&st.bowTime&&(now-st.bowTime)<1000;
+  const hasNote=st.lastNote&&st.lastNote.s===si&&st.lastNote.f===sm;
+  if(!hasBow&&!hasNote)return;
+  if(si===n.s&&sm===n.f){
+    n.hit=true;st.correct++;st.combo++;st.maxCombo=Math.max(st.maxCombo,st.combo);
+    const mid=(n.startMs+n.endMs)/2;const diff=Math.abs(elapsed-mid);
+    if(diff<n.dur*st.beatMs*0.25){st.score+=100;showJudge('PERFECT!','#ffd700');AE.playSfx('perfect');}
+    else{st.score+=60;showJudge('GOOD','#44ddee');}
+    document.getElementById('hudScore').textContent=st.score+'점';
+    document.getElementById('hudCombo').textContent=st.combo>1?st.combo+'COMBO':'';
+  }else if(si===n.s){
+    st.score+=20;n.hit=true;st.partial++;st.combo=0;
+    showJudge('OK','#44ee44');
+    document.getElementById('hudScore').textContent=st.score+'점';
+    document.getElementById('hudCombo').textContent='';
+  }else{
+    st.combo=0;st.miss++;
+    showJudge('MISS','#ff4444');AE.playSfx('miss');
+    document.getElementById('hudCombo').textContent='';
+    highlightNote(n.s,n.f);
+  }
+}
 
 function updatePerform(now){
   if(!performState||!performState.active)return;
@@ -1764,18 +1813,77 @@ function updatePerform(now){
     const n=st.timeline[i];
     if(elapsed>=n.startMs&&elapsed<n.endMs){
       curNote=n;
-      if(st.noteIdx!==i){st.noteIdx=i;
-        if(n.note!=='R'&&n.s>=0)highlightNote(n.s,n.f);else clearHighlights();}
+      if(st.noteIdx!==i){
+        for(let j=st.noteIdx;j<i;j++){
+          const prev=st.timeline[j];
+          if(!prev.hit&&prev.note!=='R'){prev.hit=true;st.miss++;st.combo=0;
+            document.getElementById('hudCombo').textContent='';}
+        }
+        st.noteIdx=i;
+        if(n.note!=='R'&&n.s>=0)highlightNote(n.s,n.f);else clearHighlights();
+      }
       break;
     }
   }
   if(!curNote&&elapsed>st.totalMs+1000){
+    for(let j=st.noteIdx;j<st.timeline.length;j++){
+      const prev=st.timeline[j];
+      if(!prev.hit&&prev.note!=='R'){prev.hit=true;st.miss++;}
+    }
     st.active=false;clearHighlights();
     document.getElementById('sheetArea').style.display='none';
-    document.getElementById('gameHud').style.display='none';
-    showPerformSongSelect();return;
+    finishPerform();return;
   }
   scheduleChords();
+}
+
+function finishPerform(){
+  const st=performState;
+  const total=st.timeline.filter(n=>n.note!=='R').length;
+  const pct=total>0?Math.round((st.correct*100+st.partial*50)/(total*100)*100):0;
+  const starCount=pct>=90?3:pct>=70?2:pct>=50?1:0;
+  const stars=starCount>=3?'★★★':starCount>=2?'★★☆':starCount>=1?'★☆☆':'☆☆☆';
+
+  const scoreKey='perform_'+st.songKey;
+  const starsKey='perform_stars_'+st.songKey;
+  const prev=loadProgress();const updates={};
+  if((prev[scoreKey]||0)<st.score)updates[scoreKey]=st.score;
+  if((prev[starsKey]||0)<starCount)updates[starsKey]=starCount;
+  if(Object.keys(updates).length>0)saveProgress(updates);
+
+  const panel=document.getElementById('panel');
+  panel.innerHTML=`
+    <h2>🎶 연주 결과</h2>
+    <div style="text-align:center;padding:20px 0;">
+      <div style="font-size:36px;color:#ffd700;margin-bottom:8px">${stars}</div>
+      <div style="font-size:24px;color:#ffd700;font-weight:700">${st.score}점</div>
+      <div style="font-size:12px;color:rgba(240,230,200,.7);margin-top:8px">
+        정확: ${st.correct} / 부분: ${st.partial} / 미스: ${st.miss}
+      </div>
+      <div style="font-size:12px;color:#ff6644;margin-top:4px">
+        최대 콤보: ${st.maxCombo} · 달성률: ${pct}%
+      </div>
+    </div>
+    <div class="pBtn" id="perfRetryBtn">다시 연주</div>
+    <div class="pBtn" id="perfBackBtn">곡 선택으로</div>
+    <div class="pClose" id="perfCloseBtn">✕</div>
+  `;
+  panel.style.display='block';
+  document.getElementById('gameHud').style.display='none';
+
+  document.getElementById('perfRetryBtn').addEventListener('pointerdown',e=>{
+    e.preventDefault();panel.style.display='none';startPerformance(st.songKey);
+  });
+  document.getElementById('perfBackBtn').addEventListener('pointerdown',e=>{
+    e.preventDefault();panel.style.display='none';performState=null;showPerformSongSelect();
+  });
+  document.getElementById('perfCloseBtn').addEventListener('pointerdown',e=>{
+    e.preventDefault();panel.style.display='none';performState=null;
+    currentMode='free';
+    document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('[data-mode="free"]').classList.add('active');
+    document.getElementById('modeLabel').textContent='자유연주';
+  });
 }
 
 function renderSheet(now){
