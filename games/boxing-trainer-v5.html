@@ -397,8 +397,12 @@ function initThree() {
 
   buildRing();
   buildCrowd();
+  buildFootGuides();
   playerModel = buildBoxer(0xe63946, true);
   oppModel = buildBoxer(0x3b82f6, false);
+  // Scale models to match ring proportions (v2 model is ~1.5m, ring expects ~4m figures)
+  playerModel.group.scale.setScalar(2.6);
+  oppModel.group.scale.setScalar(2.6);
   playerModel.group.position.set(0, 0, 3);
   oppModel.group.position.set(0, 0, -1.5);
   oppModel.group.rotation.y = Math.PI;
@@ -555,330 +559,722 @@ function buildCrowd() {
   scene.add(crowdGroup);
 }
 
-// ==================== BUILD 3D BOXER ====================
+// ==================== BUILD 3D BOXER (Hierarchical Joint System) ====================
 function buildBoxer(gloveColor, isPlayer) {
   const group = new THREE.Group();
   const skinMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.7, metalness: 0.05 });
   const darkSkinMat = new THREE.MeshStandardMaterial({ color: darkSkin, roughness: 0.7 });
   const shortsMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0x111111 : 0x1a1a2e, roughness: 0.8 });
-  const gloveMat = new THREE.MeshStandardMaterial({ color: gloveColor, roughness: 0.4, metalness: 0.1 });
+  const gloveMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0xe63946 : 0x3b82f6, roughness: 0.4, metalness: 0.1 });
   const shoeMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.9 });
   const hairMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
-  const stripeMat = new THREE.MeshStandardMaterial({ color: gloveColor, roughness: 0.6 });
+  const stripeMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0xe63946 : 0x3b82f6, roughness: 0.6 });
   const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-  const mouthguardMat = new THREE.MeshStandardMaterial({ color: gloveColor });
+  const mouthguardMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0xe63946 : 0x3b82f6 });
+  const wrapMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.8 });
 
-  // Head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 10), skinMat);
-  head.position.y = 3.95;
+  // ROOT — overall movement container
+  const root = new THREE.Group();
+  group.add(root);
+
+  // PELVIS — hip rotation
+  const pelvis = new THREE.Group();
+  pelvis.position.y = 0.88;
+  root.add(pelvis);
+
+  // Pelvis mesh (half-sphere)
+  const pelvisMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.18, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2),
+    skinMat
+  );
+  pelvisMesh.rotation.x = Math.PI;
+  pelvisMesh.scale.set(1.2, 0.6, 0.9);
+  pelvis.add(pelvisMesh);
+
+  // SPINE
+  const spine = new THREE.Group();
+  spine.position.y = 0.05;
+  pelvis.add(spine);
+
+  // Abdomen mesh
+  const abdomen = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.16, 0.18, 0.2, 8),
+    skinMat
+  );
+  abdomen.position.y = 0.1;
+  abdomen.castShadow = true;
+  spine.add(abdomen);
+
+  // CHEST
+  const chest = new THREE.Group();
+  chest.position.y = 0.22;
+  spine.add(chest);
+
+  // Chest mesh
+  const chestMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.2, 0.17, 0.25, 8),
+    skinMat
+  );
+  chestMesh.position.y = 0.1;
+  chestMesh.castShadow = true;
+  chest.add(chestMesh);
+
+  // Shoulder bulk meshes
+  const shoulderBulkGeo = new THREE.SphereGeometry(0.1, 6, 6);
+  const lShoulderBulk = new THREE.Mesh(shoulderBulkGeo, skinMat);
+  lShoulderBulk.position.set(-0.22, 0.18, 0);
+  chest.add(lShoulderBulk);
+  const rShoulderBulk = new THREE.Mesh(shoulderBulkGeo, skinMat);
+  rShoulderBulk.position.set(0.22, 0.18, 0);
+  chest.add(rShoulderBulk);
+
+  // Neck mesh
+  const neck = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.06, 0.08, 0.1, 6),
+    skinMat
+  );
+  neck.position.y = 0.26;
+  chest.add(neck);
+
+  // HEAD GROUP
+  const headGrp = new THREE.Group();
+  headGrp.position.y = 0.28;
+  chest.add(headGrp);
+
+  // Head mesh
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 10), skinMat);
+  head.position.y = 0.06;
   head.castShadow = true;
-  group.add(head);
+  headGrp.add(head);
 
-  // Hair
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.36, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), hairMat);
-  hair.position.y = 3.95;
-  group.add(hair);
+  // Chin mesh
+  const chin = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6), skinMat);
+  chin.position.set(0, -0.02, 0.07);
+  headGrp.add(chin);
 
   // Eyes
-  const eyeGeo = new THREE.SphereGeometry(0.05, 6, 6);
+  const eyeGeo = new THREE.SphereGeometry(0.02, 6, 6);
   const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-  leftEye.position.set(-0.12, 4.0, 0.28);
-  group.add(leftEye);
+  leftEye.position.set(-0.04, 0.08, 0.08);
+  headGrp.add(leftEye);
   const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-  rightEye.position.set(0.12, 4.0, 0.28);
-  group.add(rightEye);
+  rightEye.position.set(0.04, 0.08, 0.08);
+  headGrp.add(rightEye);
+
+  // Nose
+  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.03, 0.03), skinMat);
+  nose.position.set(0, 0.05, 0.1);
+  headGrp.add(nose);
 
   // Mouthguard
-  const mg = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.04, 0.08), mouthguardMat);
-  mg.position.set(0, 3.78, 0.3);
-  group.add(mg);
+  const mg = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.015, 0.03), mouthguardMat);
+  mg.position.set(0, 0.0, 0.09);
+  headGrp.add(mg);
 
-  // Torso
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.4), skinMat);
-  torso.position.y = 3.1;
-  torso.castShadow = true;
-  group.add(torso);
+  // LEFT SHOULDER joint group
+  const lSh = new THREE.Group();
+  lSh.position.set(-0.22, 0.08, 0);
+  chest.add(lSh);
 
-  // Shorts
-  const shorts = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.4, 0.42), shortsMat);
-  shorts.position.y = 2.45;
-  group.add(shorts);
+  // Upper arm mesh
+  const lUpperArm = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05, 0.045, 0.22, 6),
+    skinMat
+  );
+  lUpperArm.position.y = -0.12;
+  lUpperArm.castShadow = true;
+  lSh.add(lUpperArm);
 
-  // Shorts stripe
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.73, 0.06, 0.43), stripeMat);
-  stripe.position.y = 2.65;
-  group.add(stripe);
+  // LEFT ELBOW joint group
+  const lEl = new THREE.Group();
+  lEl.position.y = -0.24;
+  lSh.add(lEl);
 
-  // Upper arms
-  const upperArmGeo = new THREE.CylinderGeometry(0.1, 0.09, 0.5, 6);
-  const lUpperArm = new THREE.Mesh(upperArmGeo, skinMat);
-  lUpperArm.position.set(-0.5, 3.3, 0);
-  lUpperArm.rotation.z = Math.PI / 6;
-  group.add(lUpperArm);
+  // Forearm mesh
+  const lForearm = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.035, 0.2, 6),
+    skinMat
+  );
+  lForearm.position.y = -0.1;
+  lEl.add(lForearm);
 
-  const rUpperArm = new THREE.Mesh(upperArmGeo, skinMat);
-  rUpperArm.position.set(0.5, 3.3, 0);
-  rUpperArm.rotation.z = -Math.PI / 6;
-  group.add(rUpperArm);
+  // Wrist wrap
+  const lWristWrap = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 0.04, 6),
+    wrapMat
+  );
+  lWristWrap.position.y = -0.2;
+  lEl.add(lWristWrap);
 
-  // Forearms
-  const forearmGeo = new THREE.CylinderGeometry(0.08, 0.07, 0.45, 6);
-  const lForearm = new THREE.Mesh(forearmGeo, skinMat);
-  lForearm.position.set(-0.55, 3.55, 0.2);
-  group.add(lForearm);
-
-  const rForearm = new THREE.Mesh(forearmGeo, skinMat);
-  rForearm.position.set(0.55, 3.55, 0.2);
-  group.add(rForearm);
-
-  // Shoulder joints
-  const jointGeo = new THREE.SphereGeometry(0.11, 6, 6);
-  const lShoulder = new THREE.Mesh(jointGeo, skinMat);
-  lShoulder.position.set(-0.4, 3.5, 0);
-  group.add(lShoulder);
-  const rShoulder = new THREE.Mesh(jointGeo, skinMat);
-  rShoulder.position.set(0.4, 3.5, 0);
-  group.add(rShoulder);
-
-  // Elbow joints
-  const elbowGeo = new THREE.SphereGeometry(0.09, 6, 6);
-  const lElbow = new THREE.Mesh(elbowGeo, skinMat);
-  lElbow.position.set(-0.55, 3.15, 0.1);
-  group.add(lElbow);
-  const rElbow = new THREE.Mesh(elbowGeo, skinMat);
-  rElbow.position.set(0.55, 3.15, 0.1);
-  group.add(rElbow);
-
-  // Gloves
-  const gloveGeo = new THREE.SphereGeometry(0.18, 8, 8);
-  const lGlove = new THREE.Mesh(gloveGeo, gloveMat);
-  lGlove.position.set(-0.5, 3.6, 0.35);
+  // Glove mesh
+  const lGlove = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), gloveMat);
+  lGlove.scale.set(1, 1.1, 0.9);
+  lGlove.position.y = -0.26;
   lGlove.castShadow = true;
-  group.add(lGlove);
+  lEl.add(lGlove);
 
-  const rGlove = new THREE.Mesh(gloveGeo, gloveMat);
-  rGlove.position.set(0.5, 3.6, 0.35);
+  // Knuckle line
+  const lKnuckle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.015, 0.03), gloveMat);
+  lKnuckle.position.set(0, -0.26, 0.05);
+  lEl.add(lKnuckle);
+
+  // RIGHT SHOULDER joint group (mirror)
+  const rSh = new THREE.Group();
+  rSh.position.set(0.22, 0.08, 0);
+  chest.add(rSh);
+
+  const rUpperArm = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05, 0.045, 0.22, 6),
+    skinMat
+  );
+  rUpperArm.position.y = -0.12;
+  rUpperArm.castShadow = true;
+  rSh.add(rUpperArm);
+
+  // RIGHT ELBOW joint group
+  const rEl = new THREE.Group();
+  rEl.position.y = -0.24;
+  rSh.add(rEl);
+
+  const rForearm = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.035, 0.2, 6),
+    skinMat
+  );
+  rForearm.position.y = -0.1;
+  rEl.add(rForearm);
+
+  const rWristWrap = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 0.04, 6),
+    wrapMat
+  );
+  rWristWrap.position.y = -0.2;
+  rEl.add(rWristWrap);
+
+  const rGlove = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), gloveMat);
+  rGlove.scale.set(1, 1.1, 0.9);
+  rGlove.position.y = -0.26;
   rGlove.castShadow = true;
-  group.add(rGlove);
+  rEl.add(rGlove);
 
-  // Legs
-  const legGeo = new THREE.CylinderGeometry(0.11, 0.1, 0.8, 6);
-  const lLeg = new THREE.Mesh(legGeo, skinMat);
-  lLeg.position.set(-0.18, 1.8, 0);
-  group.add(lLeg);
-  const rLeg = new THREE.Mesh(legGeo, skinMat);
-  rLeg.position.set(0.18, 1.8, 0);
-  group.add(rLeg);
+  const rKnuckle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.015, 0.03), gloveMat);
+  rKnuckle.position.set(0, -0.26, 0.05);
+  rEl.add(rKnuckle);
 
-  // Lower legs
-  const lowerLegGeo = new THREE.CylinderGeometry(0.1, 0.09, 0.7, 6);
-  const lLowerLeg = new THREE.Mesh(lowerLegGeo, skinMat);
-  lLowerLeg.position.set(-0.18, 1.05, 0);
-  group.add(lLowerLeg);
-  const rLowerLeg = new THREE.Mesh(lowerLegGeo, skinMat);
-  rLowerLeg.position.set(0.18, 1.05, 0);
-  group.add(rLowerLeg);
+  // SHORTS + stripe (attached to pelvis)
+  const shorts = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.18, 0.2, 0.18, 8),
+    shortsMat
+  );
+  shorts.position.y = -0.08;
+  pelvis.add(shorts);
 
-  // Knees
-  const kneeGeo = new THREE.SphereGeometry(0.1, 6, 6);
-  const lKnee = new THREE.Mesh(kneeGeo, skinMat);
-  lKnee.position.set(-0.18, 1.4, 0);
-  group.add(lKnee);
-  const rKnee = new THREE.Mesh(kneeGeo, skinMat);
-  rKnee.position.set(0.18, 1.4, 0);
-  group.add(rKnee);
+  const stripe = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.185, 0.205, 0.03, 8),
+    stripeMat
+  );
+  stripe.position.y = 0.0;
+  pelvis.add(stripe);
 
-  // Shoes/boots
-  const shoeGeo = new THREE.BoxGeometry(0.18, 0.15, 0.28);
-  const lShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  lShoe.position.set(-0.18, 0.6, 0.05);
-  group.add(lShoe);
-  const rShoe = new THREE.Mesh(shoeGeo, shoeMat);
-  rShoe.position.set(0.18, 0.6, 0.05);
-  group.add(rShoe);
+  // LEFT HIP joint group
+  const lHip = new THREE.Group();
+  lHip.position.set(-0.09, -0.1, 0);
+  pelvis.add(lHip);
+
+  // Thigh mesh
+  const lLeg = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.06, 0.055, 0.32, 6),
+    skinMat
+  );
+  lLeg.position.y = -0.16;
+  lHip.add(lLeg);
+
+  // LEFT KNEE joint group
+  const lKn = new THREE.Group();
+  lKn.position.y = -0.34;
+  lHip.add(lKn);
+
+  // Knee mesh (for particle reference)
+  const lKnee = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), skinMat);
+  lKn.add(lKnee);
+
+  // Shin mesh
+  const lLowerLeg = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05, 0.045, 0.32, 6),
+    skinMat
+  );
+  lLowerLeg.position.y = -0.18;
+  lKn.add(lLowerLeg);
+
+  // LEFT ANKLE joint group
+  const lAnk = new THREE.Group();
+  lAnk.position.y = -0.36;
+  lKn.add(lAnk);
+
+  // Boot mesh
+  const lShoe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.12), shoeMat);
+  lShoe.position.set(0, -0.03, 0.02);
+  lAnk.add(lShoe);
+
+  // Boot top mesh
+  const lBootTop = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.045, 0.05, 0.06, 6),
+    shoeMat
+  );
+  lBootTop.position.y = 0.02;
+  lAnk.add(lBootTop);
+
+  // RIGHT HIP joint group (mirror)
+  const rHip = new THREE.Group();
+  rHip.position.set(0.09, -0.1, 0);
+  pelvis.add(rHip);
+
+  const rLeg = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.06, 0.055, 0.32, 6),
+    skinMat
+  );
+  rLeg.position.y = -0.16;
+  rHip.add(rLeg);
+
+  const rKn = new THREE.Group();
+  rKn.position.y = -0.34;
+  rHip.add(rKn);
+
+  const rKnee = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), skinMat);
+  rKn.add(rKnee);
+
+  const rLowerLeg = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.05, 0.045, 0.32, 6),
+    skinMat
+  );
+  rLowerLeg.position.y = -0.18;
+  rKn.add(rLowerLeg);
+
+  const rAnk = new THREE.Group();
+  rAnk.position.y = -0.36;
+  rKn.add(rAnk);
+
+  const rShoe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 0.12), shoeMat);
+  rShoe.position.set(0, -0.03, 0.02);
+  rAnk.add(rShoe);
+
+  const rBootTop = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.045, 0.05, 0.06, 6),
+    shoeMat
+  );
+  rBootTop.position.y = 0.02;
+  rAnk.add(rBootTop);
 
   return {
-    group, head, torso, shorts,
-    lUpperArm, rUpperArm, lForearm, rForearm,
-    lShoulder, rShoulder, lElbow, rElbow,
+    // Mesh references expected by game logic
+    group, head, torso: chestMesh, shorts,
     lGlove, rGlove,
+    lForearm, rForearm, lUpperArm, rUpperArm,
+    lShoulder: lShoulderBulk, rShoulder: rShoulderBulk,
+    lElbow: lKnuckle, rElbow: rKnuckle,
     lLeg, rLeg, lLowerLeg, rLowerLeg, lKnee, rKnee,
     lShoe, rShoe,
+    // Joint group references for animation system
+    root, pelvis, spine, chest, headGrp,
+    lSh, lEl, rSh, rEl,
+    lHip, lKn, lAnk, rHip, rKn, rAnk,
     // Animation state
     idle: { phase: Math.random() * Math.PI * 2 },
-    // Default positions
-    defaults: {
-      headY: 3.95,
-      lGlove: new THREE.Vector3(-0.5, 3.6, 0.35),
-      rGlove: new THREE.Vector3(0.5, 3.6, 0.35),
-      lForearm: new THREE.Vector3(-0.55, 3.55, 0.2),
-      rForearm: new THREE.Vector3(0.55, 3.55, 0.2),
-      lUpperArm: new THREE.Vector3(-0.5, 3.3, 0),
-      rUpperArm: new THREE.Vector3(0.5, 3.3, 0),
-      lElbow: new THREE.Vector3(-0.55, 3.15, 0.1),
-      rElbow: new THREE.Vector3(0.55, 3.15, 0.1),
-      lShoulder: new THREE.Vector3(-0.4, 3.5, 0),
-      rShoulder: new THREE.Vector3(0.4, 3.5, 0),
-      torsoY: 3.1,
-      groupY: 0
-    }
+    // Compatibility
+    defaults: { groupY: 0 }
   };
+}
+
+// ==================== GUARD POSE & KEYFRAME ANIMATION SYSTEM ====================
+
+// GUARD POSE - biomechanically accurate orthodox
+const GUARD = {
+  rootX: 0, rootZ: 0,
+  pelvisY: 0.88, pelvisRY: -0.45,
+  spineRX: 0.08, spineRY: 0, spineRZ: 0,
+  chestRX: -0.05, chestRY: -0.15, chestRZ: 0,
+  headRX: -0.12, headRY: 0.2, headRZ: 0,
+  lShX: -1.3, lShY: 0.1, lShZ: 0.6,
+  lElX: -1.6, lElY: 0.15, lElZ: 0,
+  rShX: -1.5, rShY: -0.05, rShZ: -0.35,
+  rElX: -1.8, rElY: -0.1, rElZ: 0,
+  lHipX: -0.08, lHipY: 0, lHipZ: 0.08,
+  lKnX: 0.2, lKnY: 0, lKnZ: 0, lAnkX: 0,
+  rHipX: 0.06, rHipY: 0, rHipZ: -0.06,
+  rKnX: 0.22, rKnY: 0, rKnZ: 0, rAnkX: -0.15,
+};
+
+// Punch keyframes with kinetic chain timing
+const PUNCH_KF = {
+  jab: [
+    {t:0, p:null},
+    {t:0.25, p:{pelvisRY:-0.35, lShX:-1.5, lShZ:0.4, lElX:-1.7}},
+    {t:0.5, p:{pelvisRY:-0.2, chestRY:0.05, spineRY:0.15,
+      lShX:-0.3, lShY:0.2, lShZ:0.8, lElX:-0.2, lElY:0.1,
+      rShX:-1.5, rShY:-0.05, rShZ:-0.35, rElX:-1.8, headRY:0.1}},
+    {t:0.75, p:{lShX:-0.8, lShZ:0.6, lElX:-1.0}},
+    {t:1, p:null}
+  ],
+  cross: [
+    {t:0, p:null},
+    {t:0.2, p:{pelvisRY:-0.55, rShX:-1.6, rShZ:-0.5, rElX:-1.6, rKnX:0.3}},
+    {t:0.5, p:{pelvisRY:0.1, spineRY:0.3, chestRY:0.2,
+      rShX:-0.2, rShY:-0.25, rShZ:-0.7, rElX:-0.15, rElY:-0.05,
+      rHipY:0.15, rKnX:0.15, rAnkX:-0.25,
+      lShX:-1.4, lElX:-1.7, headRY:-0.1}},
+    {t:0.75, p:{pelvisRY:-0.25, rShX:-1.0, rElX:-1.2}},
+    {t:1, p:null}
+  ],
+  hook: [
+    {t:0, p:null},
+    {t:0.2, p:{pelvisRY:-0.55, lShX:-0.9, lShY:0.3, lShZ:0.9, lElX:-1.55, lElY:0.2, lKnX:0.25}},
+    {t:0.5, p:{pelvisRY:-0.1, spineRY:0.3, chestRY:0.25,
+      lShX:-0.7, lShY:0.7, lShZ:0.2, lElX:-1.55, lElY:0.4,
+      lHipY:0.1, rShX:-1.5, rElX:-1.8, headRY:-0.05}},
+    {t:0.75, p:{lShX:-1.0, lShY:0.4, lShZ:0.5, lElX:-1.6}},
+    {t:1, p:null}
+  ],
+  uppercut: [
+    {t:0, p:null},
+    {t:0.25, p:{pelvisY:0.76, pelvisRY:-0.55,
+      rShX:-0.5, rShY:-0.15, rShZ:-0.3, rElX:-1.55,
+      lKnX:0.4, rKnX:0.5, spineRX:0.12}},
+    {t:0.55, p:{pelvisY:0.93, pelvisRY:-0.15, spineRY:-0.15, chestRY:-0.1,
+      rShX:-2.1, rShY:-0.2, rShZ:-0.4, rElX:-1.4,
+      rHipY:0.1, rAnkX:-0.25,
+      lKnX:0.12, rKnX:0.12,
+      lShX:-1.3, lElX:-1.6}},
+    {t:1, p:null}
+  ]
+};
+
+// Defense keyframes
+const DEFENSE_KF = {
+  slipL: [
+    {t:0, p:null},
+    {t:0.4, p:{spineRZ:0.25, spineRX:0.1, pelvisRY:-0.3, lKnX:0.35, rKnX:0.15, headRZ:0.15}},
+    {t:1, p:null}
+  ],
+  slipR: [
+    {t:0, p:null},
+    {t:0.4, p:{spineRZ:-0.25, spineRX:0.1, pelvisRY:-0.55, rKnX:0.35, lKnX:0.15, headRZ:-0.15}},
+    {t:1, p:null}
+  ],
+  duck: [
+    {t:0, p:null},
+    {t:0.4, p:{pelvisY:0.7, spineRX:0.2, lKnX:0.5, rKnX:0.45, headRX:-0.2}},
+    {t:1, p:null}
+  ],
+  highGuard: {
+    lShX:-1.6, lShY:0.05, lShZ:0.3, lElX:-2.2, lElY:0.1,
+    rShX:-1.6, rShY:-0.05, rShZ:-0.15, rElX:-2.2, rElY:-0.1
+  },
+  lowGuard: {
+    lShX:-0.8, lShY:0.1, lShZ:0.5, lElX:-1.4, lElY:0.1,
+    rShX:-0.8, rShY:-0.1, rShZ:-0.3, rElX:-1.4, rElY:-0.1
+  }
+};
+
+// Smoothstep interpolation
+function smooth(t) { return t * t * (3 - 2 * t); }
+function lrp(a, b, t) { return a + (b - a) * t; }
+
+function getPoseAt(kframes, t) {
+  let k0 = kframes[0], k1 = kframes[kframes.length - 1];
+  for (let i = 0; i < kframes.length - 1; i++) {
+    if (t >= kframes[i].t && t <= kframes[i + 1].t) {
+      k0 = kframes[i]; k1 = kframes[i + 1]; break;
+    }
+  }
+  const range = k1.t - k0.t;
+  const lt = range > 0 ? (t - k0.t) / range : 0;
+  const e = smooth(lt);
+  const p0 = k0.p ? { ...GUARD, ...k0.p } : { ...GUARD };
+  const p1 = k1.p ? { ...GUARD, ...k1.p } : { ...GUARD };
+  const result = {};
+  const keys = new Set([...Object.keys(p0), ...Object.keys(p1)]);
+  for (const k of keys) {
+    const a = p0[k] !== undefined ? p0[k] : (GUARD[k] || 0);
+    const b = p1[k] !== undefined ? p1[k] : (GUARD[k] || 0);
+    result[k] = lrp(a, b, e);
+  }
+  return result;
+}
+
+function applyPose(model, pose) {
+  if (!model.root) return;
+  model.root.position.x = pose.rootX || 0;
+  model.root.position.z = pose.rootZ || 0;
+  model.pelvis.position.y = pose.pelvisY || 0.88;
+  model.pelvis.rotation.y = pose.pelvisRY || -0.45;
+  model.spine.rotation.x = pose.spineRX || 0;
+  model.spine.rotation.y = pose.spineRY || 0;
+  model.spine.rotation.z = pose.spineRZ || 0;
+  model.chest.rotation.x = pose.chestRX || 0;
+  model.chest.rotation.y = pose.chestRY || 0;
+  model.chest.rotation.z = pose.chestRZ || 0;
+  model.headGrp.rotation.x = pose.headRX || -0.12;
+  model.headGrp.rotation.y = pose.headRY || 0.2;
+  model.headGrp.rotation.z = pose.headRZ || 0;
+  model.lSh.rotation.set(pose.lShX || -1.3, pose.lShY || 0, pose.lShZ || 0);
+  model.lEl.rotation.set(pose.lElX || -1.6, pose.lElY || 0, pose.lElZ || 0);
+  model.rSh.rotation.set(pose.rShX || -1.5, pose.rShY || 0, pose.rShZ || 0);
+  model.rEl.rotation.set(pose.rElX || -1.8, pose.rElY || 0, pose.rElZ || 0);
+  model.lHip.rotation.set(pose.lHipX || 0, pose.lHipY || 0, pose.lHipZ || 0);
+  model.lKn.rotation.x = pose.lKnX || 0.2;
+  model.lAnk.rotation.x = pose.lAnkX || 0;
+  model.rHip.rotation.set(pose.rHipX || 0, pose.rHipY || 0, pose.rHipZ || 0);
+  model.rKn.rotation.x = pose.rKnX || 0.22;
+  model.rAnk.rotation.x = pose.rAnkX || -0.15;
 }
 
 // ==================== 3D ANIMATIONS ====================
 function animateBoxerIdle(model, time) {
   const p = model.idle.phase;
-  const bob = Math.sin(time * 2.5 + p) * 0.03;
+  const bob = Math.sin(time * 2.5 + p) * 0.015;
   const sway = Math.sin(time * 1.8 + p) * 0.02;
-
-  model.group.position.y = model.defaults.groupY + bob;
-  model.head.position.y = model.defaults.headY + bob * 0.5;
-  model.torso.position.x = sway;
-
-  // Slight glove movement
-  model.lGlove.position.y = model.defaults.lGlove.y + Math.sin(time * 3 + p) * 0.02;
-  model.rGlove.position.y = model.defaults.rGlove.y + Math.sin(time * 3 + p + 1) * 0.02;
+  // Apply guard as base, then add idle motion
+  const pose = { ...GUARD };
+  pose.pelvisY = (GUARD.pelvisY || 0.88) + bob;
+  pose.spineRZ = sway;
+  pose.lShZ = (GUARD.lShZ || 0.6) + Math.sin(time * 3 + p) * 0.02;
+  pose.rShZ = (GUARD.rShZ || -0.35) + Math.sin(time * 3 + p + 1) * 0.02;
+  applyPose(model, pose);
 }
 
 function animatePunch(model, punchType, progress, isOpp) {
-  // progress: 0 -> 1 (extend) -> back
-  const t = progress;
-  const ext = t < 0.4 ? t / 0.4 : 1 - (t - 0.4) / 0.6; // quick extend, slow retract
-  const dir = isOpp ? -1 : 1;
-
-  switch (punchType) {
-    case 'jab': {
-      // Lead hand (left for orthodox) extends forward
-      const glove = model.lGlove;
-      const forearm = model.lForearm;
-      const elbow = model.lElbow;
-      glove.position.z = model.defaults.lGlove.z + ext * 1.2 * dir;
-      glove.position.y = model.defaults.lGlove.y + ext * 0.1;
-      glove.position.x = model.defaults.lGlove.x + ext * 0.15;
-      forearm.position.z = model.defaults.lForearm.z + ext * 0.6 * dir;
-      elbow.position.z = model.defaults.lElbow.z + ext * 0.3 * dir;
-      // Slight torso rotation
-      model.torso.rotation.y = ext * 0.15 * dir;
-      break;
-    }
-    case 'cross': {
-      // Rear hand (right) crosses forward with torso rotation
-      const glove = model.rGlove;
-      const forearm = model.rForearm;
-      const elbow = model.rElbow;
-      glove.position.z = model.defaults.rGlove.z + ext * 1.4 * dir;
-      glove.position.x = model.defaults.rGlove.x - ext * 0.3;
-      glove.position.y = model.defaults.rGlove.y + ext * 0.05;
-      forearm.position.z = model.defaults.rForearm.z + ext * 0.7 * dir;
-      forearm.position.x = model.defaults.rForearm.x - ext * 0.2;
-      elbow.position.z = model.defaults.rElbow.z + ext * 0.4 * dir;
-      model.torso.rotation.y = -ext * 0.3 * dir;
-      model.rShoulder.position.z = model.defaults.rShoulder.z + ext * 0.3 * dir;
-      break;
-    }
-    case 'hook': {
-      // Arm swings in arc from side
-      const glove = model.lGlove;
-      const forearm = model.lForearm;
-      const angle = ext * Math.PI * 0.6;
-      glove.position.x = model.defaults.lGlove.x + Math.sin(angle) * 0.8;
-      glove.position.z = model.defaults.lGlove.z + Math.cos(angle) * 0.5 * dir;
-      glove.position.y = model.defaults.lGlove.y;
-      forearm.position.x = model.defaults.lForearm.x + Math.sin(angle) * 0.4;
-      forearm.position.z = model.defaults.lForearm.z + Math.cos(angle) * 0.25 * dir;
-      model.torso.rotation.y = ext * 0.4 * dir;
-      break;
-    }
-    case 'uppercut': {
-      // Hand drops then arcs upward
-      const glove = model.rGlove;
-      const forearm = model.rForearm;
-      if (t < 0.3) {
-        // Wind down
-        const d = t / 0.3;
-        glove.position.y = model.defaults.rGlove.y - d * 0.4;
-        glove.position.z = model.defaults.rGlove.z;
-      } else {
-        // Arc upward
-        const u = (t - 0.3) / 0.7;
-        const upExt = u < 0.5 ? u / 0.5 : 1 - (u - 0.5) / 0.5;
-        glove.position.y = model.defaults.rGlove.y - 0.4 + upExt * 1.2;
-        glove.position.z = model.defaults.rGlove.z + upExt * 0.8 * dir;
-        glove.position.x = model.defaults.rGlove.x - upExt * 0.15;
-      }
-      forearm.position.y = model.defaults.rForearm.y + (ext - 0.3) * 0.4;
-      forearm.position.z = model.defaults.rForearm.z + ext * 0.3 * dir;
-      model.torso.rotation.y = -ext * 0.2 * dir;
-      // Knees bend slightly
-      model.group.position.y = model.defaults.groupY - ext * 0.1;
-      break;
-    }
-  }
+  const kfName = punchType; // jab, cross, hook, uppercut
+  const kf = PUNCH_KF[kfName];
+  if (!kf) return;
+  const pose = getPoseAt(kf, progress);
+  applyPose(model, pose);
 }
 
 function animateHit(model, progress) {
-  // Head and body snap back on hit
-  const snap = Math.sin(progress * Math.PI) * 0.3;
-  model.head.position.z = -snap * 0.3;
-  model.head.rotation.x = snap * 0.3;
-  model.torso.position.z = -snap * 0.15;
+  const snap = Math.sin(progress * Math.PI);
+  const pose = { ...GUARD };
+  pose.spineRX = (GUARD.spineRX || 0) - snap * 0.15;
+  pose.headRX = (GUARD.headRX || -0.12) - snap * 0.2;
+  pose.pelvisY = (GUARD.pelvisY || 0.88) - snap * 0.02;
+  applyPose(model, pose);
 }
 
 function animateBlock(model, guardType) {
-  if (guardType === 'high') {
-    model.lGlove.position.set(-0.2, 3.85, 0.3);
-    model.rGlove.position.set(0.2, 3.85, 0.3);
-    model.lForearm.position.set(-0.25, 3.75, 0.25);
-    model.rForearm.position.set(0.25, 3.75, 0.25);
-    model.lElbow.position.set(-0.35, 3.4, 0.15);
-    model.rElbow.position.set(0.35, 3.4, 0.15);
-  } else if (guardType === 'low') {
-    model.lGlove.position.set(-0.25, 3.2, 0.35);
-    model.rGlove.position.set(0.25, 3.2, 0.35);
-    model.lForearm.position.set(-0.3, 3.3, 0.25);
-    model.rForearm.position.set(0.3, 3.3, 0.25);
-    model.lElbow.position.set(-0.4, 3.1, 0.1);
-    model.rElbow.position.set(0.4, 3.1, 0.1);
-  }
+  const overrides = guardType === 'high' ? DEFENSE_KF.highGuard : DEFENSE_KF.lowGuard;
+  const pose = { ...GUARD, ...overrides };
+  applyPose(model, pose);
 }
 
 function animateDodge(model, dodgeType, progress) {
-  const t = Math.sin(progress * Math.PI);
-  switch (dodgeType) {
-    case 'slipL':
-      model.group.position.x = -0.5 * t;
-      model.torso.rotation.z = 0.2 * t;
-      model.head.position.x = -0.1 * t;
-      break;
-    case 'slipR':
-      model.group.position.x = 0.5 * t;
-      model.torso.rotation.z = -0.2 * t;
-      model.head.position.x = 0.1 * t;
-      break;
-    case 'duck':
-      model.group.position.y = model.defaults.groupY - 0.5 * t;
-      model.torso.rotation.x = 0.15 * t;
-      break;
-  }
+  const kf = DEFENSE_KF[dodgeType];
+  if (!kf || !Array.isArray(kf)) return;
+  const pose = getPoseAt(kf, progress);
+  applyPose(model, pose);
 }
 
 function resetBoxerPose(model) {
-  model.head.position.set(0, model.defaults.headY, 0);
-  model.head.rotation.set(0, 0, 0);
-  model.torso.position.set(0, model.defaults.torsoY, 0);
-  model.torso.rotation.set(0, 0, 0);
-  model.lGlove.position.copy(model.defaults.lGlove);
-  model.rGlove.position.copy(model.defaults.rGlove);
-  model.lForearm.position.copy(model.defaults.lForearm);
-  model.rForearm.position.copy(model.defaults.rForearm);
-  model.lUpperArm.position.copy(model.defaults.lUpperArm);
-  model.rUpperArm.position.copy(model.defaults.rUpperArm);
-  model.lElbow.position.copy(model.defaults.lElbow);
-  model.rElbow.position.copy(model.defaults.rElbow);
-  model.lShoulder.position.copy(model.defaults.lShoulder);
-  model.rShoulder.position.copy(model.defaults.rShoulder);
+  applyPose(model, GUARD);
   model.group.position.x = model.group.userData.baseX || 0;
-  model.group.position.y = model.defaults.groupY;
+}
+
+// ==================== PUNCH TRAIL SYSTEM ====================
+let punchTrails = [];
+
+function updatePunchTrail(model, isPunching) {
+  if (!isPunching) return;
+  // Get world positions of both gloves
+  const lPos = new THREE.Vector3();
+  const rPos = new THREE.Vector3();
+  model.lGlove.getWorldPosition(lPos);
+  model.rGlove.getWorldPosition(rPos);
+
+  // Store trail points
+  if (!model._trailPoints) model._trailPoints = [];
+  model._trailPoints.push({ pos: lPos.clone(), time: performance.now() });
+  model._trailPoints.push({ pos: rPos.clone(), time: performance.now() });
+
+  // Remove old points (>500ms)
+  const now = performance.now();
+  model._trailPoints = model._trailPoints.filter(p => now - p.time < 500);
+
+  // Draw trail line
+  if (model._trailLine) { scene.remove(model._trailLine); model._trailLine.geometry.dispose(); model._trailLine.material.dispose(); }
+  if (model._trailPoints.length > 2) {
+    const points = model._trailPoints.map(p => p.pos);
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    const mat = new THREE.LineBasicMaterial({ color: 0xe63946, transparent: true, opacity: 0.6, linewidth: 2 });
+    model._trailLine = new THREE.Line(geo, mat);
+    scene.add(model._trailLine);
+  }
+}
+
+function clearTrails(model) {
+  if (model._trailLine) { scene.remove(model._trailLine); model._trailLine.geometry.dispose(); model._trailLine.material.dispose(); model._trailLine = null; }
+  model._trailPoints = [];
+}
+
+// ==================== KINETIC CHAIN GLOW ====================
+let glowJoints = [];
+
+function showKineticChainGlow(model, punchType, progress) {
+  // Clear previous glow
+  glowJoints.forEach(g => { if (g.mesh) { g.mesh.material.emissive.setHex(0x000000); g.mesh.material.emissiveIntensity = 0; }});
+  glowJoints = [];
+
+  if (progress <= 0 || progress >= 1) return;
+
+  // Kinetic chain: foot → knee → hip → spine → shoulder → elbow → glove
+  // Each joint glows in sequence based on progress
+  const chainParts = [];
+  if (punchType === 'jab' || punchType === 'hook') {
+    chainParts.push(
+      { mesh: model.lShoe, start: 0, end: 0.15 },
+      { mesh: model.lKnee, start: 0.1, end: 0.25 },
+      { mesh: model.torso, start: 0.2, end: 0.35 },
+      { mesh: model.lShoulder, start: 0.25, end: 0.45 },
+      { mesh: model.lForearm, start: 0.35, end: 0.55 },
+      { mesh: model.lGlove, start: 0.4, end: 0.7 }
+    );
+  } else { // cross, uppercut - rear hand
+    chainParts.push(
+      { mesh: model.rShoe, start: 0, end: 0.15 },
+      { mesh: model.rKnee, start: 0.1, end: 0.25 },
+      { mesh: model.torso, start: 0.2, end: 0.35 },
+      { mesh: model.rShoulder, start: 0.25, end: 0.45 },
+      { mesh: model.rForearm, start: 0.35, end: 0.55 },
+      { mesh: model.rGlove, start: 0.4, end: 0.7 }
+    );
+  }
+
+  chainParts.forEach(cp => {
+    if (!cp.mesh || !cp.mesh.material) return;
+    const intensity = (progress >= cp.start && progress <= cp.end) ?
+      Math.sin((progress - cp.start) / (cp.end - cp.start) * Math.PI) : 0;
+    if (intensity > 0.1) {
+      cp.mesh.material.emissive = cp.mesh.material.emissive || new THREE.Color();
+      cp.mesh.material.emissive.setHex(0xff6600);
+      cp.mesh.material.emissiveIntensity = intensity * 0.5;
+      glowJoints.push(cp);
+    }
+  });
+}
+
+function clearGlow() {
+  glowJoints.forEach(g => { if (g.mesh && g.mesh.material) { g.mesh.material.emissive.setHex(0x000000); g.mesh.material.emissiveIntensity = 0; }});
+  glowJoints = [];
+}
+
+// ==================== FOOT POSITION GUIDE ====================
+let footGuides = null;
+
+function buildFootGuides() {
+  footGuides = new THREE.Group();
+  const guideMat = new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.15 });
+
+  // Left foot (lead) - forward, 45 degrees
+  const lGuide = new THREE.Mesh(new THREE.RingGeometry(0.05, 0.12, 16), guideMat);
+  lGuide.rotation.x = -Math.PI / 2;
+  lGuide.position.set(-0.09, 0.01, 0.15);
+  footGuides.add(lGuide);
+
+  // Right foot (rear) - back, 60-70 degrees
+  const rGuide = new THREE.Mesh(new THREE.RingGeometry(0.05, 0.12, 16), guideMat);
+  rGuide.rotation.x = -Math.PI / 2;
+  rGuide.position.set(0.09, 0.01, -0.1);
+  footGuides.add(rGuide);
+
+  // Stance width line
+  const lineGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-0.09, 0.01, 0.15),
+    new THREE.Vector3(0.09, 0.01, -0.1)
+  ]);
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.1 });
+  footGuides.add(new THREE.Line(lineGeo, lineMat));
+
+  footGuides.visible = false;
+  scene.add(footGuides);
+}
+
+// ==================== COACHING OVERLAY ====================
+const COACHING_TIPS = {
+  jab: ['앞손 스냅!', '뒷손 턱 보호', '어깨로 턱 가려라'],
+  cross: ['뒷발 피벗!', '힙 먼저 회전', '체중 앞으로 이동'],
+  hook: ['팔꿈치 90° 고정', '앞발 피벗', '수평으로만 회전'],
+  uppercut: ['무릎 먼저 굽혀라', '다리로 밀어 올려라', '스쿼트 후 폭발']
+};
+
+let coachingTimer = 0;
+function showCoachingTip(punchType) {
+  if (coachingTimer > 0) return;
+  const tips = COACHING_TIPS[punchType];
+  if (!tips) return;
+  const tip = tips[Math.floor(Math.random() * tips.length)];
+
+  // Show as floating text
+  const el = $('comboPopup');
+  el.textContent = tip;
+  el.style.opacity = '0.7';
+  el.style.fontSize = '20px';
+  el.style.color = 'var(--green)';
+  el.style.transform = 'translate(-50%,-50%) scale(1)';
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.fontSize = '48px';
+    el.style.color = 'var(--accent2)';
+  }, 1200);
+  coachingTimer = 3; // cooldown
+
+  // TTS coaching (optional, non-blocking)
+  if ('speechSynthesis' in window && Math.random() > 0.7) {
+    const u = new SpeechSynthesisUtterance(tip);
+    u.lang = 'ko-KR';
+    u.rate = 1.2;
+    u.volume = 0.4;
+    speechSynthesis.speak(u);
+  }
+}
+
+// ==================== ENHANCED SOUND SYSTEM ====================
+function playPunchEnhanced(type, intensity) {
+  const a = aud(), t = a.currentTime;
+
+  // Impact noise burst
+  const buf = a.createBuffer(1, a.sampleRate * 0.12, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (a.sampleRate * 0.025));
+  const n = a.createBufferSource(); n.buffer = buf;
+  const ng = a.createGain();
+  ng.gain.setValueAtTime((intensity || 1) * 0.5, t);
+  ng.gain.linearRampToValueAtTime(0, t + 0.1);
+
+  // Low-frequency thump (body impact feel)
+  const osc = a.createOscillator();
+  const oscGain = a.createGain();
+  osc.frequency.value = type === 'uppercut' ? 70 : type === 'hook' ? 100 : type === 'cross' ? 120 : 180;
+  osc.type = 'sine';
+  oscGain.gain.setValueAtTime(0.3 * (intensity || 1), t);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+
+  // Filter for realistic sound
+  const filter = a.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = type === 'hook' || type === 'uppercut' ? 400 : 800;
+
+  n.connect(ng).connect(filter).connect(a.destination);
+  osc.connect(oscGain).connect(a.destination);
+  n.start(t); n.stop(t + 0.12);
+  osc.start(t); osc.stop(t + 0.15);
+
+  // High-frequency snap for jab
+  if (type === 'jab') {
+    const snap = a.createOscillator();
+    const snapG = a.createGain();
+    snap.frequency.value = 3000;
+    snap.type = 'sawtooth';
+    snapG.gain.setValueAtTime(0.08, t);
+    snapG.gain.linearRampToValueAtTime(0, t + 0.03);
+    snap.connect(snapG).connect(a.destination);
+    snap.start(t); snap.stop(t + 0.03);
+  }
 }
 
 // ==================== 3D PARTICLES ====================
@@ -1193,11 +1589,8 @@ function playerPunch(type) {
     f.crowdIntensity = Math.min(1, f.crowdIntensity + 0.05);
 
     // 3D particles - impact sparks/stars
-    const hitPos = new THREE.Vector3(
-      oppModel.group.position.x,
-      oppModel.head.position.y + oppModel.group.position.y,
-      oppModel.group.position.z
-    );
+    const hitPos = new THREE.Vector3();
+    oppModel.head.getWorldPosition(hitPos);
     spawnParticles3D(hitPos, 0xffaa00, 6, 'star');
     // Sweat particles
     spawnParticles3D(hitPos, 0xddddee, 4, 'drop');
@@ -1227,6 +1620,9 @@ function playerPunch(type) {
   f.playerPunchAnim = 0.35;
   f.playerPunchType = type;
   f.playerActionTime = (0.25 - speed / 500);
+
+  // Show coaching tip occasionally
+  showCoachingTip(type);
 }
 
 function playerDodge(dir) {
@@ -1363,11 +1759,8 @@ function updateOpponentAI(dt) {
   f.oppPunchType = punchType;
 
   // 3D particles on player hit
-  const hitPos = new THREE.Vector3(
-    playerModel.group.position.x,
-    playerModel.head.position.y + playerModel.group.position.y,
-    playerModel.group.position.z
-  );
+  const hitPos = new THREE.Vector3();
+  playerModel.head.getWorldPosition(hitPos);
   spawnParticles3D(hitPos, 0xaabbcc, 3, 'drop');
   if (dmg > 6) spawnParticles3D(hitPos, 0xe63946, 2, 'star');
 
@@ -1830,6 +2223,25 @@ function update3DScene(time, dt) {
     // Hit reactions
     if (f.playerHitAnim > 0) animateHit(playerModel, f.playerHitAnim / 0.3);
     if (f.oppHitAnim > 0) animateHit(oppModel, f.oppHitAnim / 0.3);
+
+    // Punch trail effect
+    updatePunchTrail(playerModel, f.playerPunchAnim > 0);
+    updatePunchTrail(oppModel, f.oppPunchAnim > 0);
+    if (f.playerPunchAnim <= 0) clearTrails(playerModel);
+    if (f.oppPunchAnim <= 0) clearTrails(oppModel);
+
+    // Kinetic chain glow
+    if (f.playerPunchAnim > 0) {
+      showKineticChainGlow(playerModel, f.playerPunchType, 1 - f.playerPunchAnim / 0.35);
+    } else {
+      clearGlow();
+    }
+
+    // Coaching cooldown
+    if (coachingTimer > 0) coachingTimer -= dt;
+
+    // Foot guides visibility during fight
+    if (footGuides) footGuides.visible = false;
 
     // Camera shake
     if (f.shakeAmount > 0.3) {
