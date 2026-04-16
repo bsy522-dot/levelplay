@@ -22,7 +22,6 @@ canvas{display:block;max-width:100vw;max-height:100vh;touch-action:none}
 <div id="rotate-msg"><span>📱</span>세로로 돌려주세요!</div>
 <canvas id="c" role="application" aria-label="사랑의 하츄핑 v2 게임"></canvas>
 <script src="sprites_data.js"></script>
-<script src="bg_images_data.js"></script>
 <script src="env_backgrounds.js"></script>
 <script>
 'use strict';
@@ -104,8 +103,8 @@ let scr='title',t=0,ticks=0,paused=false;
 let lv=0,lives=5,hts=0,starCount=0;
 const PW=38,PH=88,GR=0.5,MXF=11;
 let P={x:0,y:0,vx:0,vy:0,gr:false,face:1,dead:false,djump:false,canDJ:false,wallSlide:false,
-  dashCD:0,dashing:false,dashT:0,dashDir:0,shieldT:0,speedT:0,magnetT:0,invincT:0};
-let camX=0,parts=[],enemies_l=[],items_l=[],powerups_l=[],npcs_l=[];
+  dashCD:0,dashing:false,dashT:0,dashDir:0,shieldT:0,speedT:0,magnetT:0,invincT:0,coyoteT:0};
+let camX=0,parts=[],enemies_l=[],items_l=[],powerups_l=[],stars_l=[],npcs_l=[];
 let boss={hp:0,mx:0,x:0,y:0,dir:1,active:false,atk:0,atkT:0,phase:0};
 let hatchuShield=true;
 let npcMsg='',npcT=0,lvDone=false,lvDoneT=0;
@@ -143,9 +142,17 @@ const ST_W4=[
 const ST_BOSS2=[
   {bg:'bg_forest_dk',img:'tp',sp:'트러핑',tx:'또 왔어?! 이번엔\n더 강해졌다!'},
 ];
+const ST_BOSS3=[
+  {bg:'bg_forest_dk',img:'tp',sp:'트러핑',tx:'이번엔 진짜야!\n최후의 힘을 보여주지!'},
+  {bg:'bg_forest_dk',img:'rf',sp:'로미',tx:'무섭지 않아!\n하츄핑을 위해 끝까지!'},
+];
 const ST_END=[
   {bg:'bg_forest_br',img:'hf',sp:'하츄핑',tx:'로미... 고마워!\n날 구하러 와줘서!'},
   {bg:'bg_fountain',img:null,sp:'',tx:'사랑이 세상을 구했습니다!\n\n로미와 하츄핑은 진정한\n짝꿍이 되었어요!'},
+];
+const ST_BONUS=[
+  {bg:'bg_forest_br',img:'hf',sp:'하츄핑',tx:'로미! 한 곳만 더 가볼까?\n비밀 정원이 있대!'},
+  {bg:'bg_forest_br',img:'rf',sp:'로미',tx:'좋아! 마지막 모험이야!'},
 ];
 
 // ===== LEVELS (10 levels, 3 worlds + 2 boss) =====
@@ -220,6 +227,14 @@ LEVELS.push({name:'라미엔느 성',bg:'dark',sx:80,sy:430,endX:3400,world:3,bo
   stars:[[550,360,1],[1400,410,1],[2300,360,1],[2850,360,1]],
   enemies:[[500,490,2],[1000,490,2],[1500,490,2],[2000,490,2],[2500,490,2]],
   powerups:[[1100,320,2],[2300,320,0]],npcs:[]});
+// Level 10: Bonus - Secret Garden (post-game celebration)
+LEVELS.push({name:'비밀 정원',bg:'forest',sx:80,sy:430,endX:4000,world:4,
+  plat:[[0,520,600,40,2],[620,520,600,40,2],[1240,520,600,40,2],[1860,520,600,40,2],[2480,520,600,40,2],[3100,520,600,40,2],[3720,520,400,40,2],
+    [300,460,120,16,3],[600,420,120,16,3],[900,460,120,16,3],[1200,420,120,16,3],[1500,460,120,16,3],[1800,420,120,16,3],[2100,460,120,16,3],[2400,420,120,16,3],[2700,460,120,16,3],[3000,420,120,16,3],[3300,460,120,16,3],[3600,420,120,16,3]],
+  items:[[360,430,0],[660,390,0],[960,430,0],[1260,390,0],[1560,430,0],[1860,390,0],[2160,430,0],[2460,390,0],[2760,430,0],[3060,390,0],[3360,430,0],[3660,390,0],[150,490,0],[450,490,0],[750,490,0],[1050,490,0],[1350,490,0],[1650,490,0],[1950,490,0],[2250,490,0],[2550,490,0],[2850,490,0],[3150,490,0],[3450,490,0]],
+  stars:[[600,380,1],[1200,380,1],[1800,380,1],[2400,380,1],[3000,380,1],[3600,380,1]],
+  enemies:[],powerups:[[500,380,3],[1500,380,1],[2500,380,0],[3500,380,2]],
+  npcs:[[500,460,'ba','축하해!\n전부 클리어했어!'],[1800,460,'ch','대단해!\n최고야!']]});
 
 // ===== POWERUP TYPES =====
 // 0=shield, 1=speed, 2=invincibility, 3=magnet
@@ -240,16 +255,18 @@ function initLv(i){const L=LEVELS[i];if(!L)return;
   const ch=chosenChar||CHARACTERS[0];
   P.x=L.sx;P.y=L.sy;P.vx=0;P.vy=0;P.gr=false;P.face=1;P.dead=false;
   P.djump=false;P.canDJ=false;P.wallSlide=false;P.dashCD=0;P.dashing=false;P.dashT=0;
-  P.shieldT=0;P.speedT=0;P.magnetT=0;P.invincT=0;
+  P.shieldT=0;P.speedT=0;P.magnetT=0;P.invincT=0;P.coyoteT=0;
   camX=0;lvDone=false;lvDoneT=0;
   hasDoubleJump=L.world>=2;hasWallSlide=L.world>=2;hasDash=L.world>=3;
-  enemies_l=L.enemies.map(e=>[e[0],e[1],e[2],e[2]===0?1.2:e[2]===1?1.5:1.8,e[0]-50,e[0]+90,true]);
+  enemies_l=L.enemies.map(e=>[e[0],e[1],e[2],e[2]===0?1.0:e[2]===1?1.3:1.6,e[0]-50,e[0]+90,true]);
   items_l=L.items.map(it=>[it[0],it[1],it[2],true]);
   powerups_l=(L.powerups||[]).map(p=>[p[0],p[1],p[2],true]);
+  if(L.stars) stars_l=L.stars.map(st=>[st[0],st[1],st[2],true]);
+  else stars_l=[];
   npcs_l=L.npcs?L.npcs.map(n=>({x:n[0],y:n[1],spr:n[2],dlg:n[3],done:false})):[];
   parts=[];npcMsg='';npcT=0;
   if(L.boss){
-    const bossHp=L.world===1?5:L.world===2?7:10;
+    const bossHp=L.world===1?5:L.world===2?7:8;
     boss={hp:bossHp,mx:bossHp,x:L.endX-200,y:440,dir:1,active:true,atk:0,atkT:0,phase:0};
   }else{boss={active:false}}
   hatchuShield=true;
@@ -283,16 +300,19 @@ function updatePlay(){
     }
   }
   if(P.wallSlide){P.vy=Math.min(P.vy,2);if(ticks%15===0)sfxWallSlide()}
+  // Coyote time
+  if(P.coyoteT>0&&!P.gr)P.coyoteT--;
   // Jump
   const wantJump=keys.ArrowUp||keys.w||keys[' ']||tJ;
   if(wantJump){
-    if(P.gr){P.vy=jmp;P.gr=false;P.canDJ=hasDoubleJump;sfxJump()}
+    if(P.gr||P.coyoteT>0){P.vy=jmp;P.gr=false;P.coyoteT=0;P.canDJ=hasDoubleJump;sfxJump()}
     else if(P.wallSlide){P.vy=jmp*0.9;P.vx=-mx*spd*1.5;P.canDJ=false;sfxJump()}
     else if(P.canDJ&&!P.djump){P.vy=jmp*0.85;P.djump=true;P.canDJ=false;sfxDoubleJump();
       for(let i=0;i<4;i++)parts.push({x:P.x+PW/2,y:P.y+PH,vx:(Math.random()-0.5)*3,vy:Math.random()*2,l:0.5,s:rng(2,4),c:'rgba(255,107,157,0.6)'});}
   }
   if(!P.dashing)P.vy=Math.min(P.vy+GR,MXF);
   P.x+=P.vx;P.y+=P.vy;
+  if(P.gr)P.coyoteT=5;
   P.gr=false;
   for(const pl of L.plat){const[px,py,pw,ph]=pl;
     if(P.x+PW>px+3&&P.x<px+pw-3){
@@ -315,7 +335,7 @@ function updatePlay(){
     if(Math.abs(dx)<28&&Math.abs(dy)<28){it[3]=false;hts++;sfxHeart();
       for(let i=0;i<5;i++)parts.push({x:it[0],y:it[1],vx:(Math.random()-0.5)*4,vy:-Math.random()*3,l:1,s:rng(3,5),c:'#FF6B9D'})}});
   // Collect stars
-  if(L.stars)L.stars.forEach(st=>{if(!st[3]&&st[3]!==undefined)return;if(st.length<4)st.push(true);if(!st[3])return;
+  stars_l.forEach(st=>{if(!st[3])return;
     let dx=P.x+PW/2-st[0],dy=P.y+PH/2-st[1];
     if(magR>0&&Math.sqrt(dx*dx+dy*dy)<magR){st[0]+=dx*0.08;st[1]+=dy*0.08}
     if(Math.abs(dx)<28&&Math.abs(dy)<28){st[3]=false;starCount++;sfxStar();
@@ -387,16 +407,16 @@ function die(){if(P.dead)return;P.dead=true;lives--;sfxDamage();
 
 function onClear(){
   saveProgress();
-  const w=LEVELS[lv].world;
-  if(lv===2){// end of world 1
-    goStory(ST_W2,()=>{lv=3;initLv(3);doTrans('play')});
+  if(lv===2){// end of world 1 - show double jump + wall slide tutorial
+    goStory(ST_W2.concat(ST_W3),()=>{lv=3;initLv(3);doTrans('play')});
   }else if(lv===5){// end of world 2
     goStory(ST_W4,()=>{lv=6;initLv(6);doTrans('play')});
-  }else if(lv===8){// final boss
+  }else if(lv===8){// end of world 3 final boss - go to bonus
+    goStory(ST_BONUS,()=>{lv=9;initLv(9);doTrans('play')});
+  }else if(lv===9){// bonus level complete - real ending
     goStory(ST_END,()=>doTrans('ending'));
   }else if(LEVELS[lv+1]&&LEVELS[lv+1].boss){
-    // Pre-boss story
-    const stories=[null,null,ST_BOSS1,null,null,ST_BOSS2,null,null,null];
+    const stories=[null,null,ST_BOSS1,null,null,ST_BOSS2,null,ST_BOSS3,null,null];
     const st=stories[lv];
     if(st)goStory(st,()=>{lv++;initLv(lv);doTrans('play')});
     else{lv++;initLv(lv);doTrans('play')}
@@ -501,7 +521,7 @@ function render(){
       btns.push({x:W/2-80,y:580,w:160,h:40,id:'lvselect'});
       rr(X,W/2-80,580,160,40,20,'rgba(255,255,255,0.2)','rgba(255,255,255,0.4)');X.fillStyle='#fff';X.font=FN(16);X.fillText('레벨 선택',W/2,606)}
     // Stats
-    if(sd.bestHearts||sd.bestStars){X.fillStyle='rgba(255,255,255,0.7)';X.font=FN(12);X.fillText('최고: '+heart+' '+(sd.bestHearts||0)+' / '+(sd.bestStars||0),W/2,640)}
+    if(sd.bestHearts||sd.bestStars){X.fillStyle='rgba(255,255,255,0.7)';X.font=FN(12);X.fillText('최고: 💗 '+(sd.bestHearts||0)+' / ⭐ '+(sd.bestStars||0),W/2,640)}
   }
   else if(scr==='charsel'){
     X.fillStyle=_bgGrads.title;X.fillRect(0,0,W,H);
@@ -548,7 +568,7 @@ function render(){
     // Items (hearts)
     items_l.forEach(it=>{if(!it[3])return;const sx=it[0]-camX,sy=it[1]+sin(t*2.4+it[0])*4;if(sx<-15||sx>W+15)return;heart(X,sx,sy,9,'#FF6B9D')});
     // Stars
-    if(L.stars)L.stars.forEach(st=>{if(st.length>=4&&!st[3])return;const sx=st[0]-camX,sy=st[1]+sin(t*3+st[0])*3;if(sx<-15||sx>W+15)return;
+    stars_l.forEach(st=>{if(!st[3])return;const sx=st[0]-camX,sy=st[1]+sin(t*3+st[0])*3;if(sx<-15||sx>W+15)return;
       X.save();X.translate(sx,sy);X.rotate(t);star(X,0,0,8,'#FFD700');X.restore();X.fillStyle='rgba(255,215,0,0.3)';X.beginPath();X.arc(sx,sy,12,0,Math.PI*2);X.fill()});
     // Powerups
     powerups_l.forEach(pu=>{if(!pu[3])return;const sx=pu[0]-camX,sy=pu[1]+sin(t*2+pu[0])*5;if(sx<-15||sx>W+15)return;
@@ -571,6 +591,10 @@ function render(){
     heart(X,70,24,6,'#FF6B9D');X.fillText(hts+'',82,30);
     star(X,120,24,5,'#FFD700');X.fillText(starCount+'',132,30);
     X.fillStyle='rgba(255,255,255,0.7)';X.font=FN(11);X.textAlign='right';X.fillText(LEVELS[lv].name+' W'+LEVELS[lv].world,W-16,28);
+    // Level progress bar
+    const prog=clamp((P.x)/(LEVELS[lv].endX-50),0,1);
+    rr(X,60,16,W-120,6,3,'rgba(255,255,255,0.15)');
+    rr(X,60,16,(W-120)*prog,6,3,'#FF6B9D');
     // Active powerups
     let puY=50;
     if(P.shieldT>0){rr(X,8,puY,90,20,8,'rgba(79,195,247,0.6)');X.fillStyle='#fff';X.font=FN(10);X.textAlign='left';X.fillText('보호막 '+Math.ceil(P.shieldT/60)+'s',14,puY+14);puY+=24}
@@ -642,14 +666,14 @@ function onDown(e){e.preventDefault();_initAudio();const p=gp(e);
     if(b.id==='lvselect'){scr='lvselect';sfxClick();return}
     if(b.id==='back'){scr='title';sfxClick();return}
     if(b.id==='startgame'){
-      chosenChar=CHARACTERS[selChar];lives=5;hts=0;starCount=0;lv=0;
+      chosenChar=CHARACTERS[selChar];lives=7;hts=0;starCount=0;lv=0;
       goStory(ST_OPEN,()=>{initLv(0);doTrans('play')});sfxClick();return}
     if(b.id&&b.id.startsWith('char')){selChar=parseInt(b.id.slice(4));sfxClick();return}
     if(b.id&&b.id.startsWith('lv')){
-      const lvNum=parseInt(b.id.slice(2));chosenChar=CHARACTERS[selChar];lives=5;hts=0;starCount=0;lv=lvNum;
+      const lvNum=parseInt(b.id.slice(2));chosenChar=CHARACTERS[selChar];lives=7;hts=0;starCount=0;lv=lvNum;
       initLv(lvNum);doTrans('play');sfxClick();return}
     if(b.id==='restart'){location.reload();return}
-    if(b.id==='retry'){lives=5;hts=0;starCount=0;initLv(lv);doTrans('play');sfxClick();return}
+    if(b.id==='retry'){lives=7;hts=0;starCount=0;initLv(lv);doTrans('play');sfxClick();return}
     if(b.id==='go_title'){scr='title';sfxClick();return}
   }
   if(scr==='story'){advSt();sfxClick();return}

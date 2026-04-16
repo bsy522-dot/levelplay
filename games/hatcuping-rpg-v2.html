@@ -75,7 +75,7 @@ function lerp(a,b,t){return a+(b-a)*t}
 // ===== TILE SYSTEM =====
 const T=40;const PW=36,PH=42;
 const TILE_WALK={0:true,1:true,5:true,6:true,8:true,10:true,11:true,12:true};
-const TILE_ENCOUNTER={12:0.10,5:0.06};
+const TILE_ENCOUNTER={12:0.08,5:0.04};
 const tileCanvas={};
 function genTiles(){
   const tiles=[
@@ -234,11 +234,32 @@ secret_garden:{w:10,h:8,
     [2,2,2,2,2,2,2,2,2,2],
   ],
   npcs:[
-    {x:4,y:3,spr:'la',name:'라라핑',dialog:['여기는 비밀 정원이야!','잘 찾아왔어, 로미!','스티커를 모으면 선물이 있대!'],cond:null},
+    {x:4,y:3,spr:'la',name:'라라핑',dialog:['여기는 비밀 정원이야!','트러핑의 이야기를 들어줘...','트러핑은 원래 착한 아이였어.','리암 왕자와 가장 친했는데...','오해 때문에 멀어진 거야.','아래쪽 문으로 가면\n트러핑의 탑이 있어!'],cond:'ch7'},
   ],
-  warps:[{x:4,y:6,map:'castle_room',tx:3,ty:5}],
+  warps:[{x:4,y:6,map:'trup_tower',tx:5,ty:1}],
   encounters:[],startX:4,startY:5,
-}};
+},
+trup_tower:{w:12,h:10,
+  tiles:[
+    [7,7,7,7,7,7,7,7,7,7,7,7],
+    [7,6,6,6,6,10,6,6,6,6,6,7],
+    [7,6,12,6,6,6,6,6,12,6,6,7],
+    [7,6,6,6,12,6,6,12,6,6,6,7],
+    [7,6,12,6,6,6,11,6,6,12,6,7],
+    [7,6,6,12,6,6,6,6,12,6,6,7],
+    [7,6,6,6,6,12,6,6,6,6,6,7],
+    [7,6,12,6,6,6,6,12,6,6,6,7],
+    [7,6,6,6,6,6,11,6,6,6,6,7],
+    [7,7,7,7,7,7,7,7,7,7,7,7],
+  ],
+  npcs:[
+    {x:6,y:4,spr:'st',name:'스틱핑',dialog:['여기는 트러핑의 탑이야...','트러핑은 외로웠던 거야.','리암 왕자가 떠난 후로\n혼자였대...','아래쪽에 트러핑이 있어!'],cond:'ch8'},
+    {x:6,y:8,spr:'ts',name:'트러핑',dialog:['...또 왔어?','이번엔 뭘 원하는 거야?','...진짜로 나를\n이해하려는 거야?','...'],cond:'ch9'},
+  ],
+  warps:[{x:5,y:1,map:'secret_garden',tx:4,ty:5}],
+  encounters:[{key:'stick_enemy',minLv:6,maxLv:9},{key:'liam_guard',minLv:6,maxLv:9},{key:'trup_minion',minLv:7,maxLv:10}],startX:5,startY:1,
+},
+};
 
 // ===== CHARACTERS =====
 const CHARS={
@@ -256,6 +277,10 @@ const CHARS={
     sk:[{n:'그림자 공격',pw:12,tp:'dark'},{n:'어둠의 파동',pw:18,tp:'dark'}]},
   trup:{n:'트러핑',ic:'⚡',hp:100,atk:24,def:15,spd:11,type:'dark',boss:true,
     sk:[{n:'다크 캐논',pw:22,tp:'dark'},{n:'배신의 사슬',pw:30,tp:'dark'},{n:'번개 폭풍',pw:28,tp:'dark'},{n:'그림자 회복',pw:-25,tp:'heal'}]},
+  stick_enemy:{n:'스틱핑',ic:'🌿',hp:28,atk:11,def:6,spd:9,type:'normal',
+    sk:[{n:'덩굴 채찍',pw:12,tp:'normal'},{n:'나뭇잎 칼날',pw:18,tp:'normal'}]},
+  liam_guard:{n:'리암 경비',ic:'🛡',hp:35,atk:13,def:9,spd:8,type:'justice',
+    sk:[{n:'방패 돌진',pw:14,tp:'justice'},{n:'심판의 칼',pw:22,tp:'justice'}]},
 };
 function mkCh(key,lv){const d=CHARS[key];if(!d)return null;const mhp=d.hp+lv*5;
   return{key,n:d.n,ic:d.ic,type:d.type,boss:d.boss||false,level:lv,mhp,hp:mhp,
@@ -266,6 +291,9 @@ const QUESTS=[
   {id:'q1',name:'꽁꽁핑에게 인사',desc:'축제 광장에서 꽁꽁핑과 대화하기',map:'festival',npc:'꽁꽁핑',reward:{hearts:3},done:false},
   {id:'q2',name:'부끄핑 만나기',desc:'부끄핑에게 다가가보기',map:'festival',npc:'부끄핑',reward:{hearts:3},done:false},
   {id:'q3',name:'바로핑 찾기',desc:'숲에서 바로핑을 찾아 대화하기',map:'forest',npc:'바로핑',reward:{hearts:5},done:false},
+  {id:'q4',name:'라라핑의 부탁',desc:'비밀 정원에서 라라핑과 대화하기',map:'secret_garden',npc:'라라핑',reward:{hearts:5},done:false},
+  {id:'q5',name:'트러핑의 추억',desc:'트러핑의 탑에서 스틱핑과 대화하기',map:'trup_tower',npc:'스틱핑',reward:{hearts:5},done:false},
+  {id:'q6',name:'하트 30개 모으기',desc:'하트를 30개 이상 모으기',map:null,npc:null,reward:{hearts:0},done:false},
 ];
 
 // ===== STICKER/ACHIEVEMENT SYSTEM =====
@@ -278,6 +306,8 @@ const STICKERS=[
   {id:'s6',name:'탐험가',desc:'모든 맵을 방문했어!',icon:'🗺',earned:false},
   {id:'s7',name:'최강 전사',desc:'레벨 10 달성!',icon:'💪',earned:false},
   {id:'s8',name:'사랑의 힘',desc:'게임 클리어!',icon:'💝',earned:false},
+  {id:'s9',name:'진정한 친구',desc:'트러핑과 화해했어!',icon:'🤝',earned:false},
+  {id:'s10',name:'완벽한 탐험가',desc:'모든 맵을 방문했어!',icon:'🌍',earned:false},
 ];
 let stickerPopup=null;
 
@@ -287,6 +317,8 @@ const ACCESSORIES=[
   {id:'a2',name:'용기의 반지',stat:{d:3},desc:'방어력 +3'},
   {id:'a3',name:'바람의 깃털',stat:{spd:5},desc:'속도 +5'},
   {id:'a4',name:'치유의 꽃',stat:{hp:20},desc:'최대 HP +20'},
+  {id:'a5',name:'우정의 팔찌',stat:{a:2,d:2},desc:'공격력+2, 방어력+2'},
+  {id:'a6',name:'무지개 왕관',stat:{hp:15,spd:3},desc:'HP+15, 속도+3'},
 ];
 let inventory=[],equipped=null;
 
@@ -325,6 +357,14 @@ function startBusDodge(cb){
     miniGame.trees.push({x:rng(W-30,W),y:rng(0,H),s:rng(8,16)});
   }
   scr='minigame';
+}
+// ===== RECONCILE MINI-GAME =====
+function startReconcile(cb){
+  miniGame={type:'reconcile',phase:'appear',timer:0,tries:0,maxTries:5,
+    actions:['마음 전하기','추억 나누기','안아주기'],selIdx:0,
+    friendship:0,friendMax:3,msg:'트러핑이 서 있다...',msgT:90,
+    heartAnim:[],shakeT:0,successT:0,cb};
+  AM.battleStart();scr='minigame';
 }
 
 // ===== GAME STATE =====
@@ -386,9 +426,10 @@ function checkStickers(){
   if(party.find(p=>p.key==='baro'))earnSticker('s2');
   if(party.find(p=>p.key==='hatchu'))earnSticker('s3');
   if(bag.hearts>=20)earnSticker('s5');
+  if(bag.hearts>=30){const q6=QUESTS.find(q=>q.id==='q6');if(q6)q6.done=true}
   if(party[0]&&party[0].level>=10)earnSticker('s7');
-  const allMaps=['castle_room','festival','library','castle_exit','forest','laminne'];
-  if(allMaps.every(m=>visitedMaps[m]))earnSticker('s6');
+  const allMaps=['castle_room','festival','library','castle_exit','forest','laminne','secret_garden','trup_tower'];
+  if(allMaps.every(m=>visitedMaps[m])){earnSticker('s6');earnSticker('s10')}
 }
 
 // ===== MAP =====
@@ -420,6 +461,11 @@ function updateHint(){
   else if(curMap==='forest'&&ch>=5){hintArrow={x:11,y:11,dir:'down',msg:'라미엔느로!'}}
   else if(curMap==='laminne'&&ch===5){hintArrow={x:6,y:6,dir:'down',msg:'하츄핑!'}}
   else if(curMap==='laminne'&&ch===6){hintArrow={x:6,y:12,dir:'down',msg:'트러핑!'}}
+  else if(curMap==='laminne'&&ch>=7){hintArrow=null}
+  else if(curMap==='secret_garden'&&ch===7){hintArrow={x:4,y:3,dir:'down',msg:'라라핑!'}}
+  else if(curMap==='secret_garden'&&ch>=8){hintArrow={x:4,y:6,dir:'down',msg:'탑으로!'}}
+  else if(curMap==='trup_tower'&&ch===8){hintArrow={x:6,y:4,dir:'down',msg:'스틱핑!'}}
+  else if(curMap==='trup_tower'&&ch===9){hintArrow={x:6,y:8,dir:'down',msg:'트러핑!'}}
 }
 
 function tryMove(dir){
@@ -448,8 +494,6 @@ function interact(){
   }
   const warp=mapData.warps.find(w=>w.x===P.x&&w.y===P.y);
   if(warp){enterMap(warp.map,warp.tx,warp.ty);return}
-  const tile=mapData.tiles[P.y][P.x];
-  if(tile===10){const w2=mapData.warps.find(w=>w.x===P.x&&w.y===P.y);if(w2)enterMap(w2.map,w2.tx,w2.ty)}
 }
 
 function advDlg(){
@@ -472,6 +516,37 @@ function advDlg(){
       ],null);
     }
     if(npc&&npc.cond==='ch6'&&storyFlags.ch===7){startBattle(mkCh('trup',10),true)}
+    // ch7: After talking to Lala in secret_garden
+    if(npc&&npc.cond==='ch7'&&storyFlags.ch===8){
+      goStory([
+        {bg:'bg_forest',char:null,sp:'',tx:'라라핑의 이야기를 들은 로미는\n마음이 아팠어요.'},
+        {bg:'bg_forest',char:'rf',sp:'로미',tx:'트러핑을 꼭 찾아가야 해!\n화해할 수 있을 거야!'},
+      ],null);
+      inventory.push(ACCESSORIES.find(a=>a.id==='a5'));
+    }
+    // ch8: After talking to Stick in trup_tower
+    if(npc&&npc.cond==='ch8'&&storyFlags.ch===9){
+      goStory([
+        {bg:'bg_dark',char:'stp',sp:'스틱핑',tx:'트러핑은 아래에 있어.\n조심해서 가.'},
+        {bg:'bg_dark',char:null,sp:'',tx:'트러핑의 진짜 마음을\n들어줄 시간이야...'},
+      ],null);
+      inventory.push(ACCESSORIES.find(a=>a.id==='a6'));
+    }
+    // ch9: After talking to Trup in trup_tower - start reconcile mini-game
+    if(npc&&npc.cond==='ch9'&&storyFlags.ch===10){
+      startReconcile(()=>{
+        earnSticker('s9');
+        goStory([
+          {bg:'bg_dark',char:'tp',sp:'트러핑',tx:'...미안해.\n나도 외로웠던 거야.'},
+          {bg:'bg_dark',char:'rf',sp:'로미',tx:'괜찮아! 이제 우리\n모두 친구야!'},
+          {bg:'bg_fountain',char:'lip',sp:'리암 왕자',tx:'트러핑! 다시 만나서\n정말 기뻐!'},
+          {bg:'bg_fountain',char:'tp',sp:'트러핑',tx:'리암... 나를 잊지\n않았구나...'},
+          {bg:'bg_fountain',char:null,sp:'',tx:'모두가 화해하고\n행복해졌습니다!'},
+          {bg:'bg_fountain',char:'hf',sp:'하츄핑',tx:'사랑의 힘이 모든 걸\n바꿨어! 우리 최고!'},
+          {bg:'bg_fountain',char:null,sp:'',tx:'로미와 하츄핑의 모험은\n영원히 계속됩니다...'},
+        ],()=>{earnSticker('s8');doTrans('ending')});
+      });
+    }
     if(npc&&npc.cond==='ch2'&&storyFlags.ch===3){
       // Library befriend encounter
       startBefriendEncounter(()=>{bag.hearts+=5;saveGame()});return;
@@ -582,7 +657,7 @@ function batWin(){
   if(!bat)return;bat.over=true;AM.victory();
   const exp=bat.en.level*12+15;
   if(party[0]){party[0].exp+=exp;party[0].hp=Math.max(1,bat.my.hp);
-    party[0].hp=Math.min(party[0].mhp,party[0].hp+Math.floor(party[0].mhp*0.3));
+    party[0].hp=Math.min(party[0].mhp,party[0].hp+Math.floor(party[0].mhp*0.5));
     if(party[0].exp>=party[0].level*25){party[0].level++;party[0].mhp+=6;party[0].hp=party[0].mhp;party[0].a+=2;party[0].d+=1;party[0].exp=0;AM.levelUp();
       bat.log='Lv.'+party[0].level+'! '+bat.en.n+' 격파! 대단해!'}
     else bat.log=bat.en.n+' 격파! EXP+'+exp+' 잘했어!'}
@@ -593,12 +668,10 @@ function batWin(){
     setTimeout(()=>{bat=null;
       goStory([
         {bg:'bg_forest',char:'hf',sp:'하츄핑',tx:'로미... 고마워!\n네 덕분에 용기를 얻었어!'},
-        {bg:'bg_castle',char:'lip',sp:'리암 왕자',tx:'트러핑... 미안해.\n다시 시작하자.'},
-        {bg:'bg_castle',char:'tp',sp:'트러핑',tx:'리암... 정말이야?\n나를 다시 받아줄 거야?'},
-        {bg:'bg_fountain',char:null,sp:'',tx:'트러핑의 저주가 풀렸어요!\n모두가 화해했습니다!'},
-        {bg:'bg_fountain',char:'hf',sp:'하츄핑',tx:'싸워도 화해하면 돼.\n로미와 함께 행복해!'},
-        {bg:'bg_fountain',char:null,sp:'',tx:'사랑이 세상을 구했습니다!\n\n로미와 하츄핑의 모험은\n영원히 계속됩니다...'},
-      ],()=>{earnSticker('s8');doTrans('ending')})},2000);return}
+        {bg:'bg_castle',char:'lip',sp:'리암 왕자',tx:'잠깐! 트러핑의 진실을\n알고 싶지 않아?'},
+        {bg:'bg_castle',char:'rf',sp:'로미',tx:'트러핑의 진실...?\n알고 싶어!'},
+        {bg:'bg_fountain',char:null,sp:'',tx:'비밀 정원으로 가면\n라라핑이 알고 있대요!'},
+      ],()=>{enterMap('secret_garden',4,5)})},2000);return}
   checkStickers();setTimeout(()=>{if(bat)batEnd()},2000)}
 function batEnd(){if(!bat&&scr!=='battle')return;bat=null;doTrans('map')}
 
@@ -663,6 +736,15 @@ function update(){
       // move trees down
       miniGame.trees.forEach(tr=>{tr.y+=miniGame.speed*0.5;if(tr.y>H+20)tr.y=-20});
     }
+    if(miniGame&&miniGame.type==='reconcile'){
+      miniGame.timer++;
+      if(miniGame.msgT>0)miniGame.msgT--;
+      miniGame.heartAnim=miniGame.heartAnim.filter(h=>{h.y-=1.5;h.t--;return h.t>0});
+      if(miniGame.shakeT>0)miniGame.shakeT--;
+      if(miniGame.successT>0){miniGame.successT--;
+        if(miniGame.successT<=0){AM.captureOk();
+          setTimeout(()=>{const cb=miniGame.cb;miniGame=null;scr='map';if(cb)cb()},800)}}
+    }
     if(miniGame&&miniGame.type==='rhythm'){miniGame.timer++;
       if(miniGame.beatI<miniGame.beats.length){const b=miniGame.beats[miniGame.beatI];
         if(miniGame.timer>b.t+20&&!b.hit){b.miss=true;miniGame.beatI++}}
@@ -696,10 +778,10 @@ function drawCharSprite(sprKey){if(!sprKey)return;const img=IM[sprKey];if(!img)r
 // ===== MAP RENDERING =====
 function renderMap(){
   if(!mapData)return;
-  const isDark=curMap==='laminne';
+  const isDark=curMap==='laminne'||curMap==='trup_tower';
   // Background color based on map
   if(isDark){X.fillStyle=getBgGrad('dark');X.fillRect(0,0,W,H)}
-  else if(curMap==='forest'){X.fillStyle=getBgGrad('forest');X.fillRect(0,0,W,H)}
+  else if(curMap==='forest'||curMap==='secret_garden'){X.fillStyle=getBgGrad('forest');X.fillRect(0,0,W,H)}
   else{X.fillStyle=getBgGrad('castle');X.fillRect(0,0,W,H)}
   const camX=P.vx*T+T/2-W/2,camY=P.vy*T+T/2-H/2.5;
   X.save();X.translate(-camX,-camY);
@@ -846,7 +928,7 @@ function renderBattle(){
   if(isDark)drawEnvBG('bg_dark');else drawEnvBG('bg_forest');
   X.fillStyle='rgba(0,0,0,0.15)';X.fillRect(0,H*0.38,W,H*0.17);
   // Enemy
-  const enSprMap={hatchu:'hm',baro:'ba',chacha:'ch',kkong:'kk',bukku:'bk',trup:'ts',trup_minion:null};
+  const enSprMap={hatchu:'hm',baro:'ba',chacha:'ch',kkong:'kk',bukku:'bk',trup:'ts',trup_minion:null,stick_enemy:null,liam_guard:null};
   const enImg=IM[enSprMap[bat.en.key]];
   if(enImg){const bob=Math.sin(bat.anim*3)*5;const shake=bat.enShake>0?Math.sin(bat.enShake)*5:0;
     X.globalAlpha=bat.en.hp<=0?0.3:1;const ew=enImg.width*(80/enImg.height);
@@ -887,11 +969,11 @@ function renderBattle(){
       rr(X,10,backY,W-20,40,8,'rgba(255,255,255,0.1)');X.fillStyle='#fff';X.font=FN(13);X.textAlign='center';X.fillText('뒤로',W/2,backY+16);
       btns.push({x:10,y:backY,w:W-20,h:40,id:'back'});
     }else{
-      const actions=[['공격','attack'],['스킬','skill'],['포획','capture'],['도망','run']];
-      actions.forEach(([label,id],i)=>{const bx=10+(i%2)*(W/2),bby=ay+Math.floor(i/2)*58;const bw=W/2-15;
-        rr(X,bx,bby,bw,54,10,'rgba(255,255,255,0.15)');
-        X.globalAlpha=bat.turn==='player'?1:0.4;X.fillStyle='#fff';X.font='bold '+FN(14);X.textAlign='center';X.fillText(label,bx+bw/2,bby+22);X.globalAlpha=1;
-        btns.push({x:bx,y:bby,w:bw,h:54,id})})}}
+      const actions=[['공격','attack'],['스킬','skill'],['포획','capture'],['교대','switch'],['도망','run']];
+      actions.forEach(([label,id],i)=>{const bx=10+(i%3)*(W/3-3),bby=ay+Math.floor(i/3)*48;const bw=W/3-9;
+        rr(X,bx,bby,bw,44,8,'rgba(255,255,255,0.15)');
+        X.globalAlpha=bat.turn==='player'?1:0.4;X.fillStyle='#fff';X.font='bold '+FN(13);X.textAlign='center';X.fillText(label,bx+bw/2,bby+18);X.globalAlpha=1;
+        btns.push({x:bx,y:bby,w:bw,h:44,id})})}}
   if(bat.over&&!bat.catching){
     const isDefeat=bat.my.hp<=0;
     rr(X,W/2-80,H*0.3,160,isDefeat?100:70,16,'rgba(0,0,0,0.9)',isDefeat?'#666':'#FF6B9D');
@@ -1031,6 +1113,46 @@ function renderMiniGame(){
     }
     return;
   }
+  if(miniGame.type==='reconcile'){
+    drawEnvBG('bg_dark');
+    X.fillStyle='rgba(0,0,0,0.3)';X.fillRect(0,0,W,H);
+    X.fillStyle='#BA68C8';X.font='bold '+FN(20);X.textAlign='center';
+    X.fillText('트러핑과 화해하기',W/2,45);
+    const shk=miniGame.shakeT>0?Math.sin(miniGame.shakeT*2)*5:0;
+    const bob=Math.sin(t*2)*6;
+    if(IM.ts){const im=IM.ts;const ch=160;const cw=im.width*(ch/im.height);
+      X.drawImage(im,W/2-cw/2+shk,100+bob,cw,ch)}
+    X.fillStyle='#fff';X.font=FN(14);X.textAlign='center';X.fillText('우호도:',W/2,280);
+    for(let i=0;i<miniGame.friendMax;i++){
+      const hx=W/2-40+i*30;
+      heart(X,hx,300,12,i<miniGame.friendship?'#BA68C8':'#555');
+    }
+    miniGame.heartAnim.forEach(h=>{
+      X.globalAlpha=h.t/40;heart(X,h.x,h.y,8,'#BA68C8');X.globalAlpha=1});
+    if(miniGame.msgT>0){
+      rr(X,20,330,W-40,50,10,'rgba(0,0,0,0.8)');
+      X.fillStyle='#fff';X.font=FN(15);X.textAlign='center';
+      X.fillText(miniGame.msg,W/2,360);
+    }
+    btns=[];
+    if(miniGame.successT<=0&&miniGame.friendship<miniGame.friendMax){
+      miniGame.actions.forEach((a,i)=>{
+        const bx=30,by=400+i*60,bw=W-60,bh=50;
+        const emojis=['💜','📖','🤗'];
+        rr(X,bx,by,bw,bh,12,'rgba(186,104,194,0.5)','rgba(255,255,255,0.3)');
+        X.fillStyle='#fff';X.font='bold '+FN(16);X.textAlign='center';
+        X.fillText(emojis[i]+' '+a,W/2,by+30);
+        btns.push({x:bx,y:by,w:bw,h:bh,id:'reconcile'+i});
+      });
+    }
+    if(miniGame.friendship>=miniGame.friendMax&&miniGame.successT>0){
+      X.fillStyle='rgba(0,0,0,0.5)';X.fillRect(0,0,W,H);
+      X.fillStyle='#BA68C8';X.font='bold '+FN(24);X.textAlign='center';
+      X.fillText('트러핑과 화해했다!',W/2,H/2-20);
+      X.fillStyle='#fff';X.font=FN(14);X.fillText('우리는 이제 친구야!',W/2,H/2+20);
+    }
+    return;
+  }
   if(miniGame.type==='match'){
     X.fillStyle='#fff';X.font='bold '+FN(20);X.textAlign='center';X.fillText('짝 맞추기!',W/2,40);
     X.fillStyle='rgba(255,255,255,0.7)';X.font=FN(13);X.fillText('같은 그림을 찾아봐!',W/2,65);
@@ -1158,6 +1280,15 @@ function onDown(e){
     if(b.id==='skill'){batAction('skill');return}
     if(b.id==='capture'){batAction('capture');return}
     if(b.id==='run'){batAction('run');return}
+    if(b.id==='switch'){
+      if(!bat||bat.over||bat.turn!=='player')return;
+      if(party.length<=1){bat.log='교체할 파티원이 없어!';return}
+      const first=party.shift();party.push(first);
+      bat.my=party[0]?{...party[0]}:bat.my;
+      if(equipped){if(equipped.stat.a)bat.my.a+=equipped.stat.a;if(equipped.stat.d)bat.my.d+=equipped.stat.d;
+        if(equipped.stat.spd)bat.my.spd+=equipped.stat.spd;if(equipped.stat.hp){bat.my.mhp+=equipped.stat.hp;bat.my.hp=Math.min(bat.my.hp+equipped.stat.hp,bat.my.mhp)}}
+      bat.log=bat.my.n+'(으)로 교체!';bat.turn='animating';
+      setTimeout(()=>{if(bat)enemyTurn()},600);return}
     if(b.id==='back'&&bat){bat.phase='select';return}
     if(b.id&&b.id.startsWith('sk')){useSkill(parseInt(b.id.slice(2)));return}
     if(b.id&&b.id.startsWith('befriend')&&miniGame&&miniGame.type==='befriend'){
@@ -1183,6 +1314,26 @@ function onDown(e){
       if(miniGame.friendship>=miniGame.friendMax){
         miniGame.successT=90;
       }
+      return;
+    }
+    if(b.id&&b.id.startsWith('reconcile')&&miniGame&&miniGame.type==='reconcile'){
+      const ai=parseInt(b.id.slice(9));AM.menuClick();
+      miniGame.tries++;
+      const responses=[
+        ['...몰라.','(외면한다)','...조금 마음이 풀렸어.'],
+        ['...그때가 좋았는데.','(눈물을 닦는다)','기억해줘서 고마워...'],
+        ['(놀라서 굳었다)','...따뜻하다.','...이 느낌이 좋아.']
+      ];
+      const success=Math.random()<0.6||(miniGame.tries>=2&&miniGame.friendship<miniGame.friendMax);
+      if(success){
+        miniGame.friendship++;miniGame.msg=responses[ai][2];
+        miniGame.heartAnim.push({x:W/2+rng(-30,30),y:270,t:40});
+        AM.captureOk();
+      }else{
+        miniGame.msg=responses[ai][rng(0,1)];miniGame.shakeT=15;AM.captureFail();
+      }
+      miniGame.msgT=90;
+      if(miniGame.friendship>=miniGame.friendMax){miniGame.successT=90}
       return;
     }
     if(b.id==='busLeft'&&miniGame&&miniGame.type==='busdodge'){
