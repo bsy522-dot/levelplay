@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v6';
+const CACHE_NAME = 'levelplay-v7';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const STATIC_ASSETS = [
   './games/hatcuping-rpg.html',
   './games/hatcuping-game-v2.html',
   './games/hatcuping-rpg-v2.html',
+  './games/rpg-v3/index.html',
   './games/hangul-game.html',
   './games/typing-game.html',
   './games/color-game.html',
