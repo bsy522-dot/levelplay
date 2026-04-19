@@ -2917,7 +2917,26 @@ function init(){
   setupKeyboardNav();
   setupGlobalShortcuts();
   // PWA 서비스 워커 등록 (오프라인 캐시)
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW 등록 실패:',e));}
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      reg.update();
+      reg.addEventListener('updatefound',()=>{
+        const nw=reg.installing;
+        if(!nw)return;
+        nw.addEventListener('statechange',()=>{
+          if(nw.state==='installed' && navigator.serviceWorker.controller){
+            console.log('[SW] 새 버전 감지, 자동 새로고침');
+            nw.postMessage({type:'SKIP_WAITING'});
+            setTimeout(()=>location.reload(),500);
+          }
+        });
+      });
+      setInterval(()=>reg.update(), 60000);
+    }).catch(e=>console.warn('SW 등록 실패:',e));
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(!window._swRel){window._swRel=true;location.reload();}
+    });
+  }
 }
 
 // ===== AI 학습 도우미 챗봇 =====

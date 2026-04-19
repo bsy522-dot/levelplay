@@ -1,5 +1,10 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v10';
+const CACHE_NAME = 'levelplay-v11';
+
+// 즉시 새 SW로 전환 메시지
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
 const STATIC_ASSETS = [
   './',
   './index.html',
