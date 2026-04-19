@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>피아노 마스터 v3</title>
+<title>피아노 마스터 v4</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 :root {
@@ -130,7 +130,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-/* Responsive */
+/* Responsive - mobile */
 @media (max-width:600px) {
   .key-white { width:14px; height:105px; }
   .key-black { width:9px; height:66px; }
@@ -139,7 +139,33 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
   .tab-icon { font-size:14px; }
   .header { padding:4px 8px; }
   .header-title { font-size:12px; }
-  .ctrl-bar { padding:4px 8px; }
+  .ctrl-bar { padding:4px 8px; font-size:11px; }
+  .score-bar { padding:2px 6px; font-size:10px; gap:6px; }
+  .lesson-item { padding:6px 8px; }
+  .modal { padding:14px; max-width:320px; }
+}
+/* Galaxy Z Flip cover / ultra-narrow */
+@media (max-width:300px) {
+  .key-white { width:10px; height:80px; }
+  .key-black { width:7px; height:52px; }
+  #piano { height:80px; }
+  .tab { font-size:9px; padding:4px 1px; }
+  .tab-icon { font-size:12px; margin-bottom:0; }
+  .header { padding:2px 4px; }
+  .header-title { font-size:10px; }
+  .header-info { font-size:9px; gap:6px; }
+  .ctrl-bar { padding:2px 4px; gap:3px; font-size:10px; }
+  .ctrl-bar select { padding:2px 3px; font-size:10px; }
+  .ctrl-bar input[type="range"] { width:50px; }
+  .score-bar { padding:2px 4px; font-size:9px; gap:4px; }
+  .btn { padding:3px 8px; font-size:10px; }
+  .learn-list { padding:6px; }
+  .lesson-item { padding:5px 6px; margin-bottom:2px; }
+  .lesson-item .l-name { font-size:11px; }
+  .free-info { font-size:11px; padding:10px; }
+  .modal { max-width:260px; padding:12px; }
+  .modal h3 { font-size:15px; }
+  .modal .stars-big { font-size:22px; }
 }
 </style>
 </head>
@@ -151,7 +177,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 </div>
 <div id="app">
   <div class="header">
-    <span class="header-title">Piano Master v3</span>
+    <span class="header-title">Piano Master v4</span>
     <div class="header-info">
       <span id="midi-status">MIDI: 대기</span>
       <span id="octave-display">C4</span>
@@ -211,11 +237,16 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <label><input type="checkbox" id="auto-play"> 자동</label>
     </div>
     <div class="score-bar" id="synth-score" style="display:none">
-      <span class="s-perfect">Perfect: <b id="sc-perfect">0</b></span>
-      <span class="s-good">Good: <b id="sc-good">0</b></span>
-      <span class="s-miss">Miss: <b id="sc-miss">0</b></span>
-      <span class="s-combo">Combo: <b id="sc-combo">0</b></span>
-      <span>점수: <b id="sc-total">0</b></span>
+      <span class="s-perfect">P:<b id="sc-perfect">0</b></span>
+      <span class="s-good">G:<b id="sc-good">0</b></span>
+      <span class="s-miss">M:<b id="sc-miss">0</b></span>
+      <span class="s-combo">C:<b id="sc-combo">0</b></span>
+      <span><b id="sc-total">0</b>pt</span>
+      <span style="flex:1"></span>
+      <span id="sc-progress" style="display:flex;align-items:center;gap:4px;min-width:80px">
+        <span style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden"><span id="sc-progress-bar" style="display:block;height:100%;width:0%;background:var(--accent);border-radius:2px;transition:width .3s"></span></span>
+        <span id="sc-progress-pct" style="font-size:10px">0%</span>
+      </span>
     </div>
     <canvas id="synth-canvas"></canvas>
   </div>
@@ -241,7 +272,10 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     <h3 id="result-title">결과</h3>
     <div class="stars-big" id="result-stars"></div>
     <p id="result-body"></p>
-    <button class="btn btn-primary" onclick="document.getElementById('result-modal').classList.remove('show')">확인</button>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" id="btn-result-retry">🔄 재도전</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('result-modal').classList.remove('show')">확인</button>
+    </div>
   </div>
 </div>
 
@@ -304,17 +338,21 @@ function createReverb() {
   try {
     reverbNode = audioCtx.createConvolver();
     const rate = audioCtx.sampleRate;
-    const length = rate * 1.5;
+    const length = rate * 2.2; // longer tail for concert hall feel
     const impulse = audioCtx.createBuffer(2, length, rate);
     for (let ch = 0; ch < 2; ch++) {
       const data = impulse.getChannelData(ch);
       for (let i = 0; i < length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.5) * 0.3;
+        // Multi-decay: early reflections + late diffusion
+        const t = i / length;
+        const early = t < 0.05 ? Math.pow(1 - t / 0.05, 1.5) * 0.4 : 0;
+        const late = Math.pow(1 - t, 3) * 0.25;
+        data[i] = (Math.random() * 2 - 1) * (early + late);
       }
     }
     reverbNode.buffer = impulse;
     const wet = audioCtx.createGain();
-    wet.gain.value = 0.15;
+    wet.gain.value = 0.18;
     reverbNode.connect(wet);
     wet.connect(audioCtx.destination);
     reverbNode._wetGain = wet;
@@ -340,9 +378,17 @@ function playNote(midi, velocity = 0.7) {
   const useReverb = document.getElementById('reverb-toggle').checked;
   if (useReverb && reverbNode) noteGain.connect(reverbNode);
 
-  // Piano-like harmonics with decay
+  // Enhanced piano harmonics - register-dependent brightness & warmth
+  const brightness = midi > 72 ? 0.6 : midi > 48 ? 1.0 : 1.3; // low=warm, high=bright
   const harmonics = [
-    {r:1, g:1}, {r:2, g:0.45}, {r:3, g:0.18}, {r:4, g:0.08}, {r:5, g:0.04}, {r:6, g:0.02}
+    {r:1, g:1},
+    {r:2, g:0.5 * brightness},
+    {r:3, g:0.22 * brightness},
+    {r:4, g:0.12 * brightness * (midi > 80 ? 0.5 : 1)},
+    {r:5, g:0.06 * brightness * (midi > 75 ? 0.3 : 1)},
+    {r:6, g:0.03 * brightness * (midi > 70 ? 0.2 : 1)},
+    {r:7, g:0.015 * (midi < 60 ? 1 : 0.3)},
+    {r:8, g:0.008 * (midi < 55 ? 1 : 0.1)},
   ];
 
   const oscs = harmonics.map(h => {
@@ -350,18 +396,34 @@ function playNote(midi, velocity = 0.7) {
     const g = ctx.createGain();
     osc.type = 'sine';
     const f = freq * h.r;
-    osc.frequency.value = f;
-    g.gain.value = (f > 14000) ? 0 : h.g * vol;
+    if (f > 16000) { osc.connect(g); g.connect(noteGain); osc.start(now); g.gain.value = 0; return {osc, gain:g}; }
+    // Slight detuning for warmth (chorus effect)
+    osc.frequency.value = f * (1 + (Math.random() - 0.5) * 0.001);
+    // Velocity-sensitive: softer hits = less high harmonics
+    const velScale = h.r > 3 ? Math.pow(velocity, 1.5) : 1;
+    g.gain.value = h.g * vol * velScale;
     osc.connect(g);
     g.connect(noteGain);
     osc.start(now);
     return {osc, gain:g};
   });
 
-  // ADSR
-  const attack = 0.005;
-  const decay = midi > 60 ? 0.2 : 0.4;
-  const sustainLevel = midi > 60 ? 0.25 : 0.35;
+  // String sympathetic resonance for bass notes
+  if (midi < 52) {
+    const resOsc = ctx.createOscillator();
+    const resG = ctx.createGain();
+    resOsc.type = 'sine';
+    resOsc.frequency.value = freq * 0.5; // sub-octave
+    resG.gain.value = vol * 0.04;
+    resOsc.connect(resG); resG.connect(noteGain);
+    resOsc.start(now);
+    oscs.push({osc:resOsc, gain:resG});
+  }
+
+  // ADSR - register-adaptive envelope
+  const attack = velocity > 0.8 ? 0.002 : 0.008; // harder = snappier attack
+  const decay = midi > 72 ? 0.15 : midi > 48 ? 0.3 : 0.6; // lower = longer sustain
+  const sustainLevel = midi > 72 ? 0.2 : midi > 48 ? 0.3 : 0.4;
   noteGain.gain.setValueAtTime(0, now);
   noteGain.gain.linearRampToValueAtTime(vol, now + attack);
   noteGain.gain.exponentialRampToValueAtTime(Math.max(vol * sustainLevel, 0.001), now + attack + decay);
@@ -605,6 +667,550 @@ addSong('AmazingGrace','Amazing Grace',80,()=>{
   return [n('G3',0),n('C4',1,2),n('E4',3,.5),n('C4',3.5,.5),n('E4',4,2),n('D4',6),n('C4',7,2),n('A3',9),n('G3',10,3),n('G3',13),n('C4',14,2),n('E4',16,.5),n('C4',16.5,.5),n('E4',17,2),n('D4',19),n('G4',20,3),n('E4',23),n('G4',24,2),n('E4',26,.5),n('G4',26.5,.5),n('E4',27,2),n('C4',29),n('D4',30,2),n('C4',32),n('A3',33,2),n('G3',35),n('C4',36,2),n('E4',38,.5),n('C4',38.5,.5),n('E4',39,2),n('D4',41),n('C4',42,3),l('C3',1,3),l('F2',7,3),l('C3',14,3),l('G2',20,3),l('C3',24,3),l('F2',30,3),l('C3',36,3)];
 });
 
+// ================ CLASSICAL PIECES (클래식 명곡) ================
+
+addSong('la_campanella','라 캄파넬라 (La Campanella)',84,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    // Bar 1-2: Bell theme - high D#6 octave leap with stepwise motion
+    n('D#6',0,.5),n('D#5',.5,.5),n('E5',1,.5),n('D#5',1.5,.5),
+    n('D#6',2,.5),n('D#5',2.5,.5),n('E5',3,.5),n('D#5',3.5,.5),
+    l('G#2',0,2),l('D#3',0,2),l('G#3',0,2),
+    l('G#2',2,2),l('D#3',2,2),l('G#3',2,2),
+    // Bar 3-4: Melody moves down with bell
+    n('D#6',4,.5),n('C#5',4.5,.5),n('D#5',5,.5),n('E5',5.5,.5),
+    n('D#6',6,.5),n('B4',6.5,.5),n('C#5',7,.5),n('D#5',7.5,.5),
+    l('A2',4,2),l('E3',4,2),l('A3',4,2),
+    l('B2',6,2),l('F#3',6,2),l('B3',6,2),
+    // Bar 5-6: Theme repeats
+    n('D#6',8,.5),n('D#5',8.5,.5),n('E5',9,.5),n('D#5',9.5,.5),
+    n('D#6',10,.5),n('D#5',10.5,.5),n('F#5',11,.5),n('E5',11.5,.5),
+    l('G#2',8,2),l('D#3',8,2),l('G#3',8,2),
+    l('G#2',10,2),l('D#3',10,2),l('G#3',10,2),
+    // Bar 7-8: Descending passage to cadence
+    n('D#5',12,.5),n('C#5',12.5,.5),n('B4',13,.5),n('A#4',13.5,.5),
+    n('G#4',14,1.5),n('A#4',15,.5),n('B4',15.5,.5),
+    l('C#3',12,2),l('G#3',12,2),
+    l('D#3',14,2),l('A#3',14,2),
+    // Bar 9-10: Second phrase
+    n('D#6',16,.5),n('D#5',16.5,.5),n('E5',17,.5),n('D#5',17.5,.5),
+    n('D#6',18,.5),n('D#5',18.5,.5),n('E5',19,.5),n('D#5',19.5,.5),
+    l('G#2',16,2),l('D#3',16,2),l('G#3',16,2),
+    l('G#2',18,2),l('D#3',18,2),l('G#3',18,2),
+    // Bar 11-12: Melodic development
+    n('D#6',20,.5),n('C#5',20.5,.5),n('D#5',21,.5),n('E5',21.5,.5),
+    n('F#5',22,.5),n('E5',22.5,.5),n('D#5',23,.5),n('C#5',23.5,.5),
+    l('A2',20,2),l('E3',20,2),l('A3',20,2),
+    l('B2',22,2),l('F#3',22,2),l('B3',22,2),
+    // Bar 13-14: Rising scale
+    n('B4',24,.5),n('C#5',24.5,.5),n('D#5',25,.5),n('E5',25.5,.5),
+    n('F#5',26,.5),n('G#5',26.5,.5),n('A#5',27,.5),n('B5',27.5,.5),
+    l('E2',24,2),l('B2',24,2),l('E3',24,2),
+    l('D#2',26,2),l('A#2',26,2),l('D#3',26,2),
+    // Bar 15-16: Final cadence
+    n('D#6',28,.5),n('C#6',28.5,.5),n('B5',29,.5),n('A#5',29.5,.5),
+    n('G#5',30,2),
+    l('G#2',28,2),l('D#3',28,2),l('G#3',28,2),
+    l('G#2',30,2),l('D#3',30,2),l('G#3',30,2)
+  ];
+});
+
+addSong('hungarian5','헝가리 무곡 5번 (Hungarian Dance No.5)',120,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    // Section A: Fiery G minor theme (2/4 time)
+    // Bar 1-2
+    n('D5',0,.5),n('D5',.5,.25),n('D5',.75,.25),n('D5',1,.5),n('A4',1.5,.5),
+    n('A#4',2,.5),n('C5',2.5,.5),n('A4',3,.5),n('G4',3.5,.5),
+    l('G2',1,1),l('D3',1,1),l('G2',2,1),l('D3',2,1),l('D2',3,1),l('A2',3,1),
+    // Bar 3-4
+    n('F#4',4,.5),n('A4',4.5,.5),n('D5',5,.5),n('D5',5.5,.25),n('D5',5.75,.25),
+    n('D5',6,.5),n('A4',6.5,.5),n('A#4',7,.5),n('C5',7.5,.5),
+    l('D2',4,1),l('A2',4,1),l('G2',5,1),l('D3',5,1),l('G2',6,1),l('D3',6,1),l('G2',7,1),l('D3',7,1),
+    // Bar 5-6
+    n('A4',8,.5),n('G4',8.5,.5),n('F#4',9,1),
+    n('D5',10,.5),n('D5',10.5,.25),n('D5',10.75,.25),n('D5',11,.5),n('A4',11.5,.5),
+    l('D2',8,1),l('A2',8,1),l('D2',9,1),l('A2',9,1),l('G2',10,1),l('D3',10,1),l('G2',11,1),l('D3',11,1),
+    // Bar 7-8
+    n('A#4',12,.5),n('C5',12.5,.5),n('A4',13,.5),n('G4',13.5,.5),
+    n('F#4',14,.5),n('A4',14.5,.5),n('G4',15,1),
+    l('G2',12,1),l('D3',12,1),l('D2',13,1),l('A2',13,1),l('D2',14,1),l('A2',14,1),l('G2',15,1),l('D3',15,1),
+    // Section A repeat bars 9-12
+    n('D5',16,.5),n('D5',16.5,.25),n('D5',16.75,.25),n('D5',17,.5),n('A4',17.5,.5),
+    n('A#4',18,.5),n('C5',18.5,.5),n('A4',19,.5),n('G4',19.5,.5),
+    l('G2',16,1),l('D3',16,1),l('G2',17,1),l('D3',17,1),l('G2',18,1),l('D3',18,1),l('D2',19,1),l('A2',19,1),
+    n('F#4',20,.5),n('A4',20.5,.5),n('D5',21,.5),n('D5',21.5,.25),n('D5',21.75,.25),
+    n('E5',22,.5),n('C5',22.5,.5),n('A4',23,.5),n('A#4',23.5,.5),
+    l('D2',20,1),l('A2',20,1),l('G2',21,1),l('D3',21,1),l('C3',22,1),l('G3',22,1),l('F2',23,1),l('C3',23,1),
+    // Bar 13-16: Second ending + cadence
+    n('A4',24,.5),n('G4',24.5,.5),n('F#4',25,1),
+    n('A#4',26,.5),n('C5',26.5,.5),n('A4',27,.5),n('G4',27.5,.5),
+    l('D2',24,1),l('A2',24,1),l('D2',25,1),l('A2',25,1),l('G2',26,1),l('D3',26,1),l('D2',27,1),l('A2',27,1),
+    n('F#4',28,.5),n('A4',28.5,.5),n('G4',29,1),
+    n('G4',30,.5),n('A#4',30.5,.5),n('D5',31,1),
+    l('D2',28,1),l('A2',28,1),l('G2',29,1),l('D3',29,1),l('G2',30,1),l('D3',30,1),l('G2',31,1),l('D3',31,1)
+  ];
+});
+
+addSong('traumerei','꿈 (Träumerei)',56,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=2)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    // Bar 1: The famous rising arpeggio melody (4/4)
+    n('C4',0,.5),n('F4',.5,.5),n('A4',1,.5),n('C5',1.5,.5),
+    n('F5',2,1.5),n('E5',3.5,.5),
+    l('F2',0,2),l('A2',0,2),l('C3',0,2),l('F2',2,2),l('A2',2,2),l('C3',2,2),
+    // Bar 2
+    n('E5',4,.5),n('D5',4.5,.5),n('D5',5,.5),n('C5',5.5,.5),
+    n('A4',6,1),n('C5',6.5,.5),n('A#4',7,.5),n('A4',7.5,.5),
+    l('A#1',4,2),l('F2',4,2),l('A#2',4,2),l('F2',6,2),l('A2',6,2),l('C3',6,2),
+    // Bar 3: Second phrase higher
+    n('C4',8,.5),n('F4',8.5,.5),n('A4',9,.5),n('C5',9.5,.5),
+    n('A5',10,1.5),n('G5',11.5,.5),
+    l('F2',8,2),l('A2',8,2),l('C3',8,2),l('F2',10,2),l('A2',10,2),l('C3',10,2),
+    // Bar 4
+    n('G5',12,.5),n('F5',12.5,.5),n('F5',13,.5),n('E5',13.5,.5),
+    n('C5',14,1),n('D5',14.5,.5),n('C5',15,.5),n('A#4',15.5,.5),
+    l('C2',12,2),l('G2',12,2),l('C3',12,2),l('F2',14,2),l('A2',14,2),l('C3',14,2),
+    // Bar 5: Middle section
+    n('A4',16,.5),n('A#4',16.5,.5),n('C5',17,.5),n('D5',17.5,.5),
+    n('F5',18,1),n('E5',18.5,.5),n('D5',19,.5),n('C5',19.5,.5),
+    l('A#1',16,2),l('F2',16,2),l('A#2',16,2),l('A#1',18,2),l('F2',18,2),l('A#2',18,2),
+    // Bar 6
+    n('D5',20,.5),n('E5',20.5,.5),n('F5',21,.5),n('A5',21.5,.5),
+    n('G5',22,1.5),n('F5',23.5,.5),
+    l('C2',20,2),l('G2',20,2),l('C3',20,2),l('C2',22,2),l('G2',22,2),l('A#2',22,2),
+    // Bar 7: Return of opening
+    n('C4',24,.5),n('F4',24.5,.5),n('A4',25,.5),n('C5',25.5,.5),
+    n('F5',26,1.5),n('E5',27.5,.5),
+    l('F2',24,2),l('A2',24,2),l('C3',24,2),l('F2',26,2),l('A2',26,2),l('C3',26,2),
+    // Bar 8: Final cadence
+    n('D5',28,.5),n('C5',28.5,.5),n('A#4',29,.5),n('A4',29.5,.5),
+    n('F4',30,2),
+    l('A#1',28,2),l('F2',28,2),l('A#2',28,2),l('F2',30,2),l('A2',30,2),l('C3',30,2)
+  ];
+});
+
+addSong('liebestraum','사랑의 꿈 (Liebestraum No.3)',66,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    // 6/4 time (6 beats per bar). "O lieb" theme in Ab major.
+    // Bar 1: Ab arpeggio accompaniment, melody enters
+    l('G#2',0,6),l('D#3',0,6),
+    n('G#3',0,1.5),n('C4',1.5,1.5),n('D#4',3,1.5),n('C5',4.5,1.5),
+    // Bar 2
+    l('G#2',6,6),l('D#3',6,6),
+    n('G#3',6,1.5),n('C4',7.5,1.5),n('D#4',9,1.5),n('D#5',10.5,1.5),
+    // Bar 3: Melody rises with turn
+    l('G#2',12,6),l('D#3',12,6),
+    n('G#3',12,1.5),n('C4',13.5,1.5),n('D#4',15,1.5),n('C5',16.5,.75),n('D#5',17.25,.75),
+    // Bar 4: Phrase peak
+    l('G#2',18,6),l('D#3',18,6),
+    n('G#3',18,1.5),n('C4',19.5,1.5),n('D#4',21,1.5),n('D#5',22.5,1.5),
+    // Bar 5: Fm - second phrase
+    l('F2',24,6),l('C3',24,6),
+    n('F3',24,1.5),n('G#3',25.5,1.5),n('C4',27,1.5),n('C5',28.5,1.5),
+    // Bar 6: Bbm
+    l('A#2',30,6),l('F3',30,6),
+    n('A#3',30,1.5),n('C#4',31.5,1.5),n('F4',33,1.5),n('A#4',34.5,1.5),
+    // Bar 7: Eb dominant - melody descends
+    l('D#2',36,6),l('A#2',36,6),
+    n('D#3',36,1.5),n('G3',37.5,1.5),n('A#3',39,1.5),n('G4',40.5,.75),n('F4',41.25,.75),
+    // Bar 8: Return Ab
+    l('G#2',42,6),l('D#3',42,6),
+    n('G#3',42,1.5),n('C4',43.5,1.5),n('D#4',45,1.5),n('D#4',46.5,1.5),
+    // Bar 9: Theme restates higher
+    l('G#2',48,6),l('D#3',48,6),
+    n('G#3',48,1.5),n('C4',49.5,1.5),n('D#4',51,1.5),n('G#5',52.5,1.5),
+    // Bar 10: Soaring melody
+    l('G#2',54,6),l('D#3',54,6),
+    n('G#3',54,1.5),n('C4',55.5,1.5),n('D#4',57,1.5),n('A#5',58.5,1.5),
+    // Bar 11: Db chord climax
+    l('C#2',60,6),l('G#2',60,6),
+    n('C#3',60,1.5),n('F3',61.5,1.5),n('G#3',63,1.5),n('G#5',64.5,.75),n('A#5',65.25,.75),
+    // Bar 12: Resolution to Ab
+    l('G#2',66,6),l('D#3',66,6),
+    n('G#3',66,1.5),n('C4',67.5,1.5),n('D#4',69,1.5),n('G#4',70.5,1.5)
+  ];
+});
+
+addSong('clementine','클레멘타인 (Oh My Darling Clementine)',100,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    // 3/4 waltz time. Simple beginner arrangement.
+    // "Oh my darling, oh my darling, oh my darling Clementine"
+    // Pickup
+    n('E4',0,1),n('E4',1,1),
+    // Bar 1: "Oh my dar-ling"
+    n('E4',2,1),n('G4',3,1),
+    l('C3',2,1),l('G3',3,1),l('E3',4,1),
+    // Bar 2: "oh my"
+    n('G4',5,1),n('F4',6,1),n('E4',7,1),
+    l('C3',5,1),l('G3',6,1),l('E3',7,1),
+    // Bar 3: "dar-ling Cle-men-"
+    n('F4',8,1),n('E4',9,1),n('D4',10,1),
+    l('G2',8,1),l('B2',9,1),l('G3',10,1),
+    // Bar 4: "-tine" + rest + "You are"
+    n('D4',11,2),n('E4',13,1),
+    l('G2',11,1),l('B2',12,1),l('G3',13,1),
+    // Bar 5: "lost and gone for-"
+    n('D4',14,1),n('E4',15,1),n('F4',16,1),
+    l('G2',14,1),l('B2',15,1),l('G3',16,1),
+    // Bar 6: "-ev-er, dread-ful"
+    n('F4',17,1),n('E4',18,1),n('E4',19,1),
+    l('C3',17,1),l('G3',18,1),l('E3',19,1),
+    // Bar 7: "sor-ry, Cle-men-"
+    n('E4',20,1),n('D4',21,1),n('D4',22,1),
+    l('G2',20,1),l('B2',21,1),l('G3',22,1),
+    // Bar 8: "-tine" (resolve)
+    n('C4',23,3),
+    l('C3',23,1),l('E3',24,1),l('G3',25,1),
+    // Chorus repeat: "Oh my darling..."
+    n('E4',26,1),n('E4',27,1),
+    n('E4',28,1),n('G4',29,1),
+    l('C3',28,1),l('G3',29,1),l('E3',30,1),
+    n('G4',31,1),n('F4',32,1),n('E4',33,1),
+    l('C3',31,1),l('G3',32,1),l('E3',33,1),
+    n('F4',34,1),n('E4',35,1),n('D4',36,1),
+    l('G2',34,1),l('B2',35,1),l('G3',36,1),
+    n('D4',37,2),n('E4',39,1),
+    l('G2',37,1),l('B2',38,1),l('G3',39,1),
+    n('D4',40,1),n('E4',41,1),n('F4',42,1),
+    l('G2',40,1),l('B2',41,1),l('G3',42,1),
+    n('F4',43,1),n('E4',44,1),n('E4',45,1),
+    l('C3',43,1),l('G3',44,1),l('E3',45,1),
+    n('E4',46,1),n('D4',47,1),n('D4',48,1),
+    l('G2',46,1),l('B2',47,1),l('G3',48,1),
+    n('C4',49,3),
+    l('C3',49,1),l('E3',50,1),l('G3',51,1)
+  ];
+});
+
+// ================ CLASSICAL PIECES SET B (클래식 명곡 추가) ================
+
+addSong('minuet_g','미뉴에트 (Minuet in G)',120,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    n('D5',0,1),n('G4',1,0.5),n('A4',1.5,0.5),n('B4',2,0.5),n('C5',2.5,0.5),
+    l('G3',0,1),l('B3',1,1),l('G3',2,1),
+    n('D5',3,1),n('G4',4,1),n('G4',5,1),
+    l('G3',3,1),l('B3',4,1),l('G3',5,1),
+    n('E5',6,1),n('C5',7,0.5),n('D5',7.5,0.5),n('E5',8,0.5),n('F#5',8.5,0.5),
+    l('C4',6,1),l('E4',7,1),l('C4',8,1),
+    n('G5',9,1),n('G4',10,1),n('G4',11,1),
+    l('G3',9,1),l('D4',10,1),l('B3',11,1),
+    n('C5',12,1),n('D5',13,0.5),n('C5',13.5,0.5),n('B4',14,0.5),n('A4',14.5,0.5),
+    l('C4',12,1),l('E4',13,1),l('C4',14,1),
+    n('B4',15,1),n('C5',16,0.5),n('B4',16.5,0.5),n('A4',17,0.5),n('G4',17.5,0.5),
+    l('B3',15,1),l('D4',16,1),l('B3',17,1),
+    n('F#4',18,1),n('G4',19,0.5),n('A4',19.5,0.5),n('B4',20,0.5),n('G4',20.5,0.5),
+    l('D3',18,1),l('A3',19,1),l('D3',20,1),
+    n('A4',21,2),n('D5',23,1),
+    l('D3',21,1),l('F#3',22,1),l('D3',23,1),
+    n('D5',24,1),n('G4',25,0.5),n('A4',25.5,0.5),n('B4',26,0.5),n('C5',26.5,0.5),
+    l('G3',24,1),l('B3',25,1),l('G3',26,1),
+    n('D5',27,1),n('G4',28,1),n('G4',29,1),
+    l('G3',27,1),l('B3',28,1),l('G3',29,1),
+    n('E5',30,1),n('C5',31,0.5),n('D5',31.5,0.5),n('E5',32,0.5),n('F#5',32.5,0.5),
+    l('C4',30,1),l('E4',31,1),l('C4',32,1),
+    n('G5',33,1),n('G4',34,1),n('G4',35,1),
+    l('G3',33,1),l('D4',34,1),l('B3',35,1),
+    n('C5',36,1),n('D5',37,0.5),n('C5',37.5,0.5),n('B4',38,0.5),n('A4',38.5,0.5),
+    l('C4',36,1),l('E4',37,1),l('C4',38,1),
+    n('B4',39,1),n('C5',40,0.5),n('B4',40.5,0.5),n('A4',41,0.5),n('G4',41.5,0.5),
+    l('B3',39,1),l('D4',40,1),l('B3',41,1),
+    n('A4',42,1),n('B4',43,0.5),n('A4',43.5,0.5),n('G4',44,0.5),n('F#4',44.5,0.5),
+    l('A3',42,1),l('C4',43,1),l('A3',44,1),
+    n('G4',45,3),
+    l('G3',45,1),l('B3',46,1),l('G3',47,1),
+  ];
+});
+
+addSong('ode_to_joy','환희의 송가 (Ode to Joy)',100,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    n('E4',0,1),n('E4',1,1),n('F4',2,1),n('G4',3,1),
+    l('C3',0,2),l('G3',0,2),l('C3',2,2),l('G3',2,2),
+    n('G4',4,1),n('F4',5,1),n('E4',6,1),n('D4',7,1),
+    l('C3',4,2),l('G3',4,2),l('G2',6,2),l('B3',6,2),
+    n('C4',8,1),n('C4',9,1),n('D4',10,1),n('E4',11,1),
+    l('C3',8,2),l('E3',8,2),l('G2',10,2),l('D3',10,2),
+    n('E4',12,1.5),n('D4',13.5,0.5),n('D4',14,2),
+    l('C3',12,2),l('G3',12,2),l('G2',14,2),l('B3',14,2),
+    n('E4',16,1),n('E4',17,1),n('F4',18,1),n('G4',19,1),
+    l('C3',16,2),l('G3',16,2),l('C3',18,2),l('G3',18,2),
+    n('G4',20,1),n('F4',21,1),n('E4',22,1),n('D4',23,1),
+    l('C3',20,2),l('G3',20,2),l('G2',22,2),l('B3',22,2),
+    n('C4',24,1),n('C4',25,1),n('D4',26,1),n('E4',27,1),
+    l('C3',24,2),l('E3',24,2),l('G2',26,2),l('D3',26,2),
+    n('D4',28,1.5),n('C4',29.5,0.5),n('C4',30,2),
+    l('G2',28,2),l('B3',28,2),l('C3',30,2),l('G3',30,2),
+  ];
+});
+
+addSong('turkish_march','터키 행진곡 (Turkish March)',140,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    n('B4',0,0.5),n('A4',0.5,0.5),n('G#4',1,0.5),n('A4',1.5,0.5),
+    n('C5',2,1),l('A2',2,1),l('E3',2.5,0.5),
+    n('D5',4,0.5),n('C5',4.5,0.5),n('B4',5,0.5),n('C5',5.5,0.5),
+    n('E5',6,1),l('A2',6,1),l('E3',6.5,0.5),
+    n('B4',8,0.5),n('A4',8.5,0.5),n('G#4',9,0.5),n('A4',9.5,0.5),
+    n('C5',10,0.5),n('A4',10.5,0.5),n('C5',11,0.5),n('A4',11.5,0.5),
+    l('A2',8,1),l('E3',8.5,0.5),l('A2',10,1),l('E3',10.5,0.5),
+    n('B4',12,0.5),n('A4',12.5,0.5),n('G#4',13,0.5),n('A4',13.5,0.5),
+    n('B4',14,0.5),n('A4',14.5,0.5),n('G#4',15,0.5),n('A4',15.5,0.5),
+    l('E3',12,1),l('B3',12.5,0.5),l('E3',14,1),l('B3',14.5,0.5),
+    n('B5',16,0.5),n('A5',16.5,0.5),n('G#5',17,0.5),n('A5',17.5,0.5),
+    n('C6',18,1),l('A2',18,1),l('E3',18.5,0.5),l('A3',19,0.5),
+    n('D6',20,0.5),n('C6',20.5,0.5),n('B5',21,0.5),n('C6',21.5,0.5),
+    n('E6',22,1),l('A2',22,1),l('E3',22.5,0.5),l('A3',23,0.5),
+    n('B5',24,0.5),n('A5',24.5,0.5),n('G#5',25,0.5),n('A5',25.5,0.5),
+    n('C6',26,0.5),n('A5',26.5,0.5),n('B5',27,0.5),n('G#5',27.5,0.5),
+    l('A2',24,1),l('E3',24.5,0.5),l('A2',26,1),l('E3',26.5,0.5),
+    n('A5',28,2),l('A2',28,1),l('C3',28.5,0.5),l('E3',29,0.5),
+    n('A4',32,0.5),n('C#5',32.5,0.5),n('E5',33,0.5),n('A5',33.5,0.5),
+    n('G#5',34,0.5),n('A5',34.5,0.5),n('G#5',35,0.5),n('A5',35.5,0.5),
+    l('A3',32,1),l('E4',32.5,0.5),l('A3',34,1),l('E4',34.5,0.5),
+    n('B5',36,1),n('A5',37,0.5),n('G#5',37.5,0.5),
+    n('A5',38,0.5),n('G#5',38.5,0.5),n('F#5',39,0.5),n('E5',39.5,0.5),
+    l('E3',36,1),l('B3',36.5,0.5),l('A3',38,1),l('E4',38.5,0.5),
+    n('A5',40,2),l('A3',40,1),l('C#4',40.5,0.5),l('E4',41,0.5),
+  ];
+});
+
+addSong('moonlight','월광 소나타 (Moonlight Sonata)',56,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  const T=1/3;
+  return [
+    l('C#2',0,4),l('C#3',0,4),
+    n('G#3',0,T),n('C#4',T,T),n('E4',2*T,T),
+    n('G#3',1,T),n('C#4',1+T,T),n('E4',1+2*T,T),
+    n('G#3',2,T),n('C#4',2+T,T),n('E4',2+2*T,T),
+    n('G#3',3,T),n('C#4',3+T,T),n('E4',3+2*T,T),
+    n('G#4',0,4),
+    l('B1',4,4),l('B2',4,4),
+    n('G#3',4,T),n('C#4',4+T,T),n('E4',4+2*T,T),
+    n('G#3',5,T),n('C#4',5+T,T),n('E4',5+2*T,T),
+    n('G#3',6,T),n('C#4',6+T,T),n('E4',6+2*T,T),
+    n('G#3',7,T),n('C#4',7+T,T),n('E4',7+2*T,T),
+    n('A4',4,2),n('G#4',6,2),
+    l('A1',8,4),l('A2',8,4),
+    n('A3',8,T),n('C#4',8+T,T),n('E4',8+2*T,T),
+    n('A3',9,T),n('C#4',9+T,T),n('E4',9+2*T,T),
+    n('A3',10,T),n('C#4',10+T,T),n('E4',10+2*T,T),
+    n('A3',11,T),n('C#4',11+T,T),n('E4',11+2*T,T),
+    n('E4',8,4),
+    l('F#1',12,2),l('F#2',12,2),
+    n('F#3',12,T),n('A3',12+T,T),n('D4',12+2*T,T),
+    n('F#3',13,T),n('A3',13+T,T),n('D4',13+2*T,T),
+    n('F#4',12,2),
+    l('G#1',14,2),l('G#2',14,2),
+    n('G#3',14,T),n('B3',14+T,T),n('E4',14+2*T,T),
+    n('G#3',15,T),n('B3',15+T,T),n('E4',15+2*T,T),
+    n('E4',14,1),n('D#4',15,1),
+    l('C#2',16,4),l('C#3',16,4),
+    n('G#3',16,T),n('C#4',16+T,T),n('E4',16+2*T,T),
+    n('G#3',17,T),n('C#4',17+T,T),n('E4',17+2*T,T),
+    n('G#3',18,T),n('C#4',18+T,T),n('E4',18+2*T,T),
+    n('G#3',19,T),n('C#4',19+T,T),n('E4',19+2*T,T),
+    n('C#4',16,4),
+  ];
+});
+
+addSong('river_flows','River Flows in You',68,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    // Intro: iconic A5-G#5 oscillation
+    n('A5',0,0.5),n('G#5',0.5,0.5),
+    n('A5',1,0.5),n('G#5',1.5,0.5),n('A5',2,0.5),n('G#5',2.5,0.5),
+    n('F#5',3,0.5),n('E5',3.5,0.5),
+    n('F#5',4,0.5),n('E5',4.5,0.5),n('F#5',5,0.5),n('E5',5.5,0.5),
+    n('D5',6,0.5),n('C#5',6.5,0.5),n('D5',7,0.5),n('E5',7.5,0.5),
+    n('A4',8,1),n('A4',9,0.5),n('B4',9.5,0.5),
+    n('C#5',10,0.5),n('D5',10.5,0.5),n('E5',11,0.5),n('D5',11.5,0.5),
+    l('A2',8,1),l('E3',8.5,0.5),l('A3',9,0.5),l('C#4',9.5,0.5),l('E4',10,2),
+    n('C#5',12,1),n('B4',13,0.5),n('A4',13.5,0.5),
+    n('B4',14,0.5),n('C#5',14.5,0.5),n('A4',15,1),
+    l('F#2',12,1),l('C#3',12.5,0.5),l('F#3',13,0.5),l('A3',13.5,0.5),l('C#4',14,2),
+    n('A4',16,0.5),n('B4',16.5,0.5),n('C#5',17,0.5),n('D5',17.5,0.5),
+    n('E5',18,0.5),n('D5',18.5,0.5),n('C#5',19,0.5),n('B4',19.5,0.5),
+    l('D2',16,1),l('A2',16.5,0.5),l('D3',17,0.5),l('F#3',17.5,0.5),l('A3',18,2),
+    n('C#5',20,1),n('B4',21,0.5),n('A4',21.5,0.5),
+    n('A4',22,2),
+    l('E2',20,1),l('B2',20.5,0.5),l('E3',21,0.5),l('G#3',21.5,0.5),l('B3',22,2),
+    n('A4',24,0.5),n('C#5',24.5,0.5),n('E5',25,0.5),n('F#5',25.5,0.5),
+    n('E5',26,0.5),n('D5',26.5,0.5),n('E5',27,0.5),n('D5',27.5,0.5),
+    l('A2',24,1),l('E3',24.5,0.5),l('A3',25,0.5),l('C#4',25.5,0.5),l('E4',26,2),
+    n('C#5',28,1),n('B4',29,0.5),n('A4',29.5,0.5),
+    n('B4',30,0.5),n('C#5',30.5,0.5),n('A4',31,1),
+    l('F#2',28,1),l('C#3',28.5,0.5),l('F#3',29,0.5),l('A3',29.5,0.5),l('C#4',30,2),
+    n('F#5',32,0.5),n('E5',32.5,0.5),n('D5',33,0.5),n('C#5',33.5,0.5),
+    n('D5',34,0.5),n('E5',34.5,0.5),n('F#5',35,0.5),n('E5',35.5,0.5),
+    l('D2',32,1),l('A2',32.5,0.5),l('D3',33,0.5),l('F#3',33.5,0.5),l('A3',34,2),
+    n('E5',36,0.5),n('D5',36.5,0.5),n('C#5',37,0.5),n('B4',37.5,0.5),
+    n('A4',38,2),
+    l('E2',36,1),l('B2',36.5,0.5),l('E3',37,0.5),l('G#3',37.5,0.5),
+    l('A2',38,1),l('E3',38.5,0.5),l('A3',39,0.5),l('C#4',39.5,0.5),
+  ];
+});
+
+addSong('swan_lake','백조의 호수 (Swan Lake)',72,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    n('B4',0,2),n('B4',2,0.5),n('C#5',2.5,0.5),n('D5',3,0.5),n('E5',3.5,0.5),
+    l('B2',0,1),l('F#3',1,1),l('B3',2,1),l('F#3',3,1),
+    n('F#5',4,1.5),n('E5',5.5,0.5),n('D5',6,1),n('E5',7,0.5),n('D5',7.5,0.5),
+    l('B2',4,1),l('F#3',5,1),l('B3',6,1),l('F#3',7,1),
+    n('C#5',8,2),n('B4',10,0.5),n('C#5',10.5,0.5),n('D5',11,0.5),n('E5',11.5,0.5),
+    l('E2',8,1),l('B2',9,1),l('E3',10,1),l('B2',11,1),
+    n('F#5',12,1.5),n('E5',13.5,0.5),n('D5',14,1),n('C#5',15,1),
+    l('F#2',12,1),l('C#3',13,1),l('F#3',14,1),l('C#3',15,1),
+    n('B4',16,2),n('B4',18,0.5),n('C#5',18.5,0.5),n('D5',19,0.5),n('E5',19.5,0.5),
+    l('B2',16,1),l('F#3',17,1),l('B3',18,1),l('F#3',19,1),
+    n('F#5',20,1.5),n('E5',21.5,0.5),n('D5',22,1),n('E5',23,0.5),n('D5',23.5,0.5),
+    l('B2',20,1),l('F#3',21,1),l('B3',22,1),l('F#3',23,1),
+    n('C#5',24,1),n('D5',25,1),n('E5',26,1),n('F#5',27,1),
+    l('A2',24,1),l('E3',25,1),l('A3',26,1),l('E3',27,1),
+    n('G5',28,1.5),n('F#5',29.5,0.5),n('E5',30,1),n('D5',31,1),
+    l('G2',28,1),l('D3',29,1),l('G3',30,1),l('D3',31,1),
+    n('C#5',32,1.5),n('D5',33.5,0.5),n('C#5',34,1),n('B4',35,1),
+    l('F#2',32,1),l('C#3',33,1),l('F#3',34,1),l('C#3',35,1),
+    n('B4',36,2),n('A#4',38,0.5),n('B4',38.5,0.5),n('C#5',39,0.5),n('D5',39.5,0.5),
+    l('B2',36,1),l('F#3',37,1),l('B3',38,1),l('F#3',39,1),
+    n('E5',40,1.5),n('D5',41.5,0.5),n('C#5',42,1),n('D5',43,0.5),n('C#5',43.5,0.5),
+    l('E2',40,1),l('B2',41,1),l('E3',42,1),l('B2',43,1),
+    n('B4',44,3),n('F#4',47,1),
+    l('B2',44,2),l('F#2',46,1),l('B2',47,1),
+  ];
+});
+
+addSong('air_on_g','G선상의 아리아 (Air on the G String)',66,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    // D major (original key)
+    n('F#5',0,1.5),n('E5',1.5,0.5),n('D5',2,1),n('C#5',3,0.5),n('D5',3.5,0.5),
+    l('D3',0,1),l('F#3',1,1),l('A3',2,1),l('F#3',3,1),
+    n('E5',4,1.5),n('D5',5.5,0.5),n('C#5',6,1),n('B4',7,0.5),n('C#5',7.5,0.5),
+    l('A2',4,1),l('C#3',5,1),l('E3',6,1),l('A3',7,1),
+    n('D5',8,1.5),n('E5',9.5,0.5),n('F#5',10,0.5),n('G5',10.5,0.5),n('F#5',11,0.5),n('E5',11.5,0.5),
+    l('B2',8,1),l('D3',9,1),l('F#3',10,1),l('B3',11,1),
+    n('F#5',12,1.5),n('E5',13.5,0.5),n('D5',14,2),
+    l('G2',12,1),l('B2',13,1),l('D3',14,1),l('A2',15,1),
+    n('F#5',16,0.5),n('G5',16.5,0.5),n('A5',17,1),n('G5',18,0.5),n('F#5',18.5,0.5),n('E5',19,0.5),n('F#5',19.5,0.5),
+    l('D3',16,1),l('F#3',17,1),l('A3',18,1),l('D3',19,1),
+    n('G5',20,1.5),n('F#5',21.5,0.5),n('E5',22,1),n('D5',23,0.5),n('E5',23.5,0.5),
+    l('G2',20,1),l('B2',21,1),l('E3',22,1),l('G3',23,1),
+    n('F#5',24,1.5),n('E5',25.5,0.5),n('D5',26,0.5),n('E5',26.5,0.5),n('F#5',27,0.5),n('D5',27.5,0.5),
+    l('A2',24,1),l('C#3',25,1),l('E3',26,1),l('A3',27,1),
+    n('E5',28,1.5),n('D5',29.5,0.5),n('C#5',30,1),n('D5',31,1),
+    l('A2',28,1),l('G3',29,1),l('F#3',30,1),l('A2',31,1),
+    n('D5',32,2),
+    l('D3',32,2),
+  ];
+});
+
+addSong('nocturne','녹턴 Op.9 No.2 (Nocturne)',63,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    n('A#4',0,2),n('G4',2,0.67),n('G#4',2.67,0.33),n('G4',3,0.33),n('F4',3.33,0.67),
+    l('D#3',0,0.33),l('A#3',0.33,0.33),l('G4',0.67,0.33),l('D#3',1,0.33),l('A#3',1.33,0.33),l('G4',1.67,0.33),
+    l('D#3',2,0.33),l('A#3',2.33,0.33),l('G4',2.67,0.33),l('D#3',3,0.33),l('A#3',3.33,0.33),l('G4',3.67,0.33),
+    n('D#4',4,1.33),n('D4',5.33,0.33),n('D#4',5.67,0.33),n('F4',6,0.67),n('D#4',6.67,0.33),n('F4',7,0.33),n('G#4',7.33,0.33),n('G4',7.67,0.33),
+    l('G#2',4,0.33),l('D#3',4.33,0.33),l('A#3',4.67,0.33),l('G#2',5,0.33),l('D#3',5.33,0.33),l('A#3',5.67,0.33),
+    l('G#2',6,0.33),l('D#3',6.33,0.33),l('A#3',6.67,0.33),l('G#2',7,0.33),l('D#3',7.33,0.33),l('A#3',7.67,0.33),
+    n('A#4',8,2),n('G4',10,0.67),n('G#4',10.67,0.33),n('A#4',11,0.33),n('G4',11.33,0.33),n('F4',11.67,0.33),
+    l('D#3',8,0.33),l('A#3',8.33,0.33),l('G4',8.67,0.33),l('D#3',9,0.33),l('A#3',9.33,0.33),l('G4',9.67,0.33),
+    l('D#3',10,0.33),l('A#3',10.33,0.33),l('G4',10.67,0.33),l('D#3',11,0.33),l('A#3',11.33,0.33),l('G4',11.67,0.33),
+    n('D#4',12,1.33),n('F4',13.33,0.33),n('G4',13.67,0.33),n('G#4',14,0.67),n('G4',14.67,0.33),n('A#4',15,0.67),n('D#5',15.67,0.33),
+    l('G#2',12,0.33),l('D#3',12.33,0.33),l('A#3',12.67,0.33),l('G#2',13,0.33),l('D#3',13.33,0.33),l('A#3',13.67,0.33),
+    l('A#2',14,0.33),l('F3',14.33,0.33),l('A#3',14.67,0.33),l('A#2',15,0.33),l('F3',15.33,0.33),l('A#3',15.67,0.33),
+    n('C5',16,1.33),n('A#4',17.33,0.33),n('C5',17.67,0.33),n('D#5',18,0.67),n('C5',18.67,0.33),n('A#4',19,0.67),n('G4',19.67,0.33),
+    l('G#2',16,0.33),l('D#3',16.33,0.33),l('C4',16.67,0.33),l('G#2',17,0.33),l('D#3',17.33,0.33),l('C4',17.67,0.33),
+    l('G#2',18,0.33),l('D#3',18.33,0.33),l('C4',18.67,0.33),l('G#2',19,0.33),l('D#3',19.33,0.33),l('C4',19.67,0.33),
+    n('A#4',20,2),n('G4',22,0.67),n('F4',22.67,0.33),n('D#4',23,0.67),n('F4',23.67,0.33),
+    l('D#3',20,0.33),l('A#3',20.33,0.33),l('G4',20.67,0.33),l('D#3',21,0.33),l('A#3',21.33,0.33),l('G4',21.67,0.33),
+    l('D#3',22,0.33),l('A#3',22.33,0.33),l('G4',22.67,0.33),l('D#3',23,0.33),l('A#3',23.33,0.33),l('G4',23.67,0.33),
+    n('D#4',24,3),
+    l('A#2',24,0.33),l('F3',24.33,0.33),l('A#3',24.67,0.33),l('A#2',25,0.33),l('F3',25.33,0.33),l('A#3',25.67,0.33),
+    l('D#2',26,0.33),l('A#2',26.33,0.33),l('G3',26.67,0.33),
+  ];
+});
+
+addSong('spring','봄 (Spring - Vivaldi)',140,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    n('E5',0,1.5),n('D#5',1.5,0.5),n('E5',2,1),
+    l('E3',0,1.5),l('B2',0,1.5),l('E3',2,1),l('B2',3,1),
+    n('E5',4,1.5),n('D#5',5.5,0.5),n('E5',6,1),
+    l('E3',4,1.5),l('B2',4,1.5),l('E3',6,1),l('B2',7,1),
+    n('E5',8,0.5),n('F#5',8.5,0.5),n('G#5',9,0.5),n('F#5',9.5,0.5),
+    n('E5',10,0.5),n('F#5',10.5,0.5),n('G#5',11,0.5),n('F#5',11.5,0.5),
+    l('E3',8,1),l('B3',9,1),l('E3',10,1),l('B3',11,1),
+    n('E5',12,0.5),n('F#5',12.5,0.5),n('G#5',13,0.5),n('A5',13.5,0.5),
+    n('B5',14,1),n('G#5',15,1),
+    l('E3',12,1),l('B3',13,1),l('E3',14,1),l('B2',15,1),
+    n('E5',16,1.5),n('D#5',17.5,0.5),n('E5',18,1),
+    l('E3',16,1.5),l('B2',16,1.5),l('E3',18,1),l('B2',19,1),
+    n('B5',20,0.5),n('A5',20.5,0.5),n('G#5',21,0.5),n('A5',21.5,0.5),
+    n('B5',22,0.5),n('A5',22.5,0.5),n('G#5',23,0.5),n('F#5',23.5,0.5),
+    l('E3',20,1),l('B3',21,1),l('E3',22,1),l('B3',23,1),
+    n('E5',24,0.5),n('F#5',24.5,0.5),n('G#5',25,0.5),n('A5',25.5,0.5),
+    n('B5',26,1),n('G#5',27,1),
+    l('E3',24,1),l('B3',25,1),l('E3',26,1),l('B2',27,1),
+    n('E5',28,2),
+    l('E3',28,2),l('E2',28,2),
+  ];
+});
+
+addSong('humoresque','유머레스크 (Humoresque)',76,()=>{
+  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
+  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
+  return [
+    n('B4',0,0.75),n('A4',0.75,0.25),n('G4',1,0.75),n('A4',1.75,0.25),
+    l('G3',0,0.5),l('D4',0.5,0.5),l('G3',1,0.5),l('D4',1.5,0.5),
+    n('B4',2,0.75),n('A4',2.75,0.25),n('B4',3,1),
+    l('G3',2,0.5),l('D4',2.5,0.5),l('G3',3,0.5),l('D4',3.5,0.5),
+    n('D5',4,0.75),n('C5',4.75,0.25),n('B4',5,0.75),n('C5',5.75,0.25),
+    l('G3',4,0.5),l('D4',4.5,0.5),l('G3',5,0.5),l('D4',5.5,0.5),
+    n('D5',6,0.75),n('C5',6.75,0.25),n('D5',7,1),
+    l('G3',6,0.5),l('D4',6.5,0.5),l('G3',7,0.5),l('D4',7.5,0.5),
+    n('E5',8,0.75),n('D5',8.75,0.25),n('C5',9,0.75),n('D5',9.75,0.25),
+    l('C3',8,0.5),l('G3',8.5,0.5),l('C3',9,0.5),l('G3',9.5,0.5),
+    n('E5',10,0.75),n('D5',10.75,0.25),n('E5',11,0.5),n('G5',11.5,0.5),
+    l('C3',10,0.5),l('G3',10.5,0.5),l('C3',11,0.5),l('E3',11.5,0.5),
+    n('G5',12,0.75),n('F#5',12.75,0.25),n('E5',13,0.75),n('D5',13.75,0.25),
+    l('G3',12,0.5),l('D4',12.5,0.5),l('G3',13,0.5),l('B3',13.5,0.5),
+    n('C5',14,0.75),n('B4',14.75,0.25),n('A4',15,0.5),n('B4',15.5,0.5),
+    l('D3',14,0.5),l('A3',14.5,0.5),l('D3',15,0.5),l('F#3',15.5,0.5),
+    n('B4',16,0.75),n('A4',16.75,0.25),n('G4',17,0.75),n('A4',17.75,0.25),
+    l('G3',16,0.5),l('D4',16.5,0.5),l('G3',17,0.5),l('D4',17.5,0.5),
+    n('B4',18,0.75),n('A4',18.75,0.25),n('B4',19,1),
+    l('G3',18,0.5),l('D4',18.5,0.5),l('G3',19,0.5),l('D4',19.5,0.5),
+    n('D5',20,0.75),n('C5',20.75,0.25),n('B4',21,0.75),n('C5',21.75,0.25),
+    l('G3',20,0.5),l('D4',20.5,0.5),l('G3',21,0.5),l('D4',21.5,0.5),
+    n('D5',22,0.75),n('C5',22.75,0.25),n('D5',23,1),
+    l('G3',22,0.5),l('D4',22.5,0.5),l('G3',23,0.5),l('D4',23.5,0.5),
+    n('B4',24,0.75),n('A4',24.75,0.25),n('G4',25,0.75),n('F#4',25.75,0.25),
+    l('G3',24,0.5),l('D4',24.5,0.5),l('G3',25,0.5),l('B3',25.5,0.5),
+    n('G4',26,2),
+    l('G2',26,1),l('G3',26,1),l('D3',27,0.5),l('G3',27.5,0.5),
+  ];
+});
+
 // ================ BEYER LESSONS (No.1~10 기반) ================
 const LESSONS = { beyer: [], songs: [] };
 
@@ -674,11 +1280,33 @@ LESSONS.beyer.push({id:'by10',name:'바이엘 No.10',desc:'오른손과 왼손�
 
 // Song-based lessons
 LESSONS.songs.push(
-  {id:'s1',name:'비행기',desc:'동요 "비행기"를 연주합니다.',notes:SONGS['비행기'].notes},
-  {id:'s2',name:'학교종',desc:'동요 "학교종이 땡땡땡"을 연주합니다.',notes:SONGS['학교종'].notes},
-  {id:'s3',name:'반짝반짝 작은별',desc:'모차르트의 작은별 변주곡 테마.',notes:SONGS['작은별'].notes},
-  {id:'s4',name:'곰 세 마리',desc:'동요 "곰 세 마리가 한 집에 있어".',notes:SONGS['곰세마리'].notes},
-  {id:'s5',name:'Amazing Grace',desc:'찬송가 Amazing Grace (양손).',notes:SONGS['AmazingGrace'].notes}
+  // 동요/찬송가 (초급)
+  {id:'s1',name:'비행기',desc:'동요 "비행기". 초급 오른손.',notes:SONGS['비행기'].notes},
+  {id:'s2',name:'학교종',desc:'동요 "학교종이 땡땡땡". 초급.',notes:SONGS['학교종'].notes},
+  {id:'s3',name:'반짝반짝 작은별',desc:'모차르트 작은별 변주곡 테마. 초급.',notes:SONGS['작은별'].notes},
+  {id:'s4',name:'곰 세 마리',desc:'동요 "곰 세 마리가 한 집에 있어". 초급.',notes:SONGS['곰세마리'].notes},
+  {id:'s5',name:'Amazing Grace',desc:'찬송가 Amazing Grace. 양손 초급.',notes:SONGS['AmazingGrace'].notes},
+  {id:'s20',name:'클레멘타인',desc:'Oh My Darling Clementine. 왈츠 초급.',notes:SONGS['clementine'].notes},
+  // 클래식 초급~중급
+  {id:'s6',name:'환희의 송가',desc:'베토벤 - Ode to Joy. C장조 양손.',notes:SONGS['ode_to_joy'].notes},
+  {id:'s7',name:'미뉴에트',desc:'바흐 - Minuet in G. 3/4박자 양손.',notes:SONGS['minuet_g'].notes},
+  {id:'s8',name:'유머레스크',desc:'드보르작 - Humoresque. 점음표 리듬.',notes:SONGS['humoresque'].notes},
+  // 클래식 중급
+  {id:'s9',name:'엘리제를 위하여',desc:'베토벤 - Für Elise. A단조 양손.',notes:SONGS['엘리제'].notes},
+  {id:'s10',name:'캐논 in D',desc:'파헬벨 - Canon in D. 양손.',notes:SONGS['캐논'].notes},
+  {id:'s11',name:'G선상의 아리아',desc:'바흐 - Air on the G String. C장조.',notes:SONGS['air_on_g'].notes},
+  {id:'s12',name:'꿈 (Träumerei)',desc:'슈만 - 꿈. F장조 서정적.',notes:SONGS['traumerei'].notes},
+  {id:'s13',name:'백조의 호수',desc:'차이코프스키 - Swan Lake. B단조.',notes:SONGS['swan_lake'].notes},
+  // 클래식 중상급~상급
+  {id:'s14',name:'터키 행진곡',desc:'모차르트 - Turkish March. A단조.',notes:SONGS['turkish_march'].notes},
+  {id:'s15',name:'월광 소나타',desc:'베토벤 - Moonlight Sonata 1악장. C#단조.',notes:SONGS['moonlight'].notes},
+  {id:'s16',name:'녹턴 Op.9 No.2',desc:'쇼팽 - Nocturne. Eb장조 아르페지오.',notes:SONGS['nocturne'].notes},
+  {id:'s17',name:'봄 (사계)',desc:'비발디 - Spring. E장조 알레그로.',notes:SONGS['spring'].notes},
+  {id:'s18',name:'사랑의 꿈',desc:'리스트 - Liebestraum No.3. Ab장조.',notes:SONGS['liebestraum'].notes},
+  {id:'s19',name:'헝가리 무곡 5번',desc:'브람스 - Hungarian Dance No.5. G단조.',notes:SONGS['hungarian5'].notes},
+  // 연주곡
+  {id:'s21',name:'River Flows in You',desc:'유루마 - River Flows in You. A장조.',notes:SONGS['river_flows'].notes},
+  {id:'s22',name:'라 캄파넬라',desc:'리스트 - La Campanella. G#단조 상급.',notes:SONGS['la_campanella'].notes},
 );
 
 // ================ PROGRESS ================
@@ -703,14 +1331,25 @@ function renderLearnList() {
   });
   html += '</div>';
 
-  // Songs section
-  html += '<div class="learn-section"><h3>🎶 동요/명곡 (5곡)</h3>';
-  LESSONS.songs.forEach(l => {
-    const stars = getLessonStars(l.id);
-    const starStr = stars > 0 ? '★'.repeat(stars) + '☆'.repeat(3-stars) : '';
-    html += `<div class="lesson-item" data-lesson="${l.id}"><span class="l-name">${l.name}</span><span>${starStr ? '<span class="stars">'+starStr+'</span>' : '<span class="badge badge-new">NEW</span>'}</span></div>`;
+  // Songs by category
+  const categories = [
+    {title:'🎵 동요/찬송가 (초급)', ids:['s1','s2','s3','s4','s5','s20']},
+    {title:'🎹 클래식 초급~중급', ids:['s6','s7','s8']},
+    {title:'🎼 클래식 중급', ids:['s9','s10','s11','s12','s13']},
+    {title:'🔥 클래식 상급', ids:['s14','s15','s16','s17','s18','s19']},
+    {title:'🎶 연주곡', ids:['s21','s22']},
+  ];
+  categories.forEach(cat => {
+    const items = cat.ids.map(id => LESSONS.songs.find(l => l.id === id)).filter(Boolean);
+    if (!items.length) return;
+    html += `<div class="learn-section"><h3>${cat.title}</h3>`;
+    items.forEach(l => {
+      const stars = getLessonStars(l.id);
+      const starStr = stars > 0 ? '★'.repeat(stars) + '☆'.repeat(3-stars) : '';
+      html += `<div class="lesson-item" data-lesson="${l.id}"><span class="l-name">${l.name}</span><span>${starStr ? '<span class="stars">'+starStr+'</span>' : '<span class="badge badge-new">NEW</span>'}</span></div>`;
+    });
+    html += '</div>';
   });
-  html += '</div>';
   el.innerHTML = html;
   el.querySelectorAll('.lesson-item').forEach(item => {
     item.addEventListener('click', () => openLesson(item.dataset.lesson));
@@ -728,15 +1367,17 @@ function openLesson(id) {
   const stars = getLessonStars(id);
   document.getElementById('lesson-stars').innerHTML = stars > 0 ? '<span style="color:var(--yellow)">' + '★'.repeat(stars) + '☆'.repeat(3-stars) + '</span>' : '';
   document.getElementById('lesson-desc').textContent = lesson.desc;
-  document.getElementById('btn-demo').onclick = () => startSynthesia(lesson.notes, 90, true, null);
-  document.getElementById('btn-practice').onclick = () => startSynthesia(lesson.notes, 70, false, null);
-  document.getElementById('btn-test').onclick = () => startSynthesia(lesson.notes, 90, false, id);
+  document.getElementById('btn-demo').onclick = () => { synthPracticeMode = false; startSynthesia(lesson.notes, 90, true, null); };
+  document.getElementById('btn-practice').onclick = () => { synthPracticeMode = true; startSynthesia(lesson.notes, 70, false, null); };
+  document.getElementById('btn-test').onclick = () => { synthPracticeMode = false; startSynthesia(lesson.notes, 90, false, id); };
 }
 
 document.getElementById('btn-back-learn').addEventListener('click', () => { stopSynthesia(); renderLearnList(); });
 
 // ================ SYNTHESIA ENGINE ================
 let synthRunning = false, synthAnimId = null;
+let synthPaused = false, synthPauseTime = 0; // pause-on-miss
+let synthPracticeMode = false; // practice = pause on miss
 let synthNotes = [], synthBPM = 120, synthSpeed = 1, synthAutoPlay = false;
 let synthStartTime = 0, synthTestId = null;
 let synthScore = {perfect:0, good:0, miss:0, combo:0, maxCombo:0};
@@ -797,7 +1438,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
   document.getElementById('sc-miss').textContent = '0';
   document.getElementById('sc-combo').textContent = '0';
   document.getElementById('sc-total').textContent = '0';
-  document.getElementById('synth-score').style.display = autoPlay ? 'none' : 'flex';
+  document.getElementById('synth-score').style.display = 'flex';
 
   // Auto-scroll piano to fit the song range
   const midiValues = notes.map(n => nameToMidi(n.note)).filter(m => m > 0);
@@ -808,6 +1449,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
 
   synthStartTime = performance.now() + 1500; // 1.5s lead-in
   synthRunning = true;
+  synthPaused = false; synthPauseTime = 0;
 
   if (!autoPlay) {
     onNoteCallback = (midi) => {
@@ -856,6 +1498,11 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
         document.getElementById('sc-miss').textContent = synthScore.miss;
         document.getElementById('sc-combo').textContent = synthScore.combo;
         document.getElementById('sc-total').textContent = synthScore.perfect*100 + synthScore.good*50;
+        // Update progress bar
+        const played = synthNotes.filter(n=>n.played).length;
+        const pct = Math.round(played / synthNotes.length * 100);
+        document.getElementById('sc-progress-bar').style.width = pct + '%';
+        document.getElementById('sc-progress-pct').textContent = pct + '%';
       }
     };
   }
@@ -863,8 +1510,38 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
   synthAnimId = requestAnimationFrame(synthLoop);
 }
 
+function pauseSynthesia(missedNote) {
+  if (!synthPracticeMode || synthPaused) return;
+  synthPaused = true;
+  synthPauseTime = performance.now();
+  // Show pause overlay on canvas
+  const canvas = document.getElementById('synth-canvas');
+  const ctx2 = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  ctx2.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx2.fillRect(0, 0, canvas.width, canvas.height);
+  ctx2.fillStyle = '#ef4444';
+  ctx2.font = `bold ${18*dpr}px sans-serif`;
+  ctx2.textAlign = 'center';
+  ctx2.fillText('MISS! 터치하여 계속', canvas.width/2, canvas.height/2 - 10*dpr);
+  if (missedNote) {
+    ctx2.fillStyle = '#eab308';
+    ctx2.font = `${13*dpr}px sans-serif`;
+    ctx2.fillText(`정답: ${missedNote}`, canvas.width/2, canvas.height/2 + 20*dpr);
+  }
+}
+
+function resumeSynthesia() {
+  if (!synthPaused) return;
+  const elapsed = performance.now() - synthPauseTime;
+  synthStartTime += elapsed; // compensate for paused time
+  synthPaused = false;
+  synthAnimId = requestAnimationFrame(synthLoop);
+}
+
 function synthLoop() {
   if (!synthRunning) return;
+  if (synthPaused) return; // frozen while paused
   const canvas = document.getElementById('synth-canvas');
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
@@ -912,6 +1589,7 @@ function synthLoop() {
         n.played = true; n.result = 'miss'; synthScore.miss++; synthScore.combo=0;
         document.getElementById('sc-miss').textContent = synthScore.miss;
         document.getElementById('sc-combo').textContent = synthScore.combo;
+        if (synthPracticeMode) { pauseSynthesia(n.note); return; }
       }
       return;
     }
@@ -1010,6 +1688,14 @@ function synthLoop() {
     return true;
   });
 
+  // Progress bar update (for autoplay mode too)
+  if (synthAutoPlay) {
+    const played = synthNotes.filter(n=>n.played).length;
+    const pct = Math.round(played / synthNotes.length * 100);
+    const pbar = document.getElementById('sc-progress-bar');
+    if (pbar) { pbar.style.width = pct + '%'; document.getElementById('sc-progress-pct').textContent = pct + '%'; }
+  }
+
   // Combo display
   if (!synthAutoPlay && synthScore.combo >= 5) {
     ctx.fillStyle = 'rgba(6,182,212,0.8)';
@@ -1034,6 +1720,13 @@ function synthLoop() {
       document.getElementById('result-body').innerHTML =
         `<div class="score-detail">Perfect: ${synthScore.perfect} / Good: ${synthScore.good} / Miss: ${synthScore.miss}<br>최대 콤보: ${synthScore.maxCombo}<br>점수: ${synthScore.perfect*100+synthScore.good*50}</div>`;
       document.getElementById('result-modal').classList.add('show');
+      // Retry button: re-run the same test
+      const _testId = synthTestId;
+      const _notes = synthNotes.map(n => ({note:n.note,time:n.time,duration:n.duration,hand:n.hand}));
+      document.getElementById('btn-result-retry').onclick = () => {
+        document.getElementById('result-modal').classList.remove('show');
+        startSynthesia(_notes, synthBPM, false, _testId);
+      };
       // Refresh learn list stars
       renderLearnList();
     }
@@ -1064,7 +1757,11 @@ function scrollToMidi(midi) {
 }
 
 // Synthesia controls
+// Click canvas to resume from practice-mode pause
+document.getElementById('synth-canvas').addEventListener('click', () => { if (synthPaused) resumeSynthesia(); });
+
 document.getElementById('btn-play-synth').addEventListener('click', () => {
+  synthPracticeMode = false;
   const songKey = document.getElementById('song-select').value;
   const song = SONGS[songKey];
   if (!song) return;
@@ -1075,13 +1772,26 @@ document.getElementById('speed').addEventListener('input', e => {
   document.getElementById('speed-val').textContent = (e.target.value/100).toFixed(1)+'x';
 });
 
-// Populate song select
+// Populate song select with categories
 (function(){
   const sel = document.getElementById('song-select');
-  Object.entries(SONGS).forEach(([key,song])=>{
-    const opt = document.createElement('option');
-    opt.value = key; opt.textContent = song.name;
-    sel.appendChild(opt);
+  const groups = [
+    {label:'동요/찬송가', keys:['비행기','학교종','작은별','곰세마리','AmazingGrace','clementine']},
+    {label:'클래식 초중급', keys:['ode_to_joy','minuet_g','humoresque']},
+    {label:'클래식 중급', keys:['엘리제','캐논','air_on_g','traumerei','swan_lake']},
+    {label:'클래식 상급', keys:['turkish_march','moonlight','nocturne','spring','liebestraum','hungarian5']},
+    {label:'연주곡', keys:['river_flows','la_campanella']},
+  ];
+  groups.forEach(g => {
+    const og = document.createElement('optgroup');
+    og.label = g.label;
+    g.keys.forEach(key => {
+      if (!SONGS[key]) return;
+      const opt = document.createElement('option');
+      opt.value = key; opt.textContent = SONGS[key].name;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
   });
 })();
 
