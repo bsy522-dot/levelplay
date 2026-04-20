@@ -2306,7 +2306,8 @@ function init() {
   } catch(e) {
     console.warn('3D 초기화 실패 (WebGL 불가):', e);
   }
-  showMain();
+  if (location.hash === '#career') showCareer();
+  else showMain();
   gameLoop();
 }
 
