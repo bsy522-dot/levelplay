@@ -60,11 +60,14 @@
     deadT: 0,
     t: 0,
 
-    // 플레이어
-    P: { x:0, y:0, vx:0, vy:0, gr:false, face:1 },
+    // 플레이어 (djump/canDJ/coyoteT: 별빛 대모험 v2 포팅)
+    P: { x:0, y:0, vx:0, vy:0, gr:false, face:1, djump:false, canDJ:true, coyoteT:0 },
 
     // 터치 버튼 상태
     btn: { left:false, right:false, jump:false },
+
+    // 키보드 점프 edge-trigger 추적 (홀드시 즉시 2단점프 방지)
+    _jumpPrev: false,
 
     // 버튼 영역 기억 (hit test용)
     _touchRects: null,
@@ -124,6 +127,8 @@
     const sp = S.L.spawn || { x:60, y: 500 };
     S.P.x = sp.x; S.P.y = sp.y;
     S.P.vx = 0; S.P.vy = 0; S.P.gr = false; S.P.face = 1;
+    S.P.djump = false; S.P.canDJ = true; S.P.coyoteT = 0;
+    S._jumpPrev = false;
     S.camX = 0;
     S.invuln = 60;
     S.lvClearing = false;
@@ -242,12 +247,34 @@
     P.vx = mx * SPD;
     if(mx !== 0) P.face = mx;
 
-    // 점프
-    const jumpPressed = keys.ArrowUp || keys.w || keys.W || keys[' '] || S.btn.jump;
-    if(jumpPressed && P.gr){
-      P.vy = JMP;
-      P.gr = false;
-      S.btn.jump = false; // 터치는 1회성
+    // ===== 점프 (별빛 대모험 v2 포팅: 2단 점프 + 코요테 타임) =====
+    // 코요테 타임 카운트다운 (공중일 때)
+    if(P.coyoteT > 0 && !P.gr) P.coyoteT--;
+
+    // 키보드는 edge-trigger (홀드시 즉시 2단점프 방지), 터치는 이미 1회성
+    const jumpKeyHeld = !!(keys.ArrowUp || keys.w || keys.W || keys[' ']);
+    const jumpKeyPressed = jumpKeyHeld && !S._jumpPrev;
+    S._jumpPrev = jumpKeyHeld;
+    const wantJump = jumpKeyPressed || S.btn.jump;
+
+    if(wantJump){
+      if(P.gr || P.coyoteT > 0){
+        // 1단 점프 (지상/코요테)
+        P.vy = JMP;
+        P.gr = false;
+        P.coyoteT = 0;
+        P.djump = false;
+        P.canDJ = true;
+        S.btn.jump = false;
+      } else if(P.canDJ && !P.djump){
+        // 2단 점프 (공중에서 한 번 더)
+        P.vy = JMP * 0.85;
+        P.djump = true;
+        P.canDJ = false;
+        S.btn.jump = false;
+        // 2단점프 이펙트 플래그(렌더에서 사용)
+        S._djFxT = 20;
+      }
     }
 
     // 중력
@@ -256,6 +283,8 @@
     // 이동 + 충돌
     P.x += P.vx;
     P.y += P.vy;
+    // 코요테 타임: 지상에서 발 떨어지는 순간 5프레임 유예
+    if(P.gr) P.coyoteT = 5;
     P.gr = false;
 
     for(const pl of L.platforms){
@@ -265,6 +294,8 @@
           P.y = pl.y - PH;
           P.vy = 0;
           P.gr = true;
+          P.djump = false;
+          P.canDJ = true;
         }
         // 아래에서 머리 박기
         if(P.vy < 0 && P.y <= pl.y + pl.h && (P.y - P.vy) >= pl.y + pl.h - 3){
@@ -310,6 +341,9 @@
         if(P.vy > 0 && P.y + PH - P.vy < e.y + 8){
           e.alive = false;
           P.vy = JMP * 0.6;
+          // 밟으면 2단점프 재충전 (관대)
+          P.djump = false;
+          P.canDJ = true;
         } else {
           _damage(1);
         }
@@ -681,6 +715,20 @@
 
   function _drawPlayer(ctx){
     const P = S.P;
+    // 2단점프 이펙트(발밑에 분홍 원 퍼짐)
+    if(S._djFxT && S._djFxT > 0){
+      const a = S._djFxT / 20;
+      const r = (1 - a) * 26 + 6;
+      ctx.save();
+      ctx.globalAlpha = a * 0.7;
+      ctx.strokeStyle = '#ff6b9d';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(P.x + PW/2, P.y + PH, r, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+      S._djFxT--;
+    }
     // 무적 깜빡임
     if(S.invuln > 0 && (S.invuln % 6 < 3)) return;
     // 간단 로미 픽토: 분홍 드레스
