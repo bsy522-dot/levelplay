@@ -1437,6 +1437,14 @@ function quickFight() {
 function startCareerFight(idx) { startFight(OPPONENTS[idx], true, idx); }
 
 function startFight(opp, isCareer, oppIdx) {
+  if (!playerModel || !renderer) {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;color:#e63946;padding:20px 30px;border-radius:12px;font-size:15px;text-align:center;z-index:9999;border:1px solid #e63946';
+    el.innerHTML = '3D 렌더러 초기화 실패<br><small style="color:#888;font-size:12px">브라우저를 새로고침 해주세요</small>';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+    return;
+  }
   hideAll();
   currentScreen = 'fight';
   $('fightHud').classList.remove('hidden');
@@ -2291,6 +2299,7 @@ function gameLoop() {
 
 // ==================== INIT ====================
 function init() {
+  if (!document.getElementById('mainMenu')) return; // THREE 로드 실패로 body 교체된 경우
   loadSave();
   try {
     initThree();
