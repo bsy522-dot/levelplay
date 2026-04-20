@@ -1330,9 +1330,8 @@ function showMain() {
   currentTraining = null;
   $('mainMenu').classList.remove('hidden');
   updatePlayerInfo();
-  // Position fighters for menu display
-  playerModel.group.visible = false;
-  oppModel.group.visible = false;
+  if (playerModel) playerModel.group.visible = false;
+  if (oppModel) oppModel.group.visible = false;
 }
 
 function updatePlayerInfo() {
@@ -1354,8 +1353,8 @@ function showCareer() {
   currentScreen = 'career';
   $('careerMenu').classList.remove('hidden');
   $('backBtn').classList.remove('hidden');
-  playerModel.group.visible = false;
-  oppModel.group.visible = false;
+  if (playerModel) playerModel.group.visible = false;
+  if (oppModel) oppModel.group.visible = false;
 
   const bClass = save.belt || '';
   $('beltInfo').innerHTML = save.belt
@@ -1386,8 +1385,8 @@ function showTraining() {
   currentScreen = 'training';
   $('trainingMenu').classList.remove('hidden');
   $('backBtn').classList.remove('hidden');
-  playerModel.group.visible = false;
-  oppModel.group.visible = false;
+  if (playerModel) playerModel.group.visible = false;
+  if (oppModel) oppModel.group.visible = false;
   $('trainStats').innerHTML = `
     <span class="stat-pill">SPD<b>${save.stats.speed}</b></span>
     <span class="stat-pill">PWR<b>${save.stats.power}</b></span>
@@ -1400,8 +1399,8 @@ function showRecords() {
   currentScreen = 'records';
   $('recordsMenu').classList.remove('hidden');
   $('backBtn').classList.remove('hidden');
-  playerModel.group.visible = false;
-  oppModel.group.visible = false;
+  if (playerModel) playerModel.group.visible = false;
+  if (oppModel) oppModel.group.visible = false;
   $('recordStats').innerHTML = `
     <span class="stat-pill">레벨<b>${save.level}</b></span>
     <span class="stat-pill">XP<b>${save.xp}/${save.xpNext}</b></span>
@@ -2279,6 +2278,7 @@ function update3DScene(time, dt) {
 // ==================== MAIN LOOP ====================
 function gameLoop() {
   requestAnimationFrame(gameLoop);
+  if (!renderer) return;
   const dt = Math.min(clock.getDelta(), 0.05);
   const time = clock.getElapsedTime();
 
@@ -2292,7 +2292,11 @@ function gameLoop() {
 // ==================== INIT ====================
 function init() {
   loadSave();
-  initThree();
+  try {
+    initThree();
+  } catch(e) {
+    console.warn('3D 초기화 실패 (WebGL 불가):', e);
+  }
   showMain();
   gameLoop();
 }
