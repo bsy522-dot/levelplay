@@ -225,14 +225,14 @@
       }
     },
 
-    // Stage 3: 러닝 미니게임
+    // Stage 3: 러닝 미니게임 (10탭)
     {
       id: 'bus_run',
       enter: function(next){
         if(!window.Dispatcher) return next();
         window.Dispatcher.switchMode('run', {
           duration: 10,
-          markers: 25,
+          markers: 10,   // 이전 25 → 10 (10번 탭이면 이김)
           onClear: (res) => {
             // 성공 — 다음으로 (플래그 저장)
             if(window.STATE){

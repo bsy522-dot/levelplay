@@ -13,20 +13,28 @@
   const SPRITE_SIZE   = 220;    // 대형 캐릭터 스프라이트
   const BOUNCE_AMP    = 6;      // sin 바운스 진폭 px
 
-  // 스프라이트 키 맵 (Foundation 없는 경우 자체 기본값)
-  if(!window.SPRITE_KEY){
-    window.SPRITE_KEY = {
-      romi:'rs', kkong:'kk', hatchu:'hs', baro:'ba',
-      buggreu:'bk', lala:'la', stick:'st', truping:'ts',
-      hartking:'hk', liam:'lip'
-    };
-  }
+  // 스프라이트 키 맵 (스토리 actor.id → window.IM[key] 로 변환)
+  // IM 실제 키: rs, rp, hs, hp, ba, ch, kk, bk, ts, la, hk, stk, liam, monju
+  window.SPRITE_KEY = Object.assign({
+    romi:'rs', kkong:'kk', hatchu:'hs', baro:'ba', chacha:'ch',
+    buggreu:'bk', bukku:'bk',   // 부끄핑
+    ddal:'stk', ddalpul:'stk', stick:'stk',   // 딱풀핑 = 스티키핑 재활용
+    lala:'la', truping:'ts',
+    hartking:'hk', king:'hk',   // 왕 = 하트킹
+    liam:'liam', monju:'monju'
+    // queen/grandma/bus_driver: 전용 스프라이트 없음 → 이모지 폴백 사용
+  }, window.SPRITE_KEY || {});
 
-  // 이모지 폴백 맵
+  // 이모지 폴백 맵 (스프라이트 없는 인간 캐릭터 포함)
   const EMOJI_FALLBACK = {
     romi:'👧', kkong:'🧊', hatchu:'💖', baro:'⚡',
-    buggreu:'🙈', lala:'🎵', stick:'🔮', truping:'😈',
-    hartking:'👑', liam:'🤴', narration:''
+    buggreu:'🙈', bukku:'🙈', ddal:'🩹', ddalpul:'🩹',
+    stick:'🔮', lala:'🎵', truping:'😈',
+    hartking:'👑', king:'👑',
+    queen:'👸', grandma:'👵',
+    liam:'🤴', monju:'🧪',
+    guard:'🛡️', bus_driver:'🚌', old_man:'🌸',
+    narration:''
   };
 
   // ----- 내부 상태 -----

@@ -261,22 +261,30 @@
   // ============================================================
   // 진행 라우터 (v3_map NPC 상호작용 → v2_scene 분기)
   // ============================================================
-  function enterMap(){
+  // 대화 후 현재 위치 유지하기 위해 진입 직전 좌표 저장
+  function enterMap(keepPos){
+    const saved = keepPos && window.STATE && window.STATE.playerPos;
+    const sx = saved && typeof saved.x === 'number' ? saved.x : 11;
+    const sy = saved && typeof saved.y === 'number' ? saved.y : 2;
     window.Dispatcher.switchMode('v3_map', {
       mapId: 'castle_interior_v4',
-      startX: 11, startY: 2,
+      startX: sx, startY: sy,
       encounterRate: 0,
       onInteractNPC: onNpcTalk
     });
   }
 
   function playScenes(scenes, onComplete){
+    // 씬 진입 직전 로미 위치 스냅샷
+    const prev = window.STATE && window.STATE.playerPos
+      ? { x: window.STATE.playerPos.x, y: window.STATE.playerPos.y } : null;
+    if(prev) window.STATE._savedMapPos = prev;
     // SceneEngine을 쓰기 전 반드시 v2_scene 모드 진입
     if(window.Dispatcher){ window.Dispatcher.switchMode('v2_scene'); }
     window.SceneEngine.start(scenes, function(){
-      // 씬 끝나면 다시 성 탐험(v3_map) 복귀
+      // 씬 끝나면 다시 성 탐험(v3_map) 복귀 — 이전 위치 유지
       if(onComplete){ onComplete(); }
-      else { enterMap(); }
+      else { enterMap(true); }
     });
   }
 
@@ -379,13 +387,33 @@
               window.Dispatcher.switchMode('platformer', opts);
             });
           });
-        } else if(!hasFlag('king_rejected')){
+        } else if(!hasFlag('met_king')){
           playInline({
-            id:'grandma_wait', location:'garden', bg:'bg_castle',
+            id:'grandma_hint1', location:'garden', bg:'bg_castle',
             actors:[A_ROMI, A_GRANDMA],
             dialog:[
-              { who:'grandma', text:'할미는 정원에 있단다.\n뭐든 필요하면 오려무나.' },
-              { who:'romi',    text:'네, 할머니.' }
+              { who:'grandma', text:'로미야, 아빠한테 먼저 인사 드렸니?\n왕좌 방에 계실 거야.' },
+              { who:'romi',    text:'아, 맞다. 아빠부터 뵈러 갈게요!' }
+            ]
+          });
+        } else if(!hasFlag('read_book')){
+          playInline({
+            id:'grandma_hint2', location:'garden', bg:'bg_castle',
+            actors:[A_ROMI, A_GRANDMA],
+            dialog:[
+              { who:'grandma', text:'도서관에서 오래된 책을 한 권 봤단다.\n「하츄핑 전설서」라고 적혀 있더구나.' },
+              { who:'grandma', text:'네 마음을 이끄는 게 있다면\n그 책을 펼쳐 보렴, 로미야.' },
+              { who:'romi',    text:'전설서… 가 볼게요!' }
+            ]
+          });
+        } else if(!hasFlag('king_rejected')){
+          playInline({
+            id:'grandma_hint3', location:'garden', bg:'bg_castle',
+            actors:[A_ROMI, A_GRANDMA],
+            dialog:[
+              { who:'grandma', text:'책은 펼쳐 봤니?\n그럼 아빠한테 마음을 전해보렴.' },
+              { who:'grandma', text:'(넌지시)\n아빠가 반대하셔도… 할미는 네 편이야.' },
+              { who:'romi',    text:'네, 아빠한테 얘기해 볼게요.' }
             ]
           });
         } else {
