@@ -1437,6 +1437,89 @@ async function playExplorationScene(scene) {
   const sceneStartMs = performance.now();
   const INPUT_GRACE_MS = 500;
 
+  // 모바일 D-pad + 대화 버튼
+  const _dpBtnStyle = [
+    'width:52px','height:52px',
+    'background:rgba(26,20,40,0.85)',
+    'border:1.5px solid rgba(255,215,0,0.5)',
+    'border-radius:10px',
+    'color:#ffd700','font-size:22px',
+    'display:flex','align-items:center','justify-content:center',
+    'cursor:pointer',
+    'touch-action:none','-webkit-user-select:none','user-select:none',
+    'box-shadow:0 2px 8px rgba(0,0,0,0.5)',
+    'transition:background 0.1s',
+  ].join(';');
+  const _dpEmpty = 'width:52px;height:52px;';
+
+  const dpad = document.createElement('div');
+  dpad.id = 'v8-dpad';
+  dpad.style.cssText = [
+    'position:fixed','bottom:24px','left:20px','z-index:300',
+    'display:grid',
+    'grid-template-columns:52px 52px 52px',
+    'grid-template-rows:52px 52px 52px',
+    'gap:6px',
+    'touch-action:none',
+  ].join(';');
+  dpad.innerHTML = `
+    <div style="${_dpEmpty}"></div>
+    <button id="v8-dp-up"    style="${_dpBtnStyle}">▲</button>
+    <div style="${_dpEmpty}"></div>
+    <button id="v8-dp-left"  style="${_dpBtnStyle}">◀</button>
+    <div style="${_dpEmpty}"></div>
+    <button id="v8-dp-right" style="${_dpBtnStyle}">▶</button>
+    <div style="${_dpEmpty}"></div>
+    <button id="v8-dp-down"  style="${_dpBtnStyle}">▼</button>
+    <div style="${_dpEmpty}"></div>
+  `;
+  document.body.appendChild(dpad);
+
+  const interactBtn = document.createElement('button');
+  interactBtn.id = 'v8-interact-btn';
+  interactBtn.innerHTML = '대화<br><span style="font-size:10px;opacity:0.7">(E)</span>';
+  interactBtn.style.cssText = [
+    'position:fixed','bottom:56px','right:24px','z-index:300',
+    'width:68px','height:68px',
+    'background:rgba(255,215,0,0.12)',
+    'border:2px solid #ffd700','border-radius:50%',
+    'color:#ffd700','font-size:14px','font-weight:700',
+    "font-family:'Noto Serif KR',serif",
+    'cursor:pointer',
+    'touch-action:none','-webkit-user-select:none','user-select:none',
+    'box-shadow:0 2px 12px rgba(255,200,60,0.25)',
+  ].join(';');
+  document.body.appendChild(interactBtn);
+
+  const _dpActions = {
+    'v8-dp-up':    () => _stepPlayer(0, -1),
+    'v8-dp-down':  () => _stepPlayer(0,  1),
+    'v8-dp-left':  () => _stepPlayer(-1, 0),
+    'v8-dp-right': () => _stepPlayer(1,  0),
+  };
+  let _dpTimer = null;
+  const _onDpStart = (e) => {
+    e.preventDefault();
+    const fn = _dpActions[e.currentTarget.id];
+    if (!fn) return;
+    if (!isDialogueActive()) fn();
+    clearInterval(_dpTimer);
+    _dpTimer = setInterval(() => { if (!isDialogueActive()) fn(); }, 180);
+  };
+  const _onDpEnd = (e) => { e.preventDefault(); clearInterval(_dpTimer); _dpTimer = null; };
+
+  ['v8-dp-up','v8-dp-down','v8-dp-left','v8-dp-right'].forEach(id => {
+    const b = document.getElementById(id);
+    b.addEventListener('touchstart', _onDpStart, { passive: false });
+    b.addEventListener('touchend',   _onDpEnd,   { passive: false });
+    b.addEventListener('touchcancel',_onDpEnd,   { passive: false });
+    b.addEventListener('mousedown',  _onDpStart);
+    b.addEventListener('mouseup',    _onDpEnd);
+    b.addEventListener('mouseleave', _onDpEnd);
+  });
+  interactBtn.addEventListener('touchstart', (e) => { e.preventDefault(); _tryInteract(); }, { passive: false });
+  interactBtn.addEventListener('click', () => _tryInteract());
+
   // 입력 바인딩
   const input = { w: 0, a: 0, s: 0, d: 0 };
   const onKeyDown = (e) => {
@@ -1478,10 +1561,7 @@ async function playExplorationScene(scene) {
     touchStart = null;
     const adx = Math.abs(dx), ady = Math.abs(dy);
     const THRESH = 24;
-    if (Math.max(adx, ady) < THRESH) {
-      _tryInteract();
-      return;
-    }
+    if (Math.max(adx, ady) < THRESH) return; // 탭 → D-pad/대화 버튼 사용
     if (adx > ady) _stepPlayer(dx > 0 ? 1 : -1, 0);
     else           _stepPlayer(0, dy > 0 ? 1 : -1);
   };
@@ -1631,6 +1711,9 @@ async function playExplorationScene(scene) {
     if (i2 >= 0) State.updateCallbacks.splice(i2, 1);
   }
   if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
+  clearInterval(_dpTimer);
+  if (dpad.parentNode) dpad.parentNode.removeChild(dpad);
+  if (interactBtn.parentNode) interactBtn.parentNode.removeChild(interactBtn);
 
   State.scene.remove(playerMesh);
   for (const m of npcMeshes) State.scene.remove(m);
@@ -1663,7 +1746,7 @@ function _showExplorationHint(title) {
   h.innerHTML = `
     <div style="font-size:17px;font-weight:700;margin-bottom:4px;">${title}</div>
     <div style="font-size:12px;color:#e8d0a0;font-weight:400;">
-      이동: WASD / 방향키 · 상호작용: E · 터치: 드래그 이동/탭 상호작용 · 나가기: ESC
+      이동: WASD / 방향키 / D-pad · 대화: E / 대화버튼 · 나가기: ESC
     </div>
   `;
   document.body.appendChild(h);
