@@ -16,7 +16,7 @@
   'use strict';
 
   const T = 40;   // 타일 크기
-  const MOVE_DELAY = 10;
+  const MOVE_DELAY = 6;  // 이전 10 → 6 (빠른 이동 반응성)
 
   const S = {
     active: false,
@@ -342,8 +342,20 @@
   // ===== 입력 =====
   function handleInput(x, y, kind){
     if(!S.active) return;
+    // Dispatcher가 키보드를 객체 {type:'key', key, down}로 전달하는 경우 지원
+    if(kind && typeof kind === 'object' && kind.type === 'key'){
+      const k = kind.key;
+      const down = !!kind.down;
+      if(k==='ArrowUp'||k==='w'||k==='W')         S.tU = down;
+      else if(k==='ArrowDown'||k==='s'||k==='S')  S.tD = down;
+      else if(k==='ArrowLeft'||k==='a'||k==='A')  S.tL = down;
+      else if(k==='ArrowRight'||k==='d'||k==='D') S.tR = down;
+      else if(down && (k==='Enter'||k===' '||k==='z'||k==='Z')) interactNPC();
+      return;
+    }
+    // 레거시 문자열 'key' 형식
     if(kind === 'key'){
-      const k = x;  // 키 이름
+      const k = x;
       const down = (y !== false);
       if(k==='ArrowUp'||k==='w'||k==='W')         S.tU = down;
       else if(k==='ArrowDown'||k==='s'||k==='S')  S.tD = down;
