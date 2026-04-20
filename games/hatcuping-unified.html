@@ -134,10 +134,19 @@ canvas{display:block;max-width:100vw;max-height:100vh;touch-action:none;backgrou
     if(!c) return;
     function route(e, kind){
       e.preventDefault();
-      const t = (e.touches && e.touches[0]) || e;
-      if(typeof t.clientX !== 'number') return;
-      const p = window.UCanvas.toLogical(t.clientX, t.clientY);
-      window.Dispatcher?.handleInput?.(p.x, p.y, kind);
+      // touchend에는 e.touches가 비어있으므로 changedTouches 우선 사용
+      const t = (e.changedTouches && e.changedTouches[0])
+             || (e.touches && e.touches[0])
+             || e;
+      let px = 0, py = 0;
+      if(typeof t.clientX === 'number'){
+        const p = window.UCanvas.toLogical(t.clientX, t.clientY);
+        px = p.x; py = p.y;
+      } else if(kind !== 'up'){
+        // 좌표 없는 down/move는 무시 (up은 좌표 없이도 dispatch)
+        return;
+      }
+      window.Dispatcher?.handleInput?.(px, py, kind);
     }
     c.addEventListener('mousedown',  e=>route(e,'down'));
     c.addEventListener('mouseup',    e=>route(e,'up'));
