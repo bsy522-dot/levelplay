@@ -116,7 +116,7 @@
 /* 미니맵 */
 #v8-minimap {
   position: absolute;
-  top: 54px;
+  top: 116px;
   right: 14px;
   width: 80px; height: 80px;
   background: rgba(10,10,20,0.75);
@@ -444,7 +444,7 @@
   #v8-hud-top { height: 38px; font-size: 12px; padding: 0 8px; }
   #v8-hud-top .v8-slot { gap: 6px; }
   #v8-btn-settings, #v8-cam-toggle { padding: 3px 8px; font-size: 11px; }
-  #v8-minimap { width: 60px; height: 60px; top: 44px; right: 8px; }
+  #v8-minimap { width: 60px; height: 60px; top: 100px; right: 8px; }
 
   #v8-unit-panel { padding: 8px 10px; }
   .v8-unit-portrait { width: 30px; height: 30px; font-size: 18px; }
