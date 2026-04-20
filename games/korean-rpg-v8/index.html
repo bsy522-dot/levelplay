@@ -275,6 +275,23 @@
   /* ★ 특이도 복원: #ui-root > * 규칙이 styles.css의 #v8-hud 를 덮어써서
      전체 HUD가 클릭을 가로채는 버그 방지 */
   #v8-hud { pointer-events: none; }
+
+  @keyframes npcArrowBounce {
+    0%   { transform: translate(-50%, -100%) translateY(0); }
+    100% { transform: translate(-50%, -100%) translateY(-8px); }
+  }
+  .npc-talk-arrow {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    font-size: 22px;
+    color: #ffe066;
+    text-shadow: 0 0 10px #ffa500, 0 2px 4px #000;
+    animation: npcArrowBounce 0.55s ease-in-out infinite alternate;
+    transform: translate(-50%, -100%);
+    line-height: 1;
+    user-select: none;
+  }
 </style>
 </head>
 <body>
@@ -1672,13 +1689,43 @@ async function playExplorationScene(scene) {
   function _hideMobileUI() { dpad.style.display = 'none'; interactBtn.style.display = 'none'; }
   function _showMobileUI() { dpad.style.display = ''; interactBtn.style.display = ''; }
 
+  let _npcArrowEl = null, _npcArrowRaf = null;
+  function _showNPCArrow(mesh) {
+    if (_npcArrowEl) _hideNPCArrow();
+    _npcArrowEl = document.createElement('div');
+    _npcArrowEl.className = 'npc-talk-arrow';
+    _npcArrowEl.textContent = '▼';
+    document.body.appendChild(_npcArrowEl);
+    const _v3 = new THREE.Vector3();
+    function _updateArrow() {
+      if (!_npcArrowEl) return;
+      const cam = State.camera;
+      const rdr = State.renderer;
+      if (!cam || !rdr) return;
+      _v3.setFromMatrixPosition(mesh.matrixWorld);
+      _v3.y += 1.6;
+      _v3.project(cam);
+      const rc = rdr.domElement.getBoundingClientRect();
+      _npcArrowEl.style.left = ((_v3.x * 0.5 + 0.5) * rc.width  + rc.left) + 'px';
+      _npcArrowEl.style.top  = ((-_v3.y * 0.5 + 0.5) * rc.height + rc.top)  + 'px';
+      _npcArrowRaf = requestAnimationFrame(_updateArrow);
+    }
+    _updateArrow();
+  }
+  function _hideNPCArrow() {
+    if (_npcArrowRaf) { cancelAnimationFrame(_npcArrowRaf); _npcArrowRaf = null; }
+    if (_npcArrowEl)  { _npcArrowEl.remove(); _npcArrowEl = null; }
+  }
+
   async function _tryInteract() {
     if (animating) return;
     const npcHit = nearestInteractable(playerUnit, npcList, 1.5);
     if (npcHit) {
       _hideMobileUI();
       faceNPCTowardsPlayer(npcHit.mesh, playerMesh);
+      _showNPCArrow(npcHit.mesh);
       await _runTrigger(npcHit.trigger, npcHit);
+      _hideNPCArrow();
       _showMobileUI();
       return;
     }
