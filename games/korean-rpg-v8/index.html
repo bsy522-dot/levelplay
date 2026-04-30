@@ -537,6 +537,7 @@ import {
 } from './js-v8/battle/highlights.js';
 
 import { initHUD, updateHUD, showUnitPanel, hideUnitPanel, setMinimap, onAction as onHudAction, onCameraChange as onHudCamChange, onSettings as onHudSettings } from './js-v8/ui/hud.js';
+import { initActionQueue, updateActionQueue, setActionQueueActive, hideActionQueue, showActionQueue } from './js-v8/ui/action_queue.js';
 import { DialogueRunner, showDialogue, hideDialogue, isDialogueActive } from './js-v8/ui/dialogue.js';
 import { openSettings, getSettings, saveSettings, onSettingsChange } from './js-v8/ui/settings.js';
 import { showInventory, showItemSelect, showVictory, showDefeat, showEpisodeSelect, showTitleLite, closeAllOverlays } from './js-v8/ui/menus.js';
@@ -655,6 +656,8 @@ State.updateCallbacks.push((dt) => {
 
 // ── HUD 초기화 ───────────────────────────────────
 const hudRoot = initHUD(document.getElementById('ui-root'));
+initActionQueue();
+hideActionQueue(); // 전투 진입 시 노출
 
 // ── 전투 컷인 HTML 오버레이 ──────────────────────
 const cutinOverlay = new CutinOverlay(document.getElementById('ui-root'));
@@ -836,6 +839,7 @@ async function playBattleScene(scene) {
   setMode('battle');
   GameState.flags.battleResult = null;
   GameState.flags._hintShown = false;
+  showActionQueue();
 
   // 맵 로드
   const mapId = scene.mapId;
@@ -965,6 +969,7 @@ async function playBattleScene(scene) {
   // 정리
   unbindCanvasClick();
   audio.stopBGM();
+  hideActionQueue();
 
   if (GameState.flags.battleResult === 'victory') {
     audio.playBGM('victory');
@@ -1084,6 +1089,7 @@ function wireTurnManager(tm) {
       hideUnitPanel();
       _detachSelectionRing();
       GameState.selected = null;
+      updateActionQueue(GameState.units, { activeId: null });
       // 첫 턴 시작 직후만 안내 표시 (행동 시작하면 자동 숨김)
       if (GameState.turnManager?.turn === 1 && !GameState.flags._hintShown) {
         showFirstTurnHint();
@@ -1094,6 +1100,7 @@ function wireTurnManager(tm) {
       GameState.selected = unit;
       _attachSelectionRing(unit);
       hideFirstTurnHint();
+      updateActionQueue(GameState.units, { activeId: unit.id });
       const tiles = calcMoveRange(unit, GameState.map, GameState.units);
       clearHighlights();
       GameState.moveHighlight = showMoveRange(tiles);
@@ -1109,6 +1116,7 @@ function wireTurnManager(tm) {
       hideUnitPanel();
       hideFirstTurnHint();
       _detachSelectionRing();
+      updateActionQueue(GameState.units, { activeId: null });
       showTurnBanner('적의 턴', 1300);
       runEnemyTurn();
     } else if (to === PHASE.VICTORY) {
@@ -1501,6 +1509,9 @@ function updateHUDAlive() {
     allyAlive: GameState.allies.filter(u => u.hp > 0).length,
     enemyAlive: GameState.enemies.filter(u => u.hp > 0).length,
   });
+  if (GameState.units && GameState.units.length) {
+    updateActionQueue(GameState.units, { activeId: GameState.selected?.id || null });
+  }
   // ★ fullloop-3d 이식: 분대 모드일 때 HP 비율에 따라 병사 visible 토글
   if (GameState.battleDisplay === 'squad') {
     for (const u of GameState.units) {
