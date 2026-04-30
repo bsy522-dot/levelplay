@@ -135,6 +135,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <button class="menu-btn" onclick="showRecords()"><span class="icon">&#x1F4CA;</span> 전적 / 스탯<span class="sub">파이트 기록과 능력치 확인</span></button>
 <button class="menu-btn" onclick="quickFight()"><span class="icon">&#x26A1;</span> 퀵 매치<span class="sub">랜덤 상대와 즉시 대전</span></button>
 <button class="menu-btn" id="ttsToggleBtn" onclick="ttsToggle()"><span class="icon">&#x1F50A;</span> <span id="ttsLabel">음성 ON</span><span class="sub">라운드콜·콤보콜·KO 외침</span></button>
+<button class="menu-btn" id="motionToggleBtn" onclick="toggleMotion()"><span class="icon">&#x1F4F1;</span> <span id="motionLabel">모션펀치 OFF</span><span class="sub">폰 흔들어 잽/크로스/훅/어퍼 입력 (모바일)</span></button>
 <button class="menu-btn" onclick="showAICoach()"><span class="icon">&#x1F916;</span> AI 코치 (BETA)<span class="sub">카메라로 자세 분석 · 로컬 Ollama 필요</span></button>
 <button class="menu-btn" onclick="resetAll()" style="border-color:rgba(230,57,70,.3)"><span class="icon">&#x1F504;</span> 데이터 초기화<span class="sub">모든 진행 상황을 리셋합니다</span></button>
 </div>
@@ -228,7 +229,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v5.7-2026.05.01-AI+TTS+POSE';
+const BUILD_VERSION = 'v5.8-2026.05.01-MOTION+HAPTIC+PUNCH';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 
@@ -442,8 +443,24 @@ function loadMascot() {
     scene.add(mascotModel);
     mascotMixer = new THREE.AnimationMixer(mascotModel);
     gltf.animations.forEach(clip => { mascotActions[clip.name] = mascotMixer.clipAction(clip); });
-    const startAnim = mascotActions['Dance'] || mascotActions['Wave'] || mascotActions['Idle'];
-    if (startAnim) startAnim.play();
+    // 메인 메뉴 진입 시 Dance, 5초마다 Punch 한 번
+    const idle = mascotActions['Dance'] || mascotActions['Wave'] || mascotActions['Idle'];
+    if (idle) idle.play();
+    const punch = mascotActions['Punch'];
+    if (punch && idle) {
+      setInterval(() => {
+        if (currentScreen !== 'main' || !mascotModel.visible) return;
+        idle.fadeOut(0.2);
+        punch.reset().setLoop(THREE.LoopOnce, 1).fadeIn(0.2).play();
+        punch.clampWhenFinished = true;
+      }, 5000);
+      mascotMixer.addEventListener('finished', e => {
+        if (e.action === punch) {
+          punch.fadeOut(0.3);
+          idle.reset().fadeIn(0.3).play();
+        }
+      });
+    }
     console.log('[Mascot] loaded:', Object.keys(mascotActions).join(', '));
   }, undefined, err => console.warn('[Mascot] load failed:', err));
 }
@@ -1373,6 +1390,51 @@ function hideAll() {
   stopAICam();
 }
 
+// ==================== DEVICE MOTION 펀치 (폰 흔들기 입력) ====================
+const MOTION_KEY = 'boxingV5_motion';
+let _motionEnabled = (localStorage.getItem(MOTION_KEY) || '0') === '1';
+let _motionLastPunch = 0;
+const MOTION_THRESHOLD = 18; // m/s² (펀치 감지 임계)
+const MOTION_COOLDOWN = 400;
+
+function _onDeviceMotion(e) {
+  if (!_motionEnabled || currentScreen !== 'fight') return;
+  const a = e.accelerationIncludingGravity || e.acceleration;
+  if (!a) return;
+  const mag = Math.hypot(a.x || 0, a.y || 0, a.z || 0);
+  const now = performance.now();
+  if (mag > MOTION_THRESHOLD && now - _motionLastPunch > MOTION_COOLDOWN) {
+    _motionLastPunch = now;
+    // 축 분석으로 펀치 종류 결정
+    const ax = Math.abs(a.x || 0), ay = Math.abs(a.y || 0), az = Math.abs(a.z || 0);
+    let type = 'jab';
+    if (az > ax && az > ay) type = (a.z < 0) ? 'cross' : 'jab';
+    else if (ay > ax) type = (a.y > 0) ? 'uppercut' : 'hook';
+    else type = ax > 12 ? 'hook' : 'jab';
+    if (typeof playerPunch === 'function') playerPunch(type);
+  }
+}
+
+async function toggleMotion() {
+  // iOS 13+ 권한 요청
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const perm = await DeviceMotionEvent.requestPermission();
+      if (perm !== 'granted') { alert('동작 센서 권한이 필요합니다'); return; }
+    } catch (e) { alert('권한 요청 실패: ' + e.message); return; }
+  }
+  _motionEnabled = !_motionEnabled;
+  localStorage.setItem(MOTION_KEY, _motionEnabled ? '1' : '0');
+  const lbl = document.getElementById('motionLabel');
+  if (lbl) lbl.textContent = _motionEnabled ? '모션펀치 ON' : '모션펀치 OFF';
+  if (_motionEnabled) {
+    window.addEventListener('devicemotion', _onDeviceMotion);
+    speak && speak('모션 펀치 활성화. 휴대폰을 흔들어 펀치를 던지세요.', { priority: 'high' });
+  } else {
+    window.removeEventListener('devicemotion', _onDeviceMotion);
+  }
+}
+
 // ==================== TTS COACH (Web Speech API, 외부 의존 0) ====================
 const TTS_ENABLED_KEY = 'boxingV5_tts';
 let _ttsEnabled = (localStorage.getItem(TTS_ENABLED_KEY) || '1') === '1';
@@ -1884,6 +1946,7 @@ function playerPunch(type) {
     f.totalPlayerHits++;
     f.totalPlayerDmg += dmg;
     f.oppHitAnim = 0.3;
+    if (navigator.vibrate) navigator.vibrate(Math.min(50 + dmg * 2, 150));
     f.shakeAmount = Math.min(dmg / 3, 8);
     f.flashAmount = 0.3;
     playPunch(type === 'hook' || type === 'uppercut' ? 'heavy' : 'light');
@@ -2056,6 +2119,7 @@ function updateOpponentAI(dt) {
   f.totalOppDmg += dmg;
   f.playerHitAnim = 0.3;
   f.shakeAmount = Math.min(dmg / 4, 6);
+  if (navigator.vibrate) navigator.vibrate([30, 50, 80]);
   playPunch(punchType === 'hook' || punchType === 'uppercut' ? 'heavy' : 'light');
 
   f.oppPunchAnim = 0.3;
@@ -2681,6 +2745,11 @@ function init() {
   _initTTS();
   const lbl = document.getElementById('ttsLabel');
   if (lbl) lbl.textContent = _ttsEnabled ? '음성 ON' : '음성 OFF';
+  const mlbl = document.getElementById('motionLabel');
+  if (mlbl) mlbl.textContent = _motionEnabled ? '모션펀치 ON' : '모션펀치 OFF';
+  if (_motionEnabled && (typeof DeviceMotionEvent === 'undefined' || typeof DeviceMotionEvent.requestPermission !== 'function')) {
+    window.addEventListener('devicemotion', _onDeviceMotion);
+  }
   loadSave();
   try {
     initThree();
