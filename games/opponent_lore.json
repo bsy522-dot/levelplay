@@ -1,0 +1,102 @@
+{
+  "_generated": "2026-04-30T11:07:01",
+  "_model": "gemma4:e4b-it-q4_K_M",
+  "opponents": {
+    "김초보": {
+      "name": "김초보",
+      "backstory": "",
+      "trashTalk": [
+        "지켜보고만 있을 생각하지 마라. 네 펀치는 쓰레기다."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "박잽마스터": {
+      "name": "박잽마스터",
+      "backstory": "",
+      "trashTalk": [
+        "잽이 네 눈에 먼저 들어올 거다. 덤벼 봐.",
+        "스피드가 네 심장을 때릴 때, 넌 그저 그림자일 뿐이다.",
+        "스피드만 믿고 덤비지 마. 네 펀치는 내 잽의 그림자도 못 따라와."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "이파워": {
+      "name": "이파워",
+      "backstory": "",
+      "trashTalk": [
+        "파워는 네가 감당할 수 있는 수준이 아닐 거야.",
+        "힘만 믿지 마라. 네 펀치, 아빠한테도 못 이긴다."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "최카운터": {
+      "name": "최카운터",
+      "backstory": "어릴 때부터 체육관을 전전하며 타고난 감각과 민첩성을 갈고닦았고, 상대의 공격을 읽고 빈틈을 노리는 카운터 펀처로 성장했다. 현재는 무관의 타이틀에 도전하며, 예측 불가능한 스피드와 정교한 펀치로 명성을 쌓아가고 있다.",
+      "trashTalk": [
+        "넌 그저 내가 지나가는 바람에 날릴 먼지일 뿐이다."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "정스위처": {
+      "name": "정스위처",
+      "backstory": "",
+      "trashTalk": [
+        "네 스텝에 맞춰 쉴 틈 없이, 오늘은 내가 널 부술 차례다."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "한콤보": {
+      "name": "한콤보",
+      "backstory": "어린 시절부터 타고난 운동 신경과 빠른 발놀림을 자랑하며 콤보 공격에 특화된 재능을 보여왔다. 현재는 무관의 타이틀을 목표로 프로 복싱계에서 자신의 역동적인 경기 스타일을 입증하고 있다.",
+      "trashTalk": [
+        "네 발로 뛰는 싸움은 이미 지쳤지? 빠져.",
+        "네 뼈를 부술 콤보로 끝내주지."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "강바디": {
+      "name": "강바디",
+      "backstory": "",
+      "trashTalk": [
+        "네 실력으로 나한테 뭘 할 수 있는데?",
+        "장난은 그만해. 네 펀치로는 내 가죽 한 장 못 긁어."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "윤디펜스": {
+      "name": "윤디펜스",
+      "backstory": "",
+      "trashTalk": [
+        "흥, 윤디펜스이 누군지 알기나 하나?"
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "서매트릭스": {
+      "name": "서매트릭스",
+      "backstory": "",
+      "trashTalk": [
+        "네 발로 서서 싸울 생각 마. 그냥 경고만 해줄게."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    },
+    "홍챔피언": {
+      "name": "홍챔피언",
+      "backstory": "",
+      "trashTalk": [
+        "느려터진 펀치로 시간 낭비하지 마라.",
+        "속도에 익숙해져. 오늘은 네가 무릎 꿇는 날이야."
+      ],
+      "winInterview": "",
+      "loseInterview": ""
+    }
+  }
+}

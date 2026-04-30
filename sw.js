@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v21';
+const CACHE_NAME = 'levelplay-v22';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -66,12 +66,14 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 가져오기: Network First (data/*.json), Cache First (나머지)
+// 가져오기: Network First (data/*.json, boxing/RPG 게임 HTML), Cache First (나머지)
+const NETWORK_FIRST_PATHS = ['/data/', 'boxing-trainer-', 'korean-rpg-', 'index.html', '/sw.js'];
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+  const isNetworkFirst = NETWORK_FIRST_PATHS.some(p => url.pathname.includes(p));
 
-  // data/*.json - Network First, fallback to cache
-  if (url.pathname.includes('/data/') && url.pathname.endsWith('.json')) {
+  // Network First 대상 - 항상 네트워크 우선, fallback to cache
+  if (isNetworkFirst) {
     event.respondWith(
       fetch(event.request).then(response => {
         if (response.ok) {
