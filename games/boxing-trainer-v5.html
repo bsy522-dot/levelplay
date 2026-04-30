@@ -134,6 +134,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <button class="menu-btn" onclick="showTraining()"><span class="icon">&#x1F3CB;&#xFE0F;</span> 트레이닝<span class="sub">스피드백, 헤비백, 줄넘기, 스파링</span></button>
 <button class="menu-btn" onclick="showRecords()"><span class="icon">&#x1F4CA;</span> 전적 / 스탯<span class="sub">파이트 기록과 능력치 확인</span></button>
 <button class="menu-btn" onclick="quickFight()"><span class="icon">&#x26A1;</span> 퀵 매치<span class="sub">랜덤 상대와 즉시 대전</span></button>
+<button class="menu-btn" id="ttsToggleBtn" onclick="ttsToggle()"><span class="icon">&#x1F50A;</span> <span id="ttsLabel">음성 ON</span><span class="sub">라운드콜·콤보콜·KO 외침</span></button>
 <button class="menu-btn" onclick="showAICoach()"><span class="icon">&#x1F916;</span> AI 코치 (BETA)<span class="sub">카메라로 자세 분석 · 로컬 Ollama 필요</span></button>
 <button class="menu-btn" onclick="resetAll()" style="border-color:rgba(230,57,70,.3)"><span class="icon">&#x1F504;</span> 데이터 초기화<span class="sub">모든 진행 상황을 리셋합니다</span></button>
 </div>
@@ -145,8 +146,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
   <video id="aiCam" autoplay playsinline muted style="width:280px;height:210px;background:#000;border:2px solid var(--border);border-radius:10px;object-fit:cover;display:none"></video>
   <canvas id="aiCanvas" style="display:none"></canvas>
   <div id="aiCoachActions" style="display:none;margin-top:12px">
-    <button class="menu-btn" style="width:280px" onclick="aiCoachAnalyze('stance')"><span class="icon">&#x1F94A;</span> 자세 평가<span class="sub">현재 가드/스탠스 점수 + 코칭</span></button>
+    <button class="menu-btn" style="width:280px" onclick="aiCoachAnalyze('stance')"><span class="icon">&#x1F94A;</span> 자세 평가<span class="sub">Ollama Moondream · 3~7초 분석</span></button>
     <button class="menu-btn" style="width:280px" onclick="aiCoachAnalyze('punch')"><span class="icon">&#x1F4A5;</span> 펀치 종류 인식<span class="sub">jab/cross/hook/uppercut</span></button>
+    <button class="menu-btn" style="width:280px" onclick="togglePoseTracking()" id="poseToggleBtn"><span class="icon">&#x1F3AF;</span> 실시간 펀치 모드 시작<span class="sub">MediaPipe Pose · 게임 입력 연동</span></button>
   </div>
   <div id="aiCoachResult" style="margin-top:12px;padding:12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);max-width:320px;min-height:60px;display:none"></div>
 </div>
@@ -226,7 +228,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v5.6-2026.04.30-AI';
+const BUILD_VERSION = 'v5.7-2026.05.01-AI+TTS+POSE';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 
@@ -1371,6 +1373,57 @@ function hideAll() {
   stopAICam();
 }
 
+// ==================== TTS COACH (Web Speech API, 외부 의존 0) ====================
+const TTS_ENABLED_KEY = 'boxingV5_tts';
+let _ttsEnabled = (localStorage.getItem(TTS_ENABLED_KEY) || '1') === '1';
+let _ttsVoice = null;
+let _comboCalledThisRound = new Set();
+function _initTTS() {
+  if (!('speechSynthesis' in window)) { _ttsEnabled = false; return; }
+  const pickVoice = () => {
+    const voices = speechSynthesis.getVoices();
+    _ttsVoice = voices.find(v => v.lang.startsWith('ko')) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+  };
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function speak(text, opts = {}) {
+  if (!_ttsEnabled || !('speechSynthesis' in window)) return;
+  if (opts.priority === 'high') speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if (_ttsVoice) u.voice = _ttsVoice;
+  u.lang = (_ttsVoice && _ttsVoice.lang) || 'ko-KR';
+  u.rate = opts.rate || 1.15;
+  u.pitch = opts.pitch || 1.0;
+  u.volume = opts.volume || 0.85;
+  speechSynthesis.speak(u);
+}
+function ttsToggle() {
+  _ttsEnabled = !_ttsEnabled;
+  localStorage.setItem(TTS_ENABLED_KEY, _ttsEnabled ? '1' : '0');
+  const lbl = document.getElementById('ttsLabel');
+  if (lbl) lbl.textContent = _ttsEnabled ? '음성 ON' : '음성 OFF';
+  if (_ttsEnabled) speak('음성 코치 활성화', { priority: 'high' });
+  else speechSynthesis.cancel();
+}
+
+// 콤보 콜 — combo가 3개 이상 연속이면 외침
+function callCombo(combo) {
+  if (!_ttsEnabled || !combo || combo.length < 2) return;
+  const key = combo.join('-');
+  if (_comboCalledThisRound.has(key)) return;
+  _comboCalledThisRound.add(key);
+  const map = { jab: '잽', cross: '크로스', hook: '훅', uppercut: '어퍼' };
+  const txt = combo.slice(-3).map(p => map[p] || p).join(' ');
+  speak(txt, { rate: 1.4 });
+}
+
+// 라운드 콜
+function callRoundStart(round, total) { speak(`라운드 ${round}, 시작!`, { priority: 'high' }); }
+function callRoundEnd(round) { _comboCalledThisRound.clear(); speak('라운드 종료', { priority: 'high' }); }
+function callKO(playerWin) { speak(playerWin ? '케이오 승리!' : '케이오 패배', { priority: 'high', rate: 1.3 }); }
+function callFightStart(oppName) { speak(`${oppName}와 경기 시작`, { priority: 'high' }); }
+
 // ==================== OPPONENT LORE (사전 생성된 백스토리/트래시토크) ====================
 let OPPONENT_LORE = {};
 fetch('opponent_lore.json').then(r => r.ok ? r.json() : null).then(d => { if (d && d.opponents) OPPONENT_LORE = d.opponents; }).catch(() => {});
@@ -1449,6 +1502,99 @@ function stopAICam() {
   if (r) r.style.display = 'none';
 }
 
+// ==================== POSE TRACKING (MediaPipe) ====================
+let _poseLoaded = false, _poseInst = null, _poseCamera = null, _poseActive = false;
+const _poseHist = { L: [], R: [] };
+const _poseCooldown = { L: 0, R: 0 };
+const POSE_HIST_LEN = 8, POSE_COOLDOWN_MS = 350, POSE_VEL = 0.018, POSE_EXT = 0.12;
+
+function _loadScript(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) return res();
+    const s = document.createElement('script');
+    s.src = src; s.crossOrigin = 'anonymous';
+    s.onload = res; s.onerror = () => rej(new Error('Load failed: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+async function _loadPoseLibs() {
+  if (_poseLoaded) return true;
+  const result = $('aiCoachResult');
+  if (result) { result.style.display = 'block'; result.innerHTML = '<div style="color:var(--dim)">⏳ MediaPipe 로드 중...</div>'; }
+  try {
+    await _loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
+    await _loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
+    _poseLoaded = true;
+    return true;
+  } catch (e) {
+    if (result) result.innerHTML = '<div style="color:#e63946">MediaPipe 로드 실패: ' + e.message + '</div>';
+    return false;
+  }
+}
+
+function _detectPosePunch(side, wrist, shoulder) {
+  const arr = _poseHist[side];
+  arr.push({ t: performance.now(), x: wrist.x, y: wrist.y, z: wrist.z || 0 });
+  if (arr.length > POSE_HIST_LEN) arr.shift();
+  if (arr.length < 4) return null;
+  const now = performance.now();
+  if (now - _poseCooldown[side] < POSE_COOLDOWN_MS) return null;
+  const a = arr[0], b = arr[arr.length - 1];
+  const dt = (b.t - a.t) / 1000; if (dt <= 0) return null;
+  const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+  const dist = Math.hypot(dx, dy, dz);
+  const vel = dist / dt;
+  if (vel < POSE_VEL * 30) return null;
+  const relZ = (wrist.z || 0) - (shoulder.z || 0);
+  let type = null;
+  if (Math.abs(relZ) > POSE_EXT && Math.abs(dz) > Math.abs(dx) + Math.abs(dy)) type = side === 'L' ? 'jab' : 'cross';
+  else if (dy < -0.08 && Math.abs(dy) > Math.abs(dx)) type = 'uppercut';
+  else if (Math.abs(dx) > 0.08 && Math.abs(dx) > Math.abs(dy) * 1.2) type = 'hook';
+  if (!type) return null;
+  _poseCooldown[side] = now;
+  return type;
+}
+
+async function togglePoseTracking() {
+  const btn = $('poseToggleBtn');
+  const lbl = btn ? btn.querySelector('.sub') : null;
+  if (_poseActive) {
+    _poseActive = false;
+    if (_poseCamera && _poseCamera.stop) _poseCamera.stop();
+    if (btn) btn.querySelector('span:nth-child(2)') ? btn.firstChild.nextSibling.textContent = ' 실시간 펀치 모드 시작' : 0;
+    const r = $('aiCoachResult'); if (r) r.innerHTML = '<div style="color:var(--dim)">실시간 펀치 모드 종료</div>';
+    return;
+  }
+  if (!await _loadPoseLibs()) return;
+  if (typeof Pose === 'undefined') { $('aiCoachResult').innerHTML = '<div style="color:#e63946">Pose 글로벌 미발견</div>'; return; }
+  if (!_poseInst) {
+    _poseInst = new Pose({ locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/pose/' + f });
+    _poseInst.setOptions({ modelComplexity: 1, smoothLandmarks: true, enableSegmentation: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    _poseInst.onResults(res => {
+      if (!res.poseLandmarks || !_poseActive) return;
+      const lm = res.poseLandmarks;
+      const tL = _detectPosePunch('L', lm[15], lm[11]);
+      const tR = _detectPosePunch('R', lm[16], lm[12]);
+      [tL, tR].forEach(t => {
+        if (!t) return;
+        const r = $('aiCoachResult');
+        if (r) r.innerHTML = `<div style="color:#22c55e;font-size:24px;font-weight:900">🥊 ${t.toUpperCase()}</div>`;
+        // 게임 전투중이면 실제 펀치 입력
+        if (currentScreen === 'fight' && typeof playerPunch === 'function') playerPunch(t);
+        window.dispatchEvent(new CustomEvent('punch-detected', { detail: { type: t } }));
+      });
+    });
+  }
+  const v = $('aiCam');
+  _poseCamera = new Camera(v, { onFrame: async () => { if (_poseActive) await _poseInst.send({ image: v }); }, width: 640, height: 480 });
+  _poseActive = true;
+  _poseCamera.start();
+  if (btn) btn.firstChild.nextSibling.textContent = ' 실시간 펀치 모드 정지';
+  $('aiCoachResult').style.display = 'block';
+  $('aiCoachResult').innerHTML = '<div style="color:#22c55e">✓ 실시간 펀치 인식 시작 — 카메라 앞에서 잽/크로스/훅/어퍼 시도</div>';
+}
+
 async function aiCoachAnalyze(mode) {
   const result = $('aiCoachResult');
   result.style.display = 'block';
@@ -1520,6 +1666,8 @@ function showCareer() {
   let html = '';
   OPPONENTS.forEach((o, i) => {
     const locked = i >= save.unlockedOpponents;
+    const lore = OPPONENT_LORE[o.name];
+    const back = (lore && lore.backstory && !locked) ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:var(--dim);line-height:1.4;text-align:left;font-style:italic">${lore.backstory.slice(0, 120)}${lore.backstory.length > 120 ? '...' : ''}</div>` : '';
     html += `<div class="opponent-card ${locked ? 'locked' : ''}" onclick="startCareerFight(${i})">
       <div class="name">${locked ? '???' : o.name}</div>
       <div class="style">${locked ? '미해금' : o.style}</div>
@@ -1530,6 +1678,7 @@ function showCareer() {
         <span class="opp-stat">DEF ${locked ? '?' : o.defense}</span>
       </div>
       ${o.belt && !locked ? `<div style="margin-top:6px;font-size:11px;color:var(--gold)">&#x1F3C6; ${BELT_NAMES[o.belt]}</div>` : ''}
+      ${back}
     </div>`;
   });
   $('opponentList').innerHTML = html;
@@ -1609,6 +1758,8 @@ function startFight(opp, isCareer, oppIdx) {
   if ('ontouchstart' in window) $('mobileControls').classList.remove('hidden');
 
   $('oppNameHud').textContent = opp.name;
+  callFightStart(opp.name);
+  setTimeout(() => callRoundStart(1, 3), 1500);
 
   // Show fighters
   playerModel.group.visible = true;
@@ -1707,9 +1858,9 @@ function playerPunch(type) {
   if (now - f.comboTimer < 1200) {
     f.combo.push(type);
     const chain = f.combo.join('-');
-    if (chain.includes('jab-cross-hook')) { dmg *= 1.5; showComboText('잽-크로스-훅!'); f.combo = []; }
-    else if (chain.includes('jab-jab-cross')) { dmg *= 1.3; showComboText('더블잽-크로스!'); f.combo = []; }
-    else if (chain.includes('jab-cross-uppercut')) { dmg *= 1.4; showComboText('잽-크로스-어퍼!'); f.combo = []; }
+    if (chain.includes('jab-cross-hook')) { dmg *= 1.5; showComboText('잽-크로스-훅!'); callCombo(['jab','cross','hook']); f.combo = []; }
+    else if (chain.includes('jab-jab-cross')) { dmg *= 1.3; showComboText('더블잽-크로스!'); callCombo(['jab','jab','cross']); f.combo = []; }
+    else if (chain.includes('jab-cross-uppercut')) { dmg *= 1.4; showComboText('잽-크로스-어퍼!'); callCombo(['jab','cross','uppercut']); f.combo = []; }
     f.comboCount = f.combo.length;
   } else {
     f.combo = [type];
@@ -1755,6 +1906,7 @@ function playerPunch(type) {
         f.slowMo = true;
         f.slowMoTimer = 2;
         showComboText('K.O.!!');
+        callKO(true);
         playCrowd(1);
         // KO flash
         koFlashLight.intensity = 5;
@@ -1924,6 +2076,7 @@ function updateOpponentAI(dt) {
       f.slowMo = true;
       f.slowMoTimer = 2;
       showComboText('다운...');
+      callKO(false);
       koFlashLight.intensity = 3;
     } else {
       f.playerHP = 10;
@@ -1955,6 +2108,7 @@ function updateFight(dt) {
       f.restTimer = 10;
       $('restScreen').classList.remove('hidden');
       playBell();
+      callRoundEnd(f.round);
       return;
     }
 
@@ -1991,6 +2145,7 @@ function updateFight(dt) {
       f.phase = 'fight';
       $('restScreen').classList.add('hidden');
       playBell();
+      callRoundStart(f.round, f.maxRounds);
     }
   } else if (f.phase === 'ko') {
     f.koTimer -= dt;
@@ -2083,6 +2238,9 @@ function endFight() {
 
   saveSave();
 
+  const _oppLore = OPPONENT_LORE[f.opp.name];
+  const _interview = _oppLore ? (playerWin ? _oppLore.loseInterview : _oppLore.winInterview) : '';
+  const _interviewHTML = _interview ? `<div style="margin-top:14px;padding:10px;background:rgba(255,255,255,.04);border-left:3px solid var(--accent);font-size:12px;color:var(--text);font-style:italic;text-align:left;line-height:1.5">"${_interview}"<div style="margin-top:4px;font-size:10px;color:var(--dim);font-style:normal">— ${f.opp.name} 인터뷰</div></div>` : '';
   const _resultHTML = `
     <div class="result-text ${playerWin ? (isKO && f.oppHP <= 0 ? 'ko' : 'win') : 'lose'}">
       ${playerWin ? (isKO && f.oppHP <= 0 ? 'K.O. 승리!' : '판정 승리!') : (isKO ? 'K.O. 패배...' : '판정 패배...')}
@@ -2095,6 +2253,7 @@ function endFight() {
       <div>회피: <b>${f.totalDodges}</b> | 블록: <b>${f.totalBlocks}</b></div>
       <div style="color:var(--gold);margin-top:8px">XP +${xpGain}</div>
       ${f.opp.belt && playerWin ? `<div style="color:var(--gold);font-size:18px;margin-top:8px">&#x1F3C6; ${BELT_NAMES[f.opp.belt]} 획득!</div>` : ''}
+      ${_interviewHTML}
     </div>
     <button class="confirm-btn" onclick="afterFight()">확인</button>
   `;
@@ -2519,6 +2678,9 @@ function gameLoop() {
 // ==================== INIT ====================
 function init() {
   if (!document.getElementById('mainMenu')) return; // THREE 로드 실패로 body 교체된 경우
+  _initTTS();
+  const lbl = document.getElementById('ttsLabel');
+  if (lbl) lbl.textContent = _ttsEnabled ? '음성 ON' : '음성 OFF';
   loadSave();
   try {
     initThree();

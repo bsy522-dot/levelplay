@@ -1,0 +1,6 @@
+games/_check*.js
+games/_newsec.js
+games/_pose.js
+games/_synctest.js
+__pycache__/
+*.pyc
