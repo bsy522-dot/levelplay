@@ -163,7 +163,7 @@ function ensureDmgContainer() {
   return _dmgContainer;
 }
 
-export function damageNumber(worldPos, text, color = '#ff4444') {
+export function damageNumber(worldPos, text, color = '#ff4444', opts = {}) {
   if (!State.camera || !State.renderer) return;
   const container = ensureDmgContainer();
 
@@ -173,30 +173,36 @@ export function damageNumber(worldPos, text, color = '#ff4444') {
 
   const el = document.createElement('div');
   el.textContent = text;
+  const sz = opts.size || 56;
   el.style.cssText = [
     'position:absolute',
     `left:${x}px`, `top:${y}px`,
-    'transform:translate(-50%,-50%)',
+    'transform:translate(-50%,-50%) scale(0.4)',
     `color:${color}`,
-    'font-size:28px', 'font-weight:900',
-    'text-shadow:0 2px 6px #000, 0 0 12px rgba(0,0,0,.7)',
-    'transition:transform .8s cubic-bezier(.2,.8,.3,1), opacity .8s ease-out',
+    `font-size:${sz}px`, 'font-weight:900',
+    'letter-spacing:1px',
+    'text-shadow:0 2px 0 #000, 0 0 14px rgba(0,0,0,.85), 0 0 24px rgba(255,80,40,.55)',
+    '-webkit-text-stroke:2px #000',
+    'transition:transform .9s cubic-bezier(.2,.8,.3,1), opacity .9s ease-out',
     'will-change:transform,opacity','opacity:1',
   ].join(';');
   container.appendChild(el);
 
-  // 애니메이션 — 위로 떠오르며 페이드아웃
+  // 애니메이션 — 살짝 튀어오른 뒤 위로 솟구치며 페이드
   requestAnimationFrame(() => {
-    el.style.transform = 'translate(-50%, -120%) scale(1.3)';
-    el.style.opacity = '0';
+    el.style.transform = 'translate(-50%, -50%) scale(1.4)';
   });
-  setTimeout(() => el.remove(), 900);
+  setTimeout(() => {
+    el.style.transform = 'translate(-50%, -160%) scale(1.0)';
+    el.style.opacity = '0';
+  }, 80);
+  setTimeout(() => el.remove(), 1000);
 }
 
 export function critNumber(worldPos, text) {
-  damageNumber(worldPos, `${text}!`, '#ffd700');
+  damageNumber(worldPos, `${text}!`, '#ffe060', { size: 76 });
 }
 
 export function healNumber(worldPos, text) {
-  damageNumber(worldPos, `+${text}`, '#66ffaa');
+  damageNumber(worldPos, `+${text}`, '#7affb0', { size: 50 });
 }

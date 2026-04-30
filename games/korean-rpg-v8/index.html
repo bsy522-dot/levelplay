@@ -252,22 +252,69 @@
   /* Turn banner */
   #v8-turn-banner {
     position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+    top: 38%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
     z-index: 200;
     pointer-events: none;
     font-family: 'Noto Serif KR', serif;
-    font-size: clamp(30px, 5vw, 56px);
+    font-size: clamp(44px, 7vw, 96px);
     font-weight: 900;
     color: #ffd700;
-    text-shadow: 0 0 20px #ff6a00, 0 4px 12px #000;
+    text-shadow:
+      0 0 24px #ff6a00,
+      0 0 48px rgba(255,140,40,.6),
+      0 6px 18px #000,
+      0 2px 0 #4a2008;
+    -webkit-text-stroke: 2px #2a1208;
     opacity: 0;
-    transition: opacity .3s, transform .3s;
-    letter-spacing: 6px;
+    transition: opacity .35s ease-out, transform .45s cubic-bezier(.2,.8,.3,1);
+    letter-spacing: 10px;
+    padding: 14px 56px;
+    background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(40,12,0,.45) 30%, rgba(40,12,0,.55) 70%, rgba(0,0,0,0) 100%);
+    border-top: 3px solid rgba(255,180,60,.7);
+    border-bottom: 3px solid rgba(255,180,60,.7);
   }
   #v8-turn-banner.v8-show {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+
+  /* 첫 턴 가이드 — 화면 우상단 (영걸전 안내문) */
+  #v8-first-turn-hint {
+    position: fixed;
+    top: 14%; right: 16px;
+    z-index: 180;
+    pointer-events: none;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 14px;
+    color: #ffe2a6;
+    background: linear-gradient(135deg, rgba(60,30,10,.92), rgba(20,10,4,.92));
+    border: 2px solid #c4956a;
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 0 18px rgba(255,170,60,.35), 0 6px 16px rgba(0,0,0,.5);
+    max-width: 240px;
+    line-height: 1.55;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity .4s ease-out, transform .4s ease-out;
+  }
+  #v8-first-turn-hint.v8-show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  #v8-first-turn-hint b {
+    color: #ffd700;
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+  @media (max-width: 720px) {
+    #v8-first-turn-hint {
+      top: 12%; right: 8px; left: 8px; max-width: none;
+      font-size: 13px;
+    }
   }
 
   #ui-root { pointer-events: none; }
@@ -345,6 +392,15 @@
 
 <!-- 턴 배너 -->
 <div id="v8-turn-banner"></div>
+
+<!-- 첫 턴 안내 (영걸전 스타일 가이드) -->
+<div id="v8-first-turn-hint">
+  <b>전투 안내</b>
+  ① 아군(황금 깃발)을 클릭<br>
+  ② <span style="color:#7ab8ff">파란 칸</span>으로 이동<br>
+  ③ <span style="color:#ff7a7a">빨간 칸</span>의 적 공격<br>
+  ④ 우측 패널의 [공격/스킬/대기]
+</div>
 
 <!-- FPS 디버그 -->
 <div id="fps-debug" style="display:none"></div>
@@ -424,6 +480,7 @@ import { audio } from './js-v8/core/audio.js';
 import { MAT, PALETTE, assertStandardMaterials } from './js-v8/graphics/materials.js';
 import { applyBattleLight, applyTownLight, applyBossLight, assertLightStandard } from './js-v8/graphics/lighting.js';
 import { buildUnit, setUnitActed, faceTowards } from './js-v8/graphics/unit_builder.js';
+import { attachUnitHud, refreshAllHuds, detachUnitHud } from './js-v8/graphics/unit_hud.js';
 import { buildTileMap, buildTile, TILE_SIZE, TILE_BASE_H, gridToWorld, PASSABLE } from './js-v8/graphics/terrain.js';
 import { buildHut, buildShop, buildTower, buildDolmen, buildGodTree, buildCampfire, tickCampfire, buildFence } from './js-v8/graphics/buildings.js';
 import {
@@ -744,6 +801,7 @@ async function playDialogueScene(scene) {
 async function playBattleScene(scene) {
   setMode('battle');
   GameState.flags.battleResult = null;
+  GameState.flags._hintShown = false;
 
   // 맵 로드
   const mapId = scene.mapId;
@@ -790,6 +848,7 @@ async function playBattleScene(scene) {
     State.scene.add(g);
     u.mesh = g;
     GameState.allyMeshes.set(u.id, g);
+    attachUnitHud(u);
   }
   for (const u of GameState.enemies) {
     // 적 유닛은 병력 수를 약간 줄임 (풍백·우사·운사 느낌 = 소수 정예)
@@ -801,7 +860,13 @@ async function playBattleScene(scene) {
     State.scene.add(g);
     u.mesh = g;
     GameState.enemyMeshes.set(u.id, g);
+    attachUnitHud(u);
   }
+
+  // 머리 위 HP바 — 매 프레임 hp 변경 검사 후 텍스처 갱신
+  const _hudTick = () => refreshAllHuds(GameState.units);
+  State.updateCallbacks.push(_hudTick);
+  GameState._hudTick = _hudTick;
 
   // 카메라 스위처 소스 설정
   const leaderAlly = GameState.allies.find(u => u.isLeader) || GameState.allies[0];
@@ -812,10 +877,15 @@ async function playBattleScene(scene) {
     obstacles: [GameState.terrain3d],
   });
 
-  // Tactical 카메라 재배치 (맵 중앙)
+  // Tactical 카메라 재배치 (맵 중앙) + 영걸전 스타일 줌인
   const cx = mapData.width * TILE_SIZE / 2;
   const cz = mapData.height * TILE_SIZE / 2;
   GameState.switcher.tacticalState.target.set(cx, 0, cz);
+  // 캐릭터 인식이 잘 되도록 기본 7 → 6 (Ortho size 작을수록 줌인)
+  GameState.switcher.tacticalState.camSize = Math.min(
+    GameState.switcher.tacticalState.camSizeMax,
+    Math.max(GameState.switcher.tacticalState.camSizeMin, 6.0)
+  );
 
   // 카메라 잠금 (EP.1)
   const camLocked = (scene.camera === 'tactical_locked');
@@ -943,6 +1013,16 @@ function placeUnitMesh(mesh, unit) {
 }
 
 function clearBattleScene() {
+  // HP바 빌보드 정리
+  for (const u of (GameState.units || [])) detachUnitHud(u);
+  if (GameState._hudTick) {
+    const idx = State.updateCallbacks.indexOf(GameState._hudTick);
+    if (idx >= 0) State.updateCallbacks.splice(idx, 1);
+    GameState._hudTick = null;
+  }
+  // 선택 링 정리
+  _detachSelectionRing();
+
   // 유닛 메시 제거
   for (const m of GameState.allyMeshes.values()) State.scene.remove(m);
   for (const m of GameState.enemyMeshes.values()) State.scene.remove(m);
@@ -968,9 +1048,18 @@ function wireTurnManager(tm) {
     if (to === PHASE.ALLY_SELECT) {
       clearHighlights();
       hideUnitPanel();
+      _detachSelectionRing();
       GameState.selected = null;
+      // 첫 턴 시작 직후만 안내 표시 (행동 시작하면 자동 숨김)
+      if (GameState.turnManager?.turn === 1 && !GameState.flags._hintShown) {
+        showFirstTurnHint();
+        GameState.flags._hintShown = true;
+        showTurnBanner('아군의 턴', 1400);
+      }
     } else if (to === PHASE.ALLY_MOVE) {
       GameState.selected = unit;
+      _attachSelectionRing(unit);
+      hideFirstTurnHint();
       const tiles = calcMoveRange(unit, GameState.map, GameState.units);
       clearHighlights();
       GameState.moveHighlight = showMoveRange(tiles);
@@ -984,20 +1073,26 @@ function wireTurnManager(tm) {
     } else if (to === PHASE.ENEMY) {
       clearHighlights();
       hideUnitPanel();
-      showTurnBanner('적의 턴');
+      hideFirstTurnHint();
+      _detachSelectionRing();
+      showTurnBanner('적의 턴', 1300);
       runEnemyTurn();
     } else if (to === PHASE.VICTORY) {
       clearHighlights();
       hideUnitPanel();
-      showTurnBanner('승리!');
+      hideFirstTurnHint();
+      _detachSelectionRing();
+      showTurnBanner('승  리!', 1600);
       GameState.flags.battleResult = 'victory';
-      setTimeout(() => GameState._battleResolve && GameState._battleResolve(), 900);
+      setTimeout(() => GameState._battleResolve && GameState._battleResolve(), 1100);
     } else if (to === PHASE.DEFEAT) {
       clearHighlights();
       hideUnitPanel();
-      showTurnBanner('패배');
+      hideFirstTurnHint();
+      _detachSelectionRing();
+      showTurnBanner('패  배', 1500);
       GameState.flags.battleResult = 'defeat';
-      setTimeout(() => GameState._battleResolve && GameState._battleResolve(), 900);
+      setTimeout(() => GameState._battleResolve && GameState._battleResolve(), 1100);
     }
   });
 
@@ -1387,6 +1482,61 @@ function showTurnBanner(text, duration = 1200) {
   b.textContent = text;
   b.classList.add('v8-show');
   setTimeout(() => b.classList.remove('v8-show'), duration);
+}
+
+// 첫 턴 가이드 — 우측 상단 영걸전 안내
+function showFirstTurnHint() {
+  const el = document.getElementById('v8-first-turn-hint');
+  if (el) el.classList.add('v8-show');
+}
+function hideFirstTurnHint() {
+  const el = document.getElementById('v8-first-turn-hint');
+  if (el) el.classList.remove('v8-show');
+}
+
+// 선택 유닛 발 밑 노란 회전 링 (영걸전 selectable indicator)
+let _selectionRing = null, _selectionRingTick = null;
+function _attachSelectionRing(unit) {
+  _detachSelectionRing();
+  if (!unit || !unit.mesh) return;
+  const geo = new THREE.RingGeometry(0.42, 0.55, 32);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xffd24a,
+    emissive: 0xffae20, emissiveIntensity: 1.1,
+    roughness: 1.0, metalness: 0.0,
+    transparent: true, opacity: 0.9,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+  const ring = new THREE.Mesh(geo, mat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(0, 0.04, 0);
+  ring.renderOrder = 50;
+  unit.mesh.add(ring);
+  _selectionRing = ring;
+
+  let t0 = performance.now();
+  _selectionRingTick = () => {
+    if (!_selectionRing) return;
+    const t = (performance.now() - t0) / 1000;
+    _selectionRing.rotation.z = t * 0.9;
+    const pulse = 0.85 + Math.sin(t * 4) * 0.12;
+    _selectionRing.material.opacity = pulse;
+  };
+  State.updateCallbacks.push(_selectionRingTick);
+}
+function _detachSelectionRing() {
+  if (_selectionRing) {
+    if (_selectionRing.parent) _selectionRing.parent.remove(_selectionRing);
+    _selectionRing.material.dispose();
+    _selectionRing.geometry.dispose();
+    _selectionRing = null;
+  }
+  if (_selectionRingTick) {
+    const idx = State.updateCallbacks.indexOf(_selectionRingTick);
+    if (idx >= 0) State.updateCallbacks.splice(idx, 1);
+    _selectionRingTick = null;
+  }
 }
 
 // ── Scene: Exploration (마을) ────────────────────
