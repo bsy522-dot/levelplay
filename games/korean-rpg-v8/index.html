@@ -105,27 +105,141 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(ellipse at 50% 30%, rgba(255,200,100,0.18), transparent 60%),
-                linear-gradient(180deg, #1a0e28 0%, #0a0a14 100%);
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 12%, rgba(255,200,90,0.35) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 60% at 50% 100%, rgba(60,30,80,0.55) 0%, transparent 70%),
+      linear-gradient(180deg, #1a0e28 0%, #2a1838 35%, #1a0e1f 70%, #050308 100%);
     color: #ffd700;
     font-family: 'Noto Serif KR', serif;
     padding: 24px;
     pointer-events: auto;
     transition: opacity .5s ease;
+    overflow: hidden;
   }
+  /* 거대 한자 워터마크 */
+  #v8-title::before {
+    content: '古朝鮮';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(280px, 55vw, 720px);
+    font-weight: 900;
+    color: rgba(255, 180, 60, 0.045);
+    letter-spacing: 12px;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    text-shadow: 0 0 40px rgba(255,140,40,0.08);
+    animation: v8TitleWatermark 18s ease-in-out infinite alternate;
+  }
+  /* 산 실루엣 (clip-path 두 겹) */
+  #v8-title::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 38vh;
+    background:
+      linear-gradient(180deg, rgba(40,20,10,0) 0%, rgba(30,16,40,0.55) 50%, #0a0612 100%);
+    clip-path: polygon(
+      0% 100%, 0% 70%,
+      8% 55%, 15% 65%, 22% 45%, 30% 60%, 38% 30%, 45% 50%, 52% 38%, 60% 55%,
+      68% 35%, 75% 50%, 82% 32%, 90% 48%, 100% 60%, 100% 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  @keyframes v8TitleWatermark {
+    0%   { letter-spacing: 12px; opacity: 0.7; }
+    100% { letter-spacing: 36px; opacity: 1.0; }
+  }
+  /* 부유 입자 컨테이너 */
+  .v8-title-particles {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .v8-title-particles span {
+    position: absolute;
+    color: rgba(255, 200, 90, 0.5);
+    font-size: 14px;
+    text-shadow: 0 0 8px rgba(255,160,60,0.6);
+    animation: v8TitleFloat linear infinite;
+    pointer-events: none;
+  }
+  @keyframes v8TitleFloat {
+    0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(-12vh) rotate(360deg); opacity: 0; }
+  }
+  /* 황금 광선 */
+  .v8-title-rays {
+    position: absolute;
+    top: -30%; left: 30%;
+    width: 40%; height: 130%;
+    background: linear-gradient(105deg,
+      rgba(255,210,90,0) 0%, rgba(255,210,90,0.18) 35%,
+      rgba(255,180,60,0.28) 50%, rgba(255,210,90,0.18) 65%, rgba(255,210,90,0) 100%);
+    transform: rotate(-12deg);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(2px);
+    animation: v8TitleRays 8s ease-in-out infinite alternate;
+  }
+  @keyframes v8TitleRays {
+    0%   { opacity: 0.55; transform: rotate(-14deg) translateX(-10px); }
+    100% { opacity: 0.95; transform: rotate(-10deg) translateX(10px); }
+  }
+
   #v8-title.v8-hidden { opacity: 0; pointer-events: none; visibility: hidden; }
   #v8-title h1 {
-    font-size: clamp(36px, 7vw, 72px);
+    position: relative;
+    z-index: 2;
+    font-size: clamp(48px, 9vw, 108px);
     font-weight: 900;
     margin: 0 0 6px;
-    letter-spacing: 4px;
-    text-shadow: 0 0 28px #ffb000, 0 0 60px #803000, 0 4px 10px #000;
+    letter-spacing: 8px;
+    color: #ffe266;
+    text-shadow:
+      0 0 22px #ffb000,
+      0 0 48px #ff7020,
+      0 0 96px rgba(255,120,30,0.55),
+      0 5px 14px #000,
+      0 2px 0 #4a2008;
+    -webkit-text-stroke: 1.5px #2a1208;
+    animation: v8TitlePulse 3.5s ease-in-out infinite alternate;
+  }
+  @keyframes v8TitlePulse {
+    0%   { text-shadow: 0 0 22px #ffb000, 0 0 48px #ff7020, 0 0 80px rgba(255,120,30,0.4), 0 5px 14px #000, 0 2px 0 #4a2008; }
+    100% { text-shadow: 0 0 32px #ffd040, 0 0 70px #ff9030, 0 0 120px rgba(255,160,50,0.7), 0 5px 14px #000, 0 2px 0 #4a2008; }
   }
   #v8-title .subtitle {
+    position: relative;
+    z-index: 2;
     font-size: clamp(14px, 2vw, 20px);
     color: #c4956a;
-    margin: 0 0 36px;
-    letter-spacing: 3px;
+    margin: 0 0 14px;
+    letter-spacing: 5px;
+    text-shadow: 0 2px 8px #000;
+  }
+  #v8-title .v8-title-cast {
+    position: relative;
+    z-index: 2;
+    margin: 0 0 32px;
+    font-size: clamp(20px, 3vw, 32px);
+    color: #ffe2a0;
+    letter-spacing: 4px;
+    text-shadow: 0 0 12px rgba(255,180,40,0.5), 0 2px 6px #000;
+  }
+  #v8-title .v8-title-cast span {
+    display: inline-block;
+    margin: 0 8px;
+    transition: transform .3s;
+  }
+  #v8-title .v8-title-cast span:hover { transform: translateY(-4px) scale(1.2); }
+  #v8-title .menu {
+    position: relative;
+    z-index: 2;
   }
   #v8-title .menu { display: flex; flex-direction: column; gap: 10px; }
   #v8-title button.v8-start-btn {
@@ -366,8 +480,25 @@
 
 <!-- 타이틀 -->
 <div id="v8-title" class="v8-hidden">
+  <div class="v8-title-rays"></div>
+  <div class="v8-title-particles">
+    <span style="left:8%;  font-size:18px; animation-duration:14s; animation-delay:-2s;">✦</span>
+    <span style="left:18%; font-size:14px; animation-duration:18s; animation-delay:-7s;">❋</span>
+    <span style="left:32%; font-size:22px; animation-duration:12s; animation-delay:-4s;">✦</span>
+    <span style="left:46%; font-size:12px; animation-duration:20s; animation-delay:-1s;">❋</span>
+    <span style="left:62%; font-size:18px; animation-duration:15s; animation-delay:-9s;">✧</span>
+    <span style="left:74%; font-size:14px; animation-duration:17s; animation-delay:-3s;">✦</span>
+    <span style="left:88%; font-size:20px; animation-duration:13s; animation-delay:-6s;">❋</span>
+  </div>
   <h1>한국사 영웅전</h1>
   <p class="subtitle">고조선의 서막</p>
+  <div class="v8-title-cast">
+    <span title="환웅 천왕">👑</span>
+    <span title="신단수">🌳</span>
+    <span title="비파형 동검">⚔️</span>
+    <span title="단군 왕검">🏛️</span>
+    <span title="웅녀">🌸</span>
+  </div>
   <div class="menu">
     <button class="v8-start-btn" data-action="ep1">EP.1 · 환웅의 시험</button>
     <button class="v8-start-btn" data-action="ep2" style="opacity:.55;border-color:#8a6a3a;color:#c4956a">EP.2 · 단군의 건국 (추후)</button>
