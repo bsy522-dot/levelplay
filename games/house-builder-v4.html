@@ -548,8 +548,9 @@ function createWeatherSystem(scene){
   const RAIN=200,SNOW=150;
   const dummy=new THREE.Object3D();
   let elapsed=0,curType=0;
-  const rainGeo=new THREE.CylinderGeometry(0.02,0.02,0.4,4);
-  const rainMat=new THREE.MeshBasicMaterial({color:0x6688aa,transparent:true,opacity:0.6,fog:false});
+  // 비: 더 굵고 진한 색으로 시인성 강화
+  const rainGeo=new THREE.CylinderGeometry(0.04,0.04,0.7,4);
+  const rainMat=new THREE.MeshBasicMaterial({color:0x4488dd,transparent:true,opacity:0.85,fog:false});
   const rain=new THREE.InstancedMesh(rainGeo,rainMat,RAIN);rain.visible=false;rain.frustumCulled=false;
   for(let i=0;i<RAIN;i++){
     dummy.position.set(Math.random()*60-30,Math.random()*25,Math.random()*60-30);
@@ -1125,7 +1126,13 @@ if(window.innerWidth<=900){
 document.getElementById('btnPanel').onclick=togglePanel;
 document.getElementById('btnWalk').onclick=()=>{
   if(walkMode){exitWalk();}
-  else{walkMode=true;document.getElementById('walkBadge').style.display='block';enterWalkthrough(controls,selRoom);}
+  else{
+    walkMode=true;document.getElementById('walkBadge').style.display='block';
+    // 워크스루 시 BoxHelper 숨김 (1인칭 시야 깔끔하게)
+    if(roomHelper)roomHelper.visible=false;
+    if(furnHelper)furnHelper.visible=false;
+    enterWalkthrough(controls,selRoom);
+  }
 };
 document.getElementById('btnShot').onclick=()=>{screenshot(renderer,scene,camera);status('📷 스크린샷 저장됨');};
 document.getElementById('btnRoof').onclick=()=>{
@@ -1148,7 +1155,13 @@ document.getElementById('btnRoof').onclick=()=>{
   controls.update();
   updateSelHighlight();
 };
-window.exitWalk=()=>{walkMode=false;document.getElementById('walkBadge').style.display='none';exitWalkthrough(controls);};
+window.exitWalk=()=>{
+  walkMode=false;document.getElementById('walkBadge').style.display='none';
+  // 워크스루 종료 시 BoxHelper 다시 표시
+  if(roomHelper)roomHelper.visible=true;
+  if(furnHelper)furnHelper.visible=true;
+  exitWalkthrough(controls);
+};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&walkMode)exitWalk();});
 
 document.querySelectorAll('.ptab').forEach(t=>t.onclick=()=>{
@@ -1484,6 +1497,27 @@ function buildSampleHouse(){
   setTimeOfDay(0,lights,sky,scene);
   status('🏠 샘플 하우스 - 2층 + 옥상 + 정원 (예산 175K)');
 }
+
+// 디버그/테스트용 선택 헬퍼 (외부에서 호출 가능)
+window.__selectRoom=(id)=>{
+  for(const f of [-1,1,2,3,4]){
+    if(!rooms[f])continue;
+    const r=rooms[f].find(rr=>rr.id===id);
+    if(r){selRoom=r;selFurn=null;currentFloor=f;updFloor();updatePanel();updateSelHighlight();return true;}
+  }
+  return false;
+};
+window.__selectFurn=(id)=>{
+  for(const f of [-1,1,2,3,4]){
+    if(!rooms[f])continue;
+    for(const r of rooms[f]){
+      const fu=(r.furniture||[]).find(ff=>ff.id===id);
+      if(fu){selRoom=r;selFurn=fu;currentFloor=f;updFloor();updatePanel();updateSelHighlight();return true;}
+    }
+  }
+  return false;
+};
+window.__getState=()=>({roofOn,timeOfDay,weather,currentFloor,selRoomId:selRoom?.id,selFurnId:selFurn?.id,roomCount:Object.values(rooms).flat().length});
 
 // INIT
 updBudget();updFloor();updatePanel();animate();
