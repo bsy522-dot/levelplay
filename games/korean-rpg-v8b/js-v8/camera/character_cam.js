@@ -9,11 +9,11 @@
 import * as THREE from 'three';
 
 const DEFAULTS = {
-  fov: 50,
+  fov: 62,                                  // 시야 넓힘 — 맵이 더 보이게
   near: 0.1,
-  far: 200,
-  offset: new THREE.Vector3(-2, 2.5, -3), // 뒤-위-옆 (로컬 좌표)
-  lookAtOffset: new THREE.Vector3(0, 0.8, 0),
+  far: 250,
+  offset: new THREE.Vector3(-4, 8, -10),    // 뒤-위-옆 — 멀리 + 위 (영걸전 조감)
+  lookAtOffset: new THREE.Vector3(0, 0.6, 0),
   lerp: 0.15,
   collisionMargin: 0.3
 };
