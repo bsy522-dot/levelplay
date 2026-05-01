@@ -6,7 +6,7 @@
 <title>심시티 v3 - 도시 건설</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:linear-gradient(180deg,#a8d8f0 0%,#e8f4fc 100%);color:#2c3e50;font-family:-apple-system,'Segoe UI',sans-serif;overflow:hidden;height:100vh;user-select:none;touch-action:none}
+body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;font-family:-apple-system,'Segoe UI',sans-serif;overflow:hidden;height:100vh;user-select:none;touch-action:none}
 
 #topBar{position:fixed;top:0;left:0;right:0;height:48px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,251,255,.95));border-bottom:2px solid #c8dceb;display:flex;align-items:center;padding:0 10px;gap:8px;z-index:30;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;box-shadow:0 2px 8px rgba(100,150,200,.15)}
 #topBar::-webkit-scrollbar{display:none}
@@ -19,7 +19,7 @@ body{background:linear-gradient(180deg,#a8d8f0 0%,#e8f4fc 100%);color:#2c3e50;fo
 .st .r.n{color:#e74c3c}
 .st .l{font-size:9px;color:#7a8a9a}
 
-#gameCanvas{position:fixed;top:48px;left:0;right:0;bottom:74px;display:block;background:linear-gradient(180deg,#b8e0f5 0%,#e8f4fc 60%,#f5fbff 100%)}
+#gameCanvas{position:fixed;top:48px;left:0;right:0;bottom:74px;display:block;background:linear-gradient(180deg,#d6efff 0%,#f0f9ff 50%,#ffffff 100%)}
 
 #toolbar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(255,255,255,.98),rgba(248,251,255,.95));border-top:2px solid #c8dceb;z-index:30;padding:4px 4px 2px;box-shadow:0 -2px 8px rgba(100,150,200,.15)}
 #cats{display:flex;gap:2px;margin-bottom:3px;overflow-x:auto;scrollbar-width:none}
@@ -102,7 +102,7 @@ body{background:linear-gradient(180deg,#a8d8f0 0%,#e8f4fc 100%);color:#2c3e50;fo
 <script>
 // === BUILDING DATA ===
 const B={
-empty:{n:'빈 땅',ic:'',c:'#a8d89a',cat:'',cost:0,d:'빈 땅'},
+empty:{n:'빈 땅',ic:'',c:'#c5e8b0',cat:'',cost:0,d:'빈 땅'},
 // Residential
 house:{n:'주택',ic:'🏠',c:'#9ed884',cat:'주거',cost:400,d:'소형 주택. 인구+8',inc:15,pop:8,hap:2,pow:-1,wat:-1},
 apt:{n:'아파트',ic:'🏢',c:'#7fc8a9',cat:'주거',cost:1500,d:'아파트. 인구+40',inc:60,pop:40,hap:1,pow:-3,wat:-3,h:2},
@@ -181,9 +181,8 @@ function darken(h,p){let[r,g,b]=hexToRgb(h);return`rgb(${Math.max(0,r-p)},${Math
 
 function draw(){
   ctx.clearRect(0,0,cvs.width,cvs.height);
-  // Sky gradient based on day/night - 밝은 톤 유지, 야간은 옅은 보라빛
-  const nightAlpha=Math.sin(nightPhase*Math.PI)*0.18;
-  if(nightAlpha>0){ctx.fillStyle=`rgba(60,60,120,${nightAlpha})`;ctx.fillRect(0,0,cvs.width,cvs.height);}
+  // 야간 오버레이 완전히 제거 - 항상 밝게 유지
+  // (계절감/시간감은 통계패널의 Day/계절 텍스트로 표현)
 
   const hw=(TW/2)*zoom,hh=(TH/2)*zoom;
   for(let y=0;y<GH;y++){
@@ -657,10 +656,10 @@ function buildDemoCity(){
 
 // === INIT ===
 buildCats();buildTiles();
-// 저장 데이터가 하나도 없으면 데모 도시 자동 생성
-let hasSave=false;
-for(let i=1;i<=5;i++)if(localStorage.getItem('simcity_v3_slot'+i)){hasSave=true;break;}
-if(!hasSave)buildDemoCity();
+// 그리드가 완전히 비어있으면 데모 도시 자동 생성 (저장 슬롯 유무 무관)
+let isEmpty=true;
+for(let y=0;y<GH&&isEmpty;y++)for(let x=0;x<GW&&isEmpty;x++)if(grid[y][x].t!=='empty')isEmpty=false;
+if(isEmpty)buildDemoCity();
 updUI();draw();startSim();
 </script>
 </body>
