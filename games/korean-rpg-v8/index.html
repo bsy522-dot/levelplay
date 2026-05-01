@@ -946,16 +946,90 @@ async function playDialogueScene(scene) {
   let dlgBg = null;
   if (!has3D) {
     dlgBg = document.createElement('div');
+    dlgBg.id = 'v8-dlg-cinematic-bg';
     dlgBg.style.cssText = [
-      'position:fixed','inset:0','z-index:15',
-      'background:radial-gradient(ellipse at 35% 45%, #1e2d0e 0%, #0d1a08 40%, #050a05 80%, #000 100%)',
+      'position:fixed','inset:0','z-index:8','overflow:hidden',
+      // 영걸전 톤 — 위쪽 황금 햇살, 가운데 산수화 안개, 아래 짙은 보라
+      'background:' +
+        'radial-gradient(ellipse 70% 40% at 50% 8%, rgba(255,200,90,0.45) 0%, transparent 70%),' +
+        'radial-gradient(ellipse 90% 60% at 50% 100%, rgba(60,30,80,0.65) 0%, transparent 70%),' +
+        'linear-gradient(180deg, #1a0e28 0%, #2a1838 35%, #1a0e1f 70%, #050308 100%)',
       'pointer-events:none',
     ].join(';');
-    // 고조선 분위기 텍스트 장식
+
+    // 거대 한자 워터마크
     const deco = document.createElement('div');
-    deco.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);color:rgba(255,215,0,0.06);font-size:120px;font-weight:900;letter-spacing:12px;white-space:nowrap;pointer-events:none;';
-    deco.textContent = '古朝鮮';
+    deco.style.cssText = [
+      'position:absolute','top:42%','left:50%',
+      'transform:translate(-50%,-50%)',
+      'color:rgba(255,180,60,0.07)',
+      'font-size:clamp(220px, 50vw, 600px)',
+      'font-weight:900','letter-spacing:24px',
+      'white-space:nowrap','pointer-events:none',
+      'text-shadow:0 0 60px rgba(255,140,40,0.12)',
+    ].join(';');
+    deco.textContent = scene.bgText || '古朝鮮';
     dlgBg.appendChild(deco);
+
+    // 산 실루엣 (clip-path)
+    const mtn = document.createElement('div');
+    mtn.style.cssText = [
+      'position:absolute','left:0','right:0','bottom:0','height:35vh',
+      'background:linear-gradient(180deg, rgba(40,20,10,0) 0%, rgba(20,10,40,0.7) 60%, #050308 100%)',
+      'clip-path:polygon(0% 100%, 0% 65%, 8% 50%, 16% 60%, 25% 35%, 33% 55%, 42% 30%, 50% 50%, 58% 35%, 66% 55%, 75% 30%, 84% 50%, 92% 35%, 100% 55%, 100% 100%)',
+      'pointer-events:none',
+    ].join(';');
+    dlgBg.appendChild(mtn);
+
+    // 광선 (회전 애니, 인라인 keyframes는 못 쓰니 transform만)
+    const ray = document.createElement('div');
+    ray.style.cssText = [
+      'position:absolute','top:-20%','left:25%','width:50%','height:120%',
+      'background:linear-gradient(105deg, rgba(255,210,90,0) 0%, rgba(255,210,90,0.18) 35%, rgba(255,180,60,0.32) 50%, rgba(255,210,90,0.18) 65%, rgba(255,210,90,0) 100%)',
+      'transform:rotate(-12deg)','filter:blur(2px)',
+      'pointer-events:none',
+    ].join(';');
+    dlgBg.appendChild(ray);
+
+    // 부유 입자 (CSS @keyframes는 inline 안 됨 — 한 번만 정의)
+    if (!document.getElementById('v8-dlg-bg-style')) {
+      const sty = document.createElement('style');
+      sty.id = 'v8-dlg-bg-style';
+      sty.textContent = `
+        @keyframes v8DlgFloat {
+          0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+          12%  { opacity: 0.85; }
+          88%  { opacity: 0.85; }
+          100% { transform: translateY(-12vh)  rotate(360deg); opacity: 0; }
+        }
+        .v8-dlg-particle {
+          position: absolute;
+          color: rgba(255,200,90,0.6);
+          font-size: 18px;
+          text-shadow: 0 0 10px rgba(255,160,60,0.7);
+          animation: v8DlgFloat linear infinite;
+          pointer-events: none;
+          z-index: 1;
+        }
+      `;
+      document.head.appendChild(sty);
+    }
+    [
+      { l:8,  s:18, d:14, dl:-2 },
+      { l:22, s:14, d:18, dl:-7 },
+      { l:36, s:22, d:12, dl:-4 },
+      { l:50, s:12, d:20, dl:-1 },
+      { l:64, s:18, d:15, dl:-9 },
+      { l:78, s:14, d:17, dl:-3 },
+      { l:90, s:20, d:13, dl:-6 },
+    ].forEach((p,i) => {
+      const sp = document.createElement('span');
+      sp.className = 'v8-dlg-particle';
+      sp.style.cssText = `left:${p.l}%; font-size:${p.s}px; animation-duration:${p.d}s; animation-delay:${p.dl}s;`;
+      sp.textContent = (i % 3 === 0) ? '✦' : (i % 3 === 1) ? '❋' : '✧';
+      dlgBg.appendChild(sp);
+    });
+
     document.body.appendChild(dlgBg);
   }
   await new Promise((resolve) => {

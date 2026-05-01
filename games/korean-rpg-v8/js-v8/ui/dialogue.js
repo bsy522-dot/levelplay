@@ -14,8 +14,67 @@ const TYPE_SPEED_MS = 30;
 let _el = null;
 let _current = null;
 
+function _ensureBigPortraitStyles() {
+  if (document.getElementById('v8-dlg-bp-style')) return;
+  const s = document.createElement('style');
+  s.id = 'v8-dlg-bp-style';
+  s.textContent = `
+    #v8-dlg-bigportrait {
+      position: fixed;
+      left: 4vw;
+      top: 12vh;
+      width: clamp(120px, 22vw, 260px);
+      height: clamp(150px, 28vw, 320px);
+      z-index: 95;
+      pointer-events: none;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(80px, 16vw, 200px);
+      border-radius: 18px;
+      border: 3px solid #c4956a;
+      background: radial-gradient(circle at 30% 30%, rgba(255,210,140,0.25), rgba(40,20,10,0.85));
+      box-shadow: 0 0 30px rgba(255,170,60,.45), 0 10px 30px rgba(0,0,0,.6);
+      transition: transform .35s ease, opacity .35s ease;
+      transform: translateX(-30px) scale(0.95);
+      opacity: 0;
+      filter: drop-shadow(0 6px 12px #000);
+    }
+    #v8-dlg-bigportrait.v8-show {
+      display: flex;
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+    #v8-dlg-bigportrait::after {
+      content: attr(data-name);
+      position: absolute;
+      bottom: -34px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Noto Serif KR', serif;
+      font-size: clamp(14px, 2.4vw, 22px);
+      font-weight: 900;
+      color: var(--bp-color, #ffd700);
+      letter-spacing: 4px;
+      text-shadow: 0 2px 8px #000, 0 0 14px rgba(255,180,40,.6);
+      white-space: nowrap;
+    }
+    @media (max-width: 720px) {
+      #v8-dlg-bigportrait { left: 4vw; top: 8vh; }
+    }
+  `;
+  document.head.appendChild(s);
+}
+
 function _ensureElement() {
   if (_el) return _el;
+  _ensureBigPortraitStyles();
+
+  // 큰 화자 portrait (배경 일러스트 역할)
+  const bp = document.createElement('div');
+  bp.id = 'v8-dlg-bigportrait';
+  document.body.appendChild(bp);
+
   const el = document.createElement('div');
   el.id = 'v8-dialogue';
   el.innerHTML = `
@@ -94,6 +153,21 @@ export class DialogueRunner {
     this.portraitEl.style.borderColor = p.color;
     this.speakerEl.textContent = line.speaker || (pid ? pid : '');
     this.speakerEl.style.color = p.color && p.color !== '#888' ? p.color : '#FFD700';
+
+    // 큰 화자 portrait 갱신 (영걸전 스타일 일러스트 영역)
+    const bp = document.getElementById('v8-dlg-bigportrait');
+    if (bp) {
+      if (line.text && pid) {
+        bp.textContent = p.emoji;
+        bp.dataset.name = line.speaker || pid;
+        bp.style.setProperty('--bp-color', p.color || '#ffd700');
+        bp.style.borderColor = p.color || '#c4956a';
+        bp.classList.add('v8-show');
+      } else {
+        bp.classList.remove('v8-show');
+      }
+    }
+
     this.textEl.textContent = '';
     this.nextEl.classList.remove('v8-ready');
     this._startTyping(line.text || '');
@@ -130,6 +204,8 @@ export class DialogueRunner {
     this.disposed = true;
     if (this.typingTimer) { clearTimeout(this.typingTimer); this.typingTimer = null; }
     this.el.classList.remove('v8-visible');
+    const bp = document.getElementById('v8-dlg-bigportrait');
+    if (bp) bp.classList.remove('v8-show');
     this.el.removeEventListener('click', this._onClick);
     window.removeEventListener('keydown', this._onKey);
     if (_current === this) _current = null;
