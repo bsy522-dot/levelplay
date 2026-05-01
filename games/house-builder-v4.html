@@ -78,6 +78,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <span id="fpsDisp">--</span>
 <div class="tb">
 <button id="btnPanel">☰</button>
+<button id="btnRoof" title="지붕 ON/OFF">🏠</button>
 <button id="btnWalk" title="워크스루">👤</button>
 <button id="btnShot" title="스크린샷">📷</button>
 <button id="btnTut">❓</button>
@@ -282,6 +283,48 @@ function buildRoomMesh(room,floor,opts={}){
     const win=new THREE.Mesh(new THREE.BoxGeometry(winW,winH,WALL_THICK+0.02),winMat);
     win.position.set(0,FLOOR_THICK+WALL_HEIGHT/2+0.1,-h/2);
     win.userData={kind:'room',refId:room.id,part:'window'};group.add(win);
+  }
+
+  // ===== 문짝 (실내 방만, 남쪽 벽에) =====
+  const indoorTypes=['living','bedroom','kitchen','bathroom','garage'];
+  if(indoorTypes.includes(room.type)){
+    const doorW=Math.min(0.9,w*0.25),doorH=2.0;
+    // 문짝 본체
+    const doorMat=makeStdMat('#3a2818',0,null);
+    const door=new THREE.Mesh(new THREE.BoxGeometry(doorW,doorH,WALL_THICK+0.06),doorMat);
+    // 남쪽 벽 한쪽에 (좌측에서 1/3 지점)
+    const doorX=-w/2+doorW*0.6+0.2;
+    door.position.set(doorX,FLOOR_THICK+doorH/2,h/2);
+    door.castShadow=true;door.receiveShadow=true;
+    door.userData={kind:'room',refId:room.id,part:'door'};
+    group.add(door);
+    // 문 손잡이 (작은 노란 구)
+    const handleMat=getMat('door_handle',()=>new THREE.MeshStandardMaterial({color:0xddaa00,roughness:0.3,metalness:0.7}));
+    const handle=new THREE.Mesh(new THREE.SphereGeometry(0.06,10,10),handleMat);
+    handle.position.set(doorX+doorW/2-0.1,FLOOR_THICK+1.05,h/2+WALL_THICK/2+0.05);
+    group.add(handle);
+    // 문틀 (어두운 테두리)
+    const frameMat=makeStdMat('#2a1808',0,null);
+    const frameT=0.04;
+    // 좌
+    const fL=new THREE.Mesh(new THREE.BoxGeometry(frameT,doorH+frameT,WALL_THICK+0.08),frameMat);
+    fL.position.set(doorX-doorW/2-frameT/2,FLOOR_THICK+doorH/2,h/2);group.add(fL);
+    // 우
+    const fR=new THREE.Mesh(new THREE.BoxGeometry(frameT,doorH+frameT,WALL_THICK+0.08),frameMat);
+    fR.position.set(doorX+doorW/2+frameT/2,FLOOR_THICK+doorH/2,h/2);group.add(fR);
+    // 위
+    const fT=new THREE.Mesh(new THREE.BoxGeometry(doorW+frameT*2,frameT,WALL_THICK+0.08),frameMat);
+    fT.position.set(doorX,FLOOR_THICK+doorH+frameT/2,h/2);group.add(fT);
+  }
+
+  // ===== 천장 (지붕 토글 또는 명시적 _ceiling) =====
+  if(opts.ceiling){
+    const ceilMat=makeStdMat('#e8e4dc',0,null);
+    const ceil=new THREE.Mesh(new THREE.BoxGeometry(w,FLOOR_THICK,h),ceilMat);
+    ceil.position.y=FLOOR_THICK+WALL_HEIGHT+FLOOR_THICK/2;
+    ceil.castShadow=true;ceil.receiveShadow=true;
+    ceil.userData={kind:'room',refId:room.id,part:'ceiling'};
+    group.add(ceil);
   }
 
   group.position.set(room.x+w/2,floorToY(floor),room.z+h/2);
@@ -695,6 +738,7 @@ let curTab='rooms';
 let weather=0,timeOfDay=0;
 let nextId=1,undoStack=[];
 let walkMode=false;
+let roofOn=false; // 지붕(천장) 토글
 
 // 메시 매핑 (id → THREE.Group)
 const meshMap=new Map();
@@ -761,7 +805,7 @@ cvs.addEventListener('webglcontextrestored',()=>{
 // SCENE 동기화 (state ↔ 메시)
 // ============================================================
 function addRoomMesh(room,floor){
-  const m=buildRoomMesh(room,floor,TEX_OPTS);
+  const m=buildRoomMesh(room,floor,{...TEX_OPTS,ceiling:roofOn&&room.type!=='rooftop'&&room.type!=='balcony'&&room.type!=='garden'});
   m.userData.refId=room.id;room.floor=floor;
   // Y축 떨어지는 애니메이션
   const targetY=m.position.y;
@@ -813,7 +857,8 @@ function rebuildAll(){
   for(let f=-1;f<=4;f++){
     for(const r of rooms[f]){
       r.floor=f;
-      const m=buildRoomMesh(r,f,TEX_OPTS);
+      const useCeiling=roofOn&&r.type!=='rooftop'&&r.type!=='balcony'&&r.type!=='garden';
+      const m=buildRoomMesh(r,f,{...TEX_OPTS,ceiling:useCeiling});
       meshMap.set('room_'+r.id,m);scene.add(m);
       for(const fu of (r.furniture||[])){
         const fm=buildFurnMesh(fu,r);
@@ -989,6 +1034,12 @@ document.getElementById('btnWalk').onclick=()=>{
   else{walkMode=true;document.getElementById('walkBadge').style.display='block';enterWalkthrough(controls,selRoom);}
 };
 document.getElementById('btnShot').onclick=()=>{screenshot(renderer,scene,camera);status('📷 스크린샷 저장됨');};
+document.getElementById('btnRoof').onclick=()=>{
+  roofOn=!roofOn;
+  document.getElementById('btnRoof').classList.toggle('act',roofOn);
+  status(roofOn?'🏠 지붕 ON':'🏠 지붕 OFF (인테리어 보임)');
+  rebuildAll();
+};
 window.exitWalk=()=>{walkMode=false;document.getElementById('walkBadge').style.display='none';exitWalkthrough(controls);};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&walkMode)exitWalk();});
 
