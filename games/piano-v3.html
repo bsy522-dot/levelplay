@@ -1387,22 +1387,22 @@ function openLesson(id) {
   };
   document.getElementById('btn-demo').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(100);
+    setSpeed(60); // 데모: 60%
     startSynthesia(lesson.notes, baseBPM, true, null);
   };
   document.getElementById('btn-wait').onclick = () => {
     synthPracticeMode = false; synthWaitMode = true;
-    setSpeed(30); // 초보자: 매우 느리게 (시각 속도 1/3)
+    setSpeed(40); // wait 모드는 어차피 시간 정지지만 슬라이더 표시 일관성
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-practice').onclick = () => {
     synthPracticeMode = true; synthWaitMode = false;
-    setSpeed(70); // 연습: 70%
+    setSpeed(50); // 연습: 50%
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-test').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(100);
+    setSpeed(80); // 테스트: 80%
     startSynthesia(lesson.notes, baseBPM, false, id);
   };
 }
@@ -1551,18 +1551,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
         synthScore.maxCombo = Math.max(synthScore.maxCombo, synthScore.combo);
         flashHit(target, midi, 'perfect');
         updateScoreUI();
-
-        // 같은 minTime 그룹이 모두 처리됐으면 다음 그룹으로 시간 워프 (천천히 떨어지도록)
-        const stillUnplayed = synthNotes.filter(n => !n.played);
-        if (stillUnplayed.length > 0) {
-          const newMinTime = Math.min(...stillUnplayed.map(n => n.time));
-          if (newMinTime > minTime) {
-            // 다음 노트가 hit line 위 lookahead 거리에서 새로 떨어지도록 시간 점프
-            const lookaheadSec = 1.5; // 1.5초 lookahead
-            const targetNow = newMinTime * beatToSec - lookaheadSec;
-            synthStartTime = performance.now() - targetNow * 1000;
-          }
-        }
+        // 시간 워프는 synthLoop가 매 프레임 처리 (다음 노트가 자동으로 hit line 직전 고정)
         return;
       }
 
@@ -1678,20 +1667,20 @@ function synthLoop() {
 
   let now = (performance.now() - synthStartTime) / 1000;
   const beatToSec = 60 / (synthBPM * synthSpeed);
-  // wait 모드는 노트가 화면에 더 오래 보이도록 천천히 떨어짐
-  const pxPerSec = H * (synthWaitMode ? 0.20 : 0.55);
+  // 일반 모드도 노트 시각 속도 완화 (0.55 → 0.40), wait 모드는 더 천천히
+  const pxPerSec = H * (synthWaitMode ? 0.15 : 0.40);
 
-  // === Wait Mode: 다음 미연주 노트가 hit line에 도달하면 시간 정지 ===
+  // === Wait Mode: 노트가 떨어지지 않고 hit line 직전에 항상 고정 ===
   if (synthWaitMode && !synthAutoPlay) {
     const unplayed = synthNotes.filter(n => !n.played);
     if (unplayed.length > 0) {
       const minTime = Math.min(...unplayed.map(n => n.time));
       const nextTimeSec = minTime * beatToSec;
-      if (now >= nextTimeSec) {
-        // 시간을 해당 노트의 도달 직전으로 고정
-        synthStartTime = performance.now() - nextTimeSec * 1000;
-        now = nextTimeSec;
-      }
+      // 다음 노트가 hit line 위 1.0초 거리에 항상 떠있도록 시간 강제 고정
+      const stopOffset = 1.0;
+      const targetNow = nextTimeSec - stopOffset;
+      synthStartTime = performance.now() - targetNow * 1000;
+      now = targetNow;
     }
   }
 
