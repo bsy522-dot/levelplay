@@ -347,8 +347,8 @@ composer.setSize(W, H);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(W, H),
-  isMobile ? 0.4 : 0.6,
-  isMobile ? 0.3 : 0.4,
+  IS_MOBILE ? 0.4 : 0.6,
+  IS_MOBILE ? 0.3 : 0.4,
   0.85
 );
 composer.addPass(bloomPass);
@@ -508,7 +508,7 @@ PLANETS.forEach((p, idx) => {
     sunGroup.add(glowSprite);
 
     // VFX: 코로나 플레어 셸 (back side, additive radial) - 모바일 분기 (QA-2 권고)
-    const coronaGeom = new THREE.SphereGeometry(radius3D * 1.35, isMobile ? 16 : 32, isMobile ? 12 : 24);
+    const coronaGeom = new THREE.SphereGeometry(radius3D * 1.35, IS_MOBILE ? 16 : 32, IS_MOBILE ? 12 : 24);
     const coronaMat = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
