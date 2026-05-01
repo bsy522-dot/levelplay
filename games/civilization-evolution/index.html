@@ -322,24 +322,77 @@ const SEASON_ICONS=['🌸','☀','🍂','❄'];
 const DAY_LENGTH=600; // frames per day
 
 // ========== SPRITE LOADER (AI 생성 에셋 자동 로드) ==========
-const SPRITES={buildings:{},items:{},characters:{}};
-function loadSprite(category,name){
-  if(SPRITES[category][name])return SPRITES[category][name];
+const SPRITES={
+  buildings:{}, items:{},
+  characters:{}, // legacy 정면
+  charsFront:{}, charsBack:{},
+  resources:{}, // 자원 노드
+  tiles:{}, // 시대별 타일
+  vfx:{} // VFX 텍스처
+};
+function loadSprite(category,name,subPath){
+  const key=subPath?subPath+'/'+name:name;
+  if(SPRITES[category][key])return SPRITES[category][key];
   const img=new Image();
   img.onload=()=>{img._loaded=true;};
   img.onerror=()=>{img._failed=true;};
-  img.src=`assets/sprites/${category}/${name}.png`;
-  SPRITES[category][name]=img;
+  const path=subPath?`assets/sprites/${subPath}/${name}.png`:`assets/sprites/${category}/${name}.png`;
+  img.src=path;
+  SPRITES[category][key]=img;
   return img;
 }
 function preloadSprites(){
+  // 건물
   BUILDINGS.forEach(b=>loadSprite('buildings',b.id));
-  // 시대별 캐릭터
+  // 캐릭터 (legacy 1방향)
   ['stoneAgePerson','neolithicPerson','bronzePerson','ironPerson','medievalPerson','industrialPerson','modernPerson'].forEach(c=>loadSprite('characters',c));
+  // 캐릭터 (신규 앞/뒤)
+  ['stoneAgePerson','neolithicPerson','bronzePerson','ironPerson','medievalPerson','industrialPerson','modernPerson'].forEach(c=>{
+    SPRITES.charsFront[c]=Object.assign(new Image(),{src:`assets/sprites/characters/front/${c}.png`,onload:function(){this._loaded=true;},onerror:function(){this._failed=true;}});
+    SPRITES.charsBack[c]=Object.assign(new Image(),{src:`assets/sprites/characters/back/${c}.png`,onload:function(){this._loaded=true;},onerror:function(){this._failed=true;}});
+  });
+  // 자원 노드
+  Object.keys(RESOURCES).forEach(r=>loadSprite('resources',r));
+  // 시대별 타일 (7시대 × 3타입 = 21개)
+  for(let e=0;e<7;e++){
+    SPRITES.tiles[e]={};
+    ['grass','dirt','stone'].forEach(t=>{
+      const img=new Image();
+      img.onload=function(){this._loaded=true;};
+      img.onerror=function(){this._failed=true;};
+      img.src=`assets/sprites/tiles/era${e}/${t}.png`;
+      SPRITES.tiles[e][t]=img;
+    });
+  }
+  // VFX 텍스처
+  ['flame','smoke','sparkle','dust','water_splash','electric','leaf','rune'].forEach(v=>loadSprite('vfx',v));
 }
-function getCurrentCharacterSprite(){
+function getCurrentCharacterSprite(direction){
   const map=['stoneAgePerson','neolithicPerson','bronzePerson','ironPerson','medievalPerson','industrialPerson','modernPerson'];
-  return SPRITES.characters[map[G.era]||'stoneAgePerson'];
+  const name=map[G.era]||'stoneAgePerson';
+  // 방향: 'front'(아래/앞) 또는 'back'(위/뒤)
+  if(direction==='back'){
+    const s=SPRITES.charsBack[name];
+    if(s&&s._loaded&&!s._failed)return s;
+  }
+  // front 우선, 실패시 legacy
+  const f=SPRITES.charsFront[name];
+  if(f&&f._loaded&&!f._failed)return f;
+  return SPRITES.characters[name];
+}
+function getPlayerDirection(){
+  // 플레이어 이동 방향 추정 (target 또는 lastMove)
+  if(G.targetX!==null&&G.targetY!==null){
+    const dy=G.targetY-G.py;
+    return dy<0?'back':'front';
+  }
+  if(G._lastDy!==undefined&&Math.abs(G._lastDy)>0.1)return G._lastDy<0?'back':'front';
+  return 'front';
+}
+function getTileSprite(type){
+  const tiles=SPRITES.tiles[G.era];
+  if(!tiles)return null;
+  return tiles[type]||tiles.grass;
 }
 
 // ========== INIT ==========
@@ -395,47 +448,52 @@ bobOffset:Math.random()*Math.PI*2
 }
 }
 
-// Resource node drawing (distinct visuals per type)
+// Resource node drawing — AI 스프라이트 우선, fallback to 도형/emoji
 function drawResourceNode(ctx,r,sx,sy,dist,anim){
 const res=RESOURCES[r.type];if(!res)return;
 const bob=Math.sin(anim*0.02+r.bobOffset)*3;
-const sz=dist<50?24:20;
-// Draw ground deposit visual
-const cat=getResourceCategory(r.type);
-if(cat==='stone'){
-  // Grey rocky deposits
-  ctx.fillStyle='#8a8a8a';ctx.beginPath();ctx.ellipse(sx,sy+6,14,6,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#999';ctx.beginPath();ctx.arc(sx-4,sy+bob-2,7,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(sx+5,sy+bob-4,5,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#bbb';ctx.beginPath();ctx.arc(sx+1,sy+bob-8,4,0,Math.PI*2);ctx.fill();
-}else if(cat==='wood'){
-  // Green tree
-  ctx.fillStyle='#5D4037';ctx.fillRect(sx-2,sy-2,4,14);
-  ctx.fillStyle='#2E7D32';ctx.beginPath();ctx.arc(sx,sy+bob-8,11,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#388E3C';ctx.beginPath();ctx.arc(sx-3,sy+bob-5,7,0,Math.PI*2);ctx.fill();
-}else if(cat==='ore'){
-  // Copper/brown ore vein
-  ctx.fillStyle='#6D4C41';ctx.beginPath();ctx.ellipse(sx,sy+5,12,5,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#D4760A';ctx.beginPath();ctx.arc(sx-3,sy+bob-2,5,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#E8A735';ctx.beginPath();ctx.arc(sx+4,sy+bob-5,4,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(sx,sy+bob-1,2,0,Math.PI*2);ctx.fill();
-}else if(cat==='clay'){
-  // Orange clay pit
-  ctx.fillStyle='#D2691E';ctx.beginPath();ctx.ellipse(sx,sy+4,13,7,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#E8A060';ctx.beginPath();ctx.ellipse(sx,sy+bob+1,9,4,0,0,Math.PI*2);ctx.fill();
+// Shadow
+ctx.fillStyle='rgba(0,0,0,.25)';
+ctx.beginPath();ctx.ellipse(sx,sy+10,14,4,0,0,Math.PI*2);ctx.fill();
+// AI 스프라이트 우선
+const spr=SPRITES.resources[r.type];
+if(spr&&spr._loaded&&!spr._failed){
+  const sz=dist<50?52:44;
+  ctx.drawImage(spr,sx-sz/2,sy-sz+12+bob,sz,sz);
 }else{
-  // Default: emoji
-  ctx.font=sz+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(res.icon,sx,sy+bob);
+  // Fallback 도형/emoji
+  const cat=getResourceCategory(r.type);
+  const sz=dist<50?24:20;
+  if(cat==='stone'){
+    ctx.fillStyle='#8a8a8a';ctx.beginPath();ctx.ellipse(sx,sy+6,14,6,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#999';ctx.beginPath();ctx.arc(sx-4,sy+bob-2,7,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#aaa';ctx.beginPath();ctx.arc(sx+5,sy+bob-4,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#bbb';ctx.beginPath();ctx.arc(sx+1,sy+bob-8,4,0,Math.PI*2);ctx.fill();
+  }else if(cat==='wood'){
+    ctx.fillStyle='#5D4037';ctx.fillRect(sx-2,sy-2,4,14);
+    ctx.fillStyle='#2E7D32';ctx.beginPath();ctx.arc(sx,sy+bob-8,11,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#388E3C';ctx.beginPath();ctx.arc(sx-3,sy+bob-5,7,0,Math.PI*2);ctx.fill();
+  }else if(cat==='ore'){
+    ctx.fillStyle='#6D4C41';ctx.beginPath();ctx.ellipse(sx,sy+5,12,5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#D4760A';ctx.beginPath();ctx.arc(sx-3,sy+bob-2,5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#E8A735';ctx.beginPath();ctx.arc(sx+4,sy+bob-5,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(sx,sy+bob-1,2,0,Math.PI*2);ctx.fill();
+  }else if(cat==='clay'){
+    ctx.fillStyle='#D2691E';ctx.beginPath();ctx.ellipse(sx,sy+4,13,7,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#E8A060';ctx.beginPath();ctx.ellipse(sx,sy+bob+1,9,4,0,0,Math.PI*2);ctx.fill();
+  }else{
+    ctx.font=sz+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(res.icon,sx,sy+bob);
+  }
 }
-// Hover glow
+// Hover glow + label
 if(dist<50){
-  ctx.fillStyle='rgba(255,215,0,.2)';ctx.beginPath();ctx.arc(sx,sy,20,0,Math.PI*2);ctx.fill();
-  ctx.font='9px sans-serif';ctx.fillStyle='#ffd700';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(res.name+' ('+r.hp+'/3)',sx,sy+20);
+  ctx.fillStyle='rgba(255,215,0,.18)';ctx.beginPath();ctx.arc(sx,sy,28,0,Math.PI*2);ctx.fill();
+  ctx.font='10px sans-serif';ctx.fillStyle='#ffd700';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(res.name+' ('+r.hp+'/3)',sx,sy+22);
 }else if(dist<80){
   ctx.font='9px sans-serif';ctx.fillStyle='#ddd';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(res.name,sx,sy+16);
+  ctx.fillText(res.name,sx,sy+18);
 }
 }
 
@@ -622,21 +680,35 @@ grad.addColorStop(1,era.bgColors[2]);
 ctx.fillStyle=grad;
 ctx.fillRect(0,0,W,H);
 
-// Ground tiles
+// Ground tiles - AI 시대별 텍스처
 const startTX=Math.max(0,Math.floor(G.camX/TILE));
 const startTY=Math.max(0,Math.floor(G.camY/TILE));
 const endTX=Math.min(WORLD_W,Math.ceil((G.camX+W)/TILE));
 const endTY=Math.min(WORLD_H,Math.ceil((G.camY+H)/TILE));
 
+const tileGrass=getTileSprite('grass');
+const tileDirt=getTileSprite('dirt');
+const tileStone=getTileSprite('stone');
+const useAITiles=tileGrass&&tileGrass._loaded&&!tileGrass._failed;
+
 for(let tx=startTX;tx<endTX;tx++){
 for(let ty=startTY;ty<endTY;ty++){
 const sx=tx*TILE-G.camX;
 const sy=ty*TILE-G.camY;
-ctx.fillStyle=((tx+ty)%2===0)?'rgba(255,255,255,.03)':'rgba(0,0,0,.03)';
-ctx.fillRect(sx,sy,TILE,TILE);
-// Grid lines
-ctx.strokeStyle='rgba(255,255,255,.04)';
-ctx.strokeRect(sx,sy,TILE,TILE);
+if(useAITiles){
+  // 결정론적 시드(타일좌표 기반) — 같은 위치 항상 같은 타일
+  const h=((tx*73856093)^(ty*19349663))>>>0;
+  const pick=h%10;
+  let sprite=tileGrass;
+  if(pick<2&&tileStone&&tileStone._loaded)sprite=tileStone;
+  else if(pick<5&&tileDirt&&tileDirt._loaded)sprite=tileDirt;
+  ctx.drawImage(sprite,sx,sy,TILE,TILE);
+}else{
+  ctx.fillStyle=((tx+ty)%2===0)?'rgba(255,255,255,.03)':'rgba(0,0,0,.03)';
+  ctx.fillRect(sx,sy,TILE,TILE);
+  ctx.strokeStyle='rgba(255,255,255,.04)';
+  ctx.strokeRect(sx,sy,TILE,TILE);
+}
 }
 }
 
@@ -699,11 +771,28 @@ ctx.beginPath();
 ctx.ellipse(px,py+14,14,5,0,0,Math.PI*2);
 ctx.fill();
 const bobY=G.walking?Math.sin(G.walkFrame*0.3)*3:Math.sin(animFrame*0.05)*1;
-const charSpr=getCurrentCharacterSprite();
+// 이동 방향 추적 (마지막 dx 저장)
+if(G.targetX!==null&&G.targetY!==null){
+  G._lastDx=G.targetX-G.px;G._lastDy=G.targetY-G.py;
+}else if(keys['ArrowLeft']||keys['a']){G._lastDx=-1;}
+else if(keys['ArrowRight']||keys['d']){G._lastDx=1;}
+else if(keys['ArrowUp']||keys['w']){G._lastDy=-1;}
+else if(keys['ArrowDown']||keys['s']){G._lastDy=1;}
+const dir=getPlayerDirection();
+const facingLeft=(G._lastDx||0)<-0.1;
+const charSpr=getCurrentCharacterSprite(dir);
 if(charSpr&&charSpr._loaded&&!charSpr._failed){
-  // AI 캐릭터 스프라이트 사용
-  const sw=44, sh=52;
-  ctx.drawImage(charSpr,px-sw/2,py-sh+8+bobY,sw,sh);
+  // AI 캐릭터 스프라이트 + 좌우 flip
+  const sw=48, sh=56;
+  ctx.save();
+  if(facingLeft){
+    ctx.translate(px,0);
+    ctx.scale(-1,1);
+    ctx.drawImage(charSpr,-sw/2,py-sh+10+bobY,sw,sh);
+  }else{
+    ctx.drawImage(charSpr,px-sw/2,py-sh+10+bobY,sw,sh);
+  }
+  ctx.restore();
 }else{
   // Fallback: 도형 캐릭터
   const legAnim=G.walking?Math.sin(G.walkFrame*0.4)*4:0;
@@ -745,6 +834,18 @@ if(G.particles){
     const alpha=Math.min(1,p.life/p.maxLife);
     ctx.globalAlpha=alpha;
     if(p.blend)ctx.globalCompositeOperation=p.blend;else ctx.globalCompositeOperation='source-over';
+    // VFX 텍스처 우선
+    let vfxName=null;
+    if(p.shape==='smoke')vfxName='smoke';
+    else if(p.shape==='spark')vfxName='electric';
+    else if(p.shape==='star')vfxName='sparkle';
+    else if(p.texture)vfxName=p.texture;
+    const vfxImg=vfxName?SPRITES.vfx[vfxName]:null;
+    if(vfxImg&&vfxImg._loaded&&!vfxImg._failed){
+      const s=p.size*4;
+      ctx.drawImage(vfxImg,psx-s/2,psy-s/2,s,s);
+      return;
+    }
     if(p.shape==='smoke'){
       ctx.fillStyle=p.color;
       ctx.beginPath();ctx.arc(psx,psy,p.size,0,Math.PI*2);ctx.fill();
