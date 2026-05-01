@@ -195,7 +195,7 @@ function draw(){
       // Ground tile
       ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();
       ctx.fillStyle=cell.dmg>0?'#ffb8a8':baseC;ctx.fill();
-      ctx.strokeStyle='rgba(100,140,180,0.25)';ctx.lineWidth=1;ctx.stroke();
+      ctx.strokeStyle='rgba(120,160,200,0.15)';ctx.lineWidth=1;ctx.stroke();
 
       if(cell.t!=='empty'&&cell.t!=='road'){
         const bh=(b.h||1)*18*zoom;
@@ -651,6 +651,10 @@ function buildDemoCity(){
   // 초기 상태 부여
   money=80000;pop=350;hap=72;saf=68;day=15;
   document.getElementById('cityName').textContent='샘플 도시';
+  // 카메라를 도시 중심 (15,15)에 강제 센터링 + 화면 크기별 줌 자동 조정
+  zoom=cvs.width<600?0.95:1.4;
+  camX=cvs.width/2;
+  camY=cvs.height/2-(15+15)*(TH/2)*zoom;
   popup('🏙️ 예시 도시가 생성되었습니다!',true);
 }
 
