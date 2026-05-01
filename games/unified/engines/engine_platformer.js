@@ -52,13 +52,12 @@
   function sin(v){ return Math.sin(v); }
   function FN(s){ return s+'px "Jua",sans-serif'; }
 
-  // ===== CHARACTERS (1단 도달 256px → 모든 발판/모든 레벨 여유 통과) =====
-  // jmp -16 → 16²/1 = 256px (v2/ACT2 최대 발판 차이 150px 대비 100px 여유)
+  // ===== CHARACTERS (1단 144px 적당 점프 + 발판 낮춤으로 충분 도달) =====
   const CHARACTERS = [
-    { id:'romi',   name:'로미',   desc:'균형잡힌 능력!',    spr:'rs', portrait:'rp', color:'#FF6B9D', spd:3.2, jmp:-16.0, jmpFreq:300, special:'하트 파워' },
-    { id:'hatchu', name:'하츄핑', desc:'빠르고 높이 점프!', spr:'hs', portrait:'hp', color:'#FF69B4', spd:3.6, jmp:-17.0, jmpFreq:420, special:'사랑의 힘' },
-    { id:'baro',   name:'바로핑', desc:'튼튼하고 강해!',    spr:'ba', portrait:'ba', color:'#FFD700', spd:3.0, jmp:-15.5, jmpFreq:220, special:'정의 펀치' },
-    { id:'chacha', name:'차차핑', desc:'불꽃처럼 빨라!',    spr:'ch', portrait:'ch', color:'#FF6347', spd:3.8, jmp:-15.5, jmpFreq:360, special:'불꽃 대시' },
+    { id:'romi',   name:'로미',   desc:'균형잡힌 능력!',    spr:'rs', portrait:'rp', color:'#FF6B9D', spd:3.2, jmp:-12.0, jmpFreq:300, special:'하트 파워' },
+    { id:'hatchu', name:'하츄핑', desc:'빠르고 높이 점프!', spr:'hs', portrait:'hp', color:'#FF69B4', spd:3.6, jmp:-13.0, jmpFreq:420, special:'사랑의 힘' },
+    { id:'baro',   name:'바로핑', desc:'튼튼하고 강해!',    spr:'ba', portrait:'ba', color:'#FFD700', spd:3.0, jmp:-11.5, jmpFreq:220, special:'정의 펀치' },
+    { id:'chacha', name:'차차핑', desc:'불꽃처럼 빨라!',    spr:'ch', portrait:'ch', color:'#FF6347', spd:3.8, jmp:-11.5, jmpFreq:360, special:'불꽃 대시' },
   ];
 
   // ===== HAPTIC (모바일 진동 — 데스크탑 무시) =====
@@ -782,38 +781,38 @@
   }
 
   function drawTouchControls(X){
-    const btnR = 35;
+    const btnR = 50;       // 35 → 50 (더 큼)
+    const lcx = 70, rcx = 180, jcx = W - 75, byc = H - 75;
     // Left
-    X.fillStyle = 'rgba(255,255,255,'+(tL?0.55:0.35)+')';
-    X.beginPath(); X.arc(55, H-60, btnR, 0, Math.PI*2); X.fill();
-    X.strokeStyle = 'rgba(255,255,255,'+(tL?0.8:0.45)+')'; X.lineWidth = 2; X.stroke();
-    X.fillStyle = '#fff'; X.font = FN(22); X.textAlign = 'center'; X.fillText('<', 55, H-52);
+    X.fillStyle = 'rgba(255,255,255,'+(tL?0.6:0.4)+')';
+    X.beginPath(); X.arc(lcx, byc, btnR, 0, Math.PI*2); X.fill();
+    X.strokeStyle = 'rgba(255,255,255,'+(tL?0.9:0.55)+')'; X.lineWidth = 3; X.stroke();
+    X.fillStyle = '#fff'; X.font = 'bold '+FN(30); X.textAlign = 'center'; X.fillText('◀', lcx, byc+10);
     // Right
-    X.fillStyle = 'rgba(255,255,255,'+(tR?0.55:0.35)+')';
-    X.beginPath(); X.arc(140, H-60, btnR, 0, Math.PI*2); X.fill();
-    X.strokeStyle = 'rgba(255,255,255,'+(tR?0.8:0.45)+')'; X.lineWidth = 2; X.stroke();
-    X.fillStyle = '#fff'; X.font = FN(22); X.fillText('>', 140, H-52);
+    X.fillStyle = 'rgba(255,255,255,'+(tR?0.6:0.4)+')';
+    X.beginPath(); X.arc(rcx, byc, btnR, 0, Math.PI*2); X.fill();
+    X.strokeStyle = 'rgba(255,255,255,'+(tR?0.9:0.55)+')'; X.lineWidth = 3; X.stroke();
+    X.fillStyle = '#fff'; X.font = 'bold '+FN(30); X.fillText('▶', rcx, byc+10);
     // Jump
-    X.fillStyle = 'rgba(255,107,157,'+(tJ?0.6:0.35)+')';
-    X.beginPath(); X.arc(W-60, H-60, 45, 0, Math.PI*2); X.fill();
-    X.strokeStyle = 'rgba(255,107,157,'+(tJ?0.9:0.5)+')'; X.lineWidth = 2; X.stroke();
-    X.fillStyle = '#fff'; X.font = 'bold '+FN(14); X.fillText('JUMP', W-60, H-54);
+    X.fillStyle = 'rgba(255,107,157,'+(tJ?0.7:0.45)+')';
+    X.beginPath(); X.arc(jcx, byc, 60, 0, Math.PI*2); X.fill();
+    X.strokeStyle = 'rgba(255,107,157,'+(tJ?1:0.65)+')'; X.lineWidth = 3; X.stroke();
+    X.fillStyle = '#fff'; X.font = 'bold '+FN(18); X.fillText('JUMP', jcx, byc+6);
     // Dash (world 3+)
     if(hasDash){
-      const dAlpha = P.dashCD > 0 ? 0.2 : 0.4;
-      X.fillStyle = 'rgba(255,215,0,'+(tDash?0.6:dAlpha)+')';
-      X.beginPath(); X.arc(W-60, H-130, 30, 0, Math.PI*2); X.fill();
-      X.strokeStyle = 'rgba(255,215,0,'+(tDash?0.9:0.5)+')'; X.lineWidth = 2; X.stroke();
-      X.fillStyle = '#fff'; X.font = 'bold '+FN(11); X.fillText('DASH', W-60, H-126);
+      const dcx = W-75, dcy = H-160;
+      const dAlpha = P.dashCD > 0 ? 0.25 : 0.5;
+      X.fillStyle = 'rgba(255,215,0,'+(tDash?0.7:dAlpha)+')';
+      X.beginPath(); X.arc(dcx, dcy, 36, 0, Math.PI*2); X.fill();
+      X.strokeStyle = 'rgba(255,215,0,'+(tDash?1:0.6)+')'; X.lineWidth = 3; X.stroke();
+      X.fillStyle = '#fff'; X.font = 'bold '+FN(13); X.fillText('DASH', dcx, dcy+5);
       if(P.dashCD > 0){
-        X.fillStyle = 'rgba(0,0,0,0.3)';
-        X.beginPath(); X.moveTo(W-60, H-130);
-        X.arc(W-60, H-130, 30, -Math.PI/2, -Math.PI/2 + Math.PI*2*(P.dashCD/60), false);
+        X.fillStyle = 'rgba(0,0,0,0.4)';
+        X.beginPath(); X.moveTo(dcx, dcy);
+        X.arc(dcx, dcy, 36, -Math.PI/2, -Math.PI/2 + Math.PI*2*(P.dashCD/60), false);
         X.fill();
       }
     }
-    // Cache hit rects
-    _touchRects = { L:{cx:55,cy:H-60,r:42}, R:{cx:140,cy:H-60,r:42}, J:{cx:W-60,cy:H-60,r:50}, D:{cx:W-60,cy:H-130,r:35} };
   }
 
   function renderPlay(X){
@@ -1000,20 +999,24 @@
     if(trA > 0.3) return;
 
     const inC = (cx, cy, r) => (x - cx)*(x - cx) + (y - cy)*(y - cy) <= r*r;
+    // 히트 영역 = 그리는 반경보다 +10 더 너그럽게 (조작감↑)
+    const HL = { cx:70,    cy:H-75, r:60 };
+    const HR = { cx:180,   cy:H-75, r:60 };
+    const HJ = { cx:W-75,  cy:H-75, r:70 };
+    const HD = { cx:W-75,  cy:H-160, r:42 };
     if(kind === 'down' || kind === 'tap'){
-      if(inC(55,  H-60, 42)) tL = true;
-      if(inC(140, H-60, 42)) tR = true;
-      if(inC(W-60, H-60, 50)) tJ = true;
-      if(hasDash && inC(W-60, H-130, 35)) tDash = true;
+      if(inC(HL.cx, HL.cy, HL.r)) tL = true;
+      if(inC(HR.cx, HR.cy, HR.r)) tR = true;
+      if(inC(HJ.cx, HJ.cy, HJ.r)) tJ = true;
+      if(hasDash && inC(HD.cx, HD.cy, HD.r)) tDash = true;
     } else if(kind === 'up'){
       tL = false; tR = false; tJ = false; tDash = false;
     } else if(kind === 'move'){
-      // multi-touch 드래그 - 재평가
       tL = false; tR = false; tJ = false; tDash = false;
-      if(inC(55,  H-60, 42)) tL = true;
-      if(inC(140, H-60, 42)) tR = true;
-      if(inC(W-60, H-60, 50)) tJ = true;
-      if(hasDash && inC(W-60, H-130, 35)) tDash = true;
+      if(inC(HL.cx, HL.cy, HL.r)) tL = true;
+      if(inC(HR.cx, HR.cy, HR.r)) tR = true;
+      if(inC(HJ.cx, HJ.cy, HJ.r)) tJ = true;
+      if(hasDash && inC(HD.cx, HD.cy, HD.r)) tDash = true;
     }
   }
 
