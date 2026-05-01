@@ -693,6 +693,8 @@ import { openSettings, getSettings, saveSettings, onSettingsChange } from './js-
 import { showInventory, showItemSelect, showVictory, showDefeat, showEpisodeSelect, showTitleLite, closeAllOverlays } from './js-v8/ui/menus.js';
 import { CutinOverlay, registerPortraits as registerCutinPortraits, registerPortraitArt as registerCutinPortraitArt } from './js-v8/ui/cutin.js';
 import { getPortraitSVG } from './js-v8/ui/portrait_art.js';
+import { initCursor, disposeCursor, getCursor, setCursor, moveCursor, hideCursor, showCursor, tickCursor } from './js-v8/ui/cursor.js';
+import { initDPad, onDPadInput, showDPad, hideDPad } from './js-v8/ui/dpad.js';
 
 // ★ 비서B P1 — exploration 씬 (마을) 모듈
 import {
@@ -1191,6 +1193,21 @@ async function playBattleScene(scene) {
   // Raycaster 입력 (tile/unit 클릭)
   bindCanvasClick();
 
+  // ★ D-pad + 타일 커서 (영걸전 컨트롤)
+  initCursor(State.scene, mapData, {
+    startX: leaderAlly?.x ?? Math.floor(mapData.width / 2),
+    startY: leaderAlly?.y ?? Math.floor(mapData.height / 2),
+    onMove: (cx, cy) => {
+      // 커서 따라 카메라 부드럽게 패닝
+      const w = gridToWorld(cx, cy);
+      panTacticalTo(w.x, w.z, 220);
+    },
+  });
+  if (!State.updateCallbacks.includes(tickCursor)) State.updateCallbacks.push(tickCursor);
+  initDPad();
+  onDPadInput(handleDPadInput);
+  showDPad();
+
   GameState.turnManager.start();
 
   // 전투 결과까지 대기
@@ -1200,6 +1217,10 @@ async function playBattleScene(scene) {
 
   // 정리
   unbindCanvasClick();
+  hideDPad();
+  disposeCursor();
+  const _ti = State.updateCallbacks.indexOf(tickCursor);
+  if (_ti >= 0) State.updateCallbacks.splice(_ti, 1);
   audio.stopBGM();
   hideActionQueue();
 
@@ -1322,6 +1343,10 @@ function wireTurnManager(tm) {
       _detachSelectionRing();
       GameState.selected = null;
       updateActionQueue(GameState.units, { activeId: null });
+      showCursor();
+      // 커서를 첫 가능 아군 위로
+      const firstReady = (GameState.allies || []).find(u => u.hp > 0 && !u.acted);
+      if (firstReady) setCursor(firstReady.x, firstReady.y, false);
       // 첫 턴 시작 직후만 안내 표시 (행동 시작하면 자동 숨김)
       if (GameState.turnManager?.turn === 1 && !GameState.flags._hintShown) {
         showFirstTurnHint();
@@ -1337,17 +1362,36 @@ function wireTurnManager(tm) {
       clearHighlights();
       GameState.moveHighlight = showMoveRange(tiles);
       showUnitPanel(unit, { actions: [] });  // 이동 중엔 액션 숨김
+      // 커서를 선택 유닛 위로
+      showCursor();
+      setCursor(unit.x, unit.y, false);
     } else if (to === PHASE.ALLY_ACTION) {
       clearHighlights();
       placeUnitMesh(unit.mesh, unit);
       showUnitPanel(unit, { actions: ['attack', 'skill', 'item', 'wait'] });
     } else if (to === PHASE.ALLY_TARGETING) {
       // 공격/스킬 범위 표시는 beginTargeting에서 처리됨
+      // 커서를 가장 가까운 사거리 내 적 위로 자동 이동 (영걸전 UX)
+      const pa = GameState.pendingAction;
+      if (pa && pa.unit) {
+        const cand = (GameState.enemies || []).filter(en => {
+          if (en.hp <= 0) return false;
+          if (pa.type === 'attack') return manhattan(pa.unit, en) <= (pa.unit.rng || 1);
+          if (pa.type === 'skill')  return manhattan(pa.unit, en) <= (pa.skillDef?.rng || 1);
+          return false;
+        });
+        if (cand.length) {
+          cand.sort((a, b) => manhattan(pa.unit, a) - manhattan(pa.unit, b));
+          showCursor();
+          setCursor(cand[0].x, cand[0].y, true);
+        }
+      }
     } else if (to === PHASE.ENEMY) {
       clearHighlights();
       hideUnitPanel();
       hideFirstTurnHint();
       _detachSelectionRing();
+      hideCursor();
       updateActionQueue(GameState.units, { activeId: null });
       showTurnBanner('적의 턴', 1300);
       runEnemyTurn();
@@ -1356,6 +1400,7 @@ function wireTurnManager(tm) {
       hideUnitPanel();
       hideFirstTurnHint();
       _detachSelectionRing();
+      hideCursor();
       showTurnBanner('승  리!', 1600);
       GameState.flags.battleResult = 'victory';
       setTimeout(() => GameState._battleResolve && GameState._battleResolve(), 1100);
@@ -1364,6 +1409,7 @@ function wireTurnManager(tm) {
       hideUnitPanel();
       hideFirstTurnHint();
       _detachSelectionRing();
+      hideCursor();
       showTurnBanner('패  배', 1500);
       GameState.flags.battleResult = 'defeat';
       setTimeout(() => GameState._battleResolve && GameState._battleResolve(), 1100);
@@ -1463,6 +1509,93 @@ async function runEnemyTurn() {
   // 턴 종료
   await delay(300);
   tm.endEnemyTurn();
+}
+
+// ── D-pad 입력 라우팅 (영걸전식 컨트롤) ─────────────
+//   ↑↓←→ : 타일 커서 이동 (+ 카메라 자동 follow)
+//   A     : 결정 (커서 위치 = onTileClick)
+//   B     : 취소 (현재 phase 한 단계 뒤로)
+//   L/R   : 이전/다음 가능 아군 사이클
+//   menu  : 대기 (현재 선택된 유닛 턴 종료)
+function handleDPadInput(cmd) {
+  const tm = GameState.turnManager;
+  if (!tm) return;
+
+  // 커서 자유 이동 — 모든 ALLY phase에서
+  if (cmd === 'up' || cmd === 'down' || cmd === 'left' || cmd === 'right') {
+    if (tm.currentPhase === PHASE.ENEMY) return;
+    showCursor();
+    moveCursor(cmd);
+    return;
+  }
+
+  if (cmd === 'a') {
+    const c = getCursor();
+    onTileClick(c.x, c.y);
+    return;
+  }
+
+  if (cmd === 'b') {
+    // 단계 뒤로 — TARGETING/MOVE 중이면 phase 복귀
+    const phase = tm.currentPhase;
+    if (phase === PHASE.ALLY_TARGETING) {
+      // 공격/스킬 대상 선택 취소 → 액션 메뉴로
+      GameState.pendingAction = null;
+      clearHighlights();
+      tm._setPhase(PHASE.ALLY_ACTION, { unit: tm.selectedUnit });
+      if (tm.selectedUnit) showUnitPanel(tm.selectedUnit, { actions: ['attack', 'skill', 'item', 'wait'] });
+    } else if (phase === PHASE.ALLY_ACTION) {
+      // 액션 메뉴 취소 → 이동 단계로 복귀
+      hideUnitPanel();
+      tm._setPhase(PHASE.ALLY_MOVE, { unit: tm.selectedUnit });
+    } else if (phase === PHASE.ALLY_MOVE) {
+      // 이동 단계 취소 → 유닛 선택 해제
+      _detachSelectionRing();
+      clearHighlights();
+      tm.selectedUnit = null;
+      tm._setPhase(PHASE.ALLY_SELECT);
+    }
+    return;
+  }
+
+  if (cmd === 'l' || cmd === 'r') {
+    cycleAlly(cmd === 'l' ? -1 : 1);
+    return;
+  }
+
+  if (cmd === 'menu') {
+    // 대기 = 현재 선택 유닛 턴 종료. 미선택이면 커서 위치 아군 선택만 시도
+    if (tm.selectedUnit && tm.currentPhase !== PHASE.ENEMY) {
+      handleAction('wait', tm.selectedUnit);
+    }
+    return;
+  }
+}
+
+// 다음/이전 행동 가능 아군으로 커서·카메라 점프
+function cycleAlly(delta) {
+  const tm = GameState.turnManager;
+  if (!tm || tm.currentPhase === PHASE.ENEMY) return;
+  const pool = (GameState.allies || []).filter(u => u.hp > 0 && !u.acted);
+  if (!pool.length) return;
+  pool.sort((a, b) => (a.id || 0) - (b.id || 0) || a.x - b.x || a.y - b.y);
+  const cur = tm.selectedUnit;
+  let idx = cur ? pool.findIndex(u => u.id === cur.id) : -1;
+  if (idx < 0) {
+    // 커서 위치 기준 가장 가까운 유닛
+    const c = getCursor();
+    pool.sort((a, b) => (Math.abs(a.x - c.x) + Math.abs(a.y - c.y)) - (Math.abs(b.x - c.x) + Math.abs(b.y - c.y)));
+    idx = 0;
+  } else {
+    idx = (idx + delta + pool.length) % pool.length;
+  }
+  const next = pool[idx];
+  setCursor(next.x, next.y, true);
+  // 선택은 ALLY_SELECT 단계에서만 자동 진행
+  if (tm.currentPhase === PHASE.ALLY_SELECT) {
+    tm.selectUnit(next);
+    audio.playSFX('click');
+  }
 }
 
 // ── 사용자 액션 처리 ─────────────────────────────
