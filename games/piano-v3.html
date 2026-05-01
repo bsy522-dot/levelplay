@@ -237,7 +237,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
   <div class="panel" id="panel-synth">
     <div class="ctrl-bar">
       <label>곡 <select id="song-select"></select></label>
-      <label title="30% 매우 느림 ~ 200% 빠름">속도 <input type="range" id="speed" min="30" max="200" value="100"><span id="speed-val">1.0x</span></label>
+      <label title="10% 매우 느림 ~ 200% 빠름">속도 <input type="range" id="speed" min="10" max="200" value="100"><span id="speed-val">1.0x</span></label>
       <button class="btn btn-primary" id="btn-play-synth">▶ 재생</button>
       <button class="btn btn-secondary" id="btn-stop-synth">■ 정지</button>
       <label><input type="checkbox" id="auto-play"> 자동</label>
@@ -1387,22 +1387,22 @@ function openLesson(id) {
   };
   document.getElementById('btn-demo').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(50); // 데모: 50%
+    setSpeed(30);
     startSynthesia(lesson.notes, baseBPM, true, null);
   };
   document.getElementById('btn-wait').onclick = () => {
     synthPracticeMode = false; synthWaitMode = true;
-    setSpeed(50);
+    setSpeed(30);
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-practice').onclick = () => {
     synthPracticeMode = true; synthWaitMode = false;
-    setSpeed(40); // 연습: 40%
+    setSpeed(25);
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-test').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(70); // 테스트: 70%
+    setSpeed(50);
     startSynthesia(lesson.notes, baseBPM, false, id);
   };
 }
@@ -1667,8 +1667,8 @@ function synthLoop() {
 
   let now = (performance.now() - synthStartTime) / 1000;
   const beatToSec = 60 / (synthBPM * synthSpeed);
-  // 비트매니아 스타일: 노트가 화면에 3~4초간 보이며 천천히 떨어짐
-  const pxPerSec = H * (synthWaitMode ? 0.25 : 0.30);
+  // 매우 천천히: 1초당 화면의 10%만 이동
+  const pxPerSec = H * (synthWaitMode ? 0.10 : 0.15);
 
   // === Wait Mode: 노트가 떨어지지 않고 hit line 직전에 항상 고정 ===
   if (synthWaitMode && !synthAutoPlay) {
@@ -1676,8 +1676,8 @@ function synthLoop() {
     if (unplayed.length > 0) {
       const minTime = Math.min(...unplayed.map(n => n.time));
       const nextTimeSec = minTime * beatToSec;
-      // 비트매니아 스타일: 다음 노트가 hit line 위 3.0초 거리에 항상 떠있어 충분히 보임
-      const stopOffset = 3.0;
+      // 다음 노트가 hit line 위 5.0초 거리에 항상 떠있음 (충분히 여유롭게 인식)
+      const stopOffset = 5.0;
       const targetNow = nextTimeSec - stopOffset;
       synthStartTime = performance.now() - targetNow * 1000;
       now = targetNow;
