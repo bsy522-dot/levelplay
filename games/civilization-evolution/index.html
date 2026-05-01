@@ -84,15 +84,16 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 #joystick.active{border-color:#FFD700;box-shadow:0 0 18px rgba(255,215,0,.5)}
 #joystick-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,215,0,.7);white-space:nowrap;pointer-events:none}
 @media(max-width:480px){#joystick{left:14px;bottom:74px;width:110px;height:110px}#joystick-stick{width:44px;height:44px}}
-/* ===== D-pad (보조 — 정확 1칸 이동) ===== */
-#dpad{position:absolute;right:20px;bottom:80px;width:120px;height:120px;z-index:20;display:none;touch-action:none}
-#dpad button{position:absolute;width:40px;height:40px;background:rgba(0,0,0,.6);border:2px solid rgba(255,215,0,.4);color:#FFD700;font-size:18px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-#dpad .up{top:0;left:40px}
-#dpad .down{bottom:0;left:40px}
-#dpad .left{left:0;top:40px}
-#dpad .right{right:0;top:40px}
-#dpad .center{top:40px;left:40px;background:rgba(255,215,0,.2);font-size:14px}
-#joystick-toggle{position:absolute;left:20px;top:96px;z-index:21;background:rgba(0,0,0,.6);border:1px solid rgba(255,215,0,.4);color:#FFD700;font-size:11px;padding:4px 10px;border-radius:14px;cursor:pointer}
+/* ===== D-pad (보조 — 정확 1칸 이동, 우하단 항상 표시) ===== */
+#dpad{position:absolute;right:14px;bottom:140px;width:130px;height:130px;z-index:20;touch-action:none;user-select:none}
+#dpad button{position:absolute;width:42px;height:42px;background:radial-gradient(circle,rgba(255,215,0,.18) 0%,rgba(0,0,0,.65) 80%);border:2px solid rgba(255,215,0,.5);color:#FFD700;font-size:20px;font-weight:bold;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#dpad button:active{background:rgba(255,215,0,.4);transform:scale(0.94)}
+#dpad .up{top:0;left:44px}
+#dpad .down{bottom:0;left:44px}
+#dpad .left{left:0;top:44px}
+#dpad .right{right:0;top:44px}
+#dpad .center{top:44px;left:44px;background:radial-gradient(circle,rgba(76,175,80,.6) 0%,rgba(46,125,50,.85) 80%);border-color:#4CAF50;color:#fff;font-size:11px;letter-spacing:-1px}
+@media(max-width:480px){#dpad{right:10px;bottom:130px;width:120px;height:120px}#dpad button{width:38px;height:38px;font-size:16px}#dpad .up,#dpad .down{left:41px}#dpad .left,#dpad .right{top:41px}#dpad .center{top:41px;left:41px;font-size:10px}}
 </style>
 </head>
 <body>
@@ -122,13 +123,12 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 <div id="joystick-label">이동</div>
 </div>
 <div id="dpad">
-<button class="up" onmousedown="dpadDown('up')" onmouseup="dpadUp()" ontouchstart="dpadDown('up');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">▲</button>
-<button class="down" onmousedown="dpadDown('down')" onmouseup="dpadUp()" ontouchstart="dpadDown('down');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">▼</button>
-<button class="left" onmousedown="dpadDown('left')" onmouseup="dpadUp()" ontouchstart="dpadDown('left');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">◄</button>
-<button class="right" onmousedown="dpadDown('right')" onmouseup="dpadUp()" ontouchstart="dpadDown('right');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">►</button>
-<button class="center" onclick="gatherNearest()">채집</button>
+<button class="up" onmousedown="dpadDown('up')" onmouseup="dpadUp()" onmouseleave="dpadUp()" ontouchstart="dpadDown('up');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()" ontouchcancel="dpadUp()">▲</button>
+<button class="down" onmousedown="dpadDown('down')" onmouseup="dpadUp()" onmouseleave="dpadUp()" ontouchstart="dpadDown('down');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()" ontouchcancel="dpadUp()">▼</button>
+<button class="left" onmousedown="dpadDown('left')" onmouseup="dpadUp()" onmouseleave="dpadUp()" ontouchstart="dpadDown('left');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()" ontouchcancel="dpadUp()">◄</button>
+<button class="right" onmousedown="dpadDown('right')" onmouseup="dpadUp()" onmouseleave="dpadUp()" ontouchstart="dpadDown('right');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()" ontouchcancel="dpadUp()">►</button>
+<button class="center" onclick="gatherNearest()" ontouchstart="event.preventDefault();gatherNearest()">채집</button>
 </div>
-<button id="joystick-toggle" onclick="togglePadMode()">🕹 조이스틱</button>
 <div id="action-buttons">
 <div class="action-btn" onclick="toggleCraftPanel()" title="제작">🔨</div>
 <div class="action-btn" onclick="toggleBuildPanel()" title="건설">🏗</div>
