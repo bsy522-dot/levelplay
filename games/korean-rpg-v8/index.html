@@ -616,7 +616,26 @@
     window.__v8SetLoadingMsg = (m) => {
       const el = document.getElementById('v8-loading-msg');
       if (el) el.textContent = m;
+      window.__v8LastLoadingMsg = m;
+      window.__v8LastLoadingAt = Date.now();
     };
+
+    // 10초 후에도 로딩이라면 진단 화면 자동 표시
+    setTimeout(() => {
+      if (reported) return;
+      if (!loadEl || loadEl.style.display === 'none') return;
+      const last = window.__v8LastLoadingMsg || '(메시지 없음 — 모듈조차 로드 안 됨)';
+      show(
+        '⏳ 10초 이상 로딩 중입니다.\n\n' +
+        '마지막 단계: ' + last + '\n\n' +
+        '원인 후보:\n' +
+        '1) 옛 캐시 — 모바일 브라우저 설정 → 사이트 데이터 지우기\n' +
+        '2) 시크릿/InPrivate 모드로 접속\n' +
+        '3) 네트워크: 데이터 절약 모드 OFF / VPN OFF\n' +
+        '4) 다른 브라우저로 시도 (크롬 ↔ 사파리)\n\n' +
+        '안 되면 F12 콘솔 첫 빨간 줄 알려주세요.'
+      );
+    }, 10000);
   })();
 </script>
 
