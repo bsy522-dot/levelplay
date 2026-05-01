@@ -78,6 +78,21 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 .vfx-burst{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none}
 .shake{animation:shake .3s}
 @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,3px)}}
+/* ===== 가상 조이스틱 (Virtual Joystick) ===== */
+#joystick{position:absolute;left:20px;bottom:80px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,215,0,0.12) 0%,rgba(0,0,0,0.5) 70%);border:2px solid rgba(255,215,0,.35);border-radius:50%;z-index:20;touch-action:none;user-select:none;-webkit-user-select:none;backdrop-filter:blur(2px)}
+#joystick-stick{position:absolute;top:50%;left:50%;width:50px;height:50px;background:radial-gradient(circle,rgba(255,215,0,.85) 0%,rgba(255,165,0,.7) 70%);border:2px solid #FFD700;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 2px 6px rgba(255,255,255,.4);transition:none;pointer-events:none}
+#joystick.active{border-color:#FFD700;box-shadow:0 0 18px rgba(255,215,0,.5)}
+#joystick-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,215,0,.7);white-space:nowrap;pointer-events:none}
+@media(max-width:480px){#joystick{left:14px;bottom:74px;width:110px;height:110px}#joystick-stick{width:44px;height:44px}}
+/* ===== D-pad (보조 — 정확 1칸 이동) ===== */
+#dpad{position:absolute;right:20px;bottom:80px;width:120px;height:120px;z-index:20;display:none;touch-action:none}
+#dpad button{position:absolute;width:40px;height:40px;background:rgba(0,0,0,.6);border:2px solid rgba(255,215,0,.4);color:#FFD700;font-size:18px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#dpad .up{top:0;left:40px}
+#dpad .down{bottom:0;left:40px}
+#dpad .left{left:0;top:40px}
+#dpad .right{right:0;top:40px}
+#dpad .center{top:40px;left:40px;background:rgba(255,215,0,.2);font-size:14px}
+#joystick-toggle{position:absolute;left:20px;top:96px;z-index:21;background:rgba(0,0,0,.6);border:1px solid rgba(255,215,0,.4);color:#FFD700;font-size:11px;padding:4px 10px;border-radius:14px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -102,6 +117,18 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 <div id="minimap"><canvas id="minimapCanvas" width="140" height="140"></canvas></div>
 <div id="objectives"><h3>📋 목표</h3><div id="obj-list"></div></div>
 <div id="inventory-bar"></div>
+<div id="joystick">
+<div id="joystick-stick"></div>
+<div id="joystick-label">이동</div>
+</div>
+<div id="dpad">
+<button class="up" onmousedown="dpadDown('up')" onmouseup="dpadUp()" ontouchstart="dpadDown('up');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">▲</button>
+<button class="down" onmousedown="dpadDown('down')" onmouseup="dpadUp()" ontouchstart="dpadDown('down');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">▼</button>
+<button class="left" onmousedown="dpadDown('left')" onmouseup="dpadUp()" ontouchstart="dpadDown('left');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">◄</button>
+<button class="right" onmousedown="dpadDown('right')" onmouseup="dpadUp()" ontouchstart="dpadDown('right');event.preventDefault()" ontouchend="dpadUp();event.preventDefault()">►</button>
+<button class="center" onclick="gatherNearest()">채집</button>
+</div>
+<button id="joystick-toggle" onclick="togglePadMode()">🕹 조이스틱</button>
 <div id="action-buttons">
 <div class="action-btn" onclick="toggleCraftPanel()" title="제작">🔨</div>
 <div class="action-btn" onclick="toggleBuildPanel()" title="건설">🏗</div>
@@ -395,9 +422,97 @@ function getTileSprite(type){
   return tiles[type]||tiles.grass;
 }
 
+// ========== 가상 조이스틱 + D-pad ==========
+let joyState={active:false,dx:0,dy:0,touchId:null,baseX:0,baseY:0,radius:50};
+let padMode='joystick'; // 'joystick' | 'dpad'
+
+function initJoystick(){
+  const pad=document.getElementById('joystick');
+  const stick=document.getElementById('joystick-stick');
+  if(!pad)return;
+
+  function start(e){
+    e.preventDefault();
+    const rect=pad.getBoundingClientRect();
+    joyState.baseX=rect.left+rect.width/2;
+    joyState.baseY=rect.top+rect.height/2;
+    joyState.radius=rect.width/2-20;
+    joyState.active=true;
+    pad.classList.add('active');
+    if(e.touches){
+      joyState.touchId=e.touches[0].identifier;
+      move(e);
+    }else{
+      move(e);
+    }
+  }
+  function move(e){
+    if(!joyState.active)return;
+    let cx,cy;
+    if(e.touches){
+      let t=null;
+      for(let i=0;i<e.touches.length;i++){
+        if(e.touches[i].identifier===joyState.touchId){t=e.touches[i];break;}
+      }
+      if(!t)return;
+      cx=t.clientX;cy=t.clientY;
+    }else{
+      cx=e.clientX;cy=e.clientY;
+    }
+    let dx=cx-joyState.baseX, dy=cy-joyState.baseY;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>joyState.radius){
+      dx=dx*joyState.radius/dist;
+      dy=dy*joyState.radius/dist;
+    }
+    joyState.dx=dx/joyState.radius; // -1~+1
+    joyState.dy=dy/joyState.radius;
+    stick.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  }
+  function end(e){
+    if(e&&e.preventDefault)e.preventDefault();
+    joyState.active=false;
+    joyState.dx=0;joyState.dy=0;
+    joyState.touchId=null;
+    pad.classList.remove('active');
+    stick.style.transform='translate(-50%,-50%)';
+  }
+
+  pad.addEventListener('touchstart',start,{passive:false});
+  pad.addEventListener('touchmove',move,{passive:false});
+  pad.addEventListener('touchend',end,{passive:false});
+  pad.addEventListener('touchcancel',end,{passive:false});
+  pad.addEventListener('mousedown',e=>{start(e);
+    const mm=ev=>move(ev);
+    const mu=ev=>{end(ev);window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);};
+    window.addEventListener('mousemove',mm);
+    window.addEventListener('mouseup',mu);
+  });
+}
+
+let dpadHeld=null;
+function dpadDown(dir){dpadHeld=dir;}
+function dpadUp(){dpadHeld=null;}
+
+function togglePadMode(){
+  padMode=padMode==='joystick'?'dpad':'joystick';
+  const joy=document.getElementById('joystick');
+  const dp=document.getElementById('dpad');
+  const btn=document.getElementById('joystick-toggle');
+  if(padMode==='dpad'){
+    joy.style.display='none';dp.style.display='block';
+    btn.textContent='⊞ D-pad';
+  }else{
+    joy.style.display='block';dp.style.display='none';
+    btn.textContent='🕹 조이스틱';
+  }
+  showToast(padMode==='joystick'?'가상 조이스틱 (드래그)':'D-pad (탭/홀드)');
+}
+
 // ========== INIT ==========
 function init(){
   preloadSprites();
+  initJoystick();
 canvas=document.getElementById('gameCanvas');
 ctx=canvas.getContext('2d');
 mmCanvas=document.getElementById('minimapCanvas');
@@ -538,6 +653,19 @@ requestAnimationFrame(gameLoop);
 function update(){
 // Movement
 const spd=3;
+// 가상 조이스틱 입력
+if(joyState.active&&(Math.abs(joyState.dx)>0.15||Math.abs(joyState.dy)>0.15)){
+  G.px+=joyState.dx*spd;
+  G.py+=joyState.dy*spd;
+  G.targetX=null;G.walking=true;G.walkFrame++;
+  G._lastDx=joyState.dx;G._lastDy=joyState.dy;
+}
+// D-pad 입력
+if(dpadHeld==='up'){G.py-=spd;G.targetX=null;G.walking=true;G.walkFrame++;G._lastDy=-1;}
+if(dpadHeld==='down'){G.py+=spd;G.targetX=null;G.walking=true;G.walkFrame++;G._lastDy=1;}
+if(dpadHeld==='left'){G.px-=spd;G.targetX=null;G.walking=true;G.walkFrame++;G._lastDx=-1;}
+if(dpadHeld==='right'){G.px+=spd;G.targetX=null;G.walking=true;G.walkFrame++;G._lastDx=1;}
+// 키보드 (PC)
 if(keys['ArrowUp']||keys['w']){G.py-=spd;G.targetX=null;G.walking=true;G.walkFrame++;}
 if(keys['ArrowDown']||keys['s']){G.py+=spd;G.targetX=null;G.walking=true;G.walkFrame++;}
 if(keys['ArrowLeft']||keys['a']){G.px-=spd;G.targetX=null;G.walking=true;G.walkFrame++;}
