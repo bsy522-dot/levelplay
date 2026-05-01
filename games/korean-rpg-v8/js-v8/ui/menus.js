@@ -15,7 +15,7 @@
 //   showTitleLite(onStart)
 //   closeAllOverlays()
 
-import portraitsData from '../data/portraits.json' with { type: 'json' };
+import portraitsData from '../data/portraits_data.js';
 
 let _currentOverlay = null;
 

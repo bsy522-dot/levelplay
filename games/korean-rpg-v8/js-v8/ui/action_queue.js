@@ -3,7 +3,7 @@
 // 다음 행동 가능한 유닛(hp>0 && !acted)을 spd 내림차순 정렬해 좌측에 표시.
 // 현재 행동자(selected)는 활성 테두리.
 
-import portraitsData from '../data/portraits.json' with { type: 'json' };
+import portraitsData from '../data/portraits_data.js';
 
 let _root = null;
 let _items = [];

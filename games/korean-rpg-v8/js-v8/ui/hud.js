@@ -14,7 +14,7 @@
 //   onCameraChange(cb)
 //   onSettings(cb)
 
-import portraitsData from '../data/portraits.json' with { type: 'json' };
+import portraitsData from '../data/portraits_data.js';
 
 const WEATHER_ICON = {
   clear: '☀️', rain: '🌧️', snow: '❄️', fog: '🌫️'

@@ -8,7 +8,7 @@
 //   hideDialogue()
 //   class DialogueRunner
 
-import portraitsData from '../data/portraits.json' with { type: 'json' };
+import portraitsData from '../data/portraits_data.js';
 import { getPortraitSVG } from './portrait_art.js';
 
 const TYPE_SPEED_MS = 30;

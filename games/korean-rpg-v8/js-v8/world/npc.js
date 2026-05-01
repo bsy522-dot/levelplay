@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { buildUnit } from '../graphics/unit_builder.js';
 import { gridToWorld, TILE_BASE_H } from '../graphics/terrain.js';
-import portraitsData from '../data/portraits.json' with { type: 'json' };
+import portraitsData from '../data/portraits_data.js';
 
 // 포트레이트 color → 망토 느낌 커스텀은 unit_builder가 material 싱글톤이라
 // 쉽게 안 됨. NPC 구별은 머리 위 "말풍선 콘" 색상으로 표현.
