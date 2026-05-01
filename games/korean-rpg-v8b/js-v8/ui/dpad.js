@@ -27,43 +27,70 @@ const STYLE = `
 }
 #v8-dpad-root.v8-dpad-on { display: block; }
 
-#v8-dpad-pad {
+/* ─── 가상 조이스틱 ─── */
+#v8-joystick {
   position: absolute;
-  left: 14px; bottom: 22px;
-  width: 156px; height: 156px;
+  left: 18px; bottom: 26px;
+  width: 150px; height: 150px;
   pointer-events: auto;
+  touch-action: none;
 }
-#v8-dpad-pad .v8-dpad-btn {
-  position: absolute;
-  width: 50px; height: 50px;
-  background: radial-gradient(circle at 30% 30%, rgba(60,40,18,.95), rgba(20,12,4,.85));
-  border: 2px solid #c4956a;
-  color: #ffd700;
-  font-size: 22px; font-weight: 900;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,.5), inset 0 -2px 4px rgba(0,0,0,.4);
-  cursor: pointer;
-  transition: transform .08s, background .1s;
+#v8-joystick .v8-joy-base {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 32%, rgba(80,55,25,.85), rgba(20,12,4,.85) 70%),
+    radial-gradient(circle at center, rgba(255,215,0,.07) 0%, transparent 60%);
+  border: 3px solid rgba(196,149,106,.85);
+  box-shadow:
+    0 6px 16px rgba(0,0,0,.55),
+    inset 0 -4px 12px rgba(0,0,0,.5),
+    inset 0 0 24px rgba(0,0,0,.35);
 }
-#v8-dpad-pad .v8-dpad-btn:active,
-#v8-dpad-pad .v8-dpad-btn.v8-press {
-  transform: scale(0.93);
-  background: radial-gradient(circle at 30% 30%, #ffd700, #c4956a);
-  color: #20100a;
-}
-#v8-dpad-pad .v8-dpad-up    { left: 53px; top: 0; }
-#v8-dpad-pad .v8-dpad-down  { left: 53px; top: 106px; }
-#v8-dpad-pad .v8-dpad-left  { left: 0;   top: 53px; }
-#v8-dpad-pad .v8-dpad-right { left: 106px; top: 53px; }
-#v8-dpad-pad .v8-dpad-center {
-  position: absolute; left: 53px; top: 53px;
-  width: 50px; height: 50px;
-  background: radial-gradient(circle at center, #5a3a18, #2a1808);
-  border: 2px solid #6b4226;
-  border-radius: 10px;
+#v8-joystick .v8-joy-base::after {
+  /* 4방향 가이드 ▲▼◀▶ — 가상 십자 */
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255,215,0,.35) 0 3px, transparent 4px),
+    radial-gradient(circle at 50% 88%, rgba(255,215,0,.35) 0 3px, transparent 4px),
+    radial-gradient(circle at 12% 50%, rgba(255,215,0,.35) 0 3px, transparent 4px),
+    radial-gradient(circle at 88% 50%, rgba(255,215,0,.35) 0 3px, transparent 4px);
   pointer-events: none;
 }
+#v8-joystick .v8-joy-stick {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 64px; height: 64px;
+  margin: -32px 0 0 -32px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, #ffe890 0%, #c4956a 50%, #6b4226 100%);
+  border: 3px solid #ffd700;
+  box-shadow:
+    0 4px 10px rgba(0,0,0,.55),
+    inset 0 -3px 6px rgba(0,0,0,.4),
+    inset 0 3px 6px rgba(255,255,255,.25);
+  transition: transform .12s ease-out, background .1s;
+  pointer-events: none;
+}
+#v8-joystick.v8-joy-active .v8-joy-stick {
+  transition: none;
+  background: radial-gradient(circle at 30% 30%, #fff5b0 0%, #ffd700 50%, #8a5a18 100%);
+}
+#v8-joystick .v8-joy-arrow {
+  position: absolute;
+  width: 20px; height: 20px;
+  font-size: 16px; line-height: 1;
+  color: #ffd700; opacity: 0; pointer-events: none;
+  text-shadow: 0 0 8px #ffae20;
+  transition: opacity .15s;
+}
+#v8-joystick .v8-joy-arrow.v8-on { opacity: 1; }
+#v8-joystick .v8-joy-arr-up    { left: calc(50% - 10px); top: -8px; }
+#v8-joystick .v8-joy-arr-down  { left: calc(50% - 10px); bottom: -8px; transform: rotate(180deg); }
+#v8-joystick .v8-joy-arr-left  { left: -8px; top: calc(50% - 10px); transform: rotate(-90deg); }
+#v8-joystick .v8-joy-arr-right { right: -8px; top: calc(50% - 10px); transform: rotate(90deg); }
 
 #v8-dpad-ab {
   position: absolute;
@@ -245,12 +272,13 @@ function _buildUI() {
       <div class="v8-dpad-sb v8-dpad-l" title="이전 유닛 (Q)">‹ L</div>
       <div class="v8-dpad-sb v8-dpad-r" title="다음 유닛 (E)">R ›</div>
     </div>
-    <div id="v8-dpad-pad">
-      <div class="v8-dpad-btn v8-dpad-up">▲</div>
-      <div class="v8-dpad-btn v8-dpad-left">◀</div>
-      <div class="v8-dpad-center"></div>
-      <div class="v8-dpad-btn v8-dpad-right">▶</div>
-      <div class="v8-dpad-btn v8-dpad-down">▼</div>
+    <div id="v8-joystick">
+      <div class="v8-joy-base"></div>
+      <div class="v8-joy-arrow v8-joy-arr-up">▲</div>
+      <div class="v8-joy-arrow v8-joy-arr-down">▲</div>
+      <div class="v8-joy-arrow v8-joy-arr-left">▲</div>
+      <div class="v8-joy-arrow v8-joy-arr-right">▲</div>
+      <div class="v8-joy-stick"></div>
     </div>
     <div id="v8-dpad-zoom">
       <div class="v8-dpad-zb v8-dpad-zin"  title="줌인 (+)">+</div>
@@ -264,10 +292,6 @@ function _buildUI() {
   `;
   document.body.appendChild(root);
 
-  _bindButton(root.querySelector('.v8-dpad-up'),    'up',    true);
-  _bindButton(root.querySelector('.v8-dpad-down'),  'down',  true);
-  _bindButton(root.querySelector('.v8-dpad-left'),  'left',  true);
-  _bindButton(root.querySelector('.v8-dpad-right'), 'right', true);
   _bindButton(root.querySelector('.v8-dpad-a'),     'a',     false);
   _bindButton(root.querySelector('.v8-dpad-b'),     'b',     false);
   _bindButton(root.querySelector('.v8-dpad-l'),     'l',     false);
@@ -276,7 +300,114 @@ function _buildUI() {
   _bindButton(root.querySelector('.v8-dpad-zout'),  'zout',  true);
   _bindButton(root.querySelector('#v8-dpad-menu'),  'menu',  false);
 
+  _bindJoystick(root.querySelector('#v8-joystick'));
+
   return root;
+}
+
+// ─── 가상 조이스틱 — 잡고 돌리면 그 방향으로 그리드 이동 ───
+function _bindJoystick(joy) {
+  if (!joy) return;
+  const stick = joy.querySelector('.v8-joy-stick');
+  const arrows = {
+    up: joy.querySelector('.v8-joy-arr-up'),
+    down: joy.querySelector('.v8-joy-arr-down'),
+    left: joy.querySelector('.v8-joy-arr-left'),
+    right: joy.querySelector('.v8-joy-arr-right'),
+  };
+  const STEP_MS = 180;     // 같은 방향 반복 간격
+  const DEAD    = 14;      // 데드존(px)
+  const MAX     = 50;      // 스틱 최대 변위(px)
+  let active = false;
+  let cx = 0, cy = 0;
+  let curDir = null;
+  let lastEmit = 0;
+  let rafId = null;
+
+  function _setArrow(dir) {
+    for (const k of Object.keys(arrows)) arrows[k].classList.toggle('v8-on', k === dir);
+  }
+  function _dirOf(dx, dy) {
+    const len = Math.hypot(dx, dy);
+    if (len < DEAD) return null;
+    // 4방향 — 큰 축이 우선
+    if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'right' : 'left';
+    return dy > 0 ? 'down' : 'up';
+  }
+  function _onMoveTick() {
+    rafId = null;
+    if (!active || !curDir) return;
+    const now = performance.now();
+    if (now - lastEmit >= STEP_MS) {
+      _emit(curDir);
+      lastEmit = now;
+    }
+    rafId = requestAnimationFrame(_onMoveTick);
+  }
+  function _begin(x, y) {
+    active = true;
+    joy.classList.add('v8-joy-active');
+    const r = joy.getBoundingClientRect();
+    cx = r.left + r.width / 2;
+    cy = r.top  + r.height / 2;
+    _move(x, y, true);
+  }
+  function _move(x, y, immediate = false) {
+    if (!active) return;
+    let dx = x - cx;
+    let dy = y - cy;
+    const len = Math.hypot(dx, dy);
+    if (len > MAX) { dx = dx * MAX / len; dy = dy * MAX / len; }
+    stick.style.transform = `translate(${dx}px, ${dy}px)`;
+    const dir = _dirOf(dx, dy);
+    _setArrow(dir);
+    if (dir !== curDir) {
+      curDir = dir;
+      if (dir) {
+        _emit(dir);
+        lastEmit = performance.now();
+        if (!rafId) rafId = requestAnimationFrame(_onMoveTick);
+      }
+    } else if (dir && immediate) {
+      // 첫 입력 즉시 emit
+      lastEmit = performance.now();
+      if (!rafId) rafId = requestAnimationFrame(_onMoveTick);
+    }
+  }
+  function _end() {
+    active = false;
+    curDir = null;
+    joy.classList.remove('v8-joy-active');
+    stick.style.transform = '';
+    _setArrow(null);
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  joy.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    _begin(t.clientX, t.clientY);
+  }, { passive: false });
+  joy.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    _move(t.clientX, t.clientY);
+  }, { passive: false });
+  joy.addEventListener('touchend',    _end);
+  joy.addEventListener('touchcancel', _end);
+
+  joy.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    _begin(e.clientX, e.clientY);
+    const onMove = (ev) => _move(ev.clientX, ev.clientY);
+    const onUp = () => {
+      _end();
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  });
 }
 
 function _bindKeyboard() {
@@ -302,21 +433,30 @@ function _bindKeyboard() {
       case '-': case '_': cmd = 'zout'; break;
       default: return;
     }
+    // 다이얼로그가 활성이면 dialogue가 Space/Enter 처리하도록 양보
+    if (window.isDialogueActive && window.isDialogueActive()) return;
     e.preventDefault();
-    e.stopPropagation();
     _emit(cmd);
-    // 시각 피드백 (해당 버튼 깜박)
+    // 시각 피드백 (해당 버튼/조이스틱 화살표)
     const map = {
-      up: '.v8-dpad-up', down: '.v8-dpad-down', left: '.v8-dpad-left', right: '.v8-dpad-right',
+      up: '.v8-joy-arr-up', down: '.v8-joy-arr-down', left: '.v8-joy-arr-left', right: '.v8-joy-arr-right',
       a: '.v8-dpad-a', b: '.v8-dpad-b', l: '.v8-dpad-l', r: '.v8-dpad-r',
       zin: '.v8-dpad-zin', zout: '.v8-dpad-zout',
       menu: '#v8-dpad-menu',
     };
     const sel = map[cmd];
-    if (sel && _root) _press(_root.querySelector(sel));
+    if (sel && _root) {
+      const el = _root.querySelector(sel);
+      if (el && el.classList.contains('v8-joy-arrow')) {
+        el.classList.add('v8-on');
+        setTimeout(() => el.classList.remove('v8-on'), 160);
+      } else {
+        _press(el);
+      }
+    }
   };
-  // capture 단계에서 잡아 다른 핸들러보다 먼저 (다이얼로그 _onKey 보다 우선)
-  window.addEventListener('keydown', _keyHandler, true);
+  // capture 단계 X — bubble 단계에서 잡아 dialogue 등 우선 핸들러 양보
+  window.addEventListener('keydown', _keyHandler, false);
 }
 
 export function initDPad() {

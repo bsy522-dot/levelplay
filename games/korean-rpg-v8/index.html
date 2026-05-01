@@ -695,6 +695,8 @@ import { CutinOverlay, registerPortraits as registerCutinPortraits, registerPort
 import { getPortraitSVG } from './js-v8/ui/portrait_art.js';
 import { initCursor, disposeCursor, getCursor, setCursor, moveCursor, hideCursor, showCursor, tickCursor } from './js-v8/ui/cursor.js';
 import { initDPad, onDPadInput, showDPad, hideDPad } from './js-v8/ui/dpad.js';
+// dpad.js 키보드 핸들러가 다이얼로그 활성 시 양보할 수 있도록 전역 노출
+window.isDialogueActive = isDialogueActive;
 
 // ★ 비서B P1 — exploration 씬 (마을) 모듈
 import {
@@ -2092,88 +2094,22 @@ async function playExplorationScene(scene) {
   const sceneStartMs = performance.now();
   const INPUT_GRACE_MS = 500;
 
-  // 모바일 D-pad + 대화 버튼
-  const _dpBtnStyle = [
-    'width:52px','height:52px',
-    'background:rgba(26,20,40,0.85)',
-    'border:1.5px solid rgba(255,215,0,0.5)',
-    'border-radius:10px',
-    'color:#ffd700','font-size:22px',
-    'display:flex','align-items:center','justify-content:center',
-    'cursor:pointer',
-    'touch-action:none','-webkit-user-select:none','user-select:none',
-    'box-shadow:0 2px 8px rgba(0,0,0,0.5)',
-    'transition:background 0.1s',
-  ].join(';');
-  const _dpEmpty = 'width:52px;height:52px;';
-
-  const dpad = document.createElement('div');
-  dpad.id = 'v8-dpad';
-  dpad.style.cssText = [
-    'position:fixed','bottom:24px','left:20px','z-index:300',
-    'display:grid',
-    'grid-template-columns:52px 52px 52px',
-    'grid-template-rows:52px 52px 52px',
-    'gap:6px',
-    'touch-action:none',
-  ].join(';');
-  dpad.innerHTML = `
-    <div style="${_dpEmpty}"></div>
-    <button id="v8-dp-up"    style="${_dpBtnStyle}">▲</button>
-    <div style="${_dpEmpty}"></div>
-    <button id="v8-dp-left"  style="${_dpBtnStyle}">◀</button>
-    <div style="${_dpEmpty}"></div>
-    <button id="v8-dp-right" style="${_dpBtnStyle}">▶</button>
-    <div style="${_dpEmpty}"></div>
-    <button id="v8-dp-down"  style="${_dpBtnStyle}">▼</button>
-    <div style="${_dpEmpty}"></div>
-  `;
-  document.body.appendChild(dpad);
-
-  const interactBtn = document.createElement('button');
-  interactBtn.id = 'v8-interact-btn';
-  interactBtn.innerHTML = '대화<br><span style="font-size:10px;opacity:0.7">(E)</span>';
-  interactBtn.style.cssText = [
-    'position:fixed','bottom:56px','right:24px','z-index:300',
-    'width:68px','height:68px',
-    'background:rgba(255,215,0,0.12)',
-    'border:2px solid #ffd700','border-radius:50%',
-    'color:#ffd700','font-size:14px','font-weight:700',
-    "font-family:'Noto Serif KR',serif",
-    'cursor:pointer',
-    'touch-action:none','-webkit-user-select:none','user-select:none',
-    'box-shadow:0 2px 12px rgba(255,200,60,0.25)',
-  ].join(';');
-  document.body.appendChild(interactBtn);
-
-  const _dpActions = {
-    'v8-dp-up':    () => _stepPlayer(0, -1),
-    'v8-dp-down':  () => _stepPlayer(0,  1),
-    'v8-dp-left':  () => _stepPlayer(-1, 0),
-    'v8-dp-right': () => _stepPlayer(1,  0),
-  };
-  let _dpTimer = null;
-  const _onDpStart = (e) => {
-    e.preventDefault();
-    const fn = _dpActions[e.currentTarget.id];
-    if (!fn) return;
-    if (!isDialogueActive()) fn();
-    clearInterval(_dpTimer);
-    _dpTimer = setInterval(() => { if (!isDialogueActive()) fn(); }, 180);
-  };
-  const _onDpEnd = (e) => { e.preventDefault(); clearInterval(_dpTimer); _dpTimer = null; };
-
-  ['v8-dp-up','v8-dp-down','v8-dp-left','v8-dp-right'].forEach(id => {
-    const b = document.getElementById(id);
-    b.addEventListener('touchstart', _onDpStart, { passive: false });
-    b.addEventListener('touchend',   _onDpEnd,   { passive: false });
-    b.addEventListener('touchcancel',_onDpEnd,   { passive: false });
-    b.addEventListener('mousedown',  _onDpStart);
-    b.addEventListener('mouseup',    _onDpEnd);
-    b.addEventListener('mouseleave', _onDpEnd);
+  // 마을 컨트롤 — 새 가상 조이스틱 + A/B 버튼 사용
+  initDPad();
+  showDPad();
+  onDPadInput((cmd) => {
+    if (isDialogueActive()) return;
+    if (performance.now() - sceneStartMs < INPUT_GRACE_MS) return;
+    if (cmd === 'up')    _stepPlayer(0, -1);
+    else if (cmd === 'down')  _stepPlayer(0,  1);
+    else if (cmd === 'left')  _stepPlayer(-1, 0);
+    else if (cmd === 'right') _stepPlayer(1,  0);
+    else if (cmd === 'a' || cmd === 'menu') _tryInteract();
+    else if (cmd === 'b') _requestExit('esc');
   });
-  interactBtn.addEventListener('touchstart', (e) => { e.preventDefault(); _tryInteract(); }, { passive: false });
-  interactBtn.addEventListener('click', () => _tryInteract());
+  // (대화 전용 별도 버튼 미사용 — A 버튼이 대화 겸함)
+  const dpad = { parentNode: null };       // 호환용 더미 (cleanup 안전)
+  const interactBtn = { parentNode: null };
 
   // 입력 바인딩
   const input = { w: 0, a: 0, s: 0, d: 0 };
@@ -2406,9 +2342,7 @@ async function playExplorationScene(scene) {
     if (i2 >= 0) State.updateCallbacks.splice(i2, 1);
   }
   if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
-  clearInterval(_dpTimer);
-  if (dpad.parentNode) dpad.parentNode.removeChild(dpad);
-  if (interactBtn.parentNode) interactBtn.parentNode.removeChild(interactBtn);
+  hideDPad();
 
   State.scene.remove(playerMesh);
   for (const m of npcMeshes) State.scene.remove(m);
