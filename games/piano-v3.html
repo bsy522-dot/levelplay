@@ -1387,22 +1387,22 @@ function openLesson(id) {
   };
   document.getElementById('btn-demo').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(60); // 데모: 60%
+    setSpeed(50); // 데모: 50%
     startSynthesia(lesson.notes, baseBPM, true, null);
   };
   document.getElementById('btn-wait').onclick = () => {
     synthPracticeMode = false; synthWaitMode = true;
-    setSpeed(40); // wait 모드는 어차피 시간 정지지만 슬라이더 표시 일관성
+    setSpeed(50);
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-practice').onclick = () => {
     synthPracticeMode = true; synthWaitMode = false;
-    setSpeed(50); // 연습: 50%
+    setSpeed(40); // 연습: 40%
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-test').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(80); // 테스트: 80%
+    setSpeed(70); // 테스트: 70%
     startSynthesia(lesson.notes, baseBPM, false, id);
   };
 }
@@ -1667,8 +1667,8 @@ function synthLoop() {
 
   let now = (performance.now() - synthStartTime) / 1000;
   const beatToSec = 60 / (synthBPM * synthSpeed);
-  // 일반 모드도 노트 시각 속도 완화 (0.55 → 0.40), wait 모드는 더 천천히
-  const pxPerSec = H * (synthWaitMode ? 0.15 : 0.40);
+  // 비트매니아 스타일: 노트가 화면에 3~4초간 보이며 천천히 떨어짐
+  const pxPerSec = H * (synthWaitMode ? 0.25 : 0.30);
 
   // === Wait Mode: 노트가 떨어지지 않고 hit line 직전에 항상 고정 ===
   if (synthWaitMode && !synthAutoPlay) {
@@ -1676,8 +1676,8 @@ function synthLoop() {
     if (unplayed.length > 0) {
       const minTime = Math.min(...unplayed.map(n => n.time));
       const nextTimeSec = minTime * beatToSec;
-      // 다음 노트가 hit line 위 1.0초 거리에 항상 떠있도록 시간 강제 고정
-      const stopOffset = 1.0;
+      // 비트매니아 스타일: 다음 노트가 hit line 위 3.0초 거리에 항상 떠있어 충분히 보임
+      const stopOffset = 3.0;
       const targetNow = nextTimeSec - stopOffset;
       synthStartTime = performance.now() - targetNow * 1000;
       now = targetNow;
