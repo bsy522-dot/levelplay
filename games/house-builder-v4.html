@@ -138,7 +138,10 @@ function makeTexCanvas(){
 function finalizeTex(canvas){
   const tex=new THREE.CanvasTexture(canvas);
   tex.wrapS=THREE.RepeatWrapping;tex.wrapT=THREE.RepeatWrapping;
-  tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;return tex;
+  tex.colorSpace=THREE.SRGBColorSpace;
+  // 비스듬한 시점에서도 텍스처 디테일 유지 (어둠 방지)
+  try{tex.anisotropy=16;}catch(e){}
+  tex.needsUpdate=true;return tex;
 }
 function clamp(v,lo,hi){return v<lo?lo:v>hi?hi:v;}
 
@@ -195,12 +198,12 @@ function makeMarbleTex(){
 
 function makeGrassTex(){
   const c=makeTexCanvas(),x=c.getContext('2d');
-  x.fillStyle='#3a5a2a';x.fillRect(0,0,TEX_SIZE,TEX_SIZE);
-  x.fillStyle='#5a8a3a';
+  x.fillStyle='#5a9a3a';x.fillRect(0,0,TEX_SIZE,TEX_SIZE);
+  x.fillStyle='#7aba4a';
   for(let i=0;i<1000;i++)x.fillRect((Math.random()*TEX_SIZE)|0,(Math.random()*TEX_SIZE)|0,1,1);
   for(let i=0;i<400;i++){
     const t=Math.random();
-    x.fillStyle=`rgb(${(74+t*40)|0},${(122+t*40)|0},${(50+t*20)|0})`;
+    x.fillStyle=`rgb(${(100+t*50)|0},${(160+t*40)|0},${(70+t*30)|0})`;
     x.fillRect((Math.random()*TEX_SIZE)|0,(Math.random()*TEX_SIZE)|0,1,8+((Math.random()*9)|0));
   }
   return finalizeTex(c);
@@ -214,6 +217,14 @@ const matCache=new Map();
 
 function floorToY(floor){
   if(floor===-1)return -FLOOR_HEIGHT;
+  if(floor===4){
+    // 옥상은 가장 높은 활성 일반 층 바로 위 (2층집이면 6m, 3층집이면 9m)
+    let maxF=1;
+    if(typeof rooms==='object'){
+      for(const k of [1,2,3])if(rooms[k]&&rooms[k].length>0)maxF=k;
+    }
+    return maxF*FLOOR_HEIGHT;
+  }
   return (floor-1)*FLOOR_HEIGHT;
 }
 function getMat(key,fac){if(!matCache.has(key))matCache.set(key,fac());return matCache.get(key);}
@@ -431,30 +442,50 @@ function buildSkyDome(scene){
 function buildLights(scene,opts={}){
   const lowSpec=!!opts.lowSpec;
   const sz=lowSpec?1024:2048;
-  const ambient=new THREE.AmbientLight(0xffeedd,0.35);scene.add(ambient);
-  const sun=new THREE.DirectionalLight(0xffd9a8,1.2);
-  sun.position.set(10,20,10);sun.castShadow=true;
+  // 강한 환경광으로 그림자 부분도 디테일 살림
+  const ambient=new THREE.AmbientLight(0xffffee,1.1);scene.add(ambient);
+  // 태양: 집 거의 머리 위에서 (그림자 짧게, 화면 밖으로)
+  const sun=new THREE.DirectionalLight(0xffffff,1.4);
+  sun.position.set(8,40,6);sun.castShadow=true;
+  // 태양 타깃을 집 중심으로 → 그림자 카메라가 집 영역 커버
+  sun.target.position.set(5,0,4.5);
   sun.shadow.mapSize.set(sz,sz);
-  sun.shadow.camera.left=-25;sun.shadow.camera.right=25;
-  sun.shadow.camera.top=25;sun.shadow.camera.bottom=-25;
-  sun.shadow.camera.near=0.1;sun.shadow.camera.far=60;sun.shadow.bias=-0.001;
+  sun.shadow.camera.left=-40;sun.shadow.camera.right=40;
+  sun.shadow.camera.top=40;sun.shadow.camera.bottom=-40;
+  sun.shadow.camera.near=0.1;sun.shadow.camera.far=100;
+  sun.shadow.bias=-0.0005;
+  sun.shadow.normalBias=0.05;
   scene.add(sun);scene.add(sun.target);
-  const hemi=new THREE.HemisphereLight(0x88aaff,0x442211,0.4);scene.add(hemi);
+  // 하늘/땅 환경광도 강화
+  const hemi=new THREE.HemisphereLight(0xc0e0ff,0xa08866,0.8);scene.add(hemi);
   return{ambient,sun,hemi};
 }
 
 function buildGround(scene,grassTex){
-  const opts={roughness:0.95,metalness:0.0};
-  if(grassTex){grassTex.repeat.set(8,8);opts.map=grassTex;}else{opts.color=0x3a5a2a;}
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.MeshStandardMaterial(opts));
-  ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.name='Ground';
+  // Basic 머티리얼: 라이팅/그림자 무관하게 항상 균일 밝음 (데스크톱 검음 완전 차단)
+  const opts={};
+  if(grassTex){grassTex.repeat.set(10,10);opts.map=grassTex;}else{opts.color=0x7abc4a;}
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshBasicMaterial(opts));
+  ground.rotation.x=-Math.PI/2;ground.position.y=-0.01;ground.name='Ground';
+  // 그라운드는 shadow 안 받음 (집 그림자는 다른 그라운드 트릭 또는 vignette로 보강 가능)
   scene.add(ground);return ground;
 }
 
+// 그림자 받기 전용 투명 평면 (집 주변에만 깔아 그림자 표시)
+function buildShadowCatcher(scene){
+  const mat=new THREE.ShadowMaterial({opacity:0.35});
+  const plane=new THREE.Mesh(new THREE.PlaneGeometry(40,40),mat);
+  plane.rotation.x=-Math.PI/2;plane.position.set(5,0.01,4.5);plane.receiveShadow=true;
+  scene.add(plane);return plane;
+}
+
 const TIME_PRESETS=[
-  {sunColor:0xffd9a8,sunIntensity:1.2,ambColor:0xffeedd,ambIntensity:0.35,skyColor:0x88aaff,fogColor:0x88aaff,sunPos:{x:10,y:20,z:10},hemiSky:0x88aaff,hemiGround:0x442211,hemiInt:0.4},
-  {sunColor:0xff8855,sunIntensity:1.0,ambColor:0xff9966,ambIntensity:0.30,skyColor:0xff7755,fogColor:0xff7755,sunPos:{x:18,y:5,z:4},hemiSky:0xff7755,hemiGround:0x331100,hemiInt:0.35},
-  {sunColor:0x445588,sunIntensity:0.4,ambColor:0x223355,ambIntensity:0.20,skyColor:0x1a2548,fogColor:0x1a2548,sunPos:{x:-10,y:8,z:-10},hemiSky:0x1a2548,hemiGround:0x000011,hemiInt:0.20},
+  // 낮: 밝고 깨끗한 디테일
+  {sunColor:0xffffee,sunIntensity:1.6,ambColor:0xffeedd,ambIntensity:0.55,skyColor:0xa0c8f8,fogColor:0xb8d0f0,sunPos:{x:10,y:25,z:10},hemiSky:0xa0c8f8,hemiGround:0x664433,hemiInt:0.55},
+  // 저녁: 따뜻한 석양 (덜 어둡게)
+  {sunColor:0xffaa66,sunIntensity:1.3,ambColor:0xffbb88,ambIntensity:0.45,skyColor:0xff8866,fogColor:0xffaa77,sunPos:{x:18,y:8,z:4},hemiSky:0xff8866,hemiGround:0x442211,hemiInt:0.45},
+  // 밤: 달빛 + 약한 환경광 (가구 식별 가능 수준)
+  {sunColor:0x6688aa,sunIntensity:0.6,ambColor:0x445566,ambIntensity:0.35,skyColor:0x1a2548,fogColor:0x223355,sunPos:{x:-10,y:12,z:-10},hemiSky:0x223355,hemiGround:0x111122,hemiInt:0.30},
 ];
 function setTimeOfDay(time,lights,sky,scene){
   const p=TIME_PRESETS[time|0]||TIME_PRESETS[0];
@@ -673,19 +704,22 @@ const meshMap=new Map();
 // ============================================================
 const cvs=document.getElementById('cvs3d');
 const qLevel=detectQualityLevel();
-const renderer=new THREE.WebGLRenderer({canvas:cvs,antialias:qLevel!=='low'});
+const renderer=new THREE.WebGLRenderer({canvas:cvs,antialias:qLevel!=='low',preserveDrawingBuffer:true,powerPreference:'high-performance'});
 renderer.setPixelRatio(qLevel==='high'?window.devicePixelRatio:Math.min(window.devicePixelRatio,1.5));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.0;
+renderer.toneMappingExposure=1.5;
+renderer.setClearColor(0xa0c8f8,1);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0x88aaff,40,80);
+// 배경색 명시 (SkyDome이 못 가리는 영역도 하늘색으로 채움)
+scene.background=new THREE.Color(0xa0c8f8);
+scene.fog=new THREE.Fog(0xb8d0f0,50,100);
 
-const camera=new THREE.PerspectiveCamera(50,1,0.1,200);
-camera.position.set(15,18,18);
+const camera=new THREE.PerspectiveCamera(35,1,0.1,200);
+camera.position.set(20,22,24);
 
 const controls=new OrbitControls(camera,cvs);
 controls.enableDamping=true;controls.dampingFactor=0.08;
@@ -713,6 +747,15 @@ function resize(){
   camera.aspect=w/h;camera.updateProjectionMatrix();
 }
 resize();window.addEventListener('resize',resize);
+
+// WebGL context lost/restored 핸들러 (텍스처 재업로드)
+cvs.addEventListener('webglcontextlost',e=>{e.preventDefault();console.warn('[v4] WebGL context lost');});
+cvs.addEventListener('webglcontextrestored',()=>{
+  console.log('[v4] WebGL context restored, re-uploading textures');
+  [brickTex,woodTex,marbleTex,grassTex].forEach(t=>{if(t)t.needsUpdate=true;});
+  if(sky&&sky.material&&sky.material.map)sky.material.map.needsUpdate=true;
+  if(typeof rebuildAll==='function')setTimeout(rebuildAll,50);
+});
 
 // ============================================================
 // SCENE 동기화 (state ↔ 메시)
@@ -1263,13 +1306,13 @@ function buildSampleHouse(){
   budget=SAMPLE.budget;
   currentFloor=1;updFloor();updBudget();updatePanel();
   rebuildAll();
-  // 카메라: 집 발자국 중심(5, 2, 4.5) 보면서 비스듬한 각도 (천장 노출 최소화)
-  camera.position.set(22,12,24);
+  // 카메라: 위에서 충분히 떨어진 각도 (집+정원 + 모든 층 잘 보이게)
+  camera.position.set(15,22,20);
   controls.target.set(5,3,4.5);controls.update();
-  // 저녁 시간대 (석양)
-  timeOfDay=1;document.getElementById('timeIcon').textContent=TIMES[1];
-  setTimeOfDay(1,lights,sky,scene);
-  status('🏠 샘플 하우스 - 2층 + 옥상 + 정원 (예산 200K)');
+  // 낮 시간대 기본 (밝고 깨끗)
+  timeOfDay=0;document.getElementById('timeIcon').textContent=TIMES[0];
+  setTimeOfDay(0,lights,sky,scene);
+  status('🏠 샘플 하우스 - 2층 + 옥상 + 정원 (예산 175K)');
 }
 
 // INIT
