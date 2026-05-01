@@ -6,64 +6,64 @@
 <title>심시티 v3 - 도시 건설</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-serif;overflow:hidden;height:100vh;user-select:none;touch-action:none}
+body{background:linear-gradient(180deg,#a8d8f0 0%,#e8f4fc 100%);color:#2c3e50;font-family:-apple-system,'Segoe UI',sans-serif;overflow:hidden;height:100vh;user-select:none;touch-action:none}
 
-#topBar{position:fixed;top:0;left:0;right:0;height:48px;background:linear-gradient(180deg,rgba(10,10,20,.97),rgba(10,10,20,.85));border-bottom:2px solid #333;display:flex;align-items:center;padding:0 10px;gap:8px;z-index:30;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+#topBar{position:fixed;top:0;left:0;right:0;height:48px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,251,255,.95));border-bottom:2px solid #c8dceb;display:flex;align-items:center;padding:0 10px;gap:8px;z-index:30;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;box-shadow:0 2px 8px rgba(100,150,200,.15)}
 #topBar::-webkit-scrollbar{display:none}
-#cityName{font-size:14px;font-weight:900;color:#6ab0ff;cursor:pointer;white-space:nowrap;flex-shrink:0}
+#cityName{font-size:14px;font-weight:900;color:#1976d2;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .st{display:flex;align-items:center;gap:3px;flex-shrink:0;font-size:12px}
 .st .i{font-size:14px}
-.st .v{font-weight:700;color:#ffd700;min-width:30px}
+.st .v{font-weight:700;color:#e67e22;min-width:30px}
 .st .r{font-size:10px}
-.st .r.p{color:#4caf50}
-.st .r.n{color:#f44336}
-.st .l{font-size:9px;color:#888}
+.st .r.p{color:#27ae60}
+.st .r.n{color:#e74c3c}
+.st .l{font-size:9px;color:#7a8a9a}
 
-#gameCanvas{position:fixed;top:48px;left:0;right:0;bottom:74px;display:block}
+#gameCanvas{position:fixed;top:48px;left:0;right:0;bottom:74px;display:block;background:linear-gradient(180deg,#b8e0f5 0%,#e8f4fc 60%,#f5fbff 100%)}
 
-#toolbar{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,20,.96);border-top:2px solid #333;z-index:30;padding:4px 4px 2px}
+#toolbar{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(255,255,255,.98),rgba(248,251,255,.95));border-top:2px solid #c8dceb;z-index:30;padding:4px 4px 2px;box-shadow:0 -2px 8px rgba(100,150,200,.15)}
 #cats{display:flex;gap:2px;margin-bottom:3px;overflow-x:auto;scrollbar-width:none}
 #cats::-webkit-scrollbar{display:none}
-.cat-btn{flex-shrink:0;padding:3px 10px;background:rgba(255,255,255,.06);border:none;border-radius:10px;font-size:11px;color:#aaa;cursor:pointer}
-.cat-btn.sel{background:rgba(100,160,255,.25);color:#6ab0ff}
+.cat-btn{flex-shrink:0;padding:3px 10px;background:rgba(100,160,220,.1);border:none;border-radius:10px;font-size:11px;color:#5a7a9a;cursor:pointer}
+.cat-btn.sel{background:rgba(33,150,243,.25);color:#1976d2;font-weight:700}
 #tiles{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
 #tiles::-webkit-scrollbar{display:none}
-.t-btn{flex-shrink:0;padding:6px 8px;background:#1a1a2e;border:2px solid transparent;border-radius:8px;cursor:pointer;text-align:center;min-width:58px;color:#eee;font-size:10px}
-.t-btn.sel{border-color:#ffd700;background:#2a2a3e}
+.t-btn{flex-shrink:0;padding:6px 8px;background:#fff;border:2px solid #d8e6f0;border-radius:8px;cursor:pointer;text-align:center;min-width:58px;color:#2c3e50;font-size:10px;box-shadow:0 1px 3px rgba(100,150,200,.15)}
+.t-btn.sel{border-color:#ff9800;background:#fff8e1;box-shadow:0 2px 6px rgba(255,152,0,.3)}
 .t-btn .ic{font-size:18px;display:block}
-.t-btn .cs{font-size:8px;color:#fa0}
+.t-btn .cs{font-size:8px;color:#e67e22;font-weight:700}
 #btmRow{display:flex;align-items:center;gap:4px;padding:2px 4px;font-size:11px}
-#btmRow button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#eee;padding:3px 8px;border-radius:8px;font-size:10px;cursor:pointer}
-#btmRow button.act{background:rgba(244,67,54,.3);border-color:#f44}
+#btmRow button{background:#fff;border:1px solid #c8dceb;color:#2c3e50;padding:3px 8px;border-radius:8px;font-size:10px;cursor:pointer;box-shadow:0 1px 2px rgba(100,150,200,.1)}
+#btmRow button.act{background:#ffe0e0;border-color:#e74c3c;color:#c0392b}
 #btmRow .sp{flex:1}
-#desc{color:#888;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#desc{color:#7a8a9a;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 
-#popup{position:fixed;top:56px;left:50%;transform:translateX(-50%);padding:8px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:40;display:none;text-align:center;color:#fff;animation:sd .3s}
-#popup.bad{background:rgba(244,67,54,.9)}
-#popup.good{background:rgba(76,175,80,.9)}
-#popup.warn{background:rgba(255,152,0,.9)}
+#popup{position:fixed;top:56px;left:50%;transform:translateX(-50%);padding:8px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:40;display:none;text-align:center;color:#fff;animation:sd .3s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+#popup.bad{background:rgba(231,76,60,.95)}
+#popup.good{background:rgba(46,204,113,.95)}
+#popup.warn{background:rgba(255,152,0,.95)}
 @keyframes sd{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
-#statsPanel{position:fixed;top:48px;right:0;width:280px;bottom:74px;background:rgba(10,10,20,.97);border-left:2px solid #333;z-index:25;display:none;flex-direction:column;padding:10px;overflow-y:auto;font-size:12px}
-#statsPanel h3{color:#6ab0ff;font-size:14px;margin-bottom:6px}
-.sr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.sr .lb{color:#888}
-.sr .vl{color:#ffd700;font-weight:700}
-.sec{color:#aaa;font-size:11px;margin:10px 0 4px;font-weight:700}
-.bar{height:12px;background:#1a1a2e;border-radius:6px;overflow:hidden;margin:3px 0}
+#statsPanel{position:fixed;top:48px;right:0;width:280px;bottom:74px;background:rgba(255,255,255,.98);border-left:2px solid #c8dceb;z-index:25;display:none;flex-direction:column;padding:10px;overflow-y:auto;font-size:12px;box-shadow:-2px 0 8px rgba(100,150,200,.15)}
+#statsPanel h3{color:#1976d2;font-size:14px;margin-bottom:6px}
+.sr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #e8eef4}
+.sr .lb{color:#7a8a9a}
+.sr .vl{color:#e67e22;font-weight:700}
+.sec{color:#5a7a9a;font-size:11px;margin:10px 0 4px;font-weight:700}
+.bar{height:12px;background:#e8eef4;border-radius:6px;overflow:hidden;margin:3px 0}
 .bar-fill{height:100%;border-radius:6px;transition:width .5s}
-.ach{padding:4px 6px;background:rgba(255,215,0,.08);border-radius:6px;margin:2px 0;font-size:11px;display:flex;align-items:center;gap:6px}
-.ach.locked{opacity:.4}
+.ach{padding:4px 6px;background:#fff8e1;border:1px solid #ffe082;border-radius:6px;margin:2px 0;font-size:11px;display:flex;align-items:center;gap:6px;color:#5d4037}
+.ach.locked{opacity:.4;background:#f5f5f5;border-color:#e0e0e0}
 
-#saveModal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;display:none;align-items:center;justify-content:center}
-#saveBox{background:#1a1a2e;border:2px solid #444;border-radius:12px;padding:16px;width:280px;max-height:80vh;overflow-y:auto}
-#saveBox h3{color:#6ab0ff;margin-bottom:10px;font-size:14px}
-.save-slot{padding:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:11px}
-.save-slot:hover{background:rgba(100,160,255,.1)}
-.save-slot .sn{font-weight:700;color:#ffd700}
-.save-slot .sd{color:#888;font-size:10px}
-#saveBox button{background:rgba(100,160,255,.2);border:1px solid rgba(100,160,255,.3);color:#6ab0ff;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;margin:2px}
-#saveBox button:hover{background:rgba(100,160,255,.3)}
+#saveModal{position:fixed;inset:0;background:rgba(100,150,200,.4);backdrop-filter:blur(4px);z-index:50;display:none;align-items:center;justify-content:center}
+#saveBox{background:#fff;border:2px solid #c8dceb;border-radius:12px;padding:16px;width:280px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+#saveBox h3{color:#1976d2;margin-bottom:10px;font-size:14px}
+.save-slot{padding:8px;background:#f5fafd;border:1px solid #d8e6f0;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:11px}
+.save-slot:hover{background:#e3f2fd;border-color:#90caf9}
+.save-slot .sn{font-weight:700;color:#e67e22}
+.save-slot .sd{color:#7a8a9a;font-size:10px}
+#saveBox button{background:#e3f2fd;border:1px solid #90caf9;color:#1976d2;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;margin:2px}
+#saveBox button:hover{background:#bbdefb}
 </style>
 </head>
 <body>
@@ -90,6 +90,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <button id="bStat">📊</button>
 <button id="bSave">💾</button>
 <button id="bLoad">📂</button>
+<button id="bDemo" title="예시 도시">🏙️데모</button>
 <button id="bSpeed" title="속도">▶1x</button>
 <span class="sp"></span>
 <span id="desc">건물을 선택하세요</span>
@@ -101,31 +102,31 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <script>
 // === BUILDING DATA ===
 const B={
-empty:{n:'빈 땅',ic:'',c:'#2a3a2a',cat:'',cost:0,d:'빈 땅'},
+empty:{n:'빈 땅',ic:'',c:'#a8d89a',cat:'',cost:0,d:'빈 땅'},
 // Residential
-house:{n:'주택',ic:'🏠',c:'#4a7a4a',cat:'주거',cost:400,d:'소형 주택. 인구+8',inc:15,pop:8,hap:2,pow:-1,wat:-1},
-apt:{n:'아파트',ic:'🏢',c:'#5a8a5a',cat:'주거',cost:1500,d:'아파트. 인구+40',inc:60,pop:40,hap:1,pow:-3,wat:-3,h:2},
-mansion:{n:'맨션',ic:'🏰',c:'#6a9a6a',cat:'주거',cost:5000,d:'고급 맨션. 인구+15, 행복+5',inc:100,pop:15,hap:5,pow:-2,wat:-2,h:2.5},
+house:{n:'주택',ic:'🏠',c:'#9ed884',cat:'주거',cost:400,d:'소형 주택. 인구+8',inc:15,pop:8,hap:2,pow:-1,wat:-1},
+apt:{n:'아파트',ic:'🏢',c:'#7fc8a9',cat:'주거',cost:1500,d:'아파트. 인구+40',inc:60,pop:40,hap:1,pow:-3,wat:-3,h:2},
+mansion:{n:'맨션',ic:'🏰',c:'#a8e6cf',cat:'주거',cost:5000,d:'고급 맨션. 인구+15, 행복+5',inc:100,pop:15,hap:5,pow:-2,wat:-2,h:2.5},
 // Commercial
-shop:{n:'상점',ic:'🏪',c:'#4a4a7a',cat:'상업',cost:600,d:'소형 상점. 수입+30',inc:30,hap:3,pow:-1,wat:-1,job:5},
-mall:{n:'쇼핑몰',ic:'🏬',c:'#5a5a9a',cat:'상업',cost:4000,d:'대형 쇼핑몰. 수입+120',inc:120,hap:8,pow:-5,wat:-3,job:30,h:2},
-office:{n:'오피스타워',ic:'🏗️',c:'#6a6aaa',cat:'상업',cost:6000,d:'업무용 타워. 수입+150',inc:150,hap:-1,pow:-4,wat:-2,job:50,h:3},
+shop:{n:'상점',ic:'🏪',c:'#74c0fc',cat:'상업',cost:600,d:'소형 상점. 수입+30',inc:30,hap:3,pow:-1,wat:-1,job:5},
+mall:{n:'쇼핑몰',ic:'🏬',c:'#9ec5fe',cat:'상업',cost:4000,d:'대형 쇼핑몰. 수입+120',inc:120,hap:8,pow:-5,wat:-3,job:30,h:2},
+office:{n:'오피스타워',ic:'🏗️',c:'#b9d4fa',cat:'상업',cost:6000,d:'업무용 타워. 수입+150',inc:150,hap:-1,pow:-4,wat:-2,job:50,h:3},
 // Industrial
-factory:{n:'공장',ic:'🏭',c:'#7a6a4a',cat:'산업',cost:2000,d:'공장. 수입+80, 행복-5',inc:80,hap:-5,pow:-3,wat:-2,job:20},
-warehouse:{n:'창고',ic:'📦',c:'#8a7a5a',cat:'산업',cost:1000,d:'물류 창고. 수입+40',inc:40,hap:-2,pow:-1,wat:0,job:8},
-techpark:{n:'테크파크',ic:'💻',c:'#5a7a8a',cat:'산업',cost:8000,d:'첨단 산업단지. 수입+200',inc:200,hap:2,pow:-6,wat:-2,job:60,h:2},
+factory:{n:'공장',ic:'🏭',c:'#ffd8a8',cat:'산업',cost:2000,d:'공장. 수입+80, 행복-5',inc:80,hap:-5,pow:-3,wat:-2,job:20},
+warehouse:{n:'창고',ic:'📦',c:'#ffe8b8',cat:'산업',cost:1000,d:'물류 창고. 수입+40',inc:40,hap:-2,pow:-1,wat:0,job:8},
+techpark:{n:'테크파크',ic:'💻',c:'#a5d8ff',cat:'산업',cost:8000,d:'첨단 산업단지. 수입+200',inc:200,hap:2,pow:-6,wat:-2,job:60,h:2},
 // Special
-hospital:{n:'병원',ic:'🏥',c:'#8a4a4a',cat:'특수',cost:5000,d:'의료시설. 행복+10, 안전+10',hap:10,saf:10,exp:80,pow:-3,wat:-2},
-school:{n:'학교',ic:'🏫',c:'#6a5a8a',cat:'특수',cost:3000,d:'교육시설. 행복+8',hap:8,exp:50,pow:-2,wat:-1,popG:3},
-police:{n:'경찰서',ic:'🚔',c:'#4a5a7a',cat:'특수',cost:3500,d:'치안시설. 안전+20',saf:20,exp:60,pow:-2,wat:-1},
-fire:{n:'소방서',ic:'🚒',c:'#8a3a3a',cat:'특수',cost:3000,d:'화재 예방. 안전+15',saf:15,exp:50,pow:-2,wat:-1},
-park:{n:'공원',ic:'🌳',c:'#3a6a3a',cat:'특수',cost:500,d:'공원. 행복+12',hap:12,exp:10},
-stadium:{n:'스타디움',ic:'🏟️',c:'#7a7a5a',cat:'특수',cost:12000,d:'종합경기장. 행복+20, 수입+100',hap:20,inc:100,exp:100,pow:-8,wat:-5,h:2},
+hospital:{n:'병원',ic:'🏥',c:'#ffc9c9',cat:'특수',cost:5000,d:'의료시설. 행복+10, 안전+10',hap:10,saf:10,exp:80,pow:-3,wat:-2},
+school:{n:'학교',ic:'🏫',c:'#e0c8ff',cat:'특수',cost:3000,d:'교육시설. 행복+8',hap:8,exp:50,pow:-2,wat:-1,popG:3},
+police:{n:'경찰서',ic:'🚔',c:'#a5c8ff',cat:'특수',cost:3500,d:'치안시설. 안전+20',saf:20,exp:60,pow:-2,wat:-1},
+fire:{n:'소방서',ic:'🚒',c:'#ffb8b8',cat:'특수',cost:3000,d:'화재 예방. 안전+15',saf:15,exp:50,pow:-2,wat:-1},
+park:{n:'공원',ic:'🌳',c:'#8ce99a',cat:'특수',cost:500,d:'공원. 행복+12',hap:12,exp:10},
+stadium:{n:'스타디움',ic:'🏟️',c:'#ffec99',cat:'특수',cost:12000,d:'종합경기장. 행복+20, 수입+100',hap:20,inc:100,exp:100,pow:-8,wat:-5,h:2},
 // Infrastructure
-road:{n:'도로',ic:'🛣️',c:'#555',cat:'인프라',cost:50,d:'도로. 건물 연결',hap:0},
-bridge:{n:'다리',ic:'🌉',c:'#666',cat:'인프라',cost:300,d:'다리. 수상 연결',hap:1},
-power:{n:'발전소',ic:'⚡',c:'#8a8a3a',cat:'인프라',cost:5000,d:'전력 공급. 전력+50',pow:50,exp:40,hap:-3},
-water:{n:'급수탑',ic:'💧',c:'#3a6a8a',cat:'인프라',cost:3000,d:'물 공급. 수도+30',wat:30,exp:30}
+road:{n:'도로',ic:'🛣️',c:'#bdc3c7',cat:'인프라',cost:50,d:'도로. 건물 연결',hap:0},
+bridge:{n:'다리',ic:'🌉',c:'#cdd5db',cat:'인프라',cost:300,d:'다리. 수상 연결',hap:1},
+power:{n:'발전소',ic:'⚡',c:'#fff3a3',cat:'인프라',cost:5000,d:'전력 공급. 전력+50',pow:50,exp:40,hap:-3},
+water:{n:'급수탑',ic:'💧',c:'#74c0fc',cat:'인프라',cost:3000,d:'물 공급. 수도+30',wat:30,exp:30}
 };
 const CATS=['주거','상업','산업','특수','인프라'];
 const KEYS=Object.keys(B).filter(k=>k!=='empty');
@@ -180,9 +181,9 @@ function darken(h,p){let[r,g,b]=hexToRgb(h);return`rgb(${Math.max(0,r-p)},${Math
 
 function draw(){
   ctx.clearRect(0,0,cvs.width,cvs.height);
-  // Sky gradient based on day/night
-  const nightAlpha=Math.sin(nightPhase*Math.PI)*0.4;
-  if(nightAlpha>0){ctx.fillStyle=`rgba(0,0,30,${nightAlpha})`;ctx.fillRect(0,0,cvs.width,cvs.height);}
+  // Sky gradient based on day/night - 밝은 톤 유지, 야간은 옅은 보라빛
+  const nightAlpha=Math.sin(nightPhase*Math.PI)*0.18;
+  if(nightAlpha>0){ctx.fillStyle=`rgba(60,60,120,${nightAlpha})`;ctx.fillRect(0,0,cvs.width,cvs.height);}
 
   const hw=(TW/2)*zoom,hh=(TH/2)*zoom;
   for(let y=0;y<GH;y++){
@@ -194,8 +195,8 @@ function draw(){
       const baseC=b.c;
       // Ground tile
       ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();
-      ctx.fillStyle=cell.dmg>0?'#3a2020':baseC;ctx.fill();
-      ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle=cell.dmg>0?'#ffb8a8':baseC;ctx.fill();
+      ctx.strokeStyle='rgba(100,140,180,0.25)';ctx.lineWidth=1;ctx.stroke();
 
       if(cell.t!=='empty'&&cell.t!=='road'){
         const bh=(b.h||1)*18*zoom;
@@ -220,10 +221,10 @@ function draw(){
           ctx.fillText('🔥',sx,sy-bh-hh*0.5);
         }
       }else if(cell.t==='road'){
-        ctx.fillStyle='#666';
+        ctx.fillStyle='#95a5a6';
         ctx.beginPath();ctx.moveTo(sx,sy-hh*0.35);ctx.lineTo(sx+hw*0.35,sy);ctx.lineTo(sx,sy+hh*0.35);ctx.lineTo(sx-hw*0.35,sy);ctx.closePath();ctx.fill();
-        // dashed line
-        ctx.strokeStyle='#aa0';ctx.lineWidth=1;ctx.setLineDash([2*zoom,2*zoom]);
+        // dashed line - 밝은 노랑
+        ctx.strokeStyle='#fff176';ctx.lineWidth=1.2;ctx.setLineDash([2*zoom,2*zoom]);
         ctx.beginPath();ctx.moveTo(sx-hw*0.15,sy-hh*0.05);ctx.lineTo(sx+hw*0.15,sy+hh*0.05);ctx.stroke();
         ctx.setLineDash([]);
       }
@@ -458,6 +459,12 @@ function buildTiles(){
 
 document.getElementById('bBull').onclick=()=>{bulldoze=!bulldoze;document.getElementById('bBull').classList.toggle('act');document.getElementById('desc').textContent=bulldoze?'클릭하면 철거 (30% 환불)':'건물을 선택하세요';};
 
+document.getElementById('bDemo').onclick=()=>{
+  if(!confirm('현재 도시를 지우고 예시 도시를 새로 만듭니다. 진행할까요?'))return;
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)grid[y][x]={t:'empty',dmg:0};
+  buildDemoCity();updUI();
+};
+
 // Speed
 let spIdx=0;const SPEEDS=[1,2,5,0];const SP_LABELS=['▶1x','▶▶2x','▶▶▶5x','⏸'];
 document.getElementById('bSpeed').onclick=()=>{spIdx=(spIdx+1)%4;speed=SPEEDS[spIdx];document.getElementById('bSpeed').textContent=SP_LABELS[spIdx];startSim();};
@@ -500,10 +507,10 @@ function renderStats(){
   h+=`<div class="sr"><span class="lb">수도</span><span class="vl" style="color:${usedWat>totalWat?'#f44':'#4caf50'}">${usedWat}/${totalWat}</span></div>`;
 
   h+=`<div class="sec">인구 추이</div>`;
-  h+=`<canvas id="popChart" width="250" height="80" style="background:#111;border-radius:6px;margin:4px 0"></canvas>`;
+  h+=`<canvas id="popChart" width="250" height="80" style="background:#f5fafd;border:1px solid #d8e6f0;border-radius:6px;margin:4px 0"></canvas>`;
 
   h+=`<div class="sec">수입 추이</div>`;
-  h+=`<canvas id="incChart" width="250" height="80" style="background:#111;border-radius:6px;margin:4px 0"></canvas>`;
+  h+=`<canvas id="incChart" width="250" height="80" style="background:#f5fafd;border:1px solid #d8e6f0;border-radius:6px;margin:4px 0"></canvas>`;
 
   h+=`<div class="sec">건물 현황</div>`;
   KEYS.forEach(k=>{if(counts[k])h+=`<div class="sr"><span class="lb">${B[k].ic} ${B[k].n}</span><span class="vl">${counts[k]}개</span></div>`;});
@@ -527,7 +534,7 @@ function drawChart(id,data,color){
   const max=Math.max(1,...data.map(Math.abs));
   const w=c.width,h=c.height;
   cx.clearRect(0,0,w,h);
-  cx.beginPath();cx.strokeStyle=color;cx.lineWidth=1.5;
+  cx.beginPath();cx.strokeStyle=color;cx.lineWidth=1.8;
   const zero=data.some(v=>v<0)?h/2:h-4;
   data.forEach((v,i)=>{
     const x=i/(data.length-1)*w;
@@ -536,7 +543,7 @@ function drawChart(id,data,color){
   });
   cx.stroke();
   // zero line if mixed
-  if(data.some(v=>v<0)){cx.strokeStyle='rgba(255,255,255,0.2)';cx.beginPath();cx.moveTo(0,h/2);cx.lineTo(w,h/2);cx.stroke();}
+  if(data.some(v=>v<0)){cx.strokeStyle='rgba(100,140,180,0.3)';cx.beginPath();cx.moveTo(0,h/2);cx.lineTo(w,h/2);cx.stroke();}
 }
 
 window.takeLoan=()=>{loans+=10000;money+=10000;popup('💳 대출 10,000 실행!',true);if(document.getElementById('statsPanel').style.display==='flex')renderStats();updUI();};
@@ -594,8 +601,67 @@ document.addEventListener('keydown',e=>{
   if(e.key==='s'&&e.ctrlKey){e.preventDefault();document.getElementById('bSave').click();}
 });
 
+// === DEMO CITY (예시 도시 자동 생성) ===
+function buildDemoCity(){
+  // 그리드 중앙 기준 (15,15)
+  const cx=15,cy=15;
+  // 십자 도로망
+  for(let i=8;i<=22;i++){grid[15][i]={t:'road',dmg:0};grid[i][15]={t:'road',dmg:0};}
+  // 외곽 순환 도로
+  for(let i=8;i<=22;i++){grid[8][i]={t:'road',dmg:0};grid[22][i]={t:'road',dmg:0};grid[i][8]={t:'road',dmg:0};grid[i][22]={t:'road',dmg:0};}
+  // 보조 도로
+  for(let i=9;i<=21;i++){if(i!==15){grid[11][i]={t:'road',dmg:0};grid[19][i]={t:'road',dmg:0};}}
+
+  // 주거 지구 (좌상단)
+  const houses=[[9,9],[10,9],[12,9],[13,9],[9,10],[10,10],[12,10],[13,10],[9,12],[10,12],[12,12],[13,12],[9,13],[10,13]];
+  houses.forEach(([x,y])=>grid[y][x]={t:'house',dmg:0});
+  // 아파트
+  [[12,13],[13,13],[14,9],[14,10]].forEach(([x,y])=>grid[y][x]={t:'apt',dmg:0});
+  // 맨션
+  [[9,14]].forEach(([x,y])=>grid[y][x]={t:'mansion',dmg:0});
+
+  // 상업 지구 (우상단)
+  [[16,9],[17,9],[18,9],[20,9],[21,9]].forEach(([x,y])=>grid[y][x]={t:'shop',dmg:0});
+  [[16,10],[20,10]].forEach(([x,y])=>grid[y][x]={t:'mall',dmg:0});
+  [[17,10],[18,10],[21,10]].forEach(([x,y])=>grid[y][x]={t:'office',dmg:0});
+  [[16,12],[17,12],[18,12]].forEach(([x,y])=>grid[y][x]={t:'shop',dmg:0});
+
+  // 산업 지구 (좌하단) — 도시에서 떨어진 위치
+  [[9,17],[10,17],[12,17],[13,17],[9,18],[10,18]].forEach(([x,y])=>grid[y][x]={t:'factory',dmg:0});
+  [[12,18],[13,18],[14,17]].forEach(([x,y])=>grid[y][x]={t:'warehouse',dmg:0});
+  [[9,20],[10,20],[12,20],[13,20]].forEach(([x,y])=>grid[y][x]={t:'techpark',dmg:0});
+
+  // 특수 시설 (우하단 + 곳곳)
+  grid[17][16]={t:'school',dmg:0};
+  grid[17][17]={t:'park',dmg:0};
+  grid[17][18]={t:'hospital',dmg:0};
+  grid[18][16]={t:'police',dmg:0};
+  grid[18][17]={t:'fire',dmg:0};
+  grid[18][18]={t:'park',dmg:0};
+  grid[20][17]={t:'stadium',dmg:0};
+  grid[13][20]={t:'park',dmg:0};
+  grid[14][14]={t:'park',dmg:0};
+  grid[16][14]={t:'park',dmg:0};
+
+  // 인프라 (모서리)
+  grid[20][20]={t:'power',dmg:0};
+  grid[21][21]={t:'power',dmg:0};
+  grid[9][21]={t:'water',dmg:0};
+  grid[10][21]={t:'water',dmg:0};
+
+  // 초기 상태 부여
+  money=80000;pop=350;hap=72;saf=68;day=15;
+  document.getElementById('cityName').textContent='샘플 도시';
+  popup('🏙️ 예시 도시가 생성되었습니다!',true);
+}
+
 // === INIT ===
-buildCats();buildTiles();updUI();draw();startSim();
+buildCats();buildTiles();
+// 저장 데이터가 하나도 없으면 데모 도시 자동 생성
+let hasSave=false;
+for(let i=1;i<=5;i++)if(localStorage.getItem('simcity_v3_slot'+i)){hasSave=true;break;}
+if(!hasSave)buildDemoCity();
+updUI();draw();startSim();
 </script>
 </body>
 </html>
