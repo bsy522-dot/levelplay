@@ -77,11 +77,11 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <span id="timeIcon" title="시간 변경">🌞</span>
 <span id="fpsDisp">--</span>
 <div class="tb">
-<button id="btnPanel">☰</button>
-<button id="btnRoof" title="지붕 ON/OFF">🏠</button>
-<button id="btnWalk" title="워크스루">👤</button>
+<button id="btnPanel" title="패널">☰</button>
+<button id="btnRoof" title="지붕 표시 ON/OFF" style="background:rgba(255,180,80,.25);border-color:#ffaa55">🏚지붕</button>
+<button id="btnWalk" title="1인칭 둘러보기">👤</button>
 <button id="btnShot" title="스크린샷">📷</button>
-<button id="btnTut">❓</button>
+<button id="btnTut" title="도움말">❓</button>
 </div>
 </div>
 
@@ -103,6 +103,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <div id="modeBtns"></div>
 <div id="actRow">
 <button id="aUndo">↩취소</button>
+<button id="aMove" style="background:rgba(80,200,140,.25);border-color:#5acc88">✋이동</button>
 <button id="aDel">🗑삭제</button>
 <button id="aRot">🔄회전</button>
 <button id="aFloorUp">▲층</button>
@@ -739,6 +740,7 @@ let weather=0,timeOfDay=0;
 let nextId=1,undoStack=[];
 let walkMode=false;
 let roofOn=false; // 지붕(천장) 토글
+let moveMode=false; // 방 이동 모드
 
 // 메시 매핑 (id → THREE.Group)
 const meshMap=new Map();
@@ -879,6 +881,22 @@ setupInput(renderer,camera,scene,controls,{
   onGroundClick(point){
     if(walkMode)return;
     const gx=Math.round(point.x),gz=Math.round(point.z);
+    // 방 이동 모드
+    if(moveMode&&selRoom){
+      saveUndo();
+      // 방 위치 변경 (좌측상단 좌표)
+      selRoom.x=gx-Math.floor(selRoom.w/2);
+      selRoom.z=gz-Math.floor(selRoom.h/2);
+      // 메시 재빌드
+      removeMesh('room_'+selRoom.id);
+      for(const fu of (selRoom.furniture||[]))removeMesh('furn_'+fu.id);
+      addRoomMesh(selRoom,currentFloor);
+      for(const fu of (selRoom.furniture||[]))addFurnMesh(fu,selRoom);
+      moveMode=false;
+      document.getElementById('aMove').classList.remove('act');
+      status('✓ 방 이동 완료');
+      return;
+    }
     if(curTab==='rooms'){
       placeRoom(gx,gz);
     }else if(curTab==='ext'){
@@ -988,6 +1006,12 @@ document.getElementById('aUndo').onclick=()=>{
   const d=JSON.parse(undoStack.pop());rooms=d.rooms;exteriors=d.exteriors;budget=d.budget;
   selRoom=null;selFurn=null;updBudget();updatePanel();rebuildAll();
 };
+document.getElementById('aMove').onclick=()=>{
+  if(!selRoom){status('⚠ 먼저 이동할 방을 클릭하세요');return;}
+  moveMode=!moveMode;
+  document.getElementById('aMove').classList.toggle('act',moveMode);
+  status(moveMode?'✋ 이동: 빈 공간을 클릭하세요':'이동 취소');
+};
 document.getElementById('aDel').onclick=deleteSelected;
 document.getElementById('aRot').onclick=rotateSelected;
 document.getElementById('aFloorUp').onclick=()=>{if(currentFloor<4){currentFloor++;updFloor();}};
@@ -1036,8 +1060,11 @@ document.getElementById('btnWalk').onclick=()=>{
 document.getElementById('btnShot').onclick=()=>{screenshot(renderer,scene,camera);status('📷 스크린샷 저장됨');};
 document.getElementById('btnRoof').onclick=()=>{
   roofOn=!roofOn;
-  document.getElementById('btnRoof').classList.toggle('act',roofOn);
-  status(roofOn?'🏠 지붕 ON':'🏠 지붕 OFF (인테리어 보임)');
+  const b=document.getElementById('btnRoof');
+  b.classList.toggle('act',roofOn);
+  b.textContent=roofOn?'🏠지붕':'🏚지붕';
+  b.style.background=roofOn?'rgba(140,80,255,.3)':'rgba(255,180,80,.25)';
+  status(roofOn?'🏠 지붕 ON - 외관 완성':'🏚 지붕 OFF - 인테리어 보임');
   rebuildAll();
 };
 window.exitWalk=()=>{walkMode=false;document.getElementById('walkBadge').style.display='none';exitWalkthrough(controls);};
@@ -1202,26 +1229,36 @@ document.getElementById('galleryModal').onclick=e=>{if(e.target.id==='galleryMod
 // ============================================================
 document.getElementById('btnTut').onclick=()=>{
   const m=document.getElementById('tutModal');m.style.display='flex';
-  document.getElementById('tutBox').innerHTML=`<h3>🏠 집짓기 v4 - 진짜 3D!</h3>
-<p><b>🎯 v4 새로운 점</b><br>
-- 진짜 3D 렌더링 (Three.js)<br>
-- 실시간 그림자 + PBR 머티리얼<br>
-- 시간 변화 (낮/저녁/밤)<br>
-- 3D 날씨 효과 (비/눈)<br>
-- 워크스루 모드 (1인칭 둘러보기)<br>
-- 스크린샷 캡처</p>
-<p><b>1. 방 배치</b><br>좌측 패널에서 방 선택 → 빈 그라운드 클릭</p>
-<p><b>2. 가구 배치</b><br>방 선택 → '가구' 탭 → 가구 클릭</p>
-<p><b>3. 스타일 적용</b><br>'스타일' 탭 → '선택 방에 적용'</p>
-<p><b>4. 워크스루</b><br>방 선택 → 👤 버튼으로 1인칭 진입, ESC로 종료</p>
-<p><b>조작</b><br>- 드래그: 카메라 회전<br>- 휠/핀치: 줌<br>- 클릭(짧게): 배치/선택</p>
-<p><b>화면 상단 토글</b><br>☀️ 날씨 / 🌞 시간대 / 📷 스크린샷 / 👤 워크스루</p>
-<p><b>예산</b><br>50만원 시작, 자재별 비용 변동, 삭제 시 50% 환불</p>
+  document.getElementById('tutBox').innerHTML=`<h3>🏠 집짓기 v4</h3>
+<p><b>📌 핵심 조작 (모바일/PC)</b><br>
+• <b>화면 드래그</b>: 카메라 회전<br>
+• <b>두 손가락 핀치/휠</b>: 줌<br>
+• <b>방 짧게 탭</b>: 방 선택<br>
+• <b>빈 잔디 탭</b>: 방 배치 (방 종류 탭 활성화 시)</p>
+
+<p><b>🆕 신규 기능</b></p>
+<p>• <b style="color:#ffaa55">🏚지붕 버튼</b> (상단 우측 주황색): 지붕 ON/OFF<br>
+&nbsp;&nbsp;OFF=인테리어 보임, ON=외관 완성</p>
+<p>• <b style="color:#5acc88">✋이동 버튼</b> (하단 좌측 녹색): 방 이동<br>
+&nbsp;&nbsp;1) 방 클릭 → 2) ✋이동 → 3) 새 위치 클릭</p>
+<p>• <b>🔄회전</b>: 가구 90도 회전</p>
+<p>• <b>🗑삭제</b>: 50% 환불</p>
+
+<p><b>🎨 스타일 변경 (벽 색상/자재/창문)</b><br>
+방 클릭 → 우측 패널 '스타일' 탭 → 벽 색상/자재/창문 선택 → '선택 방에 적용' 버튼</p>
+
+<p><b>🌅 환경</b><br>
+상단 ☀️🌞 클릭으로 날씨/시간대 변경</p>
+
+<p><b>👤 1인칭 둘러보기</b><br>
+방 선택 → 👤 버튼 → 마우스로 방안 둘러봄, ESC로 나가기</p>
+
 <button onclick="document.getElementById('tutModal').style.display='none'">확인</button>`;
 };
 document.getElementById('tutModal').onclick=e=>{if(e.target.id==='tutModal')e.target.style.display='none';};
-if(!localStorage.getItem('hb_v4_tut')){
-  setTimeout(()=>{document.getElementById('btnTut').click();localStorage.setItem('hb_v4_tut','1');},500);
+// v4 튜토리얼 ID 갱신 (신기능 안내 다시 보이게)
+if(localStorage.getItem('hb_v4_tut2')!=='1'){
+  setTimeout(()=>{document.getElementById('btnTut').click();localStorage.setItem('hb_v4_tut2','1');},500);
 }
 
 // ============================================================
