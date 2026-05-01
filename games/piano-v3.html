@@ -1413,8 +1413,8 @@ function flashHit(noteObj, midi, result) {
     const pianoWrap = document.getElementById('piano-wrap');
     const canvasToKeyScale = canvas.width / pianoWrap.clientWidth;
     const dpr = window.devicePixelRatio || 1;
-    const kx = (keyInfo.x - pianoWrap.scrollLeft) * canvasToKeyScale * dpr;
-    const kw = keyInfo.width * canvasToKeyScale * dpr;
+    const kx = (keyInfo.x - pianoWrap.scrollLeft) * canvasToKeyScale;
+    const kw = keyInfo.width * canvasToKeyScale;
     const color = result==='perfect' ? '#22c55e' : result==='good' ? '#eab308' : '#ef4444';
     for (let p=0;p<8;p++) {
       particles.push({x:kx+kw/2, y:canvas.height-10*dpr, vx:(Math.random()-.5)*4*dpr, vy:-Math.random()*6*dpr, life:1, color, size:3*dpr});
@@ -1511,11 +1511,12 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
   document.getElementById('sc-total').textContent = '0';
   document.getElementById('synth-score').style.display = 'flex';
 
-  // Auto-scroll piano to fit the song range
-  const midiValues = notes.map(n => nameToMidi(n.note)).filter(m => m > 0);
-  if (midiValues.length) {
-    const midMidi = Math.round((Math.min(...midiValues) + Math.max(...midiValues)) / 2);
-    scrollToMidi(midMidi);
+  // Auto-scroll: 첫 노트(시작 음)가 화면 가운데로 오도록
+  if (notes.length > 0) {
+    const firstMidi = nameToMidi(notes[0].note);
+    if (firstMidi > 0) scrollToMidi(firstMidi);
+    // lead-in 도중에 한 번 더 정렬 (canvas resize 후 정확한 매핑)
+    setTimeout(() => { if (firstMidi > 0) scrollToMidi(firstMidi); }, 250);
   }
 
   synthStartTime = performance.now() + (synthWaitMode ? 2500 : 1500); // lead-in (wait모드는 더 길게)
@@ -1566,8 +1567,8 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
           const canvas = document.getElementById('synth-canvas');
           const canvasToKeyScale = canvas.width / pianoWrap.clientWidth;
           const dpr = window.devicePixelRatio || 1;
-          const kx = (keyInfo.x - pianoWrap.scrollLeft) * canvasToKeyScale * dpr;
-          const kw = keyInfo.width * canvasToKeyScale * dpr;
+          const kx = (keyInfo.x - pianoWrap.scrollLeft) * canvasToKeyScale;
+          const kw = keyInfo.width * canvasToKeyScale;
           const color = best.result==='perfect' ? '#22c55e' : best.result==='good' ? '#eab308' : '#ef4444';
           for (let p=0;p<8;p++) {
             particles.push({x:kx+kw/2, y:canvas.height-10*dpr, vx:(Math.random()-.5)*4*dpr, vy:-Math.random()*6*dpr, life:1, color, size:3*dpr});
@@ -1650,7 +1651,7 @@ function synthLoop() {
     if(!el) return;
     const pianoRect = pianoWrap.getBoundingClientRect();
     const keyRect = el.getBoundingClientRect();
-    const x = (keyRect.left - pianoRect.left + pianoWrap.scrollLeft - scrollLeft) * canvasToKeyScale * dpr;
+    const x = (keyRect.left - pianoRect.left + pianoWrap.scrollLeft - scrollLeft) * canvasToKeyScale;
     ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
   });
 
@@ -1699,8 +1700,8 @@ function synthLoop() {
     if (!n.played) hasUnplayed = true;
     allDone = false;
 
-    const keyX = (keyInfo.x - scrollLeft) * canvasToKeyScale * dpr;
-    const keyW = keyInfo.width * canvasToKeyScale * dpr;
+    const keyX = (keyInfo.x - scrollLeft) * canvasToKeyScale;
+    const keyW = keyInfo.width * canvasToKeyScale;
 
     // Color
     let color, glow;
