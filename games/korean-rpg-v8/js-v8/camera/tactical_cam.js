@@ -10,17 +10,17 @@
 import * as THREE from 'three';
 
 const DEFAULTS = {
-  camSize: 7,
+  camSize: 12,
   camSizeMin: 3,
-  camSizeMax: 12,
+  camSizeMax: 28,        // 큰 맵도 한눈에 — 영걸전 전장 조망
   position: new THREE.Vector3(14, 11, 14),
   target: new THREE.Vector3(0, 0, 0),
   panSpeed: 0.08,
   rotateSpeed: 0.008,
-  wheelSpeed: 0.005,
-  pinchSpeed: 0.02,
+  wheelSpeed: 0.012,     // 휠 1tick 당 더 큰 줌 (큰 max 대응)
+  pinchSpeed: 0.04,      // 모바일 핀치도 빠르게
   near: 0.1,
-  far: 200
+  far: 300
 };
 
 function aspect() {

@@ -1148,12 +1148,12 @@ async function playBattleScene(scene) {
   const cx = mapData.width * TILE_SIZE / 2;
   const cz = mapData.height * TILE_SIZE / 2;
   GameState.switcher.tacticalState.target.set(cx, 0, cz);
-  // 영걸전 표준: 맵 전체가 한눈에 보이는 줌. 클로즈업이 아니라 전장 조망.
-  // 맵 width/height와 화면 비율에 맞게 자동 산출 (max 11)
+  // 영걸전 표준: 맵 전체가 한눈에 보이는 줌. 시작은 무조건 줌아웃.
+  // 맵 width/height와 화면 비율로 자동, 큰 맵 적극 수용 + 여유 마진.
   const _aspect = window.innerWidth / window.innerHeight;
-  const _byW = (mapData.width  * TILE_SIZE * 0.55) / Math.max(_aspect, 0.6);
-  const _byH = (mapData.height * TILE_SIZE * 0.55);
-  const _autoSize = Math.max(_byW, _byH, 8.5);
+  const _byW = (mapData.width  * TILE_SIZE * 0.75) / Math.max(_aspect, 0.5);
+  const _byH = (mapData.height * TILE_SIZE * 0.75);
+  const _autoSize = Math.max(_byW, _byH, 14);   // 최소 14 — 시작은 항상 줌아웃
   GameState.switcher.tacticalState.camSize = Math.min(
     GameState.switcher.tacticalState.camSizeMax,
     Math.max(GameState.switcher.tacticalState.camSizeMin, _autoSize)
@@ -1568,6 +1568,16 @@ function handleDPadInput(cmd) {
     if (tm.selectedUnit && tm.currentPhase !== PHASE.ENEMY) {
       handleAction('wait', tm.selectedUnit);
     }
+    return;
+  }
+
+  if (cmd === 'zin' || cmd === 'zout') {
+    const st = GameState.switcher?.tactical?.userData?._tactical;
+    if (!st) return;
+    const step = Math.max(0.6, st.camSize * 0.12);   // 현재 줌의 12% 비례
+    st.camSize = (cmd === 'zin')
+      ? Math.max(st.camSizeMin, st.camSize - step)
+      : Math.min(st.camSizeMax, st.camSize + step);
     return;
   }
 }
@@ -2033,7 +2043,8 @@ async function playExplorationScene(scene) {
   GameState.playerMesh = playerMesh;
   GameState.playerUnit = playerUnit;
 
-  // 카메라: character 모드 (squad도 허용)
+  // 카메라: 영걸전식 tactical 조감 시작 — 마을도 맵 전체 보이게.
+  // ?cam=character 로 1인칭 백업 가능.
   const wasLocked = GameState.switcher.lockMode;
   GameState.switcher.setLockMode(null);
   GameState.switcher.setSources({
@@ -2042,7 +2053,21 @@ async function playExplorationScene(scene) {
     forwardVec: new THREE.Vector3(0, 0, -1),
     obstacles: [townGroup],
   });
-  const targetCam = (scene.camera === 'squad') ? 'squad' : 'character';
+  const _camOverride = new URLSearchParams(location.search).get('cam');
+  const targetCam = _camOverride || ((scene.camera === 'squad') ? 'squad' : 'tactical');
+  if (targetCam === 'tactical') {
+    const cx = mapData.width  * TILE_SIZE / 2;
+    const cz = mapData.height * TILE_SIZE / 2;
+    GameState.switcher.tacticalState.target.set(cx, 0, cz);
+    const _aspect = window.innerWidth / window.innerHeight;
+    const fitW = (mapData.width  * TILE_SIZE) / (2 * Math.max(_aspect, 0.4)) * 1.2;
+    const fitH = (mapData.height * TILE_SIZE) / 2 * 1.2;
+    const _autoSize = Math.max(fitW, fitH, 12);
+    GameState.switcher.tacticalState.camSize = Math.min(
+      GameState.switcher.tacticalState.camSizeMax,
+      Math.max(GameState.switcher.tacticalState.camSizeMin, _autoSize)
+    );
+  }
   await GameState.switcher.switchTo(targetCam, 700, { force: true });
 
   // HUD
@@ -2208,6 +2233,10 @@ async function playExplorationScene(scene) {
     const worldTo = gridToWorld(playerUnit.x, playerUnit.y);
     playerMesh.lookAt(worldTo.x, playerMesh.position.y, worldTo.z);
     animating = true;
+    // tactical 카메라가 player 따라가게 (마을도 캐릭터 추적)
+    if (GameState.switcher?.current === 'tactical') {
+      panTacticalTo(worldTo.x, worldTo.z, 220);
+    }
     animateMove(playerMesh, from, { x: playerUnit.x, y: playerUnit.y }, 220).then(() => {
       animating = false;
     });

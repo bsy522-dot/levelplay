@@ -133,6 +133,32 @@ const STYLE = `
   color: #20100a;
 }
 
+/* 줌 +/- 버튼 — 우측 중앙 (A·B 위) */
+#v8-dpad-zoom {
+  position: absolute;
+  right: 14px; bottom: 168px;
+  display: flex; flex-direction: column; gap: 6px;
+  pointer-events: auto;
+}
+#v8-dpad-zoom .v8-dpad-zb {
+  width: 44px; height: 44px;
+  background: radial-gradient(circle at 30% 30%, rgba(60,40,18,.95), rgba(20,12,4,.85));
+  border: 2px solid #c4956a;
+  border-radius: 50%;
+  color: #ffd700;
+  font-size: 22px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.5);
+  transition: transform .08s, background .1s;
+}
+#v8-dpad-zoom .v8-dpad-zb:active,
+#v8-dpad-zoom .v8-dpad-zb.v8-press {
+  transform: scale(0.92);
+  background: radial-gradient(circle at 30% 30%, #ffd700, #c4956a);
+  color: #20100a;
+}
+
 #v8-dpad-menu {
   position: absolute;
   left: 50%; bottom: 20px; transform: translateX(-50%);
@@ -226,6 +252,10 @@ function _buildUI() {
       <div class="v8-dpad-btn v8-dpad-right">▶</div>
       <div class="v8-dpad-btn v8-dpad-down">▼</div>
     </div>
+    <div id="v8-dpad-zoom">
+      <div class="v8-dpad-zb v8-dpad-zin"  title="줌인 (+)">+</div>
+      <div class="v8-dpad-zb v8-dpad-zout" title="줌아웃 (−)">−</div>
+    </div>
     <div id="v8-dpad-ab">
       <div class="v8-dpad-ab-btn v8-dpad-b">B</div>
       <div class="v8-dpad-ab-btn v8-dpad-a">A</div>
@@ -242,6 +272,8 @@ function _buildUI() {
   _bindButton(root.querySelector('.v8-dpad-b'),     'b',     false);
   _bindButton(root.querySelector('.v8-dpad-l'),     'l',     false);
   _bindButton(root.querySelector('.v8-dpad-r'),     'r',     false);
+  _bindButton(root.querySelector('.v8-dpad-zin'),   'zin',   true);
+  _bindButton(root.querySelector('.v8-dpad-zout'),  'zout',  true);
   _bindButton(root.querySelector('#v8-dpad-menu'),  'menu',  false);
 
   return root;
@@ -266,6 +298,8 @@ function _bindKeyboard() {
       case 'q': case 'Q': cmd = 'l'; break;
       case 'e': case 'E': cmd = 'r'; break;
       case ' ':           cmd = 'menu'; break;
+      case '+': case '=': cmd = 'zin';  break;
+      case '-': case '_': cmd = 'zout'; break;
       default: return;
     }
     e.preventDefault();
@@ -275,6 +309,7 @@ function _bindKeyboard() {
     const map = {
       up: '.v8-dpad-up', down: '.v8-dpad-down', left: '.v8-dpad-left', right: '.v8-dpad-right',
       a: '.v8-dpad-a', b: '.v8-dpad-b', l: '.v8-dpad-l', r: '.v8-dpad-r',
+      zin: '.v8-dpad-zin', zout: '.v8-dpad-zout',
       menu: '#v8-dpad-menu',
     };
     const sel = map[cmd];
