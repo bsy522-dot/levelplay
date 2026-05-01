@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v25';
+const CACHE_NAME = 'levelplay-v26-no-boxing-cache';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -31,7 +31,7 @@ const STATIC_ASSETS = [
   './games/piano-v3.html',
   './games/ViolinReal-v3.html',
   './games/noraebang-v3.html',
-  './games/boxing-trainer-v5.html',
+  // boxing-trainer-v5.html: 절대 캐시 안 함 (NEVER_CACHE_PATHS 참조)
   './games/three.r128.min.js',
   './games/golf-tracker-v3.html',
   './games/korean-rpg-v4.html',
@@ -67,9 +67,17 @@ self.addEventListener('activate', event => {
 });
 
 // 가져오기: Network First (data/*.json, boxing/RPG 게임 HTML), Cache First (나머지)
-const NETWORK_FIRST_PATHS = ['/data/', 'boxing-trainer-', 'korean-rpg-', 'index.html', '/sw.js'];
+const NETWORK_FIRST_PATHS = ['/data/', 'korean-rpg-', 'index.html', '/sw.js'];
+const NEVER_CACHE_PATHS = ['boxing-trainer-', 'opponent_lore.json', 'manifest.boxing.json'];
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+
+  // 절대 캐시 금지 — 항상 네트워크에서, 캐시도 저장 안 함
+  if (NEVER_CACHE_PATHS.some(p => url.pathname.includes(p))) {
+    event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => new Response('Network error', { status: 504 })));
+    return;
+  }
+
   const isNetworkFirst = NETWORK_FIRST_PATHS.some(p => url.pathname.includes(p));
 
   // Network First 대상 - 항상 네트워크 우선, fallback to cache

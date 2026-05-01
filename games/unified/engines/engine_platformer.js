@@ -711,8 +711,8 @@
     const IM = window.IM || {};
     const ch = chosenChar || CHARACTERS[0];
     const img = IM[ch.spr];
-    // 시각 스케일: 1.0× (로미 원본 비율 그대로 — 변형 없이 명확히 인식되도록)
-    const VS = 1.0;
+    // 시각 스케일: 1.5× (로미 인식 가능한 크기, 비율은 보존 — scale 변형 없이 등배 확대만)
+    const VS = 1.5;
     const dw = PW * VS, dh = PH * VS;
     const ox = -dw/2, oy = PH/2 - dh;
     X.save();

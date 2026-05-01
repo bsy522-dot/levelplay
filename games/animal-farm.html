@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>동물농장 타이쿤</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4a7c3f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="동물농장">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="_assets/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="_assets/icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="_assets/icons/icon-512.png">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" onerror="window.__PEERJS_FAIL=true"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#2d5a1e;font-family:'Segoe UI',sans-serif;overflow:hidden;touch-action:none;user-select:none}
@@ -29,6 +39,16 @@ canvas{display:block;margin:0 auto}
 .item-card .price{color:#d4760a;font-weight:bold}
 .fact-box{background:#e8f5e9;border-left:4px solid #4caf50;padding:8px;margin:8px 0;font-size:12px;border-radius:4px}
 .eco-box{background:#fff3e0;border-left:4px solid #ff9800;padding:8px;margin:8px 0;font-size:12px;border-radius:4px}
+.mp-code{background:#fff;border:2px dashed #4a7c3f;border-radius:10px;padding:12px;margin:8px 0;text-align:center;font-family:monospace;font-size:18px;font-weight:bold;color:#2d5a1e;letter-spacing:2px}
+.mp-input{width:100%;padding:10px;border:2px solid #ccc;border-radius:8px;font-size:14px;font-family:monospace;text-transform:uppercase;text-align:center;letter-spacing:1px;margin:6px 0}
+.mp-btn{background:#4a7c3f;color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;cursor:pointer;width:100%;margin:4px 0}
+.mp-btn:active{background:#6aad55}
+.mp-btn.gift{background:#e8a735;color:#fff}
+.mp-btn.danger{background:#c0392b}
+.mp-status{font-size:12px;color:#666;margin:6px 0;text-align:center}
+#visitBanner{display:none;position:absolute;top:42px;left:0;width:100%;background:rgba(232,167,53,.95);color:#333;padding:6px 10px;font-size:12px;text-align:center;z-index:50;pointer-events:auto}
+#visitBanner.show{display:block}
+#visitBanner button{background:#c0392b;color:#fff;border:none;border-radius:8px;padding:3px 10px;margin-left:8px;font-size:11px;cursor:pointer}
 #toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;z-index:200;display:none;white-space:nowrap}
 #achieve{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#ffd700,#ffaa00);color:#333;padding:16px 28px;border-radius:16px;font-size:16px;font-weight:bold;z-index:200;display:none;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4)}
 #minigame{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);z-index:150;justify-content:center;align-items:center;flex-direction:column}
@@ -36,7 +56,35 @@ canvas{display:block;margin:0 auto}
 #mgcanvas{background:#f5edd6;border-radius:12px}
 #mginfo{color:#fff;font-size:14px;margin:8px}
 #mgclose{position:fixed;top:10px;right:14px;color:#fff;font-size:28px;cursor:pointer;z-index:160}
+/* AI Consultant chat panel */
+#cbtn{position:fixed;right:10px;bottom:64px;width:48px;height:48px;border-radius:50%;background:#4a7c3f;color:#fff;border:2px solid #6aad55;font-size:22px;cursor:pointer;z-index:120;box-shadow:0 3px 10px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;pointer-events:auto}
+#cbtn:active{background:#6aad55}
+#cbtn .cdotbtn{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#888}
+#cbtn.live .cdotbtn{background:#7cd66e;box-shadow:0 0 5px #7cd66e}
+#cpanel{position:fixed;top:0;right:-340px;width:300px;max-width:92vw;height:100%;background:#f5edd6;color:#333;z-index:140;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,.4);transition:right .3s ease;pointer-events:auto;font-family:inherit}
+#cpanel.show{right:0}
+#chead{background:#4a7c3f;color:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:bold}
+#chead .cdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#888;margin-right:6px;vertical-align:middle}
+#chead .cdot.on{background:#7cd66e;box-shadow:0 0 5px #7cd66e}
+#cclose{cursor:pointer;font-size:22px;color:#fff;background:transparent;border:none;line-height:1}
+#clog{flex:1;overflow-y:auto;padding:10px;font-size:13px;line-height:1.45;background:#f5edd6}
+.cmsg{margin:6px 0;padding:8px 10px;border-radius:10px;max-width:88%;word-wrap:break-word;white-space:pre-wrap}
+.cmsg.u{background:#4a7c3f;color:#fff;margin-left:auto;border-bottom-right-radius:2px}
+.cmsg.a{background:#fff;border:1px solid #d6c98a;border-bottom-left-radius:2px}
+.cmsg.s{background:#fff3e0;border-left:3px solid #ff9800;font-size:11px;color:#666;font-style:italic}
+#ctools{padding:6px 10px;border-top:1px solid #d6c98a;display:flex;gap:6px;flex-wrap:wrap;background:#ede0c0}
+.cbtn-tool{background:#e8a735;border:none;color:#fff;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer}
+.cbtn-tool:active{background:#d4760a}
+.cbtn-tool.alt{background:#888}
+#cinrow{display:flex;gap:6px;padding:8px 10px;border-top:1px solid #d6c98a;background:#ede0c0}
+#cin{flex:1;border:1px solid #b8a878;border-radius:8px;padding:6px 8px;font-size:13px;background:#fff;color:#333;outline:none;font-family:inherit}
+#cin:focus{border-color:#4a7c3f}
+#csend{background:#4a7c3f;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+#csend:active{background:#6aad55}
+#csend:disabled{background:#888;cursor:wait}
+@media(max-width:480px){#cpanel{width:88vw}#cbtn{width:44px;height:44px;font-size:20px;bottom:60px}}
 </style>
+<script defer src="_assets/dialogue_loader.js"></script>
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -53,13 +101,26 @@ canvas{display:block;margin:0 auto}
 <button class="bb" data-tool="build" onclick="G.openShop('build')">🏠건물</button>
 <button class="bb" data-tool="market" onclick="G.openMarket()">🏪시장</button>
 <button class="bb" data-tool="learn" onclick="G.openLearn()">📚학습</button>
-<button class="bb" data-tool="save" onclick="G.saveGame();showToast('저장 완료!')">💾저장</button>
+<button class="bb" data-tool="friend" onclick="MP.openPanel()">👥친구</button>
+<button class="bb" data-tool="save" onclick="G.saveGame();showToast('저장 완료!');AU.saveSfx()">💾저장</button>
+<button class="bb" data-tool="audio" onclick="G.openAudio()" id="audioBtn">🔊</button>
 </div>
 </div>
+<div id="visitBanner">🚪 친구 농장 방문 중 (편집 불가) <button onclick="MP.leaveVisit()">나가기</button></div>
 <div id="modal"><div id="mpanel"><span class="close" onclick="closeModal()">&times;</span><div id="mcontent"></div></div></div>
 <div id="toast"></div>
 <div id="achieve"></div>
 <div id="minigame"><span id="mgclose" onclick="G.closeMini()">&times;</span><canvas id="mgcanvas"></canvas><div id="mginfo"></div></div>
+<button id="cbtn" onclick="CONS.toggle()" title="농장 컨설턴트">🤖<span class="cdotbtn"></span></button>
+<div id="cpanel">
+<div id="chead"><div><span class="cdot" id="cstatus"></span>🤖 농장 컨설턴트</div><button id="cclose" onclick="CONS.close()">&times;</button></div>
+<div id="clog"></div>
+<div id="ctools">
+<button class="cbtn-tool" onclick="CONS.analyze()">📊 농장 분석</button>
+<button class="cbtn-tool alt" onclick="CONS.clear()">🗑️ 비우기</button>
+</div>
+<div id="cinrow"><input id="cin" type="text" placeholder="질문을 입력하세요..." maxlength="200"><button id="csend" onclick="CONS.send()">전송</button></div>
+</div>
 <script>
 const C=document.getElementById('c'),X=C.getContext('2d');
 const MC=document.getElementById('mgcanvas'),MX=MC.getContext('2d');
@@ -69,41 +130,64 @@ resize();addEventListener('resize',resize);
 
 // Data
 const ANIMALS={
-chicken:{name:'닭',icon:'🐔',cost:80,feed:'곡물',product:'달걀',prodTime:4,prodVal:15,lifespan:180,fact:'닭은 하루에 1개의 달걀을 낳아요. 세계에서 가장 많은 가축이에요!',feedCost:5},
-cow:{name:'소',icon:'🐄',cost:500,feed:'건초',product:'우유',prodTime:6,prodVal:40,lifespan:360,fact:'소는 하루에 약 30리터의 우유를 생산해요. 4개의 위장이 있어요!',feedCost:15},
-pig:{name:'돼지',icon:'🐷',cost:300,feed:'잡식',product:'고기',prodTime:30,prodVal:200,lifespan:120,fact:'돼지는 매우 똑똑해서 거울 속 자신을 인식할 수 있어요!',feedCost:10},
-sheep:{name:'양',icon:'🐑',cost:250,feed:'풀',product:'양모',prodTime:10,prodVal:50,lifespan:240,fact:'양의 양모는 매년 자라요. 한 마리에서 약 4.5kg의 양모를 얻어요!',feedCost:8},
-duck:{name:'오리',icon:'🦆',cost:100,feed:'곡물',product:'오리알',prodTime:5,prodVal:20,lifespan:150,fact:'오리 깃털은 방수예요! 기름샘에서 나온 기름을 깃털에 발라요.',feedCost:6},
-goat:{name:'염소',icon:'🐐',cost:350,feed:'풀',product:'치즈',prodTime:8,prodVal:55,lifespan:300,fact:'염소 우유로 만든 치즈는 소화가 잘 돼요. 염소는 산도 잘 올라가요!',feedCost:9},
-dog:{name:'강아지',icon:'🐕',cost:200,feed:'사료',product:'행복',prodTime:0,prodVal:0,lifespan:500,fact:'강아지는 농장 동물들을 지켜줘요. 양치기 개로 유명해요!',feedCost:8,guard:true},
-cat:{name:'고양이',icon:'🐱',cost:150,feed:'사료',product:'쥐잡기',prodTime:0,prodVal:0,lifespan:500,fact:'고양이는 농장의 쥐를 잡아줘요. 곡물 창고를 지켜요!',feedCost:5,pest:true},
-bee:{name:'꿀벌',icon:'🐝',cost:400,feed:'꽃',product:'꿀',prodTime:12,prodVal:70,lifespan:90,fact:'꿀벌 한 마리가 평생 만드는 꿀은 티스푼 1/12이에요! 꽃가루 수정도 도와요.',feedCost:3},
-rabbit:{name:'토끼',icon:'🐰',cost:120,feed:'당근',product:'토끼털',prodTime:8,prodVal:25,lifespan:200,fact:'토끼 이빨은 평생 자라요. 앙고라 토끼는 부드러운 털을 만들어줘요!',feedCost:4},
-horse:{name:'말',icon:'🐴',cost:800,feed:'건초',product:'일손',prodTime:0,prodVal:0,lifespan:400,fact:'말은 서서 잠을 잘 수 있어요! 농장에서 짐을 나르는 데 도움을 줘요.',feedCost:20,speed:true},
-fish:{name:'물고기',icon:'🐟',cost:60,feed:'먹이',product:'생선',prodTime:7,prodVal:30,lifespan:120,fact:'양어장에서 키우는 틸라피아는 4개월이면 수확할 수 있어요!',feedCost:3}
+chicken:{name:'닭',icon:'🐔',sprite:'_assets/sprites/animals/chicken.png',cost:80,feed:'곡물',product:'달걀',prodTime:4,prodVal:15,lifespan:180,fact:'닭은 하루에 1개의 달걀을 낳아요. 세계에서 가장 많은 가축이에요!',feedCost:5},
+cow:{name:'소',icon:'🐄',sprite:'_assets/sprites/animals/cow.png',cost:500,feed:'건초',product:'우유',prodTime:6,prodVal:40,lifespan:360,fact:'소는 하루에 약 30리터의 우유를 생산해요. 4개의 위장이 있어요!',feedCost:15},
+pig:{name:'돼지',icon:'🐷',sprite:'_assets/sprites/animals/pig.png',cost:300,feed:'잡식',product:'고기',prodTime:30,prodVal:200,lifespan:120,fact:'돼지는 매우 똑똑해서 거울 속 자신을 인식할 수 있어요!',feedCost:10},
+sheep:{name:'양',icon:'🐑',sprite:'_assets/sprites/animals/sheep.png',cost:250,feed:'풀',product:'양모',prodTime:10,prodVal:50,lifespan:240,fact:'양의 양모는 매년 자라요. 한 마리에서 약 4.5kg의 양모를 얻어요!',feedCost:8},
+duck:{name:'오리',icon:'🦆',sprite:'_assets/sprites/animals/duck.png',cost:100,feed:'곡물',product:'오리알',prodTime:5,prodVal:20,lifespan:150,fact:'오리 깃털은 방수예요! 기름샘에서 나온 기름을 깃털에 발라요.',feedCost:6},
+goat:{name:'염소',icon:'🐐',sprite:'_assets/sprites/animals/goat.png',cost:350,feed:'풀',product:'치즈',prodTime:8,prodVal:55,lifespan:300,fact:'염소 우유로 만든 치즈는 소화가 잘 돼요. 염소는 산도 잘 올라가요!',feedCost:9},
+dog:{name:'강아지',icon:'🐕',sprite:'_assets/sprites/animals/dog.png',cost:200,feed:'사료',product:'행복',prodTime:0,prodVal:0,lifespan:500,fact:'강아지는 농장 동물들을 지켜줘요. 양치기 개로 유명해요!',feedCost:8,guard:true},
+cat:{name:'고양이',icon:'🐱',sprite:'_assets/sprites/animals/cat.png',cost:150,feed:'사료',product:'쥐잡기',prodTime:0,prodVal:0,lifespan:500,fact:'고양이는 농장의 쥐를 잡아줘요. 곡물 창고를 지켜요!',feedCost:5,pest:true},
+bee:{name:'꿀벌',icon:'🐝',sprite:'_assets/sprites/animals/bee.png',cost:400,feed:'꽃',product:'꿀',prodTime:12,prodVal:70,lifespan:90,fact:'꿀벌 한 마리가 평생 만드는 꿀은 티스푼 1/12이에요! 꽃가루 수정도 도와요.',feedCost:3},
+rabbit:{name:'토끼',icon:'🐰',sprite:'_assets/sprites/animals/rabbit.png',cost:120,feed:'당근',product:'토끼털',prodTime:8,prodVal:25,lifespan:200,fact:'토끼 이빨은 평생 자라요. 앙고라 토끼는 부드러운 털을 만들어줘요!',feedCost:4},
+horse:{name:'말',icon:'🐴',sprite:'_assets/sprites/animals/horse.png',cost:800,feed:'건초',product:'일손',prodTime:0,prodVal:0,lifespan:400,fact:'말은 서서 잠을 잘 수 있어요! 농장에서 짐을 나르는 데 도움을 줘요.',feedCost:20,speed:true},
+fish:{name:'물고기',icon:'🐟',sprite:'_assets/sprites/animals/fish.png',cost:60,feed:'먹이',product:'생선',prodTime:7,prodVal:30,lifespan:120,fact:'양어장에서 키우는 틸라피아는 4개월이면 수확할 수 있어요!',feedCost:3}
 };
 
 const CROPS={
-potato:{name:'감자',icon:'🥔',cost:20,season:'spring',growTime:12,sellPrice:35,fact:'감자는 땅속에서 자라요. 비타민C가 풍부해요!'},
-strawberry:{name:'딸기',icon:'🍓',cost:30,season:'spring',growTime:8,sellPrice:45,fact:'딸기는 씨가 겉에 있는 유일한 과일이에요! 약 200개나 돼요.'},
-lettuce:{name:'상추',icon:'🥬',cost:15,season:'spring',growTime:6,sellPrice:25,fact:'상추는 빨리 자라요. 로마 시대부터 먹었대요!'},
-watermelon:{name:'수박',icon:'🍉',cost:40,season:'summer',growTime:16,sellPrice:80,fact:'수박의 92%는 물이에요! 더운 여름에 딱이죠.'},
-corn:{name:'옥수수',icon:'🌽',cost:25,season:'summer',growTime:14,sellPrice:50,fact:'옥수수 하나에 약 800개의 알갱이가 있어요!'},
-tomato:{name:'토마토',icon:'🍅',cost:22,season:'summer',growTime:10,sellPrice:40,fact:'토마토는 원래 관상용이었어요. 과일일까 채소일까? 둘 다에요!'},
-apple:{name:'사과',icon:'🍎',cost:50,season:'fall',growTime:20,sellPrice:65,fact:'세계에 7,500종이 넘는 사과가 있어요! 하루 한 개면 건강해요.'},
-pear:{name:'배',icon:'🍐',cost:45,season:'fall',growTime:18,sellPrice:60,fact:'배는 수분이 많고 식이섬유가 풍부해요. 한국 배는 세계적이에요!'},
-sweetpotato:{name:'고구마',icon:'🍠',cost:20,season:'fall',growTime:15,sellPrice:45,fact:'고구마는 뿌리를 먹는 거예요. 비타민A가 풍부해요!'},
-spinach:{name:'시금치',icon:'🥬',cost:18,season:'winter',growTime:8,sellPrice:30,fact:'시금치는 추위에 강해요! 철분이 풍부해서 뽀빠이가 좋아해요.'}
+potato:{name:'감자',icon:'🥔',sprite:'_assets/sprites/crops/potato.png',cost:20,season:'spring',growTime:12,sellPrice:35,fact:'감자는 땅속에서 자라요. 비타민C가 풍부해요!'},
+strawberry:{name:'딸기',icon:'🍓',sprite:'_assets/sprites/crops/strawberry.png',cost:30,season:'spring',growTime:8,sellPrice:45,fact:'딸기는 씨가 겉에 있는 유일한 과일이에요! 약 200개나 돼요.'},
+lettuce:{name:'상추',icon:'🥬',sprite:'_assets/sprites/crops/lettuce.png',cost:15,season:'spring',growTime:6,sellPrice:25,fact:'상추는 빨리 자라요. 로마 시대부터 먹었대요!'},
+watermelon:{name:'수박',icon:'🍉',sprite:'_assets/sprites/crops/watermelon.png',cost:40,season:'summer',growTime:16,sellPrice:80,fact:'수박의 92%는 물이에요! 더운 여름에 딱이죠.'},
+corn:{name:'옥수수',icon:'🌽',sprite:'_assets/sprites/crops/corn.png',cost:25,season:'summer',growTime:14,sellPrice:50,fact:'옥수수 하나에 약 800개의 알갱이가 있어요!'},
+tomato:{name:'토마토',icon:'🍅',sprite:'_assets/sprites/crops/tomato.png',cost:22,season:'summer',growTime:10,sellPrice:40,fact:'토마토는 원래 관상용이었어요. 과일일까 채소일까? 둘 다에요!'},
+apple:{name:'사과',icon:'🍎',sprite:'_assets/sprites/crops/apple.png',cost:50,season:'fall',growTime:20,sellPrice:65,fact:'세계에 7,500종이 넘는 사과가 있어요! 하루 한 개면 건강해요.'},
+pear:{name:'배',icon:'🍐',sprite:'_assets/sprites/crops/pear.png',cost:45,season:'fall',growTime:18,sellPrice:60,fact:'배는 수분이 많고 식이섬유가 풍부해요. 한국 배는 세계적이에요!'},
+sweetpotato:{name:'고구마',icon:'🍠',sprite:'_assets/sprites/crops/sweetpotato.png',cost:20,season:'fall',growTime:15,sellPrice:45,fact:'고구마는 뿌리를 먹는 거예요. 비타민A가 풍부해요!'},
+spinach:{name:'시금치',icon:'🥬',sprite:'_assets/sprites/crops/spinach.png',cost:18,season:'winter',growTime:8,sellPrice:30,fact:'시금치는 추위에 강해요! 철분이 풍부해서 뽀빠이가 좋아해요.'}
 };
 
 const BUILDINGS={
-barn:{name:'헛간',icon:'🏚️',cost:300,size:2,desc:'동물 4마리 수용'},
-silo:{name:'사일로',icon:'🏗️',cost:400,size:1,desc:'사료 저장량 +50'},
-greenhouse:{name:'온실',icon:'🏡',cost:600,size:2,desc:'겨울에도 작물 재배'},
-pond:{name:'연못',icon:'💧',cost:250,size:2,desc:'물고기 양어장'},
-market_b:{name:'직판장',icon:'🏪',cost:500,size:2,desc:'판매가격 +20%'},
-windmill:{name:'풍차',icon:'🌀',cost:350,size:1,desc:'곡물 가공'}
+barn:{name:'헛간',icon:'🏚️',sprite:'_assets/sprites/buildings/barn.png',cost:300,size:2,desc:'동물 4마리 수용'},
+silo:{name:'사일로',icon:'🏗️',sprite:'_assets/sprites/buildings/silo.png',cost:400,size:1,desc:'사료 저장량 +50'},
+greenhouse:{name:'온실',icon:'🏡',sprite:'_assets/sprites/buildings/greenhouse.png',cost:600,size:2,desc:'겨울에도 작물 재배'},
+pond:{name:'연못',icon:'💧',sprite:'_assets/sprites/buildings/pond.png',cost:250,size:2,desc:'물고기 양어장'},
+market_b:{name:'직판장',icon:'🏪',sprite:'_assets/sprites/buildings/market_b.png',cost:500,size:2,desc:'판매가격 +20%'},
+windmill:{name:'풍차',icon:'🌀',sprite:'_assets/sprites/buildings/windmill.png',cost:350,size:1,desc:'곡물 가공'}
 };
+
+// Sprite cache + preloader (graceful fallback if PNG missing)
+const SPRITES={};
+function preloadSprites(){
+  const collect=[];
+  for(const k in ANIMALS)if(ANIMALS[k].sprite)collect.push(ANIMALS[k].sprite);
+  for(const k in CROPS)if(CROPS[k].sprite)collect.push(CROPS[k].sprite);
+  for(const k in BUILDINGS)if(BUILDINGS[k].sprite)collect.push(BUILDINGS[k].sprite);
+  collect.forEach(path=>{
+    const img=new Image();
+    SPRITES[path]={img,ok:false};
+    img.onload=()=>{SPRITES[path].ok=true};
+    img.onerror=()=>{SPRITES[path].ok=false};
+    img.src=path;
+  });
+}
+function getSprite(path){
+  if(!path)return null;
+  const e=SPRITES[path];
+  if(e&&e.ok&&e.img&&e.img.complete&&e.img.naturalWidth>0)return e.img;
+  return null;
+}
+preloadSprites();
 
 const SEASONS=['spring','summer','fall','winter'];
 const SEASON_KR=['봄','여름','가을','겨울'];
@@ -151,29 +235,198 @@ tick:0,
 miniActive:false
 };
 
-// Audio
+// Audio - Procedural BGM + SFX system (no external files)
 const AU={
-ctx:null,
-init(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)()},
+ctx:null,masterGain:null,bgmGain:null,sfxGain:null,
+bgmVol:0.35,sfxVol:0.6,muted:false,bgmMuted:false,
+bgmTimer:null,currentSeasonBgm:-1,
+init(){
+  if(this.ctx)return;
+  try{
+    this.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    this.masterGain=this.ctx.createGain();this.masterGain.gain.value=1;
+    this.bgmGain=this.ctx.createGain();this.bgmGain.gain.value=this.bgmVol;
+    this.sfxGain=this.ctx.createGain();this.sfxGain.gain.value=this.sfxVol;
+    this.bgmGain.connect(this.masterGain);
+    this.sfxGain.connect(this.masterGain);
+    this.masterGain.connect(this.ctx.destination);
+    try{
+      const s=JSON.parse(localStorage.getItem('animalFarmAudio')||'{}');
+      if(typeof s.bgmVol==='number'){this.bgmVol=s.bgmVol;this.bgmGain.gain.value=s.bgmVol}
+      if(typeof s.sfxVol==='number'){this.sfxVol=s.sfxVol;this.sfxGain.gain.value=s.sfxVol}
+      if(typeof s.muted==='boolean'){this.muted=s.muted;this.masterGain.gain.value=s.muted?0:1}
+      if(typeof s.bgmMuted==='boolean'){this.bgmMuted=s.bgmMuted;if(s.bgmMuted)this.bgmGain.gain.value=0}
+    }catch(_){}
+  }catch(e){}
+},
+saveSettings(){try{localStorage.setItem('animalFarmAudio',JSON.stringify({bgmVol:this.bgmVol,sfxVol:this.sfxVol,muted:this.muted,bgmMuted:this.bgmMuted}))}catch(_){}},
+resume(){if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},
+setBgmVol(v){this.bgmVol=v;if(this.bgmGain&&!this.bgmMuted)this.bgmGain.gain.value=v;this.saveSettings()},
+setSfxVol(v){this.sfxVol=v;if(this.sfxGain)this.sfxGain.gain.value=v;this.saveSettings()},
+toggleMute(){this.muted=!this.muted;if(this.masterGain)this.masterGain.gain.value=this.muted?0:1;this.saveSettings();return this.muted},
+toggleBgmMute(){this.bgmMuted=!this.bgmMuted;if(this.bgmGain)this.bgmGain.gain.value=this.bgmMuted?0:this.bgmVol;this.saveSettings();return this.bgmMuted},
+envNote(freq,startT,dur,type='sine',peak=0.3,attack=0.01,decay=0.05,sustain=0.6,release=0.1,target=null){
+  if(!this.ctx)return;
+  try{
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(0,startT);
+    g.gain.linearRampToValueAtTime(peak,startT+attack);
+    g.gain.linearRampToValueAtTime(peak*sustain,startT+attack+decay);
+    g.gain.setValueAtTime(peak*sustain,Math.max(startT+attack+decay,startT+dur-release));
+    g.gain.exponentialRampToValueAtTime(0.0001,startT+dur+0.001);
+    o.connect(g);g.connect(target||this.sfxGain||this.ctx.destination);
+    o.start(startT);o.stop(startT+dur+0.05);
+  }catch(e){}
+},
 play(freq,dur=.1,type='sine',vol=.15){
-if(!this.ctx)return;
-try{
-const o=this.ctx.createOscillator(),g=this.ctx.createGain();
-o.type=type;o.frequency.value=freq;g.gain.value=vol;
-o.connect(g);g.connect(this.ctx.destination);
-o.start();g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+dur);
-o.stop(this.ctx.currentTime+dur);
-}catch(e){}
+  if(!this.ctx)return;
+  try{
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.value=vol;
+    o.connect(g);g.connect(this.sfxGain||this.ctx.destination);
+    o.start();g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+dur);
+    o.stop(this.ctx.currentTime+dur+0.05);
+  }catch(e){}
+},
+noise(dur=0.08,vol=0.3,filterFreq=2000){
+  if(!this.ctx)return;
+  try{
+    const len=Math.floor(this.ctx.sampleRate*dur);
+    const buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+    const d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);
+    const src=this.ctx.createBufferSource();src.buffer=buf;
+    const filter=this.ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=filterFreq;
+    const g=this.ctx.createGain();g.gain.value=vol;
+    src.connect(filter);filter.connect(g);g.connect(this.sfxGain||this.ctx.destination);
+    src.start();
+  }catch(e){}
 },
 coin(){this.play(880,.08);setTimeout(()=>this.play(1320,.1),80)},
 place(){this.play(440,.1,'triangle')},
-harvest(){this.play(660,.1);setTimeout(()=>this.play(880,.1),100);setTimeout(()=>this.play(1100,.15),200)},
+harvest(){
+  this.play(660,.08);setTimeout(()=>this.play(880,.08),80);
+  setTimeout(()=>this.play(1100,.1),160);
+  setTimeout(()=>{this.play(1320,.05);setTimeout(()=>this.play(1760,.08),60)},260);
+},
 error(){this.play(220,.2,'sawtooth')},
 achieve(){this.play(523,.1);setTimeout(()=>this.play(659,.1),120);setTimeout(()=>this.play(784,.15),240);setTimeout(()=>this.play(1047,.2),360)},
+click(){this.play(880,.03,'square',.08)},
+modal(){this.play(660,.06,'triangle',.1);setTimeout(()=>this.play(880,.05,'triangle',.08),60)},
+saveSfx(){this.play(550,.06,'sine',.12);setTimeout(()=>this.play(770,.08,'sine',.12),70);setTimeout(()=>this.play(990,.1,'sine',.1),140)},
+build(){this.noise(0.06,0.25,1500);setTimeout(()=>this.noise(0.06,0.22,1300),140);setTimeout(()=>this.noise(0.08,0.2,1100),280)},
+animalCry(type){
+  if(!this.ctx)return;
+  const detune=G.season===3?-30:G.season===1?20:0;
+  const t=this.ctx.currentTime;
+  if(type==='chicken'){
+    this.envNote(900+detune,t,0.08,'square',0.18,0.005,0.02,0.5,0.04);
+    this.envNote(1200+detune,t+0.1,0.08,'square',0.18,0.005,0.02,0.5,0.04);
+  }else if(type==='cow'){
+    this.envNote(120+detune*0.3,t,0.4,'sawtooth',0.18,0.05,0.1,0.7,0.15);
+    this.envNote(110+detune*0.3,t+0.45,0.5,'sawtooth',0.16,0.05,0.1,0.7,0.2);
+    this.envNote(100+detune*0.3,t+1.0,0.6,'sawtooth',0.14,0.05,0.15,0.7,0.25);
+  }else if(type==='pig'){
+    this.envNote(180+detune,t,0.12,'sawtooth',0.22,0.01,0.04,0.6,0.05);
+    this.envNote(160+detune,t+0.14,0.15,'sawtooth',0.2,0.01,0.04,0.6,0.06);
+  }else if(type==='sheep'){
+    this.envNote(440+detune,t,0.18,'triangle',0.18,0.02,0.05,0.6,0.08);
+    this.envNote(420+detune,t+0.2,0.22,'triangle',0.16,0.02,0.05,0.6,0.1);
+  }else if(type==='duck'){
+    this.envNote(550+detune,t,0.08,'square',0.2,0.005,0.03,0.5,0.04);
+    this.envNote(500+detune,t+0.09,0.08,'square',0.2,0.005,0.03,0.5,0.04);
+  }else{this.envNote(600,t,0.1,'sine',0.15,0.01,0.04,0.6,0.05)}
+},
+SCALES:{
+  spring:[523.25,587.33,659.25,698.46,783.99,880,987.77,1046.50],
+  summer:[659.25,739.99,830.61,880,987.77,1108.73,1244.51,1318.51],
+  fall:[440,493.88,523.25,587.33,659.25,698.46,783.99,880],
+  winter:[349.23,392,440,466.16,523.25,587.33,659.25,698.46]
+},
+SEASON_TEMPO:{spring:120,summer:140,fall:90,winter:70},
+buildMelody(season){
+  const scale=this.SCALES[season];
+  const seedBase={spring:7,summer:13,fall:23,winter:31}[season]||5;
+  let seed=seedBase;
+  const rng=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  const notes=[];
+  for(let bar=0;bar<16;bar++){
+    for(let beat=0;beat<4;beat++){
+      const r=rng();
+      if(r<0.2){notes.push({rest:true,dur:0.5});continue}
+      const dur=r<0.7?0.5:0.25;
+      let idx;
+      if(beat===0)idx=[0,2,4][Math.floor(rng()*3)];
+      else if(beat===2)idx=[2,4,5,7][Math.floor(rng()*4)];
+      else idx=Math.floor(rng()*8);
+      notes.push({freq:scale[idx],dur});
+    }
+  }
+  return notes;
+},
+buildBass(season){
+  const scale=this.SCALES[season];
+  const root=scale[0]/2,fifth=scale[4]/2;
+  const pattern=[];
+  for(let bar=0;bar<16;bar++){
+    pattern.push({freq:root,dur:1});pattern.push({freq:fifth,dur:1});
+    pattern.push({freq:root,dur:1});pattern.push({freq:fifth,dur:1});
+  }
+  return pattern;
+},
+playBgm(seasonIdx){
+  if(!this.ctx||this.bgmMuted||this.muted)return;
+  const seasons=['spring','summer','fall','winter'];
+  const season=seasons[seasonIdx];
+  if(this.currentSeasonBgm===seasonIdx&&this.bgmTimer)return;
+  this.stopBgm(true);
+  this.currentSeasonBgm=seasonIdx;
+  const tempo=this.SEASON_TEMPO[season];
+  const beatSec=60/tempo;
+  const melody=this.buildMelody(season);
+  const bass=this.buildBass(season);
+  let totalDur=0;melody.forEach(n=>totalDur+=n.dur*beatSec);
+  const startBgmLoop=()=>{
+    if(!this.ctx||this.bgmMuted||this.muted)return;
+    const startT=this.ctx.currentTime+0.05;
+    if(this.bgmGain){
+      this.bgmGain.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.bgmGain.gain.setValueAtTime(this.bgmGain.gain.value,this.ctx.currentTime);
+      this.bgmGain.gain.linearRampToValueAtTime(this.bgmMuted?0:this.bgmVol,this.ctx.currentTime+1.5);
+    }
+    let t=startT;
+    melody.forEach(n=>{
+      if(!n.rest){
+        const peak=season==='winter'?0.18:season==='fall'?0.2:0.22;
+        const type=season==='spring'?'triangle':season==='summer'?'square':'sine';
+        this.envNote(n.freq,t,n.dur*beatSec*0.95,type,peak,0.02,0.05,0.5,0.08,this.bgmGain);
+      }
+      t+=n.dur*beatSec;
+    });
+    let bt=startT;
+    bass.forEach(n=>{
+      this.envNote(n.freq,bt,n.dur*beatSec*0.9,'sine',0.12,0.02,0.05,0.7,0.1,this.bgmGain);
+      bt+=n.dur*beatSec;
+    });
+  };
+  startBgmLoop();
+  this.bgmTimer=setInterval(()=>{if(!this.bgmMuted&&!this.muted)startBgmLoop()},Math.floor(totalDur*1000));
+},
+stopBgm(quiet){
+  if(this.bgmTimer){clearInterval(this.bgmTimer);this.bgmTimer=null}
+  this.currentSeasonBgm=-1;
+  if(this.bgmGain&&this.ctx&&!quiet){
+    try{
+      this.bgmGain.gain.cancelScheduledValues(this.ctx.currentTime);
+      this.bgmGain.gain.setValueAtTime(this.bgmGain.gain.value,this.ctx.currentTime);
+      this.bgmGain.gain.linearRampToValueAtTime(0,this.ctx.currentTime+0.6);
+    }catch(_){}
+  }
+},
 ambient(){
-if(!this.ctx)return;
-// bird chirp
-setInterval(()=>{if(G.hour>=6&&G.hour<=18&&Math.random()<.3)this.play(1800+Math.random()*800,.05,'sine',.03)},3000);
+  if(!this.ctx)return;
+  setInterval(()=>{if(G.hour>=6&&G.hour<=18&&Math.random()<.3)this.play(1800+Math.random()*800,.05,'sine',.03)},3000);
 }
 };
 
@@ -181,7 +434,7 @@ setInterval(()=>{if(G.hour>=6&&G.hour<=18&&Math.random()<.3)this.play(1800+Math.
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
 function showAchieve(a){const el=document.getElementById('achieve');el.innerHTML=a.icon+'<br>'+a.name+'<br><small>'+a.desc+'</small>';el.style.display='block';AU.achieve();setTimeout(()=>el.style.display='none',3000)}
 function closeModal(){document.getElementById('modal').classList.remove('show')}
-function openModal(html){document.getElementById('mcontent').innerHTML=html;document.getElementById('modal').classList.add('show')}
+function openModal(html){document.getElementById('mcontent').innerHTML=html;document.getElementById('modal').classList.add('show');try{AU.modal()}catch(_){}}
 
 // ISO projection
 const TILE=32,HALFTILE=16;
@@ -248,6 +501,15 @@ drawTile(gx,gy,col,bdr);
 function drawPixelAnimal(x,y,type,bounce){
   const s=3;// pixel scale
   X.save();X.translate(x,y+HALFTILE/2+bounce-8);
+  // Sprite path: prefer PNG if loaded, else fall through to pixel art / emoji
+  const ad=ANIMALS[type];
+  const aimg=ad?getSprite(ad.sprite):null;
+  if(aimg){
+    const sw=32,sh=32;
+    X.drawImage(aimg,-sw/2,-sh/2-2,sw,sh);
+    X.restore();
+    return;
+  }
   if(type==='chicken'){
     X.fillStyle='#fff';X.fillRect(-3*s,-2*s,6*s,4*s);// body
     X.fillStyle='#FFD700';X.fillRect(-1*s,-3*s,3*s,1*s);// head
@@ -275,7 +537,6 @@ function drawPixelAnimal(x,y,type,bounce){
     X.fillStyle='#333';X.fillRect(-2*s,2*s,1*s,2*s);X.fillRect(1*s,2*s,1*s,2*s);// legs
   }else{
     // Fallback: use emoji
-    const ad=ANIMALS[type];
     X.font='18px serif';X.textAlign='center';X.textBaseline='middle';
     X.fillText(ad?ad.icon:'🐾',0,0);
   }
@@ -306,8 +567,14 @@ function drawCropVisual(x,y,key,stage){
     X.fillStyle='rgba(255,215,0,0.2)';X.beginPath();X.arc(0,-2*s,6*s,0,Math.PI*2);X.fill();
     X.fillStyle='#388E3C';X.fillRect(-1,-5*s,2,5*s);
     const cd=CROPS[key];
-    X.font='16px serif';X.textAlign='center';X.textBaseline='middle';
-    X.fillText(cd?cd.icon:'🌾',0,-5*s);
+    const cimg=cd?getSprite(cd.sprite):null;
+    if(cimg){
+      const sw=24,sh=24;
+      X.drawImage(cimg,-sw/2,-5*s-sh/2,sw,sh);
+    }else{
+      X.font='16px serif';X.textAlign='center';X.textBaseline='middle';
+      X.fillText(cd?cd.icon:'🌾',0,-5*s);
+    }
     // Sparkle
     const sp=Math.sin(G.tick*0.1)*3;
     X.fillStyle='#FFD700';X.fillRect(-5*s+sp,-4*s,2,2);X.fillRect(4*s-sp,-3*s,2,2);
@@ -333,7 +600,13 @@ drawCropVisual(x,y,cell.key,Math.min(cell.stage,3));
 if(cell.stage>=3){X.font='10px sans-serif';X.fillStyle='#4CAF50';X.textAlign='center';X.fillText('수확!',x,y+HALFTILE+6)}
 }else if(cell.type==='building'){
 const bd=BUILDINGS[cell.key];
-X.font='22px serif';X.textAlign='center';X.fillText(bd.icon,x,y+HALFTILE/2-2);
+const bimg=bd?getSprite(bd.sprite):null;
+if(bimg){
+  const sw=36,sh=36;
+  X.drawImage(bimg,x-sw/2,y+HALFTILE/2-sh+4,sw,sh);
+}else{
+  X.font='22px serif';X.textAlign='center';X.fillText(bd.icon,x,y+HALFTILE/2-2);
+}
 // Building shadow
 X.fillStyle='rgba(0,0,0,0.1)';X.beginPath();X.ellipse(x,y+HALFTILE/2+4,12,5,0,0,Math.PI*2);X.fill();
 }
@@ -449,6 +722,7 @@ if(G.day%7===0){
 G.season=(G.season+1)%4;
 if(G.season===0)G.year++;
 showToast(SEASON_KR[G.season]+' 시즌이 시작됐어요!');
+if(AU.ctx&&!AU.bgmMuted&&!AU.muted)AU.playBgm(G.season);
 }
 }
 
@@ -571,12 +845,13 @@ showToast('이 계절에는 심을 수 없어요!');AU.error();return;
 }
 
 G.money-=item.cost;
-AU.place();
+if(p.type==='building')AU.build();else AU.place();
 
 if(p.type==='animal'){
 const a={type:p.key,gx,gy,age:0,prodTimer:0};
 G.animals.push(a);
 G.grid[gy][gx]={type:'animal',key:p.key,hasProduct:false};
+setTimeout(()=>AU.animalCry(p.key),200);
 }else if(p.type==='crop'){
 const cr={key:p.key,gx,gy,stage:0,growTimer:0};
 G.crops.push(cr);
@@ -604,7 +879,10 @@ if(!cell)return;
 
 if(cell.type==='animal'){
 const ad=ANIMALS[cell.key];
+AU.animalCry(cell.key);
 let html=`<h2>${ad.icon} ${ad.name}</h2>`;
+const _npcLine=(window.NPC&&NPC.ready)?NPC.say(cell.key,{season:G.season}):null;
+if(_npcLine){html+=`<div class="fact-box" style="background:#fff8dc">💬 "${_npcLine}"</div>`;}
 html+=`<div class="fact-box">💡 ${ad.fact}</div>`;
 const anim=G.animals.find(a=>a.gx===gx&&a.gy===gy);
 if(anim)html+=`<p>나이: ${anim.age}일</p>`;
@@ -623,6 +901,12 @@ const stages=['씨앗','새싹','성장중','수확 가능!'];
 let html=`<h2>${cd.icon} ${cd.name}</h2>`;
 html+=`<p>상태: ${stages[Math.min(cell.stage,3)]}</p>`;
 html+=`<div class="fact-box">💡 ${cd.fact}</div>`;
+const _card=(window.NPC&&NPC.ready)?NPC.cropCard(cell.key):null;
+if(_card){
+if(_card.tip)html+=`<div class="fact-box">🌱 재배: ${_card.tip}</div>`;
+if(_card.nutrition)html+=`<div class="fact-box">🥕 영양: ${_card.nutrition}</div>`;
+if(_card.history)html+=`<div class="fact-box">📜 역사: ${_card.history}</div>`;
+}
 if(cell.stage>=3){
 html+=`<br><button class="bb" style="width:100%" onclick="G.harvestCrop(${gx},${gy});closeModal()">🌾 수확 (+${Math.round(cd.sellPrice*G.marketBonus)}원)</button>`;
 }
@@ -715,6 +999,32 @@ let html=`<h2>${l.icon} ${l.title}</h2>`;
 html+=`<div class="eco-box" style="font-size:14px;line-height:1.8">${l.content}</div>`;
 html+='<br><button class="bb" style="width:100%" onclick="G.openLearn()">← 돌아가기</button>';
 openModal(html);
+};
+
+// Audio settings panel
+G.openAudio=function(){
+  AU.init();AU.resume();AU.modal();
+  const bgmPct=Math.round(AU.bgmVol*100),sfxPct=Math.round(AU.sfxVol*100);
+  let html='<h2>🔊 사운드 설정</h2>';
+  html+=`<div style="margin:12px 0">
+    <label style="font-weight:bold">🎵 배경음악 (BGM): <span id="bgmLabel">${bgmPct}%</span></label>
+    <input type="range" min="0" max="100" value="${bgmPct}" id="bgmSlider" style="width:100%" oninput="AU.setBgmVol(this.value/100);document.getElementById('bgmLabel').textContent=this.value+'%'">
+    <button class="bb" style="width:48%;margin-top:6px" onclick="const m=AU.toggleBgmMute();document.getElementById('bgmMuteBtn').textContent=m?'🔇 BGM 켜기':'🔊 BGM 끄기';if(!m)AU.playBgm(G.season)" id="bgmMuteBtn">${AU.bgmMuted?'🔇 BGM 켜기':'🔊 BGM 끄기'}</button>
+    <button class="bb" style="width:48%;margin-top:6px;margin-left:4%" onclick="AU.playBgm(G.season);showToast('BGM 재생 ▶')">▶ 재생 테스트</button>
+  </div>`;
+  html+=`<div style="margin:12px 0">
+    <label style="font-weight:bold">🔔 효과음 (SFX): <span id="sfxLabel">${sfxPct}%</span></label>
+    <input type="range" min="0" max="100" value="${sfxPct}" id="sfxSlider" style="width:100%" oninput="AU.setSfxVol(this.value/100);document.getElementById('sfxLabel').textContent=this.value+'%'">
+    <button class="bb" style="width:48%;margin-top:6px" onclick="AU.coin();showToast('💰 동전음')">동전</button>
+    <button class="bb" style="width:48%;margin-top:6px;margin-left:4%" onclick="AU.harvest();showToast('🌾 수확음')">수확</button>
+    <button class="bb" style="width:48%;margin-top:6px" onclick="AU.build();showToast('🔨 건축음')">건축</button>
+    <button class="bb" style="width:48%;margin-top:6px;margin-left:4%" onclick="AU.animalCry('cow');showToast('🐄 음매')">동물</button>
+  </div>`;
+  html+=`<div style="margin:12px 0">
+    <button class="bb" style="width:100%;background:${AU.muted?'#c62828':'#4a7c3f'}" onclick="const m=AU.toggleMute();showToast(m?'🔇 전체 음소거':'🔊 음소거 해제');closeModal();G.openAudio()">${AU.muted?'🔇 음소거 (모두)':'🔊 음소거 (모두)'}</button>
+  </div>`;
+  html+=`<div class="eco-box">💡 봄=메이저 밝음, 여름=경쾌, 가을=마이너 차분, 겨울=느린 잔잔. 계절마다 BGM이 자동 변경돼요.</div>`;
+  openModal(html);
 };
 
 // Mini-games
@@ -825,8 +1135,10 @@ if(G.miniItems.every(p=>p.hit)){G.miniScore+=3;G.miniItems=[];}
 
 // Input handling
 let touchId=null;
+let _firstTouch=true;
 function onDown(sx,sy){
-AU.init();
+AU.init();AU.resume();
+if(_firstTouch){_firstTouch=false;if(!AU.bgmMuted&&!AU.muted)setTimeout(()=>AU.playBgm(G.season),300)}
 G.dragStart={x:sx,y:sy,cx:G.camX,cy:G.camY};
 G.isDrag=false;
 }
@@ -874,6 +1186,237 @@ return true;
 }catch(e){return false}
 };
 
+// =========================================================
+// PeerJS Multiplayer: 친구 농장 방문 (server-less, WebRTC)
+// =========================================================
+const MP={
+  peer:null,        // main peer (random PeerJS-assigned id)
+  dirPeer:null,     // directory peer with id "farmdir-<myCode>" so friends can resolve us
+  myCode:null,      // 6-char short code (FARM-XXXXXX)
+  myPeerId:null,    // full peer.id (hidden from UI)
+  conn:null,        // active connection
+  visiting:false,   // currently viewing friend's farm
+  hostBackup:null,  // snapshot of own G to restore after visit
+  ready:false,
+  shortFromId(id){
+    let h=0;for(let i=0;i<id.length;i++)h=((h<<5)-h+id.charCodeAt(i))|0;
+    const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s='';let v=Math.abs(h)+1;
+    for(let i=0;i<6;i++){s+=a[v%a.length];v=Math.floor(v/a.length)+(i+1)*7;}
+    return 'FARM-'+s;
+  },
+  init(){
+    if(window.__PEERJS_FAIL||typeof Peer==='undefined'){this.ready=false;return}
+    try{
+      this.peer=new Peer(undefined,{debug:0});
+      this.peer.on('open',id=>{
+        this.myPeerId=id;
+        this.myCode=this.shortFromId(id);
+        this.ready=true;
+        this.registerDirectory();
+      });
+      this.peer.on('connection',c=>this.onIncomingConn(c));
+      this.peer.on('error',e=>{
+        console.warn('[MP] peer error',e.type);
+        if(e.type==='peer-unavailable'){showToast('친구를 찾을 수 없어요');closeModal();}
+      });
+    }catch(e){console.warn('[MP] init failed',e);this.ready=false;}
+  },
+  // Directory peer: visitors connect to "farmdir-<code>" to learn our real peer.id
+  registerDirectory(){
+    if(this.dirPeer||!this.myCode)return;
+    try{
+      this.dirPeer=new Peer('farmdir-'+this.myCode,{debug:0});
+      this.dirPeer.on('connection',c=>{
+        c.on('open',()=>{
+          try{c.send({type:'whoami',peerId:this.myPeerId})}catch(e){}
+          setTimeout(()=>{try{c.close()}catch(e){}},2000);
+        });
+      });
+      this.dirPeer.on('error',e=>{/* collisions are non-fatal */});
+    }catch(e){console.warn('[MP] dir failed',e)}
+  },
+  // Snapshot of host data sent to a visitor
+  serializeFarm(){
+    return {
+      grid:G.grid,
+      animals:G.animals,
+      crops:G.crops,
+      buildings:G.buildings,
+      money:G.money,
+      season:G.season,
+      day:G.day,
+      year:G.year,
+      hasGreenhouse:G.hasGreenhouse
+    };
+  },
+  applyVisitSnapshot(d){
+    if(!this.hostBackup){
+      this.hostBackup={
+        grid:G.grid,animals:G.animals,crops:G.crops,buildings:G.buildings,
+        money:G.money,season:G.season,day:G.day,year:G.year,
+        hasGreenhouse:G.hasGreenhouse,
+        cropTypesPlanted:new Set([...G.cropTypesPlanted])
+      };
+    }
+    G.grid=d.grid||G.grid;
+    G.animals=d.animals||[];
+    G.crops=d.crops||[];
+    G.buildings=d.buildings||[];
+    G.money=d.money||0;
+    G.season=d.season||0;
+    G.day=d.day||1;
+    G.year=d.year||1;
+    G.hasGreenhouse=!!d.hasGreenhouse;
+    this.visiting=true;
+    document.getElementById('visitBanner').classList.add('show');
+    closeModal();
+    showToast('🚪 친구 농장에 입장!');
+  },
+  leaveVisit(){
+    if(!this.visiting||!this.hostBackup)return;
+    const cropSet=this.hostBackup.cropTypesPlanted;
+    Object.assign(G,this.hostBackup);
+    G.cropTypesPlanted=new Set([...(cropSet||[])]);
+    this.visiting=false;
+    this.hostBackup=null;
+    document.getElementById('visitBanner').classList.remove('show');
+    if(this.conn){try{this.conn.close()}catch(e){};this.conn=null;}
+    showToast('내 농장으로 돌아왔어요');
+  },
+  openPanel(){
+    if(window.__PEERJS_FAIL||typeof Peer==='undefined'){
+      showToast('오프라인: 멀티플레이 사용 불가');return;
+    }
+    if(this.visiting){
+      let html='<h2>🚪 친구 농장 방문 중</h2>';
+      html+='<p style="font-size:13px;color:#555">친구 농장을 보고 있어요. 편집은 호스트만 가능해요.</p>';
+      html+='<button class="mp-btn gift" onclick="MP.sendGift(\'coin\')">💰 100코인 선물</button>';
+      html+='<button class="mp-btn gift" onclick="MP.sendGift(\'crops\')">🌾 작물 5개 선물</button>';
+      html+='<input class="mp-input" id="mpMsgInput" placeholder="방명록 메시지 (1줄)" maxlength="40">';
+      html+='<button class="mp-btn" onclick="MP.sendMsgFromInput()">✏️ 방명록 남기기</button>';
+      html+='<button class="mp-btn danger" onclick="MP.leaveVisit();closeModal()">🏠 내 농장으로</button>';
+      openModal(html);return;
+    }
+    if(!this.ready){
+      if(!this.peer)this.init();
+      openModal('<h2>👥 친구 농장</h2><p class="mp-status">연결 준비 중... 잠시만요</p>');
+      const t=setInterval(()=>{
+        if(this.ready){clearInterval(t);this.openPanel()}
+        else if(window.__PEERJS_FAIL){clearInterval(t);closeModal();showToast('오프라인: 멀티플레이 사용 불가')}
+      },300);
+      setTimeout(()=>clearInterval(t),10000);
+      return;
+    }
+    let html='<h2>👥 친구 농장 방문</h2>';
+    html+='<p style="font-size:12px;color:#555">서버 없이 P2P로 연결돼요. 친구와 코드를 카톡 등으로 공유하세요.</p>';
+    html+='<div style="font-size:13px;font-weight:bold;margin-top:8px">📤 내 농장 코드 (친구에게 보내기)</div>';
+    html+='<div class="mp-code" id="mpMyCode">'+this.myCode+'</div>';
+    html+='<button class="mp-btn" onclick="MP.copyMyCode()">📋 복사</button>';
+    html+='<div style="font-size:13px;font-weight:bold;margin-top:14px">📥 친구 코드 입력 (방문하기)</div>';
+    html+='<input class="mp-input" id="mpFriendCode" placeholder="FARM-XXXXXX" maxlength="11">';
+    html+='<button class="mp-btn" onclick="MP.connectToFriend()">🚪 방문하기</button>';
+    html+='<p class="mp-status">📡 친구가 내 코드로 방문하면 자동으로 연결돼요</p>';
+    openModal(html);
+  },
+  copyMyCode(){
+    if(!this.myCode)return;
+    try{
+      navigator.clipboard.writeText(this.myCode).then(()=>showToast('코드 복사 완료!'));
+    }catch(e){
+      const inp=document.createElement('input');inp.value=this.myCode;document.body.appendChild(inp);
+      inp.select();document.execCommand('copy');document.body.removeChild(inp);showToast('코드 복사!');
+    }
+  },
+  connectToFriend(){
+    const inp=document.getElementById('mpFriendCode');
+    if(!inp)return;
+    const code=inp.value.trim().toUpperCase();
+    if(!/^FARM-[A-Z0-9]{6}$/.test(code)){showToast('코드 형식이 올바르지 않아요 (FARM-XXXXXX)');return}
+    if(code===this.myCode){showToast('내 코드와 같아요');return}
+    showToast('연결 중...');
+    const dirConn=this.peer.connect('farmdir-'+code,{reliable:true});
+    let resolved=false;
+    const timer=setTimeout(()=>{
+      if(!resolved){showToast('친구를 찾을 수 없어요');try{dirConn.close()}catch(e){}}
+    },8000);
+    dirConn.on('data',d=>{
+      if(d&&d.type==='whoami'&&d.peerId&&!resolved){
+        resolved=true;clearTimeout(timer);
+        try{dirConn.close()}catch(e){};
+        const c=this.peer.connect(d.peerId,{reliable:true});
+        this.conn=c;
+        c.on('open',()=>{c.send({type:'request_farm'})});
+        c.on('data',msg=>{
+          if(msg&&msg.type==='farm_snapshot'){this.applyVisitSnapshot(msg.data)}
+          else if(msg&&msg.type==='gift_ack'){showToast('호스트가 선물을 받았어요!')}
+        });
+        c.on('close',()=>{
+          if(this.visiting){showToast('호스트 연결 종료');this.leaveVisit()}
+        });
+        c.on('error',()=>{showToast('연결 오류')});
+      }
+    });
+    dirConn.on('error',()=>{
+      if(!resolved){clearTimeout(timer);showToast('친구를 찾을 수 없어요')}
+    });
+  },
+  onIncomingConn(c){
+    this.conn=c;
+    c.on('data',msg=>{
+      if(!msg||typeof msg!=='object')return;
+      if(this.visiting)return;
+      if(msg.type==='request_farm'){
+        try{c.send({type:'farm_snapshot',data:this.serializeFarm()})}catch(e){}
+      }else if(msg.type==='gift'){
+        if(msg.gift==='coin'){G.money+=100;showToast('🎁 친구가 100코인을 선물했어요!');}
+        else if(msg.gift==='crops'){G.money+=150;showToast('🎁 친구가 작물 5개를 선물했어요! (+150원)');}
+        try{c.send({type:'gift_ack'})}catch(e){}
+        AU.coin();
+      }else if(msg.type==='guestbook'){
+        const txt=String(msg.text||'').slice(0,60);
+        if(txt)showToast('💌 방명록: '+txt);
+      }
+    });
+    c.on('close',()=>{this.conn=null});
+    c.on('error',()=>{this.conn=null});
+  },
+  sendGift(kind){
+    if(!this.visiting||!this.conn){showToast('연결되어 있지 않아요');return}
+    if(kind==='coin'){
+      if(!this.hostBackup||this.hostBackup.money<100){showToast('내 코인이 100원 미만이에요');return}
+      this.hostBackup.money-=100;
+      try{this.conn.send({type:'gift',gift:'coin'})}catch(e){}
+      showToast('💰 100코인 선물 완료');
+    }else if(kind==='crops'){
+      try{this.conn.send({type:'gift',gift:'crops'})}catch(e){}
+      showToast('🌾 작물 5개 선물 완료');
+    }
+  },
+  sendMsgFromInput(){
+    const el=document.getElementById('mpMsgInput');
+    if(!el)return;
+    const txt=(el.value||'').trim().slice(0,40);
+    if(!txt){showToast('메시지를 입력하세요');return}
+    if(!this.visiting||!this.conn){showToast('연결되어 있지 않아요');return}
+    try{this.conn.send({type:'guestbook',text:txt})}catch(e){}
+    showToast('✏️ 방명록을 남겼어요');
+    el.value='';
+  }
+};
+
+// Read-only protection while visiting
+const _origSaveGame=G.saveGame;
+G.saveGame=function(){
+  if(MP.visiting){showToast('방문 중에는 저장할 수 없어요');return}
+  return _origSaveGame.apply(this,arguments);
+};
+const _origStartPlace=G.startPlace;
+G.startPlace=function(){
+  if(MP.visiting){showToast('방문 중에는 편집할 수 없어요');AU.error();return}
+  return _origStartPlace.apply(this,arguments);
+};
+
 // Init
 function init(){
 const loaded=G.loadGame();
@@ -886,11 +1429,261 @@ G.animals.push({type:'chicken',gx:8,gy:8,age:0,prodTimer:0});
 }
 AU.init();
 AU.ambient();
+// Click sound on all bottom bar / modal buttons
+document.addEventListener('click',(e)=>{
+  const t=e.target;
+  if(t&&t.classList&&(t.classList.contains('bb')||t.classList.contains('tb')||t.classList.contains('item-card'))){
+    try{AU.click()}catch(_){}
+  }
+},true);
 updateUI();
+// Lazy-init MP after a short delay so PeerJS CDN can load
+setTimeout(()=>MP.init(),500);
 gameTick();
 }
 
 init();
+
+/* ============================================================
+ * AI Consultant (Ollama-backed) — gemma4:e4b on http://127.0.0.1:11434
+ * Falls back to static advice if Ollama unreachable / CORS blocked.
+ * Conversation persisted in localStorage('animalFarmChat').
+ * ============================================================ */
+const CONS={
+  url:'http://127.0.0.1:11434/api/generate',
+  model:'gemma4:e4b',
+  history:[],
+  online:false,
+  pending:false,
+  sysPrompt:'당신은 동물농장 게임의 친절한 AI 컨설턴트입니다. 농장 상태(JSON)나 사용자 질문을 받으면, 한국어로 1~3문장의 간단명료한 조언을 해주세요. 초등학생도 이해할 수 있게 쉽고 따뜻한 말투로, 이모지를 1~2개 섞어서 답하세요. 전문용어 금지.',
+  fallbackAdvice:[
+    '🐄 동물이 부족하면 더 사 보세요! 닭은 저렴해서 시작용으로 좋아요.',
+    '🌾 사료가 떨어지면 동물이 굶어요. 시장에서 사료를 챙기세요!',
+    '🌱 봄에는 감자랑 딸기가 잘 자라요. 계절에 맞는 작물을 심어보세요.',
+    '💰 작물을 수확해서 시장에 팔면 돈을 모을 수 있어요!',
+    '🏚️ 헛간을 더 지으면 동물을 더 많이 키울 수 있어요.'
+  ],
+  randAdvice(){return this.fallbackAdvice[Math.floor(Math.random()*this.fallbackAdvice.length)]},
+  open(){
+    document.getElementById('cpanel').classList.add('show');
+    if(this.history.length===0)this.greet();
+    setTimeout(()=>{const i=document.getElementById('cin');if(i)i.focus()},320);
+  },
+  close(){document.getElementById('cpanel').classList.remove('show')},
+  toggle(){
+    const p=document.getElementById('cpanel');
+    if(p.classList.contains('show'))this.close();else this.open();
+  },
+  greet(){
+    this.appendMsg('s','컨설턴트와 연결 중...');
+    this.ping().then(ok=>{
+      this.setOnline(ok);
+      const msg=ok?'안녕하세요! 🌱 농장에 대해 궁금한 게 있으면 물어보세요. "농장 분석" 버튼으로 현재 상태를 분석해드릴 수도 있어요!':'⚠️ Ollama AI에 연결할 수 없어요 (오프라인 모드). 대신 간단한 조언을 드릴게요. CORS 설정은 _assets/CONSULTANT_README.md 참고!';
+      this.appendMsg('a',msg);
+      this.persist();
+    });
+  },
+  setOnline(ok){
+    this.online=ok;
+    document.getElementById('cstatus').classList.toggle('on',ok);
+    document.getElementById('cbtn').classList.toggle('live',ok);
+  },
+  async ping(){
+    try{
+      const r=await fetch('http://127.0.0.1:11434/api/tags',{method:'GET'});
+      return r.ok;
+    }catch(e){return false}
+  },
+  appendMsg(role,text){
+    this.history.push({role,text,t:Date.now()});
+    const log=document.getElementById('clog');
+    const d=document.createElement('div');
+    d.className='cmsg '+role;
+    d.textContent=text;
+    log.appendChild(d);
+    log.scrollTop=log.scrollHeight;
+    return d;
+  },
+  appendStream(role){
+    const log=document.getElementById('clog');
+    const d=document.createElement('div');
+    d.className='cmsg '+role;
+    d.textContent='';
+    log.appendChild(d);
+    log.scrollTop=log.scrollHeight;
+    return d;
+  },
+  buildState(){
+    const animalCount={};
+    G.animals.forEach(a=>{animalCount[a.type]=(animalCount[a.type]||0)+1});
+    const cropCount={};
+    G.crops.forEach(c=>{cropCount[c.type]=(cropCount[c.type]||0)+1});
+    return {
+      money:G.money,
+      day:G.day,
+      season:SEASON_KR[G.season],
+      year:G.year,
+      weather:WEATHER_ICONS[G.weather],
+      animalsCount:G.animals.length,
+      animalsByType:animalCount,
+      cropsCount:G.crops.length,
+      cropsByType:cropCount,
+      buildingsCount:G.buildings.length,
+      feedStock:G.feedStock,
+      totalHarvest:G.totalHarvest,
+      totalSales:G.totalSales
+    };
+  },
+  analyze(){
+    const st=this.buildState();
+    const txt='[농장 분석 요청]\n현재 상태:\n'+JSON.stringify(st,null,2)+'\n\n이 농장의 강점과 개선점을 알려주세요.';
+    this.appendMsg('u','📊 현재 농장 상태를 분석해주세요!');
+    this.persist();
+    this.askLLM(txt);
+  },
+  send(){
+    if(this.pending)return;
+    const inp=document.getElementById('cin');
+    const v=(inp.value||'').trim();
+    if(!v)return;
+    inp.value='';
+    this.appendMsg('u',v);
+    this.persist();
+    this.askLLM(v);
+  },
+  async askLLM(userText){
+    if(this.pending)return;
+    this.pending=true;
+    document.getElementById('csend').disabled=true;
+    const stEl=this.appendStream('a');
+    stEl.textContent='...';
+    let gotAny=false;
+    try{
+      const prompt=this.sysPrompt+'\n\n사용자: '+userText+'\n\n컨설턴트:';
+      const res=await fetch(this.url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:this.model,prompt:prompt,stream:true})
+      });
+      if(!res.ok)throw new Error('http '+res.status);
+      this.setOnline(true);
+      stEl.textContent='';
+      const reader=res.body.getReader();
+      const dec=new TextDecoder();
+      let buf='';
+      while(true){
+        const{value,done}=await reader.read();
+        if(done)break;
+        buf+=dec.decode(value,{stream:true});
+        const lines=buf.split('\n');
+        buf=lines.pop()||'';
+        for(const ln of lines){
+          if(!ln.trim())continue;
+          try{
+            const j=JSON.parse(ln);
+            if(j.response){
+              stEl.textContent+=j.response;
+              gotAny=true;
+              document.getElementById('clog').scrollTop=document.getElementById('clog').scrollHeight;
+            }
+          }catch(_){/* ignore parse blip */}
+        }
+      }
+      if(!gotAny)throw new Error('empty stream');
+      // commit final text into history
+      this.history[this.history.length-1].text=stEl.textContent;
+    }catch(e){
+      this.setOnline(false);
+      stEl.textContent='⚠️ AI 연결 실패. 간단 조언: '+this.randAdvice();
+      this.history[this.history.length-1].text=stEl.textContent;
+    }finally{
+      this.pending=false;
+      document.getElementById('csend').disabled=false;
+      this.persist();
+    }
+  },
+  clear(){
+    this.history=[];
+    document.getElementById('clog').innerHTML='';
+    localStorage.removeItem('animalFarmChat');
+    this.greet();
+  },
+  persist(){
+    try{
+      // keep last 40 messages to bound storage
+      const trimmed=this.history.slice(-40);
+      localStorage.setItem('animalFarmChat',JSON.stringify(trimmed));
+    }catch(_){}
+  },
+  restore(){
+    try{
+      const d=localStorage.getItem('animalFarmChat');
+      if(!d)return;
+      const arr=JSON.parse(d);
+      if(!Array.isArray(arr))return;
+      const log=document.getElementById('clog');
+      arr.forEach(m=>{
+        const el=document.createElement('div');
+        el.className='cmsg '+(m.role||'a');
+        el.textContent=m.text||'';
+        log.appendChild(el);
+      });
+      this.history=arr;
+      log.scrollTop=log.scrollHeight;
+    }catch(_){}
+  }
+};
+// Hook up Enter key + restore + initial ping
+(function(){
+  const inp=document.getElementById('cin');
+  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();CONS.send()}});
+  CONS.restore();
+  CONS.ping().then(ok=>CONS.setOnline(ok));
+})();
+</script>
+<script>
+/* PWA: Service Worker registration + install prompt handler */
+(function(){
+  // Register service worker — skip on file:// (won't work without HTTP)
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js', { scope: './' })
+        .then(function(reg){
+          console.log('[PWA] SW registered, scope:', reg.scope);
+        })
+        .catch(function(err){
+          console.warn('[PWA] SW registration failed:', err);
+        });
+    });
+  }
+
+  // Install prompt — capture event so we can trigger later
+  var deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    // Expose a global helper the game can call from a button
+    window.PWA_install = function(){
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(choice){
+        console.log('[PWA] install choice:', choice.outcome);
+        deferredPrompt = null;
+      });
+    };
+    // Optional: surface a tiny toast if the game's showToast() is defined
+    try {
+      if (typeof showToast === 'function') {
+        showToast('📲 홈 화면에 설치 가능');
+      }
+    } catch(_){}
+  });
+
+  window.addEventListener('appinstalled', function(){
+    console.log('[PWA] installed');
+    deferredPrompt = null;
+  });
+})();
 </script>
 </body>
 </html>

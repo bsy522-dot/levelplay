@@ -4,11 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#e63946">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Boxing V5">
 <link rel="manifest" href="manifest.boxing.json">
-<title>Boxing Trainer V5 - AI 코치</title>
+<title>Boxing Trainer V6 - AI 코치</title>
+<script>
+// 🚨 페이지 진입 즉시 구버전 SW + 캐시 강제 폭파 (v6.1+ 반영 보장)
+(function(){
+  var TARGET_BUILD = 'v6.2';
+  var SEEN_KEY = 'boxingV5_seen_build';
+  try {
+    var seen = localStorage.getItem(SEEN_KEY);
+    if (seen === TARGET_BUILD) return; // 이미 v6.2 받음
+    var purge = async function() {
+      try {
+        if ('serviceWorker' in navigator) {
+          var regs = await navigator.serviceWorker.getRegistrations();
+          for (var i=0;i<regs.length;i++) await regs[i].unregister();
+        }
+        if ('caches' in window) {
+          var keys = await caches.keys();
+          for (var j=0;j<keys.length;j++) await caches.delete(keys[j]);
+        }
+        localStorage.setItem(SEEN_KEY, TARGET_BUILD);
+        // 강제 새로고침 (네트워크에서 새로)
+        location.reload();
+      } catch(e) { console.warn('purge fail:', e); }
+    };
+    purge();
+  } catch(e) { console.warn('purge outer fail:', e); }
+})();
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0a0a10;--panel:rgba(14,14,22,.95);--accent:#e63946;--accent2:#ff6b35;--text:#f0f0f0;--dim:#6a6a7e;--border:rgba(255,255,255,.08);--green:#22c55e;--yellow:#eab308;--blue:#3b82f6;--gold:#ffd700}
@@ -29,7 +60,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 .back-btn.hidden{display:none}
 .opponent-card{touch-action:manipulation;-webkit-tap-highlight-color:rgba(230,57,70,.3)}
 .opponent-card *{pointer-events:none}
-.build-tag{position:fixed;bottom:6px;left:6px;z-index:9998;font-size:9px;color:rgba(255,255,255,.35);background:rgba(0,0,0,.5);padding:2px 6px;border-radius:4px;font-family:monospace;pointer-events:none}
+.build-tag{position:fixed;top:6px;right:6px;z-index:9998;font-size:10px;color:#fff;background:#22c55e;padding:3px 8px;border-radius:4px;font-family:monospace;pointer-events:none;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 .stats-bar{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap;justify-content:center}
 .stat-pill{padding:4px 12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--dim)}
 .stat-pill b{color:var(--accent);margin-left:4px}
@@ -281,7 +312,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v6.1-2026.05.01-CRITICAL-SYNTAX-FIX';
+const BUILD_VERSION = 'v6.2-CACHE-PURGE-FORCE';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 

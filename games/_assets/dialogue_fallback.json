@@ -1,0 +1,103 @@
+{
+  "version": "1.0-fallback",
+  "generated_at": "2026-05-01 manual",
+  "model": "static-fallback",
+  "animals": {
+    "chicken": [
+      {"season": "봄", "weather": "맑음", "mood": "행복", "text": "꼬꼬댁! 오늘 알 낳았어요!"},
+      {"season": "여름", "weather": "맑음", "mood": "신남", "text": "햇볕이 따끈따끈 좋아요~"},
+      {"season": "가을", "weather": "흐림", "mood": "심심", "text": "벌레 어디 갔지? 콕콕!"},
+      {"season": "겨울", "weather": "눈", "mood": "졸림", "text": "추워요… 깃털 속에 숨을래요."},
+      {"season": "봄", "weather": "비", "mood": "배고픔", "text": "비 와서 모이가 흠뻑!"}
+    ],
+    "cow": [
+      {"season": "봄", "weather": "맑음", "mood": "행복", "text": "음매~ 풀이 달콤해요."},
+      {"season": "여름", "weather": "맑음", "mood": "졸림", "text": "더워요. 그늘로 갈래요…"},
+      {"season": "가을", "weather": "흐림", "mood": "신남", "text": "건초가 가득! 든든해요."},
+      {"season": "겨울", "weather": "눈", "mood": "배고픔", "text": "음매~ 따뜻한 우유 한 잔?"},
+      {"season": "봄", "weather": "비", "mood": "심심", "text": "빗소리 들으며 되새김질~"}
+    ],
+    "pig": [
+      {"season": "봄", "weather": "맑음", "mood": "신남", "text": "꿀꿀! 진흙 목욕 최고!"},
+      {"season": "여름", "weather": "비", "mood": "행복", "text": "비 오니까 더 신나요~"},
+      {"season": "가을", "weather": "맑음", "mood": "배고픔", "text": "꿀꿀, 맛있는 거 없나요?"},
+      {"season": "겨울", "weather": "눈", "mood": "졸림", "text": "포근한 짚 위에서 쿨쿨…"},
+      {"season": "봄", "weather": "흐림", "mood": "심심", "text": "친구야, 같이 놀자!"}
+    ],
+    "sheep": [
+      {"season": "봄", "weather": "맑음", "mood": "행복", "text": "메에~ 양털이 폭신해요."},
+      {"season": "여름", "weather": "맑음", "mood": "졸림", "text": "털 깎으면 시원할 거예요."},
+      {"season": "가을", "weather": "흐림", "mood": "신남", "text": "단풍 구경 가요~ 메에!"},
+      {"season": "겨울", "weather": "눈", "mood": "행복", "text": "두툼한 털이 따뜻해요!"},
+      {"season": "봄", "weather": "비", "mood": "심심", "text": "메에~ 풀밭 그리워요."}
+    ],
+    "duck": [
+      {"season": "봄", "weather": "비", "mood": "신남", "text": "꽥꽥! 물놀이 시간!"},
+      {"season": "여름", "weather": "맑음", "mood": "행복", "text": "연못이 시원해요~"},
+      {"season": "가을", "weather": "흐림", "mood": "심심", "text": "꽥! 친구들 어디 있나요?"},
+      {"season": "겨울", "weather": "눈", "mood": "배고픔", "text": "얼음 위에서 미끄럼!"},
+      {"season": "봄", "weather": "맑음", "mood": "졸림", "text": "햇살 아래 낮잠~ 꽥…"}
+    ],
+    "goat": [
+      {"season": "봄", "weather": "맑음", "mood": "신남", "text": "메에! 산 꼭대기 가자!"},
+      {"season": "여름", "weather": "흐림", "mood": "심심", "text": "뭐든 씹고 싶어요. 우적!"},
+      {"season": "가을", "weather": "맑음", "mood": "행복", "text": "도토리 발견! 신난다!"},
+      {"season": "겨울", "weather": "눈", "mood": "졸림", "text": "헛간 안이 아늑해요."},
+      {"season": "봄", "weather": "비", "mood": "배고픔", "text": "젖은 풀도 맛있어요!"}
+    ],
+    "dog": [
+      {"season": "봄", "weather": "맑음", "mood": "신남", "text": "멍멍! 산책 가요!"},
+      {"season": "여름", "weather": "맑음", "mood": "행복", "text": "꼬리 살랑살랑~ 멍!"},
+      {"season": "가을", "weather": "흐림", "mood": "심심", "text": "공놀이 같이 해요!"},
+      {"season": "겨울", "weather": "눈", "mood": "신남", "text": "눈밭에서 뛰자! 멍멍!"},
+      {"season": "봄", "weather": "비", "mood": "졸림", "text": "비 오니 잠이 솔솔…"}
+    ],
+    "cat": [
+      {"season": "봄", "weather": "맑음", "mood": "졸림", "text": "야옹~ 햇볕 명당이에요."},
+      {"season": "여름", "weather": "맑음", "mood": "도도", "text": "쥐는 제가 다 잡아요."},
+      {"season": "가을", "weather": "흐림", "mood": "심심", "text": "낙엽이 살랑~ 잡아볼까."},
+      {"season": "겨울", "weather": "눈", "mood": "행복", "text": "이불 속이 최고예요."},
+      {"season": "봄", "weather": "비", "mood": "졸림", "text": "그르릉… 빗소리 좋아요."}
+    ],
+    "bee": [
+      {"season": "봄", "weather": "맑음", "mood": "신남", "text": "윙윙~ 꽃이 가득해요!"},
+      {"season": "여름", "weather": "맑음", "mood": "행복", "text": "꿀이 가득 모였어요!"},
+      {"season": "가을", "weather": "흐림", "mood": "배고픔", "text": "마지막 꽃 어디 있나요?"},
+      {"season": "겨울", "weather": "눈", "mood": "졸림", "text": "벌집에서 옹기종기…"},
+      {"season": "봄", "weather": "비", "mood": "심심", "text": "비 그치면 출발해요!"}
+    ],
+    "rabbit": [
+      {"season": "봄", "weather": "맑음", "mood": "신남", "text": "깡총! 당근 어디 있어요?"},
+      {"season": "여름", "weather": "흐림", "mood": "행복", "text": "그늘이 시원해요~"},
+      {"season": "가을", "weather": "맑음", "mood": "심심", "text": "낙엽 위 폴짝폴짝!"},
+      {"season": "겨울", "weather": "눈", "mood": "배고픔", "text": "하얀 털로 변신했어요!"},
+      {"season": "봄", "weather": "비", "mood": "졸림", "text": "굴 속에서 쉴래요…"}
+    ],
+    "horse": [
+      {"season": "봄", "weather": "맑음", "mood": "신남", "text": "히힝! 들판을 달려요!"},
+      {"season": "여름", "weather": "맑음", "mood": "행복", "text": "짐이라면 맡겨주세요!"},
+      {"season": "가을", "weather": "흐림", "mood": "심심", "text": "히힝~ 산책 가실래요?"},
+      {"season": "겨울", "weather": "눈", "mood": "졸림", "text": "마구간이 따뜻해요."},
+      {"season": "봄", "weather": "비", "mood": "배고픔", "text": "건초 한 입 주세요~"}
+    ],
+    "fish": [
+      {"season": "봄", "weather": "맑음", "mood": "행복", "text": "퐁당~ 물이 따뜻해요."},
+      {"season": "여름", "weather": "맑음", "mood": "신남", "text": "햇빛 비치는 물속 최고!"},
+      {"season": "가을", "weather": "흐림", "mood": "심심", "text": "조용히 헤엄쳐요…"},
+      {"season": "겨울", "weather": "눈", "mood": "졸림", "text": "찬 물도 괜찮아요!"},
+      {"season": "봄", "weather": "비", "mood": "배고픔", "text": "먹이 떨어지는 소리!"}
+    ]
+  },
+  "crops": {
+    "potato":      {"name": "감자",   "season": "봄",   "tip": "흙을 두껍게 덮어주세요.",   "nutrition": "비타민C와 칼륨이 풍부.",     "history": "조선 후기 구황작물로 들어왔어요.", "trivia": "감자 싹은 독이 있어 떼고 먹어요."},
+    "strawberry":  {"name": "딸기",   "season": "봄",   "tip": "햇볕과 짚으로 덮어주세요.",  "nutrition": "비타민C가 사과의 10배.",     "history": "한국엔 1900년대 초 도입됐어요.",   "trivia": "씨가 겉에 있는 유일한 과일."},
+    "lettuce":     {"name": "상추",   "season": "봄",   "tip": "물을 자주 줘야 해요.",       "nutrition": "식이섬유와 엽산이 풍부.",     "history": "삼국시대부터 즐겨 먹었어요.",      "trivia": "쌈채소의 대표 주자!"},
+    "watermelon":  {"name": "수박",   "season": "여름", "tip": "넓은 공간이 필요해요.",      "nutrition": "92% 수분, 라이코펜 풍부.",   "history": "고려시대 원나라에서 들어왔어요.",  "trivia": "두드려 보면 익었는지 알아요."},
+    "corn":        {"name": "옥수수", "season": "여름", "tip": "햇빛을 충분히 받게 하세요.", "nutrition": "탄수화물·식이섬유 풍부.",     "history": "조선시대 전래된 신대륙 작물.",     "trivia": "한 자루에 알이 약 800개!"},
+    "tomato":      {"name": "토마토", "season": "여름", "tip": "지지대를 세워주세요.",      "nutrition": "라이코펜과 비타민C 풍부.",   "history": "원래 관상용이었대요.",             "trivia": "과일이자 채소예요."},
+    "apple":       {"name": "사과",   "season": "가을", "tip": "가지치기를 잘 해주세요.",    "nutrition": "식이섬유·항산화 성분 풍부.", "history": "한국 사과 재배 역사 100년 이상.", "trivia": "하루 한 개면 의사가 멀어진대요."},
+    "pear":        {"name": "배",     "season": "가을", "tip": "꽃봉오리를 솎아내세요.",    "nutrition": "수분과 식이섬유가 풍부.",     "history": "신라시대부터 재배했어요.",         "trivia": "한국 배는 세계가 알아주는 명품!"},
+    "sweetpotato": {"name": "고구마", "season": "가을", "tip": "두둑을 높게 만드세요.",      "nutrition": "비타민A·식이섬유 풍부.",     "history": "조선 영조 때 일본에서 들여왔어요.","trivia": "구우면 더 달콤해져요!"},
+    "spinach":     {"name": "시금치", "season": "겨울", "tip": "추위에 강하니 노지재배 OK.", "nutrition": "철분·엽산 가득.",            "history": "고려 말 페르시아에서 전래.",       "trivia": "뽀빠이가 사랑한 채소!"}
+  }
+}

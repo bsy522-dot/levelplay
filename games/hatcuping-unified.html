@@ -215,12 +215,16 @@ canvas{display:block;max-width:100vw;max-height:100vh;touch-action:none;backgrou
     console.log('[UNIFIED v4] 에셋 로드 완료. 게임 루프 시작.');
     bindInput();
     tick();
-    // 타이틀 화면으로 진입 (Act1은 "새 모험!" 클릭 시 시작)
+    // URL ?act=xxx 가 있으면 해당 액트로 바로 진입 (디버그/바로가기용)
     setTimeout(()=>{
-      if(window.Dispatcher){
-        window.Dispatcher.switchMode('title');
+      if(!window.Dispatcher){ console.error('[UNIFIED v4] Dispatcher 미로드'); return; }
+      const params = new URLSearchParams(location.search);
+      const act = params.get('act');
+      if(act && window.StoryRouter){
+        console.log('[UNIFIED v4] URL 바로가기 →', act);
+        window.StoryRouter.play(act);
       } else {
-        console.error('[UNIFIED v4] Dispatcher 미로드');
+        window.Dispatcher.switchMode('title');
       }
     }, 100);
   }
