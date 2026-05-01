@@ -313,7 +313,7 @@ function sfx(name){
 
 // ============= THREE.JS 부트스트랩 =============
 const SCALE_DIST = 0.6;
-const SCALE_RADIUS = 0.25;
+const SCALE_RADIUS = 0.7;
 const SPEED_GAIN = 0.5;
 
 const renderer = new THREE.WebGLRenderer({
@@ -407,7 +407,7 @@ const sunGroup = new THREE.Group();
 scene.add(sunGroup);
 
 PLANETS.forEach((p, idx) => {
-  const radius3D = Math.max(p.r * SCALE_RADIUS, 0.6);
+  const radius3D = Math.max(p.r * SCALE_RADIUS, 2.0);
   const distance3D = p.orbit * SCALE_DIST;
   const seg = SPHERE_SEG;
   const geom = new THREE.SphereGeometry(radius3D, seg[0], seg[1]);
