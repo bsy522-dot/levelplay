@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Boxing Trainer V5 - 3D Career Mode</title>
+<meta name="theme-color" content="#e63946">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Boxing V5">
+<link rel="manifest" href="manifest.boxing.json">
+<title>Boxing Trainer V5 - AI 코치</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0a0a10;--panel:rgba(14,14,22,.95);--accent:#e63946;--accent2:#ff6b35;--text:#f0f0f0;--dim:#6a6a7e;--border:rgba(255,255,255,.08);--green:#22c55e;--yellow:#eab308;--blue:#3b82f6;--gold:#ffd700}
@@ -133,7 +138,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <button class="menu-btn" onclick="showCareer()"><span class="icon">&#x1F94A;</span> 커리어 모드<span class="sub">랭킹을 올려 챔피언에 도전하세요</span></button>
 <button class="menu-btn" onclick="showTraining()"><span class="icon">&#x1F3CB;&#xFE0F;</span> 트레이닝<span class="sub">스피드백, 헤비백, 줄넘기, 스파링</span></button>
 <button class="menu-btn" onclick="showRecords()"><span class="icon">&#x1F4CA;</span> 전적 / 스탯<span class="sub">파이트 기록과 능력치 확인</span></button>
+<button class="menu-btn" onclick="showMissions()"><span class="icon">&#x1F4CB;</span> 일일 미션<span class="sub">매일 새 미션 + 7일 활동 그래프</span></button>
+<button class="menu-btn" id="installBtn" onclick="triggerInstall()" style="display:none"><span class="icon">&#x1F4F2;</span> 앱으로 설치<span class="sub">홈화면에 추가하고 풀스크린으로 플레이</span></button>
 <button class="menu-btn" onclick="quickFight()"><span class="icon">&#x26A1;</span> 퀵 매치<span class="sub">랜덤 상대와 즉시 대전</span></button>
+<button class="menu-btn" onclick="showMultiplayer()"><span class="icon">&#x1F310;</span> 1:1 스파링<span class="sub">친구와 P2P 실시간 대전 (코드 입력)</span></button>
 <button class="menu-btn" id="ttsToggleBtn" onclick="ttsToggle()"><span class="icon">&#x1F50A;</span> <span id="ttsLabel">음성 ON</span><span class="sub">라운드콜·콤보콜·KO 외침</span></button>
 <button class="menu-btn" id="motionToggleBtn" onclick="toggleMotion()"><span class="icon">&#x1F4F1;</span> <span id="motionLabel">모션펀치 OFF</span><span class="sub">폰 흔들어 잽/크로스/훅/어퍼 입력 (모바일)</span></button>
 <button class="menu-btn" onclick="showAICoach()"><span class="icon">&#x1F916;</span> AI 코치 (BETA)<span class="sub">카메라로 자세 분석 · 로컬 Ollama 필요</span></button>
@@ -171,6 +179,29 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <button class="menu-btn" onclick="startTraining('heavybag')"><span class="icon">&#x1F94A;</span> 헤비백<span class="sub">콤보 연습! 파워 향상</span></button>
 <button class="menu-btn" onclick="startTraining('jumprope')"><span class="icon">&#x1F3C3;</span> 줄넘기<span class="sub">타이밍 게임! 스태미나 향상</span></button>
 <button class="menu-btn" onclick="startTraining('sparring')"><span class="icon">&#x1F93C;</span> 스파링<span class="sub">AI와 연습! 방어력 향상</span></button>
+<button class="menu-btn" onclick="startMetronomeMode()"><span class="icon">&#x1F3B5;</span> 메트로놈 콤보 (NEW)<span class="sub">BPM에 맞춰 정확히 펀치! Perfect/Good/Miss 판정</span></button>
+</div>
+
+<!-- METRONOME OVERLAY -->
+<div class="overlay hidden" id="metronomeMenu">
+<div class="menu-title" style="font-size:28px">&#x1F3B5; 메트로놈 콤보</div>
+<div style="font-size:13px;color:var(--dim);margin-bottom:14px">BPM에 맞춰 다음 펀치를 입력하세요</div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+  <span style="font-size:11px">BPM</span>
+  <input type="range" id="metBPM" min="60" max="180" value="100" style="flex:1;max-width:200px">
+  <span id="metBPMVal" style="font-size:14px;font-weight:700;color:var(--accent);min-width:40px">100</span>
+</div>
+<div id="metBeat" style="width:80px;height:80px;border-radius:50%;background:rgba(230,57,70,.2);border:3px solid var(--accent);margin:14px auto;transition:all .15s"></div>
+<div id="metTarget" style="font-size:32px;font-weight:900;color:var(--text);letter-spacing:4px;min-height:40px">JAB</div>
+<div id="metJudge" style="font-size:18px;font-weight:700;min-height:30px;margin-top:8px"></div>
+<div id="metScore" style="font-size:13px;color:var(--dim);margin-top:8px">정확도: 0% (0/0) · 콤보: 0</div>
+<div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;justify-content:center">
+  <button class="ctrl-btn atk" ontouchstart="metHit('jab')" onclick="metHit('jab')">잽</button>
+  <button class="ctrl-btn atk" ontouchstart="metHit('cross')" onclick="metHit('cross')">크로스</button>
+  <button class="ctrl-btn atk" ontouchstart="metHit('hook')" onclick="metHit('hook')">훅</button>
+  <button class="ctrl-btn atk" ontouchstart="metHit('uppercut')" onclick="metHit('uppercut')">어퍼컷</button>
+</div>
+<button class="menu-btn" style="width:280px;margin-top:14px" onclick="stopMetronome()"><span class="icon">&#x23F9;</span> 종료</button>
 </div>
 
 <!-- RECORDS -->
@@ -179,6 +210,15 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <div id="recordStats" class="stats-bar"></div>
 <div id="recordSummary" style="margin:15px 0;text-align:center"></div>
 <div class="fight-history" id="fightHistory"></div>
+</div>
+
+<!-- DAILY MISSIONS -->
+<div class="overlay hidden" id="missionsMenu">
+<div class="menu-title" style="font-size:28px">&#x1F4CB; 일일 미션</div>
+<div id="missionDate" style="font-size:11px;color:var(--dim);margin-bottom:12px"></div>
+<div id="missionList" style="width:320px;max-width:90vw"></div>
+<div style="margin-top:18px;font-size:13px;color:var(--dim);letter-spacing:2px">7일 활동</div>
+<canvas id="missionChart" width="320" height="160" style="background:rgba(255,255,255,.03);border-radius:8px;margin-top:8px"></canvas>
 </div>
 
 <!-- FIGHT HUD -->
@@ -223,13 +263,25 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 </div>
 </div>
 
+<!-- MULTIPLAYER OVERLAY (P2P 1:1 스파링) -->
+<div class="overlay hidden" id="multiplayerMenu">
+<div class="menu-title" style="font-size:32px">&#x1F310; 1:1 스파링</div>
+<div class="menu-sub">친구와 P2P 실시간 대전</div>
+<div id="mpStatus" style="font-size:12px;color:var(--dim);margin-bottom:12px;min-height:18px;text-align:center;max-width:320px">PeerJS 연결 대기...</div>
+<button class="menu-btn" id="mpHostBtn" onclick="createRoom()"><span class="icon">&#x1F4E1;</span> 방 만들기<span class="sub">6자리 코드 생성 → 친구에게 공유</span></button>
+<div id="mpHostCode" style="display:none;margin:12px 0;padding:14px 24px;background:var(--panel);border:2px solid var(--accent);border-radius:10px;font-size:28px;font-weight:900;letter-spacing:6px;color:var(--gold);text-align:center;font-family:monospace"></div>
+<button class="menu-btn" id="mpJoinBtn" onclick="joinRoom()"><span class="icon">&#x1F511;</span> 방 참가<span class="sub">친구의 6자리 코드 입력</span></button>
+<input id="mpJoinCode" maxlength="6" placeholder="코드 입력 (예: BOX834)" style="display:none;margin:8px 0;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:18px;letter-spacing:4px;text-align:center;font-family:monospace;width:240px;text-transform:uppercase">
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="three.r128.min.js"></script>
 <script src="GLTFLoader.js"></script>
 <script>
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v5.8-2026.05.01-MOTION+HAPTIC+PUNCH';
+const BUILD_VERSION = 'v6.0-2026.05.01-MULTI+MISSION+METRONOME+PWA';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 
@@ -1382,12 +1434,252 @@ let currentFight = null;
 let currentTraining = null;
 
 function hideAll() {
-  ['mainMenu', 'careerMenu', 'trainingMenu', 'recordsMenu', 'fightHud', 'controlsHint', 'fightResult', 'levelUp', 'trainResult', 'restScreen', 'mobileControls', 'trainOverlay', 'comboCounter', 'aiCoachMenu'].forEach(id => {
+  ['mainMenu', 'careerMenu', 'trainingMenu', 'recordsMenu', 'fightHud', 'controlsHint', 'fightResult', 'levelUp', 'trainResult', 'restScreen', 'mobileControls', 'trainOverlay', 'comboCounter', 'aiCoachMenu', 'multiplayerMenu', 'missionsMenu', 'metronomeMenu'].forEach(id => {
     const el = $(id);
     if (el) el.classList.add('hidden');
   });
   $('backBtn').classList.add('hidden');
   stopAICam();
+}
+
+// ==================== METRONOME COMBO MODE (Phase L) ====================
+let _metInterval = null, _metBpm = 100, _metBeatIdx = 0, _metHits = 0, _metTotal = 0, _metCombo = 0, _metMaxCombo = 0;
+const _metSeqs = ['jab', 'cross', 'hook', 'uppercut'];
+let _metCurrentTarget = 'jab', _metBeatTime = 0;
+
+function startMetronomeMode() {
+  hideAll();
+  currentScreen = 'metronome';
+  $('metronomeMenu').classList.remove('hidden');
+  $('backBtn').classList.remove('hidden');
+  if (playerModel) playerModel.group.visible = false;
+  if (oppModel) oppModel.group.visible = false;
+  _metHits = _metTotal = _metCombo = _metMaxCombo = _metBeatIdx = 0;
+  _updateMetScore();
+  const slider = $('metBPM');
+  slider.oninput = e => { _metBpm = parseInt(e.target.value); $('metBPMVal').textContent = _metBpm; _restartMet(); };
+  _metBpm = parseInt(slider.value);
+  $('metBPMVal').textContent = _metBpm;
+  _restartMet();
+}
+
+function _restartMet() {
+  if (_metInterval) clearInterval(_metInterval);
+  const period = 60000 / _metBpm;
+  _metInterval = setInterval(_metBeat, period);
+  _metBeat();
+}
+
+function _metBeat() {
+  _metBeatIdx++;
+  _metBeatTime = performance.now();
+  // 비트 펄스 시각화
+  const beat = $('metBeat');
+  if (beat) {
+    beat.style.transform = 'scale(1.4)';
+    beat.style.background = 'rgba(230,57,70,.6)';
+    setTimeout(() => { beat.style.transform = 'scale(1)'; beat.style.background = 'rgba(230,57,70,.2)'; }, 100);
+  }
+  // 새 타겟 펀치 (4비트마다 변경)
+  if (_metBeatIdx % 1 === 0) {
+    _metCurrentTarget = _metSeqs[Math.floor(Math.random() * _metSeqs.length)];
+    const labels = { jab: 'JAB', cross: 'CROSS', hook: 'HOOK', uppercut: 'UPPERCUT' };
+    $('metTarget').textContent = labels[_metCurrentTarget];
+  }
+  // 메트로놈 사운드 (저음 클릭)
+  try {
+    const a = aud(); const o = a.createOscillator(); const g = a.createGain();
+    o.frequency.value = 800; g.gain.value = 0.15;
+    o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime + 0.04);
+  } catch {}
+  // 미입력 패널티 (다음 비트 시작 시 이전 타겟 미입력 = MISS)
+  if (_metBeatIdx > 1 && _metHits === _metTotal) {
+    _metTotal++;
+    _metCombo = 0;
+    _showJudge('MISS', '#888');
+    _updateMetScore();
+  }
+}
+
+function metHit(type) {
+  if (currentScreen !== 'metronome' || !_metInterval) return;
+  const period = 60000 / _metBpm;
+  const offset = Math.abs(performance.now() - _metBeatTime);
+  const margin = Math.min(offset, period - offset);
+  let judge, color;
+  if (type !== _metCurrentTarget) { judge = 'WRONG'; color = '#e63946'; _metCombo = 0; }
+  else if (margin < 80) { judge = 'PERFECT'; color = '#22c55e'; _metHits++; _metCombo++; }
+  else if (margin < 160) { judge = 'GOOD'; color = '#eab308'; _metHits += 0.5; _metCombo++; }
+  else { judge = 'LATE'; color = '#888'; _metCombo = 0; }
+  _metTotal++;
+  _metMaxCombo = Math.max(_metMaxCombo, _metCombo);
+  _showJudge(judge + ' (' + Math.round(margin) + 'ms)', color);
+  _updateMetScore();
+  // 시각 피드백
+  if (typeof playPunch === 'function' && type) playPunch('light');
+  if (navigator.vibrate && judge === 'PERFECT') navigator.vibrate(30);
+}
+
+function _showJudge(text, color) {
+  const el = $('metJudge');
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = color;
+  el.style.transform = 'scale(1.2)';
+  setTimeout(() => { el.style.transform = 'scale(1)'; }, 150);
+}
+
+function _updateMetScore() {
+  const acc = _metTotal > 0 ? Math.round((_metHits / _metTotal) * 100) : 0;
+  $('metScore').textContent = '정확도: ' + acc + '% (' + Math.round(_metHits) + '/' + _metTotal + ') · 콤보: ' + _metCombo + ' (최고 ' + _metMaxCombo + ')';
+}
+
+function stopMetronome() {
+  if (_metInterval) { clearInterval(_metInterval); _metInterval = null; }
+  // 결과 토스트
+  if (_metTotal >= 5) {
+    const acc = Math.round((_metHits / _metTotal) * 100);
+    if (typeof speak === 'function') speak('정확도 ' + acc + '퍼센트, 최고 콤보 ' + _metMaxCombo + '연타', { priority: 'high' });
+    if (acc >= 80 && typeof trackBoxingMission === 'function') trackBoxingMission('combos', Math.floor(_metMaxCombo / 3));
+  }
+  showMain();
+}
+
+// ==================== PWA INSTALL ====================
+let _deferredInstall = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _deferredInstall = e;
+  const btn = document.getElementById('installBtn');
+  if (btn) btn.style.display = 'block';
+});
+async function triggerInstall() {
+  if (!_deferredInstall) {
+    alert('이미 설치되었거나 브라우저가 PWA 설치를 지원하지 않습니다 (Chrome/Edge/Samsung 권장)');
+    return;
+  }
+  _deferredInstall.prompt();
+  const choice = await _deferredInstall.userChoice;
+  if (choice.outcome === 'accepted') {
+    if (typeof speak === 'function') speak('앱이 홈화면에 추가됐습니다', { priority: 'high' });
+    document.getElementById('installBtn').style.display = 'none';
+  }
+  _deferredInstall = null;
+}
+
+// ==================== DAILY MISSIONS + 7일 통계 ====================
+const MISSIONS_KEY = 'boxingV5_missions';
+const STATS_KEY = 'boxingV5_stats';
+
+const MISSION_POOL = [
+  { id: 'jab50', name: '잽 50개 명중', target: 50, reward: 50, key: 'jabs' },
+  { id: 'cross30', name: '크로스 30개', target: 30, reward: 50, key: 'crosses' },
+  { id: 'hook20', name: '훅 20개', target: 20, reward: 60, key: 'hooks' },
+  { id: 'combo10', name: '콤보 10회 성공', target: 10, reward: 80, key: 'combos' },
+  { id: 'win1', name: '경기 1승', target: 1, reward: 100, key: 'wins' },
+  { id: 'ko1', name: 'KO 1회', target: 1, reward: 150, key: 'kos' },
+  { id: 'dodge20', name: '회피 20회', target: 20, reward: 60, key: 'dodges' },
+  { id: 'block30', name: '블록 30회', target: 30, reward: 60, key: 'blocks' },
+];
+
+function _today() { return new Date().toISOString().slice(0, 10); }
+
+function loadMissions() {
+  try {
+    const raw = localStorage.getItem(MISSIONS_KEY);
+    const m = raw ? JSON.parse(raw) : null;
+    if (m && m.date === _today()) return m;
+  } catch {}
+  const shuffled = [...MISSION_POOL].sort(() => Math.random() - 0.5).slice(0, 3);
+  const fresh = { date: _today(), missions: shuffled.map(m => ({ ...m, progress: 0, completed: false, claimed: false })) };
+  localStorage.setItem(MISSIONS_KEY, JSON.stringify(fresh));
+  return fresh;
+}
+
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem(STATS_KEY) || '{"daily":{}}'); }
+  catch { return { daily: {} }; }
+}
+function saveStats(s) { localStorage.setItem(STATS_KEY, JSON.stringify(s)); }
+
+function trackBoxingMission(key, amount = 1) {
+  const data = loadMissions();
+  let updated = false;
+  data.missions.forEach(m => {
+    if (m.key === key && !m.completed) {
+      m.progress = Math.min(m.target, m.progress + amount);
+      if (m.progress >= m.target) {
+        m.completed = true;
+        if (typeof speak === 'function') speak('미션 달성: ' + m.name, { priority: 'high' });
+      }
+      updated = true;
+    }
+  });
+  if (updated) localStorage.setItem(MISSIONS_KEY, JSON.stringify(data));
+  const stats = loadStats();
+  const t = _today();
+  if (!stats.daily[t]) stats.daily[t] = { jabs:0, crosses:0, hooks:0, uppercuts:0, combos:0, wins:0, kos:0, dodges:0, blocks:0 };
+  if (stats.daily[t][key] !== undefined) stats.daily[t][key] += amount;
+  saveStats(stats);
+}
+
+function claimMission(idx) {
+  const data = loadMissions();
+  const m = data.missions[idx];
+  if (!m || !m.completed || m.claimed) return;
+  m.claimed = true;
+  save.xp += m.reward;
+  saveSave();
+  localStorage.setItem(MISSIONS_KEY, JSON.stringify(data));
+  if (typeof speak === 'function') speak('보상 ' + m.reward + ' XP 획득', { priority: 'high' });
+  showMissions();
+}
+
+function showMissions() {
+  hideAll();
+  currentScreen = 'missions';
+  $('missionsMenu').classList.remove('hidden');
+  $('backBtn').classList.remove('hidden');
+  if (playerModel) playerModel.group.visible = false;
+  if (oppModel) oppModel.group.visible = false;
+  const data = loadMissions();
+  $('missionDate').textContent = data.date + ' · 매일 자정 갱신';
+  $('missionList').innerHTML = data.missions.map((m, i) => {
+    const pct = Math.min(100, (m.progress / m.target) * 100);
+    const status = m.claimed ? '<span style="color:var(--dim)">수령완료</span>'
+      : m.completed ? '<button onclick="claimMission(' + i + ')" style="background:var(--gold);color:#000;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px">+' + m.reward + ' XP 받기</button>'
+      : '<span style="color:var(--dim);font-size:11px">' + m.progress + '/' + m.target + '</span>';
+    return '<div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600">' + m.name + '</span>' + status + '</div><div style="height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;background:' + (m.completed ? 'var(--gold)' : 'var(--accent)') + ';width:' + pct + '%;transition:width .3s"></div></div></div>';
+  }).join('');
+  drawWeekChart();
+}
+
+function drawWeekChart() {
+  const cv = $('missionChart');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  const stats = loadStats();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const k = d.toISOString().slice(0, 10);
+    const v = stats.daily[k] || {};
+    const total = (v.jabs||0)+(v.crosses||0)+(v.hooks||0)+(v.uppercuts||0);
+    days.push({ label: ['일','월','화','수','목','금','토'][d.getDay()], total });
+  }
+  const maxV = Math.max(...days.map(d => d.total), 10);
+  const W = cv.width, H = cv.height, P = 20, BW = (W - P*2) / 7 - 4;
+  ctx.font = '10px sans-serif';
+  days.forEach((d, i) => {
+    const x = P + i * ((W - P*2) / 7);
+    const h = (d.total / maxV) * (H - P*2);
+    ctx.fillStyle = d.total > 0 ? '#e63946' : 'rgba(255,255,255,.1)';
+    ctx.fillRect(x, H - P - h, BW, h);
+    ctx.fillStyle = 'rgba(255,255,255,.6)';
+    ctx.fillText(d.label, x + BW/2 - 5, H - 4);
+    if (d.total > 0) ctx.fillText(d.total, x + BW/2 - 8, H - P - h - 4);
+  });
 }
 
 // ==================== DEVICE MOTION 펀치 (폰 흔들기 입력) ====================
@@ -1785,7 +2077,9 @@ function showRecords() {
 
 function goBack() {
   if (currentScreen === 'aiCoach') { stopAICam(); showMain(); return; }
-  if (currentScreen === 'career' || currentScreen === 'training' || currentScreen === 'records') showMain();
+  if (currentScreen === 'multiplayer') { try { _mpCleanup(); } catch(e){} showMain(); return; }
+  if (currentScreen === 'metronome') { stopMetronome(); return; }
+  if (currentScreen === 'career' || currentScreen === 'training' || currentScreen === 'records' || currentScreen === 'missions') showMain();
   else if (currentScreen === 'fight' || currentScreen === 'train') {
     if (currentFight && currentFight.active) {
       if (confirm('경기를 포기하시겠습니까?')) { currentFight.active = false; showMain(); }
@@ -1920,9 +2214,9 @@ function playerPunch(type) {
   if (now - f.comboTimer < 1200) {
     f.combo.push(type);
     const chain = f.combo.join('-');
-    if (chain.includes('jab-cross-hook')) { dmg *= 1.5; showComboText('잽-크로스-훅!'); callCombo(['jab','cross','hook']); f.combo = []; }
-    else if (chain.includes('jab-jab-cross')) { dmg *= 1.3; showComboText('더블잽-크로스!'); callCombo(['jab','jab','cross']); f.combo = []; }
-    else if (chain.includes('jab-cross-uppercut')) { dmg *= 1.4; showComboText('잽-크로스-어퍼!'); callCombo(['jab','cross','uppercut']); f.combo = []; }
+    if (chain.includes('jab-cross-hook')) { dmg *= 1.5; showComboText('잽-크로스-훅!'); callCombo(['jab','cross','hook']); if(typeof trackBoxingMission==='function') trackBoxingMission('combos'); f.combo = []; }
+    else if (chain.includes('jab-jab-cross')) { dmg *= 1.3; showComboText('더블잽-크로스!'); callCombo(['jab','jab','cross']); if(typeof trackBoxingMission==='function') trackBoxingMission('combos'); f.combo = []; }
+    else if (chain.includes('jab-cross-uppercut')) { dmg *= 1.4; showComboText('잽-크로스-어퍼!'); callCombo(['jab','cross','uppercut']); if(typeof trackBoxingMission==='function') trackBoxingMission('combos'); f.combo = []; }
     f.comboCount = f.combo.length;
   } else {
     f.combo = [type];
@@ -1947,6 +2241,8 @@ function playerPunch(type) {
     f.totalPlayerDmg += dmg;
     f.oppHitAnim = 0.3;
     if (navigator.vibrate) navigator.vibrate(Math.min(50 + dmg * 2, 150));
+    // 미션 트래킹 (펀치 종류별)
+    if (typeof trackBoxingMission === 'function') trackBoxingMission(type === 'jab' ? 'jabs' : type === 'cross' ? 'crosses' : type === 'hook' ? 'hooks' : 'uppercuts');
     f.shakeAmount = Math.min(dmg / 3, 8);
     f.flashAmount = 0.3;
     playPunch(type === 'hook' || type === 'uppercut' ? 'heavy' : 'light');
@@ -2275,6 +2571,7 @@ function endFight() {
   if (playerWin) {
     save.record.wins++;
     if (isKO && f.oppHP <= 0) save.record.kos++;
+    if (typeof trackBoxingMission === 'function') { trackBoxingMission('wins'); if (isKO && f.oppHP <= 0) trackBoxingMission('kos'); }
   } else {
     save.record.losses++;
     if (isKO && f.playerHP <= 0) save.record.koLosses++;
@@ -2737,6 +3034,150 @@ function gameLoop() {
   if (_replayActive) updateKOReplay();
   else update3DScene(time, dt);
   renderer.render(scene, camera);
+}
+
+// ==================== MULTIPLAYER (WebRTC P2P via PeerJS) ====================
+// PeerJS (https://peerjs.com) — MIT License. 무료 시그널링 서버 0.peerjs.com 사용.
+// 사용법: 메인메뉴 → "1:1 스파링" → 방 만들기(코드 표시) 또는 방 참가(코드 입력).
+// 데이터 흐름: punch / dodge / guard / hp_sync(100ms) / emote — JSON over DataChannel.
+// 권한: host=hp/타이머 마스터, guest=입력 송신. 끊김 시 자동 재시도 5회 후 메인메뉴 복귀.
+let _mpPeer = null, _mpConn = null, _mpIsHost = false, _mpRoomCode = null;
+let _mpHpSyncTimer = null, _mpReconnectAttempts = 0, _mpLastPeerId = null;
+const _MP_PREFIX = 'boxv5-';
+const _MP_MAX_RECONNECT = 5;
+
+function _mpStatus(msg) { const el = $('mpStatus'); if (el) el.textContent = msg; }
+function _mpGenCode() { const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = 'BOX'; for (let i=0;i<3;i++) s += c[Math.floor(Math.random()*c.length)]; return s; }
+
+function showMultiplayer() {
+  try {
+    hideAll();
+    currentScreen = 'multiplayer';
+    $('multiplayerMenu').classList.remove('hidden');
+    $('backBtn').classList.remove('hidden');
+    if (playerModel) playerModel.group.visible = false;
+    if (oppModel) oppModel.group.visible = false;
+    $('mpHostCode').style.display = 'none';
+    $('mpJoinCode').style.display = 'none';
+    $('mpHostBtn').style.display = '';
+    $('mpJoinBtn').style.display = '';
+    if (typeof Peer === 'undefined') { _mpStatus('PeerJS 로드 실패 — 인터넷 연결 확인'); return; }
+    _mpStatus('준비됨 · 방 만들기 또는 참가');
+  } catch(e) { console.warn('showMultiplayer 오류', e); }
+}
+
+function _mpCleanup() {
+  try { if (_mpHpSyncTimer) { clearInterval(_mpHpSyncTimer); _mpHpSyncTimer = null; } } catch(e){}
+  try { if (_mpConn) { _mpConn.close(); _mpConn = null; } } catch(e){}
+  try { if (_mpPeer) { _mpPeer.destroy(); _mpPeer = null; } } catch(e){}
+  _mpIsHost = false; _mpRoomCode = null; _mpReconnectAttempts = 0; _mpLastPeerId = null;
+}
+
+function _mpHookConn(conn) {
+  _mpConn = conn;
+  conn.on('open', () => {
+    _mpStatus('연결됨! 경기 시작...');
+    _mpReconnectAttempts = 0;
+    setTimeout(() => _mpStartFight(), 800);
+  });
+  conn.on('data', (d) => { try { onPeerData(d); } catch(e) { console.warn('peer data 오류', e); } });
+  conn.on('close', () => { _mpStatus('연결 끊김 — 재시도...'); _mpTryReconnect(); });
+  conn.on('error', (e) => { console.warn('conn 오류', e); _mpStatus('연결 오류: ' + (e.type||e.message||'unknown')); });
+}
+
+function _mpTryReconnect() {
+  if (_mpReconnectAttempts >= _MP_MAX_RECONNECT) { _mpStatus('재연결 실패 — 메인메뉴로'); setTimeout(() => { _mpCleanup(); showMain(); }, 1500); return; }
+  _mpReconnectAttempts++;
+  if (!_mpIsHost && _mpLastPeerId && _mpPeer) {
+    setTimeout(() => { try { _mpHookConn(_mpPeer.connect(_mpLastPeerId, { reliable: true })); } catch(e){ _mpTryReconnect(); } }, 1500);
+  }
+}
+
+function createRoom() {
+  try {
+    if (typeof Peer === 'undefined') { _mpStatus('PeerJS 미로딩'); return; }
+    _mpCleanup();
+    _mpIsHost = true;
+    _mpRoomCode = _mpGenCode();
+    _mpStatus('방 생성 중...');
+    _mpPeer = new Peer(_MP_PREFIX + _mpRoomCode, { debug: 1 });
+    _mpPeer.on('open', () => {
+      $('mpHostCode').textContent = _mpRoomCode;
+      $('mpHostCode').style.display = 'block';
+      $('mpHostBtn').style.display = 'none';
+      $('mpJoinBtn').style.display = 'none';
+      _mpStatus('코드 공유 후 친구 참가 대기 중...');
+    });
+    _mpPeer.on('connection', (conn) => _mpHookConn(conn));
+    _mpPeer.on('error', (e) => { console.warn('peer 오류', e); _mpStatus('서버 오류: ' + (e.type||e.message||'unknown')); });
+  } catch(e) { console.warn('createRoom 오류', e); _mpStatus('생성 실패: ' + e.message); }
+}
+
+function joinRoom() {
+  try {
+    const inp = $('mpJoinCode');
+    if (inp.style.display === 'none') { inp.style.display = 'block'; inp.focus(); _mpStatus('코드 입력 후 다시 "방 참가" 클릭'); return; }
+    const code = (inp.value || '').trim().toUpperCase();
+    if (!/^BOX[A-Z0-9]{3}$/.test(code)) { _mpStatus('코드 형식 오류 (예: BOX834)'); return; }
+    if (typeof Peer === 'undefined') { _mpStatus('PeerJS 미로딩'); return; }
+    _mpCleanup();
+    _mpIsHost = false; _mpRoomCode = code; _mpLastPeerId = _MP_PREFIX + code;
+    _mpStatus('연결 시도 중...');
+    _mpPeer = new Peer({ debug: 1 });
+    _mpPeer.on('open', () => { try { _mpHookConn(_mpPeer.connect(_mpLastPeerId, { reliable: true })); } catch(e){ _mpStatus('연결 실패'); } });
+    _mpPeer.on('error', (e) => { console.warn('peer 오류', e); _mpStatus('실패: ' + (e.type||e.message||'unknown')); if (e.type === 'peer-unavailable') _mpStatus('해당 코드의 방이 없습니다'); });
+  } catch(e) { console.warn('joinRoom 오류', e); _mpStatus('참가 실패: ' + e.message); }
+}
+
+function sendPeerData(obj) {
+  try { if (_mpConn && _mpConn.open) _mpConn.send(obj); } catch(e) { console.warn('send 오류', e); }
+}
+
+function onPeerData(d) {
+  if (!d || typeof d !== 'object') return;
+  const f = currentFight;
+  if (d.type === 'punch' && f) {
+    // 게스트→호스트: 상대방 입력으로 처리. 호스트→게스트: 호스트의 펀치 표시.
+    if (_mpIsHost && d.kind) {
+      // 게스트가 친 펀치 = 호스트 입장에서 oppPunch 처리
+      try { f.oppPunchAnim = 0.4; f.oppPunchType = d.kind; if (typeof playPunch === 'function') playPunch(d.kind === 'hook' ? 'hook' : 'jab'); } catch(e){}
+    }
+  } else if (d.type === 'dodge' && f) {
+    if (_mpIsHost) { f.oppDodge = d.dir; f.oppDodgeTime = 0.4; }
+  } else if (d.type === 'guard' && f) {
+    if (_mpIsHost) f.oppGuard = d.side;
+  } else if (d.type === 'hp' && !_mpIsHost && f) {
+    // 게스트는 호스트의 hp/타이머/라운드를 신뢰
+    f.playerHP = d.oppHP; f.oppHP = d.playerHP; f.round = d.round; f.timer = d.timer;
+    try { updateFightHUD(); } catch(e){}
+  } else if (d.type === 'emote') {
+    try { showComboText(d.text || '👊'); } catch(e){}
+  }
+}
+
+function _mpStartFight() {
+  try {
+    // 더미 상대 (실제 입력은 P2P로 수신)
+    const oppDummy = { name: _mpIsHost ? '게스트' : '호스트', style: 'P2P', desc: '실시간 대전', speed: 70, power: 70, defense: 70, stamina: 70, chin: 70, belt: '' };
+    startFight(oppDummy, false);
+    // hp 동기화 루프 (호스트만)
+    if (_mpIsHost) {
+      _mpHpSyncTimer = setInterval(() => {
+        const f = currentFight; if (!f || !f.active) return;
+        sendPeerData({ type:'hp', playerHP: f.playerHP, oppHP: f.oppHP, round: f.round, timer: f.timer });
+      }, 100);
+    }
+    // playerPunch/Dodge/Guard 후킹: 원본 함수를 래핑하여 P2P 송신만 추가 (기존 로직 무손상)
+    if (!window._mpHooked) {
+      window._mpHooked = true;
+      const _origPunch = window.playerPunch;
+      window.playerPunch = function(type) { try { if (_mpConn && _mpConn.open) sendPeerData({ type:'punch', kind:type, t:Date.now() }); } catch(e){} return _origPunch.apply(this, arguments); };
+      const _origDodge = window.playerDodge;
+      window.playerDodge = function(dir) { try { if (_mpConn && _mpConn.open) sendPeerData({ type:'dodge', dir:dir }); } catch(e){} return _origDodge.apply(this, arguments); };
+      const _origGuard = window.playerGuard;
+      window.playerGuard = function(side) { try { if (_mpConn && _mpConn.open) sendPeerData({ type:'guard', side:side }); } catch(e){} return _origGuard.apply(this, arguments); };
+    }
+  } catch(e) { console.warn('_mpStartFight 오류', e); _mpStatus('경기 시작 실패: ' + e.message); }
 }
 
 // ==================== INIT ====================

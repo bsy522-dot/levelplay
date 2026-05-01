@@ -1,0 +1,20 @@
+{
+  "name": "Boxing Trainer V5 - AI 코치",
+  "short_name": "Boxing V5",
+  "description": "3D 복싱 시뮬레이터 + AI 코치 + 멀티플레이",
+  "start_url": "./boxing-trainer-v5.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0a0a10",
+  "theme_color": "#e63946",
+  "categories": ["games", "sports", "fitness"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230a0a10' width='100' height='100' rx='20'/><text x='50' y='62' text-anchor='middle' font-size='52'>🥊</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
