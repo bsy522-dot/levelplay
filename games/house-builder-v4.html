@@ -744,6 +744,8 @@ let moveMode=false; // 방 이동 모드
 
 // 메시 매핑 (id → THREE.Group)
 const meshMap=new Map();
+// 선택 하이라이트 헬퍼
+let roomHelper=null,furnHelper=null;
 
 // ============================================================
 // THREE.js 초기화
@@ -849,11 +851,70 @@ function disposeMeshDeep(m){
     // material은 matCache에서 공유되므로 dispose 금지
   });
 }
+
+// 선택 하이라이트 갱신
+function updateSelHighlight(){
+  if(roomHelper){scene.remove(roomHelper);roomHelper.geometry&&roomHelper.geometry.dispose();roomHelper=null;}
+  if(furnHelper){scene.remove(furnHelper);furnHelper.geometry&&furnHelper.geometry.dispose();furnHelper=null;}
+  if(selRoom){
+    const rm=meshMap.get('room_'+selRoom.id);
+    if(rm){
+      roomHelper=new THREE.BoxHelper(rm,0xffeb00);
+      roomHelper.material.depthTest=false;
+      roomHelper.material.linewidth=3;
+      roomHelper.renderOrder=999;
+      scene.add(roomHelper);
+    }
+  }
+  if(selFurn){
+    const fm=meshMap.get('furn_'+selFurn.id);
+    if(fm){
+      furnHelper=new THREE.BoxHelper(fm,0x00ff88);
+      furnHelper.material.depthTest=false;
+      furnHelper.material.linewidth=2;
+      furnHelper.renderOrder=999;
+      scene.add(furnHelper);
+    }
+  }
+}
+
+// 외관 지붕 (roofOn 시 모든 층 위에 슬레이트 평면)
+function applyRoofMode(){
+  const old=scene.getObjectByName('GlobalRoof');
+  if(old){scene.remove(old);old.geometry&&old.geometry.dispose();old.material&&old.material.dispose();}
+  if(!roofOn)return;
+  // 모든 활성 층의 방 발자국 bounding box
+  let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity,maxF=1;
+  for(const f of [1,2,3,4]){
+    if(!rooms[f])continue;
+    for(const r of rooms[f]){
+      minX=Math.min(minX,r.x);
+      maxX=Math.max(maxX,r.x+r.w);
+      minZ=Math.min(minZ,r.z);
+      maxZ=Math.max(maxZ,r.z+r.h);
+      if(r.type!=='garden')maxF=Math.max(maxF,f===4?4:f);
+    }
+  }
+  if(minX===Infinity)return;
+  const w=(maxX-minX)+0.6,d=(maxZ-minZ)+0.6;
+  const cx=(minX+maxX)/2,cz=(minZ+maxZ)/2;
+  const topY=floorToY(maxF)+WALL_HEIGHT+0.6;
+  // 슬레이트 평면 지붕 (어두운 갈색 + 약간 비스듬)
+  const roofMat=new THREE.MeshStandardMaterial({color:0x6b4226,roughness:0.6,metalness:0.05});
+  const roof=new THREE.Mesh(new THREE.BoxGeometry(w,0.5,d),roofMat);
+  roof.position.set(cx,topY,cz);
+  roof.castShadow=true;roof.receiveShadow=true;
+  roof.name='GlobalRoof';
+  scene.add(roof);
+}
 function removeMesh(key){
   const m=meshMap.get(key);
   if(m){scene.remove(m);disposeMeshDeep(m);meshMap.delete(key);}
 }
 function rebuildAll(){
+  // 하이라이트도 같이 제거 (메시 사라지면 BoxHelper도 무효)
+  if(roomHelper){scene.remove(roomHelper);roomHelper=null;}
+  if(furnHelper){scene.remove(furnHelper);furnHelper=null;}
   for(const m of meshMap.values()){scene.remove(m);disposeMeshDeep(m);}
   meshMap.clear();
   for(let f=-1;f<=4;f++){
@@ -910,13 +971,13 @@ setupInput(renderer,camera,scene,controls,{
     if(k==='room'){
       for(let f=-1;f<=4;f++){
         const r=rooms[f].find(rr=>rr.id===id);
-        if(r){selRoom=r;selFurn=null;currentFloor=f;updFloor();status(`${ROOMS.find(rt=>rt.id===r.type).n} 선택`);updatePanel();return;}
+        if(r){selRoom=r;selFurn=null;currentFloor=f;updFloor();status(`✓ ${ROOMS.find(rt=>rt.id===r.type).n} 선택됨 (노란 박스)`);updatePanel();updateSelHighlight();return;}
       }
     }else if(k==='furn'){
       for(let f=-1;f<=4;f++){
         for(const r of rooms[f]){
           const fu=(r.furniture||[]).find(ff=>ff.id===id);
-          if(fu){selRoom=r;selFurn=fu;currentFloor=f;updFloor();status(`${FURN.find(ft=>ft.id===fu.type).n} 선택`);updatePanel();return;}
+          if(fu){selRoom=r;selFurn=fu;currentFloor=f;updFloor();status(`✓ ${FURN.find(ft=>ft.id===fu.type).n} 선택됨 (녹색 박스)`);updatePanel();updateSelHighlight();return;}
         }
       }
     }
@@ -939,7 +1000,7 @@ function placeRoom(x,z){
   rooms[currentFloor].push(room);
   addRoomMesh(room,currentFloor);
   selRoom=room;selFurn=null;
-  status(`${rt.n} 배치 (-${cost.toLocaleString()})`);updBudget();updatePanel();
+  status(`${rt.n} 배치 (-${cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();
 }
 
 function addFurniture(furnId){
@@ -951,7 +1012,8 @@ function addFurniture(furnId){
   selRoom.furniture.push(furn);
   selRoom.floor=currentFloor;
   addFurnMesh(furn,selRoom);
-  status(`${ft.n} 배치 (-${ft.cost.toLocaleString()})`);updBudget();updatePanel();
+  selFurn=furn;
+  status(`${ft.n} 배치 (-${ft.cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();
 }
 
 function placeExterior(x,z){
@@ -984,7 +1046,7 @@ function deleteSelected(){
     rooms[currentFloor]=rooms[currentFloor].filter(r=>r.id!==selRoom.id);
     selRoom=null;status('방 삭제 (50% 환불)');
   }
-  updBudget();updatePanel();
+  updBudget();updatePanel();updateSelHighlight();
 }
 
 function rotateSelected(){
@@ -1014,13 +1076,21 @@ document.getElementById('aMove').onclick=()=>{
 };
 document.getElementById('aDel').onclick=deleteSelected;
 document.getElementById('aRot').onclick=rotateSelected;
-document.getElementById('aFloorUp').onclick=()=>{if(currentFloor<4){currentFloor++;updFloor();}};
-document.getElementById('aFloorDn').onclick=()=>{if(currentFloor>-1){currentFloor--;updFloor();}};
+document.getElementById('aFloorUp').onclick=()=>changeFloor(1);
+document.getElementById('aFloorDn').onclick=()=>changeFloor(-1);
 
 function updFloor(){
   const labels={'-1':'B1','1':'1F','2':'2F','3':'3F','4':'옥상'};
   document.getElementById('floorDisp').textContent=labels[currentFloor]||currentFloor+'F';
-  selRoom=null;selFurn=null;updatePanel();
+  // updFloor는 onObjectClick에서도 호출되므로 selRoom 초기화 안 함 (이미 설정됨)
+  updatePanel();
+}
+// 층 업/다운 시에는 선택 해제
+function changeFloor(d){
+  const nf=currentFloor+d;
+  if(nf<-1||nf>4)return;
+  currentFloor=nf;selRoom=null;selFurn=null;
+  updFloor();updateSelHighlight();
 }
 function updBudget(){document.getElementById('budgetDisp').textContent='💰 '+budget.toLocaleString();}
 function status(t){document.getElementById('statusTxt').textContent=t;}
@@ -1062,10 +1132,21 @@ document.getElementById('btnRoof').onclick=()=>{
   roofOn=!roofOn;
   const b=document.getElementById('btnRoof');
   b.classList.toggle('act',roofOn);
-  b.textContent=roofOn?'🏠지붕':'🏚지붕';
-  b.style.background=roofOn?'rgba(140,80,255,.3)':'rgba(255,180,80,.25)';
-  status(roofOn?'🏠 지붕 ON - 외관 완성':'🏚 지붕 OFF - 인테리어 보임');
+  b.textContent=roofOn?'🏠지붕ON':'🏚지붕OFF';
+  b.style.background=roofOn?'rgba(140,80,255,.4)':'rgba(255,180,80,.25)';
+  status(roofOn?'🏠 지붕 ON - 외관 완성된 모습':'🏚 지붕 OFF - 인테리어 보임');
   rebuildAll();
+  applyRoofMode();
+  // 외관/인테리어 시점 자동 변경
+  if(roofOn){
+    camera.position.set(28,16,30);
+    controls.target.set(5,3,4.5);
+  }else{
+    camera.position.set(20,22,24);
+    controls.target.set(5,3,4.5);
+  }
+  controls.update();
+  updateSelHighlight();
 };
 window.exitWalk=()=>{walkMode=false;document.getElementById('walkBadge').style.display='none';exitWalkthrough(controls);};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&walkMode)exitWalk();});
@@ -1140,7 +1221,7 @@ function updatePanel(){
 
 window.pickRoom=(id)=>{selRoomType=id;updatePanel();};
 window.pickFurn=(id)=>{if(selRoom)addFurniture(id);};
-window.pickFurnItem=(fid)=>{if(selRoom){selFurn=selRoom.furniture.find(f=>f.id===fid);updatePanel();}};
+window.pickFurnItem=(fid)=>{if(selRoom){selFurn=selRoom.furniture.find(f=>f.id===fid);updatePanel();updateSelHighlight();}};
 window.pickMat=(i)=>{curMaterial=i;updatePanel();};
 window.pickWC=(i)=>{curWallColor=WALL_COLORS[i];updatePanel();};
 window.pickFT=(i)=>{curFloorType=FLOOR_TYPES[i];updatePanel();};
@@ -1394,6 +1475,7 @@ function buildSampleHouse(){
   budget=SAMPLE.budget;
   currentFloor=1;updFloor();updBudget();updatePanel();
   rebuildAll();
+  applyRoofMode();
   // 카메라: 위에서 충분히 떨어진 각도 (집+정원 + 모든 층 잘 보이게)
   camera.position.set(15,22,20);
   controls.target.set(5,3,4.5);controls.update();
