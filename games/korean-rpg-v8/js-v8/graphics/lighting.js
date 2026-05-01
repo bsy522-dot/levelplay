@@ -118,6 +118,30 @@ export function applyLightPreset(scene, name) {
 }
 
 // ─────────────────────────────────────────────
+// PMREM 환경맵 (메탈/유리 재질 광택, HDR 없이도 즉시 동작)
+// — engine.js initEngine 직후 1회 호출
+// ─────────────────────────────────────────────
+let _envCached = null;
+export async function setupEnvironment(scene, renderer, opts = {}) {
+  if (_envCached && opts.reuse !== false) {
+    scene.environment = _envCached;
+    return _envCached;
+  }
+  // 동적 import — RoomEnvironment는 Three.js examples에 포함, 추가 다운로드 0
+  const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+
+  const envScene = new RoomEnvironment();
+  const envTex   = pmrem.fromScene(envScene, opts.sigma ?? 0.04).texture;
+  scene.environment = envTex;
+  _envCached = envTex;
+
+  pmrem.dispose();
+  return envTex;
+}
+
+// ─────────────────────────────────────────────
 // QA helper
 // ─────────────────────────────────────────────
 export function assertLightStandard(scene) {
