@@ -1151,9 +1151,108 @@ function animate(){
   }
 }
 
+// ============================================================
+// SAMPLE HOUSE (?demo=1)
+// ============================================================
+function buildSampleHouse(){
+  const SAMPLE={
+    rooms:{
+      '-1':[],
+      '1':[
+        {id:1,type:'living',x:-3,z:-2,w:6,h:5,wallColor:'#f5f0e8',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,furniture:[
+          {id:101,type:'sofa',c:'#8888cc',rx:1.2,rz:1,w:2.2,h:1,rot:0},
+          {id:102,type:'tv',c:'#333',rx:1.2,rz:4,w:1.5,h:0.3,rot:0},
+          {id:103,type:'table',c:'#bb8844',rx:4.5,rz:2.5,w:1.5,h:1,rot:0},
+          {id:104,type:'chair',c:'#996633',rx:5.2,rz:3.5,w:0.5,h:0.5,rot:0},
+          {id:105,type:'plant',c:'#5a8a5a',rx:0.5,rz:4.5,w:0.4,h:0.4,rot:0},
+          {id:106,type:'lamp',c:'#ffd700',rx:5.5,rz:0.5,w:0.3,h:0.3,rot:0},
+          {id:107,type:'rug',c:'#b08060',rx:1.5,rz:2,w:2,h:1.5,rot:0}
+        ]},
+        {id:2,type:'kitchen',x:4,z:-2,w:4,h:3,wallColor:'#c0e8d8',floorColor:'#c8c8c8',floorType:'tile',material:1,windowStyle:1,furniture:[
+          {id:201,type:'fridge',c:'#ccc',rx:0.5,rz:0.5,w:0.8,h:0.8,rot:0},
+          {id:202,type:'table',c:'#bb8844',rx:2,rz:1.5,w:1.5,h:1,rot:0}
+        ]},
+        {id:3,type:'bedroom',x:-3,z:4,w:4,h:4,wallColor:'#d8c8e8',floorColor:'#9090a0',floorType:'carpet',material:0,windowStyle:2,furniture:[
+          {id:301,type:'bed',c:'#ccaaaa',rx:2,rz:1.5,w:2,h:1.4,rot:0},
+          {id:302,type:'wardrobe',c:'#8b6b3d',rx:0.5,rz:3.5,w:1.5,h:0.5,rot:0},
+          {id:303,type:'desk',c:'#aa9966',rx:3,rz:3.5,w:1.4,h:0.7,rot:0},
+          {id:304,type:'lamp',c:'#ffd700',rx:3.5,rz:0.5,w:0.3,h:0.3,rot:0}
+        ]},
+        {id:4,type:'bathroom',x:2,z:4,w:3,h:3,wallColor:'#c0d8f0',floorColor:'#e0ddd0',floorType:'marble',material:6,windowStyle:1,furniture:[
+          {id:401,type:'bathtub',c:'#dde',rx:0.8,rz:1.5,w:1.5,h:0.8,rot:0},
+          {id:402,type:'washer',c:'#eee',rx:2.3,rz:0.5,w:0.7,h:0.7,rot:0}
+        ]}
+      ],
+      '2':[
+        {id:5,type:'bedroom',x:-3,z:-2,w:4,h:4,wallColor:'#f0d0c0',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,furniture:[
+          {id:501,type:'bed',c:'#ccaaaa',rx:2,rz:1.5,w:2,h:1.4,rot:0},
+          {id:502,type:'bookshelf',c:'#775533',rx:0.5,rz:3.5,w:1.2,h:0.4,rot:0}
+        ]},
+        {id:6,type:'balcony',x:2,z:-2,w:4,h:2,wallColor:'#a0906a',floorColor:'#888',floorType:'stone',material:2,windowStyle:0,furniture:[
+          {id:601,type:'plant',c:'#5a8a5a',rx:1,rz:1,w:0.4,h:0.4,rot:0},
+          {id:602,type:'plant',c:'#5a8a5a',rx:3,rz:1,w:0.4,h:0.4,rot:0}
+        ]}
+      ],
+      '3':[],
+      '4':[
+        {id:7,type:'rooftop',x:-3,z:-1,w:6,h:6,wallColor:'#7a7a8a',floorColor:'#888',floorType:'stone',material:2,windowStyle:0,furniture:[
+          {id:701,type:'plant',c:'#5a8a5a',rx:1,rz:1,w:0.4,h:0.4,rot:0},
+          {id:702,type:'plant',c:'#5a8a5a',rx:5,rz:5,w:0.4,h:0.4,rot:0},
+          {id:703,type:'lamp',c:'#ffd700',rx:3,rz:3,w:0.3,h:0.3,rot:0}
+        ]}
+      ]
+    },
+    exteriors:[
+      {id:801,type:'tree',x:-8,z:-6},
+      {id:802,type:'tree',x:10,z:-6},
+      {id:803,type:'tree',x:-8,z:8},
+      {id:804,type:'tree',x:10,z:8},
+      {id:805,type:'fence',x:-6,z:-8},
+      {id:806,type:'fence',x:-3,z:-8},
+      {id:807,type:'fence',x:0,z:-8},
+      {id:808,type:'fence',x:3,z:-8},
+      {id:809,type:'fence',x:6,z:-8},
+      {id:810,type:'pool',x:-6,z:6},
+      {id:811,type:'flower',x:8,z:6},
+      {id:812,type:'flower',x:8,z:3},
+      {id:813,type:'driveway',x:6,z:-3}
+    ],
+    nextId:900,
+    budget:280000
+  };
+  rooms=normalizeRooms(SAMPLE.rooms);
+  exteriors=SAMPLE.exteriors;
+  nextId=SAMPLE.nextId;
+  budget=SAMPLE.budget;
+  currentFloor=1;updFloor();updBudget();updatePanel();
+  rebuildAll();
+  // 카메라를 멋진 각도로
+  camera.position.set(20,18,22);
+  controls.target.set(2,1,2);controls.update();
+  // 시간대를 저녁으로 (낭만적)
+  timeOfDay=1;document.getElementById('timeIcon').textContent=TIMES[1];
+  setTimeOfDay(1,lights,sky,scene);
+  status('🏠 샘플 하우스 - 2층집 + 옥상 + 정원');
+}
+
 // INIT
 updBudget();updFloor();updatePanel();animate();
-status('🏠 v4 진짜 3D - 빈 공간을 클릭하여 방을 배치하세요');
+
+// URL ?demo=1 자동 빌드
+const _params=new URLSearchParams(location.search);
+if(_params.get('demo')==='1'||_params.get('house')==='sample'){
+  setTimeout(()=>buildSampleHouse(),200);
+}else{
+  status('🏠 v4 진짜 3D - 빈 공간을 클릭하여 방을 배치하세요');
+}
+
+// 튜토리얼 버튼 옆에 샘플 하우스 버튼 자동 추가
+{
+  const sampleBtn=document.createElement('button');
+  sampleBtn.textContent='🏡샘플';sampleBtn.title='샘플 하우스 자동 배치';
+  sampleBtn.onclick=()=>buildSampleHouse();
+  document.querySelector('#topBar .tb').insertBefore(sampleBtn,document.getElementById('btnTut'));
+}
 
 console.log('[집짓기 v4] 품질레벨:',qLevel);
 </script>
