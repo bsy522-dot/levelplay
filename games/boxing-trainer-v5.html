@@ -281,7 +281,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v6.0-2026.05.01-MULTI+MISSION+METRONOME+PWA';
+const BUILD_VERSION = 'v6.1-2026.05.01-CRITICAL-SYNTAX-FIX';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 
@@ -2733,8 +2733,10 @@ function updateTrainOverlay() {
     </div>`;
 
   if (t.type === 'speedbag') {
-    html += `<div class="train-target" style="color:${t.sbTarget ? 'var(--green)' : 'var(--dim)};font-size:28px;margin:16px 0">${t.sbTarget ? '지금! 탭하세요!' : '대기...'}</div>
-    <div style="font-size:12px;color:var(--dim)">초록색일 때 아무 키(1/2/3/4) 또는 탭</div>`;
+    var _sbColor = t.sbTarget ? 'var(--green)' : 'var(--dim)';
+    var _sbText = t.sbTarget ? '지금! 탭하세요!' : '대기...';
+    html += '<div class="train-target" style="color:' + _sbColor + ';font-size:28px;margin:16px 0">' + _sbText + '</div>'
+      + '<div style="font-size:12px;color:var(--dim)">초록색일 때 아무 키(1/2/3/4) 또는 탭</div>';
   } else if (t.type === 'heavybag') {
     html += `<div style="margin:12px 0;font-size:14px">콤보 입력:</div>
     <div class="train-combo-seq">${t.hbTarget.map((p, i) =>
