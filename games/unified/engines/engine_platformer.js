@@ -711,8 +711,8 @@
     const IM = window.IM || {};
     const ch = chosenChar || CHARACTERS[0];
     const img = IM[ch.spr];
-    // 시각 스케일: 1.4× (충돌박스 PW/PH는 그대로, bottom-anchor로 발끝 정렬)
-    const VS = 1.4;
+    // 시각 스케일: 1.0× (로미 원본 비율 그대로 — 변형 없이 명확히 인식되도록)
+    const VS = 1.0;
     const dw = PW * VS, dh = PH * VS;
     const ox = -dw/2, oy = PH/2 - dh;
     X.save();
@@ -727,17 +727,14 @@
       P._stretch = Math.max(1, P._stretch - 0.05);
     }
     if(P.gr && Math.abs(P.vx) > 1){
-      // walk cycle: 상하 bob + 좌우 sway + 미세 회전 = 4프레임 가짜 시트
+      // walk cycle: 상하 bob만 (scale 변형 제거 → 로미 모습 보존)
       const sp = Math.abs(P.vx) * 1.8;
-      X.translate(sin(t*sp)*3, Math.abs(sin(t*sp*0.5))*2 - 1);
-      X.rotate(sin(t*sp*0.5)*0.06);
-      X.scale(1 + sin(t*sp)*0.04, 1 - sin(t*sp)*0.04);   // 호흡식 squash
+      X.translate(sin(t*sp)*2, Math.abs(sin(t*sp*0.5))*1.5);
+      X.rotate(sin(t*sp*0.5)*0.03);
     }
     else if(P.gr){
-      // idle: 호흡 + 5초마다 깜빡임 spike
-      const blink = (Math.floor(t) % 5 === 0) ? sin(t*15) * 0.5 : 0;
-      X.translate(0, sin(t*2.2)*1.5 + blink);
-      X.scale(1, 1 + sin(t*2.2)*0.025);
+      // idle: 호흡 (scale 미적용)
+      X.translate(0, sin(t*2.2)*1);
     }
     if(!P.gr) X.rotate(clamp(P.vy * 0.015, -0.2, 0.2) * P.face);
     if(P.shieldT > 0){ X.shadowColor = '#4FC3F7'; X.shadowBlur = 15; }
