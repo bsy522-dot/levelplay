@@ -44,12 +44,17 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .key-white.hit-good { background:linear-gradient(180deg,#eab308,#ca8a04) !important; }
 .key-white.hit-miss { background:linear-gradient(180deg,#ef4444,#dc2626) !important; }
 .key-white.guide { background:linear-gradient(180deg,#93c5fd,#60a5fa) !important; }
+.key-white.next-up { background:linear-gradient(180deg,#06b6d4,#0891b2) !important; box-shadow:0 0 12px #06b6d4, inset 0 0 8px rgba(255,255,255,.4) !important; animation:pulse-key 1s infinite; }
+.key-white.next-up-L { background:linear-gradient(180deg,#3b82f6,#1d4ed8) !important; box-shadow:0 0 12px #3b82f6, inset 0 0 8px rgba(255,255,255,.4) !important; animation:pulse-key 1s infinite; }
+@keyframes pulse-key { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.3)} }
 .key-black { width:13px; height:82px; background:linear-gradient(180deg,#333 0%,#111 100%); border-radius:0 0 3px 3px; cursor:pointer; position:absolute; z-index:2; top:0; box-shadow:0 2px 4px rgba(0,0,0,.5); }
 .key-black:active, .key-black.pressed { background:linear-gradient(180deg,#555,#333); }
 .key-black.hit-perfect { background:linear-gradient(180deg,#16a34a,#15803d) !important; }
 .key-black.hit-good { background:linear-gradient(180deg,#ca8a04,#a16207) !important; }
 .key-black.hit-miss { background:linear-gradient(180deg,#dc2626,#b91c1c) !important; }
 .key-black.guide { background:linear-gradient(180deg,#3b82f6,#2563eb) !important; }
+.key-black.next-up { background:linear-gradient(180deg,#06b6d4,#0e7490) !important; box-shadow:0 0 10px #06b6d4 !important; animation:pulse-key 1s infinite; }
+.key-black.next-up-L { background:linear-gradient(180deg,#3b82f6,#1e40af) !important; box-shadow:0 0 10px #3b82f6 !important; animation:pulse-key 1s infinite; }
 .key-label { position:absolute; bottom:3px; left:50%; transform:translateX(-50%); font-size:7px; color:#999; pointer-events:none; white-space:nowrap; }
 .key-black .key-label { color:#666; bottom:3px; font-size:6px; }
 
@@ -220,6 +225,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <div class="lesson-desc" id="lesson-desc"></div>
       <div class="lesson-actions">
         <button class="btn btn-primary" id="btn-demo">▶ 데모</button>
+        <button class="btn btn-success" id="btn-wait" style="background:#06b6d4">🐢 초보자</button>
         <button class="btn btn-success" id="btn-practice">🎯 연습</button>
         <button class="btn btn-danger" id="btn-test">⭐ 테스트</button>
       </div>
@@ -235,6 +241,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <button class="btn btn-primary" id="btn-play-synth">▶ 재생</button>
       <button class="btn btn-secondary" id="btn-stop-synth">■ 정지</button>
       <label><input type="checkbox" id="auto-play"> 자동</label>
+      <label title="건반을 눌러야 다음 노트 진행"><input type="checkbox" id="wait-mode"> 🐢초보자</label>
+      <label title="도/레/미 한글 표시"><input type="checkbox" id="show-korean"> 한글</label>
     </div>
     <div class="score-bar" id="synth-score" style="display:none">
       <span class="s-perfect">P:<b id="sc-perfect">0</b></span>
@@ -1278,36 +1286,39 @@ LESSONS.beyer.push({id:'by10',name:'바이엘 No.10',desc:'오른손과 왼손�
   return ns;
 })()});
 
-// Song-based lessons
+// Song-based lessons (bpm 명시: lesson에서 곡 BPM 비율로 활용)
 LESSONS.songs.push(
   // 동요/찬송가 (초급)
-  {id:'s1',name:'비행기',desc:'동요 "비행기". 초급 오른손.',notes:SONGS['비행기'].notes},
-  {id:'s2',name:'학교종',desc:'동요 "학교종이 땡땡땡". 초급.',notes:SONGS['학교종'].notes},
-  {id:'s3',name:'반짝반짝 작은별',desc:'모차르트 작은별 변주곡 테마. 초급.',notes:SONGS['작은별'].notes},
-  {id:'s4',name:'곰 세 마리',desc:'동요 "곰 세 마리가 한 집에 있어". 초급.',notes:SONGS['곰세마리'].notes},
-  {id:'s5',name:'Amazing Grace',desc:'찬송가 Amazing Grace. 양손 초급.',notes:SONGS['AmazingGrace'].notes},
-  {id:'s20',name:'클레멘타인',desc:'Oh My Darling Clementine. 왈츠 초급.',notes:SONGS['clementine'].notes},
+  {id:'s1',name:'비행기',desc:'동요 "비행기". 초급 오른손.',notes:SONGS['비행기'].notes,bpm:SONGS['비행기'].bpm},
+  {id:'s2',name:'학교종',desc:'동요 "학교종이 땡땡땡". 초급.',notes:SONGS['학교종'].notes,bpm:SONGS['학교종'].bpm},
+  {id:'s3',name:'반짝반짝 작은별',desc:'모차르트 작은별 변주곡 테마. 초급.',notes:SONGS['작은별'].notes,bpm:SONGS['작은별'].bpm},
+  {id:'s4',name:'곰 세 마리',desc:'동요 "곰 세 마리가 한 집에 있어". 초급.',notes:SONGS['곰세마리'].notes,bpm:SONGS['곰세마리'].bpm},
+  {id:'s5',name:'Amazing Grace',desc:'찬송가 Amazing Grace. 양손 초급.',notes:SONGS['AmazingGrace'].notes,bpm:SONGS['AmazingGrace'].bpm},
+  {id:'s20',name:'클레멘타인',desc:'Oh My Darling Clementine. 왈츠 초급.',notes:SONGS['clementine'].notes,bpm:SONGS['clementine'].bpm},
   // 클래식 초급~중급
-  {id:'s6',name:'환희의 송가',desc:'베토벤 - Ode to Joy. C장조 양손.',notes:SONGS['ode_to_joy'].notes},
-  {id:'s7',name:'미뉴에트',desc:'바흐 - Minuet in G. 3/4박자 양손.',notes:SONGS['minuet_g'].notes},
-  {id:'s8',name:'유머레스크',desc:'드보르작 - Humoresque. 점음표 리듬.',notes:SONGS['humoresque'].notes},
+  {id:'s6',name:'환희의 송가',desc:'베토벤 - Ode to Joy. C장조 양손.',notes:SONGS['ode_to_joy'].notes,bpm:SONGS['ode_to_joy'].bpm},
+  {id:'s7',name:'미뉴에트',desc:'바흐 - Minuet in G. 3/4박자 양손.',notes:SONGS['minuet_g'].notes,bpm:SONGS['minuet_g'].bpm},
+  {id:'s8',name:'유머레스크',desc:'드보르작 - Humoresque. 점음표 리듬.',notes:SONGS['humoresque'].notes,bpm:SONGS['humoresque'].bpm},
   // 클래식 중급
-  {id:'s9',name:'엘리제를 위하여',desc:'베토벤 - Für Elise. A단조 양손.',notes:SONGS['엘리제'].notes},
-  {id:'s10',name:'캐논 in D',desc:'파헬벨 - Canon in D. 양손.',notes:SONGS['캐논'].notes},
-  {id:'s11',name:'G선상의 아리아',desc:'바흐 - Air on the G String. C장조.',notes:SONGS['air_on_g'].notes},
-  {id:'s12',name:'꿈 (Träumerei)',desc:'슈만 - 꿈. F장조 서정적.',notes:SONGS['traumerei'].notes},
-  {id:'s13',name:'백조의 호수',desc:'차이코프스키 - Swan Lake. B단조.',notes:SONGS['swan_lake'].notes},
+  {id:'s9',name:'엘리제를 위하여',desc:'베토벤 - Für Elise. A단조 양손.',notes:SONGS['엘리제'].notes,bpm:SONGS['엘리제'].bpm},
+  {id:'s10',name:'캐논 in D',desc:'파헬벨 - Canon in D. 양손.',notes:SONGS['캐논'].notes,bpm:SONGS['캐논'].bpm},
+  {id:'s11',name:'G선상의 아리아',desc:'바흐 - Air on the G String. C장조.',notes:SONGS['air_on_g'].notes,bpm:SONGS['air_on_g'].bpm},
+  {id:'s12',name:'꿈 (Träumerei)',desc:'슈만 - 꿈. F장조 서정적.',notes:SONGS['traumerei'].notes,bpm:SONGS['traumerei'].bpm},
+  {id:'s13',name:'백조의 호수',desc:'차이코프스키 - Swan Lake. B단조.',notes:SONGS['swan_lake'].notes,bpm:SONGS['swan_lake'].bpm},
   // 클래식 중상급~상급
-  {id:'s14',name:'터키 행진곡',desc:'모차르트 - Turkish March. A단조.',notes:SONGS['turkish_march'].notes},
-  {id:'s15',name:'월광 소나타',desc:'베토벤 - Moonlight Sonata 1악장. C#단조.',notes:SONGS['moonlight'].notes},
-  {id:'s16',name:'녹턴 Op.9 No.2',desc:'쇼팽 - Nocturne. Eb장조 아르페지오.',notes:SONGS['nocturne'].notes},
-  {id:'s17',name:'봄 (사계)',desc:'비발디 - Spring. E장조 알레그로.',notes:SONGS['spring'].notes},
-  {id:'s18',name:'사랑의 꿈',desc:'리스트 - Liebestraum No.3. Ab장조.',notes:SONGS['liebestraum'].notes},
-  {id:'s19',name:'헝가리 무곡 5번',desc:'브람스 - Hungarian Dance No.5. G단조.',notes:SONGS['hungarian5'].notes},
+  {id:'s14',name:'터키 행진곡',desc:'모차르트 - Turkish March. A단조.',notes:SONGS['turkish_march'].notes,bpm:SONGS['turkish_march'].bpm},
+  {id:'s15',name:'월광 소나타',desc:'베토벤 - Moonlight Sonata 1악장. C#단조.',notes:SONGS['moonlight'].notes,bpm:SONGS['moonlight'].bpm},
+  {id:'s16',name:'녹턴 Op.9 No.2',desc:'쇼팽 - Nocturne. Eb장조 아르페지오.',notes:SONGS['nocturne'].notes,bpm:SONGS['nocturne'].bpm},
+  {id:'s17',name:'봄 (사계)',desc:'비발디 - Spring. E장조 알레그로.',notes:SONGS['spring'].notes,bpm:SONGS['spring'].bpm},
+  {id:'s18',name:'사랑의 꿈',desc:'리스트 - Liebestraum No.3. Ab장조.',notes:SONGS['liebestraum'].notes,bpm:SONGS['liebestraum'].bpm},
+  {id:'s19',name:'헝가리 무곡 5번',desc:'브람스 - Hungarian Dance No.5. G단조.',notes:SONGS['hungarian5'].notes,bpm:SONGS['hungarian5'].bpm},
   // 연주곡
-  {id:'s21',name:'River Flows in You',desc:'유루마 - River Flows in You. A장조.',notes:SONGS['river_flows'].notes},
-  {id:'s22',name:'라 캄파넬라',desc:'리스트 - La Campanella. G#단조 상급.',notes:SONGS['la_campanella'].notes},
+  {id:'s21',name:'River Flows in You',desc:'유루마 - River Flows in You. A장조.',notes:SONGS['river_flows'].notes,bpm:SONGS['river_flows'].bpm},
+  {id:'s22',name:'라 캄파넬라',desc:'리스트 - La Campanella. G#단조 상급.',notes:SONGS['la_campanella'].notes,bpm:SONGS['la_campanella'].bpm},
 );
+
+// 바이엘에도 기본 BPM 부여
+LESSONS.beyer.forEach(l => { if (!l.bpm) l.bpm = 80; });
 
 // ================ PROGRESS ================
 let progress = JSON.parse(localStorage.getItem('piano-v3-progress') || '{}');
@@ -1367,9 +1378,66 @@ function openLesson(id) {
   const stars = getLessonStars(id);
   document.getElementById('lesson-stars').innerHTML = stars > 0 ? '<span style="color:var(--yellow)">' + '★'.repeat(stars) + '☆'.repeat(3-stars) + '</span>' : '';
   document.getElementById('lesson-desc').textContent = lesson.desc;
-  document.getElementById('btn-demo').onclick = () => { synthPracticeMode = false; startSynthesia(lesson.notes, 90, true, null); };
-  document.getElementById('btn-practice').onclick = () => { synthPracticeMode = true; startSynthesia(lesson.notes, 70, false, null); };
-  document.getElementById('btn-test').onclick = () => { synthPracticeMode = false; startSynthesia(lesson.notes, 90, false, id); };
+  // BPM: lesson에 명시된 BPM, 없으면 기본 100
+  const baseBPM = lesson.bpm || 100;
+  document.getElementById('btn-demo').onclick = () => {
+    synthPracticeMode = false; synthWaitMode = false;
+    startSynthesia(lesson.notes, baseBPM, true, null);
+  };
+  document.getElementById('btn-wait').onclick = () => {
+    synthPracticeMode = false; synthWaitMode = true;
+    startSynthesia(lesson.notes, baseBPM, false, null);
+  };
+  document.getElementById('btn-practice').onclick = () => {
+    synthPracticeMode = true; synthWaitMode = false;
+    startSynthesia(lesson.notes, Math.round(baseBPM * 0.65), false, null);
+  };
+  document.getElementById('btn-test').onclick = () => {
+    synthPracticeMode = false; synthWaitMode = false;
+    startSynthesia(lesson.notes, baseBPM, false, id);
+  };
+}
+
+// ================ HELPERS (Note name & Hit feedback) ================
+const KOREAN_NOTE_MAP = {C:'도','C#':'도♯',D:'레','D#':'레♯',E:'미',F:'파','F#':'파♯',G:'솔','G#':'솔♯',A:'라','A#':'라♯',B:'시'};
+function toKoreanNote(noteWithOctave) {
+  const m = noteWithOctave.match(/^([A-G]#?)(\d)$/);
+  if (!m) return noteWithOctave;
+  return KOREAN_NOTE_MAP[m[1]] + m[2];
+}
+
+function flashHit(noteObj, midi, result) {
+  const keyInfo = getKeyX(noteObj.note);
+  const canvas = document.getElementById('synth-canvas');
+  if (keyInfo && canvas) {
+    const pianoWrap = document.getElementById('piano-wrap');
+    const canvasToKeyScale = canvas.width / pianoWrap.clientWidth;
+    const dpr = window.devicePixelRatio || 1;
+    const kx = (keyInfo.x - pianoWrap.scrollLeft) * canvasToKeyScale * dpr;
+    const kw = keyInfo.width * canvasToKeyScale * dpr;
+    const color = result==='perfect' ? '#22c55e' : result==='good' ? '#eab308' : '#ef4444';
+    for (let p=0;p<8;p++) {
+      particles.push({x:kx+kw/2, y:canvas.height-10*dpr, vx:(Math.random()-.5)*4*dpr, vy:-Math.random()*6*dpr, life:1, color, size:3*dpr});
+    }
+    const label = result==='perfect' ? 'PERFECT!' : result==='good' ? 'GOOD' : 'MISS';
+    judgmentTexts.push({text:label, x:kx+kw/2, y:canvas.height-40*dpr, life:1, color});
+  }
+  const el = document.querySelector(`[data-midi="${midi}"]`);
+  if (el) { el.classList.add('hit-'+result); setTimeout(()=>el.classList.remove('hit-perfect','hit-good','hit-miss'),300); }
+}
+
+function updateScoreUI() {
+  document.getElementById('sc-perfect').textContent = synthScore.perfect;
+  document.getElementById('sc-good').textContent = synthScore.good;
+  document.getElementById('sc-miss').textContent = synthScore.miss;
+  document.getElementById('sc-combo').textContent = synthScore.combo;
+  document.getElementById('sc-total').textContent = synthScore.perfect*100 + synthScore.good*50;
+  if (synthNotes.length) {
+    const played = synthNotes.filter(n=>n.played).length;
+    const pct = Math.round(played / synthNotes.length * 100);
+    const pbar = document.getElementById('sc-progress-bar');
+    if (pbar) { pbar.style.width = pct + '%'; document.getElementById('sc-progress-pct').textContent = pct + '%'; }
+  }
 }
 
 document.getElementById('btn-back-learn').addEventListener('click', () => { stopSynthesia(); renderLearnList(); });
@@ -1378,6 +1446,7 @@ document.getElementById('btn-back-learn').addEventListener('click', () => { stop
 let synthRunning = false, synthAnimId = null;
 let synthPaused = false, synthPauseTime = 0; // pause-on-miss
 let synthPracticeMode = false; // practice = pause on miss
+let synthWaitMode = false; // wait for correct key before advancing time
 let synthNotes = [], synthBPM = 120, synthSpeed = 1, synthAutoPlay = false;
 let synthStartTime = 0, synthTestId = null;
 let synthScore = {perfect:0, good:0, miss:0, combo:0, maxCombo:0};
@@ -1457,17 +1526,34 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
       const now = (performance.now() - synthStartTime) / 1000;
       const beatToSec = 60 / (synthBPM * synthSpeed);
 
+      // === Wait Mode: 가장 빠른 미연주 노트 그룹에서만 매칭, 무조건 perfect ===
+      if (synthWaitMode) {
+        const unplayed = synthNotes.filter(n => !n.played);
+        if (!unplayed.length) return;
+        const minTime = Math.min(...unplayed.map(n => n.time));
+        const target = unplayed.find(n => n.time === minTime && n.note === name);
+        if (!target) return; // 틀린 키는 무시 (시간은 고정 상태)
+        target.played = true;
+        target.result = 'perfect';
+        synthScore.perfect++; synthScore.combo++;
+        synthScore.maxCombo = Math.max(synthScore.maxCombo, synthScore.combo);
+        flashHit(target, midi, 'perfect');
+        updateScoreUI();
+        return;
+      }
+
+      // === 일반 모드: 정밀 매칭 (윈도우 0.4s) ===
       let best = null, bestDiff = Infinity;
       synthNotes.forEach(n => {
         if (n.played || n.note !== name) return;
         const diff = Math.abs(now - n.time * beatToSec);
-        if (diff < bestDiff && diff < 1.5) { bestDiff = diff; best = n; }
+        if (diff < bestDiff && diff < 0.4) { bestDiff = diff; best = n; }
       });
 
       if (best) {
         best.played = true;
-        if (bestDiff < 0.12) { best.result='perfect'; synthScore.perfect++; synthScore.combo++; }
-        else if (bestDiff < 0.35) { best.result='good'; synthScore.good++; synthScore.combo++; }
+        if (bestDiff < 0.08) { best.result='perfect'; synthScore.perfect++; synthScore.combo++; }
+        else if (bestDiff < 0.20) { best.result='good'; synthScore.good++; synthScore.combo++; }
         else { best.result='miss'; synthScore.miss++; synthScore.combo=0; }
         synthScore.maxCombo = Math.max(synthScore.maxCombo, synthScore.combo);
 
@@ -1566,9 +1652,23 @@ function synthLoop() {
     ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
   });
 
-  const now = (performance.now() - synthStartTime) / 1000;
+  let now = (performance.now() - synthStartTime) / 1000;
   const beatToSec = 60 / (synthBPM * synthSpeed);
   const pxPerSec = H * 0.55;
+
+  // === Wait Mode: 다음 미연주 노트가 hit line에 도달하면 시간 정지 ===
+  if (synthWaitMode && !synthAutoPlay) {
+    const unplayed = synthNotes.filter(n => !n.played);
+    if (unplayed.length > 0) {
+      const minTime = Math.min(...unplayed.map(n => n.time));
+      const nextTimeSec = minTime * beatToSec;
+      if (now >= nextTimeSec) {
+        // 시간을 해당 노트의 도달 직전으로 고정
+        synthStartTime = performance.now() - nextTimeSec * 1000;
+        now = nextTimeSec;
+      }
+    }
+  }
 
   let allDone = true;
   let hasUnplayed = false;
@@ -1628,12 +1728,14 @@ function synthLoop() {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Note label
+    // Note label (영문 또는 한글)
     if (h > 16*dpr) {
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillStyle = 'rgba(255,255,255,0.95)';
       ctx.font = `bold ${9*dpr}px sans-serif`;
       ctx.textAlign = 'center';
-      ctx.fillText(n.note, x+w/2, drawY+h/2+3*dpr);
+      const showKR = document.getElementById('show-korean')?.checked;
+      const label = showKR ? toKoreanNote(n.note) : n.note;
+      ctx.fillText(label, x+w/2, drawY+h/2+3*dpr);
     }
 
     // Auto-play
@@ -1648,19 +1750,55 @@ function synthLoop() {
       }
     }
 
-    // Guide highlight for play-along
-    if (!synthAutoPlay && !n.played && noteBottom > H-80*dpr && noteBottom < H+20*dpr) {
+    // Guide highlight for play-along (좁은 윈도우)
+    if (!synthAutoPlay && !synthWaitMode && !n.played && noteBottom > H-80*dpr && noteBottom < H+20*dpr) {
       const el = document.querySelector(`[data-midi="${nameToMidi(n.note)}"]`);
       if (el && !el.classList.contains('pressed')) { el.classList.add('guide'); setTimeout(()=>el.classList.remove('guide'),150); }
     }
   });
 
+  // === 다음 칠 노트 건반 강조 (Wait Mode + 일반 모드) ===
+  document.querySelectorAll('.next-up,.next-up-L').forEach(el => el.classList.remove('next-up','next-up-L'));
+  if (!synthAutoPlay) {
+    const unplayed = synthNotes.filter(n => !n.played);
+    if (unplayed.length > 0) {
+      const minTime = Math.min(...unplayed.map(n => n.time));
+      // wait 모드는 동시 노트 모두 강조, 일반 모드는 hit line 근처만
+      const targets = unplayed.filter(n => {
+        if (synthWaitMode) return n.time === minTime;
+        const tSec = n.time * beatToSec;
+        return Math.abs(tSec - now) < 0.3;
+      });
+      targets.forEach(n => {
+        const el = document.querySelector(`[data-midi="${nameToMidi(n.note)}"]`);
+        if (el && !el.classList.contains('pressed')) {
+          el.classList.add(n.hand === 'L' ? 'next-up-L' : 'next-up');
+        }
+      });
+    }
+  }
+
   // Hit line
-  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.strokeStyle = synthWaitMode ? 'rgba(6,182,212,0.5)' : 'rgba(255,255,255,0.2)';
   ctx.lineWidth = 2*dpr;
   ctx.setLineDash([8*dpr, 4*dpr]);
   ctx.beginPath(); ctx.moveTo(0, H-2*dpr); ctx.lineTo(W, H-2*dpr); ctx.stroke();
   ctx.setLineDash([]);
+
+  // Wait Mode 안내 텍스트
+  if (synthWaitMode && !synthPaused) {
+    const unplayed = synthNotes.filter(n => !n.played);
+    if (unplayed.length > 0) {
+      const minTime = Math.min(...unplayed.map(n => n.time));
+      const nowBeat = now / beatToSec;
+      if (Math.abs(nowBeat - minTime) < 0.05) {
+        ctx.fillStyle = 'rgba(6,182,212,0.85)';
+        ctx.font = `bold ${13*dpr}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('🐢 정답 키를 누르세요', W/2, 28*dpr);
+      }
+    }
+  }
 
   // Particles
   particles = particles.filter(p => {
@@ -1743,8 +1881,8 @@ function stopSynthesia() {
   particles = []; judgmentTexts = [];
   const canvas = document.getElementById('synth-canvas');
   if (canvas) { const c=canvas.getContext('2d'); if(c) c.clearRect(0,0,canvas.width,canvas.height); }
-  document.querySelectorAll('.guide,.hit-perfect,.hit-good,.hit-miss').forEach(el => {
-    el.classList.remove('guide','hit-perfect','hit-good','hit-miss');
+  document.querySelectorAll('.guide,.hit-perfect,.hit-good,.hit-miss,.next-up,.next-up-L').forEach(el => {
+    el.classList.remove('guide','hit-perfect','hit-good','hit-miss','next-up','next-up-L');
   });
 }
 
@@ -1762,14 +1900,24 @@ document.getElementById('synth-canvas').addEventListener('click', () => { if (sy
 
 document.getElementById('btn-play-synth').addEventListener('click', () => {
   synthPracticeMode = false;
+  synthWaitMode = document.getElementById('wait-mode').checked;
   const songKey = document.getElementById('song-select').value;
   const song = SONGS[songKey];
   if (!song) return;
-  startSynthesia(song.notes, song.bpm, document.getElementById('auto-play').checked, null);
+  // wait 모드는 자동 끄기
+  const auto = synthWaitMode ? false : document.getElementById('auto-play').checked;
+  startSynthesia(song.notes, song.bpm, auto, null);
 });
 document.getElementById('btn-stop-synth').addEventListener('click', stopSynthesia);
 document.getElementById('speed').addEventListener('input', e => {
   document.getElementById('speed-val').textContent = (e.target.value/100).toFixed(1)+'x';
+});
+// Wait 모드와 자동 모드 상호 배타
+document.getElementById('wait-mode').addEventListener('change', e => {
+  if (e.target.checked) document.getElementById('auto-play').checked = false;
+});
+document.getElementById('auto-play').addEventListener('change', e => {
+  if (e.target.checked) document.getElementById('wait-mode').checked = false;
 });
 
 // Populate song select with categories
