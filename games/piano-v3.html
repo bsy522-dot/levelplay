@@ -237,7 +237,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
   <div class="panel" id="panel-synth">
     <div class="ctrl-bar">
       <label>곡 <select id="song-select"></select></label>
-      <label>속도 <input type="range" id="speed" min="30" max="200" value="100"><span id="speed-val">1.0x</span></label>
+      <label title="30% 매우 느림 ~ 200% 빠름">속도 <input type="range" id="speed" min="30" max="200" value="100"><span id="speed-val">1.0x</span></label>
       <button class="btn btn-primary" id="btn-play-synth">▶ 재생</button>
       <button class="btn btn-secondary" id="btn-stop-synth">■ 정지</button>
       <label><input type="checkbox" id="auto-play"> 자동</label>
@@ -1380,20 +1380,29 @@ function openLesson(id) {
   document.getElementById('lesson-desc').textContent = lesson.desc;
   // BPM: lesson에 명시된 BPM, 없으면 기본 100
   const baseBPM = lesson.bpm || 100;
+  // 속도 슬라이더 자동 설정 (사용자가 Synthesia 탭에서 다시 조절 가능)
+  const setSpeed = (pct) => {
+    document.getElementById('speed').value = String(pct);
+    document.getElementById('speed-val').textContent = (pct/100).toFixed(1)+'x';
+  };
   document.getElementById('btn-demo').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
+    setSpeed(100);
     startSynthesia(lesson.notes, baseBPM, true, null);
   };
   document.getElementById('btn-wait').onclick = () => {
     synthPracticeMode = false; synthWaitMode = true;
+    setSpeed(50); // 초보자: 절반 속도 (노트 떨어지는 시각 속도)
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-practice').onclick = () => {
     synthPracticeMode = true; synthWaitMode = false;
-    startSynthesia(lesson.notes, Math.round(baseBPM * 0.65), false, null);
+    setSpeed(70); // 연습: 70%
+    startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-test').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
+    setSpeed(100);
     startSynthesia(lesson.notes, baseBPM, false, id);
   };
 }
@@ -1657,7 +1666,8 @@ function synthLoop() {
 
   let now = (performance.now() - synthStartTime) / 1000;
   const beatToSec = 60 / (synthBPM * synthSpeed);
-  const pxPerSec = H * 0.55;
+  // wait 모드는 노트가 화면에 더 오래 보이도록 천천히 떨어짐
+  const pxPerSec = H * (synthWaitMode ? 0.35 : 0.55);
 
   // === Wait Mode: 다음 미연주 노트가 hit line에 도달하면 시간 정지 ===
   if (synthWaitMode && !synthAutoPlay) {
