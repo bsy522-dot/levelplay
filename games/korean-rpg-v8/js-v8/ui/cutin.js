@@ -38,19 +38,64 @@ const UNIT_TYPE_EMOJI = {
 };
 
 let _portraitMap = null;
+let _portraitSvgGetter = null;
 
 /** 포트레이트 JSON 주입 (korean-rpg-v8.html에서 로드 후 등록) */
 export function registerPortraits(portraitsData) {
   _portraitMap = portraitsData || null;
 }
 
+/** SVG 일러스트 getter 주입 — getter(id) -> svg string | null
+ *  (portrait_art.js의 getPortraitSVG를 v8.html에서 등록) */
+export function registerPortraitArt(getter) {
+  _portraitSvgGetter = (typeof getter === 'function') ? getter : null;
+}
+
+function resolvePortraitId(unit) {
+  if (!unit) return null;
+  return unit.portrait || unit.portraitId || unit.id || null;
+}
+
+function resolveSVG(unit) {
+  if (!_portraitSvgGetter) return null;
+  const id = resolvePortraitId(unit);
+  if (!id) return null;
+  return _portraitSvgGetter(id) || null;
+}
+
 function resolveEmoji(unit) {
   if (!unit) return '❓';
   if (unit.emoji) return unit.emoji;
-  const id = unit.id || unit.portraitId;
+  const id = resolvePortraitId(unit);
   if (id && _portraitMap && _portraitMap[id]?.emoji) return _portraitMap[id].emoji;
   if (unit.unitType && UNIT_TYPE_EMOJI[unit.unitType]) return UNIT_TYPE_EMOJI[unit.unitType];
   return unit.team === 'enemy' ? '👹' : '⚔️';
+}
+
+function resolveImage(unit) {
+  if (!unit) return null;
+  const id = resolvePortraitId(unit);
+  if (id && _portraitMap && _portraitMap[id]?.image) return _portraitMap[id].image;
+  return null;
+}
+
+/** PNG image 우선, 없으면 SVG, 그래도 없으면 emoji fallback */
+function paintPortrait(el, unit) {
+  if (!el) return;
+  const img = resolveImage(unit);
+  if (img) {
+    el.innerHTML = `<img src="${img}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:14px;display:block">`;
+    el.classList.add('v8-cutin-portrait-svg');
+    return;
+  }
+  const svg = resolveSVG(unit);
+  if (svg) {
+    el.innerHTML = svg;
+    el.classList.add('v8-cutin-portrait-svg');
+  } else {
+    el.textContent = resolveEmoji(unit);
+    el.classList.remove('v8-cutin-portrait-svg');
+  }
 }
 
 function resolveName(unit) {
@@ -150,13 +195,13 @@ export class CutinOverlay {
       this._skill.style.setProperty('--v8-elem-color', color);
       this._skill.textContent = `${skillName}!`;
 
-      // 좌측=공격자, 우측=피격자
-      this._lPort.textContent = resolveEmoji(attacker);
+      // 좌측=공격자, 우측=피격자 (SVG 우선)
+      paintPortrait(this._lPort, attacker);
       this._lName.textContent = atkName;
       this._lName.style.color = atkIsAlly ? '#FFD700' : '#ff6666';
       this._lInfo.textContent = `[${attacker?.unitType || ''}] ${resolveTitle(attacker)}`.trim();
 
-      this._rPort.textContent = resolveEmoji(target);
+      paintPortrait(this._rPort, target);
       this._rName.textContent = tgtName;
       this._rName.style.color = atkIsAlly ? '#ff6666' : '#FFD700';
       this._rInfo.textContent = `[${target?.unitType || ''}] ${resolveTitle(target)}`.trim();

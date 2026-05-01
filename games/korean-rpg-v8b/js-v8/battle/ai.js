@@ -98,6 +98,9 @@ export async function enemyTurn(enemyUnits, allUnits, map, difficulty = 'normal'
     let target = pickTarget(e, allies, difficulty);
     if (!target) { e.acted = true; continue; }
 
+    // 영걸전 톤 — 행동 직전 카메라 포커스 (호스트가 카메라 lerp 처리)
+    await context.onAnim?.('focus', e, { x: e.x, y: e.y });
+
     // 3) 이미 사거리 내?
     if (manhattan(e, target) <= (e.rng || 1)) {
       await _doAttackOrSkill(e, target, actingEnemies, allUnits, map, context);

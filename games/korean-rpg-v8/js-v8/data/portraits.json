@@ -1,6 +1,6 @@
 {
   "hwanin":         { "emoji": "🌅", "color": "#ffd700", "bgColor": "#fff4cc", "desc": "환인 — 하늘의 아버지" },
-  "hwanwoong":      { "emoji": "👑", "color": "#8a6a2a", "bgColor": "#ffe8a0", "desc": "환웅 — 천왕" },
+  "hwanwoong":      { "emoji": "👑", "color": "#8a6a2a", "bgColor": "#ffe8a0", "desc": "환웅 — 천왕", "image": "./assets/portraits/hwanoong.png" },
   "pungbaek":       { "emoji": "🌬️", "color": "#3a5a6a", "bgColor": "#cce0f0", "desc": "풍백 — 바람의 신장" },
   "usa":            { "emoji": "🌧️", "color": "#2a3a6a", "bgColor": "#c0d0ff", "desc": "우사 — 비의 신장" },
   "unsa":           { "emoji": "☁️", "color": "#5a5a6a", "bgColor": "#e0e0f0", "desc": "운사 — 구름의 신장" },

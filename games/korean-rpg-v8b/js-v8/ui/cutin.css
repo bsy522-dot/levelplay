@@ -50,6 +50,23 @@
   margin-bottom: 8px;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
 }
+/* SVG 컨테이너 모드 — 영걸전 톤 일러스트 */
+#v8-cutin .v8-cutin-portrait.v8-cutin-portrait-svg {
+  width: 140px;
+  height: 196px;
+  font-size: 0;
+  padding: 0;
+  border: 2px solid rgba(196,149,106,0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.7), inset 0 0 14px rgba(255,215,0,0.15);
+  overflow: hidden;
+  background: #0a0814;
+}
+#v8-cutin .v8-cutin-portrait.v8-cutin-portrait-svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 #v8-cutin .v8-cutin-name {
   font-size: 24px;
   font-weight: 900;
@@ -171,6 +188,10 @@
     padding: 10px 12px;
   }
   #v8-cutin .v8-cutin-portrait { font-size: 56px; }
+  #v8-cutin .v8-cutin-portrait.v8-cutin-portrait-svg {
+    width: 96px;
+    height: 134px;
+  }
   #v8-cutin .v8-cutin-name     { font-size: 18px; }
   #v8-cutin .v8-cutin-skill    { font-size: 20px; }
   #v8-cutin .v8-dmg-value      { font-size: 36px; }

@@ -29,12 +29,13 @@ export const State = {
 function makeDebugOverlay() {
   const el = document.createElement('div');
   el.id = 'v8-debug';
+  // 모바일 우상단 메뉴(설정) 가림 방지 — 우하단으로 이동, 작게.
   el.style.cssText = [
-    'position:fixed','top:4px','right:6px','z-index:9999',
-    'font-family:"Noto Serif KR",monospace','font-size:11px',
+    'position:fixed','bottom:6px','right:6px','z-index:9999',
+    'font-family:"Noto Serif KR",monospace','font-size:10px',
     'color:#ffd700','background:rgba(0,0,0,.55)',
-    'padding:4px 8px','border-radius:4px','pointer-events:none',
-    'white-space:pre','line-height:1.4',
+    'padding:3px 7px','border-radius:4px','pointer-events:none',
+    'white-space:pre','line-height:1.35','opacity:.85',
   ].join(';');
   el.textContent = 'FPS —\nTRI —';
   document.body.appendChild(el);

@@ -691,7 +691,8 @@ import { initActionQueue, updateActionQueue, setActionQueueActive, hideActionQue
 import { DialogueRunner, showDialogue, hideDialogue, isDialogueActive } from './js-v8/ui/dialogue.js';
 import { openSettings, getSettings, saveSettings, onSettingsChange } from './js-v8/ui/settings.js';
 import { showInventory, showItemSelect, showVictory, showDefeat, showEpisodeSelect, showTitleLite, closeAllOverlays } from './js-v8/ui/menus.js';
-import { CutinOverlay, registerPortraits as registerCutinPortraits } from './js-v8/ui/cutin.js';
+import { CutinOverlay, registerPortraits as registerCutinPortraits, registerPortraitArt as registerCutinPortraitArt } from './js-v8/ui/cutin.js';
+import { getPortraitSVG } from './js-v8/ui/portrait_art.js';
 
 // ★ 비서B P1 — exploration 씬 (마을) 모듈
 import {
@@ -726,6 +727,8 @@ try {
   DLOG('데이터 로드 완료', Object.keys(DATA));
   // CutinOverlay 에게 portraits 전달 (emoji 매핑용)
   registerCutinPortraits(portraits);
+  // 영걸전 톤 SVG 일러스트 등록 (portrait_art.js → cutin.js)
+  registerCutinPortraitArt(getPortraitSVG);
 } catch (e) {
   window.__v8ShowError('데이터 JSON 로드 실패\n\n' + (e.stack || e.message));
   throw e;
@@ -1382,6 +1385,28 @@ function wireTurnManager(tm) {
   });
 }
 
+// ── 적 턴 카메라 포커스 (영걸전 — 행동하는 적에게 부드럽게 lerp) ────
+async function panTacticalTo(worldX, worldZ, durationMs = 380) {
+  const sw = GameState.switcher;
+  if (!sw) return;
+  const tac = sw.tactical;
+  const st = tac?.userData?._tactical;
+  if (!st) return;
+  const sx = st.target.x, sz = st.target.z;
+  if (Math.hypot(sx - worldX, sz - worldZ) < 0.4) return;
+  const t0 = performance.now();
+  await new Promise((resolve) => {
+    function step() {
+      const t = Math.min(1, (performance.now() - t0) / durationMs);
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      st.target.x = sx + (worldX - sx) * e;
+      st.target.z = sz + (worldZ - sz) * e;
+      if (t < 1) requestAnimationFrame(step); else resolve();
+    }
+    requestAnimationFrame(step);
+  });
+}
+
 // ── 적 턴 실행 ─────────────────────────────────
 async function runEnemyTurn() {
   const tm = GameState.turnManager;
@@ -1389,8 +1414,16 @@ async function runEnemyTurn() {
     weather: GameState.weather,
     skillsDb: DATA.skills,
     onAnim: async (kind, unit, targetPos) => {
-      // 이동 애니 (간단 lerp)
+      // 행동 직전 카메라 포커스
+      if (kind === 'focus') {
+        const w = gridToWorld(unit.x, unit.y);
+        await panTacticalTo(w.x, w.z, 360);
+        return;
+      }
+      // 이동 애니 (간단 lerp + 카메라 동행)
       if (kind === 'move' && unit.mesh) {
+        const w = gridToWorld(targetPos.x, targetPos.y);
+        panTacticalTo(w.x, w.z, 300);
         await animateMove(unit.mesh, unit, { x: targetPos.x, y: targetPos.y }, 300);
       }
     },

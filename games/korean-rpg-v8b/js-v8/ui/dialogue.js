@@ -194,17 +194,23 @@ export class DialogueRunner {
     this.speakerEl.style.color = p.color && p.color !== '#888' ? p.color : '#FFD700';
 
     // 큰 화자 portrait 갱신 (영걸전 스타일 일러스트 영역)
+    // 우선순위: PNG image > SVG > emoji fallback
     const bp = document.getElementById('v8-dlg-bigportrait');
     if (bp) {
       if (line.text && pid) {
-        const svg = getPortraitSVG(pid);
-        if (svg) {
-          bp.innerHTML = svg;
+        if (p.image) {
+          bp.innerHTML = `<img src="${p.image}" alt="${pid}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;display:block">`;
           bp.classList.add('v8-svg-art');
         } else {
-          bp.innerHTML = '';
-          bp.textContent = p.emoji;
-          bp.classList.remove('v8-svg-art');
+          const svg = getPortraitSVG(pid);
+          if (svg) {
+            bp.innerHTML = svg;
+            bp.classList.add('v8-svg-art');
+          } else {
+            bp.innerHTML = '';
+            bp.textContent = p.emoji;
+            bp.classList.remove('v8-svg-art');
+          }
         }
         bp.dataset.name = line.speaker || pid;
         bp.style.setProperty('--bp-color', p.color || '#ffd700');
