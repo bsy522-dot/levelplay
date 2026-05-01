@@ -16,7 +16,7 @@
 <script>
 // 🚨 페이지 진입 즉시 구버전 SW + 캐시 강제 폭파 (v6.1+ 반영 보장)
 (function(){
-  var TARGET_BUILD = 'v6.2';
+  var TARGET_BUILD = 'v6.3';
   var SEEN_KEY = 'boxingV5_seen_build';
   try {
     var seen = localStorage.getItem(SEEN_KEY);
@@ -45,7 +45,8 @@
 :root{--bg:#0a0a10;--panel:rgba(14,14,22,.95);--accent:#e63946;--accent2:#ff6b35;--text:#f0f0f0;--dim:#6a6a7e;--border:rgba(255,255,255,.08);--green:#22c55e;--yellow:#eab308;--blue:#3b82f6;--gold:#ffd700}
 html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;overflow:hidden;height:100vh;width:100vw;touch-action:none;user-select:none}
 #c3d{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
-.overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(10,10,16,.92);backdrop-filter:blur(8px)}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(10,10,16,.65) 0%,rgba(10,10,16,.55) 50%,rgba(10,10,16,.75) 100%);backdrop-filter:blur(2px)}
+#mainMenu, #careerMenu, #trainingMenu, #recordsMenu, #missionsMenu{background:linear-gradient(180deg,rgba(10,10,16,.40) 0%,rgba(10,10,16,.30) 50%,rgba(10,10,16,.55) 100%)}
 .overlay.hidden{display:none}
 .menu-title{font-size:48px;font-weight:900;letter-spacing:6px;color:var(--accent);text-shadow:0 0 30px rgba(230,57,70,.5);margin-bottom:8px}
 .menu-sub{font-size:14px;color:var(--dim);margin-bottom:30px;letter-spacing:2px}
@@ -312,7 +313,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v6.2-CACHE-PURGE-FORCE';
+const BUILD_VERSION = 'v6.3-CINEMATIC-TRANSPARENT';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 
@@ -519,9 +520,9 @@ function loadMascot() {
   const loader = new THREE.GLTFLoader();
   loader.load('RobotExpressive.glb', gltf => {
     mascotModel = gltf.scene;
-    mascotModel.scale.setScalar(0.7);
-    mascotModel.position.set(0, 0, 0);
-    mascotModel.rotation.y = Math.PI / 6;
+    mascotModel.scale.setScalar(1.4);
+    mascotModel.position.set(0, 1.0, 0);
+    mascotModel.rotation.y = Math.PI / 8;
     mascotModel.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     scene.add(mascotModel);
     mascotMixer = new THREE.AnimationMixer(mascotModel);
@@ -532,11 +533,13 @@ function loadMascot() {
     const punch = mascotActions['Punch'];
     if (punch && idle) {
       setInterval(() => {
-        if (currentScreen !== 'main' || !mascotModel.visible) return;
+        if (!mascotModel || !mascotModel.visible) return;
+        const onMenuScreen = !currentScreen || ['main','career','training','records','missions','metronome'].includes(currentScreen);
+        if (!onMenuScreen) return;
         idle.fadeOut(0.2);
         punch.reset().setLoop(THREE.LoopOnce, 1).fadeIn(0.2).play();
         punch.clampWhenFinished = true;
-      }, 5000);
+      }, 4000);
       mascotMixer.addEventListener('finished', e => {
         if (e.action === punch) {
           punch.fadeOut(0.3);
@@ -3040,11 +3043,16 @@ function update3DScene(time, dt) {
     camera.position.set(1.5, 5, 8);
     camera.lookAt(0, 3, 1);
   } else {
-    // Menu scene - slow camera rotation
-    camera.position.x = Math.sin(time * 0.15) * 8;
-    camera.position.z = Math.cos(time * 0.15) * 8;
-    camera.position.y = 4 + Math.sin(time * 0.1) * 0.5;
-    camera.lookAt(0, 1.5, 0);
+    // Menu scene - 다이내믹 시네마틱 카메라 (회전 + 줌인/아웃 + 상하)
+    const orbit = time * 0.18;
+    const zoom = 6.5 + Math.sin(time * 0.25) * 2.2; // 줌 4.3 ~ 8.7
+    const height = 3.5 + Math.sin(time * 0.13) * 1.5; // 높이 2 ~ 5
+    camera.position.x = Math.sin(orbit) * zoom;
+    camera.position.z = Math.cos(orbit) * zoom;
+    camera.position.y = height;
+    // 카메라가 마스코트 (위쪽)을 약간 위로 올려다보거나 내려다봄
+    const lookY = 1.8 + Math.sin(time * 0.08) * 0.6;
+    camera.lookAt(0, lookY, 0);
   }
 
   updateParticles3D(dt);
@@ -3061,8 +3069,13 @@ function gameLoop() {
   else if (currentScreen === 'train') updateTraining(dt);
 
   if (mascotMixer) mascotMixer.update(dt);
-  // 마스코트는 메뉴 화면에서만 표시
-  setMascotVisible(currentScreen === 'main' || currentScreen === 'aiCoach' || currentScreen === undefined);
+  // 마스코트는 모든 메뉴 화면에서 표시 (전투/트레이닝 제외)
+  const _isMenuScreen = !currentScreen || ['main','career','training','records','missions','aiCoach','metronome','multiplayer'].includes(currentScreen);
+  setMascotVisible(_isMenuScreen);
+  // 마스코트 자동 회전 (모든 메뉴 화면에서)
+  if (_isMenuScreen && mascotModel) {
+    mascotModel.rotation.y = Math.sin(time * 0.4) * 0.6;
+  }
 
   if (_replayActive) updateKOReplay();
   else update3DScene(time, dt);
