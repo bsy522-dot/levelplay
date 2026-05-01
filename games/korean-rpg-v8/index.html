@@ -2241,8 +2241,8 @@ async function playExplorationScene(scene) {
     return { exited: false };
   }
 
-  function _hideMobileUI() { dpad.style.display = 'none'; interactBtn.style.display = 'none'; }
-  function _showMobileUI() { dpad.style.display = ''; interactBtn.style.display = ''; }
+  function _hideMobileUI() { hideDPad(); }
+  function _showMobileUI() { showDPad(); }
 
   let _npcArrowEl = null, _npcArrowRaf = null;
   function _showNPCArrow(mesh) {
