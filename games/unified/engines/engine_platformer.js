@@ -52,12 +52,13 @@
   function sin(v){ return Math.sin(v); }
   function FN(s){ return s+'px "Jua",sans-serif'; }
 
-  // ===== CHARACTERS (1단 점프만으로 모든 발판 도달 가능: jmp²/(2*GR)=169px ≥ 모든 발판 차이 140px) =====
+  // ===== CHARACTERS (1단 도달 256px → 모든 발판/모든 레벨 여유 통과) =====
+  // jmp -16 → 16²/1 = 256px (v2/ACT2 최대 발판 차이 150px 대비 100px 여유)
   const CHARACTERS = [
-    { id:'romi',   name:'로미',   desc:'균형잡힌 능력!',    spr:'rs', portrait:'rp', color:'#FF6B9D', spd:3.0, jmp:-13.0, jmpFreq:300, special:'하트 파워' },
-    { id:'hatchu', name:'하츄핑', desc:'빠르고 높이 점프!', spr:'hs', portrait:'hp', color:'#FF69B4', spd:3.4, jmp:-14.0, jmpFreq:420, special:'사랑의 힘' },
-    { id:'baro',   name:'바로핑', desc:'튼튼하고 강해!',    spr:'ba', portrait:'ba', color:'#FFD700', spd:2.8, jmp:-12.5, jmpFreq:220, special:'정의 펀치' },
-    { id:'chacha', name:'차차핑', desc:'불꽃처럼 빨라!',    spr:'ch', portrait:'ch', color:'#FF6347', spd:3.6, jmp:-12.5, jmpFreq:360, special:'불꽃 대시' },
+    { id:'romi',   name:'로미',   desc:'균형잡힌 능력!',    spr:'rs', portrait:'rp', color:'#FF6B9D', spd:3.2, jmp:-16.0, jmpFreq:300, special:'하트 파워' },
+    { id:'hatchu', name:'하츄핑', desc:'빠르고 높이 점프!', spr:'hs', portrait:'hp', color:'#FF69B4', spd:3.6, jmp:-17.0, jmpFreq:420, special:'사랑의 힘' },
+    { id:'baro',   name:'바로핑', desc:'튼튼하고 강해!',    spr:'ba', portrait:'ba', color:'#FFD700', spd:3.0, jmp:-15.5, jmpFreq:220, special:'정의 펀치' },
+    { id:'chacha', name:'차차핑', desc:'불꽃처럼 빨라!',    spr:'ch', portrait:'ch', color:'#FF6347', spd:3.8, jmp:-15.5, jmpFreq:360, special:'불꽃 대시' },
   ];
 
   // ===== HAPTIC (모바일 진동 — 데스크탑 무시) =====
