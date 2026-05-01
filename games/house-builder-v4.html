@@ -1155,70 +1155,107 @@ function animate(){
 // SAMPLE HOUSE (?demo=1)
 // ============================================================
 function buildSampleHouse(){
+  // ===== 정상 발자국 설계 =====
+  // 1F 발자국 10x9: 거실[0-6,0-5] + 주방[6-10,0-3] + 욕실[6-9,3-6] + 침실[0-4,5-9]
+  // 2F 발자국 8x6 (1F 위 정렬): 침실[0-4,0-4] + 침실[4-8,0-4] + 발코니[4-8,4-6]
+  // 옥상: [1-7,0-6]  (2F 발자국 안)
   const SAMPLE={
     rooms:{
       '-1':[],
       '1':[
-        {id:1,type:'living',x:-3,z:-2,w:6,h:5,wallColor:'#f5f0e8',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,furniture:[
-          {id:101,type:'sofa',c:'#8888cc',rx:1.2,rz:1,w:2.2,h:1,rot:0},
-          {id:102,type:'tv',c:'#333',rx:1.2,rz:4,w:1.5,h:0.3,rot:0},
-          {id:103,type:'table',c:'#bb8844',rx:4.5,rz:2.5,w:1.5,h:1,rot:0},
-          {id:104,type:'chair',c:'#996633',rx:5.2,rz:3.5,w:0.5,h:0.5,rot:0},
-          {id:105,type:'plant',c:'#5a8a5a',rx:0.5,rz:4.5,w:0.4,h:0.4,rot:0},
-          {id:106,type:'lamp',c:'#ffd700',rx:5.5,rz:0.5,w:0.3,h:0.3,rot:0},
-          {id:107,type:'rug',c:'#b08060',rx:1.5,rz:2,w:2,h:1.5,rot:0}
+        // 거실 (6x5) - 좌상
+        {id:1,type:'living',x:0,z:0,w:6,h:5,wallColor:'#f5f0e8',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,_ceiling:true,furniture:[
+          {id:101,type:'sofa',c:'#8888cc',rx:3,rz:1,w:2.2,h:1,rot:0},
+          {id:102,type:'tv',c:'#333',rx:3,rz:4.5,w:1.5,h:0.3,rot:0},
+          {id:103,type:'table',c:'#bb8844',rx:1.2,rz:2.5,w:1.5,h:1,rot:0},
+          {id:104,type:'chair',c:'#996633',rx:1.2,rz:3.5,w:0.5,h:0.5,rot:0},
+          {id:105,type:'plant',c:'#5a8a5a',rx:0.4,rz:0.4,w:0.4,h:0.4,rot:0},
+          {id:106,type:'lamp',c:'#ffd700',rx:5.6,rz:0.4,w:0.3,h:0.3,rot:0},
+          {id:107,type:'rug',c:'#b08060',rx:3,rz:2.5,w:2,h:1.5,rot:0}
         ]},
-        {id:2,type:'kitchen',x:4,z:-2,w:4,h:3,wallColor:'#c0e8d8',floorColor:'#c8c8c8',floorType:'tile',material:1,windowStyle:1,furniture:[
+        // 주방 (4x3) - 거실 우측 인접
+        {id:2,type:'kitchen',x:6,z:0,w:4,h:3,wallColor:'#c0e8d8',floorColor:'#c8c8c8',floorType:'tile',material:1,windowStyle:1,_ceiling:true,furniture:[
           {id:201,type:'fridge',c:'#ccc',rx:0.5,rz:0.5,w:0.8,h:0.8,rot:0},
-          {id:202,type:'table',c:'#bb8844',rx:2,rz:1.5,w:1.5,h:1,rot:0}
+          {id:202,type:'table',c:'#bb8844',rx:2,rz:1.5,w:1.5,h:1,rot:0},
+          {id:203,type:'chair',c:'#996633',rx:3.5,rz:2.5,w:0.5,h:0.5,rot:0}
         ]},
-        {id:3,type:'bedroom',x:-3,z:4,w:4,h:4,wallColor:'#d8c8e8',floorColor:'#9090a0',floorType:'carpet',material:0,windowStyle:2,furniture:[
-          {id:301,type:'bed',c:'#ccaaaa',rx:2,rz:1.5,w:2,h:1.4,rot:0},
-          {id:302,type:'wardrobe',c:'#8b6b3d',rx:0.5,rz:3.5,w:1.5,h:0.5,rot:0},
-          {id:303,type:'desk',c:'#aa9966',rx:3,rz:3.5,w:1.4,h:0.7,rot:0},
-          {id:304,type:'lamp',c:'#ffd700',rx:3.5,rz:0.5,w:0.3,h:0.3,rot:0}
+        // 욕실 (3x3) - 주방 아래 인접
+        {id:3,type:'bathroom',x:6,z:3,w:3,h:3,wallColor:'#c0d8f0',floorColor:'#e0ddd0',floorType:'marble',material:6,windowStyle:1,_ceiling:true,furniture:[
+          {id:301,type:'bathtub',c:'#dde',rx:1,rz:0.6,w:1.5,h:0.8,rot:0},
+          {id:302,type:'washer',c:'#eee',rx:2.5,rz:2.4,w:0.7,h:0.7,rot:0}
         ]},
-        {id:4,type:'bathroom',x:2,z:4,w:3,h:3,wallColor:'#c0d8f0',floorColor:'#e0ddd0',floorType:'marble',material:6,windowStyle:1,furniture:[
-          {id:401,type:'bathtub',c:'#dde',rx:0.8,rz:1.5,w:1.5,h:0.8,rot:0},
-          {id:402,type:'washer',c:'#eee',rx:2.3,rz:0.5,w:0.7,h:0.7,rot:0}
+        // 침실 (4x4) - 거실 아래 인접
+        {id:4,type:'bedroom',x:0,z:5,w:4,h:4,wallColor:'#d8c8e8',floorColor:'#9090a0',floorType:'carpet',material:0,windowStyle:2,_ceiling:true,furniture:[
+          {id:401,type:'bed',c:'#ccaaaa',rx:2,rz:1,w:2,h:1.4,rot:0},
+          {id:402,type:'wardrobe',c:'#8b6b3d',rx:0.8,rz:3.5,w:1.5,h:0.5,rot:0},
+          {id:403,type:'desk',c:'#aa9966',rx:2.7,rz:3.5,w:1.4,h:0.7,rot:0},
+          {id:404,type:'lamp',c:'#ffd700',rx:0.5,rz:0.5,w:0.3,h:0.3,rot:0}
         ]}
       ],
       '2':[
-        {id:5,type:'bedroom',x:-3,z:-2,w:4,h:4,wallColor:'#f0d0c0',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,furniture:[
-          {id:501,type:'bed',c:'#ccaaaa',rx:2,rz:1.5,w:2,h:1.4,rot:0},
-          {id:502,type:'bookshelf',c:'#775533',rx:0.5,rz:3.5,w:1.2,h:0.4,rot:0}
+        // 침실1 (4x4) [0~4]x[0~4] - 1F 거실 좌측 위
+        {id:5,type:'bedroom',x:0,z:0,w:4,h:4,wallColor:'#f0d0c0',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,_ceiling:true,furniture:[
+          {id:501,type:'bed',c:'#ccaaaa',rx:2,rz:1,w:2,h:1.4,rot:0},
+          {id:502,type:'desk',c:'#aa9966',rx:0.8,rz:3.5,w:1.4,h:0.7,rot:0},
+          {id:503,type:'lamp',c:'#ffd700',rx:3.5,rz:3.5,w:0.3,h:0.3,rot:0}
         ]},
-        {id:6,type:'balcony',x:2,z:-2,w:4,h:2,wallColor:'#a0906a',floorColor:'#888',floorType:'stone',material:2,windowStyle:0,furniture:[
-          {id:601,type:'plant',c:'#5a8a5a',rx:1,rz:1,w:0.4,h:0.4,rot:0},
-          {id:602,type:'plant',c:'#5a8a5a',rx:3,rz:1,w:0.4,h:0.4,rot:0}
+        // 침실2 (4x4) [4~8]x[0~4] - 1F 거실 우측 + 주방 위
+        {id:6,type:'bedroom',x:4,z:0,w:4,h:4,wallColor:'#c0e8d8',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,_ceiling:true,furniture:[
+          {id:601,type:'bed',c:'#ccaaaa',rx:2,rz:1,w:2,h:1.4,rot:0},
+          {id:602,type:'bookshelf',c:'#775533',rx:0.7,rz:3.7,w:1.2,h:0.4,rot:0}
+        ]},
+        // 침실3 (4x4) [0~4]x[4~8] - 1F 거실/침실 z경계 위 (옥상 정렬용)
+        {id:7,type:'bedroom',x:0,z:4,w:4,h:4,wallColor:'#d8c8e8',floorColor:'#b08050',floorType:'wood',material:0,windowStyle:2,_ceiling:true,furniture:[
+          {id:701,type:'bed',c:'#ccaaaa',rx:2,rz:1,w:2,h:1.4,rot:0},
+          {id:702,type:'wardrobe',c:'#8b6b3d',rx:0.8,rz:3.5,w:1.5,h:0.5,rot:0}
+        ]},
+        // 발코니 (4x2) [4~8]x[3~5]은 거실/욕실 위지만 침실3/2와 z겹침 발생
+        // → [4~8]x[6~8]로 이동: 침실2/3 와 인접, 1F 욕실/빈공간 경계
+        // 더 안전하게: [4~8]x[4~6] 유지하되 사용자에게 캔틸레버는 자연스러움 명시
+        {id:8,type:'balcony',x:4,z:4,w:4,h:2,wallColor:'#a0906a',floorColor:'#888',floorType:'stone',material:2,windowStyle:0,furniture:[
+          {id:801,type:'plant',c:'#5a8a5a',rx:0.5,rz:1,w:0.4,h:0.4,rot:0},
+          {id:802,type:'plant',c:'#5a8a5a',rx:3.5,rz:1,w:0.4,h:0.4,rot:0}
         ]}
       ],
       '3':[],
+      // 옥상 (6x6) [1~7]x[0~6] - 2F 발자국 안 완전 정렬
       '4':[
-        {id:7,type:'rooftop',x:-3,z:-1,w:6,h:6,wallColor:'#7a7a8a',floorColor:'#888',floorType:'stone',material:2,windowStyle:0,furniture:[
-          {id:701,type:'plant',c:'#5a8a5a',rx:1,rz:1,w:0.4,h:0.4,rot:0},
-          {id:702,type:'plant',c:'#5a8a5a',rx:5,rz:5,w:0.4,h:0.4,rot:0},
-          {id:703,type:'lamp',c:'#ffd700',rx:3,rz:3,w:0.3,h:0.3,rot:0}
+        {id:9,type:'rooftop',x:1,z:0,w:6,h:6,wallColor:'#7a7a8a',floorColor:'#888',floorType:'stone',material:2,windowStyle:0,furniture:[
+          {id:901,type:'plant',c:'#5a8a5a',rx:1,rz:1,w:0.4,h:0.4,rot:0},
+          {id:902,type:'plant',c:'#5a8a5a',rx:5,rz:5,w:0.4,h:0.4,rot:0},
+          {id:903,type:'plant',c:'#5a8a5a',rx:1,rz:5,w:0.4,h:0.4,rot:0},
+          {id:904,type:'plant',c:'#5a8a5a',rx:5,rz:1,w:0.4,h:0.4,rot:0},
+          {id:905,type:'lamp',c:'#ffd700',rx:3,rz:3,w:0.3,h:0.3,rot:0}
         ]}
       ]
     },
+    // 외부 요소 - 집 주변 자연 배치 (1F 발자국 [0~10]x[0~9] 가정)
     exteriors:[
-      {id:801,type:'tree',x:-8,z:-6},
-      {id:802,type:'tree',x:10,z:-6},
-      {id:803,type:'tree',x:-8,z:8},
-      {id:804,type:'tree',x:10,z:8},
-      {id:805,type:'fence',x:-6,z:-8},
-      {id:806,type:'fence',x:-3,z:-8},
-      {id:807,type:'fence',x:0,z:-8},
-      {id:808,type:'fence',x:3,z:-8},
-      {id:809,type:'fence',x:6,z:-8},
-      {id:810,type:'pool',x:-6,z:6},
-      {id:811,type:'flower',x:8,z:6},
-      {id:812,type:'flower',x:8,z:3},
-      {id:813,type:'driveway',x:6,z:-3}
+      // 집 입구쪽 진입로 (북쪽)
+      {id:1001,type:'driveway',x:3,z:-3.5},
+      // 진입로 양옆 꽃밭
+      {id:1002,type:'flower',x:-1,z:-2},
+      {id:1003,type:'flower',x:7,z:-2},
+      // 4모서리 큰 나무
+      {id:1004,type:'tree',x:-3,z:-3},
+      {id:1005,type:'tree',x:13,z:-3},
+      {id:1006,type:'tree',x:-3,z:12},
+      {id:1007,type:'tree',x:13,z:12},
+      // 측면 나무
+      {id:1008,type:'tree',x:-3,z:5},
+      {id:1009,type:'tree',x:13,z:5},
+      // 뒷마당 수영장
+      {id:1010,type:'pool',x:5,z:13},
+      // 울타리 (앞마당 가장자리)
+      {id:1011,type:'fence',x:-2,z:-5},
+      {id:1012,type:'fence',x:2,z:-5},
+      {id:1013,type:'fence',x:6,z:-5},
+      {id:1014,type:'fence',x:10,z:-5},
+      // 추가 꽃밭
+      {id:1015,type:'flower',x:11,z:7}
     ],
-    nextId:900,
-    budget:280000
+    nextId:1100,
+    budget:175000
   };
   rooms=normalizeRooms(SAMPLE.rooms);
   exteriors=SAMPLE.exteriors;
@@ -1226,13 +1263,13 @@ function buildSampleHouse(){
   budget=SAMPLE.budget;
   currentFloor=1;updFloor();updBudget();updatePanel();
   rebuildAll();
-  // 카메라를 멋진 각도로
-  camera.position.set(20,18,22);
-  controls.target.set(2,1,2);controls.update();
-  // 시간대를 저녁으로 (낭만적)
+  // 카메라: 집 발자국 중심(5, 2, 4.5) 보면서 비스듬한 각도 (천장 노출 최소화)
+  camera.position.set(22,12,24);
+  controls.target.set(5,3,4.5);controls.update();
+  // 저녁 시간대 (석양)
   timeOfDay=1;document.getElementById('timeIcon').textContent=TIMES[1];
   setTimeOfDay(1,lights,sky,scene);
-  status('🏠 샘플 하우스 - 2층집 + 옥상 + 정원');
+  status('🏠 샘플 하우스 - 2층 + 옥상 + 정원 (예산 200K)');
 }
 
 // INIT
