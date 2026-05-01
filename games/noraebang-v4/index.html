@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0a1e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>StarVoice v4 - 노래방</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#555;border-radius:3px}
+body{background:#0a0818;color:#eee;font-family:-apple-system,'Malgun Gothic','맑은 고딕',sans-serif;overflow:hidden;height:100vh;user-select:none}
+#app{height:100vh;display:flex;flex-direction:column}
+button{font-family:inherit;cursor:pointer}
+
+/* Header */
+#header{background:linear-gradient(135deg,#1a1040,#2a1060);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #6a3aaa;flex-shrink:0;z-index:10}
+#header h1{font-size:20px;color:#ff6ab0;text-shadow:0 0 20px rgba(255,106,176,.5)}
+.hdr-btns{display:flex;gap:6px}
+.hdr-btns button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 12px;border-radius:18px;font-size:12px;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.hdr-btns button:hover,.hdr-btns button.active{background:rgba(255,106,176,.3);border-color:#ff6ab0}
+
+/* Song Select */
+#songSelect{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;align-content:start}
+.cat-header{grid-column:1/-1;font-size:14px;font-weight:700;color:#a855f7;margin:8px 0 2px;padding-left:4px;border-left:3px solid #a855f7}
+.song-card{background:linear-gradient(135deg,rgba(40,20,80,.8),rgba(60,30,100,.6));border:2px solid rgba(255,106,176,.15);border-radius:14px;padding:14px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;min-height:0}
+.song-card:hover{border-color:#ff6ab0;transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,106,176,.2)}
+.song-card .sc-icon{font-size:32px;float:left;margin-right:10px;flex-shrink:0}
+.song-card .sc-title{font-size:15px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.song-card .sc-info{font-size:11px;color:#aaa;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.song-card .sc-stars{color:#ffd700;font-size:13px;margin-top:4px}
+.song-card .sc-high{font-size:10px;color:#8f8;margin-top:2px}
+.song-card .sc-grade{position:absolute;top:8px;right:10px;font-size:20px;font-weight:900;opacity:.3}
+.diff-badge{position:absolute;bottom:8px;right:10px;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+.diff-easy{background:#4caf50;color:#fff}.diff-medium{background:#ff9800;color:#fff}.diff-hard{background:#f44336;color:#fff}
+
+/* Sing Screen */
+#singScreen{flex:1;display:none;flex-direction:column;position:relative}
+#pitchArea{flex:1;position:relative;background:linear-gradient(180deg,#0a0818,#15102a);overflow:hidden}
+#shaderCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#pitchCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+#particleCanvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2}
+
+/* Lyrics */
+#lyricsArea{height:120px;background:linear-gradient(180deg,rgba(30,15,60,.95),rgba(20,10,40,.98));border-top:2px solid #6a3aaa;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 16px;flex-shrink:0}
+#lyricsArea .cur-lyric{font-size:26px;font-weight:900;color:#fff;text-align:center;text-shadow:0 0 20px rgba(255,106,176,.6);min-height:34px;display:flex;align-items:center;gap:2px;flex-wrap:wrap;justify-content:center}
+#lyricsArea .cur-lyric .syl{transition:color .15s,transform .15s;display:inline-block}
+#lyricsArea .cur-lyric .syl.sung{color:#ffd700;transform:scale(1.15)}
+#lyricsArea .cur-lyric .syl.active{color:#ff6ab0;transform:scale(1.2)}
+#lyricsArea .nxt-lyric{font-size:14px;color:rgba(255,255,255,.3);text-align:center;margin-top:6px;min-height:20px}
+.lyric-prog{width:80%;max-width:500px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden}
+.lyric-prog-bar{height:100%;background:linear-gradient(90deg,#ff6ab0,#a855f7);border-radius:2px;transition:width .1s linear}
+
+/* Score HUD */
+#scoreHUD{position:absolute;top:8px;right:12px;text-align:right;z-index:5}
+#scoreHUD .sv{font-size:32px;font-weight:900;color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.5)}
+#scoreHUD .cv{font-size:13px;color:#8f8}
+#scoreHUD .pn{font-size:12px;color:#aaa;margin-top:2px}
+#scoreHUD .line-fb{font-size:11px;margin-top:4px;font-weight:700;min-height:16px}
+
+/* Pitch Meter */
+#pitchMeter{position:absolute;left:10px;top:8px;bottom:8px;width:36px;background:rgba(255,255,255,.04);border-radius:6px;z-index:5;overflow:hidden}
+#pitchMeter .mt{position:absolute;left:0;width:100%;height:20px;background:rgba(76,175,80,.25);border:2px solid #4caf50;border-radius:3px;transition:top .12s}
+#pitchMeter .mu{position:absolute;left:0;width:100%;height:6px;background:#ff6ab0;border-radius:3px;transition:top .06s;box-shadow:0 0 8px rgba(255,106,176,.6)}
+#pitchMeter .ml{position:absolute;bottom:3px;width:100%;text-align:center;font-size:8px;color:#888}
+
+/* Timer */
+#timerBar{position:absolute;top:0;left:0;right:0;height:3px;z-index:5}
+#timerFill{height:100%;background:linear-gradient(90deg,#ff6ab0,#a855f7);transition:width .3s linear}
+
+/* Controls overlay */
+#singControls{position:absolute;bottom:128px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:6;opacity:.7;transition:opacity .2s}
+#singControls:hover{opacity:1}
+#singControls button{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+#singControls button.active{background:rgba(255,106,176,.4);border-color:#ff6ab0}
+
+/* Result */
+#resultScreen{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;overflow-y:auto}
+.res-title{font-size:24px;font-weight:900;color:#ff6ab0;margin-bottom:8px}
+.res-grade{font-size:80px;font-weight:900;margin:8px 0}
+.grade-S{color:#ffd700;text-shadow:0 0 40px rgba(255,215,0,.6)}.grade-A{color:#4caf50;text-shadow:0 0 30px rgba(76,175,80,.5)}
+.grade-B{color:#2196f3}.grade-C{color:#ff9800}.grade-D{color:#f44336}
+.res-score{font-size:48px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,.4)}
+.res-stars{font-size:36px;margin:10px 0}
+.res-detail{font-size:13px;color:#aaa;margin-bottom:6px;line-height:1.8}
+.res-bars{width:280px;margin:10px auto}
+.res-bar-row{display:flex;align-items:center;margin:4px 0;font-size:12px}
+.res-bar-row .lbl{width:60px;text-align:right;margin-right:8px;color:#ccc}
+.res-bar-row .bar{flex:1;height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden}
+.res-bar-row .bar-fill{height:100%;border-radius:5px;transition:width 1s}
+.res-bar-row .val{width:36px;text-align:right;margin-left:6px;color:#fff;font-weight:700}
+.res-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.res-btns button{padding:10px 24px;border:none;border-radius:20px;font-size:14px;font-weight:700;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-retry{background:linear-gradient(135deg,#ff6ab0,#a855f7);color:#fff}
+.btn-back{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)!important}
+.btn-play{background:rgba(76,175,80,.3);color:#8f8;border:1px solid rgba(76,175,80,.4)!important}
+.btn-share{background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff}
+
+/* Practice Modal */
+#practiceModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:50;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#practiceModal.show{display:flex}
+.pm-box{background:linear-gradient(135deg,#1a1040,#2a1060);border:2px solid #6a3aaa;border-radius:16px;padding:24px;max-width:360px;width:100%}
+.pm-box h3{color:#ff6ab0;margin-bottom:16px;font-size:18px}
+.pm-row{display:flex;align-items:center;justify-content:space-between;margin:10px 0;font-size:14px}
+.pm-row label{color:#ccc}
+.pm-row input[type=range]{width:120px;accent-color:#ff6ab0}
+.pm-row select{background:#1a1040;color:#fff;border:1px solid #6a3aaa;border-radius:6px;padding:4px 8px;font-size:13px}
+.pm-row .val{color:#ff6ab0;font-weight:700;width:40px;text-align:right}
+.pm-btns{display:flex;gap:8px;margin-top:16px;justify-content:center}
+.pm-btns button{padding:8px 20px;border:none;border-radius:16px;font-size:13px;font-weight:700}
+
+/* Mic Prompt */
+#micPrompt{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:100;flex-direction:column;align-items:center;justify-content:center}
+#micPrompt.show{display:flex}
+#micPrompt .mi{font-size:56px;margin-bottom:14px}
+#micPrompt p{font-size:16px;color:#ccc;margin-bottom:16px;text-align:center;line-height:1.6;padding:0 20px}
+#micPrompt button{padding:12px 32px;background:linear-gradient(135deg,#ff6ab0,#a855f7);border:none;color:#fff;border-radius:24px;font-size:15px;font-weight:700}
+#micPrompt .skip-btn{background:transparent;color:#888;font-size:13px;margin-top:10px;border:none;text-decoration:underline}
+
+/* High Score Modal */
+#hsModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:50;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#hsModal.show{display:flex}
+.hs-box{background:linear-gradient(135deg,#1a1040,#2a1060);border:2px solid #6a3aaa;border-radius:16px;padding:24px;max-width:400px;width:100%;max-height:70vh;overflow-y:auto}
+.hs-box h3{color:#ff6ab0;margin-bottom:12px}
+.hs-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.hs-row .hs-name{color:#fff}.hs-row .hs-sc{color:#ffd700;font-weight:700}
+.hs-row .hs-gr{font-weight:900;margin-left:6px}
+
+@media(max-width:600px){
+  #songSelect{grid-template-columns:1fr;padding:10px;gap:8px}
+  .song-card{padding:12px}
+  #lyricsArea .cur-lyric{font-size:20px}
+  #scoreHUD .sv{font-size:24px}
+  #singControls button{width:32px;height:32px;font-size:12px}
+}
+</style>
+<style>
+/* =====================================================================
+   KaraokeFX - VFX Stylesheet (pure CSS, mobile-responsive)
+   Pairs with vfx_effects.js (window.KaraokeFX)
+   ===================================================================== */
+
+/* ---------- Layer container ---------- */
+.fx-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* ---------- Confetti canvas ---------- */
+.fx-confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   Keyframes
+   ===================================================================== */
+@keyframes float-up-fade {
+  0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+  20%  { transform: translate(-50%, -10px) scale(1.15); opacity: 1; }
+  60%  { transform: translate(-50%, -32px) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -64px) scale(0.9); opacity: 0; }
+}
+
+@keyframes ring-pulse {
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0.9; }
+  60%  { opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(var(--combo-scale, 2)); opacity: 0; }
+}
+
+@keyframes syllable-bounce {
+  0%   { transform: translateY(0) scale(1); }
+  35%  { transform: translateY(-18%) scale(1.18); }
+  70%  { transform: translateY(0) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes screen-flash {
+  0%   { opacity: 0; }
+  30%  { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+
+@keyframes perfect-glow {
+  0%   { filter: drop-shadow(0 0 0 #fff8); transform: rotate(0deg) scale(0.6); }
+  35%  { filter: drop-shadow(0 0 18px #FFD93D); transform: rotate(45deg) scale(1.2); }
+  100% { filter: drop-shadow(0 0 8px #FFD93D); transform: rotate(90deg) scale(1); }
+}
+
+@keyframes burst-out {
+  0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 0px))) scale(0.4); opacity: 0; }
+}
+
+@keyframes pop-in {
+  0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scale(1.18); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes fade-icon {
+  0%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* =====================================================================
+   Judgment burst container
+   ===================================================================== */
+.fx-judge {
+  position: absolute;
+  width: clamp(80px, 14vw, 140px);
+  height: clamp(80px, 14vw, 140px);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.fx-judge svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+             fade-icon 0.85s ease-out both;
+}
+
+.fx-judge-text {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 0);
+  font-weight: 900;
+  font-size: clamp(18px, 3.6vw, 32px);
+  letter-spacing: 1px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px currentColor;
+  animation: float-up-fade 0.85s ease-out both;
+  white-space: nowrap;
+}
+
+/* Variant tints */
+.fx-judge-perfect svg { animation: perfect-glow 0.6s ease-out both, fade-icon 0.85s ease-out both; }
+.fx-judge-perfect .fx-judge-text { font-size: clamp(22px, 4.4vw, 40px); }
+.fx-judge-great   svg { filter: drop-shadow(0 0 8px #6BCB77aa); }
+.fx-judge-good    svg { filter: drop-shadow(0 0 6px #4D96FFaa); }
+.fx-judge-miss    svg { filter: drop-shadow(0 0 4px #FF6B6Baa); opacity: 0.85; }
+.fx-judge-miss    .fx-judge-text { font-size: clamp(16px, 3vw, 26px); opacity: 0.9; }
+
+/* =====================================================================
+   Particle ring (judge bursts)
+   ===================================================================== */
+.fx-particle {
+  position: absolute;
+  width: clamp(6px, 1vw, 10px);
+  height: clamp(6px, 1vw, 10px);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: burst-out 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* =====================================================================
+   Screen flash (PERFECT)
+   ===================================================================== */
+.fx-screen-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #FFD93D88 0%, transparent 70%);
+  animation: screen-flash 0.18s ease-out both;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   Combo pulse ring
+   ===================================================================== */
+.fx-combo-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(80px, 12vw, 140px);
+  height: clamp(80px, 12vw, 140px);
+  border-radius: 50%;
+  border: 4px solid #FFD93D;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: ring-pulse 0.8s ease-out both;
+  box-shadow: 0 0 16px #FFD93D88, inset 0 0 16px #FFD93D44;
+}
+
+.fx-combo-lo  { border-color: #4D96FF; box-shadow: 0 0 14px #4D96FF99, inset 0 0 14px #4D96FF44; }
+.fx-combo-mid { border-color: #6BCB77; box-shadow: 0 0 18px #6BCB77aa, inset 0 0 18px #6BCB7755; }
+.fx-combo-hi  { border-color: #FFD93D; border-width: 6px; box-shadow: 0 0 32px #FFD93D, inset 0 0 24px #FFD93Daa; }
+
+/* =====================================================================
+   Lyrics syllable bounce
+   ===================================================================== */
+.fx-syllable-bounce {
+  display: inline-block;
+  animation: syllable-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform-origin: 50% 100%;
+  color: #FFD93D;
+  text-shadow: 0 2px 8px #FFD93D88, 0 0 4px #fff;
+}
+
+/* =====================================================================
+   Reduced motion fallback
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .fx-judge svg,
+  .fx-judge-text,
+  .fx-particle,
+  .fx-combo-ring,
+  .fx-syllable-bounce,
+  .fx-screen-flash {
+    animation-duration: 0.1s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* =====================================================================
+   Mobile tweaks
+   ===================================================================== */
+@media (max-width: 480px) {
+  .fx-judge { width: clamp(60px, 22vw, 100px); height: clamp(60px, 22vw, 100px); }
+  .fx-judge-text { font-size: clamp(16px, 5vw, 24px); }
+  .fx-combo-ring { width: clamp(60px, 22vw, 110px); height: clamp(60px, 22vw, 110px); }
+}
+
+/* =====================================================================
+   Compose hooks for v3 host elements
+   ===================================================================== */
+#pitchArea .fx-syllable-bounce {
+  will-change: transform;
+}
+
+#particleCanvas + .fx-confetti-canvas {
+  z-index: 1;
+}
+
+/* Stage glow helper - matches stageLight() output style for consistency */
+.fx-stage-pulse {
+  animation: stage-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes stage-pulse {
+  0%, 100% { box-shadow: inset 0 0 30px 4px rgba(255, 217, 61, 0.4); }
+  50%      { box-shadow: inset 0 0 60px 14px rgba(255, 217, 61, 0.8); }
+}
+
+/* SVG icon defaults (svg primitives drawn by JS) */
+.fx-star-svg,
+.fx-check-svg,
+.fx-circle-svg,
+.fx-x-svg {
+  display: block;
+  overflow: visible;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <h1>StarVoice v4</h1>
+    <div class="hdr-btns">
+      <button id="btnMic">마이크 OFF</button>
+      <button id="btnHS">기록</button>
+    </div>
+  </div>
+  <div id="songSelect"></div>
+  <div id="singScreen">
+    <div id="timerBar"><div id="timerFill"></div></div>
+    <div id="pitchArea">
+      <canvas id="shaderCanvas"></canvas>
+      <canvas id="pitchCanvas"></canvas>
+      <canvas id="particleCanvas"></canvas>
+    </div>
+    <div id="pitchMeter"><div class="mt"></div><div class="mu"></div><div class="ml">음정</div></div>
+    <div id="scoreHUD">
+      <div class="sv" id="sDisp">0</div>
+      <div class="cv" id="cDisp"></div>
+      <div class="pn" id="pNote"></div>
+      <div class="line-fb" id="lineFb"></div>
+    </div>
+    <div id="singControls">
+      <button id="btnGuide" title="가이드 멜로디">♪</button>
+      <button id="btnPause" title="일시정지">⏸</button>
+      <button id="btnStop" title="중지">⏹</button>
+      <button id="btnKeyUp" title="키 올리기">▲</button>
+      <button id="btnKeyDn" title="키 내리기">▼</button>
+    </div>
+    <div id="lyricsArea">
+      <div class="cur-lyric" id="curLyric"></div>
+      <div class="nxt-lyric" id="nxtLyric"></div>
+      <div class="lyric-prog"><div class="lyric-prog-bar" id="lyricProg"></div></div>
+    </div>
+    <div id="dbgPanel" style="display:none;position:absolute;right:8px;top:50px;background:rgba(0,0,0,.7);color:#0f0;font-family:monospace;font-size:10px;padding:6px 8px;border-radius:6px;z-index:20;line-height:1.4;pointer-events:none;min-width:140px">
+      <div>freq: <span id="dbgFreq">-</span> Hz</div>
+      <div>note: <span id="dbgNote">-</span></div>
+      <div>cents: <span id="dbgCents">-</span></div>
+      <div>clarity: <span id="dbgClarity">-</span></div>
+      <div>RMS: <span id="dbgRMS">-</span></div>
+      <div>fps: <span id="dbgFps">-</span></div>
+    </div>
+  </div>
+  <div id="resultScreen"></div>
+</div>
+<div id="micPrompt">
+  <div class="mi">🎤</div>
+  <p>마이크 사용 권한이 필요합니다.<br>음정 측정을 위해 허용해 주세요.</p>
+  <button id="btnAllowMic">마이크 허용</button>
+  <button class="skip-btn" id="btnSkipMic">마이크 없이 진행</button>
+</div>
+<div id="practiceModal"><div class="pm-box" id="pmBox"></div></div>
+<div id="hsModal"><div class="hs-box" id="hsBox"></div></div>
+
+<script>
+/* KaraokeAudio v4 — robust pitch engine
+ * Replaces the naive autocorrelation in noraebang-v3.html (lines 448-465).
+ * Implements McLeod Pitch Method (NSDF) inline + octave correction + median filter
+ * + per-note scoring + user-range estimation. Pure vanilla browser. No imports.
+ */
+(function (global) {
+  'use strict';
+
+  // ---------- Internal state ----------
+  var ctx = null;          // AudioContext
+  var ana = null;          // AnalyserNode
+  var BUF = 2048;
+  var buf = null;          // Float32Array time-domain
+  var freqBuf = null;      // Float32Array freq-domain (dB)
+
+  // History for octave correction (200 ms rolling)
+  var freqHist = [];       // {t, f}
+  // 5-tap median window
+  var medianWin = [];
+
+  // Per-note accumulators
+  var note = null;         // {target, id, voiced, total, centsSum, framesAbs}
+
+  // Range estimation (first 5 sec)
+  var rangeStartT = 0;
+  var rangeFreqs = [];
+  var rangeDoneAt = 0;     // performance.now() when 5 s done
+
+  // Last spectral metrics
+  var lastRMS = 0;
+  var lastCentroid = 0;
+  var lastFlatness = 0;
+
+  // Last pitch detection result (for debug panel)
+  var _lastDetection = null;
+
+  // ---------- Init ----------
+  function init(audioCtx, analyserNode, bufSize) {
+    ctx = audioCtx;
+    ana = analyserNode;
+    BUF = bufSize || 2048;
+    buf = new Float32Array(BUF);
+    freqBuf = new Float32Array(ana ? ana.frequencyBinCount : BUF / 2);
+    resetSession();
+    rangeStartT = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    rangeDoneAt = 0;
+    rangeFreqs = [];
+  }
+
+  function resetSession() {
+    freqHist = [];
+    medianWin = [];
+    note = null;
+  }
+
+  // ---------- McLeod Pitch Method (NSDF) ----------
+  // NSDF[t] = 2 * sum_{j}(x[j]*x[j+t]) / sum_{j}(x[j]^2 + x[j+t]^2)
+  // Range [-1,1]. Peaks => period candidates. Avoids amplitude bias.
+  function nsdf(x) {
+    var n = x.length;
+    var half = n >> 1; // only first half of lags is reliable
+    var out = new Float32Array(half);
+    // Brute-force time-domain (BUF=2048 -> ~2M ops, fine for per-frame).
+    for (var t = 0; t < half; t++) {
+      var ac = 0, m = 0;
+      for (var j = 0; j < n - t; j++) {
+        var a = x[j], b = x[j + t];
+        ac += a * b;
+        m += a * a + b * b;
+      }
+      out[t] = m > 0 ? (2 * ac) / m : 0;
+    }
+    return out;
+  }
+
+  // Pick highest peak after first positive zero crossing, threshold-relative.
+  function pickPeak(ns) {
+    var n = ns.length;
+    // skip downhill-from-1 region
+    var i = 1;
+    while (i < n - 1 && ns[i] > 0) i++; // descend below zero
+    while (i < n - 1 && ns[i] <= 0) i++; // climb back above
+    if (i >= n - 1) return -1;
+    // collect local maxima
+    var peakIdx = -1, peakVal = -1;
+    for (; i < n - 1; i++) {
+      if (ns[i] > ns[i - 1] && ns[i] >= ns[i + 1] && ns[i] > peakVal) {
+        peakVal = ns[i];
+        peakIdx = i;
+      }
+    }
+    return peakIdx;
+  }
+
+  // Parabolic interpolation around index k of array a — sub-sample peak.
+  // x* = k + 0.5*(a[k-1]-a[k+1]) / (a[k-1]-2a[k]+a[k+1])
+  function parabolic(a, k) {
+    if (k <= 0 || k >= a.length - 1) return { x: k, y: a[k] };
+    var l = a[k - 1], c = a[k], r = a[k + 1];
+    var denom = (l - 2 * c + r);
+    var dx = denom !== 0 ? 0.5 * (l - r) / denom : 0;
+    if (!isFinite(dx) || dx > 1 || dx < -1) dx = 0;
+    var y = c - 0.25 * (l - r) * dx;
+    return { x: k + dx, y: y };
+  }
+
+  // ---------- Spectral helpers ----------
+  function computeRMS(x) {
+    var s = 0;
+    for (var i = 0; i < x.length; i++) s += x[i] * x[i];
+    return Math.sqrt(s / x.length);
+  }
+
+  // Spectral flatness = geo-mean / arith-mean of magnitude bins. ~1 = noise, ~0 = tonal.
+  function computeFlatnessAndCentroid() {
+    if (!ana || !freqBuf) return { flat: 0, cent: 0 };
+    ana.getFloatFrequencyData(freqBuf); // dB
+    var n = freqBuf.length;
+    var mags = new Float32Array(n);
+    var sumMag = 0, logSum = 0, valid = 0;
+    var sr = ctx ? ctx.sampleRate : 44100;
+    var binHz = sr / 2 / n;
+    var weighted = 0;
+    for (var i = 1; i < n; i++) { // skip DC
+      var db = freqBuf[i];
+      if (db < -120) db = -120;
+      var lin = Math.pow(10, db / 20);
+      mags[i] = lin;
+      sumMag += lin;
+      weighted += lin * (i * binHz);
+      if (lin > 1e-10) { logSum += Math.log(lin); valid++; }
+    }
+    var flat = 0;
+    if (valid > 0 && sumMag > 0) {
+      var geo = Math.exp(logSum / valid);
+      var arith = sumMag / (n - 1);
+      flat = arith > 0 ? geo / arith : 0;
+    }
+    var cent = sumMag > 0 ? weighted / sumMag : 0;
+    return { flat: flat, cent: cent };
+  }
+
+  // ---------- Octave correction ----------
+  function trimHist(now) {
+    var cutoff = now - 200; // 200 ms window
+    while (freqHist.length && freqHist[0].t < cutoff) freqHist.shift();
+  }
+
+  function octaveCorrect(f, now) {
+    trimHist(now);
+    if (!freqHist.length) return f;
+    // geometric mean of recent freqs
+    var s = 0;
+    for (var i = 0; i < freqHist.length; i++) s += Math.log(freqHist[i].f);
+    var mean = Math.exp(s / freqHist.length);
+    var d0 = Math.abs(1200 * Math.log2(f / mean));
+    if (d0 <= 600) return f;
+    // try octave alternatives
+    var fUp = f * 2, fDn = f / 2;
+    var dUp = Math.abs(1200 * Math.log2(fUp / mean));
+    var dDn = Math.abs(1200 * Math.log2(fDn / mean));
+    var best = f, bd = d0;
+    if (dUp < bd) { best = fUp; bd = dUp; }
+    if (dDn < bd) { best = fDn; bd = dDn; }
+    return best;
+  }
+
+  // ---------- 5-tap median ----------
+  function medianFilter(f) {
+    medianWin.push(f);
+    if (medianWin.length > 5) medianWin.shift();
+    var sorted = medianWin.slice().sort(function (a, b) { return a - b; });
+    return sorted[Math.floor(sorted.length / 2)];
+  }
+
+  // ---------- Public: detectPitch ----------
+  function detectPitch() {
+    if (!ctx || !ana || !buf) { _lastDetection = null; return null; }
+    ana.getFloatTimeDomainData(buf);
+
+    // Spectral diagnostics (always update; cheap-ish)
+    var sm = computeFlatnessAndCentroid();
+    lastFlatness = sm.flat;
+    lastCentroid = sm.cent;
+
+    var rms = computeRMS(buf);
+    lastRMS = rms;
+
+    // Voicing gate
+    var voiced = (rms > 0.018) && (sm.flat < 0.5);
+    if (!voiced) { _lastDetection = null; return null; }
+
+    // NSDF
+    var ns = nsdf(buf);
+    var k = pickPeak(ns);
+    if (k < 2) { _lastDetection = null; return null; }
+    var clarity = ns[k];
+    if (clarity < 0.85) { _lastDetection = { freq: 0, clarity: clarity, voiced: false }; return null; }
+
+    // sub-sample peak
+    var refined = parabolic(ns, k);
+    var lag = refined.x;
+    if (lag <= 0) { _lastDetection = null; return null; }
+    var freq = ctx.sampleRate / lag;
+    if (freq < 80 || freq > 1000) { _lastDetection = null; return null; }
+
+    var now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+    // Octave correction
+    var fc = octaveCorrect(freq, now);
+    // Median filter
+    var fm = medianFilter(fc);
+
+    freqHist.push({ t: now, f: fm });
+
+    // Range estimation (first 5 s)
+    if (rangeDoneAt === 0) {
+      if (now - rangeStartT <= 5000) {
+        rangeFreqs.push(fm);
+      } else {
+        rangeDoneAt = now;
+      }
+    }
+
+    // Per-note accumulation
+    if (note && note.target) {
+      var cents = 1200 * Math.log2(fm / note.target);
+      note.voiced++;
+      note.centsSum += cents;
+      note.framesAbs += Math.abs(cents);
+    }
+    if (note) note.total++;
+
+    var _out = { freq: fm, clarity: clarity, voiced: true };
+    _lastDetection = _out;
+    return _out;
+  }
+
+  // ---------- Per-note scoring ----------
+  function startNote(targetFreq, noteId) {
+    note = {
+      target: targetFreq,
+      id: noteId,
+      voiced: 0,
+      total: 0,
+      centsSum: 0,
+      framesAbs: 0
+    };
+  }
+
+  function endNote() {
+    if (!note) return { avgCents: 0, hitFrames: 0, totalFrames: 0, grade: 'MISS' };
+    var avgCents = note.voiced > 0 ? (note.centsSum / note.voiced) : 9999;
+    var abs = Math.abs(avgCents);
+    var grade;
+    if (note.voiced === 0) grade = 'MISS';
+    else if (abs < 25) grade = 'PERFECT';
+    else if (abs < 50) grade = 'GREAT';
+    else if (abs < 100) grade = 'GOOD';
+    else grade = 'MISS';
+    var result = {
+      avgCents: avgCents,
+      hitFrames: note.voiced,
+      totalFrames: note.total,
+      grade: grade
+    };
+    note = null;
+    return result;
+  }
+
+  // ---------- User range estimation ----------
+  function estimateUserRange() {
+    if (rangeFreqs.length < 5) {
+      return { meanFreq: 0, suggestedKeyShift: 0 };
+    }
+    var s = 0;
+    for (var i = 0; i < rangeFreqs.length; i++) s += Math.log(rangeFreqs[i]);
+    var meanFreq = Math.exp(s / rangeFreqs.length);
+    // Compare to A3 (220 Hz) as comfortable mid-vocal anchor.
+    var anchor = 220;
+    var semis = 12 * Math.log2(meanFreq / anchor);
+    var candidates = [-5, -3, -2, 0, 2, 3, 5];
+    var best = 0, bd = 1e9;
+    for (var j = 0; j < candidates.length; j++) {
+      // shift positive => raise melody, so suggested = -round(deltaSemis) approx
+      var d = Math.abs(candidates[j] - (-semis));
+      if (d < bd) { bd = d; best = candidates[j]; }
+    }
+    return { meanFreq: meanFreq, suggestedKeyShift: best };
+  }
+
+  // ---------- Misc getters ----------
+  function getRMS() { return lastRMS; }
+  function getSpectralCentroid() { return lastCentroid; }
+
+  // ---------- Export ----------
+  global.KaraokeAudio = {
+    init: init,
+    detectPitch: detectPitch,
+    resetSession: resetSession,
+    startNote: startNote,
+    endNote: endNote,
+    estimateUserRange: estimateUserRange,
+    getRMS: getRMS,
+    getSpectralCentroid: getSpectralCentroid,
+    getLastDetection: function () { return _lastDetection; }
+  };
+
+})(typeof window !== 'undefined' ? window : this);
+</script>
+
+<script>
+/* KaraokeShader v4 — WebGL2 fluid k-pop background
+ * Domain-warped fbm, audio-reactive, neon purple/pink/gold palette.
+ * API: window.KaraokeShader.{init,resize,setAudio,setCombo,setMode,render,destroy}
+ */
+(function () {
+  'use strict';
+
+  const VERT_SRC = `#version 300 es
+  precision highp float;
+  // Full-screen triangle pair generated from gl_VertexID — no VBO needed.
+  out vec2 vUV;
+  void main() {
+    vec2 p = vec2((gl_VertexID & 1) * 2 - 1, (gl_VertexID & 2) - 1);
+    vUV = p * 0.5 + 0.5;
+    gl_Position = vec4(p, 0.0, 1.0);
+  }`;
+
+  const FRAG_SRC = `#version 300 es
+  precision highp float;
+
+  in vec2 vUV;
+  out vec4 fragColor;
+
+  uniform vec2  uResolution;
+  uniform float uTime;
+  uniform float uRMS;        // 0..1 audio loudness
+  uniform float uCentroid;   // 0..1 spectral centroid (brightness)
+  uniform float uBeat;       // 0..1 beat envelope
+  uniform float uCombo;      // 0..1 normalized combo intensity
+  uniform int   uMode;       // 0 idle, 1 singing, 2 perfect, 3 result
+  uniform float uPerfectStart; // time at which perfect flash began (negative = none)
+
+  // Theme colors (sRGB-ish):
+  const vec3 PURPLE = vec3(0.659, 0.333, 0.969); // #a855f7
+  const vec3 PINK   = vec3(1.000, 0.416, 0.690); // #ff6ab0
+  const vec3 GOLD   = vec3(1.000, 0.843, 0.000); // #ffd700
+
+  // ---- Hash / noise primitives ----
+  // 2D hash → float (cheap, no texture lookup)
+  float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+
+  // Smooth value noise
+  float vnoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    float a = hash21(i);
+    float b = hash21(i + vec2(1.0, 0.0));
+    float c = hash21(i + vec2(0.0, 1.0));
+    float d = hash21(i + vec2(1.0, 1.0));
+    vec2 u = f * f * (3.0 - 2.0 * f); // smoothstep
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+  }
+
+  // 3-octave fbm — cheap, mobile-friendly
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    mat2 R = mat2(0.8, -0.6, 0.6, 0.8); // rotate to break grid alignment
+    for (int i = 0; i < 3; i++) {
+      v += a * vnoise(p);
+      p = R * p * 2.03 + 11.7;
+      a *= 0.5;
+    }
+    return v;
+  }
+
+  // Domain-warped fbm: feeds noise into noise → fluid curtains.
+  float warpedFbm(vec2 p, float t, float warpAmt) {
+    vec2 q = vec2(fbm(p + vec2(0.0, t * 0.20)),
+                  fbm(p + vec2(5.2, 1.3) + t * 0.17));
+    vec2 r = vec2(fbm(p + warpAmt * q + vec2(1.7, 9.2) + t * 0.15),
+                  fbm(p + warpAmt * q + vec2(8.3, 2.8) + t * 0.13));
+    return fbm(p + warpAmt * r);
+  }
+
+  // Tri-color blend across a 0..1 axis (purple→pink→gold).
+  vec3 palette(float x) {
+    x = clamp(x, 0.0, 1.0);
+    vec3 c = mix(PURPLE, PINK, smoothstep(0.0, 0.55, x));
+    c = mix(c, GOLD, smoothstep(0.55, 1.0, x));
+    return c;
+  }
+
+  // Bayer-style hash dither, breaks 8-bit banding.
+  float dither(vec2 frag) {
+    return (hash21(frag) - 0.5) / 255.0;
+  }
+
+  void main() {
+    vec2 uv = vUV;
+    vec2 p = (uv * 2.0 - 1.0);
+    p.x *= uResolution.x / uResolution.y; // aspect-correct
+
+    float t = uTime;
+
+    // Speed and warp scale grow with combo + audio.
+    float speed = 0.35 + 0.85 * uCombo + 0.55 * uRMS;
+    float warpAmt = 1.4 + 1.6 * uCombo + 0.6 * uRMS;
+
+    // Slow drift so the field never sits still even when silent.
+    vec2 base = p * (1.05 + 0.25 * sin(t * 0.07));
+    base += 0.15 * vec2(sin(t * 0.11), cos(t * 0.09));
+
+    float n = warpedFbm(base * 1.4, t * speed, warpAmt);
+
+    // Color axis modulated by another low-freq fbm — keeps zones moving.
+    float zone = fbm(base * 0.6 + vec2(0.0, t * 0.05));
+    float axis = clamp(n * 0.7 + zone * 0.45 + uCentroid * 0.25, 0.0, 1.0);
+
+    vec3 col = palette(axis);
+
+    // Soft vertical curtain falloff — concert spotlight feel.
+    float curtain = smoothstep(0.0, 0.85, 0.85 - abs(uv.y - 0.5) * 0.9);
+    col *= 0.55 + 0.55 * curtain;
+
+    // RMS pulses brightness; centroid biases warmer.
+    float pulse = 1.0 + 0.55 * uRMS + 0.18 * sin(t * 6.2 + uRMS * 8.0);
+    col *= pulse;
+    col = mix(col, col * vec3(1.05, 0.98, 0.85), uCentroid * 0.4);
+
+    // Combo saturates (push away from gray).
+    float lum = dot(col, vec3(0.299, 0.587, 0.114));
+    col = mix(vec3(lum), col, 0.85 + 0.6 * uCombo);
+
+    // Beat: brief radial flash from center, white-warm.
+    float r = length(p);
+    float beatRing = exp(-pow(r * (3.0 - 1.5 * uBeat), 2.0)) * uBeat;
+    col += beatRing * vec3(1.2, 1.0, 0.85) * 0.85;
+
+    // Singing mode: soft golden rim glow on edges.
+    if (uMode == 1) {
+      float rim = smoothstep(0.7, 1.4, r);
+      col += rim * GOLD * 0.18 * (0.5 + 0.5 * uRMS);
+    }
+
+    // Perfect mode: full-screen golden flash decaying over ~0.3s.
+    if (uMode == 2 && uPerfectStart >= 0.0) {
+      float dt = max(0.0, uTime - uPerfectStart);
+      float k = exp(-dt / 0.10) * smoothstep(0.30, 0.0, dt);
+      col = mix(col, GOLD * 1.6, clamp(k, 0.0, 1.0));
+    }
+
+    // Result mode: gentle bloom-ish lift, less motion noise visible.
+    if (uMode == 3) {
+      col = col * 0.85 + GOLD * 0.07;
+    }
+
+    // Vignette to focus on lyrics center.
+    float vig = smoothstep(1.55, 0.35, r);
+    col *= mix(0.65, 1.0, vig);
+
+    // Tone curve + dither.
+    col = col / (col + 0.85);            // Reinhard-ish
+    col = pow(col, vec3(0.92));          // mild gamma lift
+    col += dither(gl_FragCoord.xy);
+
+    fragColor = vec4(col, 1.0);
+  }`;
+
+  const state = {
+    canvas: null,
+    gl: null,
+    program: null,
+    vao: null,
+    uniforms: {},
+    dpr: 1,
+    width: 0,
+    height: 0,
+    rms: 0,
+    centroid: 0.5,
+    beat: 0,
+    combo: 0,
+    mode: 0,
+    perfectStart: -1,
+    lastBeatPulse: 0,
+    startTime: 0,
+    ready: false,
+  };
+
+  function compile(gl, type, src) {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(sh);
+      gl.deleteShader(sh);
+      console.warn('[KaraokeShader] shader compile failed:', log);
+      return null;
+    }
+    return sh;
+  }
+
+  function link(gl, vs, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, vs);
+    gl.attachShader(p, fs);
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      console.warn('[KaraokeShader] link failed:', gl.getProgramInfoLog(p));
+      gl.deleteProgram(p);
+      return null;
+    }
+    return p;
+  }
+
+  function init(canvasElement) {
+    if (!canvasElement) return false;
+    const gl = canvasElement.getContext('webgl2', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: false,
+      powerPreference: 'high-performance',
+    });
+    if (!gl) return false;
+
+    const vs = compile(gl, gl.VERTEX_SHADER, VERT_SRC);
+    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG_SRC);
+    if (!vs || !fs) return false;
+    const program = link(gl, vs, fs);
+    gl.deleteShader(vs);
+    gl.deleteShader(fs);
+    if (!program) return false;
+
+    // Empty VAO — vertex positions are computed from gl_VertexID.
+    const vao = gl.createVertexArray();
+
+    state.canvas = canvasElement;
+    state.gl = gl;
+    state.program = program;
+    state.vao = vao;
+    state.uniforms = {
+      uResolution: gl.getUniformLocation(program, 'uResolution'),
+      uTime: gl.getUniformLocation(program, 'uTime'),
+      uRMS: gl.getUniformLocation(program, 'uRMS'),
+      uCentroid: gl.getUniformLocation(program, 'uCentroid'),
+      uBeat: gl.getUniformLocation(program, 'uBeat'),
+      uCombo: gl.getUniformLocation(program, 'uCombo'),
+      uMode: gl.getUniformLocation(program, 'uMode'),
+      uPerfectStart: gl.getUniformLocation(program, 'uPerfectStart'),
+    };
+    state.startTime = performance.now() / 1000;
+    state.ready = true;
+
+    resize();
+    return true;
+  }
+
+  function resize() {
+    if (!state.canvas || !state.gl) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const cssW = state.canvas.clientWidth || window.innerWidth;
+    const cssH = state.canvas.clientHeight || window.innerHeight;
+    const w = Math.max(1, Math.floor(cssW * dpr));
+    const h = Math.max(1, Math.floor(cssH * dpr));
+    if (state.width !== w || state.height !== h) {
+      state.canvas.width = w;
+      state.canvas.height = h;
+      state.width = w;
+      state.height = h;
+    }
+    state.dpr = dpr;
+    state.gl.viewport(0, 0, w, h);
+  }
+
+  function setAudio(rms, centroid, beat) {
+    if (typeof rms === 'number') state.rms = Math.min(1, Math.max(0, rms));
+    if (typeof centroid === 'number') state.centroid = Math.min(1, Math.max(0, centroid));
+    if (typeof beat === 'number') {
+      const b = Math.min(1, Math.max(0, beat));
+      // Keep peak briefly so a single-frame beat still flashes visibly.
+      state.beat = Math.max(state.beat * 0.86, b);
+    }
+  }
+
+  function setCombo(comboLevel) {
+    const c = typeof comboLevel === 'number' ? comboLevel : 0;
+    // Map 0..30+ → 0..1 with soft knee so long combos saturate gracefully.
+    state.combo = Math.min(1, c / 30);
+  }
+
+  function setMode(mode) {
+    const map = { idle: 0, singing: 1, perfect: 2, result: 3 };
+    const m = typeof mode === 'string' ? (map[mode] ?? 0) : (mode | 0);
+    if (m === 2 && state.mode !== 2) {
+      state.perfectStart = (performance.now() / 1000) - state.startTime;
+    }
+    state.mode = m;
+  }
+
+  function render(time) {
+    if (!state.ready) return;
+    const gl = state.gl;
+    // Decay beat envelope each frame so flashes don't stick.
+    state.beat *= 0.90;
+    if (state.beat < 0.002) state.beat = 0;
+
+    const t = (typeof time === 'number')
+      ? (time / 1000) - state.startTime
+      : (performance.now() / 1000) - state.startTime;
+
+    gl.useProgram(state.program);
+    gl.bindVertexArray(state.vao);
+
+    gl.uniform2f(state.uniforms.uResolution, state.width, state.height);
+    gl.uniform1f(state.uniforms.uTime, t);
+    gl.uniform1f(state.uniforms.uRMS, state.rms);
+    gl.uniform1f(state.uniforms.uCentroid, state.centroid);
+    gl.uniform1f(state.uniforms.uBeat, state.beat);
+    gl.uniform1f(state.uniforms.uCombo, state.combo);
+    gl.uniform1i(state.uniforms.uMode, state.mode);
+    gl.uniform1f(state.uniforms.uPerfectStart, state.perfectStart);
+
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  function destroy() {
+    const gl = state.gl;
+    if (gl) {
+      if (state.program) gl.deleteProgram(state.program);
+      if (state.vao) gl.deleteVertexArray(state.vao);
+      const ext = gl.getExtension('WEBGL_lose_context');
+      if (ext) ext.loseContext();
+    }
+    state.canvas = null;
+    state.gl = null;
+    state.program = null;
+    state.vao = null;
+    state.uniforms = {};
+    state.ready = false;
+    state.beat = 0;
+    state.rms = 0;
+    state.combo = 0;
+    state.mode = 0;
+    state.perfectStart = -1;
+  }
+
+  if (typeof window !== 'undefined') {
+    window.KaraokeShader = { init, resize, setAudio, setCombo, setMode, render, destroy };
+  }
+})();
+</script>
+
+<script>
+/**
+ * KaraokeFX - VFX module for karaoke app v4
+ * Pure vanilla JS + Canvas 2D, no external dependencies.
+ * Provides judgment bursts, combo rings, lyrics tick, confetti, stage light.
+ */
+(function (global) {
+  'use strict';
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  const PALETTE = {
+    PERFECT: '#FFD93D',
+    GREAT: '#6BCB77',
+    GOOD: '#4D96FF',
+    MISS: '#FF6B6B'
+  };
+
+  const CONFETTI_COLORS = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#B084FF', '#FF9F45'];
+
+  let state = {
+    root: null,
+    layer: null,
+    canvas: null,
+    ctx: null,
+    confettiActive: false,
+    confettiRAF: 0,
+    confettiParticles: [],
+    confettiEnd: 0,
+    resizeHandler: null
+  };
+
+  function createEl(tag, cls, parent) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+
+  function createSVG(viewBox) {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', viewBox);
+    svg.setAttribute('xmlns', SVG_NS);
+    return svg;
+  }
+
+  function buildStarSVG(color) {
+    const svg = createSVG('0 0 100 100');
+    svg.setAttribute('class', 'fx-star-svg');
+    const pts = [];
+    for (let i = 0; i < 16; i++) {
+      const angle = (Math.PI * 2 * i) / 16 - Math.PI / 2;
+      const r = i % 2 === 0 ? 48 : 20;
+      pts.push((50 + Math.cos(angle) * r).toFixed(1) + ',' + (50 + Math.sin(angle) * r).toFixed(1));
+    }
+    const poly = document.createElementNS(SVG_NS, 'polygon');
+    poly.setAttribute('points', pts.join(' '));
+    poly.setAttribute('fill', color);
+    poly.setAttribute('stroke', '#fff');
+    poly.setAttribute('stroke-width', '2');
+    svg.appendChild(poly);
+    return svg;
+  }
+
+  function buildCheckSVG(color) {
+    const svg = createSVG('0 0 100 100');
+    svg.setAttribute('class', 'fx-check-svg');
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', 'M 20 50 L 42 72 L 80 28');
+    path.setAttribute('stroke', color);
+    path.setAttribute('stroke-width', '10');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('fill', 'none');
+    svg.appendChild(path);
+    return svg;
+  }
+
+  function buildCircleSVG(color) {
+    const svg = createSVG('0 0 100 100');
+    svg.setAttribute('class', 'fx-circle-svg');
+    const c = document.createElementNS(SVG_NS, 'circle');
+    c.setAttribute('cx', '50');
+    c.setAttribute('cy', '50');
+    c.setAttribute('r', '34');
+    c.setAttribute('stroke', color);
+    c.setAttribute('stroke-width', '8');
+    c.setAttribute('fill', 'none');
+    svg.appendChild(c);
+    return svg;
+  }
+
+  function buildXSVG(color) {
+    const svg = createSVG('0 0 100 100');
+    svg.setAttribute('class', 'fx-x-svg');
+    const p = document.createElementNS(SVG_NS, 'path');
+    p.setAttribute('d', 'M 28 28 L 72 72 M 72 28 L 28 72');
+    p.setAttribute('stroke', color);
+    p.setAttribute('stroke-width', '8');
+    p.setAttribute('stroke-linecap', 'round');
+    p.setAttribute('fill', 'none');
+    svg.appendChild(p);
+    return svg;
+  }
+
+  function spawnParticleRing(x, y, color, count) {
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const p = createEl('span', 'fx-particle');
+      const angle = (Math.PI * 2 * i) / count;
+      const dist = 60 + Math.random() * 30;
+      p.style.setProperty('--tx', (Math.cos(angle) * dist).toFixed(1) + 'px');
+      p.style.setProperty('--ty', (Math.sin(angle) * dist).toFixed(1) + 'px');
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.style.background = color;
+      frag.appendChild(p);
+    }
+    state.layer.appendChild(frag);
+    setTimeout(() => {
+      state.layer.querySelectorAll('.fx-particle').forEach(n => {
+        if (!n._kept) n.remove();
+      });
+    }, 900);
+  }
+
+  function flashScreen() {
+    const f = createEl('div', 'fx-screen-flash', state.layer);
+    setTimeout(() => f.remove(), 200);
+  }
+
+  function judge(grade, x, y) {
+    if (!state.layer) return;
+    const G = (grade || 'GOOD').toUpperCase();
+    const color = PALETTE[G] || PALETTE.GOOD;
+    const wrap = createEl('div', 'fx-judge fx-judge-' + G.toLowerCase(), state.layer);
+    wrap.style.left = (x || window.innerWidth / 2) + 'px';
+    wrap.style.top = (y || window.innerHeight / 2) + 'px';
+
+    let icon = null;
+    if (G === 'PERFECT') {
+      icon = buildStarSVG(color);
+      flashScreen();
+      spawnParticleRing(x, y, color, 12);
+    } else if (G === 'GREAT') {
+      icon = buildCheckSVG(color);
+      spawnParticleRing(x, y, color, 6);
+    } else if (G === 'GOOD') {
+      icon = buildCircleSVG(color);
+      spawnParticleRing(x, y, color, 4);
+    } else {
+      icon = buildXSVG(color);
+    }
+    wrap.appendChild(icon);
+
+    const txt = createEl('div', 'fx-judge-text', wrap);
+    txt.textContent = G;
+    txt.style.color = color;
+
+    setTimeout(() => wrap.remove(), 850);
+  }
+
+  function comboRing(level) {
+    if (!state.layer) return;
+    const lvl = Math.max(1, Math.min(20, level | 0));
+    const ring = createEl('div', 'fx-combo-ring', state.layer);
+    const intensity = lvl >= 20 ? 'hi' : lvl >= 10 ? 'mid' : 'lo';
+    ring.classList.add('fx-combo-' + intensity);
+    ring.style.setProperty('--combo-scale', (1 + lvl * 0.06).toFixed(2));
+    setTimeout(() => ring.remove(), 800);
+  }
+
+  function lyricsTick(syllableEl) {
+    if (!syllableEl) return;
+    syllableEl.classList.remove('fx-syllable-bounce');
+    void syllableEl.offsetWidth;
+    syllableEl.classList.add('fx-syllable-bounce');
+    setTimeout(() => syllableEl.classList.remove('fx-syllable-bounce'), 500);
+  }
+
+  function ensureCanvas() {
+    if (state.canvas) return;
+    const c = document.createElement('canvas');
+    c.className = 'fx-confetti-canvas';
+    state.layer.appendChild(c);
+    state.canvas = c;
+    state.ctx = c.getContext('2d');
+    resizeCanvas();
+    state.resizeHandler = resizeCanvas;
+    window.addEventListener('resize', state.resizeHandler);
+  }
+
+  function resizeCanvas() {
+    if (!state.canvas) return;
+    state.canvas.width = window.innerWidth;
+    state.canvas.height = window.innerHeight;
+  }
+
+  function spawnConfettiParticles(count) {
+    const w = state.canvas.width;
+    state.confettiParticles = [];
+    for (let i = 0; i < count; i++) {
+      state.confettiParticles.push({
+        x: Math.random() * w,
+        y: -20 - Math.random() * 200,
+        w: 6 + Math.random() * 6,
+        h: 10 + Math.random() * 8,
+        rot: Math.random() * Math.PI * 2,
+        vr: (Math.random() - 0.5) * 0.2,
+        vy: 2 + Math.random() * 3,
+        vx: (Math.random() - 0.5) * 0.6,
+        phase: Math.random() * Math.PI * 2,
+        color: CONFETTI_COLORS[i % CONFETTI_COLORS.length]
+      });
+    }
+  }
+
+  function drawConfetti() {
+    const ctx = state.ctx;
+    const h = state.canvas.height;
+    ctx.clearRect(0, 0, state.canvas.width, h);
+    const t = performance.now() / 600;
+    for (let p of state.confettiParticles) {
+      p.phase += 0.05;
+      p.x += p.vx + Math.sin(p.phase) * 0.6;
+      p.y += p.vy;
+      p.rot += p.vr;
+      if (p.y > h + 20) {
+        p.y = -20;
+        p.x = Math.random() * state.canvas.width;
+      }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+  }
+
+  function confettiLoop() {
+    if (!state.confettiActive) return;
+    drawConfetti();
+    if (performance.now() >= state.confettiEnd) {
+      stopConfetti();
+      return;
+    }
+    state.confettiRAF = requestAnimationFrame(confettiLoop);
+  }
+
+  function stopConfetti() {
+    state.confettiActive = false;
+    cancelAnimationFrame(state.confettiRAF);
+    if (state.ctx) state.ctx.clearRect(0, 0, state.canvas.width, state.canvas.height);
+  }
+
+  function confetti(durationMs) {
+    if (!state.layer) return;
+    durationMs = durationMs || 3000;
+    ensureCanvas();
+    spawnConfettiParticles(80);
+    state.confettiActive = true;
+    state.confettiEnd = performance.now() + durationMs;
+    state.confettiRAF = requestAnimationFrame(confettiLoop);
+  }
+
+  function stageLight(color, intensity) {
+    if (!state.root) return;
+    const lvl = Math.max(0, Math.min(1, intensity == null ? 0.6 : intensity));
+    const blur = (30 + lvl * 60) | 0;
+    const spread = (5 + lvl * 15) | 0;
+    state.root.style.boxShadow = `inset 0 0 ${blur}px ${spread}px ${color || '#FFD93D'}`;
+    state.root.style.transition = 'box-shadow 0.3s ease-out';
+  }
+
+  function init(rootEl) {
+    cleanup();
+    state.root = rootEl || document.body;
+    state.layer = createEl('div', 'fx-layer', state.root);
+  }
+
+  function cleanup() {
+    stopConfetti();
+    if (state.resizeHandler) {
+      window.removeEventListener('resize', state.resizeHandler);
+      state.resizeHandler = null;
+    }
+    if (state.layer && state.layer.parentNode) {
+      state.layer.parentNode.removeChild(state.layer);
+    }
+    if (state.root) state.root.style.boxShadow = '';
+    state = {
+      root: null, layer: null, canvas: null, ctx: null,
+      confettiActive: false, confettiRAF: 0,
+      confettiParticles: [], confettiEnd: 0, resizeHandler: null
+    };
+  }
+
+  global.KaraokeFX = {
+    init: init,
+    judge: judge,
+    comboRing: comboRing,
+    lyricsTick: lyricsTick,
+    confetti: confetti,
+    stageLight: stageLight,
+    cleanup: cleanup
+  };
+})(typeof window !== 'undefined' ? window : this);
+</script>
+
+<script>
+// ===================== CONSTANTS =====================
+const C3=130.81,D3=146.83,E3=164.81,F3=174.61,G3=196,A3=220,B3=246.94;
+const C4=261.63,D4=293.66,E4=329.63,F4=349.23,G4=392,A4=440,B4=493.88;
+const C5=523.25,D5=587.33,E5=659.26,F5=698.46,G5=784;
+const NOTE_NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+function freqToNote(f){if(!f||f<=0)return"";const n=12*Math.log2(f/440)+69;const nn=Math.round(n);return NOTE_NAMES[nn%12]+(Math.floor(nn/12)-1);}
+function transpose(f,semi){return f*Math.pow(2,semi/12);}
+
+// ===================== 15 SONGS =====================
+const SONGS=[
+// --- 동요 ---
+{id:1,cat:"동요",title:"학교종이 땡땡땡",icon:"🏫",diff:"쉬움",dc:"diff-easy",bpm:120,
+melody:[
+{t:0,d:.5,f:G4,s:"학"},{t:.5,d:.5,f:G4,s:"교"},{t:1,d:.5,f:A4,s:"종"},{t:1.5,d:.5,f:A4,s:"이"},
+{t:2,d:.5,f:G4,s:"땡"},{t:2.5,d:.5,f:G4,s:"땡"},{t:3,d:1,f:E4,s:"땡"},
+{t:4,d:.5,f:G4,s:"어"},{t:4.5,d:.5,f:G4,s:"서"},{t:5,d:.5,f:E4,s:"모"},{t:5.5,d:.5,f:E4,s:"이"},
+{t:6,d:1,f:D4,s:"자"},
+{t:7,d:.5,f:G4,s:"선"},{t:7.5,d:.5,f:G4,s:"생"},{t:8,d:.5,f:A4,s:"님"},{t:8.5,d:.5,f:A4,s:"이"},
+{t:9,d:.5,f:G4,s:"우"},{t:9.5,d:.5,f:G4,s:"리"},{t:10,d:1,f:E4,s:"를"},
+{t:11,d:.5,f:G4,s:"기"},{t:11.5,d:.5,f:E4,s:"다"},{t:12,d:.5,f:D4,s:"리"},
+{t:12.5,d:.5,f:E4,s:"신"},{t:13,d:1.5,f:C4,s:"다"}
+],lyrics:[{t:0,tx:"학교 종이 땡땡땡"},{t:4,tx:"어서 모이자"},{t:7,tx:"선생님이 우리를"},{t:11,tx:"기다리신다"}],dur:15},
+
+{id:2,cat:"동요",title:"곰 세 마리",icon:"🐻",diff:"쉬움",dc:"diff-easy",bpm:110,
+melody:[
+{t:0,d:.5,f:C4,s:"곰"},{t:.5,d:.5,f:D4,s:"세"},{t:1,d:.5,f:E4,s:"마"},{t:1.5,d:.5,f:C4,s:"리"},
+{t:2,d:.5,f:C4,s:"가"},{t:2.5,d:.5,f:D4,s:"한"},{t:3,d:.5,f:E4,s:"집"},{t:3.5,d:.5,f:C4,s:"에"},
+{t:4,d:.5,f:E4,s:"있"},{t:4.5,d:.5,f:F4,s:"어"},{t:5,d:1,f:G4,s:"~"},
+{t:6,d:.5,f:E4,s:"아"},{t:6.5,d:.5,f:F4,s:"빠"},{t:7,d:1,f:G4,s:"곰"},
+{t:8,d:.3,f:G4,s:"엄"},{t:8.3,d:.3,f:A4,s:"마"},{t:8.6,d:.3,f:G4,s:"곰"},{t:8.9,d:.3,f:F4,s:"~"},
+{t:9.2,d:.5,f:E4,s:"애"},{t:9.7,d:.6,f:C4,s:"기"},
+{t:10.3,d:.7,f:D4,s:"곰"},{t:11,d:.5,f:C4,s:"아"},
+{t:11.5,d:.3,f:G3,s:"빠"},{t:11.8,d:.5,f:C4,s:"곰"},{t:12.3,d:.3,f:D4,s:"은"},
+{t:12.6,d:1,f:E4,s:"뚱"},{t:13.6,d:.5,f:E4,s:"뚱"},{t:14.1,d:.6,f:E4,s:"해"},
+{t:14.7,d:.5,f:C4,s:"엄"},{t:15.2,d:.3,f:G3,s:"마"},{t:15.5,d:.5,f:C4,s:"곰"},{t:16,d:.3,f:D4,s:"은"},
+{t:16.3,d:1,f:E4,s:"날"},{t:17.3,d:.5,f:E4,s:"씬"},{t:17.8,d:.6,f:E4,s:"해"},
+{t:18.4,d:.35,f:G4,s:"애"},{t:18.75,d:.35,f:A4,s:"기"},{t:19.1,d:.35,f:G4,s:"곰"},{t:19.45,d:.35,f:F4,s:"은"},
+{t:19.8,d:.3,f:E4,s:"너"},{t:20.1,d:.3,f:D4,s:"무"},{t:20.4,d:.3,f:E4,s:"귀"},{t:20.7,d:.5,f:C4,s:"여"},
+{t:21.2,d:.8,f:C4,s:"워"},
+{t:22,d:.5,f:D4,s:"으"},{t:22.5,d:.5,f:E4,s:"쓱"},{t:23,d:.5,f:D4,s:"으"},{t:23.5,d:1.5,f:C4,s:"쓱"}
+],lyrics:[{t:0,tx:"곰 세 마리가"},{t:2,tx:"한 집에 있어"},{t:4,tx:"아빠 곰"},{t:6,tx:"엄마 곰"},{t:8,tx:"애기 곰"},{t:10.3,tx:"아빠 곰은 뚱뚱해"},{t:14.7,tx:"엄마 곰은 날씬해"},{t:18.4,tx:"애기 곰은 너무 귀여워"},{t:22,tx:"으쓱으쓱 잘한다"}],dur:26},
+
+{id:3,cat:"동요",title:"나비야",icon:"🦋",diff:"쉬움",dc:"diff-easy",bpm:110,
+melody:[
+{t:0,d:.5,f:G4,s:"나"},{t:.5,d:.5,f:E4,s:"비"},{t:1,d:1,f:E4,s:"야"},
+{t:2,d:.5,f:F4,s:"나"},{t:2.5,d:.5,f:D4,s:"비"},{t:3,d:1,f:D4,s:"야"},
+{t:4,d:.4,f:C4,s:"이"},{t:4.4,d:.4,f:D4,s:"리"},{t:4.8,d:.4,f:E4,s:"날"},
+{t:5.2,d:.4,f:F4,s:"아"},{t:5.6,d:.4,f:G4,s:"오"},{t:6,d:.4,f:G4,s:"너"},{t:6.4,d:.6,f:G4,s:"라"},
+{t:7,d:.5,f:G4,s:"노"},{t:7.5,d:.5,f:E4,s:"랑"},{t:8,d:1,f:E4,s:"나"},
+{t:9,d:.5,f:F4,s:"비"},{t:9.5,d:.5,f:D4,s:"흰"},{t:10,d:1,f:D4,s:"나"},
+{t:11,d:.5,f:C4,s:"비"},{t:11.5,d:.5,f:E4,s:"춤"},{t:12,d:.5,f:G4,s:"을"},
+{t:12.5,d:.5,f:G4,s:"추"},{t:13,d:1.5,f:E4,s:"며"}
+],lyrics:[{t:0,tx:"나비야 나비야"},{t:4,tx:"이리 날아 오너라"},{t:7,tx:"노랑 나비 흰 나비"},{t:11,tx:"춤을 추며 오너라"}],dur:15},
+
+{id:4,cat:"동요",title:"반짝반짝 작은별",icon:"⭐",diff:"쉬움",dc:"diff-easy",bpm:100,
+melody:[
+{t:0,d:.6,f:C4,s:"반"},{t:.6,d:.6,f:C4,s:"짝"},{t:1.2,d:.6,f:G4,s:"반"},{t:1.8,d:.6,f:G4,s:"짝"},
+{t:2.4,d:.6,f:A4,s:"작"},{t:3,d:.6,f:A4,s:"은"},{t:3.6,d:1.2,f:G4,s:"별"},
+{t:4.8,d:.6,f:F4,s:"아"},{t:5.4,d:.6,f:F4,s:"름"},{t:6,d:.6,f:E4,s:"답"},{t:6.6,d:.6,f:E4,s:"게"},
+{t:7.2,d:.6,f:D4,s:"비"},{t:7.8,d:.6,f:D4,s:"치"},{t:8.4,d:1.2,f:C4,s:"네"},
+{t:9.6,d:.6,f:G4,s:"서"},{t:10.2,d:.6,f:G4,s:"쪽"},{t:10.8,d:.6,f:F4,s:"하"},{t:11.4,d:.6,f:F4,s:"늘"},
+{t:12,d:.6,f:E4,s:"에"},{t:12.6,d:.6,f:E4,s:"서"},{t:13.2,d:1.2,f:D4,s:"도"},
+{t:14.4,d:.6,f:G4,s:"동"},{t:15,d:.6,f:G4,s:"쪽"},{t:15.6,d:.6,f:F4,s:"하"},{t:16.2,d:.6,f:F4,s:"늘"},
+{t:16.8,d:.6,f:E4,s:"에"},{t:17.4,d:.6,f:E4,s:"서"},{t:18,d:1.2,f:D4,s:"도"},
+{t:19.2,d:.6,f:C4,s:"반"},{t:19.8,d:.6,f:C4,s:"짝"},{t:20.4,d:.6,f:G4,s:"반"},{t:21,d:.6,f:G4,s:"짝"},
+{t:21.6,d:.6,f:A4,s:"작"},{t:22.2,d:.6,f:A4,s:"은"},{t:22.8,d:1.2,f:G4,s:"별"},
+{t:24,d:.6,f:F4,s:"아"},{t:24.6,d:.6,f:F4,s:"름"},{t:25.2,d:.6,f:E4,s:"답"},{t:25.8,d:.6,f:E4,s:"게"},
+{t:26.4,d:.6,f:D4,s:"비"},{t:27,d:.6,f:D4,s:"치"},{t:27.6,d:1.5,f:C4,s:"네"}
+],lyrics:[{t:0,tx:"반짝 반짝 작은 별"},{t:4.8,tx:"아름답게 비치네"},{t:9.6,tx:"서쪽 하늘에서도"},{t:14.4,tx:"동쪽 하늘에서도"},{t:19.2,tx:"반짝 반짝 작은 별"},{t:24,tx:"아름답게 비치네"}],dur:30},
+
+{id:5,cat:"동요",title:"산토끼",icon:"🐰",diff:"쉬움",dc:"diff-easy",bpm:120,
+melody:[
+{t:0,d:.4,f:E4,s:"산"},{t:.4,d:.4,f:E4,s:"토"},{t:.8,d:.8,f:E4,s:"끼"},
+{t:1.6,d:.4,f:E4,s:"토"},{t:2,d:.4,f:E4,s:"끼"},{t:2.4,d:.8,f:E4,s:"야"},
+{t:3.2,d:.4,f:G4,s:"어"},{t:3.6,d:.4,f:E4,s:"디"},{t:4,d:.4,f:G4,s:"를"},
+{t:4.4,d:.4,f:E4,s:"가"},{t:4.8,d:.4,f:D4,s:"느"},{t:5.2,d:1,f:C4,s:"냐"},
+{t:6.2,d:.4,f:D4,s:"깡"},{t:6.6,d:.4,f:D4,s:"충"},{t:7,d:.4,f:D4,s:"깡"},
+{t:7.4,d:.4,f:D4,s:"충"},{t:7.8,d:.4,f:E4,s:"뛰"},{t:8.2,d:.4,f:D4,s:"면"},
+{t:8.6,d:.4,f:E4,s:"서"},{t:9,d:.4,f:G4,s:"어"},{t:9.4,d:.4,f:E4,s:"디"},{t:9.8,d:.4,f:D4,s:"를"},
+{t:10.2,d:.4,f:E4,s:"가"},{t:10.6,d:1.2,f:C4,s:"느냐"}
+],lyrics:[{t:0,tx:"산토끼 토끼야"},{t:3.2,tx:"어디를 가느냐"},{t:6.2,tx:"깡충깡충 뛰면서"},{t:9,tx:"어디를 가느냐"}],dur:13},
+
+// --- K-POP/어린이 ---
+{id:6,cat:"어린이 인기",title:"아기상어",icon:"🦈",diff:"쉬움",dc:"diff-easy",bpm:115,
+melody:[
+{t:0,d:.3,f:C4,s:"아"},{t:.3,d:.3,f:D4,s:"기"},{t:.6,d:.4,f:E4,s:"상"},{t:1,d:.3,f:E4,s:"어"},
+{t:1.3,d:.3,f:E4,s:"뚜"},{t:1.6,d:.3,f:E4,s:"루"},{t:1.9,d:.3,f:E4,s:"루"},{t:2.2,d:.3,f:E4,s:"뚜"},
+{t:2.5,d:.5,f:E4,s:"루"},
+{t:3,d:.3,f:C4,s:"아"},{t:3.3,d:.3,f:D4,s:"기"},{t:3.6,d:.4,f:E4,s:"상"},{t:4,d:.3,f:E4,s:"어"},
+{t:4.3,d:.3,f:E4,s:"뚜"},{t:4.6,d:.3,f:E4,s:"루"},{t:4.9,d:.3,f:E4,s:"루"},{t:5.2,d:.3,f:E4,s:"뚜"},
+{t:5.5,d:.5,f:E4,s:"루"},
+{t:6,d:.3,f:C4,s:"귀"},{t:6.3,d:.3,f:D4,s:"여"},{t:6.6,d:.3,f:E4,s:"운"},
+{t:6.9,d:.3,f:E4,s:"뚜"},{t:7.2,d:.3,f:E4,s:"루"},{t:7.5,d:.3,f:E4,s:"루"},{t:7.8,d:.3,f:E4,s:"뚜"},
+{t:8.1,d:.5,f:E4,s:"루"},
+{t:8.6,d:.4,f:E4,s:"아"},{t:9,d:.4,f:F4,s:"기"},{t:9.4,d:.4,f:G4,s:"상"},{t:9.8,d:1,f:G4,s:"어"}
+],lyrics:[{t:0,tx:"아기상어 뚜루루뚜루"},{t:3,tx:"아기상어 뚜루루뚜루"},{t:6,tx:"귀여운 뚜루루뚜루"},{t:8.6,tx:"아기상어!"}],dur:12},
+
+{id:7,cat:"어린이 인기",title:"뽀로로 노래",icon:"🐧",diff:"보통",dc:"diff-medium",bpm:130,
+melody:[
+{t:0,d:.4,f:G4,s:"뽀"},{t:.4,d:.4,f:G4,s:"뽀"},{t:.8,d:.4,f:A4,s:"뽀"},{t:1.2,d:.4,f:G4,s:"뽀"},
+{t:1.6,d:.8,f:E4,s:"로"},{t:2.4,d:.8,f:E4,s:"로"},
+{t:3.2,d:.4,f:G4,s:"노"},{t:3.6,d:.4,f:A4,s:"래"},{t:4,d:.4,f:G4,s:"하"},{t:4.4,d:.4,f:E4,s:"는"},
+{t:4.8,d:.4,f:D4,s:"뽀"},{t:5.2,d:.8,f:C4,s:"로"},{t:6,d:.8,f:C4,s:"로"},
+{t:6.8,d:.4,f:E4,s:"놀"},{t:7.2,d:.4,f:G4,s:"자"},{t:7.6,d:.4,f:A4,s:"함"},
+{t:8,d:.4,f:G4,s:"께"},{t:8.4,d:.4,f:E4,s:"놀"},{t:8.8,d:1,f:D4,s:"자"},
+{t:9.8,d:.4,f:C4,s:"뽀"},{t:10.2,d:.4,f:D4,s:"로"},{t:10.6,d:.4,f:E4,s:"로"},{t:11,d:.4,f:D4,s:"랑"},
+{t:11.4,d:1.5,f:C4,s:"~"}
+],lyrics:[{t:0,tx:"뽀뽀뽀 뽀로로"},{t:3.2,tx:"노래하는 뽀로로"},{t:6.8,tx:"놀자 함께 놀자"},{t:9.8,tx:"뽀로로랑~"}],dur:14},
+
+{id:8,cat:"어린이 인기",title:"상어가족",icon:"🌊",diff:"보통",dc:"diff-medium",bpm:120,
+melody:[
+{t:0,d:.3,f:C4,s:"엄"},{t:.3,d:.3,f:D4,s:"마"},{t:.6,d:.4,f:E4,s:"상"},{t:1,d:.3,f:E4,s:"어"},
+{t:1.3,d:.3,f:E4,s:"뚜"},{t:1.6,d:.3,f:E4,s:"루"},{t:1.9,d:.3,f:E4,s:"루"},{t:2.2,d:.3,f:E4,s:"뚜"},
+{t:2.5,d:.5,f:E4,s:"루"},
+{t:3,d:.3,f:C4,s:"엄"},{t:3.3,d:.3,f:D4,s:"마"},{t:3.6,d:.4,f:E4,s:"상"},{t:4,d:.3,f:E4,s:"어"},
+{t:4.3,d:.3,f:E4,s:"뚜"},{t:4.6,d:.3,f:E4,s:"루"},{t:4.9,d:.3,f:E4,s:"루"},{t:5.2,d:.3,f:E4,s:"뚜"},
+{t:5.5,d:.5,f:E4,s:"루"},
+{t:6,d:.3,f:C4,s:"아"},{t:6.3,d:.3,f:D4,s:"름"},{t:6.6,d:.3,f:E4,s:"다"},
+{t:6.9,d:.3,f:E4,s:"운"},{t:7.2,d:.3,f:E4,s:"뚜"},{t:7.5,d:.3,f:E4,s:"루"},{t:7.8,d:.3,f:E4,s:"루"},
+{t:8.1,d:.5,f:E4,s:"뚜루"},
+{t:8.6,d:.4,f:E4,s:"엄"},{t:9,d:.4,f:F4,s:"마"},{t:9.4,d:.4,f:G4,s:"상"},{t:9.8,d:1,f:G4,s:"어"}
+],lyrics:[{t:0,tx:"엄마상어 뚜루루뚜루"},{t:3,tx:"엄마상어 뚜루루뚜루"},{t:6,tx:"아름다운 뚜루루뚜루"},{t:8.6,tx:"엄마상어!"}],dur:12},
+
+// --- 트로트/가요 ---
+{id:9,cat:"가요/민요",title:"아리랑",icon:"🏔️",diff:"보통",dc:"diff-medium",bpm:80,
+melody:[
+{t:0,d:.75,f:A3,s:"아"},{t:.75,d:.75,f:C4,s:"리"},{t:1.5,d:1,f:D4,s:"랑"},
+{t:2.5,d:.75,f:E4,s:"아"},{t:3.25,d:.75,f:D4,s:"리"},{t:4,d:1,f:C4,s:"랑"},
+{t:5,d:.5,f:A3,s:"아"},{t:5.5,d:.5,f:C4,s:"라"},{t:6,d:.75,f:A3,s:"리"},{t:6.75,d:1,f:G3,s:"요"},
+{t:8,d:.6,f:E4,s:"아"},{t:8.6,d:.6,f:D4,s:"리"},{t:9.2,d:.6,f:C4,s:"랑"},
+{t:9.8,d:.6,f:A3,s:"고"},{t:10.4,d:.6,f:C4,s:"개"},{t:11,d:.5,f:C4,s:"로"},
+{t:11.5,d:.75,f:D4,s:"넘"},{t:12.25,d:.75,f:C4,s:"어"},{t:13,d:1.5,f:A3,s:"간다"},
+{t:15,d:.5,f:A3,s:"나"},{t:15.5,d:.5,f:C4,s:"를"},{t:16,d:.75,f:D4,s:"버"},{t:16.75,d:.75,f:E4,s:"리"},
+{t:17.5,d:.6,f:D4,s:"고"},{t:18.1,d:.6,f:C4,s:"가"},{t:18.7,d:.6,f:A3,s:"시"},
+{t:19.3,d:.7,f:C4,s:"는"},{t:20,d:.5,f:C4,s:"님"},
+{t:20.5,d:.5,f:D4,s:"은"},{t:21,d:.5,f:E4,s:"십"},{t:21.5,d:.75,f:D4,s:"리"},{t:22.25,d:.75,f:C4,s:"도"},
+{t:23,d:.5,f:A3,s:"못"},{t:23.5,d:.75,f:C4,s:"가"},{t:24.25,d:.75,f:A3,s:"서"},
+{t:25,d:1.5,f:A3,s:"발병난다"}
+],lyrics:[{t:0,tx:"아리랑"},{t:2.5,tx:"아리랑"},{t:5,tx:"아라리요"},{t:8,tx:"아리랑 고개로"},{t:11.5,tx:"넘어간다"},{t:15,tx:"나를 버리고"},{t:17.5,tx:"가시는 님은"},{t:20.5,tx:"십리도 못가서"},{t:23,tx:"발병난다"}],dur:28},
+
+{id:10,cat:"가요/민요",title:"도라지",icon:"🌸",diff:"보통",dc:"diff-medium",bpm:90,
+melody:[
+{t:0,d:.5,f:E4,s:"도"},{t:.5,d:.5,f:E4,s:"라"},{t:1,d:1,f:E4,s:"지"},
+{t:2,d:.5,f:E4,s:"도"},{t:2.5,d:.5,f:E4,s:"라"},{t:3,d:1,f:E4,s:"지"},
+{t:4,d:.5,f:E4,s:"도"},{t:4.5,d:.5,f:D4,s:"라"},{t:5,d:1,f:E4,s:"지"},
+{t:6,d:.5,f:G4,s:"심"},{t:6.5,d:.5,f:A4,s:"심"},{t:7,d:.5,f:G4,s:"산"},
+{t:7.5,d:.5,f:E4,s:"천"},{t:8,d:1.2,f:D4,s:"에"},
+{t:9.2,d:.5,f:E4,s:"백"},{t:9.7,d:.5,f:G4,s:"도"},{t:10.2,d:.5,f:A4,s:"라"},
+{t:10.7,d:1,f:G4,s:"지"},
+{t:11.7,d:.5,f:A4,s:"한"},{t:12.2,d:.5,f:B4,s:"두"},{t:12.7,d:.5,f:A4,s:"뿌"},
+{t:13.2,d:.5,f:G4,s:"리"},{t:13.7,d:.5,f:E4,s:"만"},{t:14.2,d:.5,f:D4,s:"캐"},
+{t:14.7,d:.5,f:E4,s:"도"},{t:15.2,d:1.5,f:E4,s:"~"},
+{t:16.7,d:.5,f:D4,s:"대"},{t:17.2,d:.5,f:E4,s:"바"},{t:17.7,d:.5,f:G4,s:"구"},{t:18.2,d:.5,f:A4,s:"니"},
+{t:18.7,d:.5,f:G4,s:"반"},{t:19.2,d:.5,f:E4,s:"시"},{t:19.7,d:.5,f:D4,s:"기"},
+{t:20.2,d:1.5,f:E4,s:"만"}
+],lyrics:[{t:0,tx:"도라지 도라지"},{t:4,tx:"도라지"},{t:6,tx:"심심산천에"},{t:9.2,tx:"백도라지"},{t:11.7,tx:"한두 뿌리만 캐도"},{t:16.7,tx:"대바구니 반시기만"}],dur:23},
+
+{id:11,cat:"가요/민요",title:"밀양아리랑",icon:"🌾",diff:"어려움",dc:"diff-hard",bpm:88,
+melody:[
+{t:0,d:.7,f:A3,s:"날"},{t:.7,d:.7,f:C4,s:"좀"},{t:1.4,d:.7,f:D4,s:"보"},
+{t:2.1,d:.7,f:E4,s:"소"},{t:2.8,d:1,f:D4,s:"~"},
+{t:3.8,d:.7,f:E4,s:"날"},{t:4.5,d:.7,f:D4,s:"좀"},{t:5.2,d:1,f:C4,s:"보소"},
+{t:6.2,d:.7,f:A3,s:"날"},{t:6.9,d:.7,f:C4,s:"좀"},{t:7.6,d:1.2,f:D4,s:"보소"},
+{t:8.8,d:.5,f:E4,s:"동"},{t:9.3,d:.5,f:E4,s:"지"},{t:9.8,d:.5,f:D4,s:"섣"},
+{t:10.3,d:.5,f:C4,s:"달"},{t:10.8,d:1,f:A3,s:"에"},
+{t:11.8,d:.7,f:A3,s:"봄"},{t:12.5,d:.7,f:C4,s:"꽃"},{t:13.2,d:.7,f:D4,s:"피"},
+{t:13.9,d:1,f:E4,s:"면"},
+{t:14.9,d:.5,f:E4,s:"날"},{t:15.4,d:.5,f:D4,s:"좀"},{t:15.9,d:1.5,f:C4,s:"보소"},
+// 후렴
+{t:17.4,d:.3,f:A4,s:"아"},{t:17.7,d:.5,f:A4,s:"리"},{t:18.2,d:.5,f:G4,s:"아"},
+{t:18.7,d:.3,f:A4,s:"리"},{t:19,d:.8,f:G4,s:"랑"},
+{t:19.8,d:.3,f:E4,s:"쓰"},{t:20.1,d:.3,f:E4,s:"리"},{t:20.4,d:.5,f:D4,s:"쓰"},
+{t:20.9,d:.5,f:E4,s:"리"},{t:21.4,d:.8,f:G4,s:"랑"},
+{t:22.2,d:.5,f:A4,s:"아"},{t:22.7,d:.5,f:G4,s:"라"},{t:23.2,d:.5,f:E4,s:"리"},
+{t:23.7,d:1.5,f:D4,s:"가"},
+{t:25.2,d:.5,f:E4,s:"낳"},{t:25.7,d:.5,f:D4,s:"네"},{t:26.2,d:.5,f:C4,s:"줘"},
+{t:26.7,d:.5,f:A3,s:"라"},{t:27.2,d:1.5,f:A3,s:"~"}
+],lyrics:[{t:0,tx:"날 좀 보소"},{t:3.8,tx:"날 좀 보소"},{t:6.2,tx:"날 좀 보소"},{t:8.8,tx:"동지섣달에"},{t:11.8,tx:"봄꽃 피면"},{t:14.9,tx:"날 좀 보소"},{t:17.4,tx:"아리아리랑"},{t:19.8,tx:"쓰리쓰리랑"},{t:22.2,tx:"아라리가 났네"}],dur:30},
+
+// --- 팝 번안 ---
+{id:12,cat:"세계명곡",title:"생일 축하 노래",icon:"🎂",diff:"쉬움",dc:"diff-easy",bpm:100,
+melody:[
+{t:0,d:.5,f:G4,s:"생"},{t:.5,d:.5,f:G4,s:"일"},
+{t:1,d:.8,f:A4,s:"축"},{t:1.8,d:.8,f:G4,s:"하"},
+{t:2.6,d:.8,f:C5,s:"합"},{t:3.4,d:1.2,f:B4,s:"니다"},
+{t:4.6,d:.5,f:G4,s:"생"},{t:5.1,d:.5,f:G4,s:"일"},
+{t:5.6,d:.8,f:A4,s:"축"},{t:6.4,d:.8,f:G4,s:"하"},
+{t:7.2,d:.8,f:D5,s:"합"},{t:8,d:1.2,f:C5,s:"니다"},
+{t:9.2,d:.5,f:G4,s:"사"},{t:9.7,d:.5,f:G4,s:"랑"},
+{t:10.2,d:.8,f:G5,s:"하"},{t:11,d:.8,f:E5,s:"는"},
+{t:11.8,d:.8,f:C5,s:"우"},{t:12.6,d:.6,f:B4,s:"리"},
+{t:13.2,d:1,f:A4,s:"~"},
+{t:14.2,d:.5,f:F5,s:"생"},{t:14.7,d:.5,f:F5,s:"일"},
+{t:15.2,d:.8,f:E5,s:"축"},{t:16,d:.8,f:C5,s:"하"},
+{t:16.8,d:.8,f:D5,s:"합"},{t:17.6,d:1.5,f:C5,s:"니다"}
+],lyrics:[{t:0,tx:"생일 축하합니다"},{t:4.6,tx:"생일 축하합니다"},{t:9.2,tx:"사랑하는 우리"},{t:14.2,tx:"생일 축하합니다"}],dur:20},
+
+{id:13,cat:"세계명곡",title:"징글벨",icon:"🎄",diff:"보통",dc:"diff-medium",bpm:130,
+melody:[
+{t:0,d:.4,f:E4,s:"징"},{t:.4,d:.4,f:E4,s:"글"},{t:.8,d:.8,f:E4,s:"벨"},
+{t:1.6,d:.4,f:E4,s:"징"},{t:2,d:.4,f:E4,s:"글"},{t:2.4,d:.8,f:E4,s:"벨"},
+{t:3.2,d:.4,f:E4,s:"징"},{t:3.6,d:.4,f:G4,s:"글"},{t:4,d:.4,f:C4,s:"벨"},
+{t:4.4,d:.4,f:D4,s:"즐"},{t:4.8,d:1.2,f:E4,s:"겁"},
+{t:6,d:.4,f:F4,s:"다"},{t:6.4,d:.4,f:F4,s:"~"},
+{t:6.8,d:.4,f:F4,s:"징"},{t:7.2,d:.4,f:F4,s:"글"},
+{t:7.6,d:.4,f:F4,s:"벨"},{t:8,d:.4,f:E4,s:"징"},
+{t:8.4,d:.4,f:E4,s:"글"},{t:8.8,d:.4,f:E4,s:"벨"},
+{t:9.2,d:.4,f:E4,s:"노"},{t:9.6,d:.4,f:E4,s:"래"},
+{t:10,d:.4,f:G4,s:"부"},{t:10.4,d:.4,f:G4,s:"르"},
+{t:10.8,d:.4,f:F4,s:"며"},{t:11.2,d:.4,f:D4,s:"달"},
+{t:11.6,d:1.2,f:C4,s:"리자"}
+],lyrics:[{t:0,tx:"징글벨 징글벨"},{t:3.2,tx:"징글벨 즐겁다"},{t:6,tx:"징글벨 징글벨"},{t:9.2,tx:"노래 부르며 달리자"}],dur:14},
+
+{id:14,cat:"세계명곡",title:"올드 맥도날드",icon:"🐄",diff:"보통",dc:"diff-medium",bpm:120,
+melody:[
+{t:0,d:.4,f:C4,s:"올"},{t:.4,d:.4,f:C4,s:"드"},{t:.8,d:.4,f:C4,s:"맥"},
+{t:1.2,d:.4,f:G3,s:"도"},{t:1.6,d:.4,f:A3,s:"날"},{t:2,d:.4,f:A3,s:"드"},
+{t:2.4,d:.8,f:G3,s:"~"},
+{t:3.2,d:.4,f:E4,s:"아"},{t:3.6,d:.4,f:E4,s:"저"},{t:4,d:.4,f:D4,s:"씨"},
+{t:4.4,d:.4,f:D4,s:"에"},{t:4.8,d:.8,f:C4,s:"겐"},
+{t:5.6,d:.4,f:G3,s:"농"},{t:6,d:.8,f:G3,s:"장"},
+{t:6.8,d:.4,f:C4,s:"이"},{t:7.2,d:.4,f:C4,s:"아"},{t:7.6,d:.4,f:C4,s:"이"},
+{t:8,d:.4,f:G3,s:"아"},{t:8.4,d:.4,f:A3,s:"이"},{t:8.8,d:.4,f:A3,s:"오"},
+{t:9.2,d:.8,f:G3,s:"~"},
+{t:10,d:.4,f:E4,s:"이"},{t:10.4,d:.4,f:E4,s:"곳"},{t:10.8,d:.4,f:D4,s:"저"},
+{t:11.2,d:.4,f:D4,s:"곳"},{t:11.6,d:.8,f:C4,s:"에"},
+{t:12.4,d:.3,f:G4,s:"음"},{t:12.7,d:.3,f:G4,s:"메"},{t:13,d:.5,f:G4,s:"~"}
+],lyrics:[{t:0,tx:"올드 맥도날드"},{t:3.2,tx:"아저씨에겐"},{t:5.6,tx:"농장이 있어"},{t:10,tx:"이곳저곳에 음메~"}],dur:14.5},
+
+{id:15,cat:"세계명곡",title:"작은별 (ABC송)",icon:"🔤",diff:"쉬움",dc:"diff-easy",bpm:100,
+melody:[
+{t:0,d:.5,f:C4,s:"A"},{t:.5,d:.5,f:C4,s:"B"},{t:1,d:.5,f:G4,s:"C"},{t:1.5,d:.5,f:G4,s:"D"},
+{t:2,d:.5,f:A4,s:"E"},{t:2.5,d:.5,f:A4,s:"F"},{t:3,d:1,f:G4,s:"G"},
+{t:4,d:.5,f:F4,s:"H"},{t:4.5,d:.5,f:F4,s:"I"},{t:5,d:.5,f:E4,s:"J"},{t:5.5,d:.5,f:E4,s:"K"},
+{t:6,d:.5,f:D4,s:"L"},{t:6.5,d:.5,f:D4,s:"M"},{t:7,d:1,f:C4,s:"N"},
+{t:8,d:.5,f:G4,s:"O"},{t:8.5,d:.5,f:G4,s:"P"},{t:9,d:.5,f:F4,s:"Q"},{t:9.5,d:.5,f:F4,s:"R"},
+{t:10,d:.5,f:E4,s:"S"},{t:10.5,d:.5,f:E4,s:"T"},{t:11,d:1,f:D4,s:"U"},
+{t:12,d:.5,f:G4,s:"V"},{t:12.5,d:.5,f:G4,s:"W"},{t:13,d:.75,f:F4,s:"X"},
+{t:13.75,d:.75,f:E4,s:"Y"},{t:14.5,d:1,f:D4,s:"Z"},
+{t:15.5,d:.5,f:C4,s:"이"},{t:16,d:.5,f:C4,s:"제"},{t:16.5,d:.5,f:G4,s:"다"},{t:17,d:.5,f:G4,s:"알"},
+{t:17.5,d:.5,f:A4,s:"았"},{t:18,d:.5,f:A4,s:"으"},{t:18.5,d:1,f:G4,s:"니"},
+{t:19.5,d:.5,f:F4,s:"다"},{t:20,d:.5,f:F4,s:"음"},{t:20.5,d:.5,f:E4,s:"에"},{t:21,d:.5,f:E4,s:"또"},
+{t:21.5,d:.5,f:D4,s:"같"},{t:22,d:.5,f:D4,s:"이"},{t:22.5,d:1.5,f:C4,s:"~"}
+],lyrics:[{t:0,tx:"A B C D E F G"},{t:4,tx:"H I J K L M N"},{t:8,tx:"O P Q R S T U"},{t:12,tx:"V W X Y Z"},{t:15.5,tx:"이제 다 알았으니"},{t:19.5,tx:"다음에 또 같이~"}],dur:25}
+];
+
+// ===================== AUDIO ENGINE =====================
+let audioCtx=null,analyser=null,micStream=null,micOn=false;
+const BUF=2048;let aBuf=new Float32Array(BUF);
+
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+
+async function startMic(){
+  try{
+    initAudio();
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    const src=audioCtx.createMediaStreamSource(micStream);
+    analyser=audioCtx.createAnalyser();analyser.fftSize=BUF;
+    src.connect(analyser);micOn=true;
+    if(window.KaraokeAudio)KaraokeAudio.init(audioCtx,analyser,BUF);
+    document.getElementById('btnMic').textContent='마이크 ON';
+    document.getElementById('btnMic').classList.add('active');
+    return true;
+  }catch(e){console.error('Mic:',e);return false;}
+}
+function stopMic(){if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}micOn=false;document.getElementById('btnMic').textContent='마이크 OFF';document.getElementById('btnMic').classList.remove('active');}
+
+function detectPitch(){
+  if(!analyser||!micOn)return null;
+  if(!window.KaraokeAudio)return null;
+  const r=KaraokeAudio.detectPitch();
+  return r?r.freq:null;
+}
+
+// Synth for guide melody
+let synthOsc=null,synthGain=null,guideOn=true;
+function playSynth(f){
+  if(!guideOn)return;initAudio();
+  if(!synthOsc){synthOsc=audioCtx.createOscillator();synthGain=audioCtx.createGain();synthOsc.type='triangle';synthGain.gain.value=0.06;synthOsc.connect(synthGain);synthGain.connect(audioCtx.destination);synthOsc.start();}
+  synthOsc.frequency.setValueAtTime(f,audioCtx.currentTime);synthGain.gain.setValueAtTime(0.06,audioCtx.currentTime);
+}
+function muteSynth(){if(synthGain)synthGain.gain.setValueAtTime(0,audioCtx.currentTime);}
+function killSynth(){if(synthOsc){try{synthOsc.stop();}catch(e){}synthOsc=null;synthGain=null;}}
+
+// Recording
+let recorder=null,recordChunks=[],recordedBlob=null;
+function startRecording(){
+  if(!micStream)return;
+  try{recorder=new MediaRecorder(micStream);recordChunks=[];
+  recorder.ondataavailable=e=>{if(e.data.size>0)recordChunks.push(e.data);};
+  recorder.onstop=()=>{recordedBlob=new Blob(recordChunks,{type:'audio/webm'});};
+  recorder.start();}catch(e){recorder=null;}
+}
+function stopRecording(){if(recorder&&recorder.state==='recording')recorder.stop();}
+
+// ===================== GAME STATE =====================
+let curSong=null,gState='select',startT=0,paused=false,pauseT=0,pauseAccum=0;
+let score=0,combo=0,maxCombo=0,totalN=0,hitN=0,pitchSum=0,rhythmSum=0;
+let userPH=[],lineScores=[],keyShift=0;
+let animId=null,particles=[];
+let practiceMode=false,tempoMul=1,loopStart=-1,loopEnd=-1,showNoteNames=false;
+// v4 wiring
+let curNoteId=null,beatPulse=0,shaderOn=false;
+let comboMilestones={5:false,10:false,20:false};
+
+// Scores
+function getHS(){try{return JSON.parse(localStorage.getItem('sv3_hs')||'{}');}catch(e){return {};}}
+function saveHS(id,s,g){const h=getHS();if(!h[id]||s>h[id].s){h[id]={s,g};localStorage.setItem('sv3_hs',JSON.stringify(h));}}
+function getGrade(s){if(s>=95)return'S';if(s>=85)return'A';if(s>=70)return'B';if(s>=50)return'C';return'D';}
+function getStars(s){if(s>=95)return 5;if(s>=80)return 4;if(s>=60)return 3;if(s>=40)return 2;if(s>=20)return 1;return 0;}
+
+// ===================== RENDER SONG LIST =====================
+function renderList(){
+  const c=document.getElementById('songSelect');c.innerHTML='';
+  const hs=getHS();const cats=[...new Set(SONGS.map(s=>s.cat))];
+  cats.forEach(cat=>{
+    const h=document.createElement('div');h.className='cat-header';h.textContent=cat;c.appendChild(h);
+    SONGS.filter(s=>s.cat===cat).forEach(song=>{
+      const d=document.createElement('div');d.className='song-card';
+      const rec=hs[song.id];const stars=rec?getStars(rec.s):0;
+      d.innerHTML=`<div class="diff-badge ${song.dc}">${song.diff}</div>
+        <div class="sc-icon">${song.icon}</div>
+        <div class="sc-title">${song.title}</div>
+        <div class="sc-info">BPM ${song.bpm} · ${song.dur}초</div>
+        <div class="sc-stars">${stars>0?'★'.repeat(stars)+'☆'.repeat(5-stars):'☆☆☆☆☆'}</div>
+        ${rec?`<div class="sc-high">최고 ${rec.s}점</div>`:''}
+        ${rec?`<div class="sc-grade grade-${rec.g}">${rec.g}</div>`:''}`;
+      d.onclick=()=>pickSong(song,false);
+      // long press for practice
+      let lt;d.onpointerdown=()=>{lt=setTimeout(()=>openPractice(song),600);};
+      d.onpointerup=()=>clearTimeout(lt);d.onpointerleave=()=>clearTimeout(lt);
+      c.appendChild(d);
+    });
+  });
+}
+
+// ===================== PRACTICE MODAL =====================
+function openPractice(song){
+  const m=document.getElementById('practiceModal');m.classList.add('show');
+  document.getElementById('pmBox').innerHTML=`
+    <h3>연습 모드 - ${song.title}</h3>
+    <div class="pm-row"><label>속도</label><input type="range" id="pmTempo" min="50" max="100" value="75"><div class="val" id="pmTempoV">75%</div></div>
+    <div class="pm-row"><label>음이름 표시</label><select id="pmNotes"><option value="1">켜기</option><option value="0">끄기</option></select></div>
+    <div class="pm-row"><label>가이드 멜로디</label><select id="pmGuide"><option value="1">켜기</option><option value="0">끄기</option></select></div>
+    <div class="pm-row"><label>구간반복</label><select id="pmLoop"><option value="0">전체</option><option value="1">1~2절</option><option value="2">후렴만</option></select></div>
+    <div class="pm-btns">
+      <button class="btn-retry" onclick="startPractice(${song.id})">연습 시작</button>
+      <button class="btn-back" onclick="document.getElementById('practiceModal').classList.remove('show')">취소</button>
+    </div>`;
+  document.getElementById('pmTempo').oninput=function(){document.getElementById('pmTempoV').textContent=this.value+'%';};
+}
+window.startPractice=function(id){
+  const song=SONGS.find(s=>s.id===id);
+  practiceMode=true;
+  tempoMul=parseInt(document.getElementById('pmTempo').value)/100;
+  showNoteNames=document.getElementById('pmNotes').value==='1';
+  guideOn=document.getElementById('pmGuide').value==='1';
+  const loop=document.getElementById('pmLoop').value;
+  if(loop==='1'){loopStart=0;loopEnd=Math.min(song.dur/2,song.dur);}
+  else if(loop==='2'){const half=song.dur/2;loopStart=half;loopEnd=song.dur;}
+  else{loopStart=-1;loopEnd=-1;}
+  document.getElementById('practiceModal').classList.remove('show');
+  pickSong(song,true);
+};
+
+// ===================== PICK SONG =====================
+async function pickSong(song,isPractice){
+  curSong=song;score=0;combo=0;maxCombo=0;totalN=0;hitN=0;pitchSum=0;rhythmSum=0;
+  userPH=[];lineScores=[];keyShift=0;particles=[];recordedBlob=null;
+  paused=false;pauseAccum=0;
+  curNoteId=null;beatPulse=0;comboMilestones={5:false,10:false,20:false};
+  if(window.KaraokeAudio)KaraokeAudio.resetSession();
+  if(!isPractice){practiceMode=false;tempoMul=1;showNoteNames=false;guideOn=true;loopStart=-1;loopEnd=-1;}
+  if(!micOn){
+    document.getElementById('micPrompt').classList.add('show');
+    document.getElementById('btnAllowMic').onclick=async()=>{
+      await startMic();document.getElementById('micPrompt').classList.remove('show');beginSing();
+    };
+    document.getElementById('btnSkipMic').onclick=()=>{document.getElementById('micPrompt').classList.remove('show');beginSing();};
+    return;
+  }
+  beginSing();
+  // v4: auto key-shift suggestion 5s after song start (one-shot)
+  window.__keyShiftSuggested=false;
+  setTimeout(()=>{
+    if(window.__keyShiftSuggested||gState!=='singing')return;
+    const r=KaraokeAudio.estimateUserRange?KaraokeAudio.estimateUserRange():null;
+    if(r&&Math.abs(r.suggestedKeyShift)>=2){
+      const div=document.createElement('div');
+      div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(168,85,247,.95),rgba(255,106,176,.95));color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:30;box-shadow:0 4px 20px rgba(255,106,176,.4);cursor:pointer;animation:fade-in .3s';
+      const dir=r.suggestedKeyShift>0?'+':'';
+      div.textContent='\u{1F3B5} 음역 추천: 키 '+dir+r.suggestedKeyShift+' (탭하여 적용)';
+      div.onclick=()=>{
+        keyShift=r.suggestedKeyShift;
+        div.remove();
+        window.__keyShiftSuggested=true;
+      };
+      document.getElementById('singScreen').appendChild(div);
+      setTimeout(()=>{if(div.parentNode){div.style.opacity='0';setTimeout(()=>{if(div.parentNode)div.remove();},300);}},5000);
+      window.__keyShiftSuggested=true;
+    }
+  },5000);
+}
+
+function beginSing(){
+  gState='singing';
+  document.getElementById('songSelect').style.display='none';
+  document.getElementById('singScreen').style.display='flex';
+  document.getElementById('resultScreen').style.display='none';
+  initAudio();if(audioCtx.state==='suspended')audioCtx.resume();
+  const c=document.getElementById('pitchCanvas');c.width=c.parentElement.clientWidth;c.height=c.parentElement.clientHeight;
+  const pc=document.getElementById('particleCanvas');pc.width=pc.parentElement.clientWidth;pc.height=pc.parentElement.clientHeight;
+  // v4: shader background
+  const sc=document.getElementById('shaderCanvas');
+  if(sc&&window.KaraokeShader){
+    sc.style.display='block';
+    shaderOn=KaraokeShader.init(sc);
+    if(!shaderOn){sc.style.display='none';}
+    else{KaraokeShader.setMode('singing');}
+  }else if(sc){sc.style.display='none';shaderOn=false;}
+  // v4: FX layer (judgments / combo rings / confetti host)
+  if(window.KaraokeFX)KaraokeFX.init(document.getElementById('pitchArea'));
+  startT=performance.now();
+  if(micOn)startRecording();
+  document.getElementById('btnGuide').classList.toggle('active',guideOn);
+  gameLoop();
+}
+
+// ===================== PARTICLES =====================
+function spawnParticles(x,y,color,count){
+  for(let i=0;i<count;i++){
+    particles.push({x,y,vx:(Math.random()-.5)*4,vy:-Math.random()*3-1,life:1,color,size:Math.random()*3+1});
+  }
+}
+function spawnFireworks(canvas){
+  const cx=Math.random()*canvas.width,cy=Math.random()*canvas.height*.5;
+  const colors=['#ffd700','#ff6ab0','#4caf50','#2196f3','#ff9800'];
+  for(let i=0;i<30;i++){
+    const angle=Math.random()*Math.PI*2,speed=Math.random()*5+2;
+    particles.push({x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,life:1,color:colors[i%colors.length],size:Math.random()*2+1});
+  }
+}
+function updateParticles(ctx){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.08;p.life-=0.02;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    ctx.globalAlpha=p.life;ctx.fillStyle=p.color;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+
+// ===================== GAME LOOP =====================
+let lastLineFbTime=0,lastLineFbText='';
+function gameLoop(){
+  if(gState!=='singing')return;
+  if(paused){animId=requestAnimationFrame(gameLoop);return;}
+
+  const now=performance.now();
+  const rawElapsed=(now-startT-pauseAccum)/1000;
+  const elapsed=rawElapsed*tempoMul;
+
+  // Loop handling
+  let songDur=curSong.dur;
+  let eff=elapsed;
+  if(loopStart>=0&&loopEnd>0){
+    const loopLen=loopEnd-loopStart;
+    if(eff>=loopEnd)eff=loopStart+((eff-loopStart)%loopLen);
+    songDur=Infinity;// never end in loop mode
+  }
+
+  if(!practiceMode&&elapsed>=curSong.dur){endSong();return;}
+
+  // Timer
+  const prog=Math.min(1,elapsed/curSong.dur);
+  document.getElementById('timerFill').style.width=(prog*100)+'%';
+
+  // User pitch
+  const userFreq=detectPitch();
+
+  // Target note
+  let targetFreq=null,curNote=null;
+  const mel=curSong.melody;
+  for(const n of mel){
+    const tf=transpose(n.f,keyShift);
+    const nt=n.t/tempoMul,nd=n.d/tempoMul;
+    if(eff/tempoMul>=nt&&eff/tempoMul<=nt+nd){targetFreq=tf;curNote=n;break;}
+  }
+  // Also check unscaled
+  if(!curNote){
+    for(const n of mel){
+      if(eff>=n.t&&eff<=n.t+n.d){targetFreq=transpose(n.f,keyShift);curNote=n;break;}
+    }
+  }
+
+  // Guide
+  if(targetFreq)playSynth(targetFreq);else muteSynth();
+
+  // v4 per-note scoring: when curNote.t changes, end prev note and start new note.
+  if(curNote){
+    if(curNoteId!==curNote.t){
+      // End previous note (if any) → judge & score
+      if(curNoteId!==null&&window.KaraokeAudio){
+        const res=KaraokeAudio.endNote();
+        const grade=res.grade;
+        // Per-grade score & combo
+        let pts=0;
+        if(grade==='PERFECT'){pts=100;hitN++;combo++;pitchSum+=100;rhythmSum+=100;}
+        else if(grade==='GREAT'){pts=70;hitN++;combo++;pitchSum+=80;rhythmSum+=85;}
+        else if(grade==='GOOD'){pts=40;hitN++;combo++;pitchSum+=55;rhythmSum+=70;}
+        else{pts=0;combo=0;pitchSum+=0;rhythmSum+=20;}
+        score+=pts;totalN++;
+        if(combo>maxCombo)maxCombo=combo;
+        // VFX
+        const pa=document.getElementById('pitchArea');
+        if(window.KaraokeFX&&pa){
+          const rect=pa.getBoundingClientRect();
+          const jx=rect.left+rect.width*0.5;
+          const jy=rect.top+rect.height*0.55;
+          KaraokeFX.judge(grade,jx,jy);
+        }
+        // Combo milestones
+        if(window.KaraokeFX){
+          if(combo>=20&&!comboMilestones[20]){comboMilestones[20]=true;KaraokeFX.comboRing(combo);}
+          else if(combo>=10&&!comboMilestones[10]){comboMilestones[10]=true;KaraokeFX.comboRing(combo);}
+          else if(combo>=5&&!comboMilestones[5]){comboMilestones[5]=true;KaraokeFX.comboRing(combo);}
+        }
+        // PERFECT shader flash
+        if(grade==='PERFECT'&&shaderOn&&window.KaraokeShader){
+          KaraokeShader.setMode('perfect');
+          setTimeout(()=>{if(shaderOn)KaraokeShader.setMode('singing');},350);
+        }
+      }
+      // Start new note
+      if(targetFreq&&window.KaraokeAudio)KaraokeAudio.startNote(targetFreq,curNote.t);
+      curNoteId=curNote.t;
+    }
+  }else if(curNoteId!==null){
+    // Gap between notes — close the open note
+    if(window.KaraokeAudio){
+      const res=KaraokeAudio.endNote();
+      const grade=res.grade;
+      let pts=0;
+      if(grade==='PERFECT'){pts=100;hitN++;combo++;pitchSum+=100;rhythmSum+=100;}
+      else if(grade==='GREAT'){pts=70;hitN++;combo++;pitchSum+=80;rhythmSum+=85;}
+      else if(grade==='GOOD'){pts=40;hitN++;combo++;pitchSum+=55;rhythmSum+=70;}
+      else{pts=0;combo=0;pitchSum+=0;rhythmSum+=20;}
+      score+=pts;totalN++;
+      if(combo>maxCombo)maxCombo=combo;
+      const pa=document.getElementById('pitchArea');
+      if(window.KaraokeFX&&pa){
+        const rect=pa.getBoundingClientRect();
+        KaraokeFX.judge(grade,rect.left+rect.width*0.5,rect.top+rect.height*0.55);
+      }
+      if(window.KaraokeFX){
+        if(combo>=20&&!comboMilestones[20]){comboMilestones[20]=true;KaraokeFX.comboRing(combo);}
+        else if(combo>=10&&!comboMilestones[10]){comboMilestones[10]=true;KaraokeFX.comboRing(combo);}
+        else if(combo>=5&&!comboMilestones[5]){comboMilestones[5]=true;KaraokeFX.comboRing(combo);}
+      }
+    }
+    curNoteId=null;
+  }
+
+  // v4: shader audio reactivity each frame
+  if(shaderOn&&window.KaraokeShader&&window.KaraokeAudio){
+    const rmsVal=KaraokeAudio.getRMS();
+    const centVal=Math.min(1,KaraokeAudio.getSpectralCentroid()/4000);
+    beatPulse*=0.9; if(rmsVal>0.05) beatPulse=1;
+    KaraokeShader.setAudio(rmsVal,centVal,beatPulse);
+    KaraokeShader.setCombo(combo);
+    KaraokeShader.render(performance.now()/1000);
+  }
+
+  // Display - score is now sum of per-note points; normalize to 0-100 by dividing by max possible.
+  const fs=totalN>0?Math.min(100,Math.round(score/Math.max(1,totalN))):0;
+  document.getElementById('sDisp').textContent=fs;
+  document.getElementById('cDisp').textContent=combo>1?combo+' 콤보!':'';
+  document.getElementById('pNote').textContent=userFreq?freqToNote(userFreq):'---';
+
+  // Per-line scoring feedback
+  let curLI=-1;
+  for(let i=curSong.lyrics.length-1;i>=0;i--){if(eff>=curSong.lyrics[i].t){curLI=i;break;}}
+
+  // Pitch meter
+  const mH=document.getElementById('pitchMeter').clientHeight;
+  if(targetFreq){const tp=Math.max(0,Math.min(1,1-(Math.log2(targetFreq/100)/3.5)));document.querySelector('.mt').style.top=(tp*(mH-20))+'px';}
+  if(userFreq){const up=Math.max(0,Math.min(1,1-(Math.log2(userFreq/100)/3.5)));document.querySelector('.mu').style.top=(up*(mH-6))+'px';document.querySelector('.mu').style.display='block';}
+  else{document.querySelector('.mu').style.display='none';}
+
+  // Lyrics with syllable highlight
+  if(curLI>=0){
+    const lyricObj=curSong.lyrics[curLI];
+    // Find notes in this lyric's time range
+    const nextT=curLI+1<curSong.lyrics.length?curSong.lyrics[curLI+1].t:curSong.dur;
+    const lyricNotes=mel.filter(n=>n.t>=lyricObj.t&&n.t<nextT);
+
+    let html='';
+    lyricNotes.forEach((n,i)=>{
+      const isSung=eff>=n.t+n.d;
+      const isAct=eff>=n.t&&eff<n.t+n.d;
+      const cls=isAct?'active':isSung?'sung':'';
+      html+=`<span class="syl ${cls}">${n.s||''}</span>`;
+    });
+    if(!html)html=`<span>${lyricObj.tx}</span>`;
+    document.getElementById('curLyric').innerHTML=html;
+
+    const nI=curLI+1;
+    document.getElementById('nxtLyric').textContent=nI<curSong.lyrics.length?curSong.lyrics[nI].tx:'';
+    const lyricProg=Math.min(1,(eff-lyricObj.t)/(nextT-lyricObj.t));
+    document.getElementById('lyricProg').style.width=(lyricProg*100)+'%';
+
+    // Line score feedback when line changes
+    if(curLI>0&&!lineScores[curLI-1]){
+      const prevNotes=mel.filter(n=>n.t>=curSong.lyrics[curLI-1].t&&n.t<lyricObj.t);
+      // Already scored globally, just show text
+      const lsc=fs;
+      lineScores[curLI-1]=true;
+      let fbText='',fbColor='';
+      if(lsc>=90){fbText='Perfect!';fbColor='#ffd700';spawnFireworks(document.getElementById('particleCanvas'));}
+      else if(lsc>=70){fbText='Great!';fbColor='#4caf50';}
+      else if(lsc>=50){fbText='Good';fbColor='#2196f3';}
+      else{fbText='Miss';fbColor='#f44336';}
+      const fb=document.getElementById('lineFb');fb.textContent=fbText;fb.style.color=fbColor;
+      lastLineFbTime=now;lastLineFbText=fbText;
+    }
+  }
+  if(now-lastLineFbTime>1500)document.getElementById('lineFb').textContent='';
+
+  // v4: debug panel (opt-in via triple-tap on title)
+  if(window.__dbgOn){
+    const dbg=window.KaraokeAudio;
+    const r=dbg&&dbg.getLastDetection?dbg.getLastDetection():null;
+    document.getElementById('dbgFreq').textContent=userFreq?userFreq.toFixed(1):'-';
+    document.getElementById('dbgNote').textContent=userFreq?freqToNote(userFreq):'-';
+    document.getElementById('dbgCents').textContent=(targetFreq&&userFreq)?(1200*Math.log2(userFreq/targetFreq)).toFixed(0):'-';
+    document.getElementById('dbgClarity').textContent=r&&r.clarity!=null?r.clarity.toFixed(2):'-';
+    document.getElementById('dbgRMS').textContent=dbg&&dbg.getRMS?dbg.getRMS().toFixed(3):'-';
+    if(!window.__fpsLast)window.__fpsLast={t:performance.now(),c:0,fps:0};
+    const fl=window.__fpsLast;fl.c++;
+    const dt=performance.now()-fl.t;
+    if(dt>=500){fl.fps=(fl.c*1000/dt).toFixed(0);fl.c=0;fl.t=performance.now();}
+    document.getElementById('dbgFps').textContent=fl.fps;
+  }
+
+  // Draw
+  drawPitch(eff,userFreq,targetFreq);
+  drawParticles();
+
+  // Stage lighting
+  const pa=document.getElementById('pitchArea');
+  if(combo>=10)pa.style.boxShadow='inset 0 0 60px rgba(255,215,0,.15)';
+  else if(combo>=5)pa.style.boxShadow='inset 0 0 40px rgba(76,175,80,.1)';
+  else pa.style.boxShadow='none';
+
+  // Store pitch
+  if(userFreq)userPH.push({t:eff,f:userFreq});
+  while(userPH.length>0&&userPH[0].t<eff-10)userPH.shift();
+
+  animId=requestAnimationFrame(gameLoop);
+}
+
+// ===================== DRAW PITCH CANVAS =====================
+function drawPitch(elapsed,userFreq,targetFreq){
+  const c=document.getElementById('pitchCanvas'),ctx=c.getContext('2d');
+  const W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
+  const minL=Math.log2(130),maxL=Math.log2(800);
+  const freqToY=f=>H-((Math.log2(f)-minL)/(maxL-minL))*H;
+
+  // Grid
+  const noteFreqs=[C3,D3,E3,F3,G3,A3,B3,C4,D4,E4,F4,G4,A4,B4,C5,D5,E5];
+  const noteNames2=["C3","D3","E3","F3","G3","A3","B3","C4","D4","E4","F4","G4","A4","B4","C5","D5","E5"];
+  ctx.lineWidth=1;ctx.font='9px sans-serif';
+  noteFreqs.forEach((f,i)=>{
+    const y=freqToY(f);if(y<0||y>H)return;
+    ctx.strokeStyle=f===C4||f===C5?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)';
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillText(noteNames2[i],3,y-2);
+  });
+
+  // Time window
+  const wS=elapsed-2,wE=elapsed+5;
+  const tX=t=>((t-wS)/(wE-wS))*W;
+
+  // Current time line
+  const nowX=tX(elapsed);
+  ctx.strokeStyle='rgba(255,106,176,.25)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(nowX,0);ctx.lineTo(nowX,H);ctx.stroke();
+
+  // Target bars
+  curSong.melody.forEach(n=>{
+    const tf=transpose(n.f,keyShift);
+    if(n.t+n.d<wS||n.t>wE)return;
+    const x=tX(n.t),x2=tX(n.t+n.d),y=freqToY(tf);
+    const past=elapsed>n.t+n.d,cur=elapsed>=n.t&&elapsed<=n.t+n.d;
+    const bH=12;
+    ctx.fillStyle=cur?'rgba(76,175,80,.5)':past?'rgba(100,100,100,.25)':'rgba(106,58,170,.45)';
+    ctx.strokeStyle=cur?'#4caf50':past?'#555':'#8855cc';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(x,y-bH/2,Math.max(3,x2-x),bH,3);ctx.fill();ctx.stroke();
+    // Note name
+    if(showNoteNames&&!past){
+      ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='9px sans-serif';
+      ctx.fillText(freqToNote(tf),x+2,y-bH/2-2);
+    }
+    // Syllable on bar
+    if(n.s&&!past){
+      ctx.fillStyle=cur?'#fff':'rgba(255,255,255,.5)';ctx.font=cur?'bold 11px sans-serif':'10px sans-serif';
+      ctx.fillText(n.s,x+2,y+bH/2+10);
+    }
+  });
+
+  // User pitch trail
+  if(userPH.length>1){
+    ctx.strokeStyle='#ff6ab0';ctx.lineWidth=2.5;ctx.shadowColor='rgba(255,106,176,.5)';ctx.shadowBlur=6;
+    ctx.beginPath();let started=false;
+    userPH.forEach(p=>{const x=tX(p.t),y=freqToY(p.f);if(!started){ctx.moveTo(x,y);started=true;}else ctx.lineTo(x,y);});
+    ctx.stroke();ctx.shadowBlur=0;
+  }
+
+  // User dot
+  if(userFreq){
+    const bx=nowX,by=freqToY(userFreq);
+    // Color based on accuracy
+    let dotColor='#f44336';
+    if(targetFreq){
+      const ac=Math.abs(1200*Math.log2(userFreq/targetFreq));
+      if(ac<15)dotColor='#ffd700';else if(ac<50)dotColor='#4caf50';else if(ac<100)dotColor='#ff9800';
+    }
+    ctx.beginPath();ctx.arc(bx,by,7,0,Math.PI*2);ctx.fillStyle=dotColor;
+    ctx.shadowColor=dotColor;ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
+  }
+}
+
+function drawParticles(){
+  const c=document.getElementById('particleCanvas'),ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  updateParticles(ctx);
+}
+
+// ===================== END SONG =====================
+function endSong(){
+  gState='result';killSynth();stopRecording();
+  if(animId)cancelAnimationFrame(animId);
+
+  // v4: close any open per-note scoring
+  if(curNoteId!==null&&window.KaraokeAudio){KaraokeAudio.endNote();curNoteId=null;}
+
+  const fs=totalN>0?Math.min(100,Math.round(score/Math.max(1,totalN))):0;
+  const pitchAcc=totalN>0?Math.round(pitchSum/totalN):0;
+  const rhythmAcc=totalN>0?Math.round(rhythmSum/totalN):0;
+  const grade=getGrade(fs);const stars=getStars(fs);
+  if(!practiceMode)saveHS(curSong.id,fs,grade);
+
+  // v4: confetti on S grade; transition shader to result mode
+  if(grade==='S'&&window.KaraokeFX)KaraokeFX.confetti(3500);
+  if(shaderOn&&window.KaraokeShader)KaraokeShader.setMode('result');
+
+  document.getElementById('singScreen').style.display='none';
+  const r=document.getElementById('resultScreen');r.style.display='flex';
+  r.innerHTML=`
+    <div class="res-title">${practiceMode?'연습 완료!':'노래 완료!'}</div>
+    <div class="res-grade grade-${grade}">${grade}</div>
+    <div class="res-score">${fs}점</div>
+    <div class="res-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+    <div class="res-bars">
+      <div class="res-bar-row"><div class="lbl">음정</div><div class="bar"><div class="bar-fill" style="width:${pitchAcc}%;background:linear-gradient(90deg,#ff6ab0,#a855f7)"></div></div><div class="val">${pitchAcc}%</div></div>
+      <div class="res-bar-row"><div class="lbl">리듬</div><div class="bar"><div class="bar-fill" style="width:${rhythmAcc}%;background:linear-gradient(90deg,#4caf50,#2196f3)"></div></div><div class="val">${rhythmAcc}%</div></div>
+    </div>
+    <div class="res-detail">최대 콤보: ${maxCombo} · 히트율: ${totalN>0?Math.round(hitN/totalN*100):0}%</div>
+    <div class="res-btns">
+      <button class="btn-retry" id="rRetry">다시 부르기</button>
+      ${recordedBlob?'<button class="btn-play" id="rPlay">녹음 재생</button>':''}
+      <button class="btn-share" id="rShare">📷 공유 카드</button>
+      <button class="btn-back" id="rBack">곡 선택</button>
+    </div>`;
+  document.getElementById('rShare').onclick=()=>downloadShareCard();
+  document.getElementById('rRetry').onclick=()=>pickSong(curSong,practiceMode);
+  document.getElementById('rBack').onclick=()=>{
+    gState='select';killSynth();
+    if(window.KaraokeFX)KaraokeFX.cleanup();
+    if(shaderOn&&window.KaraokeShader){KaraokeShader.destroy();shaderOn=false;}
+    r.style.display='none';document.getElementById('singScreen').style.display='none';
+    document.getElementById('songSelect').style.display='grid';renderList();
+  };
+  if(recordedBlob){
+    document.getElementById('rPlay').onclick=()=>{const a=new Audio(URL.createObjectURL(recordedBlob));a.play();};
+  }
+}
+
+function downloadShareCard(){
+  const W=1080, H=1920; // 9:16 portrait, instagram story format
+  const c = document.createElement('canvas'); c.width=W; c.height=H;
+  const x = c.getContext('2d');
+
+  // Background gradient
+  const bg = x.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#1a1040'); bg.addColorStop(0.5,'#2a1060'); bg.addColorStop(1,'#0a0818');
+  x.fillStyle=bg; x.fillRect(0,0,W,H);
+
+  // Glow circles for vibe
+  for(let i=0;i<6;i++){
+    const r = 200+Math.random()*300;
+    const cx = Math.random()*W, cy = Math.random()*H;
+    const g = x.createRadialGradient(cx,cy,0,cx,cy,r);
+    const colors = ['rgba(255,106,176,.15)','rgba(168,85,247,.15)','rgba(255,215,0,.10)'];
+    g.addColorStop(0, colors[i%3]); g.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+  }
+
+  // Title
+  x.fillStyle='#ff6ab0'; x.textAlign='center';
+  x.font='bold 64px sans-serif'; x.fillText('🎤 StarVoice v4', W/2, 200);
+  x.fillStyle='rgba(255,255,255,.6)'; x.font='32px sans-serif';
+  x.fillText('나의 노래방 점수', W/2, 260);
+
+  // Song title
+  x.fillStyle='#fff'; x.font='bold 56px sans-serif';
+  const songTitle = (curSong&&curSong.title)?curSong.title:'노래';
+  x.fillText(songTitle, W/2, 380);
+
+  // Grade letter (giant)
+  const fs = totalN>0?Math.min(100,Math.round(score/Math.max(1,totalN))):0;
+  const grade = getGrade(fs);
+  const gColors = {S:'#ffd700', A:'#4caf50', B:'#2196f3', C:'#ff9800', D:'#f44336'};
+  x.fillStyle = gColors[grade]||'#fff';
+  x.font='900 480px sans-serif';
+  x.shadowColor=gColors[grade]||'#fff'; x.shadowBlur=80;
+  x.fillText(grade, W/2, 920);
+  x.shadowBlur=0;
+
+  // Score
+  x.fillStyle='#ffd700'; x.font='900 240px sans-serif';
+  x.fillText(fs+'점', W/2, 1180);
+
+  // Stars
+  const stars = getStars(fs);
+  x.fillStyle='#ffd700'; x.font='100px sans-serif';
+  x.fillText('★'.repeat(stars)+'☆'.repeat(5-stars), W/2, 1320);
+
+  // Stats
+  const pitchAcc=totalN>0?Math.round(pitchSum/totalN):0;
+  const rhythmAcc=totalN>0?Math.round(rhythmSum/totalN):0;
+  x.fillStyle='rgba(255,255,255,.85)'; x.font='44px sans-serif';
+  x.fillText('음정 '+pitchAcc+'%   |   박자 '+rhythmAcc+'%', W/2, 1460);
+  x.fillText('최고 콤보 '+(maxCombo||0), W/2, 1530);
+
+  // Footer
+  x.fillStyle='rgba(255,255,255,.4)'; x.font='32px sans-serif';
+  const date = new Date().toLocaleDateString('ko-KR');
+  x.fillText(date+' · StarVoice v4', W/2, H-100);
+
+  // Download
+  c.toBlob(blob=>{
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `StarVoice_${songTitle}_${grade}_${fs}점.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }, 'image/png', 0.95);
+}
+
+// ===================== CONTROLS =====================
+document.getElementById('btnGuide').onclick=()=>{guideOn=!guideOn;document.getElementById('btnGuide').classList.toggle('active',guideOn);if(!guideOn)muteSynth();};
+document.getElementById('btnPause').onclick=()=>{
+  if(gState!=='singing')return;
+  paused=!paused;
+  document.getElementById('btnPause').textContent=paused?'▶':'⏸';
+  if(paused){pauseT=performance.now();muteSynth();}
+  else{pauseAccum+=performance.now()-pauseT;}
+};
+document.getElementById('btnStop').onclick=()=>{if(gState==='singing')endSong();};
+document.getElementById('btnKeyUp').onclick=()=>{keyShift=Math.min(keyShift+1,6);};
+document.getElementById('btnKeyDn').onclick=()=>{keyShift=Math.max(keyShift-1,-6);};
+document.getElementById('btnMic').onclick=async()=>{if(micOn)stopMic();else await startMic();};
+document.getElementById('btnHS').onclick=()=>{
+  const m=document.getElementById('hsModal');m.classList.add('show');
+  const hs=getHS();
+  let html='<h3>최고 기록</h3>';
+  SONGS.forEach(s=>{
+    const rec=hs[s.id];
+    html+=`<div class="hs-row"><span class="hs-name">${s.icon} ${s.title}</span>`;
+    if(rec)html+=`<span><span class="hs-sc">${rec.s}점</span><span class="hs-gr grade-${rec.g}">${rec.g}</span></span>`;
+    else html+=`<span style="color:#555">기록 없음</span>`;
+    html+=`</div>`;
+  });
+  html+=`<div style="text-align:center;margin-top:14px"><button class="btn-back" onclick="document.getElementById('hsModal').classList.remove('show')">닫기</button></div>`;
+  document.getElementById('hsBox').innerHTML=html;
+};
+
+// Resize
+function resizeCanvases(){
+  if(gState==='singing'){
+    const c=document.getElementById('pitchCanvas');c.width=c.parentElement.clientWidth;c.height=c.parentElement.clientHeight;
+    const pc=document.getElementById('particleCanvas');pc.width=pc.parentElement.clientWidth;pc.height=pc.parentElement.clientHeight;
+    if(shaderOn&&window.KaraokeShader)KaraokeShader.resize();
+  }
+}
+window.addEventListener('resize',resizeCanvases);
+
+// ===================== INIT =====================
+renderList();
+
+// v4: triple-tap on title toggles debug panel (hidden by default)
+(function(){
+  let taps=[],el=null;
+  function setup(){
+    el=document.querySelector('#header h1');
+    if(!el){setTimeout(setup,100);return;}
+    el.addEventListener('click',()=>{
+      const now=Date.now();
+      taps=taps.filter(t=>now-t<700);
+      taps.push(now);
+      if(taps.length>=3){
+        window.__dbgOn=!window.__dbgOn;
+        const p=document.getElementById('dbgPanel');
+        if(p)p.style.display=window.__dbgOn?'block':'none';
+        taps=[];
+        console.log('[v4] debug panel:',window.__dbgOn?'ON':'OFF');
+      }
+    });
+  }
+  setup();
+})();
+</script>
+
+<script>
+// v4 self-test
+console.log('[v4]',
+  'KaraokeAudio:', typeof window.KaraokeAudio,
+  'KaraokeShader:', typeof window.KaraokeShader,
+  'KaraokeFX:', typeof window.KaraokeFX);
+</script>
+</body>
+</html>
