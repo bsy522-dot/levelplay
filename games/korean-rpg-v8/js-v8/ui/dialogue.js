@@ -9,6 +9,7 @@
 //   class DialogueRunner
 
 import portraitsData from '../data/portraits.json' with { type: 'json' };
+import { getPortraitSVG } from './portrait_art.js';
 
 const TYPE_SPEED_MS = 30;
 let _el = null;
@@ -88,6 +89,17 @@ function _ensureBigPortraitStyles() {
         font-size: clamp(100px, 28vw, 180px);
       }
       #v8-dlg-bigportrait::after { bottom: -34px; font-size: clamp(16px, 4.5vw, 24px); letter-spacing: 4px; }
+    }
+    /* SVG 모드 — 일러스트가 박스를 채움 */
+    #v8-dlg-bigportrait.v8-svg-art {
+      font-size: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #v8-dlg-bigportrait.v8-svg-art > svg {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 18px;
     }
   `;
   document.head.appendChild(s);
@@ -185,7 +197,15 @@ export class DialogueRunner {
     const bp = document.getElementById('v8-dlg-bigportrait');
     if (bp) {
       if (line.text && pid) {
-        bp.textContent = p.emoji;
+        const svg = getPortraitSVG(pid);
+        if (svg) {
+          bp.innerHTML = svg;
+          bp.classList.add('v8-svg-art');
+        } else {
+          bp.innerHTML = '';
+          bp.textContent = p.emoji;
+          bp.classList.remove('v8-svg-art');
+        }
         bp.dataset.name = line.speaker || pid;
         bp.style.setProperty('--bp-color', p.color || '#ffd700');
         bp.style.borderColor = p.color || '#c4956a';
