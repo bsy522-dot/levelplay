@@ -110,6 +110,9 @@ canvas{display:block}
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
 'use strict';
 const $=s=>document.getElementById(s);
@@ -337,11 +340,29 @@ const sunLight = new THREE.PointLight(0xffe7b3, 2.5, 0, 1.6);
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
 
+// ============= 후처리 (Bloom) =============
+const composer = new EffectComposer(renderer);
+composer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+composer.setSize(W, H);
+composer.addPass(new RenderPass(scene, camera));
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(W, H),
+  isMobile ? 0.4 : 0.6,
+  isMobile ? 0.3 : 0.4,
+  0.85
+);
+composer.addPass(bloomPass);
+
 // ============= 텍스처 로더 =============
 const texLoader = new THREE.TextureLoader();
 function loadTex(path){
   const t = texLoader.load(path);
   t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+function loadNormal(path){
+  const t = texLoader.load(path);
+  t.colorSpace = THREE.NoColorSpace;
   return t;
 }
 const TEX = {
@@ -357,6 +378,17 @@ const TEX = {
   neptune: loadTex('assets/textures/neptune.jpg'),
   saturnRing: loadTex('assets/textures/saturn_ring.png'),
   starsMilkyway: loadTex('assets/textures/stars_milkyway.jpg')
+};
+const NRM = {
+  mercury: loadNormal('assets/textures/mercury_normal.jpg'),
+  venus:   loadNormal('assets/textures/venus_normal.jpg'),
+  earth:   loadNormal('assets/textures/earth_normal.jpg'),
+  moon:    loadNormal('assets/textures/moon_normal.jpg'),
+  mars:    loadNormal('assets/textures/mars_normal.jpg'),
+  jupiter: loadNormal('assets/textures/jupiter_normal.jpg'),
+  saturn:  loadNormal('assets/textures/saturn_normal.jpg'),
+  uranus:  loadNormal('assets/textures/uranus_normal.jpg'),
+  neptune: loadNormal('assets/textures/neptune_normal.jpg')
 };
 
 // 배경 milkyway 큐브 스카이
@@ -433,12 +465,19 @@ PLANETS.forEach((p, idx) => {
       `
     });
   } else {
-    mat = new THREE.MeshStandardMaterial({
+    const matCfg = {
       map: TEX[p.id],
       roughness: 0.9,
       metalness: 0.0,
       emissive: 0x000000
-    });
+    };
+    if (NRM[p.id]) {
+      matCfg.normalMap = NRM[p.id];
+      const nScale = (p.id === 'jupiter' || p.id === 'saturn'
+                   || p.id === 'uranus'  || p.id === 'neptune') ? 0.4 : 1.0;
+      matCfg.normalScale = new THREE.Vector2(nScale, nScale);
+    }
+    mat = new THREE.MeshStandardMaterial(matCfg);
   }
   const mesh = new THREE.Mesh(geom, mat);
   mesh.userData.planetData = p;
@@ -1461,6 +1500,8 @@ canvas.addEventListener('touchend', e => {
 function resize(){
  W = window.innerWidth; H = window.innerHeight;
  renderer.setSize(W, H, false);
+ composer.setSize(W, H);
+ bloomPass.setSize(W, H);
  camera.aspect = W / H;
  camera.updateProjectionMatrix();
 }
@@ -1507,7 +1548,7 @@ function gameLoop(now){
    }
  }
 
- renderer.render(scene, camera);
+ composer.render();
  requestAnimationFrame(gameLoop);
 }
 
@@ -1519,5 +1560,7 @@ G.updateHUD();
 requestAnimationFrame(gameLoop);
 
 </script>
+<link rel="stylesheet" href="assets/tutorial/tutorial.css">
+<script defer src="assets/tutorial/tutorial.js"></script>
 </body>
 </html>
