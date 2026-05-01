@@ -78,28 +78,31 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 .vfx-burst{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none}
 .shake{animation:shake .3s}
 @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,3px)}}
-/* ===== 조이스틱 비활성화 (D-pad 단독 사용) ===== */
-#joystick{display:none !important}
-/* ===== D-pad (좌하단, 큼지막한 십자형) — 모바일 게임 표준 ===== */
-#dpad{position:absolute;left:16px;bottom:80px;width:180px;height:180px;z-index:30;touch-action:none;user-select:none;-webkit-user-select:none;pointer-events:none}
-#dpad button{position:absolute;width:60px;height:60px;background:radial-gradient(circle,rgba(60,40,20,.85) 0%,rgba(20,10,5,.95) 80%);border:3px solid rgba(255,215,0,.7);color:#FFD700;font-size:30px;font-weight:bold;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.6),inset 0 2px 4px rgba(255,215,0,.15);pointer-events:auto;-webkit-tap-highlight-color:transparent;font-family:sans-serif}
+/* ===== 가상 조이스틱 (좌하단, 드래그식) — Brawl Stars/Genshin 표준 ===== */
+#joystick{position:absolute;left:20px;bottom:88px;width:140px;height:140px;background:radial-gradient(circle,rgba(255,215,0,.15) 0%,rgba(0,0,0,.55) 75%);border:3px solid rgba(255,215,0,.5);border-radius:50%;z-index:30;touch-action:none;user-select:none;-webkit-user-select:none;backdrop-filter:blur(2px);box-shadow:0 4px 16px rgba(0,0,0,.5)}
+#joystick-stick{position:absolute;top:50%;left:50%;width:60px;height:60px;background:radial-gradient(circle,#FFD700 0%,#B8860B 80%);border:3px solid #FFA500;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 4px 12px rgba(0,0,0,.6),inset 0 3px 8px rgba(255,255,255,.4);transition:none;pointer-events:none}
+#joystick.active{border-color:#FFD700;box-shadow:0 0 24px rgba(255,215,0,.6)}
+#joystick-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,215,0,.8);white-space:nowrap;pointer-events:none;font-weight:bold}
+@media(max-width:480px){#joystick{left:14px;bottom:80px;width:130px;height:130px}#joystick-stick{width:54px;height:54px}}
+/* ===== D-pad (우하단, 정확 1방향, 보조용) ===== */
+#dpad{position:absolute;right:16px;bottom:140px;width:140px;height:140px;z-index:30;touch-action:none;user-select:none;-webkit-user-select:none;pointer-events:none}
+#dpad button{position:absolute;width:46px;height:46px;background:radial-gradient(circle,rgba(60,40,20,.85) 0%,rgba(20,10,5,.95) 80%);border:2px solid rgba(255,215,0,.6);color:#FFD700;font-size:22px;font-weight:bold;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.6),inset 0 2px 4px rgba(255,215,0,.15);pointer-events:auto;-webkit-tap-highlight-color:transparent;font-family:sans-serif}
 #dpad button:active{background:radial-gradient(circle,rgba(255,215,0,.65) 0%,rgba(180,140,30,.9) 80%);transform:scale(0.92);box-shadow:0 0 18px rgba(255,215,0,.7)}
-#dpad .up{top:0;left:60px}
-#dpad .down{bottom:0;left:60px}
-#dpad .left{left:0;top:60px}
-#dpad .right{right:0;top:60px}
-#dpad .center{top:60px;left:60px;width:60px;height:60px;background:radial-gradient(circle,rgba(76,175,80,.85) 0%,rgba(46,125,50,.95) 80%);border-color:#8BC34A;color:#fff;font-size:14px;font-weight:900;letter-spacing:-1px}
+#dpad .up{top:0;left:47px}
+#dpad .down{bottom:0;left:47px}
+#dpad .left{left:0;top:47px}
+#dpad .right{right:0;top:47px}
+#dpad .center{top:47px;left:47px;width:46px;height:46px;background:radial-gradient(circle,rgba(76,175,80,.85) 0%,rgba(46,125,50,.95) 80%);border-color:#8BC34A;color:#fff;font-size:12px;font-weight:900;letter-spacing:-1px}
 #dpad .center:active{background:radial-gradient(circle,rgba(139,195,74,.9) 0%,rgba(76,175,80,1) 80%)}
-/* 모바일 화면 480px 이하: 약간 축소 */
 @media(max-width:480px){
-  #dpad{left:10px;bottom:74px;width:160px;height:160px}
-  #dpad button{width:53px;height:53px;font-size:26px}
-  #dpad .up,#dpad .down{left:53px}
-  #dpad .left,#dpad .right{top:53px}
-  #dpad .center{top:53px;left:53px;width:53px;height:53px;font-size:12px}
-  /* 미니맵을 우상단으로, 작게 — D-pad 자리 비우기 */
-  #minimap{left:auto !important;right:8px !important;top:48px !important;width:100px !important;height:100px !important}
-  #objectives{top:158px !important;width:160px !important;font-size:10px !important}
+  #dpad{right:10px;bottom:130px;width:130px;height:130px}
+  #dpad button{width:42px;height:42px;font-size:18px}
+  #dpad .up,#dpad .down{left:44px}
+  #dpad .left,#dpad .right{top:44px}
+  #dpad .center{top:44px;left:44px;width:42px;height:42px;font-size:10px}
+  /* 미니맵 우상단 자동 이동 */
+  #minimap{left:auto !important;right:8px !important;top:48px !important;width:90px !important;height:90px !important}
+  #objectives{top:148px !important;width:140px !important;font-size:9px !important;max-height:140px !important}
 }
 </style>
 </head>
@@ -574,6 +577,9 @@ bobOffset:Math.random()*Math.PI*2
 function drawResourceNode(ctx,r,sx,sy,dist,anim){
 const res=RESOURCES[r.type];if(!res)return;
 const bob=Math.sin(anim*0.02+r.bobOffset)*3;
+// 채집 중일 때 좌우 흔들림
+const shakeX=r.shaking?(Math.sin(anim*0.5)*r.shaking*0.5):0;
+sx+=shakeX;
 // Shadow
 ctx.fillStyle='rgba(0,0,0,.25)';
 ctx.beginPath();ctx.ellipse(sx,sy+10,14,4,0,0,Math.PI*2);ctx.fill();
@@ -689,9 +695,17 @@ if(G.targetX!==null&&G.targetY!==null){
 }
 G.px=Math.max(10,Math.min(WORLD_W*TILE-10,G.px));
 G.py=Math.max(10,Math.min(WORLD_H*TILE-10,G.py));
+// 채집 작업 처리 (이동 → 도착 → 채집 애니)
+processGatherTask();
+
 // Update floating texts
 if(G.floatingTexts){G.floatingTexts.forEach(ft=>{ft.y-=1;ft.t--});
   G.floatingTexts=G.floatingTexts.filter(ft=>ft.t>0);}
+
+// 자원 흔들림 감쇠
+if(G.worldResources){
+  G.worldResources.forEach(r=>{if(r.shaking)r.shaking=Math.max(0,r.shaking-0.5);});
+}
 
 // Update particles
 if(G.particles){
@@ -887,6 +901,21 @@ const dist=Math.sqrt(dx*dx+dy*dy);
 drawResourceNode(ctx,r,sx,sy,dist,animFrame);
 });
 
+// 채집 진행바 (Task target 위에)
+if(G.task&&G.task.type==='gather'&&G.task.target){
+  const t=G.task.target;
+  const sx=t.x-G.camX, sy=t.y-G.camY-40;
+  if(sx>-30&&sx<W+30&&sy>-30&&sy<H+30){
+    const w=50,h=8;
+    ctx.fillStyle='rgba(0,0,0,.6)';
+    ctx.fillRect(sx-w/2,sy,w,h);
+    ctx.fillStyle='#FFD700';
+    ctx.fillRect(sx-w/2+2,sy+2,(w-4)*Math.min(1,G.task.progress),h-4);
+    ctx.strokeStyle='#FFA500';ctx.lineWidth=1;
+    ctx.strokeRect(sx-w/2,sy,w,h);
+  }
+}
+
 // Villagers
 G.villagers.forEach(v=>{
 const sx=v.x-G.camX;
@@ -917,16 +946,24 @@ const dir=getPlayerDirection();
 const facingLeft=(G._lastDx||0)<-0.1;
 const charSpr=getCurrentCharacterSprite(dir);
 if(charSpr&&charSpr._loaded&&!charSpr._failed){
-  // AI 캐릭터 스프라이트 + 좌우 flip
-  const sw=48, sh=56;
-  ctx.save();
-  if(facingLeft){
-    ctx.translate(px,0);
-    ctx.scale(-1,1);
-    ctx.drawImage(charSpr,-sw/2,py-sh+10+bobY,sw,sh);
-  }else{
-    ctx.drawImage(charSpr,px-sw/2,py-sh+10+bobY,sw,sh);
+  // 캐릭터 PNG에서 하단 잔디 타일 영역 자동 자르기 (source crop)
+  const srcW=charSpr.naturalWidth||512, srcH=charSpr.naturalHeight||512;
+  const cropRatio=0.78; // 상단 78%만 사용 (하단 22%는 잔디 타일)
+  const srcCropH=srcH*cropRatio;
+  // 캔버스 표시 사이즈
+  const dw=52, dh=Math.round(dw*cropRatio*srcH/srcW); // 비율 유지
+  let tilt=0;
+  if(G.task&&G.task.type==='gather'&&Math.abs((G.task.target?G.task.target.x:G.px)-G.px)<60){
+    tilt=Math.sin(animFrame*0.4)*0.35;
+  }else if(G.walking){
+    tilt=Math.sin(G.walkFrame*0.35)*0.08;
   }
+  ctx.save();
+  // 발 위치를 px,py에 맞춤 (캐릭터 발이 정확히 땅에 닿도록)
+  ctx.translate(px,py-dh/2+8+bobY);
+  if(facingLeft)ctx.scale(-1,1);
+  ctx.rotate(tilt);
+  ctx.drawImage(charSpr, 0, 0, srcW, srcCropH, -dw/2, -dh/2, dw, dh);
   ctx.restore();
 }else{
   // Fallback: 도형 캐릭터
@@ -1125,12 +1162,13 @@ if(item)showToast(`📖 새 레시피 발견: ${item.name}!`);
 
 function onCanvasClick(e){
 if(!gameStarted)return;
-// canvas 좌표 정확화 (모바일/줌/스크롤 대응)
 const rect=canvas.getBoundingClientRect();
 const cx=(e.clientX-rect.left)*(canvas.width/rect.width);
 const cy=(e.clientY-rect.top)*(canvas.height/rect.height);
 const mx=cx+G.camX;
 const my=cy+G.camY;
+// 진행 중 작업 취소
+if(G.task)G.task=null;
 
 // Check if clicked on resource
 let clicked=null,minD=30;
@@ -1141,40 +1179,92 @@ if(d<minD){minD=d;clicked=r;}
 });
 
 if(clicked){
-const dx=G.px-clicked.x,dy=G.py-clicked.y;
-const d=Math.sqrt(dx*dx+dy*dy);
-if(d<80){
-// Gather
-clicked.hp--;
-const res=RESOURCES[clicked.type];
-if(clicked.hp<=0){
-addItem(clicked.type,1);
-showToast(`${res.icon} ${res.name} 획득!`);
-// Floating text + harvest burst particles
-if(!G.floatingTexts)G.floatingTexts=[];
-G.floatingTexts.push({text:'+1 '+res.name,x:clicked.x,y:clicked.y-10,t:50,color:'#4CAF50'});
-const cat=getResourceCategory(clicked.type);
-const palette={stone:['#8a8a8a','#aaaaaa','#bbbbbb'],wood:['#5D4037','#8D6E63','#A1887F'],ore:['#FFD700','#D4760A','#E8A735'],clay:['#D2691E','#E8A060','#CD853F'],other:['#4CAF50','#81C784','#FFEB3B']}[cat]||['#FFD700'];
-spawnParticles(clicked.x,clicked.y,{count:15,colors:palette,speed:3,life:35,gravity:0.2,size:3});
-playSound(800+Math.random()*200,0.06,0.08);
-G.worldResources=G.worldResources.filter(r=>r!==clicked);
-discoverRecipesFor(clicked.type);
-}else{
-showToast(`${res.icon} 채집 중... (${3-clicked.hp}/3)`);
-if(!G.floatingTexts)G.floatingTexts=[];
-G.floatingTexts.push({text:(3-clicked.hp)+'/3',x:clicked.x,y:clicked.y-10,t:30,color:'#FFD700'});
-spawnParticles(clicked.x,clicked.y,{count:5,colors:['#FFD700','#FFA500'],speed:2,life:20,gravity:0.15,size:2});
-playSound(400+Math.random()*100,0.04,0.05);
-}
-}else{
-// Walk toward resource
+// 자원 채집 작업 등록 — 자동 이동 + 도착 후 채집 행동
+G.task={type:'gather',target:clicked,progress:0,toolPower:getToolPower(clicked.type)};
 G.targetX=clicked.x;G.targetY=clicked.y;
-}
+const res=RESOURCES[clicked.type];
+showToast(`${res.icon} ${res.name}(으)로 이동...`);
 }else{
-// Walk to click position (정확한 캔버스 좌표 사용)
-G.targetX=mx;
-G.targetY=my;
+G.targetX=mx;G.targetY=my;
 }
+}
+
+// ========== 도구 시스템 ==========
+function getToolPower(resourceType){
+  const cat=getResourceCategory(resourceType);
+  const inv=G.inv||{};
+  let power=1.0; // 맨손 기본
+  let canGather=true;
+  // 나무는 도구 필수
+  if(cat==='wood'&&resourceType==='wood'){
+    if(inv.steelAxe>0)power=4.0;
+    else if(inv.bronzeAxe>0)power=2.5;
+    else if(inv.stoneAxe>0)power=1.5;
+    else canGather=false;
+  }else if(cat==='wood'){
+    // stick/fiber/berry는 맨손도 OK
+    if(inv.stoneAxe>0)power=1.5;
+  }else if(cat==='ore'){
+    // 광석은 곡괭이/도구 필수 (현재는 망치로 대체)
+    if(inv.stoneHammer>0)power=1.3;
+    if(inv.bronzeHammer>0)power=2.0;
+    else canGather=resourceType==='copperOre'||resourceType==='coal'?true:(inv.stoneHammer>0);
+  }
+  return {power,canGather};
+}
+
+// ========== 채집 행동 처리 (update 루프에서 호출) ==========
+function processGatherTask(){
+  if(!G.task||G.task.type!=='gather')return;
+  const t=G.task;
+  if(!G.worldResources.includes(t.target)){G.task=null;return;}
+  // 거리 체크
+  const dx=t.target.x-G.px,dy=t.target.y-G.py;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>50){
+    // 아직 이동 중
+    G.targetX=t.target.x;G.targetY=t.target.y;
+    return;
+  }
+  // 도착! 도구 가능 여부 체크
+  if(!t.toolPower.canGather){
+    showToast('⚠ 더 좋은 도구가 필요합니다!');
+    G.task=null;
+    return;
+  }
+  // 채집 진행
+  G.targetX=null;G.targetY=null;G.walking=false;
+  t.progress+=t.toolPower.power*(1/60); // 60fps 기준
+  G.gatheringFrame=(G.gatheringFrame||0)+1;
+  // 자원 흔들림 (target에 swayOffset 추가)
+  t.target.shaking=8;
+  // 도구 휘두르기 파티클
+  if(G.gatheringFrame%20===0){
+    const cat=getResourceCategory(t.target.type);
+    const palette={stone:['#aaa','#888'],wood:['#5D4037','#8D6E63'],ore:['#FFD700','#D4760A'],clay:['#D2691E','#E8A060'],other:['#4CAF50','#81C784']}[cat]||['#FFD700'];
+    spawnParticles(t.target.x,t.target.y-5,{count:3,colors:palette,speed:2,life:20,gravity:0.2,size:2});
+    playSound(500+Math.random()*200,0.05,0.06);
+  }
+  // 1.0 진행 = hp 1 감소
+  if(t.progress>=1.0){
+    t.progress=0;
+    t.target.hp--;
+    const res=RESOURCES[t.target.type];
+    if(t.target.hp<=0){
+      addItem(t.target.type,1);
+      const cat=getResourceCategory(t.target.type);
+      const palette={stone:['#8a8a8a','#aaa','#bbb'],wood:['#5D4037','#8D6E63','#A1887F'],ore:['#FFD700','#D4760A','#E8A735'],clay:['#D2691E','#E8A060','#CD853F'],other:['#4CAF50','#81C784','#FFEB3B']}[cat]||['#FFD700'];
+      spawnParticles(t.target.x,t.target.y,{count:18,colors:palette,speed:4,life:40,gravity:0.2,size:3});
+      playSound(800+Math.random()*200,0.08,0.1);
+      if(!G.floatingTexts)G.floatingTexts=[];
+      G.floatingTexts.push({text:'+1 '+res.name,x:t.target.x,y:t.target.y-10,t:50,color:'#4CAF50'});
+      G.worldResources=G.worldResources.filter(r=>r!==t.target);
+      discoverRecipesFor(t.target.type);
+      G.task=null;
+    }else{
+      showToast(`${res.icon} 채집 중... (${3-t.target.hp}/3)`);
+    }
+  }
 }
 
 function onCanvasTouch(e){
