@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>우주 탐험가 - Space Explorer 3D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a1a;color:#e0e8ff;font-family:'Segoe UI',sans-serif;overflow:hidden;touch-action:none;user-select:none}
+canvas{display:block}
+#c{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0}
+#ui{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1}
+#ui>*{pointer-events:auto}
+.panel{background:rgba(10,15,40,0.92);border:1px solid rgba(100,140,255,0.3);border-radius:12px;padding:16px;backdrop-filter:blur(6px)}
+#hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;font-size:14px}
+#hud .fuel-bar{width:120px;height:14px;background:#1a1a3a;border-radius:7px;overflow:hidden;border:1px solid #334}
+#hud .fuel-fill{height:100%;background:linear-gradient(90deg,#f80,#ff0);border-radius:7px;transition:width 0.3s}
+#hud .badge-count{color:#ffd700}
+.btn{background:linear-gradient(135deg,#1a3a6a,#0d2040);border:1px solid rgba(100,160,255,0.4);color:#8cf;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;transition:all 0.2s}
+.btn:hover,.btn:active{background:linear-gradient(135deg,#2a5a9a,#1a3a6a);color:#fff;border-color:#6af}
+.btn-gold{background:linear-gradient(135deg,#5a4a10,#3a3000);border-color:rgba(255,215,0,0.5);color:#ffd700}
+#planet-info{position:absolute;bottom:0;left:0;right:0;max-height:60vh;overflow-y:auto;display:none;padding:20px;border-radius:16px 16px 0 0}
+#planet-info h2{color:#ffd700;margin-bottom:8px;font-size:20px}
+#planet-info .facts{color:#b0c8ff;line-height:1.7;margin:10px 0}
+#quiz-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(90vw,420px);display:none;padding:24px}
+#quiz-panel h3{color:#ffd700;margin-bottom:12px}
+#quiz-panel .q-option{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 14px;background:rgba(30,50,100,0.6);border:1px solid #335;border-radius:8px;color:#aac;cursor:pointer;font-size:14px}
+#quiz-panel .q-option:hover{background:rgba(50,80,150,0.6);color:#fff}
+#quiz-panel .q-option.correct{background:rgba(0,150,50,0.4);border-color:#0a0;color:#0f0}
+#quiz-panel .q-option.wrong{background:rgba(150,0,0,0.4);border-color:#a00;color:#f66}
+#builder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(95vw,500px);display:none;padding:20px}
+#builder h3{color:#ffd700;margin-bottom:12px}
+.part-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.part-item{text-align:center;padding:10px;background:rgba(20,30,60,0.8);border:1px solid #335;border-radius:8px;cursor:pointer;font-size:12px}
+.part-item.selected{border-color:#ffd700;background:rgba(60,60,20,0.6)}
+.part-item .icon{font-size:28px;display:block;margin-bottom:4px}
+#rocket-preview{text-align:center;margin:12px 0;min-height:80px}
+#album{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(95vw,520px);max-height:80vh;overflow-y:auto;display:none;padding:20px}
+#album h3{color:#ffd700;margin-bottom:12px}
+.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.album-item{text-align:center;padding:12px 6px;background:rgba(20,30,60,0.7);border-radius:10px;border:1px solid #223}
+.album-item.collected{border-color:#ffd700;background:rgba(40,40,10,0.5)}
+.album-item .planet-icon{font-size:32px;display:block;margin-bottom:4px}
+.album-item .sample-count{font-size:11px;color:#889}
+#upgrade-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(95vw,460px);display:none;padding:20px}
+.upgrade-item{display:flex;justify-content:space-between;align-items:center;padding:10px;margin:6px 0;background:rgba(20,30,60,0.7);border-radius:8px;border:1px solid #334}
+.upgrade-item .cost{color:#ffd700;font-size:13px}
+#nav-btns{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#menu-bar{position:absolute;top:50px;right:8px;display:flex;flex-direction:column;gap:6px}
+.close-btn{position:absolute;top:10px;right:14px;background:none;border:none;color:#f66;font-size:22px;cursor:pointer}
+#toast{position:absolute;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,80,0,0.85);color:#0f0;padding:10px 20px;border-radius:8px;font-size:14px;display:none;z-index:99;border:1px solid #0a0}
+#title-overlay{position:absolute;top:38px;left:50%;transform:translateX(-50%);text-align:center;color:#ffd700;font-weight:bold;font-size:18px;text-shadow:0 0 8px #000;pointer-events:none}
+#title-overlay .sub{color:#6688aa;font-size:12px;font-weight:normal;margin-top:4px}
+/* ============= VFX: Panel transitions (fade + scale) ============= */
+#planet-info,#quiz-panel,#builder,#album,#upgrade-panel{opacity:0;transition:opacity 0.3s ease-out,transform 0.3s ease-out}
+#planet-info{transform:translateY(20px) scale(0.92);transform-origin:center bottom}
+#quiz-panel,#builder,#album,#upgrade-panel{transform:translate(-50%,-50%) scale(0.92);transform-origin:center center}
+#planet-info.vfx-show{opacity:1;transform:translateY(0) scale(1)}
+#quiz-panel.vfx-show,#builder.vfx-show,#album.vfx-show,#upgrade-panel.vfx-show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#planet-info.vfx-hide,#quiz-panel.vfx-hide,#builder.vfx-hide,#album.vfx-hide,#upgrade-panel.vfx-hide{transition:opacity 0.2s ease-in,transform 0.2s ease-in}
+/* ============= VFX: Button click feedback ============= */
+.btn:active{transform:scale(0.95);transition:transform 0.1s ease-out}
+.btn{transition:all 0.2s,transform 0.1s ease-out}
+.q-option:active{transform:scale(0.97);transition:transform 0.1s ease-out}
+/* ============= VFX: HUD count-up spring ============= */
+@keyframes vfx-countup{0%{transform:scale(1)}30%{transform:scale(1.4);color:#fff200}60%{transform:scale(0.92)}100%{transform:scale(1)}}
+#hud-samples.vfx-bump,#hud-badges.vfx-bump{display:inline-block;animation:vfx-countup 0.4s cubic-bezier(0.34,1.56,0.64,1) 1}
+/* ============= VFX: HUD low-fuel pulse ============= */
+@keyframes vfx-fuel-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,40,40,0)}50%{box-shadow:0 0 12px 4px rgba(255,40,40,0.85)}}
+#fuel-bar.vfx-low{animation:vfx-fuel-pulse 0.8s ease-in-out infinite;background:linear-gradient(90deg,#f33,#ff6)!important}
+/* ============= VFX: Badge gold flash ============= */
+@keyframes vfx-gold-flash{0%{opacity:0}30%{opacity:0.85}100%{opacity:0}}
+#vfx-flash{position:absolute;inset:0;pointer-events:none;z-index:50;background:radial-gradient(ellipse at center,rgba(255,215,0,0.85) 0%,rgba(255,180,0,0.4) 40%,rgba(255,140,0,0) 75%);opacity:0;display:none}
+#vfx-flash.active{display:block;animation:vfx-gold-flash 0.5s ease-out forwards}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">
+<div id="hud" class="panel">
+ <div>🚀 <span id="hud-loc">태양계</span></div>
+ <div>⛽ <div class="fuel-bar"><div class="fuel-fill" id="fuel-bar" style="width:100%"></div></div></div>
+ <div>💎 <span id="hud-samples">0</span></div>
+ <div class="badge-count">🏅 <span id="hud-badges">0</span></div>
+</div>
+<div id="menu-bar">
+ <button class="btn" onclick="G.showBuilder()">🔧 로켓</button>
+ <button class="btn" onclick="G.showAlbum()">📖 앨범</button>
+ <button class="btn" onclick="G.showUpgrades()">⬆ 강화</button>
+</div>
+<div id="title-overlay">우주 탐험가 🚀<div class="sub">행성을 클릭하여 탐험하세요</div></div>
+<div id="nav-btns"></div>
+<div id="planet-info" class="panel"></div>
+<div id="quiz-panel" class="panel"></div>
+<div id="builder" class="panel"></div>
+<div id="album" class="panel"></div>
+<div id="upgrade-panel" class="panel"></div>
+<div id="toast"></div>
+<div id="vfx-flash"></div>
+</div>
+<script src="assets/audio/audio.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+'use strict';
+const $=s=>document.getElementById(s);
+const canvas=$('c');
+let W=window.innerWidth, H=window.innerHeight;
+
+// ============= 3D 환경 감지 =============
+const IS_MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+const SPHERE_SEG = IS_MOBILE ? [16,12] : [32,24];
+
+// ============= DATA (보존) =============
+const PLANETS=[
+{id:'sun',name:'태양',color:'#ff8800',r:35,orbit:0,speed:0,icon:'☀️',
+ facts:['태양은 태양계 전체 질량의 99.86%를 차지합니다','표면 온도는 약 5,500°C입니다','수소 핵융합으로 에너지를 생산합니다'],
+ quizzes:[
+  {q:'태양의 표면 온도는?',o:['약 1,000°C','약 5,500°C','약 15,000°C','약 100°C'],a:1},
+  {q:'태양은 무엇으로 에너지를 만드나요?',o:['석탄 연소','수소 핵융합','전기 발전','화학 반응'],a:1},
+  {q:'태양계 질량에서 태양이 차지하는 비율은?',o:['50%','75%','99.86%','30%'],a:2}
+ ],surface:'#ff6600',surfaceAlt:'#cc4400',samples:['태양풍 입자','코로나 플라즈마','흑점 자기장 데이터']},
+{id:'mercury',name:'수성',color:'#aaa',r:6,orbit:65,speed:0.04,icon:'🪨',
+ facts:['태양에 가장 가까운 행성입니다','낮 온도 430°C, 밤 온도 -180°C','대기가 거의 없어 온도차가 극심합니다','공전주기는 88일입니다'],
+ quizzes:[
+  {q:'수성의 낮 온도는?',o:['100°C','430°C','200°C','1000°C'],a:1},
+  {q:'수성의 공전주기는?',o:['365일','88일','225일','30일'],a:1},
+  {q:'수성에 대기가 거의 없는 이유는?',o:['중력이 약해서','태양이 멀어서','자전이 빨라서','물이 많아서'],a:0}
+ ],surface:'#888',surfaceAlt:'#666',samples:['수성 암석','크레이터 먼지','금속 핵 파편']},
+{id:'venus',name:'금성',color:'#ffcc44',r:9,orbit:95,speed:0.03,icon:'🌕',
+ facts:['두꺼운 대기로 극심한 온실효과가 일어납니다','표면 온도 약 465°C로 수성보다 뜨겁습니다','지구와 비슷한 크기와 질량을 가졌습니다','자전 방향이 다른 행성과 반대입니다'],
+ quizzes:[
+  {q:'금성의 표면 온도는?',o:['100°C','265°C','465°C','665°C'],a:2},
+  {q:'금성이 뜨거운 이유는?',o:['태양에 가장 가까워서','온실효과 때문에','핵반응 때문에','마찰열 때문에'],a:1},
+  {q:'금성의 특이한 점은?',o:['고리가 있다','자전 방향이 반대다','위성이 10개다','물이 많다'],a:1}
+ ],surface:'#cc9922',surfaceAlt:'#aa7711',samples:['황산 구름 샘플','현무암 조각','대기 가스 샘플']},
+{id:'earth',name:'지구',color:'#4488ff',r:10,orbit:130,speed:0.025,icon:'🌍',
+ facts:['태양계에서 유일하게 액체 상태의 물이 존재합니다','대기가 생명을 보호합니다','자전주기 24시간, 공전주기 365.25일','표면의 71%가 물로 덮여 있습니다'],
+ quizzes:[
+  {q:'지구 표면에서 물이 차지하는 비율은?',o:['50%','60%','71%','80%'],a:2},
+  {q:'지구의 공전주기는?',o:['365.25일','360일','400일','300일'],a:0},
+  {q:'지구의 대기 주성분은?',o:['산소','이산화탄소','질소','수소'],a:2}
+ ],surface:'#226644',surfaceAlt:'#1a4433',samples:['해수 샘플','토양 미생물','대기 조성 데이터']},
+{id:'moon',name:'달',color:'#ccc',r:4,orbit:148,speed:0.022,icon:'🌙',
+ facts:['지구의 유일한 자연 위성입니다','1969년 닐 암스트롱이 최초로 달에 착륙했습니다','지구와의 평균 거리 384,400km','중력은 지구의 1/6입니다'],
+ quizzes:[
+  {q:'최초로 달에 착륙한 사람은?',o:['유리 가가린','닐 암스트롱','버즈 올드린','존 글렌'],a:1},
+  {q:'달의 중력은 지구의 몇 분의 1?',o:['1/2','1/4','1/6','1/10'],a:2},
+  {q:'달까지의 평균 거리는?',o:['38만 km','100만 km','10만 km','500만 km'],a:0}
+ ],surface:'#999',surfaceAlt:'#777',samples:['달 암석','레골리스','운석 파편']},
+{id:'mars',name:'화성',color:'#dd4422',r:8,orbit:175,speed:0.02,icon:'🔴',
+ facts:['붉은 행성이라 불립니다 (산화철 때문)','올림푸스 산은 태양계에서 가장 높은 산(21.9km)입니다','NASA 탐사 로버들이 활동 중입니다','하루가 약 24시간 37분입니다'],
+ quizzes:[
+  {q:'화성이 붉은 이유는?',o:['용암 때문','산화철 때문','태양빛 반사','대기 색깔'],a:1},
+  {q:'올림푸스 산의 높이는?',o:['8.8km','15km','21.9km','30km'],a:2},
+  {q:'화성의 하루 길이는?',o:['12시간','24시간 37분','48시간','6시간'],a:1}
+ ],surface:'#aa3311',surfaceAlt:'#882200',samples:['붉은 토양','얼음 샘플','암석 코어']},
+{id:'jupiter',name:'목성',color:'#ddaa66',r:18,orbit:225,speed:0.012,icon:'🟤',
+ facts:['태양계에서 가장 큰 행성입니다','대적점은 300년 넘게 지속된 거대한 폭풍입니다','79개 이상의 위성을 가지고 있습니다','가스 행성으로 단단한 표면이 없습니다'],
+ quizzes:[
+  {q:'목성의 대적점은 무엇인가요?',o:['화산','거대한 폭풍','바다','산'],a:1},
+  {q:'목성의 위성 개수는?',o:['10개','30개','79개 이상','5개'],a:2},
+  {q:'목성은 어떤 종류의 행성인가요?',o:['암석 행성','가스 행성','얼음 행성','금속 행성'],a:1}
+ ],surface:'#bb8844',surfaceAlt:'#996633',samples:['대기 가스','대적점 데이터','자기장 측정값']},
+{id:'saturn',name:'토성',color:'#eedd88',r:15,orbit:280,speed:0.008,icon:'🪐',
+ facts:['아름다운 고리로 유명합니다 (얼음과 암석 조각)','밀도가 물보다 낮아 물에 뜰 수 있습니다','타이탄 위성에는 액체 메탄 호수가 있습니다','바람 속도가 시속 1,800km에 달합니다'],
+ quizzes:[
+  {q:'토성의 고리는 무엇으로 이루어져 있나요?',o:['가스','얼음과 암석','금속','먼지'],a:1},
+  {q:'토성의 특이한 물리적 성질은?',o:['자기장이 없다','물에 뜬다','자전하지 않는다','빛을 낸다'],a:1},
+  {q:'타이탄 위성의 특징은?',o:['물 바다','액체 메탄 호수','활화산','산소 대기'],a:1}
+ ],surface:'#ccbb66',surfaceAlt:'#aa9944',samples:['고리 얼음 파편','타이탄 메탄','대기 샘플']},
+{id:'uranus',name:'천왕성',color:'#66ccdd',r:12,orbit:330,speed:0.005,icon:'🔵',
+ facts:['자전축이 98도 기울어져 옆으로 누워 자전합니다','메탄 대기 때문에 청록색입니다','27개의 위성을 가지고 있습니다','고리가 있지만 매우 어둡습니다'],
+ quizzes:[
+  {q:'천왕성이 옆으로 누운 이유로 추정되는 것은?',o:['태양 중력','거대한 충돌','자기장','위성 영향'],a:1},
+  {q:'천왕성의 색깔이 청록색인 이유는?',o:['물 때문에','메탄 대기 때문에','빙하 때문에','반사 때문에'],a:1},
+  {q:'천왕성의 자전축 기울기는?',o:['23도','45도','98도','0도'],a:2}
+ ],surface:'#448899',surfaceAlt:'#336677',samples:['메탄 얼음','대기 가스','자기장 데이터']},
+{id:'neptune',name:'해왕성',color:'#3355cc',r:11,orbit:370,speed:0.003,icon:'🔷',
+ facts:['태양계에서 가장 먼 행성입니다','풍속이 시속 2,100km로 태양계 최강입니다','대흑점이라는 거대한 폭풍이 있습니다','트리톤 위성은 역행 궤도를 가집니다'],
+ quizzes:[
+  {q:'해왕성의 최대 풍속은?',o:['시속 500km','시속 1,000km','시속 2,100km','시속 100km'],a:2},
+  {q:'해왕성의 거대 폭풍 이름은?',o:['대적점','대흑점','대백점','대청점'],a:1},
+  {q:'트리톤 위성의 특징은?',o:['가장 크다','역행 궤도','고리가 있다','대기가 두껍다'],a:1}
+ ],surface:'#2244aa',surfaceAlt:'#1a3388',samples:['다이아몬드 비 데이터','대기 메탄','트리톤 얼음']}
+];
+
+const PARTS=[
+ {id:'capsule',name:'캡슐',icon:'🛸',desc:'우주비행사 탑승',cost:0,weight:2},
+ {id:'fuel1',name:'연료탱크S',icon:'🛢️',desc:'연료 +30',cost:0,fuel:30,weight:3},
+ {id:'fuel2',name:'연료탱크M',icon:'🛢️',desc:'연료 +60',cost:50,fuel:60,weight:5},
+ {id:'fuel3',name:'연료탱크L',icon:'🛢️',desc:'연료 +100',cost:120,fuel:100,weight:8},
+ {id:'engine1',name:'엔진 Mk1',icon:'🔥',desc:'기본 추진',cost:0,thrust:1,weight:2},
+ {id:'engine2',name:'엔진 Mk2',icon:'🔥',desc:'강력 추진',cost:80,thrust:2,weight:3},
+ {id:'solar',name:'태양전지',icon:'⚡',desc:'전력 공급',cost:30,power:1,weight:1},
+ {id:'antenna',name:'안테나',icon:'📡',desc:'통신 장비',cost:20,comm:1,weight:1}
+];
+
+const UPGRADES=[
+ {id:'suit1',name:'우주복 Mk2',desc:'행성 탐사 시간 +50%',cost:100,type:'suit',level:1},
+ {id:'suit2',name:'우주복 Mk3',desc:'극한 환경 내성',cost:250,type:'suit',level:2},
+ {id:'tool1',name:'채집 도구 Mk2',desc:'샘플 채집 +1',cost:80,type:'tool',level:1},
+ {id:'tool2',name:'채집 도구 Mk3',desc:'샘플 채집 +2',cost:200,type:'tool',level:2},
+ {id:'rocket1',name:'추진 강화',desc:'연료 효율 20% 증가',cost:150,type:'rocket',level:1},
+ {id:'rocket2',name:'워프 드라이브',desc:'연료 효율 50% 증가',cost:400,type:'rocket',level:2}
+];
+
+// ============= GAME STATE (보존) =============
+let G={
+ state:'map', // map, travel, explore, quiz
+ fuel:100,maxFuel:100,
+ samples:0,badges:0,
+ currentPlanet:null,
+ rocketParts:['capsule','fuel1','engine1'],
+ collected:{},// planet-id: [sample indices]
+ quizDone:{},// planet-id: true
+ upgrades:{suit:0,tool:0,rocket:0},
+ explorerX:0,explorerY:0,
+ camX:0,
+ stars:[],
+ orbitalAngle:0,
+ hoverPlanet:null,
+ touchStart:null,
+ mapScale:1,
+ toastTimer:null,
+
+ save(){
+  const d={fuel:this.fuel,maxFuel:this.maxFuel,samples:this.samples,badges:this.badges,
+   rocketParts:this.rocketParts,collected:this.collected,quizDone:this.quizDone,
+   upgrades:this.upgrades};
+  localStorage.setItem('space-explorer',JSON.stringify(d));
+ },
+ load(){
+  try{
+   const d=JSON.parse(localStorage.getItem('space-explorer'));
+   if(d){Object.assign(this,d);this.recalcFuel();}
+  }catch(e){}
+ },
+ recalcFuel(){
+  let f=0;
+  this.rocketParts.forEach(p=>{const pt=PARTS.find(x=>x.id===p);if(pt&&pt.fuel)f+=pt.fuel;});
+  this.maxFuel=Math.max(f,30);
+ },
+ getFuelCost(planet){
+  let base=planet.orbit/10;
+  let eff=1;
+  if(this.upgrades.rocket>=1)eff=0.8;
+  if(this.upgrades.rocket>=2)eff=0.5;
+  return Math.ceil(base*eff);
+ },
+ getCollectMax(){return 1+this.upgrades.tool;},
+ toast(msg){
+  const t=$('toast');t.textContent=msg;t.style.display='block';
+  clearTimeout(this.toastTimer);
+  this.toastTimer=setTimeout(()=>t.style.display='none',2500);
+ },
+ _lastSamples:0,_lastBadges:0,
+ updateHUD(){
+  $('hud-loc').textContent=this.currentPlanet?this.currentPlanet.name:'태양계';
+  const fb=$('fuel-bar');
+  fb.style.width=(this.fuel/this.maxFuel*100)+'%';
+  // VFX: 연료 30 미만 펄스
+  if(this.fuel < 30) fb.classList.add('vfx-low');
+  else fb.classList.remove('vfx-low');
+  const sEl=$('hud-samples'), bEl=$('hud-badges');
+  sEl.textContent=this.samples;
+  bEl.textContent=this.badges;
+  // VFX: 카운트업 스프링 (값 변경 시 bump 1회)
+  if(this.samples !== this._lastSamples){
+    sEl.classList.remove('vfx-bump');
+    void sEl.offsetWidth;
+    sEl.classList.add('vfx-bump');
+    this._lastSamples = this.samples;
+  }
+  if(this.badges !== this._lastBadges){
+    bEl.classList.remove('vfx-bump');
+    void bEl.offsetWidth;
+    bEl.classList.add('vfx-bump');
+    this._lastBadges = this.badges;
+  }
+ }
+};
+
+// 글로벌 노출 (인라인 onclick 핸들러용)
+window.G = G;
+
+// ============= AUDIO 통합 (AudioEngine 래퍼) =============
+let _audioStarted = false;
+function ensureAudio(){
+  if(_audioStarted) return;
+  if(typeof AudioEngine === 'undefined') return;
+  AudioEngine.init();
+  AudioEngine.playBGM();
+  _audioStarted = true;
+}
+function sfx(name){
+  if(typeof AudioEngine !== 'undefined' && AudioEngine.isInit){
+    AudioEngine.sfx(name);
+  }
+}
+
+// ============= THREE.JS 부트스트랩 =============
+const SCALE_DIST = 0.6;
+const SCALE_RADIUS = 0.25;
+const SPEED_GAIN = 0.5;
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+  antialias: window.devicePixelRatio < 2,
+  alpha: false,
+  powerPreference: 'high-performance'
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(W, H, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x06060f);
+
+const camera = new THREE.PerspectiveCamera(55, W/H, 0.1, 5000);
+camera.position.set(0, 180, 380);
+camera.lookAt(0, 0, 0);
+
+// 조명
+const ambient = new THREE.AmbientLight(0xffffff, 0.18);
+scene.add(ambient);
+const sunLight = new THREE.PointLight(0xffe7b3, 2.5, 0, 1.6);
+sunLight.position.set(0, 0, 0);
+scene.add(sunLight);
+
+// ============= 텍스처 로더 =============
+const texLoader = new THREE.TextureLoader();
+function loadTex(path){
+  const t = texLoader.load(path);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const TEX = {
+  sun: loadTex('assets/textures/sun.jpg'),
+  mercury: loadTex('assets/textures/mercury.jpg'),
+  venus: loadTex('assets/textures/venus.jpg'),
+  earth: loadTex('assets/textures/earth.jpg'),
+  moon: loadTex('assets/textures/moon.jpg'),
+  mars: loadTex('assets/textures/mars.jpg'),
+  jupiter: loadTex('assets/textures/jupiter.jpg'),
+  saturn: loadTex('assets/textures/saturn.jpg'),
+  uranus: loadTex('assets/textures/uranus.jpg'),
+  neptune: loadTex('assets/textures/neptune.jpg'),
+  saturnRing: loadTex('assets/textures/saturn_ring.png'),
+  starsMilkyway: loadTex('assets/textures/stars_milkyway.jpg')
+};
+
+// 배경 milkyway 큐브 스카이
+{
+  const skyTex = TEX.starsMilkyway;
+  skyTex.mapping = THREE.EquirectangularReflectionMapping;
+  scene.background = skyTex;
+  scene.backgroundIntensity = 0.35;
+}
+
+// ============= 행성 메쉬 생성 =============
+const planetMeshes = {};
+const planetPivots = {};
+const pickableMeshes = [];
+const sunGroup = new THREE.Group();
+scene.add(sunGroup);
+
+PLANETS.forEach((p, idx) => {
+  const radius3D = Math.max(p.r * SCALE_RADIUS, 0.6);
+  const distance3D = p.orbit * SCALE_DIST;
+  const seg = SPHERE_SEG;
+  const geom = new THREE.SphereGeometry(radius3D, seg[0], seg[1]);
+
+  let mat;
+  if(p.id === 'sun'){
+    // VFX: 태양 코로나 셰이더 (procedural noise(uv*5+time*0.1) + fresnel rim)
+    mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uColor1: { value: new THREE.Color(0xffee88) },  // 중심 색
+        uColor2: { value: new THREE.Color(0xff6600) },  // 가장자리 불꽃 색
+        uTex: { value: TEX.sun }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vViewDir;
+        void main(){
+          vUv = uv;
+          vNormal = normalize(normalMatrix * normal);
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          vViewDir = normalize(-mv.xyz);
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uColor1;
+        uniform vec3 uColor2;
+        uniform sampler2D uTex;
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vViewDir;
+        // 끓는 표면 noise: noise(uv*5 + time*0.1)
+        float noise(vec2 p){
+          return sin(p.x * 5.0 + uTime * 0.1) * sin(p.y * 5.0 - uTime * 0.1)
+               + 0.5 * sin(p.x * 11.0 - uTime * 0.15) * sin(p.y * 13.0 + uTime * 0.12)
+               + 0.25 * sin(p.x * 23.0 + uTime * 0.2) * sin(p.y * 19.0 - uTime * 0.18);
+        }
+        void main(){
+          vec2 uv = vUv;
+          float boil = noise(uv * 5.0);
+          float intensity = 0.5 + 0.5 * (boil + 1.0) * 0.5;
+          vec3 base = texture2D(uTex, uv).rgb;
+          // 중심 노랑 → 가장자리 주황 (intensity 기반)
+          vec3 hot = mix(uColor2, uColor1, intensity);
+          vec3 col = mix(base * 0.6, hot, 0.75) * (0.85 + 0.4 * intensity);
+          // fresnel: 가장자리에서 불꽃 강조
+          float rim = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 1.6);
+          col = mix(col, uColor2, rim * 0.7);
+          col += uColor1 * rim * 0.4;
+          gl_FragColor = vec4(col, 1.0);
+        }
+      `
+    });
+  } else {
+    mat = new THREE.MeshStandardMaterial({
+      map: TEX[p.id],
+      roughness: 0.9,
+      metalness: 0.0,
+      emissive: 0x000000
+    });
+  }
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.userData.planetData = p;
+  mesh.userData.radius3D = radius3D;
+  planetMeshes[p.id] = mesh;
+
+  if(p.id === 'sun'){
+    sunGroup.add(mesh);
+    // 픽킹용 invisible 큰 sphere
+    const pickGeom = new THREE.SphereGeometry(radius3D * 1.6, 12, 8);
+    const pickMat = new THREE.MeshBasicMaterial({ visible: false });
+    const pickMesh = new THREE.Mesh(pickGeom, pickMat);
+    pickMesh.userData.planetData = p;
+    sunGroup.add(pickMesh);
+    pickableMeshes.push(pickMesh);
+
+    // 태양 글로우 sprite (기존 sprite는 그대로 두되 보강)
+    const glowMat = new THREE.SpriteMaterial({
+      map: TEX.sun,
+      color: 0xffaa44,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const glowSprite = new THREE.Sprite(glowMat);
+    glowSprite.scale.set(radius3D * 4, radius3D * 4, 1);
+    sunGroup.add(glowSprite);
+
+    // VFX: 코로나 플레어 셸 (back side, additive radial) - 모바일 분기 (QA-2 권고)
+    const coronaGeom = new THREE.SphereGeometry(radius3D * 1.35, isMobile ? 16 : 32, isMobile ? 12 : 24);
+    const coronaMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uColor1: { value: new THREE.Color(0xffee88) },
+        uColor2: { value: new THREE.Color(0xff6600) }
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vViewDir;
+        void main(){
+          vNormal = normalize(normalMatrix * normal);
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          vViewDir = normalize(-mv.xyz);
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        uniform vec3 uColor1;
+        uniform vec3 uColor2;
+        varying vec3 vNormal;
+        varying vec3 vViewDir;
+        void main(){
+          float fres = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 2.5);
+          float pulse = 0.85 + 0.15 * sin(uTime * 1.5);
+          vec3 col = mix(uColor2, uColor1, fres) * pulse;
+          gl_FragColor = vec4(col, fres * 0.85);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+    const corona = new THREE.Mesh(coronaGeom, coronaMat);
+    sunGroup.add(corona);
+    sunGroup.userData.coronaMat = coronaMat;
+    sunGroup.userData.sunMat = mat;
+  } else {
+    const pivot = new THREE.Group();
+    planetPivots[p.id] = pivot;
+    pivot.rotation.y = idx * 0.8; // 초기 위상각
+    scene.add(pivot);
+
+    const planetGroup = new THREE.Group();
+    planetGroup.position.set(distance3D, 0, 0);
+    pivot.add(planetGroup);
+
+    planetGroup.add(mesh);
+
+    // VFX: 대기 글로우 (지구=하늘색, 금성=노랑, 해왕성=청록, 천왕성=옅은 청록)
+    const ATMOS_COLORS = {
+      earth: 0x88ccff,
+      venus: 0xffee44,
+      neptune: 0x33ddcc,
+      uranus: 0x88ddee
+    };
+    if(ATMOS_COLORS[p.id] !== undefined){
+      const atmGeom = new THREE.SphereGeometry(radius3D * 1.08, seg[0], seg[1]);
+      const atmMat = new THREE.ShaderMaterial({
+        uniforms: {
+          uColor: { value: new THREE.Color(ATMOS_COLORS[p.id]) }
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vViewDir;
+          void main(){
+            vNormal = normalize(normalMatrix * normal);
+            vec4 mv = modelViewMatrix * vec4(position, 1.0);
+            vViewDir = normalize(-mv.xyz);
+            gl_Position = projectionMatrix * mv;
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 uColor;
+          varying vec3 vNormal;
+          varying vec3 vViewDir;
+          void main(){
+            float fres = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 2.0);
+            gl_FragColor = vec4(uColor * fres, fres * 0.9);
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+        depthWrite: false
+      });
+      const atmMesh = new THREE.Mesh(atmGeom, atmMat);
+      planetGroup.add(atmMesh);
+    }
+
+    // 픽킹용 invisible 더 큰 sphere
+    const pickGeom = new THREE.SphereGeometry(radius3D * 2.2, 12, 8);
+    const pickMat = new THREE.MeshBasicMaterial({ visible: false });
+    const pickMesh = new THREE.Mesh(pickGeom, pickMat);
+    pickMesh.userData.planetData = p;
+    planetGroup.add(pickMesh);
+    pickableMeshes.push(pickMesh);
+
+    // 토성 고리
+    if(p.id === 'saturn'){
+      const ringGeom = new THREE.RingGeometry(radius3D * 1.3, radius3D * 2.1, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        map: TEX.saturnRing,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85,
+        depthWrite: false
+      });
+      const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+      ringMesh.rotation.x = -Math.PI / 2 + 0.3;
+      planetGroup.add(ringMesh);
+    }
+
+    // 궤도선
+    const orbitGeom = new THREE.BufferGeometry();
+    const orbitPts = [];
+    const segments = 96;
+    for(let i = 0; i <= segments; i++){
+      const ang = (i / segments) * Math.PI * 2;
+      orbitPts.push(Math.cos(ang) * distance3D, 0, Math.sin(ang) * distance3D);
+    }
+    orbitGeom.setAttribute('position', new THREE.Float32BufferAttribute(orbitPts, 3));
+    const orbitMat = new THREE.LineBasicMaterial({
+      color: 0x3c5078,
+      transparent: true,
+      opacity: 0.25
+    });
+    const orbitLine = new THREE.LineLoop(orbitGeom, orbitMat);
+    scene.add(orbitLine);
+  }
+});
+
+// ============= 별 필드 (BufferGeometry + custom shader twinkle) =============
+const STAR_COUNT = 1500;
+const starsGeom = new THREE.BufferGeometry();
+const starPos = new Float32Array(STAR_COUNT * 3);
+const starPhase = new Float32Array(STAR_COUNT);
+const starBright = new Float32Array(STAR_COUNT);
+for(let i = 0; i < STAR_COUNT; i++){
+  starPos[i*3]   = (Math.random() - 0.5) * 4000;
+  starPos[i*3+1] = (Math.random() - 0.5) * 3000;
+  starPos[i*3+2] = (Math.random() - 0.5) * 4000;
+  starPhase[i] = Math.random() * Math.PI * 2;
+  starBright[i] = 0.4 + Math.random() * 0.6;
+}
+starsGeom.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+starsGeom.setAttribute('aPhase', new THREE.Float32BufferAttribute(starPhase, 1));
+starsGeom.setAttribute('aBright', new THREE.Float32BufferAttribute(starBright, 1));
+
+const starsMat = new THREE.ShaderMaterial({
+  uniforms: { uTime: { value: 0 } },
+  vertexShader: `
+    attribute float aPhase;
+    attribute float aBright;
+    varying float vBright;
+    uniform float uTime;
+    void main(){
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * mv;
+      gl_PointSize = (1.5 + aBright * 1.8) * (300.0 / -mv.z);
+      vBright = aBright * (0.5 + 0.5 * sin(uTime * 2.0 + aPhase));
+    }
+  `,
+  fragmentShader: `
+    varying float vBright;
+    void main(){
+      vec2 d = gl_PointCoord - vec2(0.5);
+      float r = length(d);
+      if(r > 0.5) discard;
+      float alpha = (1.0 - r * 2.0) * vBright;
+      gl_FragColor = vec4(1.0, 1.0, 0.95, alpha);
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending
+});
+const starField = new THREE.Points(starsGeom, starsMat);
+starField.frustumCulled = false;
+scene.add(starField);
+
+// ============= VFX: 우주 먼지 (카메라 주변) =============
+const DUST_COUNT = IS_MOBILE ? 400 : 800;
+const DUST_BOX = 200;
+const dustGeom = new THREE.BufferGeometry();
+const dustPos = new Float32Array(DUST_COUNT * 3);
+const dustVel = new Float32Array(DUST_COUNT * 3);
+for(let i = 0; i < DUST_COUNT; i++){
+  dustPos[i*3]   = (Math.random() - 0.5) * 2 * DUST_BOX;
+  dustPos[i*3+1] = (Math.random() - 0.5) * 2 * DUST_BOX;
+  dustPos[i*3+2] = (Math.random() - 0.5) * 2 * DUST_BOX;
+  dustVel[i*3]   = (Math.random() - 0.5) * 0.5;
+  dustVel[i*3+1] = (Math.random() - 0.5) * 0.5;
+  dustVel[i*3+2] = (Math.random() - 0.5) * 0.5;
+}
+dustGeom.setAttribute('position', new THREE.Float32BufferAttribute(dustPos, 3));
+const dustMat = new THREE.PointsMaterial({
+  color: 0xffffff,
+  size: 0.5,
+  transparent: true,
+  opacity: 0.4,
+  depthWrite: false,
+  sizeAttenuation: true
+});
+const dustField = new THREE.Points(dustGeom, dustMat);
+dustField.frustumCulled = false;
+scene.add(dustField);
+
+function updateDust(dt){
+  const camPos = camera.position;
+  const arr = dustGeom.attributes.position.array;
+  for(let i = 0; i < DUST_COUNT; i++){
+    arr[i*3]   += dustVel[i*3]   * dt;
+    arr[i*3+1] += dustVel[i*3+1] * dt;
+    arr[i*3+2] += dustVel[i*3+2] * dt;
+    // wrap-around: 카메라 기준 ±DUST_BOX
+    let dx = arr[i*3]   - camPos.x;
+    let dy = arr[i*3+1] - camPos.y;
+    let dz = arr[i*3+2] - camPos.z;
+    if(dx >  DUST_BOX) arr[i*3]   -= 2 * DUST_BOX;
+    if(dx < -DUST_BOX) arr[i*3]   += 2 * DUST_BOX;
+    if(dy >  DUST_BOX) arr[i*3+1] -= 2 * DUST_BOX;
+    if(dy < -DUST_BOX) arr[i*3+1] += 2 * DUST_BOX;
+    if(dz >  DUST_BOX) arr[i*3+2] -= 2 * DUST_BOX;
+    if(dz < -DUST_BOX) arr[i*3+2] += 2 * DUST_BOX;
+  }
+  dustGeom.attributes.position.needsUpdate = true;
+}
+
+// ============= VFX: 로켓 엔진 분사 (travel 모드, spaceship 뒤로) =============
+const THRUST_COUNT = 200;
+const thrustGeom = new THREE.BufferGeometry();
+const thrustPos = new Float32Array(THRUST_COUNT * 3);
+const thrustColor = new Float32Array(THRUST_COUNT * 3);
+const thrustLife = new Float32Array(THRUST_COUNT); // 0..1 (1=신생, 0=소멸, 수명 1초)
+for(let i = 0; i < THRUST_COUNT; i++){
+  thrustLife[i] = Math.random();
+  // 초기 노랑 (이후 매 프레임 life 기반 노랑→주황→빨강 페이드)
+  thrustColor[i*3] = 1.0;
+  thrustColor[i*3+1] = 1.0;
+  thrustColor[i*3+2] = 0.3;
+}
+thrustGeom.setAttribute('position', new THREE.Float32BufferAttribute(thrustPos, 3));
+thrustGeom.setAttribute('color', new THREE.Float32BufferAttribute(thrustColor, 3));
+const thrustMat = new THREE.PointsMaterial({
+  size: 2.0,
+  transparent: true,
+  opacity: 0.9,
+  vertexColors: true,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  sizeAttenuation: true
+});
+const thrustField = new THREE.Points(thrustGeom, thrustMat);
+thrustField.frustumCulled = false;
+thrustField.visible = false;
+scene.add(thrustField);
+
+const _thrustForward = new THREE.Vector3();
+const _thrustRight = new THREE.Vector3();
+const _thrustUp = new THREE.Vector3();
+const _thrustOrigin = new THREE.Vector3();
+function updateThrust(dt){
+  if(G.state !== 'travel'){
+    if(thrustField.visible) thrustField.visible = false;
+    return;
+  }
+  thrustField.visible = true;
+  // 분사 원점 결정: travel 모드에서 spaceship.glb가 보이면 그 뒤, 아니면 카메라 후방
+  let useShip = (spaceshipModel && spaceshipModel.visible);
+  if(useShip){
+    spaceshipModel.getWorldPosition(_thrustOrigin);
+    // spaceship의 forward = -Z (lookAt 적용 후 기준)
+    _thrustForward.set(0, 0, -1).applyQuaternion(spaceshipModel.quaternion);
+  } else {
+    _thrustOrigin.copy(camera.position);
+    camera.getWorldDirection(_thrustForward);
+  }
+  _thrustUp.set(0,1,0);
+  _thrustRight.crossVectors(_thrustForward, _thrustUp).normalize();
+  _thrustUp.crossVectors(_thrustRight, _thrustForward).normalize();
+  const arr = thrustGeom.attributes.position.array;
+  const carr = thrustGeom.attributes.color.array;
+  for(let i = 0; i < THRUST_COUNT; i++){
+    thrustLife[i] -= dt; // 수명 1초
+    if(thrustLife[i] <= 0){
+      // respawn: 분사 원점 후방
+      thrustLife[i] = 1.0;
+      const back = useShip ? (1.5 + Math.random() * 1.5) : (4 + Math.random() * 2);
+      const sp = useShip ? 1.0 : 2.2;
+      const spread = (Math.random() - 0.5) * sp;
+      const spread2 = (Math.random() - 0.5) * sp;
+      arr[i*3]   = _thrustOrigin.x - _thrustForward.x * back + _thrustRight.x * spread + _thrustUp.x * spread2;
+      arr[i*3+1] = _thrustOrigin.y - _thrustForward.y * back + _thrustRight.y * spread + _thrustUp.y * spread2;
+      arr[i*3+2] = _thrustOrigin.z - _thrustForward.z * back + _thrustRight.z * spread + _thrustUp.z * spread2;
+    } else {
+      // drift further behind
+      const driftSpd = useShip ? 8 : 6;
+      arr[i*3]   -= _thrustForward.x * dt * driftSpd;
+      arr[i*3+1] -= _thrustForward.y * dt * driftSpd;
+      arr[i*3+2] -= _thrustForward.z * dt * driftSpd;
+    }
+    // 색상 페이드: life 1.0=노랑(1,1,0.3), 0.5=주황(1,0.5,0.1), 0.0=빨강(1,0.1,0)
+    const L = thrustLife[i];
+    if(L > 0.5){
+      const k = (L - 0.5) * 2.0; // 0..1
+      carr[i*3]   = 1.0;
+      carr[i*3+1] = 0.5 + 0.5 * k;
+      carr[i*3+2] = 0.1 + 0.2 * k;
+    } else {
+      const k = L * 2.0; // 0..1
+      carr[i*3]   = 1.0;
+      carr[i*3+1] = 0.1 + 0.4 * k;
+      carr[i*3+2] = 0.05 * k;
+    }
+  }
+  thrustGeom.attributes.position.needsUpdate = true;
+  thrustGeom.attributes.color.needsUpdate = true;
+  thrustMat.opacity = 0.9;
+}
+
+// ============= VFX: 샘플 채집 폭죽 (24개, 0.8초, 노랑→투명) =============
+const BURST_COUNT = 24;
+const BURST_DURATION = 0.8;
+const burstGeom = new THREE.BufferGeometry();
+const burstPos = new Float32Array(BURST_COUNT * 3);
+const burstVel = new Float32Array(BURST_COUNT * 3);
+burstGeom.setAttribute('position', new THREE.Float32BufferAttribute(burstPos, 3));
+const burstMat = new THREE.PointsMaterial({
+  color: 0xffd700,
+  size: 1.8,
+  transparent: true,
+  opacity: 0,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  sizeAttenuation: true
+});
+const burstField = new THREE.Points(burstGeom, burstMat);
+burstField.frustumCulled = false;
+burstField.visible = false;
+scene.add(burstField);
+let burstTimer = 0;
+
+function spawnBurst(worldPos){
+  for(let i = 0; i < BURST_COUNT; i++){
+    burstPos[i*3]   = worldPos.x;
+    burstPos[i*3+1] = worldPos.y;
+    burstPos[i*3+2] = worldPos.z;
+    // 구면 균등 방향 (방사형 폭발)
+    const u = Math.random() * 2 - 1;
+    const a = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(1 - u*u);
+    const speed = 5 + Math.random() * 3;
+    burstVel[i*3]   = r * Math.cos(a) * speed;
+    burstVel[i*3+1] = u * speed;
+    burstVel[i*3+2] = r * Math.sin(a) * speed;
+  }
+  burstGeom.attributes.position.needsUpdate = true;
+  burstMat.opacity = 1.0;
+  burstField.visible = true;
+  burstTimer = BURST_DURATION;
+}
+
+function updateBurst(dt){
+  if(!burstField.visible) return;
+  burstTimer -= dt;
+  if(burstTimer <= 0){
+    burstField.visible = false;
+    burstMat.opacity = 0;
+    return;
+  }
+  const arr = burstGeom.attributes.position.array;
+  for(let i = 0; i < BURST_COUNT; i++){
+    arr[i*3]   += burstVel[i*3]   * dt;
+    arr[i*3+1] += burstVel[i*3+1] * dt;
+    arr[i*3+2] += burstVel[i*3+2] * dt;
+    // gentle slow-down
+    burstVel[i*3]   *= 0.94;
+    burstVel[i*3+1] *= 0.94;
+    burstVel[i*3+2] *= 0.94;
+  }
+  burstGeom.attributes.position.needsUpdate = true;
+  burstMat.opacity = Math.max(burstTimer / BURST_DURATION, 0);
+}
+
+// ============= 우주비행사 / 우주선 (explore 모드) =============
+let astronautSprite = null;
+let spaceshipModel = null;
+{
+  // 절차적 우주비행사 sprite (캔버스 기반)
+  const astrCv = document.createElement('canvas');
+  astrCv.width = 128; astrCv.height = 128;
+  const actx = astrCv.getContext('2d');
+  // 헬멧
+  actx.fillStyle = '#fff';
+  actx.beginPath(); actx.arc(64, 50, 28, 0, Math.PI*2); actx.fill();
+  actx.fillStyle = '#1a2a4a';
+  actx.beginPath(); actx.arc(64, 50, 22, 0, Math.PI*2); actx.fill();
+  actx.fillStyle = '#88ccff';
+  actx.beginPath(); actx.ellipse(64, 48, 16, 14, 0, 0, Math.PI*2); actx.fill();
+  // 몸체
+  actx.fillStyle = '#fff';
+  actx.fillRect(48, 70, 32, 35);
+  actx.fillStyle = '#dddddd';
+  actx.fillRect(40, 72, 8, 25);
+  actx.fillRect(80, 72, 8, 25);
+  // 액센트
+  actx.fillStyle = '#ff5555';
+  actx.fillRect(60, 76, 8, 4);
+  const astrTex = new THREE.CanvasTexture(astrCv);
+  astrTex.colorSpace = THREE.SRGBColorSpace;
+  const astrMat = new THREE.SpriteMaterial({ map: astrTex, transparent: true, depthWrite: false });
+  astronautSprite = new THREE.Sprite(astrMat);
+  astronautSprite.scale.set(8, 8, 1);
+  astronautSprite.visible = false;
+  scene.add(astronautSprite);
+}
+
+// spaceship.glb 로드 (옵션, 실패해도 문제 없음)
+const gltfLoader = new GLTFLoader();
+gltfLoader.load('assets/models/spaceship.glb',
+  (gltf) => {
+    spaceshipModel = gltf.scene;
+    spaceshipModel.scale.set(2, 2, 2);
+    spaceshipModel.visible = false;
+    scene.add(spaceshipModel);
+  },
+  undefined,
+  () => {
+    // 실패 시 무시 (sprite로 대체됨)
+    spaceshipModel = null;
+  }
+);
+
+// ============= 카메라 상태 머신 =============
+const cameraState = {
+  pos: new THREE.Vector3(0, 180, 380),
+  target: new THREE.Vector3(0, 0, 0),
+  travelStartPos: new THREE.Vector3(),
+  travelEndPos: new THREE.Vector3(),
+  travelStartTarget: new THREE.Vector3(),
+  travelEndTarget: new THREE.Vector3(),
+  travelT: 0,
+  travelDur: 1.5,
+  travelCb: null,
+  // VFX: 카메라 진동
+  shakeTime: 0,
+  shakeDur: 0,
+  shakeAmp: 0
+};
+function triggerShake(duration, amplitude){
+  cameraState.shakeDur = duration;
+  cameraState.shakeTime = duration;
+  cameraState.shakeAmp = amplitude;
+}
+const _currentLookAt = new THREE.Vector3(0, 0, 0);
+// 매 프레임 alloc 회피 — 모듈 스코프 재사용 객체 (QA-2 권고)
+const _tmpPos = new THREE.Vector3();
+const _tmpDir = new THREE.Vector3();
+const _tmpOff = new THREE.Vector3();
+const _tmpOff2 = new THREE.Vector3();
+const _tmpUp = new THREE.Vector3(0, 1.5, 3);
+const _tmpSph = new THREE.Spherical();
+const _tmpSph2 = new THREE.Spherical();
+
+function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
+
+function getPlanetWorldPos(p, out){
+  out = out || _tmpPos;
+  const mesh = planetMeshes[p.id];
+  if(!mesh) return out.set(0,0,0);
+  mesh.getWorldPosition(out);
+  return out;
+}
+
+function startTravel(planet, cb){
+  G.state = 'travel';
+  cameraState.travelStartPos.copy(camera.position);
+  cameraState.travelStartTarget.copy(_currentLookAt);
+  const planetPos = getPlanetWorldPos(planet, _tmpPos);
+  const r3D = planetMeshes[planet.id].userData.radius3D;
+  if(planetPos.length() > 0.1){ _tmpDir.copy(planetPos).normalize(); }
+  else { _tmpDir.set(1,0,0); }
+  cameraState.travelEndPos.copy(planetPos)
+    .addScaledVector(_tmpDir, r3D * 5)
+    .add(_tmpUp.set(0, r3D * 1.5, r3D * 3));
+  cameraState.travelEndTarget.copy(planetPos);
+  cameraState.travelT = 0;
+  cameraState.travelCb = cb;
+  sfx('travel_start');
+}
+
+// playTravel 시그니처 보존 (외부 호환용)
+function playTravel(planet, cb){ startTravel(planet, cb); }
+
+function updateCamera(dt){
+  if(G.state === 'map'){
+    cameraState.pos.set(0, 180, 380);
+    cameraState.target.set(0, 0, 0);
+  } else if(G.state === 'travel'){
+    cameraState.travelT += dt / cameraState.travelDur;
+    const t = Math.min(cameraState.travelT, 1);
+    const eased = easeInOutCubic(t);
+    // 이동 중 목적지 행성 위치 갱신 (행성이 공전 중이므로)
+    if(G.currentPlanet){
+      const planetPos = getPlanetWorldPos(G.currentPlanet, _tmpPos);
+      const r3D = planetMeshes[G.currentPlanet.id].userData.radius3D;
+      if(planetPos.length() > 0.1){ _tmpDir.copy(planetPos).normalize(); }
+      else { _tmpDir.set(1,0,0); }
+      cameraState.travelEndPos.copy(planetPos)
+        .addScaledVector(_tmpDir, r3D * 5)
+        .add(_tmpUp.set(0, r3D * 1.5, r3D * 3));
+      cameraState.travelEndTarget.copy(planetPos);
+    }
+    cameraState.pos.lerpVectors(cameraState.travelStartPos, cameraState.travelEndPos, eased);
+    cameraState.target.lerpVectors(cameraState.travelStartTarget, cameraState.travelEndTarget, eased);
+    if(t >= 1){
+      // 도착
+      const cb = cameraState.travelCb;
+      cameraState.travelCb = null;
+      sfx('travel_arrive');
+      // VFX: 도착 카메라 진동
+      triggerShake(0.3, 0.5);
+      if(cb) cb();
+    }
+  } else if(G.state === 'explore' && G.currentPlanet){
+    const p = G.currentPlanet;
+    const planetPos = getPlanetWorldPos(p, _tmpPos);
+    const r3D = planetMeshes[p.id].userData.radius3D;
+    // Spherical 좌표: phi=π/2 - 0.25 (위에서 약간 비스듬), theta=camX 기반
+    _tmpSph.set(r3D * 3.0, Math.PI/2 - 0.25, G.camX * 0.005);
+    _tmpOff.setFromSpherical(_tmpSph);
+    cameraState.pos.copy(planetPos).add(_tmpOff);
+    cameraState.target.copy(planetPos);
+
+    // 우주비행사/우주선 위치 갱신 (행성 표면 근처)
+    if(spaceshipModel){
+      _tmpSph2.set(r3D * 1.6, Math.PI/2 - 0.1, G.camX * 0.005 + 0.3);
+      _tmpOff2.setFromSpherical(_tmpSph2);
+      spaceshipModel.position.copy(planetPos).add(_tmpOff2);
+      spaceshipModel.lookAt(planetPos);
+      spaceshipModel.visible = true;
+      if(astronautSprite) astronautSprite.visible = false;
+    } else if(astronautSprite){
+      _tmpSph2.set(r3D * 1.4, Math.PI/2 - 0.1, G.camX * 0.005 + 0.2);
+      _tmpOff2.setFromSpherical(_tmpSph2);
+      astronautSprite.position.copy(planetPos).add(_tmpOff2);
+      astronautSprite.visible = true;
+    }
+  }
+
+  // 부드러운 보간
+  if(G.state === 'travel'){
+    camera.position.copy(cameraState.pos);
+    _currentLookAt.copy(cameraState.target);
+  } else {
+    camera.position.lerp(cameraState.pos, 0.1);
+    _currentLookAt.lerp(cameraState.target, 0.1);
+  }
+  // VFX: 카메라 진동 적용
+  if(cameraState.shakeTime > 0){
+    cameraState.shakeTime = Math.max(0, cameraState.shakeTime - dt);
+    const k = cameraState.shakeTime / cameraState.shakeDur;
+    const amp = cameraState.shakeAmp * k;
+    camera.position.x += (Math.random() - 0.5) * 2 * amp;
+    camera.position.y += (Math.random() - 0.5) * 2 * amp;
+    camera.position.z += (Math.random() - 0.5) * 2 * amp;
+  }
+  camera.lookAt(_currentLookAt);
+}
+
+function updateWorld(dt){
+  // 행성 공전
+  PLANETS.forEach(p => {
+    if(p.id === 'sun') return;
+    const pivot = planetPivots[p.id];
+    if(pivot) pivot.rotation.y += p.speed * dt * SPEED_GAIN * 60;
+    const mesh = planetMeshes[p.id];
+    if(mesh) mesh.rotation.y += dt * 0.3;
+  });
+  // 태양 자전
+  if(planetMeshes.sun) planetMeshes.sun.rotation.y += dt * 0.05;
+}
+
+// ============= RAYCASTER 픽킹 =============
+const raycaster = new THREE.Raycaster();
+const mouseNDC = new THREE.Vector2();
+
+function onPointerDown(e){
+  ensureAudio();
+  if(G.state !== 'map') return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  const cx = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+  const cy = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+  mouseNDC.x = ((cx - rect.left) / rect.width) * 2 - 1;
+  mouseNDC.y = -((cy - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouseNDC, camera);
+  const hits = raycaster.intersectObjects(pickableMeshes, false);
+  if(hits.length > 0){
+    const p = hits[0].object.userData.planetData;
+    if(p){
+      sfx('ui_click');
+      showPlanetInfo(p);
+    }
+  }
+}
+canvas.addEventListener('pointerdown', onPointerDown);
+
+// VFX: 행성 호버 펄스 (PC, pointermove raycast → emissive 펄스)
+let hoverPlanetId = null;
+function onPointerMove(e){
+  if(IS_MOBILE) return;
+  if(G.state !== 'map') return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouseNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouseNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouseNDC, camera);
+  const hits = raycaster.intersectObjects(pickableMeshes, false);
+  const newId = (hits.length > 0 && hits[0].object.userData.planetData) ? hits[0].object.userData.planetData.id : null;
+  if(newId !== hoverPlanetId){
+    // 기존 호버 해제 (emissive 0으로 복원)
+    if(hoverPlanetId){
+      const oldMesh = planetMeshes[hoverPlanetId];
+      if(oldMesh && oldMesh.material && oldMesh.material.emissive){
+        oldMesh.material.emissive.setHex(0x000000);
+        oldMesh.material.emissiveIntensity = 0;
+      }
+    }
+    hoverPlanetId = newId;
+    canvas.style.cursor = newId ? 'pointer' : 'default';
+  }
+}
+canvas.addEventListener('pointermove', onPointerMove);
+
+// ============= UI 함수 (보존) =============
+function showPlanetInfo(p){
+ G.currentPlanet=p;
+ const el=$('planet-info');
+ const cost=G.getFuelCost(p);
+ const collected=G.collected[p.id]||[];
+ const hasBadge=G.quizDone[p.id];
+ el.innerHTML=`<button class="close-btn" onclick="closePanels()">✕</button>
+  <h2>${p.icon} ${p.name}</h2>
+  <div class="facts">${p.facts.map(f=>'• '+f).join('<br>')}</div>
+  <div style="margin:10px 0;color:#889">
+   💎 채집: ${collected.length}/${p.samples.length} |
+   ${hasBadge?'🏅 퀴즈 완료':'❓ 퀴즈 미완료'} |
+   ⛽ 이동 비용: ${cost}
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+   <button class="btn" onclick="G.travelTo('${p.id}')">🚀 출발 (⛽${cost})</button>
+   <button class="btn" onclick="G.startQuiz('${p.id}')">❓ 퀴즈</button>
+   <button class="btn" onclick="closePanels()">닫기</button>
+  </div>`;
+ _showPanel('planet-info');
+}
+window.showPlanetInfo = showPlanetInfo;
+
+function closePanels(){
+ ['planet-info','quiz-panel','builder','album','upgrade-panel'].forEach(id=>{
+  const el=$(id);
+  if(el.style.display==='block' && el.classList.contains('vfx-show')){
+   // fade-out 트랜지션 (0.2s) 후 hide
+   el.classList.add('vfx-hide');
+   el.classList.remove('vfx-show');
+   setTimeout(()=>{
+    el.style.display='none';
+    el.classList.remove('vfx-hide');
+   },200);
+  } else {
+   el.style.display='none';
+   el.classList.remove('vfx-show','vfx-hide');
+  }
+ });
+ $('nav-btns').innerHTML='';
+}
+window.closePanels = closePanels;
+// VFX: 패널 표시 헬퍼 (display:block 후 다음 프레임에 클래스 추가하여 트랜지션 발동)
+function _showPanel(id){
+ const el=$(id);
+ el.style.display='block';
+ // 강제 reflow → transition 발동
+ void el.offsetWidth;
+ el.classList.add('vfx-show');
+}
+window._showPanel = _showPanel;
+
+// ============= TRAVEL =============
+G.travelTo=function(pid){
+ const p=PLANETS.find(x=>x.id===pid);
+ const cost=this.getFuelCost(p);
+ if(this.fuel<cost){this.toast('연료가 부족합니다! 로켓을 업그레이드하세요.');return;}
+ closePanels();
+ this.fuel-=cost;
+ this.currentPlanet=p;
+ playTravel(p, ()=>{
+  this.state='explore';
+  this.camX=0;
+  this.explorerX=W/2;
+  showExploreUI();
+  this.updateHUD();
+  this.save();
+ });
+};
+
+function showExploreUI(){
+ const nb=$('nav-btns');
+ nb.innerHTML=`
+  <button class="btn" onclick="G.moveExplorer(-1)">⬅ 왼쪽</button>
+  <button class="btn" onclick="G.collectSample()">💎 채집</button>
+  <button class="btn" onclick="G.startQuiz(G.currentPlanet.id)">❓ 퀴즈</button>
+  <button class="btn" onclick="G.refuel()">⛽ 보급</button>
+  <button class="btn" onclick="G.returnToMap()">🗺 귀환</button>
+  <button class="btn" onclick="G.moveExplorer(1)">➡ 오른쪽</button>`;
+}
+window.showExploreUI = showExploreUI;
+
+G.moveExplorer=function(dir){
+  G.camX += dir * 60;
+  sfx('ui_click');
+};
+
+G.collectSample=function(){
+ const p=this.currentPlanet;if(!p)return;
+ if(!this.collected[p.id])this.collected[p.id]=[];
+ const max=this.getCollectMax();
+ const uncollected=p.samples.map((_,i)=>i).filter(i=>!this.collected[p.id].includes(i));
+ if(uncollected.length===0){this.toast('이 행성의 모든 샘플을 채집했습니다!');return;}
+ // 기존 호환: camX 기준 가까운 샘플 채집
+ let best=-1,bestDist=Infinity;
+ uncollected.forEach(i=>{
+  const sx=200+i*300-this.camX;
+  const d=Math.abs(sx-W/2);
+  if(d<bestDist&&d<150){bestDist=d;best=i;}
+ });
+ if(best===-1){this.toast('💎에 더 가까이 이동하세요!');return;}
+ this.collected[p.id].push(best);
+ this.samples++;
+ sfx('sample_collect');
+ // VFX: 채집 위치에 골드 폭죽 (우주비행사/우주선 위치 우선, 없으면 행성 표면)
+ try{
+  const burstPos = new THREE.Vector3();
+  if(spaceshipModel && spaceshipModel.visible){
+   spaceshipModel.getWorldPosition(burstPos);
+  } else if(astronautSprite && astronautSprite.visible){
+   burstPos.copy(astronautSprite.position);
+  } else {
+   getPlanetWorldPos(p, burstPos);
+  }
+  spawnBurst(burstPos);
+ }catch(e){}
+ this.toast(`💎 "${p.samples[best]}" 채집 완료!`);
+ this.updateHUD();this.save();
+};
+
+G.refuel=function(){
+ if(this.samples<5){this.toast('샘플 5개로 연료를 보급할 수 있습니다.');return;}
+ this.samples-=5;this.fuel=Math.min(this.fuel+30,this.maxFuel);
+ sfx('upgrade');
+ this.toast('⛽ 연료 30 보급 완료!');
+ this.updateHUD();this.save();
+};
+
+G.returnToMap=function(){
+ this.state='map';this.currentPlanet=null;
+ if(spaceshipModel) spaceshipModel.visible = false;
+ if(astronautSprite) astronautSprite.visible = false;
+ closePanels();
+ this.updateHUD();this.save();
+};
+
+// ============= QUIZ =============
+G.startQuiz=function(pid){
+ const p=PLANETS.find(x=>x.id===pid);
+ if(G.quizDone[pid]){G.toast('이미 이 행성 퀴즈를 완료했습니다! 🏅');return;}
+ closePanels();
+ G.quizState={planet:p,qIdx:0,correct:0};
+ showQuizQuestion();
+};
+
+function showQuizQuestion(){
+ const qs=G.quizState;
+ const p=qs.planet;
+ const q=p.quizzes[qs.qIdx];
+ const el=$('quiz-panel');
+ el.innerHTML=`<button class="close-btn" onclick="closePanels()">✕</button>
+  <h3>${p.icon} ${p.name} 퀴즈 (${qs.qIdx+1}/${p.quizzes.length})</h3>
+  <p style="margin:10px 0;color:#dde">${q.q}</p>
+  ${q.o.map((o,i)=>`<button class="q-option" data-idx="${i}" onclick="answerQuiz(${i})">${o}</button>`).join('')}
+  <p style="margin-top:8px;color:#667;font-size:12px">맞은 개수: ${qs.correct}/${qs.qIdx}</p>`;
+ _showPanel('quiz-panel');
+}
+window.showQuizQuestion = showQuizQuestion;
+
+window.answerQuiz=function(idx){
+ const qs=G.quizState;
+ const q=qs.planet.quizzes[qs.qIdx];
+ const btns=document.querySelectorAll('.q-option');
+ btns.forEach(b=>{
+  b.style.pointerEvents='none';
+  const bi=parseInt(b.dataset.idx);
+  if(bi===q.a)b.classList.add('correct');
+  if(bi===idx&&idx!==q.a)b.classList.add('wrong');
+ });
+ if(idx===q.a){
+  qs.correct++;
+  sfx('quiz_correct');
+ } else {
+  sfx('quiz_wrong');
+ }
+ setTimeout(()=>{
+  qs.qIdx++;
+  if(qs.qIdx<qs.planet.quizzes.length){
+   showQuizQuestion();
+  }else{
+   const passed=qs.correct===qs.planet.quizzes.length;
+   if(passed){
+    G.quizDone[qs.planet.id]=true;G.badges++;
+    G.toast(`🏅 ${qs.planet.name} 퀴즈 올클리어! 배지 획득!`);
+    sfx('badge');
+    // VFX: 골드 플래시
+    try{
+     const f=$('vfx-flash');
+     f.classList.remove('active');
+     void f.offsetWidth;
+     f.classList.add('active');
+     setTimeout(()=>f.classList.remove('active'),550);
+    }catch(e){}
+   }else{
+    G.toast(`${qs.correct}/${qs.planet.quizzes.length} 정답. 다시 도전하세요!`);
+   }
+   closePanels();
+   if(G.state==='explore')showExploreUI();
+   G.updateHUD();G.save();
+  }
+ },1200);
+};
+
+// ============= BUILDER =============
+G.showBuilder=function(){
+ closePanels();
+ sfx('ui_click');
+ const el=$('builder');
+ const currentParts=this.rocketParts;
+ el.innerHTML=`<button class="close-btn" onclick="closePanels()">✕</button>
+  <h3>🔧 로켓 조립소</h3>
+  <p style="color:#889;font-size:13px;margin-bottom:8px">부품을 선택하여 로켓을 만드세요. 💎 샘플로 구매합니다.</p>
+  <div class="part-grid">
+   ${PARTS.map(p=>{
+    const owned=currentParts.includes(p.id);
+    const canBuy=this.samples>=p.cost;
+    return `<div class="part-item ${owned?'selected':''}" onclick="G.togglePart('${p.id}')">
+     <span class="icon">${p.icon}</span>
+     <b>${p.name}</b><br>
+     <span style="color:#889;font-size:11px">${p.desc}</span><br>
+     ${p.cost>0?`<span style="color:${owned?'#0a0':canBuy?'#ffd700':'#a55'};font-size:12px">${owned?'장착됨':'💎'+p.cost}</span>`:'<span style="color:#0a0;font-size:12px">기본</span>'}
+    </div>`;
+   }).join('')}
+  </div>
+  <div id="rocket-preview">${this.getRocketPreview()}</div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:8px">
+   <button class="btn" onclick="closePanels()">완료</button>
+  </div>`;
+ _showPanel('builder');
+};
+
+G.togglePart=function(pid){
+ const part=PARTS.find(x=>x.id===pid);
+ if(this.rocketParts.includes(pid)){
+  if(part.cost===0){this.toast('기본 부품은 제거할 수 없습니다.');return;}
+  this.rocketParts=this.rocketParts.filter(x=>x!==pid);
+  this.toast(`${part.name} 제거됨`);
+ }else{
+  if(part.cost>0&&this.samples<part.cost){this.toast(`💎 ${part.cost}개 필요합니다.`);return;}
+  if(part.cost>0)this.samples-=part.cost;
+  this.rocketParts.push(pid);
+  sfx('ui_click');
+  this.toast(`${part.name} 장착!`);
+ }
+ this.recalcFuel();
+ this.fuel=Math.min(this.fuel,this.maxFuel);
+ this.updateHUD();this.save();
+ this.showBuilder();
+};
+
+G.getRocketPreview=function(){
+ let preview='';
+ if(this.rocketParts.includes('antenna'))preview+='📡';
+ if(this.rocketParts.includes('solar'))preview+='⚡';
+ preview+='🛸';
+ const fuelCount=this.rocketParts.filter(x=>x.startsWith('fuel')).length;
+ for(let i=0;i<fuelCount;i++)preview+='🛢️';
+ const engineCount=this.rocketParts.filter(x=>x.startsWith('engine')).length;
+ for(let i=0;i<engineCount;i++)preview+='🔥';
+ return `<div style="font-size:28px;letter-spacing:4px">${preview}</div>
+  <div style="color:#889;font-size:12px;margin-top:6px">최대 연료: ${this.maxFuel} | 부품: ${this.rocketParts.length}개</div>`;
+};
+
+// ============= ALBUM =============
+G.showAlbum=function(){
+ closePanels();
+ sfx('ui_click');
+ const el=$('album');
+ let totalSamples=0,collectedSamples=0;
+ PLANETS.forEach(p=>{totalSamples+=p.samples.length;collectedSamples+=(G.collected[p.id]||[]).length;});
+ el.innerHTML=`<button class="close-btn" onclick="closePanels()">✕</button>
+  <h3>📖 수집 앨범</h3>
+  <p style="color:#889;font-size:13px;margin-bottom:10px">채집 진행: ${collectedSamples}/${totalSamples} | 배지: ${G.badges}/${PLANETS.length}</p>
+  <div class="album-grid">
+   ${PLANETS.map(p=>{
+    const col=G.collected[p.id]||[];
+    const badge=G.quizDone[p.id];
+    return `<div class="album-item ${col.length>0?'collected':''}">
+     <span class="planet-icon">${p.icon}</span>
+     <b style="font-size:12px">${p.name}</b>
+     ${badge?'<br>🏅':''}
+     <div class="sample-count">💎 ${col.length}/${p.samples.length}</div>
+     ${col.map(i=>`<div style="font-size:10px;color:#aab">• ${p.samples[i]}</div>`).join('')}
+    </div>`;
+   }).join('')}
+  </div>
+  <button class="btn" onclick="closePanels()" style="margin-top:12px;width:100%">닫기</button>`;
+ _showPanel('album');
+};
+
+// ============= UPGRADES =============
+G.showUpgrades=function(){
+ closePanels();
+ sfx('ui_click');
+ const el=$('upgrade-panel');
+ el.innerHTML=`<button class="close-btn" onclick="closePanels()">✕</button>
+  <h3>⬆ 우주비행사 강화</h3>
+  <p style="color:#889;font-size:13px;margin-bottom:10px">💎 샘플로 업그레이드합니다. 현재: 💎${G.samples}</p>
+  ${UPGRADES.map(u=>{
+   const owned=G.upgrades[u.type]>=u.level;
+   const canBuy=!owned&&G.samples>=u.cost&&G.upgrades[u.type]>=u.level-1;
+   return `<div class="upgrade-item">
+    <div>
+     <b>${u.name}</b><br>
+     <span style="color:#889;font-size:12px">${u.desc}</span>
+    </div>
+    <div>
+     ${owned?'<span style="color:#0a0">보유</span>':`<button class="btn ${canBuy?'btn-gold':''}" onclick="G.buyUpgrade('${u.id}')" ${canBuy?'':'disabled style="opacity:0.4"'}>💎${u.cost}</button>`}
+    </div>
+   </div>`;
+  }).join('')}
+  <button class="btn" onclick="closePanels()" style="margin-top:12px;width:100%">닫기</button>`;
+ _showPanel('upgrade-panel');
+};
+
+G.buyUpgrade=function(uid){
+ const u=UPGRADES.find(x=>x.id===uid);
+ if(!u||G.upgrades[u.type]>=u.level)return;
+ if(G.samples<u.cost){G.toast('샘플이 부족합니다.');return;}
+ if(G.upgrades[u.type]<u.level-1){G.toast('이전 단계를 먼저 구매하세요.');return;}
+ G.samples-=u.cost;
+ G.upgrades[u.type]=u.level;
+ sfx('upgrade');
+ G.toast(`⬆ ${u.name} 업그레이드 완료!`);
+ G.updateHUD();G.save();
+ G.showUpgrades();
+};
+
+// ============= INPUT (모바일/키보드 호환) =============
+// 키보드
+document.addEventListener('keydown', e => {
+ if(G.state === 'explore'){
+  if(e.key === 'ArrowLeft') G.moveExplorer(-1);
+  if(e.key === 'ArrowRight') G.moveExplorer(1);
+  if(e.key === ' ') G.collectSample();
+ }
+});
+
+// 터치 스와이프 (explore 모드)
+let touchSX = 0;
+canvas.addEventListener('touchstart', e => {
+  ensureAudio();
+  if(e.touches && e.touches[0]) touchSX = e.touches[0].clientX;
+}, { passive: true });
+canvas.addEventListener('touchend', e => {
+  if(G.state !== 'explore') return;
+  if(!e.changedTouches || !e.changedTouches[0]) return;
+  const dx = e.changedTouches[0].clientX - touchSX;
+  if(Math.abs(dx) > 30) G.moveExplorer(dx > 0 ? -1 : 1);
+}, { passive: true });
+
+// resize
+function resize(){
+ W = window.innerWidth; H = window.innerHeight;
+ renderer.setSize(W, H, false);
+ camera.aspect = W / H;
+ camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ============= GAME LOOP =============
+let lastT = performance.now();
+let isHidden = false;
+document.addEventListener('visibilitychange', ()=>{
+  isHidden = (document.visibilityState === 'hidden');
+  if(!isHidden){
+    lastT = performance.now();
+    if(typeof AudioEngine !== 'undefined' && AudioEngine.resume) AudioEngine.resume();
+  }
+});
+
+function gameLoop(now){
+ if(isHidden){ requestAnimationFrame(gameLoop); return; }
+ const dt = Math.min((now - lastT) / 1000, 0.1);
+ lastT = now;
+ const tSec = now / 1000;
+
+ updateWorld(dt);
+ updateCamera(dt);
+
+ // VFX: 파티클 시스템 갱신
+ updateDust(dt);
+ updateThrust(dt);
+ updateBurst(dt);
+
+ // VFX: 셰이더 uniform 갱신 (별 트윙클, 태양 코로나, 코로나 셸)
+ starsMat.uniforms.uTime.value = tSec;
+ if(sunGroup.userData.sunMat) sunGroup.userData.sunMat.uniforms.uTime.value = tSec;
+ if(sunGroup.userData.coronaMat) sunGroup.userData.coronaMat.uniforms.uTime.value = tSec;
+
+ // VFX: 행성 호버 펄스 (PC, emissive 0.3 * sin(time*4))
+ if(hoverPlanetId){
+   const hm = planetMeshes[hoverPlanetId];
+   if(hm && hm.material && hm.material.emissive){
+     const pulse = 0.3 * (0.5 + 0.5 * Math.sin(tSec * 4));
+     hm.material.emissive.setHex(0xffffff);
+     hm.material.emissiveIntensity = pulse;
+   }
+ }
+
+ renderer.render(scene, camera);
+ requestAnimationFrame(gameLoop);
+}
+
+// ============= INIT =============
+G.load();
+G.recalcFuel();
+if(G.fuel <= 0) G.fuel = G.maxFuel;
+G.updateHUD();
+requestAnimationFrame(gameLoop);
+
+</script>
+</body>
+</html>
