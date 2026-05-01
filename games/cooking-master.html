@@ -345,9 +345,9 @@ function drawParticles(){
 // Buttons tracking
 let btns=[];
 function clearBtns(){btns=[];}
-function regBtn(x,y,w,h,action,label){
- btns.push({x,y,w,h,action,label});
- return drawBtn(x,y,w,h,label);
+function regBtn(x,y,w,h,label,color){
+ btns.push({x,y,w,h,action:null,label});
+ return drawBtn(x,y,w,h,label,color);
 }
 function checkBtns(){
  if(!tapped)return;

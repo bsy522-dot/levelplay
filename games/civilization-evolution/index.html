@@ -64,6 +64,20 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 #menu-screen .subtitle{font-size:14px;color:#aaa;margin-bottom:32px}
 #menu-screen button{width:200px;padding:12px;margin:6px;background:rgba(255,215,0,.15);border:2px solid #ffd700;color:#ffd700;border-radius:8px;font-size:16px;cursor:pointer;font-family:inherit;transition:.2s}
 #menu-screen button:hover{background:rgba(255,215,0,.3)}
+@keyframes eraZoomIn{0%{transform:scale(0.5);opacity:0;filter:blur(20px)}50%{filter:blur(0)}100%{transform:scale(1);opacity:1}}
+@keyframes eraGlow{0%,100%{text-shadow:0 0 20px #ffd700,0 0 40px #ffd700}50%{text-shadow:0 0 40px #fff,0 0 80px #ffd700}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+#era-transition.show h1{animation:eraZoomIn .8s ease-out, eraGlow 2s ease-in-out infinite .8s}
+#era-transition .era-bg-fx{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(255,215,0,.15), transparent 70%);pointer-events:none}
+#screen-flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:250;mix-blend-mode:overlay}
+#screen-flash.flash{animation:flashFade .5s ease-out}
+@keyframes flashFade{0%{opacity:.6}100%{opacity:0}}
+.craft-recipe.disabled{position:relative;overflow:hidden}
+.craft-recipe:not(.disabled){background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,215,0,.08) 50%,rgba(255,255,255,.05) 100%);background-size:200% 100%;animation:shimmer 3s linear infinite}
+#craft-success-vfx{position:absolute;inset:0;pointer-events:none;z-index:120;display:none}
+.vfx-burst{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none}
+.shake{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,3px)}}
 </style>
 </head>
 <body>
@@ -94,12 +108,21 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 <div class="action-btn" onclick="toggleRecipeBook()" title="레시피북">📖</div>
 <div class="action-btn" onclick="toggleSavePanel()" title="저장/불러오기">💾</div>
 </div>
+<div id="screen-flash"></div>
 <div id="toast"></div>
+<div id="audio-toggle" style="position:absolute;top:48px;right:220px;z-index:11;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.3);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#fff" onclick="toggleAudio()" title="배경음">🔊</div>
+<div id="ai-toggle" style="position:absolute;top:48px;right:262px;z-index:11;background:rgba(0,0,0,.6);border:1px solid rgba(255,215,0,.4);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:#FFD700" onclick="toggleAI()" title="AI 내레이터">🤖</div>
 <div id="craft-panel"><button class="panel-close" onclick="toggleCraftPanel()">✕</button><h2>🔨 제작</h2><div id="craft-list"></div></div>
 <div id="build-panel"><button class="panel-close" onclick="toggleBuildPanel()">✕</button><h2>🏗 건설</h2><div id="build-list"></div></div>
 <div id="recipe-book"><button class="panel-close" onclick="toggleRecipeBook()">✕</button><h2>📖 레시피북</h2><div id="recipe-list"></div></div>
 <div id="edu-popup"><h3 id="edu-title"></h3><div id="edu-body"></div><button class="close-btn" onclick="closeEdu()">확인!</button></div>
-<div id="era-transition"><h1 id="era-trans-title"></h1><p id="era-trans-desc"></p><button class="continue-btn" onclick="closeEraTransition()">계속하기</button></div>
+<div id="era-transition">
+<video id="era-video" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s;z-index:1;pointer-events:none" muted playsinline></video>
+<div style="position:relative;z-index:2;text-align:center;padding:20px;background:rgba(0,0,0,0.4);border-radius:16px">
+<h1 id="era-trans-title"></h1><p id="era-trans-desc"></p>
+<button class="continue-btn" onclick="closeEraTransition()">계속하기</button>
+</div>
+</div>
 <div id="save-panel"><button class="panel-close" onclick="toggleSavePanel()">✕</button><h2>💾 저장/불러오기</h2><div id="save-list"></div></div>
 </div>
 
@@ -216,8 +239,73 @@ px:400,py:300,targetX:null,targetY:null,walking:false,walkFrame:0,
 worldResources:[],buildings:[],villagers:[],
 camX:0,camY:0,
 selectedSlot:0,
-floatingTexts:[]
+floatingTexts:[],
+particles:[],
+shakeAmount:0,shakeDecay:0
 };
+// ========== PARTICLE SYSTEM ==========
+function spawnParticles(x,y,opts={}){
+  const count=opts.count||20;
+  const colors=opts.colors||['#FFD700','#FFA500','#FFFFFF'];
+  const speed=opts.speed||4;
+  const life=opts.life||40;
+  const gravity=opts.gravity!==undefined?opts.gravity:0.15;
+  const size=opts.size||3;
+  const shape=opts.shape||'circle';
+  for(let i=0;i<count;i++){
+    const ang=Math.random()*Math.PI*2;
+    const sp=speed*(0.5+Math.random()*0.5);
+    G.particles.push({
+      x,y,
+      vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp-(opts.upward?2:0),
+      life:life*(0.7+Math.random()*0.6),maxLife:life,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      size:size*(0.7+Math.random()*0.6),
+      gravity,shape,
+      rot:Math.random()*Math.PI*2,vrot:(Math.random()-0.5)*0.2,
+      world:opts.world!==false
+    });
+  }
+}
+function spawnAmbientFire(x,y){
+  if(Math.random()<0.4){
+    G.particles.push({
+      x:x+(Math.random()-0.5)*8,y:y+5,
+      vx:(Math.random()-0.5)*0.4,vy:-1.2-Math.random()*0.8,
+      life:30+Math.random()*20,maxLife:50,
+      color:Math.random()<0.6?'#FF6B00':(Math.random()<0.5?'#FFD700':'#FF3300'),
+      size:3+Math.random()*3,gravity:-0.05,shape:'circle',
+      rot:0,vrot:0,world:true,blend:'lighter'
+    });
+  }
+  if(Math.random()<0.15){
+    G.particles.push({
+      x:x+(Math.random()-0.5)*6,y:y-15,
+      vx:(Math.random()-0.5)*0.3,vy:-0.8,
+      life:60,maxLife:60,
+      color:'rgba(60,60,60,0.5)',
+      size:5+Math.random()*4,gravity:-0.02,shape:'smoke',
+      rot:0,vrot:0.02,world:true
+    });
+  }
+}
+function spawnAmbientSparks(x,y){
+  if(Math.random()<0.3){
+    G.particles.push({
+      x:x+(Math.random()-0.5)*10,y:y,
+      vx:(Math.random()-0.5)*3,vy:-2-Math.random()*2,
+      life:25,maxLife:25,
+      color:Math.random()<0.5?'#FFEB3B':'#FFFFFF',
+      size:2,gravity:0.2,shape:'spark',
+      rot:0,vrot:0,world:true,blend:'lighter'
+    });
+  }
+}
+function screenShake(amt){G.shakeAmount=Math.max(G.shakeAmount,amt);G.shakeDecay=0.9;}
+function screenFlash(){
+  const fl=document.getElementById('screen-flash');
+  fl.classList.remove('flash');void fl.offsetWidth;fl.classList.add('flash');
+}
 
 let canvas,ctx,mmCanvas,mmCtx;
 let W=800,H=600;
@@ -233,8 +321,30 @@ const SEASONS=['봄','여름','가을','겨울'];
 const SEASON_ICONS=['🌸','☀','🍂','❄'];
 const DAY_LENGTH=600; // frames per day
 
+// ========== SPRITE LOADER (AI 생성 에셋 자동 로드) ==========
+const SPRITES={buildings:{},items:{},characters:{}};
+function loadSprite(category,name){
+  if(SPRITES[category][name])return SPRITES[category][name];
+  const img=new Image();
+  img.onload=()=>{img._loaded=true;};
+  img.onerror=()=>{img._failed=true;};
+  img.src=`assets/sprites/${category}/${name}.png`;
+  SPRITES[category][name]=img;
+  return img;
+}
+function preloadSprites(){
+  BUILDINGS.forEach(b=>loadSprite('buildings',b.id));
+  // 시대별 캐릭터
+  ['stoneAgePerson','neolithicPerson','bronzePerson','ironPerson','medievalPerson','industrialPerson','modernPerson'].forEach(c=>loadSprite('characters',c));
+}
+function getCurrentCharacterSprite(){
+  const map=['stoneAgePerson','neolithicPerson','bronzePerson','ironPerson','medievalPerson','industrialPerson','modernPerson'];
+  return SPRITES.characters[map[G.era]||'stoneAgePerson'];
+}
+
 // ========== INIT ==========
 function init(){
+  preloadSprites();
 canvas=document.getElementById('gameCanvas');
 ctx=canvas.getContext('2d');
 mmCanvas=document.getElementById('minimapCanvas');
@@ -257,11 +367,16 @@ G={era:0,day:1,time:0,season:0,population:1,
 inv:{stick:3,stone:2},crafted:{},built:{},discoveredRecipes:['stoneAxe','spear'],
 px:WORLD_W*TILE/2,py:WORLD_H*TILE/2,
 worldResources:[],buildings:[],villagers:[],
-camX:0,camY:0,selectedSlot:0};
+camX:0,camY:0,selectedSlot:0,
+particles:[],floatingTexts:[],shakeAmount:0};
 generateWorld();
 document.getElementById('menu-screen').style.display='none';
 gameStarted=true;
 showToast('석기시대에 오신 것을 환영합니다! 자원을 모아 도구를 만드세요.');
+// Start ambient BGM (after first user interaction has occurred via 새 게임 button)
+setTimeout(()=>startAmbient(G.era),300);
+// AI 가용성 1회 체크
+checkAIAvailable();
 gameLoop();
 }
 
@@ -385,9 +500,48 @@ G.py=Math.max(10,Math.min(WORLD_H*TILE-10,G.py));
 if(G.floatingTexts){G.floatingTexts.forEach(ft=>{ft.y-=1;ft.t--});
   G.floatingTexts=G.floatingTexts.filter(ft=>ft.t>0);}
 
-// Camera follow
+// Update particles
+if(G.particles){
+  G.particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    p.vy+=p.gravity;
+    p.vx*=0.99;
+    p.life--;
+    if(p.shape==='smoke'){p.size+=0.15;p.vx*=0.95;}
+    if(p.vrot)p.rot+=p.vrot;
+  });
+  G.particles=G.particles.filter(p=>p.life>0);
+  if(G.particles.length>500)G.particles=G.particles.slice(-500);
+}
+
+// Building ambient particles
+G.buildings.forEach(b=>{
+  const sx=b.x-G.camX,sy=b.y-G.camY;
+  if(sx<-60||sx>W+60||sy<-60||sy>H+60)return;
+  if(b.type==='campfire'||b.type==='kiln'||b.type==='smelter'||b.type==='forge'){
+    spawnAmbientFire(b.x,b.y);
+  }
+  if(b.type==='forge'||b.type==='factory'){
+    spawnAmbientSparks(b.x,b.y);
+  }
+  if(b.type==='powerPlant'){
+    if(Math.random()<0.2)spawnParticles(b.x,b.y-5,{count:1,colors:['#00E5FF','#FFFFFF'],speed:2,life:20,gravity:0,size:2,upward:true});
+  }
+});
+
+// Screen shake decay
+if(G.shakeAmount>0){
+  G.shakeAmount*=G.shakeDecay||0.85;
+  if(G.shakeAmount<0.1)G.shakeAmount=0;
+}
+
+// Camera follow + shake
 G.camX=G.px-W/2;
 G.camY=G.py-H/2;
+if(G.shakeAmount>0){
+  G.camX+=(Math.random()-0.5)*G.shakeAmount;
+  G.camY+=(Math.random()-0.5)*G.shakeAmount;
+}
 
 // Day/night cycle
 G.time++;
@@ -493,15 +647,25 @@ if(!bDef)return;
 const sx=b.x-G.camX;
 const sy=b.y-G.camY;
 if(sx<-60||sx>W+60||sy<-60||sy>H+60)return;
-ctx.fillStyle='rgba(0,0,0,.3)';
-ctx.fillRect(sx-18,sy-18,36,36);
-ctx.font='28px serif';
-ctx.textAlign='center';
-ctx.textBaseline='middle';
-ctx.fillText(bDef.icon,sx,sy);
+// Shadow
+ctx.fillStyle='rgba(0,0,0,.35)';
+ctx.beginPath();ctx.ellipse(sx,sy+22,28,7,0,0,Math.PI*2);ctx.fill();
+// AI sprite or emoji fallback
+const spr=SPRITES.buildings[b.type];
+if(spr&&spr._loaded&&!spr._failed){
+  ctx.drawImage(spr,sx-32,sy-40,64,64);
+}else{
+  ctx.fillStyle='rgba(0,0,0,.3)';
+  ctx.fillRect(sx-18,sy-18,36,36);
+  ctx.font='28px serif';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(bDef.icon,sx,sy);
+}
 ctx.font='9px sans-serif';
-ctx.fillStyle='#aaa';
-ctx.fillText(bDef.name,sx,sy+22);
+ctx.fillStyle='#FFD700';
+ctx.textAlign='center';
+ctx.fillText(bDef.name,sx,sy+30);
 });
 
 // Resources (visible nodes with distinct visuals)
@@ -530,26 +694,29 @@ ctx.fillText('👤',sx,sy);
 const px=G.px-G.camX;
 const py=G.py-G.camY;
 // Shadow
-ctx.fillStyle='rgba(0,0,0,.3)';
+ctx.fillStyle='rgba(0,0,0,.35)';
 ctx.beginPath();
-ctx.ellipse(px,py+12,10,4,0,0,Math.PI*2);
+ctx.ellipse(px,py+14,14,5,0,0,Math.PI*2);
 ctx.fill();
-// Walking sprite (simple pixel-art body)
 const bobY=G.walking?Math.sin(G.walkFrame*0.3)*3:Math.sin(animFrame*0.05)*1;
-const legAnim=G.walking?Math.sin(G.walkFrame*0.4)*4:0;
-// Body
-ctx.fillStyle='#F5CBA7';ctx.beginPath();ctx.arc(px,py-10+bobY,7,0,Math.PI*2);ctx.fill();// head
-ctx.fillStyle='#3498DB';ctx.fillRect(px-5,py-3+bobY,10,12);// torso
-// Arms
-ctx.fillStyle='#F5CBA7';
-ctx.fillRect(px-8,py-1+bobY+legAnim*0.3,3,8);
-ctx.fillRect(px+5,py-1+bobY-legAnim*0.3,3,8);
-// Legs
-ctx.fillStyle='#2C3E50';
-ctx.fillRect(px-4,py+9+bobY,3,6+legAnim);
-ctx.fillRect(px+1,py+9+bobY,3,6-legAnim);
-// Eyes
-ctx.fillStyle='#333';ctx.fillRect(px-3,py-11+bobY,2,2);ctx.fillRect(px+1,py-11+bobY,2,2);
+const charSpr=getCurrentCharacterSprite();
+if(charSpr&&charSpr._loaded&&!charSpr._failed){
+  // AI 캐릭터 스프라이트 사용
+  const sw=44, sh=52;
+  ctx.drawImage(charSpr,px-sw/2,py-sh+8+bobY,sw,sh);
+}else{
+  // Fallback: 도형 캐릭터
+  const legAnim=G.walking?Math.sin(G.walkFrame*0.4)*4:0;
+  ctx.fillStyle='#F5CBA7';ctx.beginPath();ctx.arc(px,py-10+bobY,7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#3498DB';ctx.fillRect(px-5,py-3+bobY,10,12);
+  ctx.fillStyle='#F5CBA7';
+  ctx.fillRect(px-8,py-1+bobY+legAnim*0.3,3,8);
+  ctx.fillRect(px+5,py-1+bobY-legAnim*0.3,3,8);
+  ctx.fillStyle='#2C3E50';
+  ctx.fillRect(px-4,py+9+bobY,3,6+legAnim);
+  ctx.fillRect(px+1,py+9+bobY,3,6-legAnim);
+  ctx.fillStyle='#333';ctx.fillRect(px-3,py-11+bobY,2,2);ctx.fillRect(px+1,py-11+bobY,2,2);
+}
 // Name
 ctx.font='10px sans-serif';
 ctx.fillStyle='#ffd700';ctx.textAlign='center';ctx.textBaseline='middle';
@@ -567,6 +734,41 @@ if(G.floatingTexts){G.floatingTexts.forEach(ft=>{
   ctx.fillStyle=ft.color||'#FFD700';ctx.font='bold 14px sans-serif';ctx.textAlign='center';
   ctx.fillText(ft.text,ft.x-G.camX,ft.y-G.camY);ctx.globalAlpha=1;
 });}
+
+// Particles (rendered above world, below UI)
+if(G.particles){
+  ctx.save();
+  G.particles.forEach(p=>{
+    const psx=p.world?p.x-G.camX:p.x;
+    const psy=p.world?p.y-G.camY:p.y;
+    if(psx<-50||psx>W+50||psy<-50||psy>H+50)return;
+    const alpha=Math.min(1,p.life/p.maxLife);
+    ctx.globalAlpha=alpha;
+    if(p.blend)ctx.globalCompositeOperation=p.blend;else ctx.globalCompositeOperation='source-over';
+    if(p.shape==='smoke'){
+      ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(psx,psy,p.size,0,Math.PI*2);ctx.fill();
+    }else if(p.shape==='spark'){
+      ctx.strokeStyle=p.color;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(psx-p.vx,psy-p.vy);ctx.lineTo(psx,psy);ctx.stroke();
+    }else if(p.shape==='star'){
+      ctx.translate(psx,psy);ctx.rotate(p.rot);ctx.fillStyle=p.color;
+      ctx.beginPath();
+      for(let i=0;i<5;i++){
+        const a=i*Math.PI*2/5-Math.PI/2;
+        ctx.lineTo(Math.cos(a)*p.size,Math.sin(a)*p.size);
+        const a2=a+Math.PI/5;
+        ctx.lineTo(Math.cos(a2)*p.size*0.5,Math.sin(a2)*p.size*0.5);
+      }
+      ctx.closePath();ctx.fill();
+      ctx.setTransform(1,0,0,1,0,0);
+    }else{
+      ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(psx,psy,p.size,0,Math.PI*2);ctx.fill();
+    }
+  });
+  ctx.restore();
+}
 
 // Gather range indicator
 ctx.strokeStyle='rgba(255,215,0,.15)';
@@ -687,8 +889,12 @@ if(item)showToast(`📖 새 레시피 발견: ${item.name}!`);
 
 function onCanvasClick(e){
 if(!gameStarted)return;
-const mx=e.clientX+G.camX;
-const my=e.clientY+G.camY;
+// canvas 좌표 정확화 (모바일/줌/스크롤 대응)
+const rect=canvas.getBoundingClientRect();
+const cx=(e.clientX-rect.left)*(canvas.width/rect.width);
+const cy=(e.clientY-rect.top)*(canvas.height/rect.height);
+const mx=cx+G.camX;
+const my=cy+G.camY;
 
 // Check if clicked on resource
 let clicked=null,minD=30;
@@ -708,24 +914,30 @@ const res=RESOURCES[clicked.type];
 if(clicked.hp<=0){
 addItem(clicked.type,1);
 showToast(`${res.icon} ${res.name} 획득!`);
-// Floating text
+// Floating text + harvest burst particles
 if(!G.floatingTexts)G.floatingTexts=[];
 G.floatingTexts.push({text:'+1 '+res.name,x:clicked.x,y:clicked.y-10,t:50,color:'#4CAF50'});
+const cat=getResourceCategory(clicked.type);
+const palette={stone:['#8a8a8a','#aaaaaa','#bbbbbb'],wood:['#5D4037','#8D6E63','#A1887F'],ore:['#FFD700','#D4760A','#E8A735'],clay:['#D2691E','#E8A060','#CD853F'],other:['#4CAF50','#81C784','#FFEB3B']}[cat]||['#FFD700'];
+spawnParticles(clicked.x,clicked.y,{count:15,colors:palette,speed:3,life:35,gravity:0.2,size:3});
+playSound(800+Math.random()*200,0.06,0.08);
 G.worldResources=G.worldResources.filter(r=>r!==clicked);
 discoverRecipesFor(clicked.type);
 }else{
 showToast(`${res.icon} 채집 중... (${3-clicked.hp}/3)`);
 if(!G.floatingTexts)G.floatingTexts=[];
 G.floatingTexts.push({text:(3-clicked.hp)+'/3',x:clicked.x,y:clicked.y-10,t:30,color:'#FFD700'});
+spawnParticles(clicked.x,clicked.y,{count:5,colors:['#FFD700','#FFA500'],speed:2,life:20,gravity:0.15,size:2});
+playSound(400+Math.random()*100,0.04,0.05);
 }
 }else{
 // Walk toward resource
 G.targetX=clicked.x;G.targetY=clicked.y;
 }
 }else{
-// Walk to click position
-G.targetX=e.clientX+G.camX;
-G.targetY=e.clientY+G.camY;
+// Walk to click position (정확한 캔버스 좌표 사용)
+G.targetX=mx;
+G.targetY=my;
 }
 }
 
@@ -782,9 +994,15 @@ G.crafted[r.result]=(G.crafted[r.result]||0)+r.qty;
 if(!G.discoveredRecipes.includes(r.result))G.discoveredRecipes.push(r.result);
 const item=ITEMS[r.result];
 showToast(`✅ ${item.icon} ${item.name} 제작 완료!`);
-// Play sound
-playSound(600,0.1,0.1);
-setTimeout(()=>playSound(800,0.1,0.1),100);
+// VFX: burst particles + screen shake
+spawnParticles(G.px,G.py-10,{count:30,colors:['#FFD700','#FFA500','#FFEB3B','#FFFFFF'],speed:5,life:50,gravity:0.1,size:3,shape:'star'});
+spawnParticles(G.px,G.py-10,{count:20,colors:['#FFD700'],speed:8,life:30,gravity:0.05,size:2});
+screenShake(4);
+// Play craft chime (3-tone arpeggio)
+playChord([523,659,784],0.15);
+// AI 내레이션 (첫 발견 시 30% 확률)
+const isFirst=(G.crafted[r.result]||0)===r.qty;
+if(isFirst)aiCraftDiscovery(item.name);
 // Show educational popup
 if(r.edu){
 setTimeout(()=>showEdu(r.edu.title,r.edu.body),500);
@@ -850,8 +1068,13 @@ G.villagers.push({x:bx+(Math.random()-0.5)*40,y:by+(Math.random()-0.5)*40});
 }
 }
 showToast(`🏗 ${b.icon} ${b.name} 건설 완료!`);
-playSound(400,0.15,0.15);
-setTimeout(()=>playSound(500,0.1,0.1),150);
+// VFX: dust burst + heavy shake
+spawnParticles(bx,by+15,{count:40,colors:['#8d6e63','#bcaaa4','#a1887f'],speed:3,life:60,gravity:0.08,size:4});
+spawnParticles(bx,by-5,{count:15,colors:['#FFD700','#FFFFFF'],speed:5,life:40,gravity:0.1,size:3,shape:'star'});
+screenShake(6);
+playChord([392,494,587],0.18);
+// AI 내레이션 (40% 확률)
+aiBuildingEvent(b.name);
 renderBuildList();
 updateObjectives();
 }
@@ -938,11 +1161,13 @@ const data=localStorage.getItem('civevo_save_'+slot);
 if(!data)return;
 try{
 G=JSON.parse(data);
+G.particles=G.particles||[];G.floatingTexts=G.floatingTexts||[];G.shakeAmount=0;
 document.getElementById('menu-screen').style.display='none';
 closeAllPanels();
-gameStarted=true;
+const wasStarted=gameStarted;gameStarted=true;
 showToast(`✅ 슬롯 ${slot+1} 불러오기 완료!`);
-if(!gameStarted)gameLoop();
+setTimeout(()=>startAmbient(G.era),300);
+if(!wasStarted)gameLoop();
 }catch(e){showToast('저장 데이터가 손상되었습니다.');}
 }
 
@@ -985,9 +1210,24 @@ list.innerHTML+='<div style="color:#ffd700;margin-top:8px;font-weight:bold">🎉
 function advanceEra(){
 G.era++;
 const era=ERAS[G.era];
-// Show transition
+// Show transition with cinematic
 const trans=document.getElementById('era-transition');
 trans.style.display='flex';
+trans.classList.remove('show');void trans.offsetWidth;trans.classList.add('show');
+// Inject FX layer if missing
+if(!trans.querySelector('.era-bg-fx')){
+  const fx=document.createElement('div');fx.className='era-bg-fx';trans.insertBefore(fx,trans.firstChild);
+}
+// AI 시네마틱 영상 재생 (있을 경우)
+const eraNames=['stoneAge','neolithic','bronze','iron','medieval','industrial','modern'];
+const vid=document.getElementById('era-video');
+if(vid){
+  const src=`assets/videos/era_${G.era}_${eraNames[G.era]||eraNames[0]}.mp4`;
+  vid.src=src;vid.style.opacity='0';
+  vid.onloadeddata=()=>{vid.style.opacity='0.85';vid.play().catch(e=>console.warn('video play err',e));};
+  vid.onerror=()=>{vid.style.opacity='0';};
+  vid.loop=true;
+}
 document.getElementById('era-trans-title').textContent=`🎉 ${era.name} 진입!`;
 document.getElementById('era-trans-desc').innerHTML=`${era.desc}<br><br><strong>역사적 사실:</strong><br>${era.fact}`;
 addEraResources();
@@ -997,13 +1237,30 @@ if(!G.discoveredRecipes.includes(r.result)){
 G.discoveredRecipes.push(r.result);
 }
 });
-playSound(523,0.15,0.2);
-setTimeout(()=>playSound(659,0.15,0.2),200);
-setTimeout(()=>playSound(784,0.15,0.3),400);
+// Mega VFX: screen flash + shake + golden burst at center
+screenFlash();
+screenShake(15);
+for(let i=0;i<3;i++){
+  setTimeout(()=>{
+    spawnParticles(W/2+G.camX,H/2+G.camY,{count:60,colors:['#FFD700','#FFEB3B','#FFFFFF','#FFA500'],speed:10,life:80,gravity:0.05,size:4,shape:'star'});
+  },i*200);
+}
+// Cinematic chord progression (orchestral feel)
+playChord([261.63,329.63,392.00],0.4,0.18); // C major
+setTimeout(()=>playChord([329.63,392.00,493.88],0.4,0.18),500); // E minor
+setTimeout(()=>playChord([392.00,493.88,587.33],0.5,0.2),1000); // G major
+setTimeout(()=>playChord([523.25,659.25,783.99,1046.5],0.8,0.22),1500); // C major octave (climax)
+// Switch ambient BGM to new era
+setTimeout(()=>switchEraAmbient(G.era),300);
+// AI 내레이터: 시대 진입 이벤트 생성
+setTimeout(()=>aiEraEvent(G.era),1200);
 }
 
 function closeEraTransition(){
-document.getElementById('era-transition').style.display='none';
+const t=document.getElementById('era-transition');
+t.style.display='none';t.classList.remove('show');
+const vid=document.getElementById('era-video');
+if(vid){try{vid.pause();vid.removeAttribute('src');vid.load();}catch(e){}}
 }
 
 // ========== EDUCATIONAL POPUP ==========
@@ -1033,25 +1290,213 @@ toastTimer=setTimeout(()=>{t.style.display='none';},2500);
 }
 
 // ========== WEB AUDIO ==========
-let audioCtx=null;
+let audioCtx=null,audioMuted=false,ambientNodes=null,masterGain=null;
 function getAudioCtx(){
-if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+if(!audioCtx){
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  masterGain=audioCtx.createGain();
+  masterGain.gain.value=audioMuted?0:0.6;
+  masterGain.connect(audioCtx.destination);
+}
 return audioCtx;
 }
-function playSound(freq,dur,vol){
+function playSound(freq,dur,vol,type){
 try{
 const ac=getAudioCtx();
 const osc=ac.createOscillator();
 const gain=ac.createGain();
-osc.type='sine';
+osc.type=type||'sine';
 osc.frequency.value=freq;
 gain.gain.value=vol||0.1;
 gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
 osc.connect(gain);
-gain.connect(ac.destination);
+gain.connect(masterGain);
 osc.start();
 osc.stop(ac.currentTime+dur);
 }catch(e){}
+}
+function playChord(freqs,dur,vol){
+  freqs.forEach((f,i)=>{
+    setTimeout(()=>playSound(f,dur||0.2,(vol||0.12)*(1-i*0.1),'triangle'),i*40);
+  });
+}
+// ========== AMBIENT BGM (시대별 procedural pad) ==========
+const ERA_AMBIENT=[
+  // 석기시대: low drone + occasional bird
+  {root:130.81,scale:[0,3,5,7,10],tempo:8000,pad:'sawtooth',color:'primal'},
+  // 신석기시대: warmer pad
+  {root:146.83,scale:[0,2,4,7,9],tempo:7000,pad:'triangle',color:'pastoral'},
+  // 청동기시대: brass-like
+  {root:164.81,scale:[0,2,4,5,7,9],tempo:6500,pad:'sawtooth',color:'heroic'},
+  // 철기시대: metallic
+  {root:174.61,scale:[0,3,5,6,7,10],tempo:6000,pad:'square',color:'industrial'},
+  // 중세: minor harmonic
+  {root:196.00,scale:[0,2,3,5,7,8,11],tempo:5500,pad:'triangle',color:'medieval'},
+  // 산업혁명: rhythmic mechanical
+  {root:220.00,scale:[0,2,3,5,7,9,10],tempo:4000,pad:'sawtooth',color:'mechanical'},
+  // 현대: ambient electronic
+  {root:261.63,scale:[0,2,4,5,7,9,11],tempo:5000,pad:'sine',color:'modern'}
+];
+function switchEraAmbient(era){
+  stopAmbient();
+  startAmbient(era);
+}
+function startAmbient(era){
+  if(audioMuted)return;
+  try{
+    const ac=getAudioCtx();
+    const cfg=ERA_AMBIENT[era]||ERA_AMBIENT[0];
+    ambientNodes={cfg,timer:null,oscs:[]};
+    // Persistent drone (root + fifth)
+    [cfg.root/2, cfg.root, cfg.root*1.5].forEach((f,i)=>{
+      const osc=ac.createOscillator();
+      const g=ac.createGain();
+      const lfo=ac.createOscillator();
+      const lfoG=ac.createGain();
+      osc.type=cfg.pad;
+      osc.frequency.value=f;
+      g.gain.value=0;
+      g.gain.linearRampToValueAtTime(0.025-i*0.005,ac.currentTime+3);
+      lfo.frequency.value=0.1+i*0.05;
+      lfoG.gain.value=2;
+      lfo.connect(lfoG);lfoG.connect(osc.frequency);
+      osc.connect(g);g.connect(masterGain);
+      osc.start();lfo.start();
+      ambientNodes.oscs.push({osc,lfo,g});
+    });
+    // Melodic notes (procedural pentatonic)
+    const playMelody=()=>{
+      if(!ambientNodes||audioMuted)return;
+      const note=cfg.scale[Math.floor(Math.random()*cfg.scale.length)];
+      const oct=[1,2,2,4][Math.floor(Math.random()*4)];
+      const f=cfg.root*oct*Math.pow(2,note/12);
+      playSound(f,1.5,0.04,'triangle');
+      ambientNodes.timer=setTimeout(playMelody,cfg.tempo*0.5+Math.random()*cfg.tempo);
+    };
+    ambientNodes.timer=setTimeout(playMelody,2000);
+  }catch(e){console.warn('ambient err',e);}
+}
+function stopAmbient(){
+  if(!ambientNodes)return;
+  try{
+    const ac=audioCtx;
+    if(ambientNodes.timer)clearTimeout(ambientNodes.timer);
+    ambientNodes.oscs.forEach(({osc,lfo,g})=>{
+      g.gain.linearRampToValueAtTime(0,ac.currentTime+0.5);
+      setTimeout(()=>{try{osc.stop();lfo.stop();}catch(e){}},600);
+    });
+  }catch(e){}
+  ambientNodes=null;
+}
+function toggleAudio(){
+  audioMuted=!audioMuted;
+  document.getElementById('audio-toggle').textContent=audioMuted?'🔇':'🔊';
+  if(masterGain)masterGain.gain.value=audioMuted?0:0.6;
+  if(audioMuted){stopAmbient();}else{startAmbient(G.era);}
+}
+
+// ========== OLLAMA AI NARRATOR (동적 이벤트) ==========
+const OLLAMA_URL='http://127.0.0.1:11434';
+const OLLAMA_MODEL='gemma4:e4b-it-q4_K_M';
+let aiEnabled=localStorage.getItem('civevo_ai_enabled')!=='0'; // default on
+let aiFailed=false;
+
+async function aiGenerate(prompt,maxTokens){
+  if(!aiEnabled||aiFailed)return null;
+  try{
+    const ctrl=new AbortController();
+    const timeoutId=setTimeout(()=>ctrl.abort(),5000);
+    const r=await fetch(OLLAMA_URL+'/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:OLLAMA_MODEL,
+        prompt:prompt,
+        stream:false,
+        options:{temperature:0.9,num_predict:maxTokens||40,top_p:0.9}
+      }),
+      signal:ctrl.signal
+    });
+    clearTimeout(timeoutId);
+    const j=await r.json();
+    let text=(j.response||'').trim();
+    // Strip markdown/quotes
+    text=text.replace(/^["'`*\s]+|["'`*\s]+$/g,'').replace(/\n+/g,' ');
+    if(text.length<2||text.length>200)return null;
+    return text;
+  }catch(e){
+    console.warn('AI offline:',e.message);
+    aiFailed=true;
+    setTimeout(()=>{aiFailed=false;},30000); // retry after 30s
+    return null;
+  }
+}
+
+async function aiEraEvent(era){
+  const eraName=ERAS[era].name;
+  const prompt=`너는 문명 게임 내레이터다. "${eraName}" 시대에 진입한 부족에게 일어난 흥미로운 사건을 한국어 한 문장으로 묘사해라. 따옴표 없이 문장만:`;
+  const result=await aiGenerate(prompt,60);
+  if(result){
+    showAINarration(`📜 ${eraName} - ${result}`);
+  }
+}
+
+async function aiBuildingEvent(buildingName){
+  if(Math.random()>0.4)return; // 40% 확률
+  const eraName=ERAS[G.era].name;
+  const prompt=`${eraName} 시대 부족원이 "${buildingName}"을(를) 건설한 후 한 짧은 한국어 대사 한 줄. 따옴표 없이 대사만:`;
+  const result=await aiGenerate(prompt,40);
+  if(result){
+    showAINarration(`💬 ${result}`);
+  }
+}
+
+async function aiCraftDiscovery(itemName){
+  if(Math.random()>0.3)return; // 30% 확률
+  const prompt=`고대 부족원이 "${itemName}"을(를) 처음 만들고 외친 한국어 짧은 감탄 한 줄. 따옴표 없이:`;
+  const result=await aiGenerate(prompt,30);
+  if(result){
+    showAINarration(`✨ ${result}`);
+  }
+}
+
+function showAINarration(text){
+  let n=document.getElementById('ai-narration');
+  if(!n){
+    n=document.createElement('div');n.id='ai-narration';
+    n.style.cssText='position:absolute;bottom:80px;left:50%;transform:translateX(-50%);max-width:80vw;background:linear-gradient(135deg,rgba(20,30,60,.95),rgba(40,20,80,.95));color:#FFD700;padding:14px 20px;border-radius:12px;border:1px solid rgba(255,215,0,.4);font-size:13px;line-height:1.5;z-index:55;box-shadow:0 4px 20px rgba(255,215,0,.3);transition:opacity .5s;text-align:center';
+    document.body.appendChild(n);
+  }
+  n.textContent=text;n.style.opacity='1';n.style.display='block';
+  if(n._t)clearTimeout(n._t);
+  n._t=setTimeout(()=>{n.style.opacity='0';setTimeout(()=>n.style.display='none',500);},6000);
+}
+
+function toggleAI(){
+  aiEnabled=!aiEnabled;
+  localStorage.setItem('civevo_ai_enabled',aiEnabled?'1':'0');
+  const btn=document.getElementById('ai-toggle');
+  if(btn){btn.textContent=aiEnabled?'🤖':'🚫';btn.title='AI 내레이터 '+(aiEnabled?'ON':'OFF');}
+  showToast('AI 내레이터 '+(aiEnabled?'ON':'OFF'));
+  if(aiEnabled)aiFailed=false;
+}
+
+// AI 가용성 체크 (게임 시작 후 1회)
+async function checkAIAvailable(){
+  try{
+    const r=await fetch(OLLAMA_URL+'/api/tags',{signal:AbortSignal.timeout(2000)});
+    const j=await r.json();
+    if(j.models&&j.models.length>0){
+      console.log('✅ Ollama 연결됨, 모델:',j.models.map(m=>m.name).join(', '));
+      return true;
+    }
+  }catch(e){
+    console.warn('Ollama 미연결, AI 내레이터 비활성화');
+    aiEnabled=false;
+    const btn=document.getElementById('ai-toggle');
+    if(btn){btn.textContent='⚠';btn.title='Ollama 서버 미연결';}
+    return false;
+  }
 }
 
 // ========== START ==========

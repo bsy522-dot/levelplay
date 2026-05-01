@@ -749,7 +749,7 @@ const GMS=[
 {nm:'노래방',em:'🎤',u:'games/noraebang-v3.html',d:'음정감지+15곡+S~D채점'},
 {nm:'복싱 트레이너',em:'🥊',u:'games/boxing-trainer-v5.html',d:'3D 복싱+커리어+10대전'},
 {nm:'골프 트래커',em:'⛳',u:'games/golf-tracker-v3.html',d:'스윙분석+통계+라운드'},
-{nm:'한국사 영웅전 v8 ✨',em:'⚔️',u:'games/korean-rpg-v8/index.html',d:'Three.js 3D 택티컬RPG · 카메라3모드 · 고조선 EP1~2'},
+{nm:'한국사 영웅전 v8 🆕',em:'⚔️',u:'games/korean-rpg-v8b/index.html',d:'영걸전 SRPG · 3D · SVG 인물 · 캐시 우회 새 빌드'},
 {nm:'한국사 영웅전 (구)',em:'⚔️',u:'games/korean-rpg-v4.html',d:'고조선RPG 환웅+단군편'},
 {nm:'심시티 빌더',em:'🏙️',u:'games/simcity-v3.html',d:'도시건설+경제+재난'},
 {nm:'집짓기',em:'🏠',u:'games/house-builder-v4.html',d:'진짜 3D+그림자+시간/날씨+워크스루'},
@@ -757,7 +757,7 @@ const GMS=[
 {nm:'별빛 RPG v2',em:'🗡️',u:'games/hatcuping-rpg-v2.html',d:'10챕터+9맵+파티교체+미니게임5종'},
 {nm:'별빛 RPG v3 ✨',em:'🌟',u:'games/rpg-v3/index.html',d:'원작완전판 S1~S5+극장판 6Act+41종도감+엔딩2종'},
 {nm:'하츄핑 UNIFIED v4 🌸',em:'✨',u:'games/hatcuping-unified.html',d:'3게임 융합 프리퀄 — 성내부 탐험+꽁꽁핑 눈피하기+성탈출+Act5 호감도'},
-{nm:'문명 진화',em:'🏛️',u:'games/civilization-evolution.html',d:'석기→현대 7시대 진화'},
+{nm:'문명 진화 ✨',em:'🏛️',u:'games/civilization-evolution/index.html',d:'AI 픽셀아트 24장+동적BGM+AI내레이터 · 석기→현대 7시대'},
 {nm:'우주 탐험 3D ✨',em:'🌌',u:'games/space-explorer-3d/index.html',d:'Three.js 3D · 11행성 자전공전 · 셰이더+파티클 · BGM/SFX'},
 {nm:'우주 탐험',em:'🚀',u:'games/space-explorer.html',d:'태양계 8행성 과학탐사'},
 {nm:'요리왕',em:'🍳',u:'games/cooking-master.html',d:'한식15종 요리+영양학습'},
@@ -862,7 +862,7 @@ function vc(v){const watched=U.seen&&U.seen[v.id];return'<div class="vc" onclick
 function playVid(id,t){document.getElementById('moB').innerHTML='<div id="vidSpn" style="display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;background:var(--bg);border-radius:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div></div><div style="font-size:12px;font-weight:600;margin-top:8px">'+t+'</div>';document.getElementById('mo').classList.add('sh');const ifr=document.createElement('iframe');ifr.src='https://www.youtube.com/embed/'+id+'?autoplay=1';ifr.style.cssText='width:100%;aspect-ratio:16/9;border:none;border-radius:8px';ifr.allow='autoplay;fullscreen';ifr.allowFullscreen=true;ifr.onload=function(){const sp=document.getElementById('vidSpn');if(sp)sp.replaceWith(ifr);};document.getElementById('moB').prepend(ifr);ifr.style.display='none';ifr.onload=function(){const sp=document.getElementById('vidSpn');if(sp)sp.remove();ifr.style.display='';};if(!U.seen)U.seen={};if(!U.seen[id]){U.seen[id]=1;const vObj=V.find(x=>x.id===id);const vCat=vObj?vObj.c:'기타';if(!U.stats.videosByCategory[vCat])U.stats.videosByCategory[vCat]=0;U.stats.videosByCategory[vCat]++;xp(10,'영상: '+t);trackMission('video');sv();checkBadges();}}
 function sc(s){return'<div class="gc" style="position:relative" onclick="playSim(\''+s.u+'\',\''+s.nm+'\')"><button onclick="tgBm(event,\'sim\',\''+s.nm.replace(/'/g,"\\'")+'\',\''+s.nm.replace(/'/g,"\\'")+'\')" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:14px;cursor:pointer">'+(isBm('sim',s.nm)?'⭐':'☆')+'</button><div class="gi">'+s.ic+'</div><div class="gn">'+s.nm+'</div><div class="gd">'+s.d+'</div></div>';}
 function playSim(u,n){document.getElementById('moB').innerHTML='<div id="simSpn" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:450px;background:var(--bg);border-radius:8px;gap:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:11px;color:var(--t3)">실험 로딩 중...</div></div><div style="font-size:12px;font-weight:600;margin-top:6px">'+n+'</div>';const ifr=document.createElement('iframe');ifr.src=u;ifr.style.cssText='width:100%;height:450px;border:none;border-radius:8px;display:none';ifr.onload=function(){const sp=document.getElementById('simSpn');if(sp)sp.remove();ifr.style.display='';};document.getElementById('moB').prepend(ifr);document.getElementById('mo').classList.add('sh');xp(10,'실험');}
-const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8/index.html']);
+const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8/index.html','games/korean-rpg-v8b/index.html']);
 function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();if(_3D_GAMES.has(u)){window.open(u,'_blank');return;}document.getElementById('gT').textContent=n;document.getElementById('gF').src=u;document.getElementById('gO').classList.add('sh');}
 function cG(){document.getElementById('gO').classList.remove('sh');document.getElementById('gF').src='';}
 
