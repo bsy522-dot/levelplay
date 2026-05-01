@@ -3,6 +3,8 @@
 // 01_GRAPHICS_STANDARD §1 엄수. WebGLRenderer + ACES + PCFSoft + sRGB.
 
 import * as THREE from 'three';
+import { setupComposer } from '../graphics/postprocess.js';
+import { setupEnvironment } from '../graphics/lighting.js';
 
 // ─────────────────────────────────────────────
 // 전역 State — 게임 상태머신
@@ -69,7 +71,7 @@ export function initEngine(opts = {}) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.35;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.appendChild(renderer.domElement);
 
@@ -78,6 +80,16 @@ export function initEngine(opts = {}) {
   const camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 200);
   camera.position.set(14, 11, 14);
   camera.lookAt(0, 0, 0);
+
+  // ─── 후처리 컴포저 (Bloom + Outline + FXAA + Output) ───
+  // 디스크 0, 즉시 비주얼 향상
+  const composerHandle = setupComposer(renderer, scene, camera, opts.composer || {});
+
+  // ─── PMREM 환경맵 (메탈/유리 재질 광택) ───
+  // RoomEnvironment 사용 — HDR 파일 없이 즉시 동작, 디스크 0
+  setupEnvironment(scene, renderer).catch((e) => {
+    console.warn('[engine] PMREM environment 적용 실패 (무시):', e);
+  });
 
   // Resize handler
   const onResize = () => {
@@ -125,7 +137,9 @@ export function initEngine(opts = {}) {
       try { cb(dt, elapsed); } catch (e) { console.error('[engine] update cb err', e); }
     }
 
-    renderer.render(scene, State.camera || camera);
+    const cam = State.camera || camera;
+    if (composerHandle.renderPass.camera !== cam) composerHandle.setCamera(cam);
+    composerHandle.composer.render(dt);
 
     // Debug HUD
     if (debugEl) {
@@ -151,6 +165,8 @@ export function initEngine(opts = {}) {
   State.clock = clock;
   State.debug = debug;
   State.debugEl = debugEl;
+  State.composer = composerHandle.composer;
+  State.composerHandle = composerHandle;
 
   return State;
 }

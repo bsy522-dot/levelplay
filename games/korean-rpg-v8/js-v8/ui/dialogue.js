@@ -21,46 +21,73 @@ function _ensureBigPortraitStyles() {
   s.textContent = `
     #v8-dlg-bigportrait {
       position: fixed;
-      left: 4vw;
-      top: 12vh;
-      width: clamp(120px, 22vw, 260px);
-      height: clamp(150px, 28vw, 320px);
-      z-index: 95;
+      left: 5vw;
+      top: 18vh;
+      width: clamp(170px, 32vw, 360px);
+      height: clamp(220px, 40vw, 460px);
+      z-index: 210; /* turn-banner(200), dialogue(100) 위 */
       pointer-events: none;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(80px, 16vw, 200px);
-      border-radius: 18px;
-      border: 3px solid #c4956a;
-      background: radial-gradient(circle at 30% 30%, rgba(255,210,140,0.25), rgba(40,20,10,0.85));
-      box-shadow: 0 0 30px rgba(255,170,60,.45), 0 10px 30px rgba(0,0,0,.6);
-      transition: transform .35s ease, opacity .35s ease;
-      transform: translateX(-30px) scale(0.95);
+      font-size: clamp(120px, 24vw, 280px);
+      border-radius: 22px;
+      border: 4px solid #c4956a;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,220,150,0.55), rgba(120,70,30,0.4) 45%, rgba(40,20,10,0.92) 100%),
+        linear-gradient(180deg, rgba(80,50,20,0.4) 0%, rgba(20,10,4,0.7) 100%);
+      box-shadow:
+        0 0 40px rgba(255,170,60,.55),
+        0 0 80px rgba(255,140,40,.3),
+        inset 0 0 30px rgba(0,0,0,.4),
+        0 14px 36px rgba(0,0,0,.7);
+      transition: transform .4s cubic-bezier(.2,.9,.3,1.1), opacity .4s ease, border-color .3s;
+      transform: translateX(-40px) scale(0.85);
       opacity: 0;
-      filter: drop-shadow(0 6px 12px #000);
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,.7));
+      visibility: hidden;
     }
     #v8-dlg-bigportrait.v8-show {
-      display: flex;
       transform: translateX(0) scale(1);
       opacity: 1;
+      visibility: visible;
     }
+    /* portrait 안 광택 */
+    #v8-dlg-bigportrait::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border-radius: 16px;
+      border: 1.5px solid rgba(255,220,150,0.35);
+      pointer-events: none;
+    }
+    /* 이름 라벨 */
     #v8-dlg-bigportrait::after {
       content: attr(data-name);
       position: absolute;
-      bottom: -34px;
+      bottom: -42px;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'Noto Serif KR', serif;
-      font-size: clamp(14px, 2.4vw, 22px);
+      font-size: clamp(20px, 3.5vw, 32px);
       font-weight: 900;
       color: var(--bp-color, #ffd700);
-      letter-spacing: 4px;
-      text-shadow: 0 2px 8px #000, 0 0 14px rgba(255,180,40,.6);
+      letter-spacing: 6px;
+      text-shadow: 0 2px 10px #000, 0 0 18px rgba(255,180,40,.7), 0 0 36px rgba(255,140,40,.4);
       white-space: nowrap;
+      padding: 6px 18px;
+      background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(40,20,8,0.7) 30%, rgba(40,20,8,0.7) 70%, rgba(0,0,0,0) 100%);
+      border-top: 2px solid rgba(255,180,60,.5);
+      border-bottom: 2px solid rgba(255,180,60,.5);
     }
     @media (max-width: 720px) {
-      #v8-dlg-bigportrait { left: 4vw; top: 8vh; }
+      #v8-dlg-bigportrait {
+        left: 4vw; top: 12vh;
+        width: clamp(140px, 38vw, 220px);
+        height: clamp(180px, 48vw, 280px);
+        font-size: clamp(100px, 28vw, 180px);
+      }
+      #v8-dlg-bigportrait::after { bottom: -34px; font-size: clamp(16px, 4.5vw, 24px); letter-spacing: 4px; }
     }
   `;
   document.head.appendChild(s);

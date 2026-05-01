@@ -1120,14 +1120,19 @@ async function playBattleScene(scene) {
     obstacles: [GameState.terrain3d],
   });
 
-  // Tactical 카메라 재배치 (맵 중앙) + 영걸전 스타일 줌인
+  // Tactical 카메라 재배치 (맵 중앙)
   const cx = mapData.width * TILE_SIZE / 2;
   const cz = mapData.height * TILE_SIZE / 2;
   GameState.switcher.tacticalState.target.set(cx, 0, cz);
-  // 캐릭터 인식이 잘 되도록 기본 7 → 6 (Ortho size 작을수록 줌인)
+  // 영걸전 표준: 맵 전체가 한눈에 보이는 줌. 클로즈업이 아니라 전장 조망.
+  // 맵 width/height와 화면 비율에 맞게 자동 산출 (max 11)
+  const _aspect = window.innerWidth / window.innerHeight;
+  const _byW = (mapData.width  * TILE_SIZE * 0.55) / Math.max(_aspect, 0.6);
+  const _byH = (mapData.height * TILE_SIZE * 0.55);
+  const _autoSize = Math.max(_byW, _byH, 8.5);
   GameState.switcher.tacticalState.camSize = Math.min(
     GameState.switcher.tacticalState.camSizeMax,
-    Math.max(GameState.switcher.tacticalState.camSizeMin, 6.0)
+    Math.max(GameState.switcher.tacticalState.camSizeMin, _autoSize)
   );
 
   // 카메라 잠금 (EP.1)
