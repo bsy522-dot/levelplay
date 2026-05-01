@@ -78,22 +78,29 @@ body{background:#1a1a2e;color:#e0e0e0;font-family:'Malgun Gothic','맑은 고딕
 .vfx-burst{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none}
 .shake{animation:shake .3s}
 @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,3px)}}
-/* ===== 가상 조이스틱 (Virtual Joystick) ===== */
-#joystick{position:absolute;left:20px;bottom:80px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,215,0,0.12) 0%,rgba(0,0,0,0.5) 70%);border:2px solid rgba(255,215,0,.35);border-radius:50%;z-index:20;touch-action:none;user-select:none;-webkit-user-select:none;backdrop-filter:blur(2px)}
-#joystick-stick{position:absolute;top:50%;left:50%;width:50px;height:50px;background:radial-gradient(circle,rgba(255,215,0,.85) 0%,rgba(255,165,0,.7) 70%);border:2px solid #FFD700;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 2px 6px rgba(255,255,255,.4);transition:none;pointer-events:none}
-#joystick.active{border-color:#FFD700;box-shadow:0 0 18px rgba(255,215,0,.5)}
-#joystick-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(255,215,0,.7);white-space:nowrap;pointer-events:none}
-@media(max-width:480px){#joystick{left:14px;bottom:74px;width:110px;height:110px}#joystick-stick{width:44px;height:44px}}
-/* ===== D-pad (보조 — 정확 1칸 이동, 우하단 항상 표시) ===== */
-#dpad{position:absolute;right:14px;bottom:140px;width:130px;height:130px;z-index:20;touch-action:none;user-select:none}
-#dpad button{position:absolute;width:42px;height:42px;background:radial-gradient(circle,rgba(255,215,0,.18) 0%,rgba(0,0,0,.65) 80%);border:2px solid rgba(255,215,0,.5);color:#FFD700;font-size:20px;font-weight:bold;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);box-shadow:0 2px 8px rgba(0,0,0,.4)}
-#dpad button:active{background:rgba(255,215,0,.4);transform:scale(0.94)}
-#dpad .up{top:0;left:44px}
-#dpad .down{bottom:0;left:44px}
-#dpad .left{left:0;top:44px}
-#dpad .right{right:0;top:44px}
-#dpad .center{top:44px;left:44px;background:radial-gradient(circle,rgba(76,175,80,.6) 0%,rgba(46,125,50,.85) 80%);border-color:#4CAF50;color:#fff;font-size:11px;letter-spacing:-1px}
-@media(max-width:480px){#dpad{right:10px;bottom:130px;width:120px;height:120px}#dpad button{width:38px;height:38px;font-size:16px}#dpad .up,#dpad .down{left:41px}#dpad .left,#dpad .right{top:41px}#dpad .center{top:41px;left:41px;font-size:10px}}
+/* ===== 조이스틱 비활성화 (D-pad 단독 사용) ===== */
+#joystick{display:none !important}
+/* ===== D-pad (좌하단, 큼지막한 십자형) — 모바일 게임 표준 ===== */
+#dpad{position:absolute;left:16px;bottom:80px;width:180px;height:180px;z-index:30;touch-action:none;user-select:none;-webkit-user-select:none;pointer-events:none}
+#dpad button{position:absolute;width:60px;height:60px;background:radial-gradient(circle,rgba(60,40,20,.85) 0%,rgba(20,10,5,.95) 80%);border:3px solid rgba(255,215,0,.7);color:#FFD700;font-size:30px;font-weight:bold;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.6),inset 0 2px 4px rgba(255,215,0,.15);pointer-events:auto;-webkit-tap-highlight-color:transparent;font-family:sans-serif}
+#dpad button:active{background:radial-gradient(circle,rgba(255,215,0,.65) 0%,rgba(180,140,30,.9) 80%);transform:scale(0.92);box-shadow:0 0 18px rgba(255,215,0,.7)}
+#dpad .up{top:0;left:60px}
+#dpad .down{bottom:0;left:60px}
+#dpad .left{left:0;top:60px}
+#dpad .right{right:0;top:60px}
+#dpad .center{top:60px;left:60px;width:60px;height:60px;background:radial-gradient(circle,rgba(76,175,80,.85) 0%,rgba(46,125,50,.95) 80%);border-color:#8BC34A;color:#fff;font-size:14px;font-weight:900;letter-spacing:-1px}
+#dpad .center:active{background:radial-gradient(circle,rgba(139,195,74,.9) 0%,rgba(76,175,80,1) 80%)}
+/* 모바일 화면 480px 이하: 약간 축소 */
+@media(max-width:480px){
+  #dpad{left:10px;bottom:74px;width:160px;height:160px}
+  #dpad button{width:53px;height:53px;font-size:26px}
+  #dpad .up,#dpad .down{left:53px}
+  #dpad .left,#dpad .right{top:53px}
+  #dpad .center{top:53px;left:53px;width:53px;height:53px;font-size:12px}
+  /* 미니맵을 우상단으로, 작게 — D-pad 자리 비우기 */
+  #minimap{left:auto !important;right:8px !important;top:48px !important;width:100px !important;height:100px !important}
+  #objectives{top:158px !important;width:160px !important;font-size:10px !important}
+}
 </style>
 </head>
 <body>
@@ -1730,6 +1737,10 @@ async function checkAIAvailable(){
 
 // ========== START ==========
 init();
+// QA용 자동시작: URL에 #auto 붙이면 메뉴 스킵
+if(location.hash==='#auto'){
+  setTimeout(()=>{try{startNewGame();}catch(e){console.warn(e);}},300);
+}
 </script>
 </body>
 </html>
