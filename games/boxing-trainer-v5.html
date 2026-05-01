@@ -16,7 +16,7 @@
 <script>
 // 🚨 페이지 진입 즉시 구버전 SW + 캐시 강제 폭파 (v6.1+ 반영 보장)
 (function(){
-  var TARGET_BUILD = 'v6.3';
+  var TARGET_BUILD = 'v6.4';
   var SEEN_KEY = 'boxingV5_seen_build';
   try {
     var seen = localStorage.getItem(SEEN_KEY);
@@ -164,7 +164,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 
 <!-- MAIN MENU -->
 <div class="overlay" id="mainMenu">
-<div class="menu-title">BOXING</div>
+<div style="position:relative;text-align:center"><img src="img/boxer_silhouette.png" style="height:140px;width:auto;opacity:.55;filter:drop-shadow(0 0 30px rgba(230,57,70,.6));margin-bottom:-10px" alt=""><div class="menu-title" style="margin-top:-20px">BOXING</div></div>
 <div class="menu-sub">TRAINER V5 — 3D CAREER MODE</div>
 <div id="playerInfo" style="margin-bottom:15px"></div>
 <button class="menu-btn" onclick="showCareer()"><span class="icon">&#x1F94A;</span> 커리어 모드<span class="sub">랭킹을 올려 챔피언에 도전하세요</span></button>
@@ -313,7 +313,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v6.3-CINEMATIC-TRANSPARENT';
+const BUILD_VERSION = 'v6.4-COMFYUI-ARENA-BG';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 
@@ -439,6 +439,13 @@ function initThree() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x050508);
   scene.fog = new THREE.FogExp2(0x050508, 0.015);
+  // ComfyUI 생성 아레나 텍스처 배경
+  new THREE.TextureLoader().load('img/boxing_arena.png', tex => {
+    tex.encoding = THREE.sRGBEncoding;
+    tex.minFilter = THREE.LinearFilter;
+    scene.background = tex;
+    scene.fog = new THREE.FogExp2(0x0a0a18, 0.025);
+  }, undefined, () => console.warn('arena bg load failed'));
 
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
   camera.position.set(0, 4.5, 9);
@@ -2065,7 +2072,7 @@ function showCareer() {
         <span class="opp-stat">PWR ${locked ? '?' : o.power}</span>
         <span class="opp-stat">DEF ${locked ? '?' : o.defense}</span>
       </div>
-      ${o.belt && !locked ? `<div style="margin-top:6px;font-size:11px;color:var(--gold)">&#x1F3C6; ${BELT_NAMES[o.belt]}</div>` : ''}
+      ${o.belt && !locked ? `<div style="margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--gold)"><img src="img/belt_world.png" style="height:24px;width:auto;border-radius:3px;box-shadow:0 0 8px rgba(255,215,0,.4)" alt=""> ${BELT_NAMES[o.belt]}</div>` : ''}
       ${back}
     </div>`;
   });
@@ -3023,15 +3030,13 @@ function update3DScene(time, dt) {
     camera.position.y = 5 + cameraShake.y + Math.sin(time * 0.2) * 0.05;
     camera.lookAt(camTarget);
 
-    // Flash overlay using ambient light
-    if (f.flashAmount > 0.05) {
+    // Flash overlay using ambient light (텍스처 배경 보존)
+    if (f.flashAmount > 0.05 && scene.background && scene.background.isColor) {
       scene.background = new THREE.Color(
         0.02 + f.flashAmount * 0.3,
         0.02,
         0.03
       );
-    } else {
-      scene.background = new THREE.Color(0x050508);
     }
 
   } else if (currentScreen === 'train' && currentTraining && currentTraining.type === 'sparring') {
