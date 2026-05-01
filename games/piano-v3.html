@@ -1491,7 +1491,9 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
   document.getElementById('panel-synth').classList.add('active');
 
   stopSynthesia();
+  resizeSynthCanvas();
   setTimeout(() => resizeSynthCanvas(), 50);
+  setTimeout(() => resizeSynthCanvas(), 200);
 
   synthNotes = notes.map((n,i) => ({...n, idx:i, played:false, result:null}));
   synthBPM = bpm;
@@ -1516,7 +1518,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
     scrollToMidi(midMidi);
   }
 
-  synthStartTime = performance.now() + 1500; // 1.5s lead-in
+  synthStartTime = performance.now() + (synthWaitMode ? 2500 : 1500); // lead-in (wait모드는 더 길게)
   synthRunning = true;
   synthPaused = false; synthPauseTime = 0;
 
@@ -1680,7 +1682,7 @@ function synthLoop() {
     if (!keyInfo) return;
 
     const noteBottom = H - (noteTimeSec - now) * pxPerSec * dpr;
-    const noteHeight = Math.max(noteDurSec * pxPerSec * dpr, 6*dpr);
+    const noteHeight = Math.max(noteDurSec * pxPerSec * dpr, 14*dpr);
     const noteTop = noteBottom - noteHeight;
 
     // Off screen below = missed
@@ -1785,18 +1787,18 @@ function synthLoop() {
   ctx.beginPath(); ctx.moveTo(0, H-2*dpr); ctx.lineTo(W, H-2*dpr); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Wait Mode 안내 텍스트
+  // Wait Mode 항상 안내 텍스트
   if (synthWaitMode && !synthPaused) {
     const unplayed = synthNotes.filter(n => !n.played);
     if (unplayed.length > 0) {
       const minTime = Math.min(...unplayed.map(n => n.time));
-      const nowBeat = now / beatToSec;
-      if (Math.abs(nowBeat - minTime) < 0.05) {
-        ctx.fillStyle = 'rgba(6,182,212,0.85)';
-        ctx.font = `bold ${13*dpr}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillText('🐢 정답 키를 누르세요', W/2, 28*dpr);
-      }
+      const targets = unplayed.filter(n => n.time === minTime);
+      const showKR = document.getElementById('show-korean')?.checked;
+      const noteList = targets.map(n => showKR ? toKoreanNote(n.note) : n.note).join(' + ');
+      ctx.fillStyle = 'rgba(6,182,212,0.95)';
+      ctx.font = `bold ${14*dpr}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(`🐢 ${noteList} 키를 누르세요`, W/2, 22*dpr);
     }
   }
 
