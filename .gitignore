@@ -1,4 +1,5 @@
 games/_*.js
 games/_*.html
+games/_tmp_*
 __pycache__/
 *.pyc
