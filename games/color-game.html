@@ -3,6 +3,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>색깔 맞히기 게임</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -100,11 +103,7 @@ function saveBest(diff,stars,sc,pct){
 }
 function getStars(pct){return pct>=90?3:pct>=70?2:pct>=40?1:0;}
 function starStr(n){return n>=3?'★★★':n>=2?'★★☆':n>=1?'★☆☆':'☆☆☆';}
-function isUnlocked(diff){
-  if(diff===0) return true;
-  const prev=getBest(diff-1);
-  return prev.stars>=1;
-}
+function isUnlocked(diff){return true;}
 
 function getName(c){return lang==='ko'?c.ko:c.en;}
 
@@ -132,7 +131,7 @@ function renderMenu(app){
         <button class="toggle-btn ${lang==='en'?'active':''}" onclick="setLang('en')">English</button>
       </div>
       ${btns}
-      <p style="font-size:14px;color:#888;text-align:center;max-width:300px;margin-top:8px">각 난이도에서 별 1개 이상 획득 시<br>다음 난이도가 열립니다!</p>
+      <p style="font-size:14px;color:#888;text-align:center;max-width:300px;margin-top:8px">원하는 난이도를 자유롭게 선택하세요!<br>모든 레벨이 잠금 해제되어 있습니다.</p>
     </div>`;
 }
 
@@ -144,25 +143,23 @@ function startGame(diff){
   const d=DIFFICULTIES[diff];
   questions=[];
 
-  if(diff===0){
-    // Easy: 6 basic colors
-    const basic=COLORS.slice(0,6);
-    for(let i=0;i<d.questions;i++) questions.push({type:'name',color:basic[Math.random()*basic.length|0]});
-  } else if(diff===1){
-    // Normal: all 12 colors
-    for(let i=0;i<d.questions;i++) questions.push({type:'name',color:COLORS[Math.random()*COLORS.length|0]});
-  } else if(diff===2){
-    // Hard: English names only
-    for(let i=0;i<d.questions;i++) questions.push({type:'english',color:COLORS[Math.random()*COLORS.length|0]});
-  } else if(diff===3){
-    // Advanced: RGB values
-    for(let i=0;i<d.questions;i++) questions.push({type:'rgb',color:COLORS[Math.random()*COLORS.length|0]});
-  } else {
-    // Master: similar color discrimination
-    for(let i=0;i<d.questions;i++){
+  // 난이도별 출제 type 풀 — 같은 게임 안에서 type이 랜덤으로 왔다갔다
+  let typePool;
+  if(diff===0){typePool=['name_ko','name_en'];}
+  else if(diff===1){typePool=['name_ko','name_en','name_ko','name_en','english'];}
+  else if(diff===2){typePool=['name_ko','name_en','english','english','rgb'];}
+  else if(diff===3){typePool=['name_ko','name_en','english','rgb','rgb','similar'];}
+  else {typePool=['similar','similar','similar','rgb','english'];}
+
+  for(let i=0;i<d.questions;i++){
+    const t=typePool[Math.random()*typePool.length|0];
+    if(t==='similar'){
       const pair=SIMILAR_PAIRS[Math.random()*SIMILAR_PAIRS.length|0];
       const target=pair[Math.random()*pair.length|0];
       questions.push({type:'similar',target:target,options:shuffle([...pair])});
+    } else {
+      const palette=diff===0?COLORS.slice(0,6):COLORS;
+      questions.push({type:t,color:palette[Math.random()*palette.length|0]});
     }
   }
   render();
@@ -174,7 +171,19 @@ function renderPlay(app){
   const d=DIFFICULTIES[currentDiff];
   let optionsHtml='', hintText='', circleHex='';
 
-  if(q.type==='name'){
+  if(q.type==='name_ko'){
+    circleHex=q.color.hex;
+    hintText='이 색깔의 이름은?';
+    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const opts=shuffle([q.color,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${o.ko}</button>`).join('');
+  } else if(q.type==='name_en'){
+    circleHex=q.color.hex;
+    hintText='What color is this?';
+    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const opts=shuffle([q.color,...wrongs]);
+    optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${o.en}</button>`).join('');
+  } else if(q.type==='name'){
     circleHex=q.color.hex;
     hintText=lang==='ko'?'이 색깔의 이름은?':'What color is this?';
     const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);

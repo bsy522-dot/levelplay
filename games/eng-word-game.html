@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>영어 단어 맞히기 — Lv.1~10</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;min-height:100%;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
+.wrap{max-width:480px;margin:0 auto;padding:14px;min-height:100vh;display:flex;flex-direction:column}
+h1{text-align:center;font-size:26px;margin:6px 0;color:#FFD700}
+.sub{text-align:center;font-size:13px;color:#aaa;margin-bottom:14px}
+.score-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.4);border-radius:14px;padding:10px 16px;margin-bottom:14px;font-size:15px;font-weight:700}
+.sb-lv{color:#FFD700}.sb-prog{color:#7FDBFF}.sb-streak{color:#FF6B9D}
+.menu{display:flex;flex-direction:column;align-items:center;flex:1;gap:10px}
+.lv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;max-width:420px}
+.lv-btn{padding:14px 8px;font-size:15px;font-weight:700;border:2px solid #444;border-radius:14px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;transition:all .15s;text-align:left}
+.lv-btn:active{transform:scale(.96)}
+.lv-btn .num{font-size:22px;color:#FFD700;display:inline-block;margin-right:6px}
+.lv-btn .desc{display:block;font-size:11px;color:#aaa;margin-top:4px;font-weight:400}
+.lv-btn.lv10{background:linear-gradient(135deg,#E53935,#9C27B0);border-color:#9C27B0}
+.lv-btn.lv10 .num,.lv-btn.lv10 .desc{color:#fff}
+.lv-btn.lv9{background:linear-gradient(135deg,#FF5722,#E53935);border-color:#E53935}
+.lv-btn.lv9 .num,.lv-btn.lv9 .desc{color:#fff}
+.lv-btn.lv8,.lv-btn.lv7{background:linear-gradient(135deg,#FF9800,#FF5722);border-color:#FF5722}
+.lv-btn.lv8 .num,.lv-btn.lv7 .num,.lv-btn.lv8 .desc,.lv-btn.lv7 .desc{color:#fff}
+.lv-btn.lv6,.lv-btn.lv5{background:linear-gradient(135deg,#FFC107,#FF9800);border-color:#FF9800}
+.lv-btn.lv6 .num,.lv-btn.lv5 .num,.lv-btn.lv6 .desc,.lv-btn.lv5 .desc{color:#fff}
+.lv-btn.lv4,.lv-btn.lv3{background:linear-gradient(135deg,#4CAF50,#FFC107);border-color:#4CAF50}
+.lv-btn.lv4 .num,.lv-btn.lv3 .num,.lv-btn.lv4 .desc,.lv-btn.lv3 .desc{color:#fff}
+.lv-btn.lv2,.lv-btn.lv1{background:linear-gradient(135deg,#2196F3,#4CAF50);border-color:#2196F3}
+.lv-btn.lv2 .num,.lv-btn.lv1 .num,.lv-btn.lv2 .desc,.lv-btn.lv1 .desc{color:#fff}
+.q-emoji{font-size:64px;text-align:center;margin:14px 0}
+.q-hint{font-size:18px;text-align:center;color:#7FDBFF;margin-bottom:18px;line-height:1.5}
+.q-kor{font-size:24px;font-weight:700;color:#FFD700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{min-height:60px;padding:10px;font-size:17px;font-weight:700;border:2px solid #555;border-radius:12px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:all .15s;word-break:break-word}
+.opt:active{transform:scale(.95)}
+.opt.correct{background:rgba(76,175,80,.3);border-color:#4CAF50;color:#A8F0A0}
+.opt.wrong{background:rgba(229,57,53,.3);border-color:#E53935;color:#FFCDD2}
+.back{background:none;border:none;font-size:15px;color:#aaa;cursor:pointer;padding:8px 0;align-self:flex-start}
+.clear-card{text-align:center;padding:20px;background:rgba(255,215,0,.1);border:2px solid #FFD700;border-radius:18px;margin:20px 0}
+.clear-card .big{font-size:64px;margin-bottom:8px}
+.clear-card h2{font-size:22px;color:#FFD700;margin-bottom:8px}
+.clear-card p{font-size:14px;color:#ccc;margin-bottom:14px}
+.btn-row{display:flex;flex-direction:column;gap:8px}
+.act{padding:13px;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;color:#fff}
+.act.next{background:linear-gradient(135deg,#4CAF50,#81C784)}
+.act.retry{background:linear-gradient(135deg,#2196F3,#64B5F6)}
+.act.menu-btn{background:rgba(255,255,255,.1);border:2px solid #555}
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s;z-index:99}
+.toast.on{opacity:1}
+</style>
+</head><body>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+'use strict';
+
+const ENG_LEVELS=[null,
+  {nm:'유치원',desc:'기초 5-8단어',ws:[{e:'🍎',w:'Apple',k:'사과'},{e:'🐱',w:'Cat',k:'고양이'},{e:'🐶',w:'Dog',k:'강아지'},{e:'☀️',w:'Sun',k:'해'},{e:'🌙',w:'Moon',k:'달'},{e:'⭐',w:'Star',k:'별'},{e:'💧',w:'Water',k:'물'},{e:'🐟',w:'Fish',k:'물고기'}]},
+  {nm:'초등 1-2',desc:'일상 단어',ws:[{e:'🏠',w:'House',k:'집'},{e:'📚',w:'Book',k:'책'},{e:'🐦',w:'Bird',k:'새'},{e:'🌳',w:'Tree',k:'나무'},{e:'🚗',w:'Car',k:'자동차'},{e:'🍕',w:'Pizza',k:'피자'},{e:'🎂',w:'Cake',k:'케이크'},{e:'🏫',w:'School',k:'학교'}]},
+  {nm:'초등 3-4',desc:'생활 단어',ws:[{e:'👨‍👩‍👧‍👦',w:'Family',k:'가족'},{e:'👫',w:'Friend',k:'친구'},{e:'🎵',w:'Music',k:'음악'},{e:'🌸',w:'Flower',k:'꽃'},{e:'🌊',w:'Ocean',k:'바다'},{e:'🌈',w:'Rainbow',k:'무지개'},{e:'✈️',w:'Airplane',k:'비행기'},{e:'🐘',w:'Elephant',k:'코끼리'}]},
+  {nm:'초등 5-6',desc:'확장 단어',ws:[{e:'🦋',w:'Butterfly',k:'나비'},{e:'⛰️',w:'Mountain',k:'산'},{e:'📖',w:'Library',k:'도서관'},{e:'🏥',w:'Hospital',k:'병원'},{e:'🌍',w:'Country',k:'나라'},{e:'🎨',w:'Picture',k:'그림'},{e:'🍞',w:'Breakfast',k:'아침식사'},{e:'🌃',w:'Evening',k:'저녁'}]},
+  {nm:'중학교',desc:'기본 형용사·동사',ws:[{w:'Beautiful',k:'아름다운'},{w:'Important',k:'중요한'},{w:'Different',k:'다른'},{w:'Knowledge',k:'지식'},{w:'Difficult',k:'어려운'},{w:'Discover',k:'발견하다'},{w:'Remember',k:'기억하다'},{w:'Understand',k:'이해하다'}]},
+  {nm:'중학 고급',desc:'추상 개념',ws:[{w:'Achievement',k:'성취'},{w:'Determine',k:'결정하다'},{w:'Considerate',k:'사려깊은'},{w:'Influence',k:'영향'},{w:'Necessary',k:'필요한'},{w:'Obvious',k:'명백한'},{w:'Generous',k:'관대한'},{w:'Confident',k:'자신있는'}]},
+  {nm:'고등 기본',desc:'학술 어휘',ws:[{w:'Comprehensive',k:'포괄적인'},{w:'Tremendous',k:'엄청난'},{w:'Magnificent',k:'장엄한'},{w:'Significant',k:'중요한'},{w:'Approximate',k:'대략적인'},{w:'Demonstrate',k:'증명하다'},{w:'Sophisticated',k:'정교한'},{w:'Substantial',k:'상당한'}]},
+  {nm:'고등 고급',desc:'복잡한 형용사',ws:[{w:'Ambiguous',k:'모호한'},{w:'Conspicuous',k:'눈에 띄는'},{w:'Inevitable',k:'불가피한'},{w:'Elaborate',k:'정교한'},{w:'Profound',k:'심오한'},{w:'Reluctant',k:'마지못한'},{w:'Diligent',k:'근면한'},{w:'Vigilant',k:'경계하는'}]},
+  {nm:'수능',desc:'고난도 어휘',ws:[{w:'Reciprocal',k:'상호적인'},{w:'Pertinent',k:'적절한'},{w:'Tangible',k:'실재하는'},{w:'Indispensable',k:'필수의'},{w:'Subordinate',k:'종속적인'},{w:'Pragmatic',k:'실용적인'},{w:'Meticulous',k:'꼼꼼한'},{w:'Skeptical',k:'회의적인'}]},
+  {nm:'대학(SAT/GRE)',desc:'대학·미국 시험 단어',ws:[{w:'Quintessential',k:'본질적인 전형'},{w:'Surreptitious',k:'은밀한'},{w:'Ephemeral',k:'순간적인'},{w:'Ubiquitous',k:'어디에나 있는'},{w:'Esoteric',k:'난해한'},{w:'Sycophant',k:'아첨꾼'},{w:'Obfuscate',k:'모호하게 하다'},{w:'Incongruous',k:'어울리지 않는'},{w:'Mellifluous',k:'감미로운'},{w:'Perspicacious',k:'통찰력 있는'},{w:'Recalcitrant',k:'반항적인'},{w:'Sanctimonious',k:'독선적인'}]}
+];
+
+let screen='menu',lv=1,correct=0,total=0,streak=0,current=null,recent=[];
+
+function $(id){return document.getElementById(id);}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*i+1|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function sendXP(amt){try{window.parent.postMessage({type:'xp',amount:amt,source:'eng-word-game'},'*');}catch(e){}}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1400);}
+
+function getBest(l){try{return JSON.parse(localStorage.getItem('eng_best_'+l))||{cleared:false,bestStreak:0};}catch(e){return{cleared:false,bestStreak:0};}}
+function saveBest(l,cleared,bestStreak){
+  const prev=getBest(l);
+  localStorage.setItem('eng_best_'+l,JSON.stringify({cleared:cleared||prev.cleared,bestStreak:Math.max(bestStreak,prev.bestStreak)}));
+}
+
+function render(){
+  if(screen==='menu')return renderMenu();
+  if(screen==='play')return renderPlay();
+  if(screen==='clear')return renderClear();
+}
+
+function renderMenu(){
+  let h='<h1>🔤 영어 단어 맞히기</h1>';
+  h+='<div class="sub">레벨을 자유롭게 선택하세요 · 10개 정답 시 클리어</div>';
+  h+='<div class="lv-grid">';
+  for(let l=1;l<=10;l++){
+    const data=ENG_LEVELS[l];
+    const b=getBest(l);
+    const tag=b.cleared?' ✓':'';
+    h+='<button class="lv-btn lv'+l+'" onclick="startGame('+l+')"><span class="num">Lv.'+l+tag+'</span> '+data.nm+'<span class="desc">'+data.desc+(b.bestStreak?' · 연속 '+b.bestStreak:'')+'</span></button>';
+  }
+  h+='</div>';
+  h+='<div class="sub" style="margin-top:14px">Lv.10 = 대학·SAT·GRE 수준의 진짜 어려운 단어!</div>';
+  $('app').innerHTML=h;
+}
+
+function startGame(l){
+  lv=l;correct=0;total=0;streak=0;recent=[];screen='play';
+  pickNext();
+  render();
+}
+
+function pickNext(){
+  const pool=ENG_LEVELS[lv].ws;
+  let candidates=pool.filter(w=>!recent.includes(w.w));
+  if(candidates.length<4)candidates=pool;
+  const w=candidates[Math.random()*candidates.length|0];
+  recent.push(w.w);if(recent.length>5)recent.shift();
+  current=w;
+}
+
+function renderPlay(){
+  if(correct>=10){screen='clear';saveBest(lv,true,streak);sendXP(20+lv*2);render();return;}
+  const w=current;
+  const pool=ENG_LEVELS[lv].ws;
+  const wrongs=shuffle(pool.filter(x=>x.w!==w.w)).slice(0,3).map(x=>x.w);
+  const opts=shuffle([w.w,...wrongs]);
+  const lvData=ENG_LEVELS[lv];
+  let h='<button class="back" onclick="screen=\'menu\';render()">← 레벨 선택으로</button>';
+  h+='<div class="score-bar"><span class="sb-lv">Lv.'+lv+' '+lvData.nm+'</span><span class="sb-prog">'+correct+'/10</span><span class="sb-streak">🔥 '+streak+'</span></div>';
+  if(w.e)h+='<div class="q-emoji">'+w.e+'</div>';
+  h+='<div class="q-hint"><span class="q-kor">'+w.k+'</span><br>의 영어는?</div>';
+  h+='<div class="opts">'+opts.map(o=>'<button class="opt" onclick="answer(this,\''+o.replace(/'/g,"\\'")+'\')">'+o+'</button>').join('')+'</div>';
+  $('app').innerHTML=h;
+}
+
+function answer(btn,sel){
+  if(btn.parentElement.querySelector('.correct,.wrong'))return;
+  total++;
+  if(sel===current.w){
+    btn.classList.add('correct');
+    correct++;streak++;
+    sendXP(lv);
+    toast('Correct! +'+lv+'XP');
+    setTimeout(()=>{pickNext();render();},650);
+  } else {
+    btn.classList.add('wrong');
+    streak=0;
+    [...btn.parentElement.children].forEach(b=>{if(b.textContent===current.w)b.classList.add('correct');});
+    toast('정답: '+current.w+' ('+current.k+')');
+    setTimeout(()=>{pickNext();render();},1500);
+  }
+}
+
+function renderClear(){
+  const lvData=ENG_LEVELS[lv];
+  let h='<button class="back" onclick="screen=\'menu\';render()">← 레벨 선택으로</button>';
+  h+='<div class="clear-card"><div class="big">🎉</div><h2>Lv.'+lv+' '+lvData.nm+' 클리어!</h2>';
+  h+='<p>10개 정답 · 최대 연속 '+streak+'개<br>+'+(20+lv*2)+' XP 획득</p>';
+  if(lv===10)h+='<p style="color:#FFD700;font-weight:700;font-size:16px">🏆 최종 레벨 정복!</p>';
+  h+='</div>';
+  h+='<div class="btn-row">';
+  if(lv<10)h+='<button class="act next" onclick="startGame('+(lv+1)+')">다음 Lv.'+(lv+1)+' '+ENG_LEVELS[lv+1].nm+' ▶</button>';
+  h+='<button class="act retry" onclick="startGame('+lv+')">같은 레벨 다시</button>';
+  h+='<button class="act menu-btn" onclick="screen=\'menu\';render()">레벨 선택으로</button>';
+  h+='</div>';
+  $('app').innerHTML=h;
+}
+
+render();
+</script>
+</body></html>
