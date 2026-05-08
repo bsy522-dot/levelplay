@@ -168,6 +168,22 @@ const TW=48,TH=24;
 function iso(gx,gy){return{x:(gx-gy)*(TW/2)*zoom+camX,y:(gx+gy)*(TH/2)*zoom+camY};}
 function fromIso(sx,sy){const cx=(sx-camX)/zoom,cy=(sy-camY)/zoom;return{x:Math.floor((cx/(TW/2)+cy/(TH/2))/2),y:Math.floor((cy/(TH/2)-cx/(TW/2))/2)};}
 
+// === ASSET IMAGES (ComfyUI 생성 PNG) ===
+const IMG={};let IMG_READY=false,IMG_LOADED=0,IMG_TOTAL=0;
+function loadAssets(){
+  // 22 건물 + empty + road = 24장
+  const names=['empty','road','house','apt','mansion','shop','mall','office','factory','warehouse','techpark','hospital','school','police','fire','park','stadium','bridge','power','water'];
+  IMG_TOTAL=names.length;
+  names.forEach(n=>{
+    const im=new Image();
+    im.onload=()=>{IMG_LOADED++;if(IMG_LOADED>=IMG_TOTAL*0.7)IMG_READY=true;};
+    im.onerror=()=>{IMG_LOADED++;};
+    im.src=`v4_assets/${n}.png?v=${Date.now()}`;
+    IMG[n]=im;
+  });
+}
+loadAssets();
+
 // === CANVAS ===
 const cvs=document.getElementById('gameCanvas');
 const ctx=cvs.getContext('2d');
@@ -192,29 +208,65 @@ function draw(){
       const cell=grid[y][x];
       const b=B[cell.t];
       const baseC=b.c;
+      const useImg=IMG_READY&&IMG[cell.t]&&IMG[cell.t].complete&&IMG[cell.t].naturalWidth>0;
       // Ground tile
       ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();
-      ctx.fillStyle=cell.dmg>0?'#ffb8a8':baseC;ctx.fill();
-      ctx.strokeStyle='rgba(120,160,200,0.15)';ctx.lineWidth=1;ctx.stroke();
+      if(useImg&&cell.t==='empty'){
+        ctx.save();ctx.clip();
+        const tw=hw*2,th=hh*2;
+        ctx.drawImage(IMG.empty,sx-hw,sy-hh,tw,th);
+        ctx.restore();
+      }else{
+        ctx.fillStyle=cell.dmg>0?'#ffb8a8':baseC;ctx.fill();
+      }
+      ctx.strokeStyle='rgba(120,160,200,0.12)';ctx.lineWidth=1;ctx.stroke();
 
-      if(cell.t!=='empty'&&cell.t!=='road'){
+      // 빈 땅에 나무/꽃 디테일 (랜덤이지만 좌표 기반 stable)
+      if(cell.t==='empty'&&zoom>0.7){
+        const seed=(x*73+y*131)%100;
+        if(seed<22){
+          // 작은 나무
+          const tx=sx+((seed%7)-3)*hw*0.15, ty=sy+((seed%5)-2)*hh*0.2;
+          ctx.fillStyle=seed<11?'#5cb85c':'#7cc77c';
+          ctx.beginPath();ctx.arc(tx,ty,3*zoom,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle='#6b4423';
+          ctx.fillRect(tx-zoom*0.4,ty,zoom*0.8,2*zoom);
+        }else if(seed<32){
+          // 꽃 점
+          const fx=sx+((seed%5)-2)*hw*0.2, fy=sy+((seed%4)-1)*hh*0.2;
+          ctx.fillStyle=['#ff6b9d','#ffd166','#ef476f','#ffffff'][seed%4];
+          ctx.fillRect(fx-zoom,fy-zoom,2*zoom,2*zoom);
+        }
+      }
+
+      if(useImg&&cell.t!=='empty'&&cell.t!=='road'){
+        // ComfyUI 이미지로 건물 그리기
+        const ih=(b.h||1)*0.55+1.4;
+        const imgW=hw*2.6,imgH=imgW*ih;
+        ctx.drawImage(IMG[cell.t],sx-imgW/2,sy+hh-imgH+hh*0.15,imgW,imgH);
+        if(cell.dmg>0){
+          ctx.font=`${Math.max(12,16*zoom)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText('🔥',sx,sy-imgH*0.4);
+        }
+      }else if(useImg&&cell.t==='road'){
+        ctx.save();ctx.clip();
+        const tw=hw*2,th=hh*2;
+        ctx.drawImage(IMG.road,sx-hw,sy-hh,tw,th);
+        ctx.restore();
+      }else if(cell.t!=='empty'&&cell.t!=='road'){
+        // 이미지 없으면 fallback: 기존 박스 렌더링
         const bh=(b.h||1)*18*zoom;
-        // Left face
         ctx.beginPath();ctx.moveTo(sx-hw,sy);ctx.lineTo(sx-hw,sy-bh);ctx.lineTo(sx,sy+hh-bh);ctx.lineTo(sx,sy+hh);ctx.closePath();
         ctx.fillStyle=darken(baseC,25);ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.stroke();
-        // Right face
         ctx.beginPath();ctx.moveTo(sx+hw,sy);ctx.lineTo(sx+hw,sy-bh);ctx.lineTo(sx,sy+hh-bh);ctx.lineTo(sx,sy+hh);ctx.closePath();
         ctx.fillStyle=darken(baseC,15);ctx.fill();ctx.stroke();
-        // Top face
         ctx.beginPath();ctx.moveTo(sx,sy-hh-bh);ctx.lineTo(sx+hw,sy-bh);ctx.lineTo(sx,sy+hh-bh);ctx.lineTo(sx-hw,sy-bh);ctx.closePath();
         ctx.fillStyle=lighten(baseC,25);ctx.fill();ctx.stroke();
-        // Icon
         if(b.ic){
           const isz=Math.max(10,14*zoom);
           ctx.font=`${isz}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
           ctx.fillText(b.ic,sx,sy-bh/2-hh*0.3);
         }
-        // Damage indicator
         if(cell.dmg>0){
           ctx.font=`${Math.max(8,10*zoom)}px sans-serif`;
           ctx.fillText('🔥',sx,sy-bh-hh*0.5);
@@ -222,10 +274,24 @@ function draw(){
       }else if(cell.t==='road'){
         ctx.fillStyle='#95a5a6';
         ctx.beginPath();ctx.moveTo(sx,sy-hh*0.35);ctx.lineTo(sx+hw*0.35,sy);ctx.lineTo(sx,sy+hh*0.35);ctx.lineTo(sx-hw*0.35,sy);ctx.closePath();ctx.fill();
-        // dashed line - 밝은 노랑
         ctx.strokeStyle='#fff176';ctx.lineWidth=1.2;ctx.setLineDash([2*zoom,2*zoom]);
         ctx.beginPath();ctx.moveTo(sx-hw*0.15,sy-hh*0.05);ctx.lineTo(sx+hw*0.15,sy+hh*0.05);ctx.stroke();
         ctx.setLineDash([]);
+        // 도로 위 자동차 (좌표+day 기반으로 천천히 이동)
+        if(zoom>0.8){
+          const seedC=(x*37+y*97)%100;
+          if(seedC<35){
+            const phase=((day*0.1+seedC*0.07)%1);
+            const cx2=sx+(phase-0.5)*hw*0.6;
+            const cy2=sy+(phase-0.5)*hh*0.6;
+            const colors=['#e74c3c','#3498db','#f39c12','#2ecc71','#ecf0f1','#9b59b6'];
+            ctx.fillStyle=colors[seedC%6];
+            ctx.fillRect(cx2-3*zoom,cy2-2*zoom,6*zoom,3*zoom);
+            // 차창
+            ctx.fillStyle='rgba(150,200,255,0.7)';
+            ctx.fillRect(cx2-2*zoom,cy2-1.5*zoom,4*zoom,1.5*zoom);
+          }
+        }
       }
     }
   }
