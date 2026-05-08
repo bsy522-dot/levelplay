@@ -83,10 +83,61 @@ canvas{display:block;margin:0 auto}
 #csend:active{background:#6aad55}
 #csend:disabled{background:#888;cursor:wait}
 @media(max-width:480px){#cpanel{width:88vw}#cbtn{width:44px;height:44px;font-size:20px;bottom:60px}}
+/* Zoom controls (right-bottom, above #cbtn) */
+#zoomCtl{position:fixed;right:10px;bottom:120px;display:flex;flex-direction:column;gap:6px;z-index:115;pointer-events:auto}
+#zoomCtl button{width:42px;height:42px;border-radius:50%;background:rgba(74,124,63,.92);color:#fff;border:2px solid #6aad55;font-size:20px;font-weight:bold;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
+#zoomCtl button:active{background:#6aad55}
+#zoomCtl .zlabel{background:rgba(0,0,0,.55);color:#fff;border-radius:14px;padding:2px 0;font-size:11px;text-align:center;border:1px solid rgba(255,255,255,.25)}
+@media(max-width:480px){#zoomCtl{bottom:114px}#zoomCtl button{width:38px;height:38px;font-size:18px}}
+/* Splash screen */
+#splash{position:fixed;inset:0;background:linear-gradient(135deg,#4a7c3f,#2d5a1e);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px;transition:opacity .55s ease;font-family:'Segoe UI',sans-serif}
+#splash.hide{opacity:0;pointer-events:none}
+#splash .sLogo{font-size:88px;line-height:1;margin-bottom:12px;animation:sBounce 1.6s ease-in-out infinite}
+#splash .sTitle{font-size:28px;font-weight:bold;letter-spacing:2px;text-shadow:2px 2px 0 rgba(0,0,0,.35);margin-bottom:6px}
+#splash .sSub{font-size:14px;opacity:.9;margin-bottom:18px}
+#splash .sBar{width:220px;height:8px;border-radius:6px;background:rgba(0,0,0,.3);overflow:hidden;border:1px solid rgba(255,255,255,.4)}
+#splash .sFill{height:100%;width:0%;background:linear-gradient(90deg,#ffd700,#e8a735);transition:width .25s ease}
+#splash .sNote{font-size:11px;opacity:.7;margin-top:14px}
+@keyframes sBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+/* Tutorial overlay */
+#tutOv{position:fixed;inset:0;z-index:7500;display:none;pointer-events:auto;font-family:'Segoe UI',sans-serif}
+#tutOv.show{display:block}
+#tutMask{position:absolute;inset:0;background:rgba(0,0,0,.66);transition:clip-path .3s ease}
+#tutBubble{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;color:#333;border-radius:18px;padding:18px 22px 16px;max-width:340px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,.5);text-align:center;border:3px solid #e8a735}
+#tutBubble.bottom{top:auto;bottom:90px;transform:translate(-50%,0)}
+#tutBubble.top{top:60px;transform:translate(-50%,0)}
+#tutBubble h3{color:#2d5a1e;font-size:18px;margin-bottom:8px;font-weight:bold}
+#tutBubble p{font-size:14px;line-height:1.6;margin-bottom:12px}
+#tutBubble .tutStep{font-size:11px;color:#888;margin-bottom:6px}
+#tutBubble .tutBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+#tutBubble button{border:none;border-radius:10px;padding:9px 18px;font-size:13px;cursor:pointer;font-weight:bold}
+#tutBubble .tutNext{background:#4a7c3f;color:#fff;flex:1;min-width:120px}
+#tutBubble .tutNext:active{background:#6aad55}
+#tutBubble .tutSkip{background:#bbb;color:#fff}
+#tutBubble .tutSkip:active{background:#888}
+#tutBubble::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:12px solid #e8a735;display:none}
+#tutBubble.bottom::before{display:block}
+#tutBubble.top::before{top:auto;bottom:-12px;border-bottom:none;border-top:12px solid #e8a735;display:block}
+#tutHelp{position:fixed;left:10px;bottom:64px;width:42px;height:42px;border-radius:50%;background:rgba(74,124,63,.9);color:#fff;border:2px solid #6aad55;font-size:18px;cursor:pointer;z-index:120;box-shadow:0 3px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;pointer-events:auto;font-weight:bold}
+#tutHelp:active{background:#6aad55}
+@media(max-width:480px){#tutHelp{width:38px;height:38px;font-size:16px;bottom:60px}}
+/* Bigger close button */
+#mpanel .close{width:36px;height:36px;border-radius:50%;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;line-height:1;border:2px solid #ccc;top:10px;right:10px}
+#mpanel .close:active{background:#ddd;color:#333}
+/* Tutorial pulse highlight */
+.tutPulse{animation:tutPulse 1.2s ease-in-out infinite;position:relative;z-index:7600}
+@keyframes tutPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.6),0 0 0 4px #ffd700}50%{box-shadow:0 0 0 14px rgba(255,215,0,0),0 0 0 4px #ffd700}}
 </style>
 <script defer src="_assets/dialogue_loader.js"></script>
 </head>
 <body>
+<div id="splash">
+  <div class="sLogo">🐄</div>
+  <div class="sTitle">동물농장</div>
+  <div class="sSub">농장을 준비하는 중...</div>
+  <div class="sBar"><div class="sFill" id="splashFill"></div></div>
+  <div class="sNote">한국 최고의 농장 타이쿤 게임 🌾</div>
+</div>
 <canvas id="c"></canvas>
 <div id="ui">
 <div id="topbar">
@@ -112,6 +163,14 @@ canvas{display:block;margin:0 auto}
 <div id="achieve"></div>
 <div id="minigame"><span id="mgclose" onclick="G.closeMini()">&times;</span><canvas id="mgcanvas"></canvas><div id="mginfo"></div></div>
 <button id="cbtn" onclick="CONS.toggle()" title="농장 컨설턴트">🤖<span class="cdotbtn"></span></button>
+<button id="tutHelp" onclick="TUT.start(true)" title="도움말 / 튜토리얼 다시보기">❓</button>
+<div id="zoomCtl">
+  <button onclick="ZOOM.zoomIn()" title="확대 (+)" aria-label="zoom in">+</button>
+  <div class="zlabel" id="zlabel">100%</div>
+  <button onclick="ZOOM.zoomOut()" title="축소 (−)" aria-label="zoom out">−</button>
+  <button onclick="ZOOM.reset()" title="원래 크기로 (1.0x)" aria-label="reset zoom" style="font-size:14px">⟲</button>
+</div>
+<div id="tutOv"><div id="tutMask"></div><div id="tutBubble"><div class="tutStep" id="tutStep">1 / 5</div><h3 id="tutTitle"></h3><p id="tutBody"></p><div class="tutBtns"><button class="tutNext" id="tutNext" onclick="TUT.next()">다음 ▶</button><button class="tutSkip" onclick="TUT.skip()">건너뛰기</button></div></div></div>
 <div id="cpanel">
 <div id="chead"><div><span class="cdot" id="cstatus"></span>🤖 농장 컨설턴트</div><button id="cclose" onclick="CONS.close()">&times;</button></div>
 <div id="clog"></div>
@@ -224,6 +283,7 @@ animals:[],crops:[],buildings:[],inventory:{},
 grid:Array(16).fill(null).map(()=>Array(16).fill(null)),
 tool:'select',placing:null,
 camX:0,camY:0,dragStart:null,isDrag:false,
+zoom:1.0,minZoom:0.5,maxZoom:3.0,
 totalHarvest:0,totalSales:0,cropTypes:0,learnCount:0,
 achieveUnlocked:[],
 cropTypesPlanted:new Set(),
@@ -437,14 +497,21 @@ function closeModal(){document.getElementById('modal').classList.remove('show')}
 function openModal(html){document.getElementById('mcontent').innerHTML=html;document.getElementById('modal').classList.add('show');try{AU.modal()}catch(_){}}
 
 // ISO projection
+// isoX/isoY return PRE-ZOOM canvas coords (zoom is applied via ctx.scale in render()).
+// Mapping: screen = (preZoom - W/2) * zoom + W/2  (zoom centered on viewport center)
 const TILE=32,HALFTILE=16;
 function isoX(gx,gy){return(gx-gy)*HALFTILE+W/2+G.camX}
 function isoY(gx,gy){return(gx+gy)*(HALFTILE/2)+80+G.camY}
+function screenToPreZoom(sx,sy){
+  const z=G.zoom||1;
+  return [(sx-W/2)/z+W/2,(sy-H/2)/z+H/2];
+}
 function screenToGrid(sx,sy){
-const rx=sx-W/2-G.camX,ry=sy-80-G.camY;
-const gx=(rx/HALFTILE+ry/(HALFTILE/2))/2;
-const gy=(ry/(HALFTILE/2)-rx/HALFTILE)/2;
-return[Math.floor(gx),Math.floor(gy)];
+  const [px,py]=screenToPreZoom(sx,sy);
+  const rx=px-W/2-G.camX,ry=py-80-G.camY;
+  const gx=(rx/HALFTILE+ry/(HALFTILE/2))/2;
+  const gy=(ry/(HALFTILE/2)-rx/HALFTILE)/2;
+  return[Math.floor(gx),Math.floor(gy)];
 }
 
 // Rendering
@@ -669,15 +736,24 @@ X.fillStyle=`rgba(40,20,60,${(G.hour-18)*0.1})`;X.fillRect(0,0,W,H);
 
 function render(){
 X.clearRect(0,0,W,H);
-// sky gradient
+// sky gradient (drawn full-screen, NOT zoomed)
 const skyColors=[['#87ceeb','#4a90d9'],['#ffcc02','#ff8c00'],['#d4740f','#8b4513'],['#b0c4de','#778899']];
 const sc=skyColors[G.season];
 const grad=X.createLinearGradient(0,0,0,H);
 grad.addColorStop(0,sc[0]);grad.addColorStop(1,sc[1]);
 X.fillStyle=grad;X.fillRect(0,0,W,H);
 
+// Apply zoom around viewport center: screen = (worldCanvas - cx)*zoom + cx
+const z=G.zoom||1;
+X.save();
+X.translate(W/2,H/2);
+X.scale(z,z);
+X.translate(-W/2,-H/2);
 drawGrid();
 drawEntities();
+X.restore();
+
+// Weather is drawn in screen space (rain/snow particle uses W/H directly)
 drawWeather();
 }
 
@@ -1133,22 +1209,90 @@ if(G.miniItems.every(p=>p.hit)){G.miniScore+=3;G.miniItems=[];}
 }
 });
 
+// =========================================================
+// ZOOM module — wheel + pinch + double-tap, with cursor-anchored zoom
+// =========================================================
+const ZOOM={
+  step:0.1,
+  apply(newZoom,anchorX,anchorY){
+    const z0=G.zoom||1;
+    const z1=Math.max(G.minZoom,Math.min(G.maxZoom,newZoom));
+    if(z1===z0)return;
+    // Anchor: keep the world point under (anchorX,anchorY) fixed on screen.
+    // pre-zoom coord at anchor: pre = (anchor - W/2)/z + W/2
+    // we want pre' such that (pre' - W/2)*z1 + W/2 = anchor, i.e. pre' = (anchor - W/2)/z1 + W/2
+    // Adjust camX/camY so pre'==pre (since pre depends on camX via isoX)
+    if(typeof anchorX!=='number')anchorX=W/2;
+    if(typeof anchorY!=='number')anchorY=H/2;
+    const preX0=(anchorX-W/2)/z0+W/2;
+    const preY0=(anchorY-H/2)/z0+H/2;
+    const preX1=(anchorX-W/2)/z1+W/2;
+    const preY1=(anchorY-H/2)/z1+H/2;
+    G.camX+=(preX1-preX0);
+    G.camY+=(preY1-preY0);
+    G.zoom=z1;
+    this.updateLabel();
+  },
+  zoomIn(){this.apply((G.zoom||1)+this.step,W/2,H/2)},
+  zoomOut(){this.apply((G.zoom||1)-this.step,W/2,H/2)},
+  reset(){this.apply(1.0,W/2,H/2);showToast('줌 100%')},
+  updateLabel(){
+    const el=document.getElementById('zlabel');
+    if(el)el.textContent=Math.round((G.zoom||1)*100)+'%';
+  }
+};
+
 // Input handling
 let touchId=null;
 let _firstTouch=true;
+let _lastTap=0,_lastTapX=0,_lastTapY=0;
+let _activePointers=new Map();
+let _pinchStartDist=0,_pinchStartZoom=1,_pinchStartCx=0,_pinchStartCy=0;
+let _pinchActive=false;
+let _suppressClickUntil=0;
+
+function _pinchDist(){
+  const pts=[..._activePointers.values()];
+  if(pts.length<2)return 0;
+  const dx=pts[0].x-pts[1].x,dy=pts[0].y-pts[1].y;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+function _pinchMid(){
+  const pts=[..._activePointers.values()];
+  if(pts.length<2)return [W/2,H/2];
+  return [(pts[0].x+pts[1].x)/2,(pts[0].y+pts[1].y)/2];
+}
+
 function onDown(sx,sy){
 AU.init();AU.resume();
 if(_firstTouch){_firstTouch=false;if(!AU.bgmMuted&&!AU.muted)setTimeout(()=>AU.playBgm(G.season),300)}
+// Double-tap detection (ignore if it's a multi-touch starting)
+const now=Date.now();
+if(_activePointers.size===1){
+  const dx=sx-_lastTapX,dy=sy-_lastTapY;
+  if(now-_lastTap<320&&Math.abs(dx)<24&&Math.abs(dy)<24){
+    // double-tap → reset zoom
+    ZOOM.reset();
+    _lastTap=0;
+    G.dragStart=null;G.isDrag=false;
+    _suppressClickUntil=now+320;
+    return;
+  }
+  _lastTap=now;_lastTapX=sx;_lastTapY=sy;
+}
 G.dragStart={x:sx,y:sy,cx:G.camX,cy:G.camY};
 G.isDrag=false;
 }
 function onMove(sx,sy){
+if(_pinchActive)return;
 if(!G.dragStart)return;
 const dx=sx-G.dragStart.x,dy=sy-G.dragStart.y;
 if(Math.abs(dx)>5||Math.abs(dy)>5)G.isDrag=true;
 if(G.isDrag){G.camX=G.dragStart.cx+dx;G.camY=G.dragStart.cy+dy}
 }
 function onUp(sx,sy){
+if(_pinchActive){G.dragStart=null;return}
+if(Date.now()<_suppressClickUntil){G.dragStart=null;return}
 if(!G.isDrag&&G.dragStart){
 const[gx,gy]=screenToGrid(sx,sy);
 if(G.tool==='place'&&G.placing){placeItem(gx,gy)}
@@ -1157,9 +1301,65 @@ else if(G.tool==='select'){handleSelect(gx,gy)}
 G.dragStart=null;
 }
 
-C.addEventListener('pointerdown',e=>{e.preventDefault();onDown(e.clientX,e.clientY)});
-C.addEventListener('pointermove',e=>{e.preventDefault();onMove(e.clientX,e.clientY)});
-C.addEventListener('pointerup',e=>{e.preventDefault();onUp(e.clientX,e.clientY)});
+C.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  _activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(_activePointers.size===2){
+    // start pinch
+    _pinchActive=true;
+    _pinchStartDist=_pinchDist();
+    _pinchStartZoom=G.zoom||1;
+    G.dragStart=null;G.isDrag=false;
+  }else if(_activePointers.size===1){
+    onDown(e.clientX,e.clientY);
+  }
+});
+C.addEventListener('pointermove',e=>{
+  e.preventDefault();
+  if(_activePointers.has(e.pointerId))_activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(_pinchActive&&_activePointers.size>=2){
+    const d=_pinchDist();
+    if(_pinchStartDist>10&&d>10){
+      const factor=d/_pinchStartDist;
+      const [mx,my]=_pinchMid();
+      ZOOM.apply(_pinchStartZoom*factor,mx,my);
+    }
+  }else{
+    onMove(e.clientX,e.clientY);
+  }
+});
+function _endPointer(e){
+  e.preventDefault();
+  _activePointers.delete(e.pointerId);
+  if(_activePointers.size<2&&_pinchActive){
+    _pinchActive=false;
+    _suppressClickUntil=Date.now()+250;
+    G.dragStart=null;
+  }
+  if(_activePointers.size===0){
+    onUp(e.clientX,e.clientY);
+  }
+}
+C.addEventListener('pointerup',_endPointer);
+C.addEventListener('pointercancel',_endPointer);
+C.addEventListener('pointerleave',e=>{
+  if(_activePointers.has(e.pointerId))_endPointer(e);
+});
+
+// Mouse wheel zoom (desktop)
+C.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const dir=e.deltaY<0?1:-1;
+  const newZ=(G.zoom||1)+dir*ZOOM.step;
+  ZOOM.apply(newZ,e.clientX,e.clientY);
+},{passive:false});
+
+// Double-click → reset zoom (desktop)
+C.addEventListener('dblclick',e=>{
+  e.preventDefault();
+  ZOOM.reset();
+  _suppressClickUntil=Date.now()+200;
+});
 
 // Save/Load
 G.saveGame=function(){
@@ -1169,7 +1369,8 @@ weather:G.weather,animals:G.animals,crops:G.crops,buildings:G.buildings,
 grid:G.grid,totalHarvest:G.totalHarvest,totalSales:G.totalSales,
 cropTypes:G.cropTypes,learnCount:G.learnCount,achieveUnlocked:G.achieveUnlocked,
 cropTypesPlanted:[...G.cropTypesPlanted],feedStock:G.feedStock,
-marketBonus:G.marketBonus,storageBonus:G.storageBonus,hasGreenhouse:G.hasGreenhouse
+marketBonus:G.marketBonus,storageBonus:G.storageBonus,hasGreenhouse:G.hasGreenhouse,
+zoom:G.zoom,camX:G.camX,camY:G.camY
 };
 localStorage.setItem('animalFarmSave',JSON.stringify(sv));
 };
@@ -1182,6 +1383,8 @@ const sv=JSON.parse(d);
 Object.assign(G,sv);
 G.cropTypesPlanted=new Set(sv.cropTypesPlanted||[]);
 G.tick=0;G.tool='select';G.placing=null;G.miniActive=false;
+if(typeof G.zoom!=='number'||G.zoom<G.minZoom||G.zoom>G.maxZoom)G.zoom=1.0;
+if(ZOOM&&ZOOM.updateLabel)ZOOM.updateLabel();
 return true;
 }catch(e){return false}
 };
@@ -1417,9 +1620,143 @@ G.startPlace=function(){
   return _origStartPlace.apply(this,arguments);
 };
 
+// =========================================================
+// Tutorial system — 5-step guided onboarding
+// =========================================================
+const TUT={
+  step:0,
+  active:false,
+  steps:[
+    {title:'환영합니다! 🌱',body:'안녕하세요! 농장 경영을 시작해볼까요?\n\n💰 1000골드로 시작합니다!\n드래그=이동, 휠/핀치=줌, 더블클릭=원복',target:null,pos:'center'},
+    {title:'🐄 동물 키우기',body:'아래 "🐄동물" 버튼을 눌러 동물을 사세요.\n튜토리얼을 위해 닭 한 마리를 무료로 드릴게요!',target:'[data-tool="animal"]',pos:'bottom',action:'gift_chicken'},
+    {title:'🌱 작물 심기',body:'"🌱작물"로 씨앗을 심어보세요.\n튜토리얼 선물: 감자 1개를 무료로 심어드릴게요!',target:'[data-tool="crop"]',pos:'bottom',action:'gift_potato'},
+    {title:'🏪 시장에서 판매',body:'동물이 만든 생산물(달걀·우유)과 다 자란 작물을 클릭해서 판매하세요. "🏪시장" 버튼은 시세를 보여줘요.',target:'[data-tool="market"]',pos:'bottom'},
+    {title:'✨ 더 많은 기능',body:'🤖 AI 농장 컨설턴트(우측 하단), 👥 친구초대, 🔊 음악 설정도 활용하세요!\n도움말은 언제든 ❓ 버튼으로 다시 볼 수 있어요.',target:null,pos:'center'}
+  ],
+  start(force){
+    if(!force){
+      try{if(localStorage.getItem('animalFarmTutorialDone')==='1')return}catch(_){}
+    }
+    this.active=true;this.step=0;
+    document.getElementById('tutOv').classList.add('show');
+    this.render();
+  },
+  next(){
+    // execute pending action for current step
+    const cur=this.steps[this.step];
+    if(cur&&cur.action){this.runAction(cur.action)}
+    this.step++;
+    if(this.step>=this.steps.length){this.finish();return}
+    this.render();
+  },
+  skip(){this.finish()},
+  finish(){
+    this.active=false;
+    document.getElementById('tutOv').classList.remove('show');
+    document.querySelectorAll('.tutPulse').forEach(el=>el.classList.remove('tutPulse'));
+    try{localStorage.setItem('animalFarmTutorialDone','1')}catch(_){}
+  },
+  runAction(act){
+    if(act==='gift_chicken'){
+      // place a free chicken on a nearby empty tile
+      const spot=this._findEmpty(8,9)||this._findEmpty(9,8)||this._findAnyEmpty();
+      if(spot){
+        const[gx,gy]=spot;
+        G.animals.push({type:'chicken',gx,gy,age:0,prodTimer:0});
+        G.grid[gy][gx]={type:'animal',key:'chicken',hasProduct:false};
+        showToast('🐔 무료 닭 한 마리 받았어요!');
+        try{AU.coin()}catch(_){}
+      }
+    }else if(act==='gift_potato'){
+      const spot=this._findEmpty(6,8)||this._findEmpty(7,9)||this._findAnyEmpty();
+      if(spot){
+        const[gx,gy]=spot;
+        G.crops.push({key:'potato',gx,gy,stage:0,growTimer:0});
+        G.grid[gy][gx]={type:'crop',key:'potato',stage:0};
+        G.cropTypesPlanted.add('potato');
+        G.cropTypes=G.cropTypesPlanted.size;
+        showToast('🥔 무료 감자 1개 심었어요!');
+        try{AU.place()}catch(_){}
+      }
+    }
+  },
+  _findEmpty(gx,gy){
+    if(gx<0||gx>15||gy<0||gy>15)return null;
+    if(!G.grid[gy][gx])return [gx,gy];
+    return null;
+  },
+  _findAnyEmpty(){
+    for(let gy=0;gy<16;gy++)for(let gx=0;gx<16;gx++){
+      if(!G.grid[gy][gx])return [gx,gy];
+    }
+    return null;
+  },
+  render(){
+    const s=this.steps[this.step];
+    if(!s)return;
+    document.getElementById('tutStep').textContent=(this.step+1)+' / '+this.steps.length;
+    document.getElementById('tutTitle').textContent=s.title;
+    document.getElementById('tutBody').textContent=s.body;
+    const nextBtn=document.getElementById('tutNext');
+    nextBtn.textContent=this.step===this.steps.length-1?'시작하기 🚀':'다음 ▶';
+    // Spotlight effect (clip-path circle around target)
+    document.querySelectorAll('.tutPulse').forEach(el=>el.classList.remove('tutPulse'));
+    const mask=document.getElementById('tutMask');
+    const bubble=document.getElementById('tutBubble');
+    bubble.classList.remove('top','bottom');
+    if(s.target){
+      const tgt=document.querySelector(s.target);
+      if(tgt){
+        tgt.classList.add('tutPulse');
+        const r=tgt.getBoundingClientRect();
+        const cx=r.left+r.width/2,cy=r.top+r.height/2;
+        const radius=Math.max(r.width,r.height)/2+18;
+        // Use clip-path to cut a hole in the dark mask around the target
+        try{
+          mask.style.clipPath=`path(evenodd, "M0 0H${innerWidth}V${innerHeight}H0Z M${cx} ${cy} m-${radius} 0 a${radius} ${radius} 0 1 0 ${radius*2} 0 a${radius} ${radius} 0 1 0 -${radius*2} 0")`;
+        }catch(_){mask.style.clipPath=''}
+        // Position bubble away from target
+        if(cy>innerHeight/2){bubble.classList.add('top')}else{bubble.classList.add('bottom')}
+        return;
+      }
+    }
+    mask.style.clipPath='';
+  }
+};
+window.addEventListener('resize',()=>{if(TUT.active)TUT.render()});
+
+// Splash hide helper
+function hideSplash(){
+  const s=document.getElementById('splash');
+  if(!s)return;
+  s.classList.add('hide');
+  setTimeout(()=>{try{s.remove()}catch(_){s.style.display='none'}},650);
+}
+function _splashProgress(p){
+  const f=document.getElementById('splashFill');
+  if(f)f.style.width=Math.max(0,Math.min(100,p))+'%';
+}
+
+// Welcome message for first-time users
+function showWelcome(){
+  let html='<h2 style="text-align:center">🌱 환영합니다!</h2>';
+  html+='<div class="fact-box" style="text-align:center;font-size:14px;line-height:1.7">';
+  html+='🎁 시작 자금 <b style="color:#d4760a;font-size:18px">1,000골드</b><br>';
+  html+='🐔 시작 동물: 닭 1마리 + 헛간 1동<br>';
+  html+='💡 동물·작물·건물을 사서 농장을 키워보세요!';
+  html+='</div>';
+  html+='<button class="bb" style="width:100%;font-size:14px" onclick="closeModal();TUT.start(true)">📖 튜토리얼 시작</button>';
+  html+='<button class="bb" style="width:100%;margin-top:6px;background:#888;border-color:#aaa" onclick="closeModal();try{localStorage.setItem(\'animalFarmTutorialDone\',\'1\')}catch(_){}">바로 시작하기</button>';
+  openModal(html);
+}
+
 // Init
 function init(){
+_splashProgress(20);
+let isFirstTime=false;
+try{isFirstTime=!localStorage.getItem('animalFarmSave')}catch(_){}
 const loaded=G.loadGame();
+_splashProgress(45);
 if(!loaded){
 // Place starting items
 G.grid[7][7]={type:'building',key:'barn'};
@@ -1427,8 +1764,10 @@ G.buildings.push({key:'barn',gx:7,gy:7});
 G.grid[8][8]={type:'animal',key:'chicken',hasProduct:false};
 G.animals.push({type:'chicken',gx:8,gy:8,age:0,prodTimer:0});
 }
+_splashProgress(65);
 AU.init();
 AU.ambient();
+ZOOM.updateLabel();
 // Click sound on all bottom bar / modal buttons
 document.addEventListener('click',(e)=>{
   const t=e.target;
@@ -1436,10 +1775,29 @@ document.addEventListener('click',(e)=>{
     try{AU.click()}catch(_){}
   }
 },true);
+// Global error handler — friendly message instead of crash
+window.addEventListener('error',function(ev){
+  try{
+    console.warn('[Game error]',ev.message);
+    showToast('⚠️ 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+  }catch(_){}
+});
+window.addEventListener('unhandledrejection',function(ev){
+  try{console.warn('[Promise rejection]',ev.reason)}catch(_){}
+});
 updateUI();
+_splashProgress(85);
 // Lazy-init MP after a short delay so PeerJS CDN can load
 setTimeout(()=>MP.init(),500);
 gameTick();
+_splashProgress(100);
+// Hide splash after a short polish delay, then show first-time welcome / tutorial
+setTimeout(()=>{
+  hideSplash();
+  if(isFirstTime){
+    setTimeout(()=>showWelcome(),650);
+  }
+},650);
 }
 
 init();
