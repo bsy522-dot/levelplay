@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v30-auto';
+const CACHE_NAME = 'levelplay-v31-auto';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './v2_patch.js',
   './games/hatcuping-game.html',
   './games/hatcuping-rpg.html',
   './games/hatcuping-game-v2.html',
@@ -43,6 +44,22 @@ const STATIC_ASSETS = [
   './games/animal-farm.html'
 ];
 
+// v2_patch.js 주입 (메인 앱 HTML에 스크립트 태그 삽입)
+async function injectV2Patch(response) {
+  if (!response || !response.ok) return response;
+  const ct = response.headers.get('content-type') || '';
+  if (!ct.includes('text/html')) return response;
+  let html = await response.text();
+  if (html.includes('</body>') && !html.includes('v2_patch.js')) {
+    html = html.replace('</body>', '<script src="v2_patch.js" defer><\/script>\n</body>');
+  }
+  return new Response(html, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers
+  });
+}
+
 // 설치: 정적 자산 캐시
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -66,7 +83,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 가져오기: Network First (data/*.json, boxing/RPG 게임 HTML), Cache First (나머지)
+// 가져오기: Network First (data/*.json, RPG 게임 HTML), Cache First (나머지)
 const NETWORK_FIRST_PATHS = ['/data/', 'korean-rpg-', 'index.html', '/sw.js'];
 const NEVER_CACHE_PATHS = ['boxing-trainer-', 'opponent_lore.json', 'manifest.boxing.json'];
 self.addEventListener('fetch', event => {
@@ -75,6 +92,23 @@ self.addEventListener('fetch', event => {
   // 절대 캐시 금지 — 항상 네트워크에서, 캐시도 저장 안 함
   if (NEVER_CACHE_PATHS.some(p => url.pathname.includes(p))) {
     event.respondWith(fetch(event.request, { cache: 'no-store' }).catch(() => new Response('Network error', { status: 504 })));
+    return;
+  }
+
+  // 메인 앱 Navigation (게임 페이지 제외): v2_patch.js 자동 주입
+  if (event.request.mode === 'navigate' && !url.pathname.includes('/games/')) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response.ok) {
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
+        }
+        return injectV2Patch(response);
+      }).catch(() =>
+        caches.match(event.request).then(cached =>
+          cached ? injectV2Patch(cached) : caches.match('./index.html').then(fb => fb ? injectV2Patch(fb) : undefined)
+        )
+      )
+    );
     return;
   }
 
