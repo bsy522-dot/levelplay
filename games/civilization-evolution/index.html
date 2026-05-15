@@ -388,6 +388,21 @@ function preloadSprites(){
     SPRITES.charsFront[c]=Object.assign(new Image(),{src:`assets/sprites/characters/front/${c}.png`,onload:function(){this._loaded=true;},onerror:function(){this._failed=true;}});
     SPRITES.charsBack[c]=Object.assign(new Image(),{src:`assets/sprites/characters/back/${c}.png`,onload:function(){this._loaded=true;},onerror:function(){this._failed=true;}});
   });
+  // Voxel 캐릭터 (Blender, 4방향 × 4 walk frame)
+  SPRITES.charsVoxel={};
+  ['stoneAgePerson','neolithicPerson','bronzePerson','ironPerson','medievalPerson','industrialPerson','modernPerson'].forEach(c=>{
+    SPRITES.charsVoxel[c]={};
+    ['front','right','back','left'].forEach(d=>{
+      SPRITES.charsVoxel[c][d]=[];
+      for(let f=0;f<4;f++){
+        const img=new Image();
+        img.onload=function(){this._loaded=true;};
+        img.onerror=function(){this._failed=true;};
+        img.src=`assets/sprites/characters/voxel/${d}/${c}_${f}.png`;
+        SPRITES.charsVoxel[c][d].push(img);
+      }
+    });
+  });
   // 자원 노드
   Object.keys(RESOURCES).forEach(r=>loadSprite('resources',r));
   // 시대별 타일 (7시대 × 3타입 = 21개)
@@ -404,27 +419,44 @@ function preloadSprites(){
   // VFX 텍스처
   ['flame','smoke','sparkle','dust','water_splash','electric','leaf','rune'].forEach(v=>loadSprite('vfx',v));
 }
+function get4Direction(){
+  // dx/dy 우세에 따라 4방향 결정
+  let dx=G._lastDx||0, dy=G._lastDy||0;
+  if(G.targetX!==null&&G.targetY!==null){dx=G.targetX-G.px;dy=G.targetY-G.py;}
+  if(Math.abs(dx)<0.1&&Math.abs(dy)<0.1)return 'front';
+  if(Math.abs(dy)>Math.abs(dx))return dy<0?'back':'front';
+  return dx<0?'left':'right';
+}
 function getCurrentCharacterSprite(direction){
   const map=['stoneAgePerson','neolithicPerson','bronzePerson','ironPerson','medievalPerson','industrialPerson','modernPerson'];
   const name=map[G.era]||'stoneAgePerson';
-  // 방향: 'front'(아래/앞) 또는 'back'(위/뒤)
+  // 1순위: voxel (4방향 × 4프레임 walk cycle)
+  if(SPRITES.charsVoxel&&SPRITES.charsVoxel[name]){
+    const dir=direction||get4Direction();
+    const dirSprites=SPRITES.charsVoxel[name][dir];
+    if(dirSprites&&dirSprites.length>0){
+      let frame=0;
+      if(G.walking){
+        frame=Math.floor(G.walkFrame/8)%4;
+      }
+      const s=dirSprites[frame];
+      if(s&&s._loaded&&!s._failed)return s;
+      // fallback to frame 0 if specific frame failed
+      if(dirSprites[0]&&dirSprites[0]._loaded&&!dirSprites[0]._failed)return dirSprites[0];
+    }
+  }
+  // 2순위: AI front/back
   if(direction==='back'){
     const s=SPRITES.charsBack[name];
     if(s&&s._loaded&&!s._failed)return s;
   }
-  // front 우선, 실패시 legacy
   const f=SPRITES.charsFront[name];
   if(f&&f._loaded&&!f._failed)return f;
+  // 3순위: legacy
   return SPRITES.characters[name];
 }
 function getPlayerDirection(){
-  // 플레이어 이동 방향 추정 (target 또는 lastMove)
-  if(G.targetX!==null&&G.targetY!==null){
-    const dy=G.targetY-G.py;
-    return dy<0?'back':'front';
-  }
-  if(G._lastDy!==undefined&&Math.abs(G._lastDy)>0.1)return G._lastDy<0?'back':'front';
-  return 'front';
+  return get4Direction();
 }
 function getTileSprite(type){
   const tiles=SPRITES.tiles[G.era];
@@ -946,24 +978,31 @@ const dir=getPlayerDirection();
 const facingLeft=(G._lastDx||0)<-0.1;
 const charSpr=getCurrentCharacterSprite(dir);
 if(charSpr&&charSpr._loaded&&!charSpr._failed){
-  // 캐릭터 PNG에서 하단 잔디 타일 영역 자동 자르기 (source crop)
-  const srcW=charSpr.naturalWidth||512, srcH=charSpr.naturalHeight||512;
-  const cropRatio=0.78; // 상단 78%만 사용 (하단 22%는 잔디 타일)
-  const srcCropH=srcH*cropRatio;
-  // 캔버스 표시 사이즈
-  const dw=52, dh=Math.round(dw*cropRatio*srcH/srcW); // 비율 유지
+  // voxel 사용 시 회전·crop 불필요 (4방향 PNG가 정확)
+  const isVoxel=charSpr.src&&charSpr.src.includes('/voxel/');
   let tilt=0;
   if(G.task&&G.task.type==='gather'&&Math.abs((G.task.target?G.task.target.x:G.px)-G.px)<60){
-    tilt=Math.sin(animFrame*0.4)*0.35;
-  }else if(G.walking){
-    tilt=Math.sin(G.walkFrame*0.35)*0.08;
+    tilt=Math.sin(animFrame*0.4)*0.30;
   }
   ctx.save();
-  // 발 위치를 px,py에 맞춤 (캐릭터 발이 정확히 땅에 닿도록)
-  ctx.translate(px,py-dh/2+8+bobY);
-  if(facingLeft)ctx.scale(-1,1);
-  ctx.rotate(tilt);
-  ctx.drawImage(charSpr, 0, 0, srcW, srcCropH, -dw/2, -dh/2, dw, dh);
+  if(isVoxel){
+    // voxel: 정확한 4방향, 그대로 그리기 (flip/crop 없이)
+    const dw=64, dh=64;
+    ctx.translate(px,py-dh/2+12);
+    ctx.rotate(tilt);
+    ctx.drawImage(charSpr, -dw/2, -dh/2, dw, dh);
+  }else{
+    // AI PNG: crop + flip
+    const srcW=charSpr.naturalWidth||512, srcH=charSpr.naturalHeight||512;
+    const cropRatio=0.70;
+    const srcCropH=srcH*cropRatio;
+    const dw=52, dh=Math.round(dw*cropRatio*srcH/srcW);
+    if(G.walking)tilt+=Math.sin(G.walkFrame*0.35)*0.08;
+    ctx.translate(px,py-dh/2+8+bobY);
+    if(facingLeft)ctx.scale(-1,1);
+    ctx.rotate(tilt);
+    ctx.drawImage(charSpr, 0, 0, srcW, srcCropH, -dw/2, -dh/2, dw, dh);
+  }
   ctx.restore();
 }else{
   // Fallback: 도형 캐릭터
