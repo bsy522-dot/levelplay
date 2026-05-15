@@ -211,14 +211,8 @@ function draw(){
       const useImg=IMG_READY&&IMG[cell.t]&&IMG[cell.t].complete&&IMG[cell.t].naturalWidth>0;
       // Ground tile
       ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();
-      if(useImg&&cell.t==='empty'){
-        ctx.save();ctx.clip();
-        const tw=hw*2,th=hh*2;
-        ctx.drawImage(IMG.empty,sx-hw,sy-hh,tw,th);
-        ctx.restore();
-      }else{
-        ctx.fillStyle=cell.dmg>0?'#ffb8a8':baseC;ctx.fill();
-      }
+      // empty/road는 단색이 더 깔끔 (PNG 텍스처 반복 시 지저분)
+      ctx.fillStyle=cell.dmg>0?'#ffb8a8':baseC;ctx.fill();
       ctx.strokeStyle='rgba(120,160,200,0.12)';ctx.lineWidth=1;ctx.stroke();
 
       // 빈 땅에 나무/꽃 디테일 (랜덤이지만 좌표 기반 stable)
@@ -248,11 +242,6 @@ function draw(){
           ctx.font=`${Math.max(12,16*zoom)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
           ctx.fillText('🔥',sx,sy-imgH*0.4);
         }
-      }else if(useImg&&cell.t==='road'){
-        ctx.save();ctx.clip();
-        const tw=hw*2,th=hh*2;
-        ctx.drawImage(IMG.road,sx-hw,sy-hh,tw,th);
-        ctx.restore();
       }else if(cell.t!=='empty'&&cell.t!=='road'){
         // 이미지 없으면 fallback: 기존 박스 렌더링
         const bh=(b.h||1)*18*zoom;
