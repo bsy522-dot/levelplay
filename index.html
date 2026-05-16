@@ -1207,7 +1207,7 @@ const SUBJECTS_KIDS=[
   {id:'코딩',nm:'코딩',ic:'💻',unitCount:5,topicCount:15,builtinKey:'coding'},
   {id:'사회',nm:'사회',ic:'🏘️',unitCount:5,topicCount:15,builtinKey:'social'},
   {id:'안전건강',nm:'안전건강',ic:'🛡️',unitCount:5,topicCount:16,builtinKey:'health'},
-  {id:'인성감성',nm:'인성감성',ic:'💛',unitCount:5,topicCount:15}
+  {id:'인성감성',nm:'인성감성',ic:'💛',unitCount:5,topicCount:15,builtinKey:'personality'}
 ];
 const SUBJECTS_ADULT=[
   {id:'수학',nm:'수학',ic:'🔢',unitCount:6,topicCount:28,builtinKey:'math'},
@@ -3379,5 +3379,6 @@ function renderLearningReport(){
 document.addEventListener('DOMContentLoaded',init);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){cG();cMo();closeBattle();if(_tutorOpen)toggleTutor();const ob=document.getElementById('onboardOverlay');if(ob&&ob.style.display==='flex'){ob.style.display='none';U.onboarded=true;sv();}}});
 </script>
+<script src="v3_patch.js" defer></script>
 </body>
 </html>
