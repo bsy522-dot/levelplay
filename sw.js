@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v33-auto';
+const CACHE_NAME = 'levelplay-v34-auto';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -11,6 +11,8 @@ const STATIC_ASSETS = [
   './manifest.json',
   './v2_patch.js',
   './v3_patch.js',
+  './goal-tree.js',
+  './data/goals.json',
   './games/hatcuping-game.html',
   './games/hatcuping-rpg.html',
   './games/hatcuping-game-v2.html',

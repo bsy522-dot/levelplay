@@ -102,6 +102,12 @@ nav button span:first-child{font-size:20px}
 .heatmap-legend .heatmap-cell:hover::after{display:none}
 /* 일일 과제 */
 .mission-card{background:linear-gradient(135deg,var(--c1),rgba(6,214,160,.05));border:1.5px solid rgba(6,214,160,.18);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(6,214,160,.08)}
+.home-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+.home-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 4px;border:1px solid rgba(139,92,246,.12);border-radius:14px;background:var(--c1);cursor:pointer;font-size:11px;font-weight:700;color:inherit;font-family:inherit;transition:transform .12s,box-shadow .15s}
+.home-btn:active{transform:scale(.93)}
+.home-btn:hover{box-shadow:0 4px 14px rgba(139,92,246,.12)}
+.home-btn .hb-ic{font-size:25px;line-height:1}
+.home-btn.hb-goal{background:linear-gradient(135deg,rgba(139,92,246,.16),rgba(6,214,160,.1));border-color:rgba(139,92,246,.28)}
 .mission-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}
 .mission-item .mi-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--t3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
 .mission-item.done .mi-check{background:var(--cy);border-color:var(--cy);color:#000}
@@ -444,14 +450,33 @@ nav button span:first-child{font-size:20px}
 <div style="position:relative;margin-bottom:10px"><input class="fi" id="srchIn" placeholder="무엇을 배워볼까? 영상, 퀴즈, 실험, 게임 검색..." oninput="doSearch(this.value)" style="padding-left:32px;padding-top:10px;padding-bottom:10px;font-size:13px;border-radius:10px;border:1.5px solid rgba(139,92,246,.2);background:linear-gradient(135deg,var(--bg),rgba(139,92,246,.03))"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none">&#x1F50D;</span></div>
 <div id="srchRes" style="display:none;margin-bottom:10px"></div>
 
+<!-- 목표 기반 첫 화면: 8버튼 미니멀 -->
+<div class="home-grid">
+<button class="home-btn" onclick="goSubject('언어')"><span class="hb-ic">🗣️</span><span>언어</span></button>
+<button class="home-btn" onclick="goSubject('수학')"><span class="hb-ic">🔢</span><span>수학</span></button>
+<button class="home-btn" onclick="goSubject('과학')"><span class="hb-ic">🔬</span><span>과학</span></button>
+<button class="home-btn" onclick="goSubject('사회')"><span class="hb-ic">🏘️</span><span>사회</span></button>
+<button class="home-btn hb-goal" onclick="openGoalTree()"><span class="hb-ic">🎯</span><span>목표</span></button>
+<button class="home-btn" onclick="showHomePanel('mission')"><span class="hb-ic">📋</span><span>과제</span></button>
+<button class="home-btn" onclick="showHomePanel('challenge')"><span class="hb-ic">🏆</span><span>챌린지</span></button>
+<button class="home-btn" onclick="go(2)"><span class="hb-ic">🛠️</span><span>도구</span></button>
+</div>
+
+<!-- 목표 트리 영역 (goal-tree.js가 채움) -->
+<div id="goalTreeArea"></div>
+
+<!-- 일일과제·주간챌린지: 버튼 토글 (v2_patch.js가 weeklyChallengeArea를 dailyMissionArea 다음에 삽입) -->
+<div id="missionWrap" style="display:none;margin-top:6px"><div id="dailyMissionArea"></div></div>
+
+<!-- 레거시 홈 요소: 렌더 함수 호환 위해 보존, 화면에는 미표시 -->
+<div id="legacyHome" style="display:none" aria-hidden="true">
 <div id="heroBanner"></div>
-<div id="streakHome" style="margin-bottom:8px"></div>
-<div id="dailyMissionArea"></div>
+<div id="streakHome"></div>
 <div id="reviewArea"></div>
 <div id="recArea"></div>
-
 <div class="cat-tabs-wrap"><div class="cat-tabs" id="catTabs"></div></div>
 <div class="cat-content" id="catContent"></div>
+</div>
 
 <div style="margin-top:24px;padding:16px 10px;border-top:1px solid rgba(139,92,246,.08);text-align:center">
 <div style="font-size:10px;font-weight:600;color:var(--t2);margin-bottom:4px">LevelPlay &copy; 2026</div>
@@ -2065,6 +2090,32 @@ function completeAILesson(id,title){
   xp(20,'AI레슨: '+title);toast('+20XP AI 레슨 완료!');sv();checkBadges();cMo();
 }
 
+// ===== 목표 기반 첫 화면 (8버튼) =====
+function goSubject(name){
+  var map={'언어':(typeof U!=='undefined'&&U.kidMode)?'한글국어':'언어'};
+  var target=map[name]||name;
+  go(1);
+  setTimeout(function(){try{if(typeof openSubjectNew==='function')openSubjectNew(target);}catch(e){}},60);
+}
+function showHomePanel(which){
+  var w=_el('missionWrap');if(!w)return;
+  var dm=_el('dailyMissionArea'),wc=_el('weeklyChallengeArea');
+  if(w.style.display==='block'&&w.getAttribute('data-panel')===which){w.style.display='none';return;}
+  if(which==='mission'){
+    if(typeof renderMission==='function')renderMission();
+    if(dm)dm.style.display='';if(wc)wc.style.display='none';
+  }else{
+    if(typeof renderWeeklyChallenge==='function')renderWeeklyChallenge();
+    if(dm)dm.style.display='none';if(wc)wc.style.display='';
+  }
+  w.style.display='block';w.setAttribute('data-panel',which);
+  w.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function openGoalTree(){
+  if(typeof renderGoalPicker==='function')renderGoalPicker();
+  else if(typeof toast==='function')toast('목표 트리를 불러오는 중입니다...');
+}
+
 function rAll(){
   renderCategoryTabs();
   renderCategoryContent();
@@ -3380,5 +3431,6 @@ document.addEventListener('DOMContentLoaded',init);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){cG();cMo();closeBattle();if(_tutorOpen)toggleTutor();const ob=document.getElementById('onboardOverlay');if(ob&&ob.style.display==='flex'){ob.style.display='none';U.onboarded=true;sv();}}});
 </script>
 <script src="v3_patch.js" defer></script>
+<script src="goal-tree.js" defer></script>
 </body>
 </html>
