@@ -76,7 +76,7 @@ const ENG_LEVELS=[null,
 let screen='menu',lv=1,correct=0,total=0,streak=0,current=null,recent=[];
 
 function $(id){return document.getElementById(id);}
-function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*i+1|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 function sendXP(amt){try{window.parent.postMessage({type:'xp',amount:amt,source:'eng-word-game'},'*');}catch(e){}}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1400);}
 

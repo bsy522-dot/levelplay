@@ -1706,8 +1706,11 @@ function nextEng(){
   const pool=lv.ws;
   const w=pool[Math.floor(Math.random()*pool.length)];
   engCurrent=w;
-  const wrongs=pool.filter(x=>x.w!==w.w).sort(()=>Math.random()-.5).slice(0,3).map(x=>x.w);
-  const opts=[w.w,...wrongs].sort(()=>Math.random()-.5);
+  const wrongPool=pool.filter(x=>x.w!==w.w);
+  for(let i=wrongPool.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[wrongPool[i],wrongPool[j]]=[wrongPool[j],wrongPool[i]];}
+  const wrongs=wrongPool.slice(0,3).map(x=>x.w);
+  const opts=[w.w,...wrongs];
+  for(let i=opts.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[opts[i],opts[j]]=[opts[j],opts[i]];}
   let h='';
   if(w.e)h+='<div style="font-size:28px;text-align:center;margin:6px 0">'+w.e+'</div>';
   h+='<div style="font-size:13px;text-align:center;color:var(--t2);margin-bottom:8px">\''+w.k+'\'의 영어는?</div>';
