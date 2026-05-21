@@ -1,7 +1,7 @@
 {
   "name": "LevelPlay - 배우고, 올리고, 증명하라",
   "short_name": "LevelPlay",
-  "description": "게이미피케이션 기반 교육 플랫폼. 14과목 175+레슨, 퀴즈, 게임, 과학실험, 주간챌린지, 수료증으로 레벨업!",
+  "description": "게이미피케이션 기반 교육 플랫폼. 14과목 175+레슨, 마스터리챌린지, 타임어택, 학습스토리, 30배지, 듣기퀴즈, 학습달력으로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
