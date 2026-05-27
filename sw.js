@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v34-auto';
+const CACHE_NAME = 'levelplay-v35-auto';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -12,6 +12,7 @@ const STATIC_ASSETS = [
   './v2_patch.js',
   './v3_patch.js',
   './v4_patch.js',
+  './v5_patch.js',
   './games/hatcuping-game.html',
   './games/hatcuping-rpg.html',
   './games/hatcuping-game-v2.html',
@@ -257,11 +258,13 @@ async function injectV2Patch(response) {
   if (!ct.includes('text/html')) return response;
   let html = await response.text();
   if (html.includes('</body>') && !html.includes('v2_patch.js')) {
-    html = html.replace('</body>', '<script src="v2_patch.js" defer><\/script>\n<script src="v3_patch.js" defer><\/script>\n<script src="v4_patch.js" defer><\/script>\n</body>');
+    html = html.replace('</body>', '<script src="v2_patch.js" defer><\/script>\n<script src="v3_patch.js" defer><\/script>\n<script src="v4_patch.js" defer><\/script>\n<script src="v5_patch.js" defer><\/script>\n</body>');
   } else if (html.includes('</body>') && !html.includes('v3_patch.js')) {
-    html = html.replace('</body>', '<script src="v3_patch.js" defer><\/script>\n<script src="v4_patch.js" defer><\/script>\n</body>');
+    html = html.replace('</body>', '<script src="v3_patch.js" defer><\/script>\n<script src="v4_patch.js" defer><\/script>\n<script src="v5_patch.js" defer><\/script>\n</body>');
   } else if (html.includes('</body>') && !html.includes('v4_patch.js')) {
-    html = html.replace('</body>', '<script src="v4_patch.js" defer><\/script>\n</body>');
+    html = html.replace('</body>', '<script src="v4_patch.js" defer><\/script>\n<script src="v5_patch.js" defer><\/script>\n</body>');
+  } else if (html.includes('</body>') && !html.includes('v5_patch.js')) {
+    html = html.replace('</body>', '<script src="v5_patch.js" defer><\/script>\n</body>');
   }
   return new Response(html, {
     status: response.status,
