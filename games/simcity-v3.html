@@ -64,6 +64,11 @@ body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;fo
 .save-slot .sd{color:#7a8a9a;font-size:10px}
 #saveBox button{background:#e3f2fd;border:1px solid #90caf9;color:#1976d2;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;margin:2px}
 #saveBox button:hover{background:#bbdefb}
+
+/* === MISSIONS BANNER === */
+#MIS_banner{position:fixed;top:48px;left:0;right:0;min-height:22px;background:linear-gradient(180deg,rgba(255,248,225,.97),rgba(255,243,205,.95));border-bottom:1px solid #ffe082;display:flex;align-items:center;justify-content:center;gap:6px;padding:2px 10px;z-index:28;font-size:11px;font-weight:700;color:#8d6e00;box-shadow:0 1px 4px rgba(180,150,80,.15);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#MIS_banner.done{background:linear-gradient(180deg,rgba(200,245,210,.97),rgba(180,240,195,.95));border-bottom-color:#66bb6a;color:#1b7a3e}
+#MIS_banner .MIS_rw{font-size:10px;font-weight:700;color:#e67e22;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -77,6 +82,7 @@ body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;fo
 <div class="st"><span class="i">📅</span><span class="v" id="sDay">1</span><span class="l" id="sSea">봄</span></div>
 </div>
 
+<div id="MIS_banner">🎯 목표 로딩중...</div>
 <canvas id="gameCanvas"></canvas>
 <div id="popup"></div>
 
@@ -92,6 +98,7 @@ body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;fo
 <button id="bLoad">📂</button>
 <button id="bDemo" title="예시 도시">🏙️데모</button>
 <button id="bSpeed" title="속도">▶1x</button>
+<button id="AUD_btn" title="소리" onclick="AUD_toggle()">🔊</button>
 <span class="sp"></span>
 <span id="desc">건물을 선택하세요</span>
 </div>
@@ -235,15 +242,15 @@ function draw(){
 
       if(useImg&&cell.t!=='empty'&&cell.t!=='road'){
         // ComfyUI 이미지로 건물 그리기
-        const ih=(b.h||1)*0.55+1.4;
-        const imgW=hw*2.6,imgH=imgW*ih;
-        ctx.drawImage(IMG[cell.t],sx-imgW/2,sy+hh-imgH+hh*0.15,imgW,imgH);
+        RND_groundShadow(sx,sy,hw,hh);
+        const imgH=RND_drawSprite(IMG[cell.t],sx,sy,hw,hh,x,y);
         if(cell.dmg>0){
           ctx.font=`${Math.max(12,16*zoom)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
           ctx.fillText('🔥',sx,sy-imgH*0.4);
         }
       }else if(cell.t!=='empty'&&cell.t!=='road'){
         // 이미지 없으면 fallback: 기존 박스 렌더링
+        RND_groundShadow(sx,sy,hw,hh);
         const bh=(b.h||1)*18*zoom;
         ctx.beginPath();ctx.moveTo(sx-hw,sy);ctx.lineTo(sx-hw,sy-bh);ctx.lineTo(sx,sy+hh-bh);ctx.lineTo(sx,sy+hh);ctx.closePath();
         ctx.fillStyle=darken(baseC,25);ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.stroke();
@@ -291,6 +298,7 @@ function draw(){
     ctx.strokeStyle=bulldoze?'rgba(244,67,54,0.8)':'rgba(255,215,0,0.6)';ctx.lineWidth=2;ctx.stroke();
     ctx.fillStyle=bulldoze?'rgba(244,67,54,0.12)':'rgba(255,215,0,0.08)';ctx.fill();
   }
+  FX_update();FX_draw(ctx);
   requestAnimationFrame(draw);
 }
 
@@ -338,15 +346,18 @@ function place(g){
       const old=B[grid[g.y][g.x].t];
       money+=Math.floor((old.cost||0)*0.3);
       grid[g.y][g.x]={t:'empty',dmg:0};
+      window.playSfx('bull');
       popup('🗑️ 철거 완료 (환불 30%)',false);
     }
     return;
   }
-  if(grid[g.y][g.x].t!=='empty'){popup('이미 건물이 있습니다!',false);return;}
+  if(grid[g.y][g.x].t!=='empty'){window.playSfx('error');popup('이미 건물이 있습니다!',false);return;}
   const b=B[selTile];
-  if(money<b.cost){popup('💰 자금 부족!',false);return;}
+  if(money<b.cost){window.playSfx('error');popup('💰 자금 부족!',false);return;}
   money-=b.cost;
   grid[g.y][g.x]={t:selTile,dmg:0};
+  window.playSfx('place');
+  FX_spawnPlace(g.x,g.y,b);
   updUI();
 }
 
@@ -363,11 +374,12 @@ function simulate(){
     const c=grid[y][x];if(c.t==='empty')continue;
     const b=B[c.t];bcount++;
     if(c.dmg>0){c.dmg--;if(c.dmg<=0)c.dmg=0;continue;} // damaged buildings don't produce
-    if(b.inc)inc+=b.inc;
+    var _adjF=ADJ_factor(x,y,b); if(b.inc)inc+=Math.round(b.inc*ADJ_commBonus(x,y,b)*_adjF);
     if(b.exp)exp+=b.exp;
     if(b.hap)tHap+=b.hap;
+    tHap+=ADJ_hap(x,y,b);
     if(b.saf)tSaf+=b.saf;
-    if(b.pop)tPop+=b.pop;
+    if(b.pop)tPop+=Math.round(b.pop*_adjF);
     if(b.pow>0)tPow+=b.pow; else if(b.pow<0)uPow-=b.pow;
     if(b.wat>0)tWat+=b.wat; else if(b.wat<0)uWat-=b.wat;
     if(b.job)jobs+=b.job;
@@ -441,6 +453,7 @@ function simulate(){
   // Check achievements
   const st={pop,money,hap,saf,bcount};
   ACHS.forEach(a=>{if(!achievements.has(a.id)&&a.check(st)){achievements.add(a.id);popup(`🏆 업적 달성: ${a.n}`,true);}});
+  MIS_check(st); // missions: check current objective after achievements
 
   updUI();
 }
@@ -627,7 +640,7 @@ function showSaveModal(mode){
 }
 
 window.doSave=(slot)=>{
-  const data={grid,money,pop,hap,saf,day,season,loans,achievements:[...achievements],popHistory,incHistory,cityName:document.getElementById('cityName').textContent};
+  const data={grid,money,pop,hap,saf,day,season,loans,achievements:[...achievements],popHistory,incHistory,MIS_idx,MIS_won,cityName:document.getElementById('cityName').textContent};
   localStorage.setItem('simcity_v3_slot'+slot,JSON.stringify(data));
   document.getElementById('saveModal').style.display='none';
   popup('💾 저장 완료!',true);
@@ -638,6 +651,7 @@ window.doLoad=(slot)=>{
     if(!data){popup('저장 데이터 없음',false);return;}
     grid=data.grid;money=data.money;pop=data.pop;hap=data.hap;saf=data.saf;day=data.day;season=data.season||0;loans=data.loans||0;
     achievements=new Set(data.achievements||[]);popHistory=data.popHistory||[];incHistory=data.incHistory||[];
+    MIS_idx=data.MIS_idx||0;MIS_won=!!data.MIS_won;MIS_render(); // missions: restore objective progress
     if(data.cityName)document.getElementById('cityName').textContent=data.cityName;
     document.getElementById('saveModal').style.display='none';
     popup('📂 불러오기 완료!',true);updUI();
@@ -713,12 +727,386 @@ function buildDemoCity(){
   popup('🏙️ 예시 도시가 생성되었습니다!',true);
 }
 
+// === ADJ: ADJACENCY + ROAD CONNECTIVITY (prefix ADJ) ===================
+// All location-strategy logic lives here. simulate() calls these helpers
+// inside its existing per-cell accumulation loop. O(4) per cell => O(900).
+//
+// Building-type sets (kept local; do not redeclare existing globals).
+const ADJ_RESIDENTIAL={house:1,apt:1,mansion:1};
+const ADJ_COMMERCIAL={shop:1,mall:1,office:1};
+const ADJ_POLLUTERS={factory:1,warehouse:1}; // hurt nearby residents
+const ADJ_DISCONN=0.5; // production multiplier when not road-connected
+
+// 4-neighbour helper: returns the tile type at (x+dx,y+dy) or '' if OOB.
+function ADJ_typeAt(x,y){
+  if(x<0||x>=GW||y<0||y>=GH)return '';
+  return grid[y][x].t;
+}
+
+// Does this cell qualify as a "producer" for road-connectivity purposes?
+// (has income, population, or jobs). Roads & 인프라 are exempt.
+function ADJ_isProducer(t,b){
+  if(t==='road'||t==='bridge')return false;
+  if(b.cat==='인프라')return false; // power/water/road/bridge exempt
+  return !!(b.inc||b.pop||b.job);
+}
+
+// True if (x,y) is 4-neighbour-adjacent to at least one 'road' tile.
+function ADJ_roadAdjacent(x,y){
+  return ADJ_typeAt(x-1,y)==='road'||ADJ_typeAt(x+1,y)==='road'||
+         ADJ_typeAt(x,y-1)==='road'||ADJ_typeAt(x,y+1)==='road';
+}
+
+// ROAD CONNECTIVITY (1): producers not touching a road operate at 50%.
+// Returns the multiplier (0.5 or 1) AND records grid[y][x]._dc so the
+// renderer can flag disconnected producers later. Non-producers => 1, _dc=false.
+function ADJ_factor(x,y,b){
+  const cell=grid[y][x];
+  if(!ADJ_isProducer(cell.t,b)){cell._dc=false;return 1;}
+  const ok=ADJ_roadAdjacent(x,y);
+  cell._dc=!ok;
+  return ok?1:ADJ_DISCONN;
+}
+
+// PARK ADJACENCY (2): residential gets +2 happiness per adjacent park,
+// -3 per adjacent factory/warehouse (pollution). Returns the tHap delta
+// (0 for non-residential).
+function ADJ_hap(x,y,b){
+  if(!ADJ_RESIDENTIAL[grid[y][x].t])return 0;
+  let d=0;
+  const n=[ADJ_typeAt(x-1,y),ADJ_typeAt(x+1,y),ADJ_typeAt(x,y-1),ADJ_typeAt(x,y+1)];
+  for(let i=0;i<4;i++){
+    const t=n[i];
+    if(t==='park')d+=2;
+    else if(ADJ_POLLUTERS[t])d-=3;
+  }
+  return d;
+}
+
+// COMMERCIAL SYNERGY (3): commercial adjacent to any residential earns
+// +10% of its own income. Returns an income multiplier (1.1 or 1.0).
+function ADJ_commBonus(x,y,b){
+  if(!ADJ_COMMERCIAL[grid[y][x].t])return 1;
+  const n=[ADJ_typeAt(x-1,y),ADJ_typeAt(x+1,y),ADJ_typeAt(x,y-1),ADJ_typeAt(x,y+1)];
+  for(let i=0;i<4;i++)if(ADJ_RESIDENTIAL[n[i]])return 1.1;
+  return 1;
+}
+
+/* ===== RND: sprite consistency + grounding + contact shadow =====
+   Fixes "scattered sticker" look: uniform footprint, aspect-correct
+   clamped height, bottom-center grounded on the tile front, plus a soft
+   elliptical contact shadow. Reuses module-level ctx/zoom; reads optional
+   window.FX_scale only via typeof guard so offline/no-FX builds are safe. */
+
+// Soft elliptical contact shadow on the ground at the tile front.
+// sx,sy = tile center (screen); hw,hh = diamond half-width/half-height (already zoom-scaled).
+function RND_groundShadow(sx, sy, hw, hh){
+  ctx.save();
+  ctx.fillStyle = 'rgba(35,55,30,0.22)';
+  ctx.beginPath();
+  ctx.ellipse(sx, sy + hh * 0.30, hw * 0.85, hh * 0.72, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Draw one building sprite, grounded & uniformly scaled.
+// Returns the drawn height (drawH) so the existing damage-🔥 marker
+// (which reads `imgH` as sy-imgH*0.4) keeps positioning above the building.
+function RND_drawSprite(img, sx, sy, hw, hh, gx, gy){
+  // (a) uniform footprint width regardless of native sprite size
+  const footprintW = (hw * 2) * 0.92;
+  const nw = (img.naturalWidth  > 0) ? img.naturalWidth  : 1;
+  const nh = (img.naturalHeight > 0) ? img.naturalHeight : 1;
+  let drawW = footprintW;
+  let drawH = footprintW * (nh / nw);
+  // clamp very tall/narrow sprites (e.g. water tower) so they don't tower absurdly
+  const maxH = footprintW * 2.2;
+  if (drawH > maxH) drawH = maxH;
+  // (d) optional pop scale (FX module) anchored at bottom-center -> grows from the ground
+  if (typeof window !== 'undefined' && typeof window.FX_scale === 'function'){
+    const s = window.FX_scale(gx, gy) || 1;
+    drawW *= s;
+    drawH *= s;
+  }
+  // (b) bottom-center anchored on the tile's front
+  const bottomY = sy + hh * 0.30;
+  ctx.drawImage(img, sx - drawW / 2, bottomY - drawH, drawW, drawH);
+  return drawH;
+}
+
+// === JUICE / GAME FEEL (prefix FX) ===
+// Pure additive visual feedback on building placement. No state mutation of game data.
+const FX_pops=new Map();        // key 'x,y' -> {t0} placement pop start time
+const FX_floats=[];             // {x,y,vy,text,color,t0,life}
+const FX_particles=[];          // {x,y,vx,vy,t0,life,r,color}
+const FX_MAX_PARTICLES=120;     // hard cap to stay performant
+const FX_POP_MS=320;            // pop duration
+
+// (1) Placement pop scale 0->1 with slight overshoot. Returns 1 when settled/absent.
+function FX_scale(gx,gy){
+  const e=FX_pops.get(gx+','+gy);
+  if(!e)return 1;
+  const k=(performance.now()-e.t0)/FX_POP_MS;
+  if(k>=1){FX_pops.delete(gx+','+gy);return 1;}
+  // easeOutBack-style overshoot: starts at 0, passes through ~1.05, settles at 1
+  const c1=1.70158,c3=c1+1,p=k-1;
+  const s=1+c3*p*p*p+c1*p*p;
+  return Math.max(0.05,s);
+}
+
+// (2) Floating text
+function FX_float(sx,sy,text,color){
+  FX_floats.push({x:sx,y:sy,vy:-0.55,text:text,color:color||'#fff',t0:performance.now(),life:900});
+  if(FX_floats.length>40)FX_floats.shift();
+}
+
+// (3) Small particle burst (gravity + fade), total capped
+function FX_burst(sx,sy,color){
+  const n=10;
+  for(let i=0;i<n;i++){
+    if(FX_particles.length>=FX_MAX_PARTICLES)break;
+    const ang=Math.random()*Math.PI*2,sp=0.8+Math.random()*1.8;
+    FX_particles.push({
+      x:sx,y:sy,
+      vx:Math.cos(ang)*sp,
+      vy:Math.sin(ang)*sp-1.4,
+      t0:performance.now(),life:520+Math.random()*220,
+      r:(1.5+Math.random()*2),color:color
+    });
+  }
+}
+
+// Spawn all placement effects for a building. b is the building def (B[selTile]).
+function FX_spawnPlace(gx,gy,b){
+  if(typeof iso!=='function')return;
+  const p=iso(gx,gy);
+  FX_pops.set(gx+','+gy,{t0:performance.now()});
+  const cost=(b&&b.cost)||0;
+  if(cost>0)FX_float(p.x,p.y-10,'-$'+cost,'#e74c3c');
+  const gain=(b&&b.pop)?('+인구'+b.pop):'완료';
+  FX_float(p.x,p.y-28,gain,'#2ecc71');
+  FX_burst(p.x,p.y,(b&&b.c)||'#ffd54f');
+}
+
+// Advance all effects (call once per frame)
+function FX_update(){
+  const now=performance.now();
+  // Prune stale pops (FX_scale may never be polled if render module absent)
+  FX_pops.forEach((_,key)=>{
+    const e=FX_pops.get(key);
+    if(e&&now-e.t0>=FX_POP_MS)FX_pops.delete(key);
+  });
+  for(let i=FX_floats.length-1;i>=0;i--){
+    const f=FX_floats[i];
+    if(now-f.t0>=f.life){FX_floats.splice(i,1);continue;}
+    f.y+=f.vy;
+  }
+  for(let i=FX_particles.length-1;i>=0;i--){
+    const pt=FX_particles[i];
+    if(now-pt.t0>=pt.life){FX_particles.splice(i,1);continue;}
+    pt.vy+=0.09;             // gravity
+    pt.x+=pt.vx;pt.y+=pt.vy;
+  }
+}
+
+// Render all effects on top of the scene
+function FX_draw(c){
+  const now=performance.now();
+  // particles
+  for(let i=0;i<FX_particles.length;i++){
+    const pt=FX_particles[i];
+    const a=1-(now-pt.t0)/pt.life;
+    if(a<=0)continue;
+    c.globalAlpha=Math.max(0,a);
+    c.fillStyle=pt.color;
+    c.beginPath();c.arc(pt.x,pt.y,pt.r,0,Math.PI*2);c.fill();
+  }
+  // floating text
+  c.textAlign='center';c.textBaseline='middle';
+  for(let i=0;i<FX_floats.length;i++){
+    const f=FX_floats[i];
+    const a=1-(now-f.t0)/f.life;
+    if(a<=0)continue;
+    c.globalAlpha=Math.max(0,a);
+    c.font='bold 13px -apple-system,"Segoe UI",sans-serif';
+    c.lineWidth=3;c.strokeStyle='rgba(255,255,255,0.85)';
+    c.strokeText(f.text,f.x,f.y);
+    c.fillStyle=f.color;
+    c.fillText(f.text,f.x,f.y);
+  }
+  c.globalAlpha=1;
+}
+
+
+// === MISSIONS / GOALS / WIN CONDITION ===
+// Sequential objectives that give the player a reason to keep playing.
+// State: MIS_idx = index of the CURRENT (not-yet-completed) mission.
+let MIS_idx=0;
+let MIS_won=false;
+
+// Helper: count buildings by category from the live grid (runs at 0.5Hz, cheap enough).
+function MIS_counts(){
+  let com=0,ind=0,spc=0;
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){
+    const t=grid[y][x].t;
+    if(t==='empty'||t==='road')continue;
+    const cat=B[t]&&B[t].cat;
+    if(cat==='상업')com++;
+    else if(cat==='산업')ind++;
+    else if(cat==='특수')spc++;
+  }
+  return{com,ind,spc};
+}
+
+// Each mission: {id, desc, check:(s)=>bool, reward}. s = {pop,money,hap,saf,bcount}.
+const MIS_LIST=[
+  {id:'m_pop100', desc:'인구 100명 달성', reward:2000,  check:s=>s.pop>=100},
+  {id:'m_hap80',  desc:'행복도 80 이상 유지', reward:3000,  check:s=>s.hap>=80},
+  {id:'m_mix',    desc:'상업·산업·특수 시설 각 3개 이상 건설', reward:5000, check:s=>{const c=MIS_counts();return c.com>=3&&c.ind>=3&&c.spc>=3;}},
+  {id:'m_pop500', desc:'인구 500명 달성', reward:6000,  check:s=>s.pop>=500},
+  {id:'m_money',  desc:'자금 150,000 모으기', reward:10000, check:s=>s.money>=150000},
+  {id:'m_build40',desc:'건물 40개 건설', reward:8000,  check:s=>s.bcount>=40},
+  {id:'m_pop1000',desc:'인구 1,000명 달성', reward:15000, check:s=>s.pop>=1000},
+  {id:'m_pop5000',desc:'🏆 인구 5,000명 — 도시 마스터!', reward:50000, check:s=>s.pop>=5000}
+];
+
+// Update the always-visible banner.
+function MIS_render(){
+  const el=document.getElementById('MIS_banner');
+  if(!el)return;
+  if(MIS_won||MIS_idx>=MIS_LIST.length){
+    el.className='done';
+    el.innerHTML='👑 모든 목표 달성! 당신은 도시 마스터입니다!';
+    return;
+  }
+  const m=MIS_LIST[MIS_idx];
+  el.className='';
+  el.innerHTML='🎯 ['+(MIS_idx+1)+'/'+MIS_LIST.length+'] '+m.desc+' <span class="MIS_rw">+'+m.reward.toLocaleString()+'</span>';
+}
+
+// Called from simulate() after the achievements block. st has {pop,money,hap,saf,bcount}.
+function MIS_check(st){
+  if(MIS_won||MIS_idx>=MIS_LIST.length)return;
+  const m=MIS_LIST[MIS_idx];
+  if(m.check(st)){
+    money+=m.reward;
+    const isFinal=(MIS_idx>=MIS_LIST.length-1);
+    popup('🎯 목표 달성! +'+m.reward.toLocaleString(),true);
+    MIS_idx++;
+    if(window.playSfx)window.playSfx('mission');
+    if(isFinal){
+      MIS_won=true;
+      popup('👑 축하합니다! 도시 마스터 달성 — 승리!',true);
+    }
+    MIS_render();
+  }
+}
+
+// === AUDIO SFX (Web Audio, no external files) ===
+var AUD_ctx=null;
+var AUD_master=null;
+var AUD_muted=false;
+try{AUD_muted=localStorage.getItem('simcity_v3_mute')==='1';}catch(e){}
+
+function AUD_ensure(){
+  // Lazily create AudioContext + master gain; safe if unsupported.
+  if(AUD_ctx)return AUD_ctx;
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return null;
+    AUD_ctx=new AC();
+    AUD_master=AUD_ctx.createGain();
+    AUD_master.gain.value=AUD_muted?0:0.18;
+    AUD_master.connect(AUD_ctx.destination);
+  }catch(e){AUD_ctx=null;}
+  return AUD_ctx;
+}
+
+function AUD_resume(){
+  // Called on first user gesture so audio can play (autoplay policy).
+  try{
+    var c=AUD_ensure();
+    if(c&&c.state==='suspended'&&c.resume)c.resume();
+  }catch(e){}
+}
+
+function AUD_tone(freq,start,dur,type,peak){
+  // Schedule one oscillator+gain envelope on the master bus.
+  try{
+    var c=AUD_ctx;if(!c||!AUD_master)return;
+    var t0=c.currentTime+start;
+    var osc=c.createOscillator();
+    var g=c.createGain();
+    osc.type=type||'sine';
+    osc.frequency.setValueAtTime(freq,t0);
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001,peak||0.6),t0+Math.min(0.02,dur*0.3));
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    osc.connect(g);g.connect(AUD_master);
+    osc.start(t0);
+    osc.stop(t0+dur+0.02);
+  }catch(e){}
+}
+
+function AUD_play(name){
+  // Public SFX entry. Never throws; silently no-ops when audio unsupported/muted.
+  try{
+    if(AUD_muted)return;
+    var c=AUD_ensure();if(!c)return;
+    if(c.state==='suspended'&&c.resume)c.resume();
+    if(name==='place'){
+      // short bright pluck
+      AUD_tone(880,0,0.10,'triangle',0.7);
+      AUD_tone(1320,0.02,0.08,'sine',0.4);
+    }else if(name==='bull'){
+      // low thunk
+      AUD_tone(150,0,0.14,'square',0.6);
+      AUD_tone(90,0.01,0.16,'sine',0.5);
+    }else if(name==='error'){
+      // short low buzz
+      AUD_tone(160,0,0.16,'sawtooth',0.5);
+      AUD_tone(120,0.04,0.14,'square',0.35);
+    }else if(name==='mission'){
+      // rising 3-note jingle
+      AUD_tone(523,0.00,0.14,'triangle',0.6);
+      AUD_tone(659,0.13,0.14,'triangle',0.6);
+      AUD_tone(784,0.26,0.22,'triangle',0.7);
+    }else if(name==='disaster'){
+      // alarm two-tone
+      AUD_tone(440,0.00,0.20,'square',0.55);
+      AUD_tone(330,0.22,0.20,'square',0.55);
+      AUD_tone(440,0.44,0.20,'square',0.55);
+      AUD_tone(330,0.66,0.24,'square',0.55);
+    }
+  }catch(e){}
+}
+window.playSfx=AUD_play;
+
+window.AUD_toggle=function(){
+  AUD_muted=!AUD_muted;
+  try{localStorage.setItem('simcity_v3_mute',AUD_muted?'1':'0');}catch(e){}
+  try{if(AUD_master)AUD_master.gain.value=AUD_muted?0:0.18;}catch(e){}
+  var btn=document.getElementById('AUD_btn');
+  if(btn)btn.textContent=AUD_muted?'🔇':'🔊';
+  if(!AUD_muted){AUD_resume();window.playSfx('place');}
+};
+
+function AUD_initBtn(){
+  var btn=document.getElementById('AUD_btn');
+  if(btn)btn.textContent=AUD_muted?'🔇':'🔊';
+}
+
+/* === SUPERPOWER_INTEGRATED === */
 // === INIT ===
 buildCats();buildTiles();
 // 그리드가 완전히 비어있으면 데모 도시 자동 생성 (저장 슬롯 유무 무관)
 let isEmpty=true;
 for(let y=0;y<GH&&isEmpty;y++)for(let x=0;x<GW&&isEmpty;x++)if(grid[y][x].t!=='empty')isEmpty=false;
 if(isEmpty)buildDemoCity();
+MIS_render()
+AUD_initBtn()
+window.addEventListener('pointerdown',AUD_resume,{once:true})
+window.addEventListener('touchstart',AUD_resume,{once:true})
 updUI();draw();startSim();
 </script>
 </body>
