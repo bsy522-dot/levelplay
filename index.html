@@ -479,7 +479,7 @@ nav button span:first-child{font-size:20px}
 <div><div style="font-size:14px;font-weight:700">AI와 퀴즈 대결!</div><div style="font-size:10px;color:var(--t3)">5문제 · 15초 제한 · 승리 시 +20XP</div></div>
 </div>
 <div id="battleLogArea" style="margin-bottom:8px"></div>
-<div class="sec">🎮 <span data-i18n="game">게임</span></div><div class="g2" id="allGm"></div>
+<div class="sec">🎮 <span data-i18n="game">게임</span></div><div class="row" id="allGmCats" style="gap:5px;padding-bottom:6px"></div><div class="g2" id="allGm"></div>
 <div class="sec">📺 <span data-i18n="videos">영상</span></div><div class="row" id="allVr" style="gap:5px;padding-bottom:4px"></div><div id="allVids"></div>
 <div class="sec">🔬 <span data-i18n="science_exp">과학 실험</span></div><div class="g2" id="allS"></div>
 <div class="sec">📝 <span data-i18n="quiz_challenge">퀴즈</span></div><div id="allQ"></div>
@@ -1810,6 +1810,10 @@ GAME_CATS['복싱 트레이너']='sports';GAME_CATS['골프 트래커']='sports'
 GAME_CATS['심시티 빌더']='creative';GAME_CATS['집짓기']='creative';GAME_CATS['요리왕']='creative';GAME_CATS['동물농장']='creative';
 GAME_CATS['별빛 대모험']='kids';GAME_CATS['별빛 RPG']='kids';GAME_CATS['색깔 맞히기']='kids';GAME_CATS['기억력 카드']='kids';
 GAME_CATS['별빛 대모험 v2']='kids';GAME_CATS['별빛 RPG v2']='kids';
+// 버전/이모지 표기로 매핑 누락됐던 게임 보강
+GAME_CATS['노래방 v4 ✨']='music';GAME_CATS['한국사 영웅전 v8 🆕']='history';GAME_CATS['한국사 영웅전 (구)']='history';
+GAME_CATS['별빛 RPG v3 ✨']='kids';GAME_CATS['하츄핑 UNIFIED v4 🌸']='kids';GAME_CATS['문명 진화 ✨']='history';
+GAME_CATS['우주 탐험 3D ✨']='science';GAME_CATS['동물농장 타이쿤']='creative';
 
 function getVideoCat(v){
   var c=v.c.toLowerCase();
@@ -2068,11 +2072,32 @@ function completeAILesson(id,title){
   xp(20,'AI레슨: '+title);toast('+20XP AI 레슨 완료!');sv();checkBadges();cMo();
 }
 
+// ===== 놀이 탭 게임 카테고리 필터 =====
+let _gmCat='all';
+const GCAT_ORDER=['kids','korean','english','math','science','history','music','creative','sports'];
+const GCAT_LABELS={all:'✨ 전체',kids:'🧸 키즈',korean:'🔤 국어',english:'🔠 영어',math:'🔢 수학',science:'🔬 과학',history:'🏛️ 역사',music:'🎵 음악',creative:'🎨 창작',sports:'⚽ 스포츠'};
+function _presentGameCats(){return GCAT_ORDER.filter(function(c){return GMS.some(function(g){return (GAME_CATS[g.nm]||'all')===c;});});}
+function renderGameCats(){
+  var el=_el('allGmCats');if(!el)return;
+  var cats=['all'].concat(_presentGameCats());
+  el.innerHTML=cats.map(function(c){
+    var cnt=c==='all'?GMS.length:GMS.filter(function(g){return (GAME_CATS[g.nm]||'all')===c;}).length;
+    return '<button class="bt '+(_gmCat===c?'bp':'bs')+'" onclick="filterGames(\''+c+'\')" style="font-size:10px;padding:4px 10px;flex-shrink:0">'+(GCAT_LABELS[c]||c)+' '+cnt+'</button>';
+  }).join('');
+}
+function filterGames(cat){
+  _gmCat=cat;
+  renderGameCats();
+  var el=_el('allGm');if(!el)return;
+  var list=cat==='all'?GMS:GMS.filter(function(g){return (GAME_CATS[g.nm]||'all')===cat;});
+  el.innerHTML=list.map(function(g){return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>';}).join('');
+}
+
 function rAll(){
   renderCategoryTabs();
   renderCategoryContent();
   renderSubjects();
-  var _aGm=_el('allGm');if(_aGm)_aGm.innerHTML=GMS.map(function(g){return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>';}).join('');
+  renderGameCats();filterGames(_gmCat);
   var fV=getV();var cats2=[...new Set(fV.map(function(v){return v.c;}))];
   var _aVr=_el('allVr');if(_aVr)_aVr.innerHTML='<button class="bt bp" onclick="filterVids(null)" style="font-size:9px;padding:3px 8px;flex-shrink:0">전체</button>'+cats2.map(function(c){return '<button class="bt bs" onclick="filterVids(\''+c+'\')" style="font-size:9px;padding:3px 8px;flex-shrink:0">'+c+'</button>';}).join('');
   var _aVids=_el('allVids');if(_aVids)_aVids.innerHTML=cats2.map(function(c){return '<div class="sec" style="font-size:12px" data-vcat="'+c+'">'+c+'</div><div class="row" data-vcat="'+c+'">'+fV.filter(function(v){return v.c===c;}).map(vc).join('')+'</div>';}).join('');
