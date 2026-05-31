@@ -52,13 +52,16 @@ nav button span:first-child{font-size:20px}
 .gc .gn{font-size:11px;font-weight:600}
 .gc .gd{font-size:9px;color:var(--t3);margin-top:2px}
 /* 놀이탭 게임 전용 카드(4존) — .gc 재사용처와 격리 */
-.gcard{position:relative;background:var(--c1);border:1px solid rgba(139,92,246,.10);border-radius:var(--r);padding:0 0 28px;text-align:center;cursor:pointer;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.22);transition:transform .12s,border-color .12s,box-shadow .12s}
+.gcard{position:relative;background:var(--c1);border:1px solid rgba(139,92,246,.10);border-radius:var(--r);padding:0 0 30px;text-align:center;cursor:pointer;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.22);transition:transform .12s,border-color .12s,box-shadow .12s}
 .gcard:hover{border-color:var(--cy);transform:translateY(-2px)}
 .gcard:active{transform:translateY(2px);box-shadow:none}
 .gcard .band{height:4px;width:100%}
-.gcard .gi{font-size:30px;margin:12px 0 6px;line-height:1}
+.gcard .gi{font-size:30px;margin:10px 0 5px;line-height:1}
 .gcard .gn{font-size:13px;font-weight:700;padding:0 6px;line-height:1.2}
-.gcard .gd{font-size:10px;color:var(--t3);margin-top:3px;padding:0 8px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .gd{font-size:10px;color:var(--t2);margin-top:3px;padding:0 8px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard .gmeta{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:5px;font-size:9px;color:var(--t3)}
+.gcard .gmeta .gdiff b{color:var(--t2)}
+.gcard .gmeta .gxp{font-weight:800;color:var(--gd)}
 .gcard .play{position:absolute;left:0;right:0;bottom:0;height:26px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:10px;font-weight:800;color:var(--cy);background:rgba(6,214,160,.10);border-top:1px solid rgba(6,214,160,.18)}
 html.kid{--r:18px}
 html.kid .gcard .gi{font-size:38px}
@@ -2089,6 +2092,28 @@ let _gmCat='all';
 const GCAT_ORDER=['kids','korean','english','math','science','history','music','creative','sports'];
 const GCAT_LABELS={all:'✨ 전체',kids:'🧸 키즈',korean:'🔤 국어',english:'🔠 영어',math:'🔢 수학',science:'🔬 과학',history:'🏛️ 역사',music:'🎵 음악',creative:'🎨 창작',sports:'⚽ 스포츠'};
 const GCAT_COLORS={all:'#8b5cf6',kids:'#FFE135',korean:'#FF6B9D',english:'#7FDBFF',math:'#8b5cf6',science:'#06d6a0',history:'#fbbf24',music:'#FF9F43',creative:'#A29BFE',sports:'#22c55e'};
+/* 4중 시그니파이어 메타데이터 — 워크플로우 39에이전트(분류34+검증5) 생성·반영 {d:난이도1-3,xp,min:분(0=∞),hook:호기심} */
+const GAME_META={
+'별빛 대모험':{d:1,xp:10,min:0,hook:'별까지 날아가 볼까?'},'별빛 RPG':{d:1,xp:15,min:0,hook:'엔딩까지 갈 수 있어?'},
+'한글 배우기':{d:1,xp:15,min:5,hook:'가나다 같이 만들어볼까?'},'영어 단어 Lv.1~10':{d:2,xp:20,min:5,hook:'영어 단어 몇 개나 알까?'},
+'타이핑 게임':{d:2,xp:20,min:5,hook:'몇 단어까지 버틸까?'},'색깔 맞히기':{d:1,xp:12,min:4,hook:'몇 색깔까지 맞힐까?'},
+'세계지도 퀴즈':{d:2,xp:20,min:5,hook:'수도 다 알 자신 있어?'},'시간여행':{d:2,xp:20,min:5,hook:'역사의 순서, 알고 있어?'},
+'수학 퍼즐':{d:2,xp:20,min:5,hook:'빈칸에 뭐가 들어갈까?'},'과학 실험실':{d:2,xp:20,min:5,hook:'실험 결과가 달라질까?'},
+'리듬 게임':{d:2,xp:20,min:5,hook:'박자 다 맞힐 수 있어?'},'단어 연결':{d:2,xp:20,min:5,hook:'몇 단어나 이을 수 있어?'},
+'기억력 카드':{d:1,xp:10,min:5,hook:'몇 장까지 기억할 수 있어?'},'스도쿠':{d:3,xp:22,min:15,hook:'빈칸 다 채울 수 있어?'},
+'문장 만들기':{d:2,xp:20,min:5,hook:'이 단어들, 이을 수 있어?'},'주기율표':{d:3,xp:25,min:5,hook:'몇 개나 알고 있어?'},
+'피아노 마스터':{d:2,xp:20,min:8,hook:'오늘 몇 곡 완주할까?'},'바이올린 리듬':{d:2,xp:20,min:7,hook:'끝 단계까지 갈 수 있어?'},
+'노래방 v4 ✨':{d:2,xp:20,min:5,hook:'내 음정 몇 점짜리일까?'},'복싱 트레이너':{d:2,xp:20,min:6,hook:'챔피언벨트 딸 수 있어?'},
+'골프 트래커':{d:3,xp:22,min:0,hook:'내 스윙 몇 타짜리일까?'},'한국사 영웅전 v8 🆕':{d:3,xp:25,min:0,hook:'천하를 제패할 영웅은?'},
+'한국사 영웅전 (구)':{d:2,xp:20,min:0,hook:'네 영웅, 왕좌에 오를까?'},'심시티 빌더':{d:2,xp:20,min:0,hook:'내 도시, 재난 버텨낼까?'},
+'집짓기':{d:2,xp:20,min:0,hook:'내 집 설계, 몇 층까지?'},'별빛 대모험 v2':{d:1,xp:12,min:0,hook:'보스 이길 수 있어?'},
+'별빛 RPG v2':{d:2,xp:20,min:0,hook:'엔딩까지 갈 수 있어?'},'별빛 RPG v3 ✨':{d:2,xp:20,min:0,hook:'숨겨진 엔딩 찾을 수 있어?'},
+'하츄핑 UNIFIED v4 🌸':{d:1,xp:15,min:0,hook:'엔딩까지 갈 수 있어?'},'문명 진화 ✨':{d:2,xp:20,min:0,hook:'인류 끝까지 이끌 수 있어?'},
+'우주 탐험 3D ✨':{d:2,xp:20,min:0,hook:'행성을 다 찾을 수 있어?'},'우주 탐험':{d:2,xp:20,min:5,hook:'우주 끝까지 날아갈 수 있어?'},
+'요리왕':{d:2,xp:20,min:7,hook:'내 요리 몇 점 나올까?'},'동물농장 타이쿤':{d:2,xp:20,min:0,hook:'내 농장, 얼마나 커질까?'}
+};
+function _gmDots(n){var s='';for(var i=0;i<3;i++)s+=(i<n?'<b>●</b>':'○');return s;}
+function _gmStars(n){var s='';for(var i=0;i<3;i++)s+=(i<n?'★':'☆');return s;}
 function _presentGameCats(){return GCAT_ORDER.filter(function(c){return GMS.some(function(g){return (GAME_CATS[g.nm]||'all')===c;});});}
 function renderGameCats(){
   var el=_el('allGmCats');if(!el)return;
@@ -2103,7 +2128,18 @@ function filterGames(cat){
   renderGameCats();
   var el=_el('allGm');if(!el)return;
   var list=cat==='all'?GMS:GMS.filter(function(g){return (GAME_CATS[g.nm]||'all')===cat;});
-  el.innerHTML=list.map(function(g){var cat=GAME_CATS[g.nm]||'all';var col=GCAT_COLORS[cat]||'#8b5cf6';return '<div class="gcard" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="band" style="background:'+col+'"></div><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div><div class="play">▶ 플레이</div></div>';}).join('');
+  var kid=document.documentElement.classList.contains('kid');
+  el.innerHTML=list.map(function(g){
+    var cat=GAME_CATS[g.nm]||'all';var col=GCAT_COLORS[cat]||'#8b5cf6';
+    var m=GAME_META[g.nm]||{d:2,xp:15,min:5,hook:g.d};
+    var diff=kid?('<span style="color:var(--gd)">'+_gmStars(m.d)+'</span>'):('<span class="gdiff">'+_gmDots(m.d)+'</span>');
+    var tm=m.min>0?(m.min+'분'):'∞';
+    var xp=kid?('⭐'+m.xp):('+'+m.xp+'XP');
+    return '<div class="gcard" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="band" style="background:'+col+'"></div>'
+      +'<div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div><div class="gd">'+m.hook+'</div>'
+      +'<div class="gmeta">'+diff+'<span class="gtime">'+tm+'</span><span class="gxp">'+xp+'</span></div>'
+      +'<div class="play">▶ '+(kid?'놀기!':'플레이')+'</div></div>';
+  }).join('');
 }
 
 function rAll(){
