@@ -1306,8 +1306,9 @@ function convertSubject(subjectData,subjectName,icon){
           try{
             if(!t||!t.name)return null;
             return{t:t.name,lv:t.level||1,
-              content:'<h3>'+t.name+'</h3><p>이 레슨은 <b>'+t.name+'</b>에 대해 학습합니다.</p><p>레벨: Lv.'+(t.level||1)+' ('+(['','입문','초급','중급','고급','심화'][t.level]||'심화')+')</p><p>예상 학습량: '+(t.lessonCount||1)+'개 세부 레슨</p><p style="color:var(--t3);font-size:11px;margin-top:12px">* 상세 콘텐츠가 준비 중입니다. 곧 풍부한 학습 자료가 추가됩니다!</p>',
-              quiz:[{q:t.name+'의 핵심 개념을 이해했나요?',a:['네, 이해했어요','아직 어려워요','다시 볼게요','질문이 있어요'],c:0}]};
+              content: t.content || ('<h3>'+t.name+'</h3><p>이 레슨은 <b>'+t.name+'</b>에 대해 학습합니다.</p><p>레벨: Lv.'+(t.level||1)+' ('+(['','입문','초급','중급','고급','심화'][t.level]||'심화')+')</p><p>예상 학습량: '+(t.lessonCount||1)+'개 세부 레슨</p><p style="color:var(--t3);font-size:11px;margin-top:12px">* 상세 콘텐츠가 준비 중입니다. 곧 풍부한 학습 자료가 추가됩니다!</p>'),
+              quiz: (Array.isArray(t.quiz)&&t.quiz.length) ? t.quiz : [{q:t.name+'의 핵심 개념을 이해했나요?',a:['네, 이해했어요','아직 어려워요','다시 볼게요','질문이 있어요'],c:0}],
+              vq: t.videoQuery||''};
           }catch(e){console.warn('convertSubject: skipping topic',e);return null;}
         }).filter(Boolean)};
       }catch(e){console.warn('convertSubject: skipping unit',e);return null;}
@@ -1714,6 +1715,7 @@ function openLesson(ui,li){
   document.getElementById('learnLesson').style.display='';
   document.getElementById('lessonTitle').textContent=l.t;
   let html='<div style="background:var(--c1);border-radius:var(--r);padding:14px;margin-bottom:8px;font-size:13px;line-height:1.8;color:var(--t2)">'+l.content+'</div>';
+  html+='<button class="bt" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ff5252,#d32f2f);color:#fff;font-weight:700;border:none" onclick="vidSearchLesson('+ui+','+li+')">📺 영상으로 학습하기</button>';
   if(l.quiz&&l.quiz.length){
     html+='<div class="sec" style="font-size:13px">확인해볼까?</div>';
     l.quiz.forEach(q=>{
@@ -1732,6 +1734,7 @@ function openLesson(ui,li){
 }
 function backToSubjects(){document.getElementById('learnMain').style.display='';document.getElementById('learnUnit').style.display='none';}
 function backToUnits(){document.getElementById('learnUnit').style.display='';document.getElementById('learnLesson').style.display='none';}
+function vidSearchLesson(ui,li){var s=curSubjData;if(!s||!s.units[ui]||!s.units[ui].lessons[li])return;var l=s.units[ui].lessons[li];var q=(l.vq&&(''+l.vq).trim())?(''+l.vq):((s.nm||'')+' '+l.t);window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank');}
 
 // 영어 단어 게임 (기본 20개, JSON 로드 시 300개로 확장)
 const ENG_LEVELS=[null,
