@@ -1,7 +1,7 @@
 {
-  "name": "LevelPlay - 배우고, 올리고, 증명하라",
+  "name": "LevelPlay v6.0 - 배우고, 올리고, 증명하라",
   "short_name": "LevelPlay",
-  "description": "게이미피케이션 기반 교육 플랫폼. 14과목 175+레슨, 주간리그 7티어, 마스터리레이더, 학습로드맵, 스트릭실드, 40배지, 컨페티, 학습스토리6편, 성적공유카드로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v6.0. 증명서, 플래시카드, 보석시스템, XP부스트, 일일도전, 아바타커스터마이즈, 52배지, 주간리그, 300+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -14,6 +14,23 @@
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%238b5cf6'/><stop offset='100%25' style='stop-color:%2306d6a0'/></linearGradient></defs><rect fill='%230a0a1a' width='100' height='100' rx='20'/><text x='50' y='62' text-anchor='middle' font-family='Arial' font-size='36' font-weight='900' fill='url(%23g)'>LP</text></svg>",
       "sizes": "any",
       "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "일일 퀴즈 도전",
+      "url": "./index.html#daily",
+      "description": "오늘의 퀴즈 도전하기"
+    },
+    {
+      "name": "플래시카드",
+      "url": "./index.html#flash",
+      "description": "플래시카드로 복습하기"
+    },
+    {
+      "name": "증명서",
+      "url": "./index.html#cert",
+      "description": "학습 증명서 발급"
     }
   ]
 }
