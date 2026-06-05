@@ -464,6 +464,114 @@ function getTileSprite(type){
   return tiles[type]||tiles.grass;
 }
 
+// ========== 타일 BIOME 군집화 (결정론적 value-noise) ==========
+// Stardew Valley / Terraria식 접근: 좌표 해시로 격자점 난수를 만들고
+// smoothstep 보간 + 다중 옥타브로 연속 지형 필드를 생성한다.
+// sin/Math.random 미사용 → 같은 좌표는 항상 같은 값(카메라 이동 시 안정),
+// 곱셈/비트연산뿐이라 모바일에서도 타일당 비용이 극히 작다.
+const TILE_BIOME = {
+  // biome 임계값: noise<dirtT → dirt, <stoneT 영역 → stone, 그 외 grass
+  grassCut: 0.42,   // grass가 더 넓게 (지배적 지형)
+  stoneCut: 0.14,   // 돌 영역 축소
+  blend: 0.12,      // 경계 전이대 넓힘 — 부드러운 cross-fade
+  scaleLow: 0.038,  // 저주파 빈도 ↓ → biome 덩어리 약 2.2배 크게
+  scaleHigh: 0.09,  // 고주파 빈도 ↓ → 잔격자 제거
+  highAmp: 0.14,    // 고주파 가중치 ↓ → 체스판 무늬 완화
+  seed: 1337
+};
+// 격자점 해시 → 0~1 (정수 좌표 전용)
+function _latticeRand(ix, iy, seed){
+  let h = (ix * 374761393) ^ (iy * 668265263) ^ (seed * 2147483647);
+  h = (h ^ (h >>> 13)) >>> 0;
+  h = (h * 1274126177) >>> 0;
+  return (h & 0xffffff) / 0x1000000; // 0~1
+}
+function _smooth(t){ return t * t * (3 - 2 * t); } // smoothstep
+// 단일 옥타브 value-noise: 실수 격자좌표(fx,fy)에서 보간
+function _vnoise(fx, fy, seed){
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  const sx = _smooth(fx - x0), sy = _smooth(fy - y0);
+  const n00 = _latticeRand(x0,   y0,   seed);
+  const n10 = _latticeRand(x0+1, y0,   seed);
+  const n01 = _latticeRand(x0,   y0+1, seed);
+  const n11 = _latticeRand(x0+1, y0+1, seed);
+  const ix0 = n00 + (n10 - n00) * sx;
+  const ix1 = n01 + (n11 - n01) * sx;
+  return ix0 + (ix1 - ix0) * sy; // 0~1
+}
+// 타일(tx,ty)의 biome 노이즈 값 0~1 (era별로 다른 시드 → 시대마다 지형 다름)
+function tileNoise(tx, ty){
+  const seed = TILE_BIOME.seed + G.era * 101;
+  const low  = _vnoise(tx * TILE_BIOME.scaleLow,  ty * TILE_BIOME.scaleLow,  seed);
+  const high = _vnoise(tx * TILE_BIOME.scaleHigh, ty * TILE_BIOME.scaleHigh, seed + 7);
+  let v = (low + high * TILE_BIOME.highAmp) / (1 + TILE_BIOME.highAmp);
+  if (v < 0) v = 0; else if (v > 1) v = 1;
+  return v;
+}
+// 노이즈 값 → 타일 종류 키 ('grass'|'dirt'|'stone')
+function biomeType(n){
+  if (n < TILE_BIOME.stoneCut) return 'stone';
+  if (n < TILE_BIOME.grassCut) return 'dirt';
+  return 'grass';
+}
+// 경계 전이대에서 섞일 "이웃 biome"을 반환(없으면 null) + 블렌딩 가중치(0~1)
+function biomeBlend(n){
+  const b = TILE_BIOME.blend;
+  // stone↔dirt 경계
+  if (Math.abs(n - TILE_BIOME.stoneCut) < b)
+    return { type: n < TILE_BIOME.stoneCut ? 'dirt' : 'stone',
+             w: 1 - (Math.abs(n - TILE_BIOME.stoneCut) / b) }; // 경계 중심에서 0.5 근처
+  // dirt↔grass 경계
+  if (Math.abs(n - TILE_BIOME.grassCut) < b)
+    return { type: n < TILE_BIOME.grassCut ? 'grass' : 'dirt',
+             w: 1 - (Math.abs(n - TILE_BIOME.grassCut) / b) };
+  return null;
+}
+// 타일 1장 렌더 (AI 스프라이트 경로). render() 루프에서 호출.
+// 시대별 자연 지형 팔레트 (절차적 — 이음새/격자 없음)
+const TILE_PAL=[
+ {grass:'#4a6b35',dirt:'#6b5238',stone:'#6b6b6b'}, // 석기
+ {grass:'#577a38',dirt:'#7a5e40',stone:'#707070'}, // 신석기
+ {grass:'#5e7339',dirt:'#836a45',stone:'#787068'}, // 청동
+ {grass:'#4f6638',dirt:'#6e5740',stone:'#5f5f63'}, // 철기
+ {grass:'#42583f',dirt:'#5a4a3a',stone:'#56565e'}, // 중세
+ {grass:'#5a5e44',dirt:'#6b5c48',stone:'#666660'}, // 산업
+ {grass:'#3d5a4a',dirt:'#4a4a55',stone:'#5a5a66'}  // 현대
+];
+// 타일 1장 렌더 — 절차적 지형색 + 부드러운 노이즈 명암 (체스판 없음)
+function drawBiomeTile(ctx, tx, ty, sx, sy, gMap, ready){
+  const n = tileNoise(tx, ty);
+  const type = biomeType(n);
+  const pal = TILE_PAL[G.era] || TILE_PAL[0];
+  // 베이스 색
+  ctx.fillStyle = pal[type];
+  ctx.fillRect(sx, sy, TILE, TILE);
+  // 경계 전이대 cross-fade (이웃 색 반투명)
+  const nb = biomeBlend(n);
+  if (nb){
+    ctx.globalAlpha = nb.w * 0.45;
+    ctx.fillStyle = pal[nb.type];
+    ctx.fillRect(sx, sy, TILE, TILE);
+    ctx.globalAlpha = 1;
+  }
+  // 부드러운 대형 명암 (저주파 — 언덕/굴곡감, 격자 아님)
+  const shade = (_vnoise(tx*0.16, ty*0.16, TILE_BIOME.seed+99) - 0.5) * 0.14;
+  ctx.fillStyle = shade>=0 ? 'rgba(255,255,255,'+shade.toFixed(3)+')'
+                           : 'rgba(0,0,0,'+(-shade).toFixed(3)+')';
+  ctx.fillRect(sx, sy, TILE, TILE);
+  // grass에 잔디 디테일 점 (결정론적, 드물게)
+  if (type==='grass'){
+    const d = _latticeRand(tx, ty, 555);
+    if (d > 0.78){
+      ctx.fillStyle = 'rgba(120,160,80,0.35)';
+      const ox = (_latticeRand(tx,ty,1)*0.6+0.2)*TILE;
+      const oy = (_latticeRand(tx,ty,2)*0.6+0.2)*TILE;
+      ctx.fillRect(sx+ox, sy+oy, 3, 2);
+      ctx.fillRect(sx+ox+4, sy+oy-2, 2, 3);
+    }
+  }
+}
+
 // ========== 가상 조이스틱 + D-pad ==========
 let joyState={active:false,dx:0,dy:0,touchId:null,baseX:0,baseY:0,radius:50};
 let padMode='joystick'; // 'joystick' | 'dpad'
@@ -578,13 +686,16 @@ inv:{stick:3,stone:2},crafted:{},built:{},discoveredRecipes:['stoneAxe','spear']
 px:WORLD_W*TILE/2,py:WORLD_H*TILE/2,
 worldResources:[],buildings:[],villagers:[],
 camX:0,camY:0,selectedSlot:0,
-particles:[],floatingTexts:[],shakeAmount:0};
+particles:[],floatingTexts:[],shakeAmount:0,
+threats:[],hunger:0,tutorial:null};
 generateWorld();
 document.getElementById('menu-screen').style.display='none';
 gameStarted=true;
 showToast('석기시대에 오신 것을 환영합니다! 자원을 모아 도구를 만드세요.');
 // Start ambient BGM (after first user interaction has occurred via 새 게임 button)
 setTimeout(()=>startAmbient(G.era),300);
+// 온보딩 튜토리얼 시작
+startTutorial();
 // AI 가용성 1회 체크
 checkAIAvailable();
 gameLoop();
@@ -592,17 +703,7 @@ gameLoop();
 
 function generateWorld(){
 G.worldResources=[];
-const rTypes=getEraResources(G.era);
-for(let i=0;i<120;i++){
-const rt=rTypes[Math.floor(Math.random()*rTypes.length)];
-G.worldResources.push({
-type:rt,
-x:Math.random()*WORLD_W*TILE,
-y:Math.random()*WORLD_H*TILE,
-hp:3,
-bobOffset:Math.random()*Math.PI*2
-});
-}
+populateWorldByBiome(120);
 }
 
 // Resource node drawing — AI 스프라이트 우선, fallback to 도형/emoji
@@ -677,13 +778,70 @@ if(era>=6) base.push('silicon','uranium');
 return base;
 }
 
+// ========== 자원 BIOME 군집 배치 (Don't Starve / Terraria식) ==========
+// 핵심: 자원을 무작위로 흩뿌리지 않고, 기존 타일 biome 노이즈(tileNoise/biomeType)를
+// 그대로 재사용해 숲(grass=나무·섬유)/바위지대(stone=돌·광석)/평야(dirt=점토·식량)로
+// 나눈 뒤 같은 종류를 작은 반경 안에 7~12개씩 뭉쳐 배치한다.
+// → 채집 동선(숲 가서 나무, 바위지대 가서 광석)이 생기고, 시각 타일과 100% 일치한다.
+// tileNoise는 G.era로 시드되어 시대마다 지형이 다르고, 좌표당 결정론적이라 매 프레임 캐시 불필요.
+
+// 자원 type → 선호 타일 biome ('grass'|'stone'|'dirt'). 기존 getResourceCategory 재사용(type/era 로직 불변).
+function biomeForResource(type){
+  const cat=getResourceCategory(type);
+  if(cat==='wood') return 'grass';            // stick/wood/fiber/rubber → 숲(grass)
+  if(cat==='stone'||cat==='ore') return 'stone'; // stone/flint/광석/석탄/석회석/모래 등 → 바위지대(stone)
+  return 'dirt';                              // clay/food/berry/씨앗/목화 등 → 평야(dirt)
+}
+// 지정 biome 타일 한 곳을 무작위 선택(없으면 전역 랜덤 fallback). tileNoise/biomeType은 기존 함수.
+function _pickBiomeTile(wantType){
+  for(let tries=0;tries<28;tries++){
+    const tx=(Math.random()*WORLD_W)|0, ty=(Math.random()*WORLD_H)|0;
+    if(biomeType(tileNoise(tx,ty))===wantType) return {tx,ty};
+  }
+  return {tx:(Math.random()*WORLD_W)|0, ty:(Math.random()*WORLD_H)|0};
+}
+// 군집 산포: 시드 좌표 주변 작은 반경에 같은 type 여러 개(같은 종류가 뭉쳐 나도록).
+function _scatterCluster(type,centerWX,centerWY,n,radiusPx){
+  for(let i=0;i<n;i++){
+    const ang=Math.random()*Math.PI*2, rad=Math.sqrt(Math.random())*radiusPx;
+    let x=centerWX+Math.cos(ang)*rad, y=centerWY+Math.sin(ang)*rad;
+    x=Math.max(8,Math.min(WORLD_W*TILE-8,x));
+    y=Math.max(8,Math.min(WORLD_H*TILE-8,y));
+    // biome 경계로 약간 새도 자연스러움(부드러운 가장자리) — 강제 재배치 안 함(성능).
+    G.worldResources.push({type,x,y,hp:3,bobOffset:Math.random()*Math.PI*2});
+  }
+}
+// generateWorld 본체 대체: biome별 군집 배치(총량 기존 ~120 유지).
+function populateWorldByBiome(targetTotal){
+  const rTypes=getEraResources(G.era);
+  const target=targetTotal||120;
+  let placed=0, guard=0;
+  while(placed<target && guard++<2000){
+    const type=rTypes[(Math.random()*rTypes.length)|0];
+    const cell=_pickBiomeTile(biomeForResource(type));
+    const cx=cell.tx*TILE+TILE/2, cy=cell.ty*TILE+TILE/2;
+    const n=Math.min(7+((Math.random()*6)|0), target-placed); // 군집당 7~12개
+    _scatterCluster(type,cx,cy,n,TILE*2.2);
+    placed+=n;
+  }
+}
+// era-up/respawn 공용: 지정 type을 알맞은 biome에 군집 추가.
+function addResourcesByBiome(types,count){
+  let placed=0, guard=0;
+  while(placed<count && guard++<800){
+    const type=types[(Math.random()*types.length)|0];
+    const cell=_pickBiomeTile(biomeForResource(type));
+    const cx=cell.tx*TILE+TILE/2, cy=cell.ty*TILE+TILE/2;
+    const n=Math.min(5+((Math.random()*5)|0), count-placed);
+    _scatterCluster(type,cx,cy,n,TILE*2.0);
+    placed+=n;
+  }
+}
+
 function addEraResources(){
 const rTypes=getEraResources(G.era);
 const newTypes=rTypes.filter(r=>RESOURCES[r].era===G.era);
-for(let i=0;i<40;i++){
-const rt=newTypes.length>0?newTypes[Math.floor(Math.random()*newTypes.length)]:rTypes[Math.floor(Math.random()*rTypes.length)];
-G.worldResources.push({type:rt,x:Math.random()*WORLD_W*TILE,y:Math.random()*WORLD_H*TILE,hp:3});
-}
+addResourcesByBiome((newTypes.length>0?newTypes:rTypes),40);
 }
 
 // ========== GAME LOOP ==========
@@ -729,6 +887,9 @@ G.px=Math.max(10,Math.min(WORLD_W*TILE-10,G.px));
 G.py=Math.max(10,Math.min(WORLD_H*TILE-10,G.py));
 // 채집 작업 처리 (이동 → 도착 → 채집 애니)
 processGatherTask();
+// 밤 늑대 위협 + 온보딩 진행
+updateThreats();
+updateTutorial();
 
 // Update floating texts
 if(G.floatingTexts){G.floatingTexts.forEach(ft=>{ft.y-=1;ft.t--});
@@ -774,9 +935,12 @@ if(G.shakeAmount>0){
   if(G.shakeAmount<0.1)G.shakeAmount=0;
 }
 
-// Camera follow + shake
-G.camX=G.px-W/2;
-G.camY=G.py-H/2;
+// Camera follow (smooth lerp) + shake
+const _camTX=G.px-W/2, _camTY=G.py-H/2;
+if(G.camX===undefined||G.camX===null)G.camX=_camTX;
+if(G.camY===undefined||G.camY===null)G.camY=_camTY;
+G.camX+=(_camTX-G.camX)*0.12;
+G.camY+=(_camTY-G.camY)*0.12;
 if(G.shakeAmount>0){
   G.camX+=(Math.random()-0.5)*G.shakeAmount;
   G.camY+=(Math.random()-0.5)*G.shakeAmount;
@@ -792,18 +956,28 @@ document.getElementById('season-display').textContent=SEASON_ICONS[G.season]+' '
 }
 // Spawn resources periodically
 if(G.day%5===0 && G.worldResources.length<200){
-const rTypes=getEraResources(G.era);
-for(let i=0;i<10;i++){
-const rt=rTypes[Math.floor(Math.random()*rTypes.length)];
-G.worldResources.push({type:rt,x:Math.random()*WORLD_W*TILE,y:Math.random()*WORLD_H*TILE,hp:3});
+addResourcesByBiome(getEraResources(G.era),10);
 }
-}
-// Food consumption
+// Food consumption + 굶주림 페널티
 const foodNeeded=Math.ceil(G.population/3);
 const totalFood=(G.inv.meat||0)+(G.inv.berry||0)+(G.inv.bread||0)+(G.inv.wheat||0)+(G.inv.rice||0);
+if(G.hunger===undefined)G.hunger=0;
 if(totalFood>=foodNeeded){
 for(const f of['bread','meat','berry','wheat','rice']){
 if(G.inv[f]&&G.inv[f]>0){const take=Math.min(G.inv[f],foodNeeded);G.inv[f]-=take;break;}
+}
+G.hunger=Math.max(0,G.hunger-1); // 회복
+}else{
+// 식량 부족 → 기아 누적
+G.hunger++;
+if(G.hunger>=3 && G.population>1){
+G.population--;
+G.hunger=1;
+showToast('💀 식량 부족! 굶주림으로 인구가 줄었습니다.');
+if(G.villagers&&G.villagers.length>0)G.villagers.pop();
+screenFlash&&screenFlash();
+}else if(G.hunger>=1){
+showToast('⚠ 식량이 부족합니다! 사냥·농경으로 식량을 확보하세요.');
 }
 }
 document.getElementById('day-count').textContent=G.day+'일차';
@@ -871,24 +1045,16 @@ const tileGrass=getTileSprite('grass');
 const tileDirt=getTileSprite('dirt');
 const tileStone=getTileSprite('stone');
 const useAITiles=tileGrass&&tileGrass._loaded&&!tileGrass._failed;
+const tileMap={grass:tileGrass,dirt:tileDirt,stone:tileStone};
 
 for(let tx=startTX;tx<endTX;tx++){
 for(let ty=startTY;ty<endTY;ty++){
 const sx=tx*TILE-G.camX;
 const sy=ty*TILE-G.camY;
 if(useAITiles){
-  // 결정론적 시드(타일좌표 기반) — 같은 위치 항상 같은 타일
-  const h=((tx*73856093)^(ty*19349663))>>>0;
-  const pick=h%10;
-  let sprite=tileGrass;
-  if(pick<2&&tileStone&&tileStone._loaded)sprite=tileStone;
-  else if(pick<5&&tileDirt&&tileDirt._loaded)sprite=tileDirt;
-  ctx.drawImage(sprite,sx,sy,TILE,TILE);
+  drawBiomeTile(ctx,tx,ty,sx,sy,tileMap,true);
 }else{
-  ctx.fillStyle=((tx+ty)%2===0)?'rgba(255,255,255,.03)':'rgba(0,0,0,.03)';
-  ctx.fillRect(sx,sy,TILE,TILE);
-  ctx.strokeStyle='rgba(255,255,255,.04)';
-  ctx.strokeRect(sx,sy,TILE,TILE);
+  drawBiomeTile(ctx,tx,ty,sx,sy,tileMap,false);
 }
 }
 }
@@ -961,11 +1127,13 @@ ctx.fillText('👤',sx,sy);
 // Player with walking animation
 const px=G.px-G.camX;
 const py=G.py-G.camY;
-// Shadow
-ctx.fillStyle='rgba(0,0,0,.35)';
-ctx.beginPath();
-ctx.ellipse(px,py+14,14,5,0,0,Math.PI*2);
-ctx.fill();
+// Shadow (강화 — 접지감)
+ctx.save();
+ctx.fillStyle='rgba(0,0,0,.18)';
+ctx.beginPath();ctx.ellipse(px,py+15,20,7,0,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='rgba(0,0,0,.45)';
+ctx.beginPath();ctx.ellipse(px,py+15,13,4.5,0,0,Math.PI*2);ctx.fill();
+ctx.restore();
 const bobY=G.walking?Math.sin(G.walkFrame*0.3)*3:Math.sin(animFrame*0.05)*1;
 // 이동 방향 추적 (마지막 dx 저장)
 if(G.targetX!==null&&G.targetY!==null){
@@ -1091,6 +1259,8 @@ ctx.stroke();
 ctx.setLineDash([]);
 
 // Minimap
+drawThreats();
+drawHungerWarning();
 renderMinimap();
 updateInventoryBar();
 }
@@ -1162,8 +1332,128 @@ if(G.inv[k]<=0)delete G.inv[k];
 }
 }
 
+// ========== 밤 늑대 위협 시스템 ==========
+function updateThreats(){
+  if(!G.threats)G.threats=[];
+  const dp=G.time/DAY_LENGTH;
+  const isNight=dp>0.72||dp<0.12;
+  if(isNight && G.threats.length<5 && animFrame%90===0 && Math.random()<0.6){
+    const edge=Math.floor(Math.random()*4),m=80;let wx,wy;
+    if(edge===0){wx=G.px+(Math.random()-0.5)*W;wy=G.py-H/2-m;}
+    else if(edge===1){wx=G.px+(Math.random()-0.5)*W;wy=G.py+H/2+m;}
+    else if(edge===2){wx=G.px-W/2-m;wy=G.py+(Math.random()-0.5)*H;}
+    else{wx=G.px+W/2+m;wy=G.py+(Math.random()-0.5)*H;}
+    G.threats.push({x:wx,y:wy,hp:2,fade:1,speed:1.4+Math.random()*0.6,atkCD:0});
+  }
+  const camp=G.buildings?G.buildings.filter(b=>b.type==='campfire'):[];
+  for(let i=G.threats.length-1;i>=0;i--){
+    const w=G.threats[i];
+    if(!isNight){w.fade-=0.02;if(w.fade<=0){G.threats.splice(i,1);continue;}}
+    let flee=null;
+    for(const c of camp){if(Math.hypot(c.x-w.x,c.y-w.y)<120){flee=c;break;}}
+    let tx=G.px,ty=G.py;
+    if(flee){tx=w.x+(w.x-flee.x);ty=w.y+(w.y-flee.y);}
+    const dx=tx-w.x,dy=ty-w.y,d=Math.hypot(dx,dy)||1;
+    w.x+=dx/d*w.speed;w.y+=dy/d*w.speed;
+    let safe=false;
+    for(const c of camp){if(Math.hypot(c.x-G.px,c.y-G.py)<120){safe=true;break;}}
+    const pd=Math.hypot(G.px-w.x,G.py-w.y);
+    if(pd<22 && !safe && (w.atkCD||0)<=0){
+      w.atkCD=120;
+      if(G.population>1){G.population--;if(G.villagers&&G.villagers.length)G.villagers.pop();}
+      showToast('🐺 늑대의 습격! 인구가 줄었습니다.');
+      if(typeof screenShake==='function')screenShake(10);
+      if(typeof screenFlash==='function')screenFlash();
+      G.px+=(G.px-w.x)/pd*30;G.py+=(G.py-w.y)/pd*30;
+    }
+    if(w.atkCD>0)w.atkCD--;
+  }
+}
+function hasWeapon(){
+  return['spear','stoneAxe','bronzeAxe','bronzeSword','ironSword','steelSword','stoneHammer'].some(k=>(G.inv[k]||0)>0);
+}
+function attackThreats(){
+  if(!G.threats||!G.threats.length)return false;
+  let hit=false;
+  for(let i=G.threats.length-1;i>=0;i--){
+    const w=G.threats[i];
+    if(Math.hypot(G.px-w.x,G.py-w.y)<60){
+      w.hp-=hasWeapon()?2:1;
+      spawnParticles(w.x,w.y,{count:8,colors:['#c00','#f44','#fff'],speed:3,life:25,gravity:0.2,size:3});
+      playSound(200,0.1,0.12,'sawtooth');
+      if(w.hp<=0){G.threats.splice(i,1);showToast('🗡 늑대를 격퇴했습니다! (고기 +1)');addItem('meat',1);}
+      hit=true;
+    }
+  }
+  return hit;
+}
+function drawThreats(){
+  if(!G.threats)return;
+  G.threats.forEach(w=>{
+    const sx=w.x-G.camX,sy=w.y-G.camY;
+    if(sx<-40||sx>W+40||sy<-40||sy>H+40)return;
+    ctx.save();ctx.globalAlpha=Math.max(0,w.fade);
+    ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(sx,sy+8,12,4,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3a3a3a';ctx.beginPath();ctx.ellipse(sx,sy,11,7,0,0,Math.PI*2);ctx.fill();
+    const dir=G.px>w.x?9:-9;
+    ctx.fillStyle='#2a2a2a';ctx.beginPath();ctx.arc(sx+dir,sy-3,6,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ff3030';ctx.beginPath();ctx.arc(sx+dir*1.2,sy-4,1.7,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+}
+function drawHungerWarning(){
+  if(!G.hunger||G.hunger<1)return;
+  const pulse=0.25+Math.abs(Math.sin(animFrame*0.1))*0.3;
+  ctx.save();
+  const g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.3,W/2,H/2,Math.max(W,H)*0.6);
+  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`rgba(170,0,0,${pulse})`);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.restore();
+}
+
+// ========== 온보딩 튜토리얼 ==========
+function totalInvCount(){return Object.values(G.inv||{}).reduce((a,b)=>a+b,0);}
+const TUT_STEPS=[
+  {text:'🕹 조이스틱이나 방향키로 움직여 보세요',check:()=>G.tutorial&&Math.hypot(G.px-G.tutorial.startPx,G.py-G.tutorial.startPy)>120},
+  {text:'⛏ 가까운 자원을 탭하면 캐릭터가 가서 채집합니다',check:()=>totalInvCount()>5},
+  {text:'🔨 우하단 망치 버튼으로 도구를 제작해 보세요',check:()=>panelOpen==='craft'}
+];
+function startTutorial(){
+  if(localStorage.getItem('civevo_tutorial_done')==='1')return;
+  G.tutorial={step:0,startPx:G.px,startPy:G.py};
+  showTutorialBanner();
+}
+function showTutorialBanner(){
+  let b=document.getElementById('tutorial-banner');
+  if(!b){
+    b=document.createElement('div');b.id='tutorial-banner';
+    b.style.cssText='position:absolute;top:90px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(20,40,80,.95),rgba(40,20,80,.95));color:#fff;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,215,0,.5);font-size:14px;z-index:60;box-shadow:0 4px 16px rgba(0,0,0,.5);text-align:center;max-width:85vw';
+    document.body.appendChild(b);
+  }
+  if(!G.tutorial||G.tutorial.step>=TUT_STEPS.length){b.style.display='none';return;}
+  b.style.display='block';
+  b.innerHTML=`<div style="color:#FFD700;font-size:11px;margin-bottom:4px">튜토리얼 ${G.tutorial.step+1}/3</div>${TUT_STEPS[G.tutorial.step].text}<br><button onclick="skipTutorial()" style="margin-top:8px;padding:3px 12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#ccc;border-radius:6px;font-size:11px;cursor:pointer">건너뛰기</button>`;
+}
+function updateTutorial(){
+  if(!G.tutorial||G.tutorial.step>=TUT_STEPS.length)return;
+  if(TUT_STEPS[G.tutorial.step].check()){
+    G.tutorial.step++;
+    if(G.tutorial.step>=TUT_STEPS.length){
+      localStorage.setItem('civevo_tutorial_done','1');
+      showToast('🎉 튜토리얼 완료! 이제 문명을 발전시키세요.');
+      const b=document.getElementById('tutorial-banner');if(b)b.style.display='none';
+      G.tutorial=null;
+    }else{showTutorialBanner();if(typeof playSound==='function')playSound(700,0.1,0.1);}
+  }
+}
+function skipTutorial(){
+  localStorage.setItem('civevo_tutorial_done','1');G.tutorial=null;
+  const b=document.getElementById('tutorial-banner');if(b)b.style.display='none';
+}
+
 // ========== GATHERING ==========
 function gatherNearest(){
+// 늑대가 근처에 있으면 먼저 공격
+if(attackThreats())return;
 let closest=null,minD=50;
 G.worldResources.forEach(r=>{
 const dx=G.px-r.x,dy=G.py-r.y;
@@ -1206,6 +1496,10 @@ const cx=(e.clientX-rect.left)*(canvas.width/rect.width);
 const cy=(e.clientY-rect.top)*(canvas.height/rect.height);
 const mx=cx+G.camX;
 const my=cy+G.camY;
+// 늑대가 근처에 있으면 클릭으로 공격 우선
+if(G.threats&&G.threats.some(w=>Math.hypot(mx-w.x,my-w.y)<50)){
+  if(attackThreats())return;
+}
 // 진행 중 작업 취소
 if(G.task)G.task=null;
 
