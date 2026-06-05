@@ -502,21 +502,25 @@ button{font-family:inherit;cursor:pointer}
 
   // Pick highest peak after first positive zero crossing, threshold-relative.
   function pickPeak(ns) {
+    // MPM: globalMax*0.9 임계를 넘는 '첫' key-maximum 선택 (전역최대 아님).
+    // 전역최대를 잡으면 2*T0 하모닉이 이겨 음정이 한 옥타브 아래로 검출됨(옥타브 점프 버그).
     var n = ns.length;
-    // skip downhill-from-1 region
+    var maxima = [];
     var i = 1;
-    while (i < n - 1 && ns[i] > 0) i++; // descend below zero
-    while (i < n - 1 && ns[i] <= 0) i++; // climb back above
-    if (i >= n - 1) return -1;
-    // collect local maxima
-    var peakIdx = -1, peakVal = -1;
-    for (; i < n - 1; i++) {
-      if (ns[i] > ns[i - 1] && ns[i] >= ns[i + 1] && ns[i] > peakVal) {
-        peakVal = ns[i];
-        peakIdx = i;
-      }
+    while (i < n - 1 && ns[i] > 0) i++;
+    while (i < n - 1) {
+      if (ns[i] > 0) {
+        var mIdx = i, mVal = ns[i];
+        while (i < n - 1 && ns[i] > 0) { if (ns[i] > mVal) { mVal = ns[i]; mIdx = i; } i++; }
+        maxima.push(mIdx);
+      } else i++;
     }
-    return peakIdx;
+    if (!maxima.length) return -1;
+    var gMax = 0;
+    for (var k = 0; k < maxima.length; k++) if (ns[maxima[k]] > gMax) gMax = ns[maxima[k]];
+    var thresh = gMax * 0.9;
+    for (var k2 = 0; k2 < maxima.length; k2++) if (ns[maxima[k2]] >= thresh) return maxima[k2];
+    return maxima[0];
   }
 
   // Parabolic interpolation around index k of array a — sub-sample peak.
@@ -1652,7 +1656,7 @@ function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webki
 async function startMic(){
   try{
     initAudio();
-    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
     const src=audioCtx.createMediaStreamSource(micStream);
     analyser=audioCtx.createAnalyser();analyser.fftSize=BUF;
     src.connect(analyser);micOn=true;
