@@ -276,7 +276,7 @@
         Math.cos(S.orbitAngle) * r * 0.6
       );
       S.camera.lookAt(0, 0.4, 0);
-    } else if (S.mode === 'cooking'){
+    } else if (S.mode === 'cooking' || S.mode === 'cooking_dim'){
       // 스토브 정면 약간 위 (0,1.5,3) — 약간의 흔들림
       var sx = Math.sin(t*1.7) * 0.03;
       var sy = Math.sin(t*2.3) * 0.02;
@@ -299,10 +299,11 @@
   // -- 라이팅 모드별 업데이트
   function updateLights(dt){
     if (!S.stoveLight) return;
-    var target = (S.mode === 'cooking') ? 1.0 : 0.0;
+    var isCook = (S.mode === 'cooking' || S.mode === 'cooking_dim');
+    var target = isCook ? 1.0 : 0.0;
     S.stoveLight.intensity += (target - S.stoveLight.intensity) * Math.min(1, dt*3);
     // 약간의 깜빡임
-    if (S.mode === 'cooking'){
+    if (isCook){
       S.stoveLight.intensity *= 0.96 + Math.random()*0.08;
     }
   }
@@ -316,7 +317,7 @@
       S.foodGroup.position.z += (-0.25 - S.foodGroup.position.z) * Math.min(1, dt*2);
       S.foodGroup.position.y += (0.62 - S.foodGroup.position.y) * Math.min(1, dt*2);
       S.foodGroup.rotation.y += 0.2 * dt;
-    } else if (S.mode === 'cooking'){
+    } else if (S.mode === 'cooking' || S.mode === 'cooking_dim'){
       S.foodGroup.position.x += (-0.5 - S.foodGroup.position.x) * Math.min(1, dt*2);
       S.foodGroup.position.z += (-0.25 - S.foodGroup.position.z) * Math.min(1, dt*2);
       S.foodGroup.position.y += (0.62 - S.foodGroup.position.y) * Math.min(1, dt*2);
@@ -413,11 +414,16 @@
 
   function setMode(mode){
     if (!S.ready || !S.supported) return;
-    if (mode === 'menu' || mode === 'cooking' || mode === 'result' || mode === 'hidden'){
+    if (mode === 'menu' || mode === 'cooking' || mode === 'cooking_dim' || mode === 'result' || mode === 'hidden'){
       S.mode = mode;
       if (S.canvas){
         S.canvas.style.visibility = (mode === 'hidden') ? 'hidden' : 'visible';
       }
+      // 요리(dim) 중에는 조리도구/음식 3D 메쉬를 숨겨 2D 팬과 겹치는 '유령 냄비' 제거
+      var hideCookware = (mode === 'cooking_dim');
+      if (S.pot)       S.pot.visible       = !hideCookware;
+      if (S.pan)       S.pan.visible       = !hideCookware;
+      if (S.foodGroup) S.foodGroup.visible = !hideCookware;
     }
   }
 
@@ -489,14 +495,17 @@
     S.camera = null;
   }
 
-  // -- 노출
+  // -- 노출 (shaders.js 등 외부 모듈이 renderer/scene을 공유받을 수 있도록 getter 제공)
   window.Kitchen3D = {
     init: init,
     resize: resize,
     setMode: setMode,
     setRecipeFood: setRecipeFood,
     render: render,
-    dispose: dispose
+    dispose: dispose,
+    get _renderer(){ return S.renderer; },
+    get _scene(){ return S.scene; },
+    get _ready(){ return S.ready && S.supported; }
   };
 
 })();

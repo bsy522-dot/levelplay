@@ -28,6 +28,7 @@
         // No-op stub when THREE is missing or WebGL is unsupported.
         window.GameShaders = {
             init: function () { return false; },
+            render: function () {},
             triggerFire: function () {},
             triggerSteam: function () {},
             triggerBoil: function () {},
@@ -259,13 +260,15 @@
     }
 
     function init(renderer, scene) {
+        // scene 인자는 더 이상 사용하지 않음 (이름 보존을 위해 받기만 함).
+        // shaders는 perspective Kitchen3D 씬과 분리된 자체 ortho 씬을 사용한다.
         if (state.ready) return true;
-        if (!renderer || !scene) return false;
+        if (!renderer) return false;
 
-        // Detect WebGL support via Three's renderer (already created if passed).
         try {
             state.renderer = renderer;
-            state.scene = scene;
+            // 별도 ortho 씬 (perspective Kitchen3D scene과 분리)
+            state.scene = new THREE.Scene();
             var size = new THREE.Vector2();
             renderer.getSize(size);
             state.viewportW = size.x || window.innerWidth;
@@ -284,7 +287,7 @@
                 f.life = 0;
                 f.maxLife = FIRE_LIFE;
                 f.active = false;
-                scene.add(f.mesh);
+                state.scene.add(f.mesh);
                 state.firePool.push(f);
             }
             for (var j = 0; j < POOL_STEAM; j++) {
@@ -293,7 +296,7 @@
                 s.life = 0;
                 s.maxLife = STEAM_LIFE;
                 s.active = false;
-                scene.add(s.mesh);
+                state.scene.add(s.mesh);
                 state.steamPool.push(s);
             }
 
@@ -301,7 +304,7 @@
             var b = makePlane(1, 1, FRAG_BOIL, { uActive: { value: 0.0 } });
             b.mesh.renderOrder = 99;
             b.active = false;
-            scene.add(b.mesh);
+            state.scene.add(b.mesh);
             state.boil = b;
 
             state.ready = true;
@@ -311,6 +314,17 @@
             state.ready = false;
             return false;
         }
+    }
+
+    // Render shader scene over Kitchen3D scene without clearing the framebuffer.
+    function render() {
+        if (!state.ready) return;
+        var ac = state.renderer.autoClear;
+        state.renderer.autoClear = false;
+        try {
+            state.renderer.render(state.scene, state.camera);
+        } catch (e) { /* ignore */ }
+        state.renderer.autoClear = ac;
     }
 
     function pickFreeSlot(pool) {
@@ -481,6 +495,7 @@
 
     window.GameShaders = {
         init: init,
+        render: render,
         triggerFire: triggerFire,
         triggerSteam: triggerSteam,
         triggerBoil: triggerBoil,

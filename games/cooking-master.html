@@ -47,30 +47,36 @@ let dragItem=null,dragOX=0,dragOY=0,particles=[],steamPs=[];
 let restaurantMode=false,customers=[],orderTimer=0,servedCount=0;
 let earnedStars={},scrollY=0,infoPopup=null,animT=0;
 
-// Audio
-const AC=new(window.AudioContext||window.webkitAudioContext)();
-function playSound(type){
+// Audio — lazy 생성: 첫 제스처 시점에 만들어 autoplay 정책 위반 방지
+let AC=null;
+function ensureAudio(){
+ if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){AC=null;return null;}}
  if(AC.state==='suspended')AC.resume();
- const o=AC.createOscillator(),g=AC.createGain(),n=AC.createBufferSource();
- g.connect(AC.destination);
+ return AC;
+}
+function playSound(type){
+ const ac=ensureAudio();
+ if(!ac)return;
+ const o=ac.createOscillator(),g=ac.createGain(),n=ac.createBufferSource();
+ g.connect(ac.destination);
  if(type==='chop'){
-  const buf=AC.createBuffer(1,AC.sampleRate*.08,AC.sampleRate),d=buf.getChannelData(0);
+  const buf=ac.createBuffer(1,ac.sampleRate*.08,ac.sampleRate),d=buf.getChannelData(0);
   for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/800);
   n.buffer=buf;n.connect(g);g.gain.value=.3;n.start();
  }else if(type==='sizzle'){
-  const buf=AC.createBuffer(1,AC.sampleRate*.5,AC.sampleRate),d=buf.getChannelData(0);
+  const buf=ac.createBuffer(1,ac.sampleRate*.5,ac.sampleRate),d=buf.getChannelData(0);
   for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*.15*Math.exp(-i/8000);
   n.buffer=buf;n.connect(g);g.gain.value=.25;n.start();
  }else if(type==='boil'){
-  const buf=AC.createBuffer(1,AC.sampleRate*.4,AC.sampleRate),d=buf.getChannelData(0);
-  for(let i=0;i<d.length;i++){const t=i/AC.sampleRate;d[i]=Math.sin(t*200+Math.sin(t*50)*5)*.1*Math.exp(-i/15000)+(Math.random()-.5)*.05;}
+  const buf=ac.createBuffer(1,ac.sampleRate*.4,ac.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++){const t=i/ac.sampleRate;d[i]=Math.sin(t*200+Math.sin(t*50)*5)*.1*Math.exp(-i/15000)+(Math.random()-.5)*.05;}
   n.buffer=buf;n.connect(g);g.gain.value=.2;n.start();
  }else if(type==='ding'){
-  o.connect(g);o.frequency.value=880;g.gain.setValueAtTime(.3,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.3);o.start();o.stop(AC.currentTime+.3);
+  o.connect(g);o.frequency.value=880;g.gain.setValueAtTime(.3,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.3);o.start();o.stop(ac.currentTime+.3);
  }else if(type==='star'){
-  o.connect(g);o.frequency.setValueAtTime(523,AC.currentTime);o.frequency.setValueAtTime(659,AC.currentTime+.1);o.frequency.setValueAtTime(784,AC.currentTime+.2);g.gain.setValueAtTime(.2,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.4);o.start();o.stop(AC.currentTime+.4);
+  o.connect(g);o.frequency.setValueAtTime(523,ac.currentTime);o.frequency.setValueAtTime(659,ac.currentTime+.1);o.frequency.setValueAtTime(784,ac.currentTime+.2);g.gain.setValueAtTime(.2,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.4);o.start();o.stop(ac.currentTime+.4);
  }else if(type==='click'){
-  o.connect(g);o.frequency.value=600;g.gain.setValueAtTime(.15,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.05);o.start();o.stop(AC.currentTime+.05);
+  o.connect(g);o.frequency.value=600;g.gain.setValueAtTime(.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.05);o.start();o.stop(ac.currentTime+.05);
  }
 }
 
@@ -297,6 +303,35 @@ function drawText(txt,x,y,size,color,align='center',bold=false){
  X.fillStyle=color;X.textAlign=align;X.textBaseline='middle';
  X.fillText(txt,x,y);
 }
+function wrapLines(txt,maxW,size,bold,maxLines){
+ X.font=(bold?'bold ':'')+size+'px "Segoe UI",sans-serif';
+ const hasSpace=txt.indexOf(' ')>=0;
+ const tokens=hasSpace?txt.split(' '):txt.split('');
+ const join=hasSpace?' ':'';
+ const lines=[]; let cur='';
+ for(const t of tokens){
+  const test=cur?cur+join+t:t;
+  if(X.measureText(test).width>maxW&&cur){lines.push(cur);cur=t;}
+  else cur=test;
+ }
+ if(cur)lines.push(cur);
+ if(maxLines&&lines.length>maxLines){
+  const kept=lines.slice(0,maxLines);
+  let last=kept[maxLines-1];
+  while(last.length>1&&X.measureText(last+'…').width>maxW)last=last.slice(0,-1);
+  kept[maxLines-1]=last+'…';
+  return kept;
+ }
+ return lines;
+}
+function pickDragIngredient(recipe,step,stepText){
+ const need=recipe.ingredients||[];
+ const inText=need.find(ing=>stepText&&stepText.includes(ing));
+ if(inText)return inText;
+ let dragIdx=0;
+ for(let i=0;i<step;i++)if(recipe.stepTypes[i]==='drag')dragIdx++;
+ return need[dragIdx % need.length] || need[0] || '재료';
+}
 function drawRoundRect(x,y,w,h,r,fill,stroke){
  X.beginPath();X.roundRect(x,y,w,h,r);
  if(fill){X.fillStyle=fill;X.fill();}
@@ -451,6 +486,7 @@ function drawRecipeList(){
 // Cooking
 let holdProgress=0,holdTarget=3,ingredientSlots=[],stepComplete=false,ingredientPhase=true;
 let correctCount=0,totalPossible=0;
+let cookExitConfirm=false;   // 요리 중 나가기 모달 (C-3)
 
 function startCooking(recipe){
  currentRecipe=recipe;cookStep=0;cookScore=0;
@@ -458,6 +494,7 @@ function startCooking(recipe){
  stepComplete=false;ingredientPhase=true;correctCount=0;
  totalPossible=recipe.ingredients.length;dragItem=null;
  particles=[];state='cooking';
+ cookExitConfirm=false;   // C-3
  document.getElementById('hud').classList.remove('hidden');
  updateHUD();
 }
@@ -551,6 +588,8 @@ function drawCookingStep(){
  const step=recipe.steps[cookStep];
  const stype=recipe.stepTypes[cookStep];
  const isLast=cookStep>=recipe.steps.length-1;
+ // 비상구 모달 떠 있으면 조리(연속) 입력만 무시. tapped은 모달 버튼(checkBtns)용으로 유지 (C-3)
+ if(cookExitConfirm){touching=false;}
 
  // Kitchen bg
  fillRect(0,0,W,H,'#EFEBE9');
@@ -641,7 +680,7 @@ function drawCookingStep(){
  if(stype==='hold'){
   holdTarget=step.includes('4초')?4:3;
   if(touching&&!stepComplete){
-   holdProgress+=1/60;
+   holdProgress+=(window._dt||1/60);
    // Fire effect
    if(frame%3===0)addParticle(bx+Math.random()*40-20,panY+10,'fire');
    if(frame%10===0)addParticle(bx+Math.random()*30-15,panY-20,'steam');
@@ -658,13 +697,14 @@ function drawCookingStep(){
  }else if(stype==='drag'){
   // Drag zone
   if(!stepComplete){
-   const dzx=W*.1,dzy=H*.05,dzw=70,dzh=70;
+   const dzw=72,dzh=72,dzx=Math.max(12,W*.06),dzy=64;
    drawRoundRect(dzx,dzy,dzw,dzh,10,'#FFF9C4','#FFC107');
-   const dragIngr=selectedIngredients[Math.min(cookStep,selectedIngredients.length-1)]||'재료';
+   const dragIngr=pickDragIngredient(recipe,cookStep,step);
    const info=INGREDIENT_INFO[dragIngr];
-   drawText(info?info.emoji:'🍽️',dzx+dzw/2,dzy+dzh/2,28,'#000');
+   drawText(info?info.emoji:'🍽️',dzx+dzw/2,dzy+dzh/2-6,26,'#000');
+   drawText(dragIngr,dzx+dzw/2,dzy+dzh/2+20,9,'#5D4037','center',true);
 
-   if(tapped&&hitTest(dzx,dzy,dzw,dzh,tapX,tapY)){
+   if(tapped&&!cookExitConfirm&&hitTest(dzx,dzy,dzw,dzh,tapX,tapY)){
     dragItem={x:dzx,y:dzy};tapped=false;
    }
    if(dragItem&&touching){
@@ -690,7 +730,7 @@ function drawCookingStep(){
   }
  }else{
   // Tap
-  if(tapped&&!stepComplete){
+  if(tapped&&!stepComplete&&!cookExitConfirm){
    stepComplete=true;cookScore+=20;playSound('chop');
    addParticle(tapX,tapY,'star');
    tapped=false;
@@ -713,34 +753,63 @@ function drawCookingStep(){
   };
  }
 
+ // ===== 요리 중 비상구 ✕ + 모달 (C-3) =====
+ if(!cookExitConfirm){
+  const xs=40, xx=W-xs-8, xy=H*.045;
+  drawRoundRect(xx,xy,xs,xs,12,'rgba(244,67,54,.92)','#B71C1C');
+  drawText('✕',xx+xs/2,xy+xs/2,22,'#fff','center',true);
+  if(tapped&&hitTest(xx,xy,xs,xs,tapX,tapY)){tapped=false;cookExitConfirm=true;playSound('click');}
+ }else{
+  fillRect(0,0,W,H,'rgba(0,0,0,.55)');
+  const mw=Math.min(300,W-40),mh=180,mx=(W-mw)/2,my=(H-mh)/2;
+  drawRoundRect(mx,my,mw,mh,18,'#FFF8E1','#FFB74D');
+  drawText('🍳',W/2,my+34,34,'#000');
+  drawText('요리를 그만둘까요?',W/2,my+70,17,'#3E2723','center',true);
+  drawText('지금 나가면 이 요리는 사라져요',W/2,my+94,12,'#8D6E63','center');
+  const bw=mw/2-22, bh=46;
+  regBtn(mx+14,my+mh-58,bw,bh,'계속하기 ✨','#4CAF50');
+  btns[btns.length-1].action=()=>{cookExitConfirm=false;};
+  regBtn(mx+mw-bw-14,my+mh-58,bw,bh,'그만두기','#8D6E63');
+  btns[btns.length-1].action=()=>{
+   cookExitConfirm=false;
+   if(state==='cooking_restaurant'){state='restaurant';document.getElementById('hud').classList.remove('hidden');document.getElementById('hud-timer').classList.remove('hidden');}
+   else{state='recipes';scrollY=0;document.getElementById('hud').classList.add('hidden');}
+   currentRecipe=null;
+  };
+ }
+
  drawParticles();
  updateParticles();
 }
 
 function finishCooking(){
- state='result';
  const recipe=currentRecipe;
- // Ingredient score (50%)
  const ingScore=Math.round((correctCount/totalPossible)*50);
- // Cooking score (30%) - from steps
- const stepScore=Math.round((cookScore/(recipe.steps.length*20))*30);
- // Presentation (20%) - bonus
- const presScore=15+Math.floor(Math.random()*6);
- const total=ingScore+stepScore+presScore;
- const stars=total>=90?3:total>=70?2:total>=40?1:0;
- const earned=coins+stars*10+total;
- const prevStars=earnedStars[recipe.id]||0;
- if(stars>prevStars){totalStars+=stars-prevStars;earnedStars[recipe.id]=stars;}
- coins+=stars*10+Math.floor(total/5);
- playerLevel=1+Math.floor(totalStars/5);
- cookScore=total;
- save();
- playSound('star');
+ const maxStep=recipe.steps.length*20;
+ const stepScore=Math.round((Math.min(cookScore,maxStep)/maxStep)*30);
+ const presScore=Math.round((Math.min(cookScore,maxStep)/maxStep)*20); // C-5: 난수 제거, 수행도 기반
+ const total=Math.min(100,ingScore+stepScore+presScore);
+ if(state==='cooking_restaurant'){
+  const reward=Math.floor(total/5)+5;
+  coins+=reward;servedCount++;
+  save();playSound('star');
+  state='restaurant';currentRecipe=null;
+  document.getElementById('hud-timer').classList.remove('hidden');
+ }else{
+  state='result';
+  const stars=total>=90?3:total>=70?2:total>=40?1:0;
+  const prevStars=earnedStars[recipe.id]||0;
+  if(stars>prevStars){totalStars+=stars-prevStars;earnedStars[recipe.id]=stars;}
+  coins+=stars*10+Math.floor(total/5);
+  playerLevel=1+Math.floor(totalStars/5);
+  cookScore=total;
+  save();playSound('star');
+ }
 }
 
 function drawResult(){
  fillRect(0,0,W,H,'rgba(0,0,0,.6)');
- const pw=Math.min(340,W-30),ph=420,px=(W-pw)/2,py=(H-ph)/2;
+ const pw=Math.min(340,W-30),ph=460,px=(W-pw)/2,py=(H-ph)/2;
  drawRoundRect(px,py,pw,ph,20,'#FFF8E1','#FFB74D');
 
  drawText('🎉 요리 완성!',W/2,py+30,22,'#E65100','center',true);
@@ -763,10 +832,12 @@ function drawResult(){
   drawRoundRect(bx+40,by,(bw-40)*nt[k]/50,12,6,ncolors[i]);
  });
 
- // Science fact
- drawRoundRect(px+10,py+325,pw-20,45,8,'#E3F2FD','#42A5F5');
- drawText('🔬 '+currentRecipe.science.substring(0,25),W/2,py+338,11,'#1565C0');
- drawText(currentRecipe.science.substring(25,55),W/2,py+354,11,'#1565C0');
+ // Science fact (C-7: word-wrap, 하드컷 제거)
+ const sciSize=11, sciLineH=15, sciW=pw-44;
+ const sciLines=wrapLines('🔬 '+currentRecipe.science, sciW, sciSize, false, 3);
+ const sciBoxH=sciLines.length*sciLineH+16;
+ drawRoundRect(px+10,py+322,pw-20,sciBoxH,8,'#E3F2FD','#42A5F5');
+ sciLines.forEach((l,i)=>drawText(l,W/2,py+322+12+i*sciLineH,sciSize,'#1565C0','center'));
 
  const bw2=140,bh2=40;
  regBtn(W/2-bw2/2,py+ph-50,bw2,bh2,'확인','#FF8C42');
@@ -933,8 +1004,14 @@ function drawEncyclopedia(){
 }
 
 // Main loop
-function gameLoop(){
- frame++;clearBtns();animT+=.016;
+let _lastT=0;
+function gameLoop(ts){
+ if(!_lastT)_lastT=ts||performance.now();
+ const now=ts||performance.now();
+ let dt=(now-_lastT)/1000; _lastT=now;
+ if(!(dt>0)||dt>0.1)dt=1/60;
+ window._dt=dt;
+ frame++;clearBtns();animT+=dt;
  X.clearRect(0,0,W,H);
 
  switch(state){
@@ -956,38 +1033,11 @@ function gameLoop(){
  requestAnimationFrame(gameLoop);
 }
 
-// Handle restaurant cooking completion override
-const origFinish=finishCooking;
-finishCooking=function(){
- if(state==='cooking_restaurant'){
-  const recipe=currentRecipe;
-  const ingScore=Math.round((correctCount/totalPossible)*50);
-  const stepScore=Math.round((cookScore/(recipe.steps.length*20))*30);
-  const total=ingScore+stepScore+15;
-  const reward=Math.floor(total/5)+5;
-  coins+=reward;servedCount++;
-  save();playSound('star');
-  state='restaurant';currentRecipe=null;
-  document.getElementById('hud-timer').classList.remove('hidden');
- }else{
-  state='result';
-  const recipe=currentRecipe;
-  const ingScore=Math.round((correctCount/totalPossible)*50);
-  const stepScore=Math.round((cookScore/(recipe.steps.length*20))*30);
-  const presScore=15+Math.floor(Math.random()*6);
-  const total=ingScore+stepScore+presScore;
-  const stars=total>=90?3:total>=70?2:total>=40?1:0;
-  const prevStars=earnedStars[recipe.id]||0;
-  if(stars>prevStars){totalStars+=stars-prevStars;earnedStars[recipe.id]=stars;}
-  coins+=stars*10+Math.floor(total/5);
-  playerLevel=1+Math.floor(totalStars/5);
-  cookScore=total;
-  save();playSound('star');
- }
-};
-
 // Init
 load();resize();
+const _unlock=()=>{ensureAudio();window.removeEventListener('pointerdown',_unlock);window.removeEventListener('touchstart',_unlock);};
+window.addEventListener('pointerdown',_unlock);
+window.addEventListener('touchstart',_unlock,{passive:true});
 gameLoop();
 </script>
 </body>
