@@ -95,6 +95,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <div class="ptab" data-t="furn">가구</div>
 <div class="ptab" data-t="style">스타일</div>
 <div class="ptab" data-t="ext">외부</div>
+<div class="ptab" data-t="mission">🎯</div>
 </div>
 <div id="pcontent"></div>
 </div>
@@ -111,6 +112,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 <span class="sp"></span>
 <span id="statusTxt">방을 배치하세요</span>
 <span class="sp"></span>
+<button id="aEval" title="집 평가" style="background:rgba(255,200,80,.25);border-color:#ffcc55">🏆</button>
 <button id="aSave">💾</button>
 <button id="aGal">🖼</button>
 </div>
@@ -791,7 +793,7 @@ const weatherSys=createWeatherSystem(scene);
 ground.userData={kind:'ground'};
 
 function resize(){
-  const w=window.innerWidth,h=window.innerHeight-44-70;
+  const w=window.innerWidth,h=window.innerHeight-70-70;
   renderer.setSize(w,h);
   camera.aspect=w/h;camera.updateProjectionMatrix();
 }
@@ -1001,7 +1003,7 @@ function placeRoom(x,z){
   rooms[currentFloor].push(room);
   addRoomMesh(room,currentFloor);
   selRoom=room;selFurn=null;
-  status(`${rt.n} 배치 (-${cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();
+  status(`${rt.n} 배치 (-${cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();refreshGameState(false);
 }
 
 function addFurniture(furnId){
@@ -1014,7 +1016,7 @@ function addFurniture(furnId){
   selRoom.floor=currentFloor;
   addFurnMesh(furn,selRoom);
   selFurn=furn;
-  status(`${ft.n} 배치 (-${ft.cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();
+  status(`${ft.n} 배치 (-${ft.cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();refreshGameState(false);
 }
 
 function placeExterior(x,z){
@@ -1026,7 +1028,7 @@ function placeExterior(x,z){
   const ext={id:nextId++,type,x,z};
   exteriors.push(ext);
   addExtMesh(ext);
-  status(`${ed.n} 배치 (-${ed.cost.toLocaleString()})`);updBudget();
+  status(`${ed.n} 배치 (-${ed.cost.toLocaleString()})`);updBudget();updatePanel();refreshGameState(false);
 }
 
 function deleteSelected(){
@@ -1047,7 +1049,7 @@ function deleteSelected(){
     rooms[currentFloor]=rooms[currentFloor].filter(r=>r.id!==selRoom.id);
     selRoom=null;status('방 삭제 (50% 환불)');
   }
-  updBudget();updatePanel();updateSelHighlight();
+  updBudget();updatePanel();updateSelHighlight();refreshGameState(false);
 }
 
 function rotateSelected(){
@@ -1067,7 +1069,7 @@ function rotateSelected(){
 document.getElementById('aUndo').onclick=()=>{
   if(!undoStack.length)return;
   const d=JSON.parse(undoStack.pop());rooms=d.rooms;exteriors=d.exteriors;budget=d.budget;
-  selRoom=null;selFurn=null;updBudget();updatePanel();rebuildAll();
+  selRoom=null;selFurn=null;updBudget();updatePanel();rebuildAll();refreshGameState(false);
 };
 document.getElementById('aMove').onclick=()=>{
   if(!selRoom){status('⚠ 먼저 이동할 방을 클릭하세요');return;}
@@ -1229,6 +1231,15 @@ function updatePanel(){
     h+='</div>';
     h+=`<div style="margin-top:8px;font-size:10px;color:#888">외부 요소를 선택하고 맵을 클릭하세요</div>`;
     pc.innerHTML=h;
+  }else if(curTab==='mission'){
+    const done=completedMissions.size;
+    let h=`<div class="sec">🎯 미션 ${done}/${MISSIONS.length}</div>`;
+    h+=`<div style="font-size:10px;color:#888;margin-bottom:6px">달성 시 예산 보너스 지급!</div>`;
+    MISSIONS.forEach(m=>{
+      const ok=completedMissions.has(m.id);
+      h+=`<div style="padding:7px 8px;margin:4px 0;border-radius:8px;background:${ok?'rgba(90,204,136,.15)':'rgba(255,255,255,.03)'};border-left:3px solid ${ok?'#5acc88':'#555'}"><div style="font-size:11px;font-weight:700;color:${ok?'#9f9':'#ddd'}">${ok?'✅':'⬜'} <span style="color:#ffcc55">${'★'.repeat(m.stars)}</span> ${m.title}</div><div style="font-size:10px;color:#999;margin-top:2px">${m.desc}</div><div style="font-size:10px;color:#fa0;margin-top:2px">보상 +₩${m.reward.toLocaleString()}</div></div>`;
+    });
+    pc.innerHTML=h;
   }
 }
 
@@ -1249,7 +1260,7 @@ window.applyStyle=()=>{
   for(const fu of (selRoom.furniture||[]))removeMesh('furn_'+fu.id);
   addRoomMesh(selRoom,currentFloor);
   for(const fu of (selRoom.furniture||[]))addFurnMesh(fu,selRoom);
-  status('스타일 적용 완료');
+  status('스타일 적용 완료');refreshGameState(false);
 };
 
 // ============================================================
@@ -1313,6 +1324,7 @@ window.loadDesign=(i)=>{
   selRoom=null;selFurn=null;currentFloor=1;updFloor();updBudget();updatePanel();
   document.getElementById('galleryModal').style.display='none';
   rebuildAll();
+  completedMissions.clear();refreshGameState(true);
   status('📂 불러오기 완료!');
 };
 window.clearGallery=()=>{if(confirm('v4 전체 삭제?')){localStorage.removeItem('hb_v4_saves');document.getElementById('aGal').click();}};
@@ -1489,6 +1501,7 @@ function buildSampleHouse(){
   currentFloor=1;updFloor();updBudget();updatePanel();
   rebuildAll();
   applyRoofMode();
+  completedMissions.clear();refreshGameState(true);
   // 카메라: 위에서 충분히 떨어진 각도 (집+정원 + 모든 층 잘 보이게)
   camera.position.set(15,22,20);
   controls.target.set(5,3,4.5);controls.update();
@@ -1519,8 +1532,228 @@ window.__selectFurn=(id)=>{
 };
 window.__getState=()=>({roofOn,timeOfDay,weather,currentFloor,selRoomId:selRoom?.id,selFurnId:selFurn?.id,roomCount:Object.values(rooms).flat().length});
 
+// ============================================================
+// GAME SYSTEMS (워크플로우 22 에이전트 산출 통합)
+// ============================================================
+
+// --- 코어: 집 가치 ---
+function computeHouseValue(){
+  let construction=0,furniture=0,exterior=0,roomCount=0,furnCount=0,floorsUsed=0;
+  for(let f=-1;f<=4;f++){
+    const arr=rooms[f]||[];
+    if(!arr.length)continue;
+    floorsUsed++;
+    for(const rm of arr){
+      roomCount++;
+      const rdef=ROOMS.find(r=>r.id===rm.type);
+      if(rdef){const mi=(rm.material>=0&&rm.material<MAT_COSTS.length)?rm.material:0;construction+=rdef.cost*MAT_COSTS[mi];}
+      for(const fu of (rm.furniture||[])){furnCount++;const fd=FURN.find(x=>x.id===fu.type);if(fd)furniture+=fd.cost;}
+    }
+  }
+  for(const ex of (exteriors||[])){const ed=EXTERIOR.find(e=>e.id===ex.type);if(ed)exterior+=ed.cost;}
+  let mul=1.0+Math.min(roomCount/8,1)*0.25+Math.min(furnCount/16,1)*0.20+Math.min(floorsUsed/6,1)*0.15;
+  if(mul>1.6)mul=1.6;mul=Math.round(mul*1000)/1000;
+  const total=Math.round((construction+furniture+exterior)*mul);
+  return {total,breakdown:{construction:Math.round(construction),furniture:Math.round(furniture),exterior:Math.round(exterior),appreciationMul:mul}};
+}
+
+// --- 코어: 거주 만족도 ---
+function computeSatisfaction(){
+  const all=[];for(let f=-1;f<=4;f++)for(const r of (rooms[f]||[]))all.push(r);
+  const n=all.length;
+  const has=t=>all.some(r=>r.type===t);
+  const windowed=all.filter(r=>(r.windowStyle|0)>0).length;
+  const lightRatio=n>0?windowed/n:0;
+  let totF=0;for(const r of all)totF+=(r.furniture||[]).length;
+  const avgF=n>0?totF/n:0;const furnRatio=Math.min(1,avgF/2);
+  let fc=0;for(let f=-1;f<=4;f++)if((rooms[f]||[]).length)fc++;
+  const floorRatio=Math.min(1,fc/4);
+  const garden=has('garden')||(exteriors||[]).some(e=>e.type==='tree'||e.type==='flower');
+  const factors=[
+    {label:'침실 있음',ok:has('bedroom'),pts:has('bedroom')?15:0},
+    {label:'주방 있음',ok:has('kitchen'),pts:has('kitchen')?12:0},
+    {label:'욕실 있음',ok:has('bathroom'),pts:has('bathroom')?12:0},
+    {label:'거실 있음',ok:has('living'),pts:has('living')?11:0},
+    {label:'채광(창문)',ok:lightRatio>=0.5,pts:Math.round(15*lightRatio)},
+    {label:'가구 충분',ok:avgF>=2,pts:Math.round(15*furnRatio)},
+    {label:'층 다양성',ok:fc>=2,pts:Math.round(10*floorRatio)},
+    {label:'정원/조경',ok:garden,pts:garden?10:0},
+  ];
+  let score=0;for(const f of factors)score+=f.pts;score=Math.max(0,Math.min(100,Math.round(score)));
+  return {score,factors};
+}
+
+// --- 코어: 별점 등급 ---
+function computeRating(value,satisfaction,missionsDone,missionsTotal){
+  let sat=Math.max(0,Math.min(100,Number(satisfaction)||0));
+  let done=Math.max(0,Number(missionsDone)||0);
+  let total=Math.max(0,Number(missionsTotal)||0);
+  if(total>0&&done>total)done=total;
+  const val=Number(value)||0;
+  const valueTier=val<200000?0:val<400000?50:val<700000?80:100;
+  const missionPct=(done/Math.max(1,total))*100;
+  let score=sat*0.5+missionPct*0.3+valueTier*0.2;
+  score=Math.max(0,Math.min(100,score));
+  let stars,grade,title,message;
+  if(score>=90){stars=5;grade='S';title='드림하우스';message='완벽합니다! 모두가 꿈꾸는 최고의 집이에요.';}
+  else if(score>=75){stars=4;grade='A';title='럭셔리 저택';message='훌륭해요! 손님들이 부러워할 멋진 집이네요.';}
+  else if(score>=60){stars=3;grade='B';title='아늑한 보금자리';message='좋아요! 살기 편안하고 정감 가는 집이에요.';}
+  else if(score>=40){stars=2;grade='C';title='소박한 우리집';message='나쁘지 않아요. 조금만 더 꾸미면 훨씬 좋아져요.';}
+  else{stars=1;grade='D';title='공사중';message='아직 공사중! 방과 가구를 더 채워볼까요?';}
+  return {stars,grade,title,message,score:Math.round(score)};
+}
+
+// --- 코어: 경제/레벨 ---
+function getStartBudget(level){const lv=Math.max(1,Math.floor(level||1));return 500000+(lv-1)*50000;}
+function getBudgetBonus(stars){return Math.max(0,Math.floor(stars||0))*20000;}
+function nextLevelUnlocked(stars){return (Number(stars)||0)>=3;}
+
+// --- 미션 데이터 (큐레이션 12개) ---
+const MISSIONS=[
+  {id:'green_first_garden',title:'첫 정원 가꾸기',desc:'정원을 한 칸 들여 친환경 라이프 첫걸음.',condType:'hasRoom',targetType:'garden',reward:15000,stars:1},
+  {id:'full_starter_furniture',title:'첫 가구 들이기',desc:'가구 8개 이상 배치해 집에 온기를.',condType:'furnitureCount',threshold:8,reward:15000,stars:1},
+  {id:'pool_first_splash',title:'첫 물놀이',desc:'마당에 수영장 1개 설치.',condType:'hasExterior',targetType:'pool',threshold:1,reward:18000,stars:1},
+  {id:'family_three_bedrooms',title:'북적북적 삼남매네',desc:'침실 3개 이상으로 온 가족 각자 방.',condType:'roomTypeCount',targetType:'bedroom',threshold:3,reward:25000,stars:1},
+  {id:'family_double_bathroom',title:'아침 화장실 전쟁 끝!',desc:'욕실 2개 이상으로 아침 혼잡 해결.',condType:'roomTypeCount',targetType:'bathroom',threshold:2,reward:30000,stars:2},
+  {id:'tiny_house_budget',title:'알뜰 미니 하우스',desc:'건축비 10만원 이하로 집 완성.',condType:'spentUnder',threshold:100000,reward:35000,stars:2},
+  {id:'skyscraper_three_floors',title:'하늘로 솟아라: 3층',desc:'최소 3개 층을 올린 고층 골조.',condType:'floors',threshold:3,reward:40000,stars:2},
+  {id:'budget_cozy_interior',title:'가성비 인테리어',desc:'알뜰템으로 가구 10개 이상.',condType:'furnitureCount',threshold:10,reward:30000,stars:2},
+  {id:'efficient_one_floor',title:'단층 효율왕',desc:'만족도 70% 이상 달성.',condType:'satisfaction',threshold:70,reward:50000,stars:3},
+  {id:'luxury_high_value_mansion',title:'럭셔리 대저택',desc:'자산 가치 30만원 이상 초호화 저택.',condType:'value',threshold:300000,reward:60000,stars:3},
+  {id:'full_mansion_max',title:'가구로 가득 찬 저택',desc:'가구 35개 이상 풀옵션 저택.',condType:'furnitureCount',threshold:35,reward:80000,stars:3},
+  {id:'skyscraper_five_levels',title:'도심 속 마천루',desc:'방 있는 층 5개 이상.',condType:'floors',threshold:5,reward:80000,stars:3},
+];
+let completedMissions=new Set();
+let gameLevel=1;
+
+// --- 미션 조건 체커 ---
+function _flatRooms(){const a=[];for(let f=-1;f<=4;f++)for(const r of (rooms[f]||[]))a.push(r);return a;}
+function _cntRoom(t){return _flatRooms().filter(r=>r.type===t).length;}
+function _cntFurn(){return _flatRooms().reduce((s,r)=>s+(r.furniture||[]).length,0);}
+function _usedFloors(){let c=0;for(let f=-1;f<=4;f++)if((rooms[f]||[]).length)c++;return c;}
+function _cntExt(t){return (exteriors||[]).filter(e=>e.type===t).length;}
+function _rawCost(){const b=computeHouseValue().breakdown;return b.construction+b.furniture+b.exterior;}
+function checkMissionCond(m){
+  const th=m.threshold||1;
+  switch(m.condType){
+    case 'hasRoom':return _cntRoom(m.targetType)>=1;
+    case 'roomTypeCount':return _cntRoom(m.targetType)>=th;
+    case 'roomCount':return _flatRooms().length>=th;
+    case 'satisfaction':return computeSatisfaction().score>=th;
+    case 'value':return computeHouseValue().total>=th;
+    case 'spentUnder':return _flatRooms().length>0&&_rawCost()<=(m.threshold||0);
+    case 'floors':return _usedFloors()>=th;
+    case 'furnitureCount':return _cntFurn()>=th;
+    case 'hasExterior':return _cntExt(m.targetType)>=(m.threshold||1);
+    default:return false;
+  }
+}
+function refreshMissions(silent){
+  const newly=[];
+  for(const m of MISSIONS){
+    if(!completedMissions.has(m.id)&&checkMissionCond(m)){
+      completedMissions.add(m.id);
+      if(!silent){budget+=m.reward;newly.push(m);}
+    }
+  }
+  if(newly.length&&!silent){
+    updBudget();
+    const sum=newly.reduce((a,n)=>a+n.reward,0);
+    status('🎯 미션 달성! '+newly.map(n=>n.title).join(', ')+' (+₩'+sum.toLocaleString()+')');
+    updatePanel();
+  }
+  return {done:completedMissions.size,total:MISSIONS.length,newly};
+}
+function refreshGameState(silent){const r=refreshMissions(silent);renderHUD(r.done,r.total);}
+
+// --- HUD 스트립 ---
+function ensureHUD(){
+  if(!document.getElementById('gameHudStyle')){
+    const st=document.createElement('style');st.id='gameHudStyle';
+    st.textContent=`#gameHud{position:fixed;top:44px;left:0;right:0;height:26px;z-index:99;display:flex;align-items:center;gap:6px;padding:0 8px;box-sizing:border-box;background:linear-gradient(135deg,rgba(20,12,44,.95),rgba(30,18,68,.95));border-bottom:1px solid #4a2a7a;font-size:11px;line-height:1;white-space:nowrap;overflow:hidden;pointer-events:none;font-family:inherit}
+#gameHud .hud-i{display:flex;align-items:center;gap:3px;flex-shrink:0}
+#gameHud .hud-sep{width:1px;height:13px;background:rgba(255,255,255,.12);flex-shrink:0}
+#hudValue{color:#ffd700;font-weight:700}
+#hudSatBar{position:relative;width:36px;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;flex-shrink:0}
+#hudSatBar>i{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,#ff5a5a,#ffd24a,#5ad17a);transition:width .35s}
+#hudSat{color:#d0b0ff;font-weight:700;min-width:22px}
+#hudMission{color:#9ad}
+#hudGrade{color:#fff;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(140,80,255,.35);border:1px solid #a070ff;flex-shrink:0}
+@media(max-width:430px){#gameHud{gap:4px;padding:0 5px;font-size:10px}#hudSatBar{width:28px}}
+#cvs3d{top:70px !important}#panel{top:70px !important}#panelToggle{top:76px !important}#walkBadge{top:76px !important}`;
+    document.head.appendChild(st);
+  }
+  if(!document.getElementById('gameHud')){
+    const hud=document.createElement('div');hud.id='gameHud';
+    hud.innerHTML='<span class="hud-i" title="집 가치">💰<span id="hudValue">0</span></span><span class="hud-sep"></span><span class="hud-i" title="만족도">😊<span id="hudSatBar"><i></i></span><span id="hudSat">0</span></span><span class="hud-sep"></span><span class="hud-i" title="미션">🎯<span id="hudMission">0/0</span></span><span class="hud-sep"></span><span id="hudGrade" title="등급">🏆 D</span>';
+    document.body.appendChild(hud);
+  }
+}
+function renderHUD(done,total){
+  ensureHUD();
+  let v=0;try{v=computeHouseValue().total;}catch(e){}
+  document.getElementById('hudValue').textContent=Math.round(v).toLocaleString();
+  let s=0;try{s=computeSatisfaction().score;}catch(e){}
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  const bar=document.querySelector('#hudSatBar>i');if(bar)bar.style.width=s+'%';
+  document.getElementById('hudSat').textContent=s;
+  document.getElementById('hudMission').textContent=(done||0)+'/'+(total||0);
+  const r=computeRating(v,s,done||0,total||0);
+  document.getElementById('hudGrade').textContent='🏆 '+r.grade;
+}
+
+// --- 평가 결과 모달 ---
+function openEvaluation(){
+  const hv=computeHouseValue();
+  const cs=computeSatisfaction();
+  const done=completedMissions.size,total=MISSIONS.length;
+  const r=computeRating(hv.total,cs.score,done,total);
+  const gradeColors={S:'#ffd700',A:'#a070ff',B:'#5acc88',C:'#ffaa55',D:'#ff6b6b'};
+  const gc=gradeColors[r.grade]||'#a070ff';
+  const starStr='⭐'.repeat(r.stars)+'☆'.repeat(5-r.stars);
+  let roomCount=0,furnCount=0;for(let f=-1;f<=4;f++){const a=rooms[f]||[];roomCount+=a.length;for(const rm of a)furnCount+=(rm.furniture||[]).length;}
+  const extCount=(exteriors||[]).length;
+  const gaugeCol=cs.score>=70?'#5acc88':cs.score>=40?'#ffaa55':'#ff6b6b';
+  const factorsHtml=cs.factors.map(f=>{
+    const mk=f.ok?'✅':'⚠️',col=f.ok?'#5acc88':'#ffaa55';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.04);border-radius:8px;margin:4px 0;border-left:3px solid ${col}"><span>${mk}</span><span style="color:#e8e0ff;font-size:12px">${f.label}</span><span style="margin-left:auto;font-weight:700;color:${col}">+${f.pts}</span></div>`;
+  }).join('');
+  let modal=document.getElementById('evalModal');
+  if(!modal){modal=document.createElement('div');modal.id='evalModal';modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box';document.body.appendChild(modal);modal.addEventListener('click',e=>{if(e.target===modal)modal.style.display='none';});}
+  modal.innerHTML=`<div style="background:linear-gradient(160deg,#1a1a2e,#16122b 55%,#1c1438);border:2px solid ${gc};border-radius:18px;padding:20px;width:340px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 30px ${gc}33;color:#fff;box-sizing:border-box">
+    <div style="text-align:center;font-size:12px;letter-spacing:3px;color:#a070ff;font-weight:700">집짓기 · 평가 결과</div>
+    <div style="text-align:center;font-size:13px;color:#888;margin-bottom:12px">🏠 ${r.title}</div>
+    <div style="text-align:center"><div style="display:inline-block;padding:6px 18px;border:2px solid ${gc};border-radius:14px;background:${gc}1a"><span style="font-size:13px;color:#cfc0ff">등급</span> <span style="font-size:34px;font-weight:800;color:${gc};vertical-align:middle">${r.grade}</span></div></div>
+    <div style="text-align:center;font-size:26px;letter-spacing:2px;margin:10px 0 2px">${starStr}</div>
+    <div style="text-align:center;font-size:12px;color:#bbb;margin-bottom:14px">${r.score}점</div>
+    <div style="background:rgba(140,80,255,.12);border:1px solid #4a2a7a;border-radius:12px;padding:12px;text-align:center;margin-bottom:14px"><div style="font-size:11px;color:#a070ff;margin-bottom:2px">💰 추정 집 가치</div><div style="font-size:26px;font-weight:800;color:#ffd700">₩${hv.total.toLocaleString()}</div></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:#a070ff;font-weight:700">😊 거주 만족도</span><span style="font-weight:800;color:${gaugeCol}">${cs.score}%</span></div>
+    <div style="height:12px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;margin-bottom:12px"><div style="height:100%;width:${cs.score}%;background:linear-gradient(90deg,${gaugeCol}aa,${gaugeCol})"></div></div>
+    ${factorsHtml}
+    <div style="display:flex;gap:6px;margin:12px 0;text-align:center">
+      <div style="flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#d0b0ff">${roomCount}</div><div style="font-size:10px;color:#999">방</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#d0b0ff">${furnCount}</div><div style="font-size:10px;color:#999">가구</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 4px"><div style="font-size:18px;font-weight:800;color:#d0b0ff">${extCount}</div><div style="font-size:10px;color:#999">조경</div></div>
+      <div style="flex:1.3;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 4px"><div style="font-size:16px;font-weight:800;color:#5acc88">${done}/${total}</div><div style="font-size:10px;color:#999">미션</div></div>
+    </div>
+    <div style="background:rgba(160,112,255,.1);border-left:3px solid #a070ff;border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:16px;font-size:13px;color:#e8e0ff">"${r.message}"</div>
+    <div style="display:flex;gap:10px">
+      <button id="evalClose" style="flex:1;padding:11px;background:rgba(255,255,255,.06);border:1px solid #5a3a9a;color:#d0b0ff;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">닫기</button>
+      <button id="evalShot" style="flex:1;padding:11px;background:linear-gradient(135deg,#7a4ad0,#a070ff);border:1px solid #a070ff;color:#fff;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">📷 스크린샷</button>
+    </div>
+  </div>`;
+  document.getElementById('evalClose').onclick=()=>{modal.style.display='none';};
+  document.getElementById('evalShot').onclick=()=>{modal.style.display='none';document.getElementById('btnShot').click();};
+  modal.style.display='flex';
+  status('🏆 평가: '+r.grade+'등급 '+r.title+' ('+r.stars+'⭐)');
+}
+document.getElementById('aEval').onclick=openEvaluation;
+window.openEvaluation=openEvaluation;
+
 // INIT
-updBudget();updFloor();updatePanel();animate();
+updBudget();updFloor();updatePanel();
+ensureHUD();refreshGameState(true);
+animate();
 
 // URL ?demo=1 자동 빌드
 const _params=new URLSearchParams(location.search);
