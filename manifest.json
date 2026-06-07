@@ -1,7 +1,7 @@
 {
-  "name": "LevelPlay v6.0 - 배우고, 올리고, 증명하라",
+  "name": "LevelPlay v7.0 - 배우고, 올리고, 증명하라",
   "short_name": "LevelPlay",
-  "description": "게이미피케이션 교육 플랫폼 v6.0. 증명서, 플래시카드, 보석시스템, XP부스트, 일일도전, 아바타커스터마이즈, 52배지, 주간리그, 300+퀴즈로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v7.0. 스트릭마일스톤, 오답재시도, 영상이해도퀴즈, 학부모공유카드, 접근성(고대비/글꼴), 약점분석, 적응형학습, 64배지, 400+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -18,19 +18,19 @@
   ],
   "shortcuts": [
     {
-      "name": "일일 퀴즈 도전",
-      "url": "./index.html#daily",
-      "description": "오늘의 퀴즈 도전하기"
+      "name": "오답노트 재시도",
+      "url": "./index.html#wrong",
+      "description": "오답노트에서 다시 풀기"
     },
     {
-      "name": "플래시카드",
-      "url": "./index.html#flash",
-      "description": "플래시카드로 복습하기"
+      "name": "학부모 공유 카드",
+      "url": "./index.html#share",
+      "description": "주간 학습 리포트 생성"
     },
     {
-      "name": "증명서",
-      "url": "./index.html#cert",
-      "description": "학습 증명서 발급"
+      "name": "약점 분석",
+      "url": "./index.html#weak",
+      "description": "과목별 약점 분석 보기"
     }
   ]
 }
