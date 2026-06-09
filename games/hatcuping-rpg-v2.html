@@ -1292,7 +1292,8 @@ function onDown(e){
     if(b.id==='back'&&bat){bat.phase='select';return}
     if(b.id&&b.id.startsWith('sk')){useSkill(parseInt(b.id.slice(2)));return}
     if(b.id&&b.id.startsWith('befriend')&&miniGame&&miniGame.type==='befriend'){
-      const ai=parseInt(b.id.slice(7));AM.menuClick();
+      const ai=parseInt(b.id.slice('befriend'.length))||0;AM.menuClick();
+      if(ai<0||ai>=miniGame.actions.length)return;
       miniGame.tries++;
       const responses=[
         ['...뭐야?','(경계하는 눈빛)','조금 관심을 보인다!'],
@@ -1317,7 +1318,8 @@ function onDown(e){
       return;
     }
     if(b.id&&b.id.startsWith('reconcile')&&miniGame&&miniGame.type==='reconcile'){
-      const ai=parseInt(b.id.slice(9));AM.menuClick();
+      const ai=parseInt(b.id.slice('reconcile'.length))||0;AM.menuClick();
+      if(ai<0||ai>=miniGame.actions.length)return;
       miniGame.tries++;
       const responses=[
         ['...몰라.','(외면한다)','...조금 마음이 풀렸어.'],
