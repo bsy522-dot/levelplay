@@ -241,7 +241,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <button class="btn btn-primary" id="btn-play-synth">▶ 재생</button>
       <button class="btn btn-secondary" id="btn-stop-synth">■ 정지</button>
       <label><input type="checkbox" id="auto-play"> 자동</label>
-      <label title="건반을 눌러야 다음 노트 진행"><input type="checkbox" id="wait-mode"> 🐢초보자</label>
+      <label title="노트가 판정선에서 멈춤 → 그 건반을 누르면 다음 음이 내려옴 (왕초보 한음씩)"><input type="checkbox" id="wait-mode"> 🐢한음씩</label>
       <label title="도/레/미 한글 표시"><input type="checkbox" id="show-korean"> 한글</label>
     </div>
     <div class="score-bar" id="synth-score" style="display:none">
@@ -1676,8 +1676,8 @@ function synthLoop() {
     if (unplayed.length > 0) {
       const minTime = Math.min(...unplayed.map(n => n.time));
       const nextTimeSec = minTime * beatToSec;
-      // 다음 노트가 hit line 위 5.0초 거리에 항상 떠있음 (충분히 여유롭게 인식)
-      const stopOffset = 5.0;
+      // 다음 노트가 hit line 바로 위에 멈춰서 대기 (판정선 가까이 — 지금 칠 음이 명확)
+      const stopOffset = 1.0;
       const targetNow = nextTimeSec - stopOffset;
       synthStartTime = performance.now() - targetNow * 1000;
       now = targetNow;
@@ -1810,7 +1810,7 @@ function synthLoop() {
       ctx.fillStyle = 'rgba(6,182,212,0.95)';
       ctx.font = `bold ${14*dpr}px sans-serif`;
       ctx.textAlign = 'center';
-      ctx.fillText(`🐢 ${noteList} 키를 누르세요`, W/2, 22*dpr);
+      ctx.fillText(`⏸ ${noteList} 키를 누르세요`, W/2, 22*dpr);
     }
   }
 

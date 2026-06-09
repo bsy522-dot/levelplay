@@ -632,8 +632,8 @@ const CHORDS={
 };
 
 /* Difficulty speed multipliers */
-const DIFF_SPEEDS={easy:0.7,normal:1.0,hard:1.4};
-const DIFF_LABELS={easy:'쉬움',normal:'보통',hard:'어려움'};
+const DIFF_SPEEDS={step:0.7,easy:0.7,normal:1.0,hard:1.4};
+const DIFF_LABELS={step:'🐢한음씩',easy:'쉬움',normal:'보통',hard:'어려움'};
 
 /* ═══════════════════════════════════════════════════════════
    LESSON DATA — 30 Levels
@@ -1024,11 +1024,12 @@ function showRhythmSongSelect(){
   const panel=document.getElementById('panel');
   const progress=loadProgress();
   let html='<h2>🎵 리듬게임</h2>';
-  html+='<div style="padding:4px 0;font-size:10px;color:rgba(201,169,110,.5);text-align:center;">노트가 떨어지면 정확한 타이밍에 맞춰 연주하세요!</div>';
+  const stepHint=selectedDifficulty==='step';
+  html+=`<div style="padding:4px 0;font-size:10px;color:${stepHint?'#ffd700':'rgba(201,169,110,.5)'};text-align:center;">${stepHint?'🐢 노트가 멈춰서 기다립니다. 맞는 음을 켜면 다음 음이 내려와요!':'노트가 떨어지면 정확한 타이밍에 맞춰 연주하세요!'}</div>`;
 
   /* Difficulty selector */
   html+='<div class="diffRow">';
-  ['easy','normal','hard'].forEach(d=>{
+  ['step','easy','normal','hard'].forEach(d=>{
     html+=`<div class="diffBtn ${d===selectedDifficulty?'active':''}" data-diff="${d}">${DIFF_LABELS[d]}</div>`;
   });
   html+='</div>';
@@ -1136,7 +1137,8 @@ function startRhythmGame(songKey){
   const speedMult=DIFF_SPEEDS[selectedDifficulty]||1.0;
   const bpmAdj=Math.round(song.bpm*speedMult);
   const beatMs=60000/bpmAdj;
-  const scrollTime=practiceMode?3500:2500;
+  const stepMode=selectedDifficulty==='step';
+  const scrollTime=(practiceMode||stepMode)?3500:2500;
 
   const fallingNotes=[];
   let beatPos=0;
@@ -1153,12 +1155,13 @@ function startRhythmGame(songKey){
   });
 
   const maxHealth=100;
-  const missDmg=practiceMode?0:(selectedDifficulty==='hard'?20:selectedDifficulty==='normal'?15:10);
+  const missDmg=(practiceMode||stepMode)?0:(selectedDifficulty==='hard'?20:selectedDifficulty==='normal'?15:10);
 
   rhythmState={
     active:true,songKey,song,bpm:bpmAdj,beatMs,scrollTime,
     difficulty:selectedDifficulty,
     practice:practiceMode,
+    stepMode,
     notes:fallingNotes,
     startTime:performance.now(),
     pausedAt:0,
@@ -1180,7 +1183,7 @@ function startRhythmGame(songKey){
   document.getElementById('hudSong').textContent=song.name;
   document.getElementById('hudScore').textContent='0점';
   document.getElementById('hudCombo').textContent='';
-  document.getElementById('healthBar').style.display='block';
+  document.getElementById('healthBar').style.display=stepMode?'none':'block';
   document.getElementById('healthFill').style.width='100%';
   document.getElementById('practiceToggle').style.display=practiceMode?'block':'none';
   if(practiceMode)document.getElementById('practiceToggle').classList.add('active');
@@ -1216,6 +1219,32 @@ function checkRhythmHit(si,sm){
   const st=rhythmState;
   const now=performance.now();
   const elapsed=now-st.startTime;
+
+  /* STEP MODE: match only the front note by string+finger; timing ignored, no penalty */
+  if(st.stepMode){
+    let idx=-1;
+    for(let i=st.noteIdx;i<st.notes.length;i++){
+      if(!st.notes[i].hit&&!st.notes[i].judge){idx=i;break;}
+    }
+    if(idx<0)return;
+    const tn=st.notes[idx];
+    if(tn.s!==si||tn.f!==sm)return; /* wrong note → ignore */
+    const hasBowS=st.bowActive[si]&&(now-st.bowActive[si])<800;
+    const hasNoteS=st.notePressed[si+'_'+sm]&&(now-st.notePressed[si+'_'+sm])<800;
+    if(!hasBowS&&!hasNoteS)return;
+    tn.judge='perfect';tn.hit=true;st.perfect++;st.combo++;
+    st.maxCombo=Math.max(st.maxCombo,st.combo);
+    st.multiplier=Math.min(4,1+Math.floor(st.combo/10));
+    st.score+=100*st.multiplier;
+    st.lastHitNote=tn;
+    delete st.notePressed[si+'_'+sm];
+    showJudge('PERFECT!','#ffd700');
+    AE.playSfx('perfect');
+    tn.flashTimer=now;
+    st.noteIdx=idx+1;
+    while(st.noteIdx<st.notes.length&&st.notes[st.noteIdx].hit)st.noteIdx++;
+    return;
+  }
 
   /* Find the closest unhit note that matches this string+finger */
   let bestIdx=-1,bestDiff=9999;
@@ -1278,6 +1307,28 @@ function checkRhythmHit(si,sm){
 function updateRhythm(now){
   if(!rhythmState||!rhythmState.active)return;
   const st=rhythmState;
+
+  /* STEP MODE: freeze the next note just above the hit line; no miss / no health */
+  if(st.stepMode){
+    let nextN=null;
+    for(let i=st.noteIdx;i<st.notes.length;i++){
+      if(!st.notes[i].hit&&!st.notes[i].judge){nextN=st.notes[i];break;}
+    }
+    if(nextN){
+      const stopGap=st.scrollTime*0.16; /* hover just above the hit line */
+      st.startTime=now-(nextN.hitTime-stopGap);
+    }
+    document.getElementById('hudScore').textContent=st.score+'점';
+    const comboTxt2=st.combo>1?(st.combo+'COMBO'+(st.multiplier>1?' x'+st.multiplier:'')):'';
+    document.getElementById('hudCombo').textContent=comboTxt2;
+    const lastN=st.notes[st.notes.length-1];
+    if(lastN&&lastN.hit&&!st.finished){
+      st.finished=true;st.active=false;
+      finishRhythm();
+    }
+    return;
+  }
+
   const elapsed=now-st.startTime;
 
   /* Check for misses */
@@ -1440,6 +1491,30 @@ function renderRhythm(now){
     rc.save();rc.globalAlpha=.7;
     rc.fillStyle='#ffd700';rc.font='bold 14px Georgia';rc.textAlign='right';rc.textBaseline='top';
     rc.fillText('x'+st.multiplier,RW-8,30);rc.restore();
+  }
+
+  /* STEP MODE guidance — pulse ring on the waiting note + which string/finger to play */
+  if(st.stepMode){
+    let nextN=null;
+    for(let i=st.noteIdx;i<st.notes.length;i++){
+      if(!st.notes[i].hit&&!st.notes[i].judge){nextN=st.notes[i];break;}
+    }
+    if(nextN){
+      const hy=RH-28, gx=strX(nextN.s);
+      const osc=Math.abs(Math.sin(now/180));
+      rc.save();
+      rc.globalAlpha=.4+.4*osc;
+      rc.strokeStyle='#ffd700';rc.lineWidth=3;rc.shadowColor='#ffd700';rc.shadowBlur=12;
+      rc.beginPath();rc.arc(gx,hy,18+6*osc,0,Math.PI*2);rc.stroke();
+      rc.restore();
+      const SNAMES=['G','D','A','E'];
+      rc.save();rc.textAlign='center';
+      rc.fillStyle='#ffd700';rc.font='bold 14px Georgia';rc.globalAlpha=.95;
+      rc.fillText('🎯 '+nextN.note+' 음을 켜세요',RW/2,38);
+      rc.font='11px Georgia';rc.globalAlpha=.8;
+      rc.fillText(SNAMES[nextN.s]+'선 · '+(nextN.f>0?nextN.f+'번 손가락':'개방현'),RW/2,55);
+      rc.restore();
+    }
   }
 }
 
