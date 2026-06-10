@@ -316,7 +316,7 @@ window.v7RetryQuestion=function(idx){
           if(t){t.textContent='✅ 정답! 오답노트에서 제거됨';t.classList.add('sh');setTimeout(()=>t.classList.remove('sh'),3000);}
         }else{
           this.classList.add('v7-wrong');
-          overlay.querySelectorAll('.vq-opts button')[ci].classList.add('v7-correct');
+          const _corr=overlay.querySelectorAll('.vq-opts button')[ci];if(_corr)_corr.classList.add('v7-correct');
         }
         overlay.querySelectorAll('.vq-opts button').forEach(b=>b.style.pointerEvents='none');
       });

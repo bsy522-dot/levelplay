@@ -236,7 +236,7 @@ function getDueCards(){
 // ===== Hint System =====
 const HINTS={};
 function generateHint(quiz){
-  if(!quiz||!quiz.a||!quiz.c===undefined)return null;
+  if(!quiz||!quiz.a||quiz.c===undefined||quiz.c<0||quiz.c>=quiz.a.length)return null;
   const correct=quiz.a[quiz.c];
   if(!correct)return null;
   const hints=[];
@@ -666,7 +666,7 @@ if(window.QUIZ&&Array.isArray(window.QUIZ)){
     {q:'for 반복문에서 i++의 의미는?',a:['i를 1 증가','i를 2배','i를 출력','i를 삭제'],c:0,cat:'코딩'},
     {q:'베토벤의 대표곡이 아닌 것은?',a:['사계','운명','월광','엘리제를 위하여'],c:0,cat:'음악'}
   ];
-  newQuizzes.forEach(q=>window.QUIZ.push(q));
+  newQuizzes.forEach(q=>{if(!window.QUIZ.find(x=>x.q===q.q))window.QUIZ.push(q);});
 }
 
 // ===== Init =====
