@@ -1,6 +1,6 @@
 {
-  "name": "LevelPlay v7.0 - 배우고, 올리고, 증명하라",
-  "short_name": "LevelPlay",
+  "name": "배움퀘스트 — 배우고, 올리고, 증명하라",
+  "short_name": "배움퀘스트",
   "description": "게이미피케이션 교육 플랫폼 v7.0. 스트릭마일스톤, 오답재시도, 영상이해도퀴즈, 학부모공유카드, 접근성(고대비/글꼴), 약점분석, 적응형학습, 64배지, 400+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
