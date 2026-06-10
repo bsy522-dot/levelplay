@@ -3036,10 +3036,10 @@ function renderGreeting(){
   const el=document.getElementById('greetingBar');if(!el)return;
   const h=new Date().getHours();
   let greet='';
-  if(h<6)greet='🌙 늦은 밤까지 공부하는 '+U.nick+'님, 대단해요!';
-  else if(h<12)greet='☀️ 좋은 아침이에요, '+U.nick+'님! 오늘도 한 걸음 성장해요';
-  else if(h<18)greet='🌤️ '+U.nick+'님, 오후 학습 화이팅!';
-  else greet='🌅 '+U.nick+'님, 저녁 시간에도 레벨업 중이네요!';
+  if(h<6)greet='🌙 늦은 밤까지 공부하는 '+(U.nk||'탐험가')+'님, 대단해요!';
+  else if(h<12)greet='☀️ 좋은 아침이에요, '+(U.nk||'탐험가')+'님! 오늘도 한 걸음 성장해요';
+  else if(h<18)greet='🌤️ '+(U.nk||'탐험가')+'님, 오후 학습 화이팅!';
+  else greet='🌅 '+(U.nk||'탐험가')+'님, 저녁 시간에도 레벨업 중이네요!';
   const totalLessons=Object.values(CURRICULUM).reduce((s,c)=>s+c.units.reduce((ss,u)=>ss+u.lessons.length,0),0);
   const completedCount=Object.keys(U.completedLessons||{}).length;
   el.innerHTML=greet+' <span style="float:right;font-size:10px;color:var(--cy)">'+totalLessons+'개 레슨 중 '+completedCount+'개 완료</span>';
