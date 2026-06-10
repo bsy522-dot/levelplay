@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v38-auto';
+const CACHE_NAME = 'levelplay-v39-auto';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -14,37 +14,6 @@ const STATIC_ASSETS = [
   './v5_patch.js',
   './v6_patch.js',
   './v7_patch.js',
-  './games/hatcuping-game.html',
-  './games/hatcuping-rpg.html',
-  './games/hatcuping-game-v2.html',
-  './games/hatcuping-rpg-v2.html',
-  './games/hatcuping-unified.html',
-  // 공유 자산 (rpg-v3, hatcuping 시리즈 공유)
-  './games/sprites_data.js',
-  './games/env_backgrounds.js',
-  // 별빛 RPG v3 — 폴더형 (data/story/systems/ui js 자산)
-  './games/rpg-v3/index.html',
-  './games/rpg-v3/data/types.js',
-  './games/rpg-v3/data/tiniping_dex.js',
-  './games/rpg-v3/data/maps.js',
-  './games/rpg-v3/story/act0_prologue.js',
-  './games/rpg-v3/story/act1_scatter.js',
-  './games/rpg-v3/story/act2_jewel.js',
-  './games/rpg-v3/story/act3_mystic.js',
-  './games/rpg-v3/story/act4_dessert.js',
-  './games/rpg-v3/story/act5_star.js',
-  './games/rpg-v3/systems/save.js',
-  './games/rpg-v3/systems/party.js',
-  './games/rpg-v3/systems/battle.js',
-  './games/rpg-v3/systems/capture.js',
-  './games/rpg-v3/systems/evolution.js',
-  './games/rpg-v3/systems/pokedex.js',
-  './games/rpg-v3/systems/gym.js',
-  './games/rpg-v3/ui/katok_dialog.js',
-  './games/rpg-v3/ui/hud.js',
-  './games/rpg-v3/ui/menu.js',
-  './games/rpg-v3/ui/battle_ui.js',
-  './games/rpg-v3/ui/title_screen.js',
   './games/hangul-game.html',
   './games/typing-game.html',
   './games/color-game.html',
