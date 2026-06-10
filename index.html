@@ -476,6 +476,15 @@ html.kid .hero-feat .hf-q{font-size:16px}
 .ai-lesson-card .alc-tips{font-size:10px;color:var(--t3);line-height:1.6}
 .ai-lesson-card .alc-cmd{display:inline-block;font-family:monospace;font-size:10px;background:rgba(139,92,246,.1);color:var(--p);padding:2px 6px;border-radius:4px;margin:2px 0}
 @keyframes catFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* ── 접근성(WCAG AA) 보강 2026-06-10: 기존 규칙 미수정, 추가만 ── */
+:root{--t3:#c5cdd9}
+:root.light{--t3:#666}
+button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visible,.gcard:focus-visible,.fi:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.fi::placeholder{color:var(--t2);opacity:1}
+.qz-a button.correct{border-left:4px solid var(--gn)}
+.qz-a button.wrong{border-left:4px solid var(--rd)}
+.qz-a button.correct::after{content:" ✓";font-weight:700}
+.qz-a button.wrong::after{content:" ✕";font-weight:700}
 </style>
 </head>
 <body>
