@@ -3,3 +3,20 @@ games/_*.html
 games/_tmp_*
 __pycache__/
 *.pyc
+
+# ── 개인정보·민감 파일 (공개 배포 절대 금지) ──
+.claude_session.json
+.claude/
+AUTO_REPORT.md
+*.docx
+*.pptx
+*.bak
+
+# ── 빌드/배포에 불필요한 대용량·임시 산출물 ──
+apk/
+_deleted_files/
+_screenshots/
+data/_gen/
+data/*.bak
+node_modules/
+*.log
