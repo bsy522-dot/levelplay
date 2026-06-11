@@ -1,7 +1,7 @@
 {
   "name": "배움퀘스트 — 배우고, 올리고, 증명하라",
   "short_name": "배움퀘스트",
-  "description": "게이미피케이션 교육 플랫폼 v7.0. 스트릭마일스톤, 오답재시도, 영상이해도퀴즈, 학부모공유카드, 접근성(고대비/글꼴), 약점분석, 적응형학습, 64배지, 400+퀴즈로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v8.0. 학습경로맵, 마스터리트리, 코딩샌드박스, 집중타이머, 업적갤러리, 일일미션, 스마트복습, 학습히트맵, 76배지, 450+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -17,19 +17,24 @@
   ],
   "shortcuts": [
     {
-      "name": "오답노트 재시도",
-      "url": "./index.html#wrong",
-      "description": "오답노트에서 다시 풀기"
+      "name": "코딩 샌드박스",
+      "url": "./index.html#code",
+      "description": "인터랙티브 코딩 연습"
     },
     {
-      "name": "학부모 공유 카드",
-      "url": "./index.html#share",
-      "description": "주간 학습 리포트 생성"
+      "name": "학습 경로맵",
+      "url": "./index.html#pathmap",
+      "description": "과목별 학습 진도 시각화"
     },
     {
-      "name": "약점 분석",
-      "url": "./index.html#weak",
-      "description": "과목별 약점 분석 보기"
+      "name": "일일 미션",
+      "url": "./index.html#missions",
+      "description": "오늘의 학습 미션 확인"
+    },
+    {
+      "name": "스마트 복습",
+      "url": "./index.html#review",
+      "description": "간격반복 복습 카드"
     }
   ]
 }
