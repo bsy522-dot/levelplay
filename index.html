@@ -36,3 +36,21 @@ nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-
 nav button.on{color:var(--cy)}
 nav button.on::before{content:'';position:absolute;top:0;width:20px;height:2px;background:var(--g1);border-radius:0 0 2px 2px}
 nav button span:first-child{font-size:20px}
+.sec{font-size:16px;font-weight:700;margin:18px 0 10px;display:flex;align-items:center;gap:5px}
+.sec:first-child{margin-top:4px}
+.row{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(to right,black 85%,transparent 100%);-webkit-mask-image:linear-gradient(to right,black 85%,transparent 100%)}
+.row::-webkit-scrollbar{display:none}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:480px){.g2{grid-template-columns:repeat(3,1fr)}}
+.vc{flex-shrink:0;width:240px;cursor:pointer;transition:.15s}
+.vc:hover{transform:scale(1.02)}
+.vc img{width:100%;border-radius:8px;display:block}
+.vc .vt{font-size:13px;font-weight:600;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vc .vs{font-size:10px;color:var(--t3)}
+.vc .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.vc .play div{width:32px;height:32px;background:rgba(255,0,0,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.gc{background:var(--c1);border:1px solid rgba(139,92,246,.08);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;transition:.15s}
+.gc:hover{border-color:var(--cy);transform:translateY(-2px)}
+.gc .gi{font-size:28px;margin-bottom:6px}
+.gc .gn{font-size:11px;font-weight:600}
+.gc .gd{font-size:9px;color:var(--t3);margin-top:2px}
