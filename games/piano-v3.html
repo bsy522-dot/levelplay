@@ -1676,11 +1676,11 @@ function synthLoop() {
     if (unplayed.length > 0) {
       const minTime = Math.min(...unplayed.map(n => n.time));
       const nextTimeSec = minTime * beatToSec;
-      // 다음 노트가 hit line 바로 위에 멈춰서 대기 (판정선 가까이 — 지금 칠 음이 명확)
-      const stopOffset = 1.0;
-      const targetNow = nextTimeSec - stopOffset;
-      synthStartTime = performance.now() - targetNow * 1000;
-      now = targetNow;
+      // 노트가 판정선까지 내려오면 거기서 멈춰 대기 → now가 노트 시간을 넘지 않게 클램프(누르면 다음 노트가 내려옴)
+      if (now > nextTimeSec) {
+        synthStartTime = performance.now() - nextTimeSec * 1000;
+        now = nextTimeSec;
+      }
     }
   }
 

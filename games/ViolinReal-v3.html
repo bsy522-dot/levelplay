@@ -1308,15 +1308,15 @@ function updateRhythm(now){
   if(!rhythmState||!rhythmState.active)return;
   const st=rhythmState;
 
-  /* STEP MODE: freeze the next note just above the hit line; no miss / no health */
+  /* STEP MODE: 노트가 판정선까지 내려와 멈추고 대기 → 맞는 음을 누르면 다음 노트가 내려옴. no miss / no health */
   if(st.stepMode){
     let nextN=null;
     for(let i=st.noteIdx;i<st.notes.length;i++){
       if(!st.notes[i].hit&&!st.notes[i].judge){nextN=st.notes[i];break;}
     }
     if(nextN){
-      const stopGap=st.scrollTime*0.16; /* hover just above the hit line */
-      st.startTime=now-(nextN.hitTime-stopGap);
+      /* 시간을 노트의 hitTime에서 클램프 → 노트가 판정선에 닿으면 그 자리에서 정지(대기). 누르면 noteIdx가 넘어가 다음 노트가 내려옴 */
+      if((now-st.startTime)>nextN.hitTime){ st.startTime=now-nextN.hitTime; }
     }
     document.getElementById('hudScore').textContent=st.score+'점';
     const comboTxt2=st.combo>1?(st.combo+'COMBO'+(st.multiplier>1?' x'+st.multiplier:'')):'';
