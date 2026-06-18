@@ -1,7 +1,7 @@
 {
   "name": "배움퀘스트 — 배우고, 올리고, 증명하라",
   "short_name": "배움퀘스트",
-  "description": "게이미피케이션 교육 플랫폼 v8.0. 학습경로맵, 마스터리트리, 코딩샌드박스, 집중타이머, 업적갤러리, 일일미션, 스마트복습, 학습히트맵, 76배지, 450+퀴즈로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v9.0. 스트릭시스템, 스페이스드반복, 학습리그, 스토리학습, 듣기퀴즈, 오답노트, 학습플래너, 공유카드, 진도대시보드, 88배지, 500+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -17,24 +17,44 @@
   ],
   "shortcuts": [
     {
-      "name": "코딩 샌드박스",
-      "url": "./index.html#code",
-      "description": "인터랙티브 코딩 연습"
+      "name": "학습 스트릭",
+      "url": "./index.html#streak",
+      "description": "연속 학습 기록 확인"
     },
     {
-      "name": "학습 경로맵",
-      "url": "./index.html#pathmap",
-      "description": "과목별 학습 진도 시각화"
-    },
-    {
-      "name": "일일 미션",
-      "url": "./index.html#missions",
-      "description": "오늘의 학습 미션 확인"
-    },
-    {
-      "name": "스마트 복습",
-      "url": "./index.html#review",
+      "name": "스페이스드 반복",
+      "url": "./index.html#spaced",
       "description": "간격반복 복습 카드"
+    },
+    {
+      "name": "학습 리그",
+      "url": "./index.html#league",
+      "description": "브론즈~마스터 리그 확인"
+    },
+    {
+      "name": "스토리 학습",
+      "url": "./index.html#story",
+      "description": "이야기로 배우기"
+    },
+    {
+      "name": "듣기 퀴즈",
+      "url": "./index.html#listen",
+      "description": "듣고 맞추는 퀴즈"
+    },
+    {
+      "name": "오답 노트",
+      "url": "./index.html#wrong",
+      "description": "틀린 문제 복습"
+    },
+    {
+      "name": "학습 플래너",
+      "url": "./index.html#planner",
+      "description": "오늘의 학습 계획"
+    },
+    {
+      "name": "진도 대시보드",
+      "url": "./index.html#dashboard",
+      "description": "학습 진도 시각화"
     }
   ]
 }
