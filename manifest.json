@@ -1,7 +1,7 @@
 {
   "name": "배움퀘스트 — 배우고, 올리고, 증명하라",
   "short_name": "배움퀘스트",
-  "description": "게이미피케이션 교육 플랫폼 v9.0. 스트릭시스템, 스페이스드반복, 학습리그, 스토리학습, 듣기퀴즈, 오답노트, 학습플래너, 공유카드, 진도대시보드, 88배지, 500+퀴즈로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v10.0. 일일챌린지, 마스터리레이더Canvas, 포모도로타이머, 플래시카드빌더, 학습경로맵, 단어장, 타임어택, 주간리포트, 100배지, 565+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -55,6 +55,46 @@
       "name": "진도 대시보드",
       "url": "./index.html#dashboard",
       "description": "학습 진도 시각화"
+    },
+    {
+      "name": "일일 챌린지",
+      "url": "./index.html#challenge",
+      "description": "오늘의 학습 챌린지"
+    },
+    {
+      "name": "마스터리 레이더",
+      "url": "./index.html#mastery",
+      "description": "11과목 역량 레이더"
+    },
+    {
+      "name": "포모도로 타이머",
+      "url": "./index.html#pomo",
+      "description": "25분 집중 학습"
+    },
+    {
+      "name": "플래시카드",
+      "url": "./index.html#flash",
+      "description": "나만의 암기 카드"
+    },
+    {
+      "name": "단어장",
+      "url": "./index.html#vocab",
+      "description": "핵심 용어 학습"
+    },
+    {
+      "name": "타임어택",
+      "url": "./index.html#timeattack",
+      "description": "시간제한 스피드 퀴즈"
+    },
+    {
+      "name": "주간 리포트",
+      "url": "./index.html#report",
+      "description": "주간 학습 요약"
+    },
+    {
+      "name": "학습 경로 맵",
+      "url": "./index.html#path",
+      "description": "커리큐럼 로드맵"
     }
   ]
 }
