@@ -1713,12 +1713,12 @@ function showQuizQuestion(){
   }
   const q=G._quizSet[quizIdx];
   $('quiz-question').textContent=`문제 ${quizIdx+1}/${quizTotal}: ${q.q}`;
-  $('quiz-answers').innerHTML=q.a.map((a,i)=>`<button class="quiz-btn" onclick="answerQuiz(${i})">${a}</button>`).join('');
+  q._order=q.a.map((_,i)=>i);for(var _i=q._order.length-1;_i>0;_i--){var _j=Math.random()*(_i+1)|0,_t=q._order[_i];q._order[_i]=q._order[_j];q._order[_j]=_t;}$('quiz-answers').innerHTML=q._order.map(oi=>`<button class="quiz-btn" onclick="answerQuiz(${oi})">${q.a[oi]}</button>`).join('');
 }
 window.answerQuiz=function(i){
   const q=G._quizSet[quizIdx];
   const btns=$('quiz-answers').querySelectorAll('.quiz-btn');
-  btns.forEach((b,j)=>{b.disabled=true;if(j===q.c)b.classList.add('correct');if(j===i&&j!==q.c)b.classList.add('wrong')});
+  btns.forEach((b,d)=>{b.disabled=true;var oi=(q._order&&q._order[d]!=null)?q._order[d]:d;if(oi===q.c)b.classList.add('correct');if(oi===i&&i!==q.c)b.classList.add('wrong')});
   if(i===q.c){quizCorrect++;sfx('sel')}else sfx('miss');
   setTimeout(()=>{quizIdx++;showQuizQuestion()},1000)
 };

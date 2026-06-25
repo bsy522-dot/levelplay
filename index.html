@@ -928,6 +928,7 @@ const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8b/in
 function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();var _u=u+(u.indexOf('?')>=0?'&':'?')+'_cb='+Date.now();if(_3D_GAMES.has(u)){window.open(_u,'_blank');return;}document.getElementById('gT').textContent=n;document.getElementById('gF').src=_u;document.getElementById('gO').classList.add('sh');}
 function cG(){document.getElementById('gO').classList.remove('sh');document.getElementById('gF').src='';}
 
+Object.defineProperty(Array.prototype,'shuffle',{value:function(){for(var i=this.length-1;i>0;i--){var j=Math.random()*(i+1)|0,t=this[i];this[i]=this[j];this[j]=t;}return this;},enumerable:false,writable:true,configurable:true});
 function getQuiz(){if(U.kidMode){return QUIZ.filter(q=>!q.age||q.age!=='adult');}return QUIZ;}
 function getAdaptiveDifficulty(cat){
   const d=U.stats.quizByCategory[cat];
@@ -970,11 +971,11 @@ function renderQuiz(el,items,type){
   const filtered=items||getQuiz();
   let sh;
   if(type==='summative'){
-    sh=[...filtered].sort(()=>Math.random()-.5).slice(0,10);
+    sh=[...filtered].shuffle().slice(0,10);
   }else if(!items){
     sh=getAdaptiveQuizzes(filtered);
   }else{
-    sh=[...filtered].sort(()=>Math.random()-.5).slice(0,5);
+    sh=[...filtered].shuffle().slice(0,5);
   }
   const qType=type||'default';
   const typeClass=type==='formative'?'qz-formative':type==='summative'?'qz-summative':'';
@@ -991,7 +992,7 @@ function renderQuiz(el,items,type){
   }
   html+=sh.map((q,qi)=>{
     const qIdx=QUIZ.indexOf(q);
-    const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).sort(()=>Math.random()-.5);
+    const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).shuffle();
     let qHtml='<div class="qz '+typeClass+'" data-quiz-idx="'+qIdx+'" data-quiz-type="'+qType+'">'+typeLabel+'<div class="qz-q">'+(q.cat||'')+' | '+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div>';
     if(type==='formative'){
       const hint=q.explanation||'정답은 보기 중 하나에요. 천천히 생각해보세요!';
@@ -1728,7 +1729,7 @@ function openLesson(ui,li){
     html+='<div class="sec" style="font-size:13px">확인해볼까?</div>';
     l.quiz.forEach(q=>{
       const hint=q.explanation||'정답은 보기 중 하나에요. 천천히 생각해보세요!';
-      const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).sort(()=>Math.random()-.5);
+      const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).shuffle();
       html+='<div class="qz qz-formative" data-quiz-type="formative"><div class="qz-type-label">확인해볼까?</div><div class="qz-q">'+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div><button class="qz-hint-btn" onclick="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">힌트 보기</button><div class="qz-hint">'+hint+'</div></div>';
     });
   }
@@ -1853,7 +1854,7 @@ function checkGG(){const ans=parseInt(document.getElementById('ggA').value);if(i
 
 function filterVids(cat){document.querySelectorAll('[data-vcat]').forEach(el=>{el.style.display=(!cat||el.dataset.vcat===cat)?'':'none';});}
 
-function doSearch(q){const box=document.getElementById('srchRes');if(!q||q.trim().length<1){box.style.display='none';return;}const s=q.trim().toLowerCase();let h='';const vr=getV().filter(v=>v.t.toLowerCase().includes(s)||v.c.toLowerCase().includes(s));if(vr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin-bottom:4px">영상 ('+vr.length+')</div><div class="row">'+vr.slice(0,10).map(vc).join('')+'</div>';const qr=QUIZ.filter(x=>x.q.toLowerCase().includes(s)||x.cat.toLowerCase().includes(s));if(qr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">퀴즈 ('+qr.length+')</div>'+qr.slice(0,5).map(q2=>{const qIdx=QUIZ.indexOf(q2);const opts=[...q2.a].map((a,i)=>({t:a,ok:i===q2.c})).sort(()=>Math.random()-.5);return'<div class="qz" data-quiz-idx="'+qIdx+'"><div class="qz-q">'+q2.cat+' | '+q2.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';}).join('');const sr=SIMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(sr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">실험 ('+sr.length+')</div><div class="g2">'+sr.map(sc).join('')+'</div>';const gr=GMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(gr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">게임 ('+gr.length+')</div><div class="g2">'+gr.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div></div>').join('')+'</div>';const cr=[];Object.entries(CURRICULUM).forEach(([k,v])=>{v.units.forEach((u,ui)=>{u.lessons.forEach((l,li)=>{if(l.t.toLowerCase().includes(s)||v.nm.toLowerCase().includes(s)||u.nm.toLowerCase().includes(s))cr.push({subj:k,subjNm:v.nm,ic:v.ic,unitNm:u.nm,ui,li,t:l.t,lv:l.lv});});});});const subjMatches=getSubjects().filter(sb=>sb.nm.toLowerCase().includes(s)&&!cr.find(c=>c.subjNm===sb.nm));if(subjMatches.length)subjMatches.forEach(sb=>{cr.push({subj:sb.id,subjNm:sb.nm,ic:sb.ic,unitNm:'전체',ui:-1,li:-1,t:sb.nm+' ('+sb.unitCount+'단원 '+sb.topicCount+'토픽)',lv:0,isDyn:true});});if(cr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">커리큘럼 ('+cr.length+')</div>'+cr.slice(0,8).map(c=>{if(c.isDyn)return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>openSubjectNew(\''+c.subj+'\'),50)"><div style="font-size:12px;font-weight:600">'+c.ic+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">과목 열기</div></div>';return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>{openSubject(\''+c.subj+'\');setTimeout(()=>openLesson('+c.ui+','+c.li+'),50)},50)"><div style="font-size:12px;font-weight:600">'+c.ic+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">'+c.subjNm+' > '+c.unitNm+' > Lv.'+c.lv+'</div></div>';}).join('');if(!h)h='<div style="font-size:11px;color:var(--t3);text-align:center;padding:12px">검색 결과가 없습니다</div>';box.innerHTML=h;box.style.display='block';}
+function doSearch(q){const box=document.getElementById('srchRes');if(!q||q.trim().length<1){box.style.display='none';return;}const s=q.trim().toLowerCase();let h='';const vr=getV().filter(v=>v.t.toLowerCase().includes(s)||v.c.toLowerCase().includes(s));if(vr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin-bottom:4px">영상 ('+vr.length+')</div><div class="row">'+vr.slice(0,10).map(vc).join('')+'</div>';const qr=QUIZ.filter(x=>x.q.toLowerCase().includes(s)||x.cat.toLowerCase().includes(s));if(qr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">퀴즈 ('+qr.length+')</div>'+qr.slice(0,5).map(q2=>{const qIdx=QUIZ.indexOf(q2);const opts=[...q2.a].map((a,i)=>({t:a,ok:i===q2.c})).shuffle();return'<div class="qz" data-quiz-idx="'+qIdx+'"><div class="qz-q">'+q2.cat+' | '+q2.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';}).join('');const sr=SIMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(sr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">실험 ('+sr.length+')</div><div class="g2">'+sr.map(sc).join('')+'</div>';const gr=GMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(gr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">게임 ('+gr.length+')</div><div class="g2">'+gr.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')"><div class="gi">'+g.em+'</div><div class="gn">'+g.nm+'</div></div>').join('')+'</div>';const cr=[];Object.entries(CURRICULUM).forEach(([k,v])=>{v.units.forEach((u,ui)=>{u.lessons.forEach((l,li)=>{if(l.t.toLowerCase().includes(s)||v.nm.toLowerCase().includes(s)||u.nm.toLowerCase().includes(s))cr.push({subj:k,subjNm:v.nm,ic:v.ic,unitNm:u.nm,ui,li,t:l.t,lv:l.lv});});});});const subjMatches=getSubjects().filter(sb=>sb.nm.toLowerCase().includes(s)&&!cr.find(c=>c.subjNm===sb.nm));if(subjMatches.length)subjMatches.forEach(sb=>{cr.push({subj:sb.id,subjNm:sb.nm,ic:sb.ic,unitNm:'전체',ui:-1,li:-1,t:sb.nm+' ('+sb.unitCount+'단원 '+sb.topicCount+'토픽)',lv:0,isDyn:true});});if(cr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">커리큘럼 ('+cr.length+')</div>'+cr.slice(0,8).map(c=>{if(c.isDyn)return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>openSubjectNew(\''+c.subj+'\'),50)"><div style="font-size:12px;font-weight:600">'+c.ic+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">과목 열기</div></div>';return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>{openSubject(\''+c.subj+'\');setTimeout(()=>openLesson('+c.ui+','+c.li+'),50)},50)"><div style="font-size:12px;font-weight:600">'+c.ic+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">'+c.subjNm+' > '+c.unitNm+' > Lv.'+c.lv+'</div></div>';}).join('');if(!h)h='<div style="font-size:11px;color:var(--t3);text-align:center;padding:12px">검색 결과가 없습니다</div>';box.innerHTML=h;box.style.display='block';}
 
 
 // ===== CATEGORY SYSTEM =====
@@ -2084,7 +2085,7 @@ function renderQuizWithGating(el,quizzes,cat){
     h+='<div style="font-size:11px;font-weight:600;color:var(--gn);margin-bottom:6px">\u{1F7E2} 기본 (Lv.1+)</div>';
     basic.forEach(function(q){
       var qIdx=QUIZ.indexOf(q);
-      var opts=q.a.map(function(a,i){return{t:a,ok:i===q.c};}).sort(function(){return Math.random()-.5;});
+      var opts=q.a.map(function(a,i){return{t:a,ok:i===q.c};}).shuffle();
       h+='<div class="qz" data-quiz-idx="'+qIdx+'" data-quiz-type="default"><div class="qz-q">'+(q.cat||'')+' | '+q.q+'</div><div class="qz-a">'+opts.map(function(o){return '<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>';}).join('')+'</div></div>';
     });
   }
@@ -2097,7 +2098,7 @@ function renderQuizWithGating(el,quizzes,cat){
     }
     advanced.slice(0,5).forEach(function(q){
       var qIdx=QUIZ.indexOf(q);
-      var opts=q.a.map(function(a,i){return{t:a,ok:i===q.c};}).sort(function(){return Math.random()-.5;});
+      var opts=q.a.map(function(a,i){return{t:a,ok:i===q.c};}).shuffle();
       h+='<div class="qz'+(locked?' quiz-locked':'')+'" data-quiz-idx="'+qIdx+'" data-quiz-type="default"'+(locked?' data-req-lv="'+reqLv+'"':'')+'><div class="qz-q">'+(q.cat||'')+' | '+q.q+'</div><div class="qz-a">'+opts.map(function(o){return '<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>';}).join('')+'</div></div>';
     });
   }
@@ -2314,7 +2315,7 @@ function retryWrongNotes(){
     if(!orig){orig=QUIZ.find(q=>{const qt=q.cat?q.cat+' | '+q.q:q.q;return qt.includes(n.q)||q.q===n.q;});}
     if(orig){
       const qIdx=QUIZ.indexOf(orig);
-      const opts=[...orig.a].map((a,i)=>({t:a,ok:i===orig.c})).sort(()=>Math.random()-.5);
+      const opts=[...orig.a].map((a,i)=>({t:a,ok:i===orig.c})).shuffle();
       h+='<div class="qz" data-quiz-idx="'+qIdx+'"><div class="qz-q">'+(orig.cat||'')+' | '+orig.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';
     } else {
       h+='<div class="qz"><div class="qz-q">'+n.q+'</div><div style="font-size:11px;color:var(--t3)">정답: '+n.correctAnswer+'</div></div>';
@@ -2334,7 +2335,7 @@ function completeLesson(subjNm,lessonT){
 function openSummativeQuiz(unitName){
   const catQuizzes=QUIZ.filter(q=>q.cat&&(q.cat.includes(unitName)||unitName.includes(q.cat)));
   let pool=catQuizzes.length>=5?catQuizzes:QUIZ;
-  const selected=[...pool].sort(()=>Math.random()-.5).slice(0,10);
+  const selected=[...pool].shuffle().slice(0,10);
   let h='<div style="font-size:14px;font-weight:700;margin-bottom:6px">단원 평가: '+unitName+'</div>';
   h+='<div style="font-size:10px;color:var(--t2);margin-bottom:10px">시간제한 있음 | 70점 이상 통과 | 뱃지 획득 가능</div>';
   h+='<div id="summQuizArea"></div>';
@@ -2379,7 +2380,7 @@ function openReviewQuiz(){
   let h='<div style="font-size:14px;font-weight:700;margin-bottom:10px">🔄 오늘의 복습 ('+reviews.length+'문제)</div>';
   reviews.slice(0,10).forEach(r=>{
     const q=QUIZ[r.qIdx];if(!q)return;
-    const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).sort(()=>Math.random()-.5);
+    const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).shuffle();
     h+='<div class="qz" data-quiz-idx="'+r.qIdx+'"><div class="qz-q">'+(q.cat||'')+' | '+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';
   });
   document.getElementById('moB').innerHTML=h;document.getElementById('mo').classList.add('sh');
@@ -2437,11 +2438,11 @@ function renderRecommendations(){
 function openWeakQuiz(cat){
   const qs=QUIZ.filter(q=>q.cat===cat);
   if(qs.length===0){toast('해당 카테고리 퀴즈가 없습니다');return;}
-  const sh=[...qs].sort(()=>Math.random()-.5).slice(0,5);
+  const sh=[...qs].shuffle().slice(0,5);
   let h='<div style="font-size:14px;font-weight:700;margin-bottom:10px">📝 '+cat+' 취약 과목 연습</div>';
   sh.forEach(q=>{
     const qIdx=QUIZ.indexOf(q);
-    const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).sort(()=>Math.random()-.5);
+    const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).shuffle();
     h+='<div class="qz" data-quiz-idx="'+qIdx+'"><div class="qz-q">'+(q.cat||'')+' | '+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';
   });
   document.getElementById('moB').innerHTML=h;document.getElementById('mo').classList.add('sh');
@@ -2744,7 +2745,7 @@ let _battle=null,_battleTimer=null;
 function startBattle(){
   const pool=getQuiz();
   if(pool.length<5){toast('퀴즈가 부족합니다');return;}
-  const shuffled=[...pool].sort(()=>Math.random()-.5).slice(0,5);
+  const shuffled=[...pool].shuffle().slice(0,5);
   _battle={questions:shuffled,current:0,myScore:0,aiScore:0,myAnswers:[],aiAnswers:[],timeLeft:15};
   document.getElementById('battleOverlay').style.display='flex';
   renderBattleQ();
@@ -2752,7 +2753,7 @@ function startBattle(){
 function renderBattleQ(){
   const b=_battle;if(!b)return;
   const q=b.questions[b.current];
-  const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).sort(()=>Math.random()-.5);
+  const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).shuffle();
   b.timeLeft=15;
   let h='<div class="battle-card"><div class="battle-header"><div class="battle-player"><div class="bp-name">'+(U.nk||'나')+'</div><div class="bp-score">'+b.myScore+'</div></div><div class="battle-vs">VS</div><div class="battle-player"><div class="bp-name">AI 도전자</div><div class="bp-score">'+b.aiScore+'</div></div></div>';
   h+='<div style="font-size:9px;color:var(--t3);text-align:center;margin-bottom:6px">'+(b.current+1)+'/5 문제</div>';
