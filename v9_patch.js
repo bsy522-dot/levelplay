@@ -101,7 +101,7 @@ v9css.textContent=`
 .v9-fab{position:fixed;left:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:900}
 .v9-fab button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(139,92,246,.2);background:rgba(17,17,39,.95);color:var(--tx);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;backdrop-filter:blur(8px)}
 .v9-fab button:hover{border-color:var(--cy);transform:scale(1.1)}
-@media(max-width:480px){.v9-fab{left:4px;gap:4px}.v9-fab button{width:30px;height:30px;font-size:13px}}
+@media(max-width:480px){.v9-fab{display:none}}
 `;
 document.head.appendChild(v9css);
 
@@ -343,8 +343,8 @@ function renderStoryMode(){
   if(scene.quiz){
     return `<div class="v9-panel"><h3>\u{1F4D6} ${story.title} - 퀴즈!</h3>
       <div class="v9-story"><div class="narrator">${scene.text}</div>
-        <div class="qz"><div class="qz-q">${scene.quiz.q}</div><div class="qz-a">${scene.quiz.a.map((a,i)=>
-          `<button onclick="v9StoryQuiz(${i},${scene.quiz.c})">${a}</button>`
+        <div class="qz"><div class="qz-q">${scene.quiz.q}</div><div class="qz-a">${scene.quiz.a.map((a,i)=>i).shuffle().map(oi=>
+          `<button onclick="v9StoryQuiz(${oi},${scene.quiz.c})">${scene.quiz.a[oi]}</button>`
         ).join('')}</div></div>
       </div>
       <button class="v9-btn" onclick="v9EndStory()">← 스토리 목록</button>
@@ -386,8 +386,8 @@ function renderListenQuiz(){
       <button class="v9-btn" onclick="v9PlayListen('${q.text.replace(/'/g,"\\'")}','${q.lang}')" style="font-size:16px;padding:12px 24px">\u{1F50A} 문장 듣기</button>
       <div style="font-size:9px;color:var(--t3);margin-top:4px">버튼을 눌러 문장을 들으세요</div>
     </div>
-    <div class="qz"><div class="qz-q">${q.q}</div><div class="qz-a">${q.a.map((a,i)=>
-      `<button onclick="v9ListenAnswer(${i},${q.c})">${a}</button>`
+    <div class="qz"><div class="qz-q">${q.q}</div><div class="qz-a">${q.a.map((a,i)=>i).shuffle().map(oi=>
+      `<button onclick="v9ListenAnswer(${oi},${q.c})">${q.a[oi]}</button>`
     ).join('')}</div></div>
     <div style="font-size:9px;color:var(--t3);text-align:center">${done}문제 완료</div>
   </div>`;

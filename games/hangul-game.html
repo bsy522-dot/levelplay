@@ -142,7 +142,7 @@ const DIFFICULTIES = [
 let score=0, streak=0, total=0, correct=0, mode='menu', modeType=0, qIdx=0, questions=[], flashIdx=0;
 let currentDiff=0;
 
-function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.random()*i+1|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 function sendXP(amount){try{window.parent.postMessage({type:'xp',amount:amount,source:'hangul-game'},'*');}catch(e){}}
 function getBest(m,d){try{return JSON.parse(localStorage.getItem('hangul_best_'+m+'_'+d))||{stars:0,score:0};}catch(e){return{stars:0,score:0};}}
 function saveBest(m,d,stars,sc){

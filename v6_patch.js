@@ -481,8 +481,9 @@ function renderDailyChallenge(){
       h+='<div class="v6-daily-q"><div class="v6dq-num">Q'+(currentIdx+1)+'</div>';
       h+='<div class="v6dq-text">'+q.q+'</div>';
       h+='<div class="v6dq-opts">';
-      q.a.forEach((opt,i)=>{
-        h+='<button onclick="v6DailyAnswer('+i+','+q.c+')">'+opt+'</button>';
+      var _ord=q.a.map(function(_,i){return i;});for(var _k=_ord.length-1;_k>0;_k--){var _j=Math.random()*(_k+1)|0,_t=_ord[_k];_ord[_k]=_ord[_j];_ord[_j]=_t;}
+      _ord.forEach(function(oi){
+        h+='<button onclick="v6DailyAnswer('+oi+','+q.c+')">'+q.a[oi]+'</button>';
       });
       h+='</div></div>';
     }

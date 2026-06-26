@@ -299,8 +299,8 @@ window.v7RetryQuestion=function(idx){
     overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
     let h='<div class="v7-vidquiz"><h3>🔄 오답 재시도</h3>';
     h+='<div class="vq-q">'+match.q+'</div><div class="vq-opts">';
-    match.a.forEach((opt,i)=>{
-      h+='<button data-idx="'+i+'" data-correct="'+match.c+'">'+opt+'</button>';
+    match.a.map(function(_,i){return i;}).shuffle().forEach(function(oi){
+      h+='<button data-idx="'+oi+'" data-correct="'+match.c+'">'+match.a[oi]+'</button>';
     });
     h+='</div></div>';
     overlay.innerHTML=h;
@@ -343,8 +343,8 @@ function triggerPostVideoQuiz(lessonId){
     const q=qs[idx];
     let h='<div class="v7-vidquiz"><h3>📺 영상 이해도 체크 ('+(idx+1)+'/2)</h3>';
     h+='<div class="vq-q">'+q.q+'</div><div class="vq-opts">';
-    q.a.forEach((opt,i)=>{
-      h+='<button data-idx="'+i+'" data-correct="'+q.c+'">'+opt+'</button>';
+    q.a.map(function(_,i){return i;}).shuffle().forEach(function(oi){
+      h+='<button data-idx="'+oi+'" data-correct="'+q.c+'">'+q.a[oi]+'</button>';
     });
     h+='</div></div>';
     overlay.innerHTML=h;

@@ -104,7 +104,7 @@ v10css.textContent=`
 .v10-fab{position:fixed;left:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:900}
 .v10-fab button{width:36px;height:36px;border-radius:50%;border:1px solid rgba(139,92,246,.2);background:rgba(17,17,39,.95);color:var(--tx);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;backdrop-filter:blur(8px)}
 .v10-fab button:hover{border-color:var(--cy);transform:scale(1.1)}
-@media(max-width:480px){.v10-fab{left:4px;gap:4px}.v10-fab button{width:30px;height:30px;font-size:13px}}
+@media(max-width:480px){.v10-fab{display:none}}
 /* Scroll nav bar */
 .v10-nav{position:fixed;bottom:calc(var(--nv)+4px);left:50%;transform:translateX(-50%);display:flex;gap:4px;background:rgba(17,17,39,.95);backdrop-filter:blur(12px);border:1px solid rgba(139,92,246,.15);border-radius:20px;padding:4px;z-index:800;max-width:90vw;overflow-x:auto;scrollbar-width:none}
 .v10-nav::-webkit-scrollbar{display:none}
@@ -531,8 +531,8 @@ function renderVocabBuilder(){
   if(v10VocabState.showQuiz&&v10VocabState.quizWord){
     const qw=v10VocabState.quizWord;
     const allWords=VOCAB_SETS.flatMap(s=>s.words);
-    const wrongOpts=allWords.filter(w=>w.word!==qw.word).sort(()=>Math.random()-.5).slice(0,3).map(w=>w.meaning);
-    const opts=[qw.meaning,...wrongOpts].sort(()=>Math.random()-.5);
+    const wrongOpts=allWords.filter(w=>w.word!==qw.word).shuffle().slice(0,3).map(w=>w.meaning);
+    const opts=[qw.meaning,...wrongOpts].shuffle();
     return `<div class="v10-panel v10-vocab"><h3>\u{1F4DD} 단어 퀴즈</h3>
       <div style="text-align:center;margin:12px 0">
         <div style="font-size:20px;font-weight:900;color:var(--cy)">${qw.word}</div>
@@ -618,8 +618,8 @@ function renderTimeAttack(){
     <div class="timer-bar"><div class="timer-fill" style="width:${v10TAState.timeLeft/60*100}%"></div></div>
     <div style="font-size:10px;color:var(--t3);margin-bottom:6px">${v10TAState.qIdx+1}/${TA_QUIZZES.length} | 점수: ${v10TAState.score}</div>
     <div class="ta-q">${q.q}</div>
-    <div class="ta-opts">${q.a.map((a,i)=>
-      `<button onclick="v10TAAnswer(this,${i},${q.c})">${a}</button>`
+    <div class="ta-opts">${q.a.map((a,i)=>i).shuffle().map(oi=>
+      `<button onclick="v10TAAnswer(this,${oi},${q.c})">${q.a[oi]}</button>`
     ).join('')}</div>
   </div>`;
 }
@@ -637,7 +637,7 @@ function renderTAResult(){
 }
 window.v10TAStart=function(){
   v10TAState={active:true,qIdx:0,score:0,timeLeft:60,answered:0,interval:null};
-  TA_QUIZZES.sort(()=>Math.random()-.5);
+  TA_QUIZZES.shuffle();
   v10Sfx('timeattack_start');
   v10TAState.interval=setInterval(()=>{
     v10TAState.timeLeft--;
