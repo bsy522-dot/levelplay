@@ -664,7 +664,7 @@ function setupInput(renderer,camera,scene,controls,callbacks){
     for(const hit of hits){
       let obj=hit.object;
       while(obj&&!(obj.userData&&obj.userData.kind))obj=obj.parent;
-      if(obj&&obj.userData&&obj.userData.kind){
+      if(obj&&obj.userData&&(obj.userData.kind==='room'||obj.userData.kind==='furn'||obj.userData.kind==='ext')){
         if(callbacks.onObjectClick)callbacks.onObjectClick(obj);
         return;
       }
@@ -1003,7 +1003,7 @@ function placeRoom(x,z){
   rooms[currentFloor].push(room);
   addRoomMesh(room,currentFloor);
   selRoom=room;selFurn=null;
-  status(`${rt.n} 배치 (-${cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();refreshGameState(false);
+  status(`${rt.n} 배치 (-${cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();refreshGameState(false);tutAdvance('roomPlaced');
 }
 
 function addFurniture(furnId){
@@ -1016,7 +1016,7 @@ function addFurniture(furnId){
   selRoom.floor=currentFloor;
   addFurnMesh(furn,selRoom);
   selFurn=furn;
-  status(`${ft.n} 배치 (-${ft.cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();refreshGameState(false);
+  status(`${ft.n} 배치 (-${ft.cost.toLocaleString()})`);updBudget();updatePanel();updateSelHighlight();refreshGameState(false);tutAdvance('furnAdded');
 }
 
 function placeExterior(x,z){
@@ -1117,6 +1117,7 @@ function togglePanel(){
   const p=document.getElementById('panel');
   p.classList.toggle('hide');
   document.getElementById('panelToggle').textContent=p.classList.contains('hide')?'☰':'✕';
+  if(!p.classList.contains('hide'))tutAdvance('panelOpen');
 }
 window.togglePanel=togglePanel;
 if(window.innerWidth<=900){
@@ -1156,6 +1157,7 @@ document.getElementById('btnRoof').onclick=()=>{
   }
   controls.update();
   updateSelHighlight();
+  tutAdvance('roofToggled');
 };
 window.exitWalk=()=>{
   walkMode=false;document.getElementById('walkBadge').style.display='none';
@@ -1170,6 +1172,7 @@ document.querySelectorAll('.ptab').forEach(t=>t.onclick=()=>{
   curTab=t.dataset.t;
   document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('act'));t.classList.add('act');
   updatePanel();
+  tutAdvance('tab:'+curTab);
 });
 
 function updatePanel(){
@@ -1243,7 +1246,7 @@ function updatePanel(){
   }
 }
 
-window.pickRoom=(id)=>{selRoomType=id;updatePanel();};
+window.pickRoom=(id)=>{selRoomType=id;updatePanel();tutAdvance('roomPicked');};
 window.pickFurn=(id)=>{if(selRoom)addFurniture(id);};
 window.pickFurnItem=(fid)=>{if(selRoom){selFurn=selRoom.furniture.find(f=>f.id===fid);updatePanel();updateSelHighlight();}};
 window.pickMat=(i)=>{curMaterial=i;updatePanel();};
@@ -1333,39 +1336,139 @@ document.getElementById('galleryModal').onclick=e=>{if(e.target.id==='galleryMod
 // ============================================================
 // TUTORIAL
 // ============================================================
-document.getElementById('btnTut').onclick=()=>{
-  const m=document.getElementById('tutModal');m.style.display='flex';
-  document.getElementById('tutBox').innerHTML=`<h3>🏠 집짓기 v4</h3>
-<p><b>📌 핵심 조작 (모바일/PC)</b><br>
-• <b>화면 드래그</b>: 카메라 회전<br>
-• <b>두 손가락 핀치/휠</b>: 줌<br>
-• <b>방 짧게 탭</b>: 방 선택<br>
-• <b>빈 잔디 탭</b>: 방 배치 (방 종류 탭 활성화 시)</p>
-
-<p><b>🆕 신규 기능</b></p>
-<p>• <b style="color:#ffaa55">🏚지붕 버튼</b> (상단 우측 주황색): 지붕 ON/OFF<br>
-&nbsp;&nbsp;OFF=인테리어 보임, ON=외관 완성</p>
-<p>• <b style="color:#5acc88">✋이동 버튼</b> (하단 좌측 녹색): 방 이동<br>
-&nbsp;&nbsp;1) 방 클릭 → 2) ✋이동 → 3) 새 위치 클릭</p>
-<p>• <b>🔄회전</b>: 가구 90도 회전</p>
-<p>• <b>🗑삭제</b>: 50% 환불</p>
-
-<p><b>🎨 스타일 변경 (벽 색상/자재/창문)</b><br>
-방 클릭 → 우측 패널 '스타일' 탭 → 벽 색상/자재/창문 선택 → '선택 방에 적용' 버튼</p>
-
-<p><b>🌅 환경</b><br>
-상단 ☀️🌞 클릭으로 날씨/시간대 변경</p>
-
-<p><b>👤 1인칭 둘러보기</b><br>
-방 선택 → 👤 버튼 → 마우스로 방안 둘러봄, ESC로 나가기</p>
-
-<button onclick="document.getElementById('tutModal').style.display='none'">확인</button>`;
-};
+document.getElementById('btnTut').onclick=()=>startTutorial();
 document.getElementById('tutModal').onclick=e=>{if(e.target.id==='tutModal')e.target.style.display='none';};
-// v4 튜토리얼 ID 갱신 (신기능 안내 다시 보이게)
-if(localStorage.getItem('hb_v4_tut2')!=='1'){
-  setTimeout(()=>{document.getElementById('btnTut').click();localStorage.setItem('hb_v4_tut2','1');},500);
+
+// ============================================================
+// INTERACTIVE TUTORIAL (유치원 눈높이 스포트라이트 가이드)
+// ============================================================
+let tutActive=false,tutStep=0;
+const TUT_COPY={
+  welcome:{mascot:'🐤',big:'🐤 안녕! 같이 집 지어요',small:'꼬마 건축가가 도와줄게! 따라 해봐요 😊',praise:''},
+  openMenu:{mascot:'👉',big:'☰ 요술 가방을 열어요',small:'위에 있는 줄 세 개(☰)를 콕 눌러요',praise:'짠! 도구가 와르르 나왔어요 ✨'},
+  pickRoom:{mascot:'🛋️',big:'🛋️ 거실을 골라봐요',small:"방 목록에서 '거실'을 톡 눌러요",praise:'좋아요! 첫 번째 방이에요 💛🎉'},
+  placeRoom:{mascot:'👇',big:'🌱 잔디밭에 콕! 놓아요',small:'가운데 빈 잔디밭을 손가락으로 콕!',praise:'우와, 우리 집이 뿅! 생겼어요 🏡✨'},
+  furnTab:{mascot:'🪑',big:'🪑 가구 서랍을 열어요',small:"패널 위쪽 '가구' 글자를 톡 눌러요",praise:'예쁜 가구가 가득가득! 😍'},
+  addFurn:{mascot:'🛏️',big:'💕 마음에 쏙 든 가구 놓기',small:'좋아하는 가구 하나를 톡 눌러요',praise:'방이 포근포근해졌어요! 🥰'},
+  roof:{mascot:'🏠',big:'🏠 지붕을 살짝 덮어요',small:"위 오른쪽 주황색 '🏚지붕'을 톡 눌러요",praise:'짜잔! 진짜 집이 됐어요 🏡🎊'},
+  evaluate:{mascot:'🏆',big:'🏆 우리 집 점수 볼까요?',small:'아래 트로피(🏆) 버튼을 톡 눌러요',praise:''},
+};
+const TUT_STEPS=[
+  {id:'welcome',target:null,trigger:'next'},
+  {id:'openMenu',target:()=>document.getElementById('panelToggle'),trigger:'panelOpen',pre:tutClosePanel},
+  {id:'pickRoom',target:()=>document.querySelector('#pcontent .item-btn'),trigger:'roomPicked',pre:()=>{tutOpenPanel();tutSwitchTab('rooms');}},
+  {id:'placeRoom',target:tutCanvasRect,trigger:'roomPlaced',pre:()=>{tutClosePanel();tutFrameGround();}},
+  {id:'furnTab',target:()=>document.querySelector('.ptab[data-t="furn"]'),trigger:'tab:furn',pre:tutOpenPanel},
+  {id:'addFurn',target:tutFirstFurnBtn,trigger:'furnAdded',pre:()=>{tutOpenPanel();tutSwitchTab('furn');}},
+  {id:'roof',target:()=>document.getElementById('btnRoof'),trigger:'roofToggled',pre:tutClosePanel},
+  {id:'evaluate',target:()=>document.getElementById('aEval'),trigger:'evalOpened',pre:tutClosePanel},
+];
+function tutOpenPanel(){const p=document.getElementById('panel');if(p&&p.classList.contains('hide')){p.classList.remove('hide');document.getElementById('panelToggle').textContent='✕';}}
+function tutClosePanel(){const p=document.getElementById('panel');if(p&&!p.classList.contains('hide')){p.classList.add('hide');document.getElementById('panelToggle').textContent='☰';}}
+function tutSwitchTab(t){curTab=t;document.querySelectorAll('.ptab').forEach(x=>x.classList.toggle('act',x.dataset.t===t));updatePanel();}
+function tutCanvasRect(){const c=document.getElementById('cvs3d').getBoundingClientRect();const s=Math.min(c.width,c.height)*0.42;return {left:c.left+c.width/2-s/2,top:c.top+c.height/2-s/2,width:s,height:s};}
+function tutFrameGround(){try{camera.position.set(5,17,9);controls.target.set(5,0,5);controls.update();}catch(e){}}
+function tutFirstFurnBtn(){return [...document.querySelectorAll('#pcontent .item-btn')].find(b=>{const o=b.getAttribute('onclick');return o&&o.indexOf('pickFurn')>=0;});}
+function tutVisible(el){return el&&el.offsetParent!==null&&el.getBoundingClientRect().width>0;}
+
+function ensureTutDom(){
+  if(document.getElementById('tutStyle'))return;
+  const st=document.createElement('style');st.id='tutStyle';
+  st.textContent=`#tutDimTop,#tutDimBottom,#tutDimLeft,#tutDimRight{position:fixed;background:rgba(0,0,0,.72);z-index:1000;pointer-events:auto;-webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}
+#tutRing{position:fixed;z-index:1001;pointer-events:none;box-sizing:border-box;border:4px solid #ffd700;border-radius:22px;background:rgba(255,215,0,.06);box-shadow:0 0 0 4px rgba(255,215,0,.25),0 0 22px 6px rgba(255,215,0,.55),inset 0 0 16px rgba(255,215,0,.25);transition:top .35s cubic-bezier(.25,.9,.3,1.2),left .35s cubic-bezier(.25,.9,.3,1.2),width .35s cubic-bezier(.25,.9,.3,1.2),height .35s cubic-bezier(.25,.9,.3,1.2);animation:tutPulse 1.4s ease-in-out infinite}
+@keyframes tutPulse{0%,100%{box-shadow:0 0 0 3px rgba(255,215,0,.25),0 0 16px 4px rgba(255,215,0,.45),inset 0 0 12px rgba(255,215,0,.20);border-color:#ffd700}50%{box-shadow:0 0 0 7px rgba(255,215,0,.12),0 0 34px 12px rgba(255,215,0,.75),inset 0 0 20px rgba(255,215,0,.40);border-color:#ffe34d}}
+#tutHand{position:fixed;z-index:1001;pointer-events:none;font-size:46px;line-height:1;filter:drop-shadow(0 4px 6px rgba(0,0,0,.55));transform-origin:70% 10%;animation:tutTap 1.1s ease-in-out infinite;will-change:transform}
+@keyframes tutTap{0%,100%{transform:translateY(0) rotate(0deg) scale(1)}30%{transform:translateY(10px) rotate(-12deg) scale(.92)}60%{transform:translateY(0) rotate(0deg) scale(1)}}
+#tutCard{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:1002;width:90%;max-width:420px;box-sizing:border-box;padding:22px 22px 20px;border-radius:28px;background:linear-gradient(160deg,#b98bff 0%,#a070ff 42%,#7c4dff 100%);border:2px solid rgba(255,255,255,.22);color:#fff;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 0 4px rgba(160,112,255,.28),inset 0 1px 0 rgba(255,255,255,.35);animation:tutBounceIn .55s cubic-bezier(.18,.9,.32,1.4) both}
+@keyframes tutBounceIn{0%{opacity:0;transform:translateX(-50%) translateY(60px) scale(.85)}60%{opacity:1;transform:translateX(-50%) translateY(-8px) scale(1.03)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+#tutMascot{display:block;font-size:58px;line-height:1;margin:-52px auto 6px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));animation:tutFloat 2.6s ease-in-out infinite}
+@keyframes tutFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+#tutBig{display:block;margin:4px 0 6px;font-size:22px;font-weight:800;line-height:1.3;letter-spacing:-.2px;color:#fff;text-shadow:0 2px 4px rgba(60,20,120,.45)}
+#tutSmall{display:block;margin:0 auto 14px;max-width:320px;font-size:13px;line-height:1.5;font-weight:500;color:#ece3ff;opacity:.9}
+#tutProgress{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin:0 0 14px;padding:5px 12px;border-radius:999px;background:rgba(0,0,0,.22);font-size:13px;font-weight:700;color:#ffd700;letter-spacing:.5px}
+#tutNext{display:block;width:100%;box-sizing:border-box;margin:4px 0 0;padding:16px 24px;border:none;border-radius:18px;background:linear-gradient(160deg,#ffe06a 0%,#ffd700 55%,#f5b800 100%);color:#3a2a00;font-size:19px;font-weight:800;letter-spacing:.3px;cursor:pointer;box-shadow:0 8px 22px rgba(255,184,0,.45),inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(180,120,0,.35);transition:transform .12s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#tutNext:active{transform:translateY(3px) scale(.98)}
+#tutSkip{display:inline-block;margin:13px auto 0;padding:6px 10px;background:none;border:none;font-size:13px;font-weight:600;color:rgba(255,255,255,.72);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+@media(max-width:360px){#tutCard{width:92%;padding:20px 16px 18px;border-radius:24px}#tutBig{font-size:20px}#tutMascot{font-size:52px;margin-top:-46px}#tutNext{font-size:18px;padding:15px 20px}}
+@media(prefers-reduced-motion:reduce){#tutRing,#tutHand,#tutMascot,#tutCard{animation:none}#tutDimTop,#tutDimBottom,#tutDimLeft,#tutDimRight,#tutRing{transition:none}}`;
+  document.head.appendChild(st);
+  ['tutDimTop','tutDimBottom','tutDimLeft','tutDimRight','tutRing','tutHand'].forEach(id=>{const d=document.createElement('div');d.id=id;d.style.display='none';document.body.appendChild(d);});
+  const card=document.createElement('div');card.id='tutCard';card.style.display='none';
+  card.innerHTML='<div id="tutMascot"></div><div id="tutBig"></div><div id="tutSmall"></div><div id="tutProgress"></div><button id="tutNext">시작! 👆</button><div id="tutSkip">건너뛰기</div>';
+  document.body.appendChild(card);
+  document.getElementById('tutSkip').onclick=skipTutorial;
+  document.getElementById('tutNext').onclick=()=>tutAdvance('next');
 }
+function startTutorial(){ensureTutDom();tutActive=true;tutStep=0;window.addEventListener('resize',tutReposition);showTutStep(0);}
+function hideTutDom(){['tutDimTop','tutDimBottom','tutDimLeft','tutDimRight','tutRing','tutHand','tutCard'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});}
+function skipTutorial(){tutActive=false;window.removeEventListener('resize',tutReposition);hideTutDom();localStorage.setItem('hb_v4_tutDone','1');status('튜토리얼 종료 — ❓로 다시 볼 수 있어요');}
+function finishTutorial(){tutActive=false;window.removeEventListener('resize',tutReposition);hideTutDom();fireConfetti();status('🎉 멋진 건축가가 됐어요! 이제 마음껏 지어봐요');localStorage.setItem('hb_v4_tutDone','1');}
+
+function showTutStep(i){
+  const step=TUT_STEPS[i];if(!step)return;tutStep=i;
+  if(step.id==='finish'){finishTutorial();return;}
+  if(step.pre)step.pre();
+  setTimeout(()=>{
+    if(!tutActive)return;
+    let t=step.target?step.target():null;
+    if(step.target && t instanceof Element && !tutVisible(t)){ if(step.id==='openMenu')tutOpenPanel(); showTutStep(i+1); return; }
+    const rect=t?((t instanceof Element)?t.getBoundingClientRect():t):null;
+    positionTutSpotlight(rect);
+    renderTutCardRaw(TUT_COPY[step.id]||{},rect,step.trigger==='next');
+  },360);
+}
+function tutReposition(){if(!tutActive)return;const step=TUT_STEPS[tutStep];if(!step||step.id==='finish')return;const t=step.target?step.target():null;const rect=t?((t instanceof Element)?t.getBoundingClientRect():t):null;positionTutSpotlight(rect);renderTutCardRaw(TUT_COPY[step.id]||{},rect,step.trigger==='next');}
+
+function positionTutSpotlight(rect){
+  const W=innerWidth,H=innerHeight;
+  const top=document.getElementById('tutDimTop'),bot=document.getElementById('tutDimBottom'),lf=document.getElementById('tutDimLeft'),rt=document.getElementById('tutDimRight'),ring=document.getElementById('tutRing'),hand=document.getElementById('tutHand');
+  if(!rect){top.style.display='block';top.style.left='0';top.style.top='0';top.style.width=W+'px';top.style.height=H+'px';bot.style.display='none';lf.style.display='none';rt.style.display='none';ring.style.display='none';hand.style.display='none';return;}
+  const p=8,x=rect.left-p,y=rect.top-p,w=rect.width+p*2,h=rect.height+p*2;
+  top.style.display='block';bot.style.display='block';lf.style.display='block';rt.style.display='block';
+  top.style.left='0';top.style.top='0';top.style.width=W+'px';top.style.height=Math.max(0,y)+'px';
+  bot.style.left='0';bot.style.top=(y+h)+'px';bot.style.width=W+'px';bot.style.height=Math.max(0,H-(y+h))+'px';
+  lf.style.left='0';lf.style.top=y+'px';lf.style.width=Math.max(0,x)+'px';lf.style.height=h+'px';
+  rt.style.left=(x+w)+'px';rt.style.top=y+'px';rt.style.width=Math.max(0,W-(x+w))+'px';rt.style.height=h+'px';
+  ring.style.display='block';ring.style.left=x+'px';ring.style.top=y+'px';ring.style.width=w+'px';ring.style.height=h+'px';
+  hand.style.display='block';
+  if(w>180||h>180){hand.style.left=(x+w/2-20)+'px';hand.style.top=(y+h/2-20)+'px';}
+  else{hand.style.left=(x+w-14)+'px';hand.style.top=(y+h-10)+'px';}
+}
+function renderTutCardRaw(c,rect,showNext){
+  const card=document.getElementById('tutCard');card.style.display='block';
+  document.getElementById('tutMascot').textContent=c.mascot||'🏠';
+  document.getElementById('tutBig').textContent=c.big||'';
+  document.getElementById('tutSmall').textContent=c.small||'';
+  document.getElementById('tutProgress').textContent=(TUT_STEPS[tutStep]&&TUT_STEPS[tutStep].id==='finish')?'':((tutStep+1)+' / 8');
+  const next=document.getElementById('tutNext');
+  next.style.display=showNext?'inline-block':'none';
+  next.textContent=(TUT_STEPS[tutStep]&&TUT_STEPS[tutStep].id==='welcome')?'시작! 👆':'다음';
+  if(!rect){card.style.top='34%';card.style.bottom='auto';}
+  else if(rect.top>innerHeight*0.5){card.style.top='9%';card.style.bottom='auto';}
+  else{card.style.top='auto';card.style.bottom='12%';}
+}
+function tutAdvance(trigger){
+  if(!tutActive)return;
+  const step=TUT_STEPS[tutStep];if(!step||step.trigger!==trigger)return;
+  const c=TUT_COPY[step.id]||{};
+  if(c.praise){document.getElementById('tutBig').textContent=c.praise;document.getElementById('tutSmall').textContent='';document.getElementById('tutMascot').textContent='🎉';document.getElementById('tutHand').style.display='none';document.getElementById('tutRing').style.display='none';}
+  const nxt=tutStep+1;
+  setTimeout(()=>{if(!tutActive)return;if(nxt>=TUT_STEPS.length)finishTutorial();else showTutStep(nxt);},c.praise?950:200);
+}
+function fireConfetti(){
+  const cont=document.createElement('div');cont.style.cssText='position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden';document.body.appendChild(cont);
+  const cols=['#ff5a5a','#ffd24a','#5ad17a','#a070ff','#4aa6ff','#ff8ad0'];
+  for(let i=0;i<70;i++){
+    const pc=document.createElement('div');const sz=6+Math.random()*9;
+    pc.style.cssText='position:absolute;width:'+sz+'px;height:'+(sz*0.6)+'px;background:'+cols[i%cols.length]+';left:'+(Math.random()*100)+'%;top:-24px;border-radius:2px';
+    cont.appendChild(pc);
+    const dur=1500+Math.random()*1300,xd=(Math.random()*2-1)*140,rot=720*(Math.random()>.5?1:-1);
+    pc.animate([{transform:'translate(0,0) rotate(0deg)',opacity:1},{transform:'translate('+xd+'px,'+(innerHeight+80)+'px) rotate('+rot+'deg)',opacity:.9}],{duration:dur,easing:'cubic-bezier(.2,.6,.4,1)'});
+  }
+  setTimeout(()=>cont.remove(),2900);
+}
+
+// INIT
 
 // ============================================================
 // 메인 루프
@@ -1746,6 +1849,7 @@ function openEvaluation(){
   document.getElementById('evalShot').onclick=()=>{modal.style.display='none';document.getElementById('btnShot').click();};
   modal.style.display='flex';
   status('🏆 평가: '+r.grade+'등급 '+r.title+' ('+r.stars+'⭐)');
+  tutAdvance('evalOpened');
 }
 document.getElementById('aEval').onclick=openEvaluation;
 window.openEvaluation=openEvaluation;
@@ -1761,6 +1865,8 @@ if(_params.get('demo')==='1'||_params.get('house')==='sample'){
   setTimeout(()=>buildSampleHouse(),200);
 }else{
   status('🏠 v4 진짜 3D - 빈 공간을 클릭하여 방을 배치하세요');
+  // 첫 방문 시 인터랙티브 튜토리얼 자동 시작
+  if(localStorage.getItem('hb_v4_tutDone')!=='1')setTimeout(()=>startTutorial(),700);
 }
 
 // 튜토리얼 버튼 옆에 샘플 하우스 버튼 자동 추가
