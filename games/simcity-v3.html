@@ -69,6 +69,26 @@ body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;fo
 #MIS_banner{position:fixed;top:48px;left:0;right:0;min-height:22px;background:linear-gradient(180deg,rgba(255,248,225,.97),rgba(255,243,205,.95));border-bottom:1px solid #ffe082;display:flex;align-items:center;justify-content:center;gap:6px;padding:2px 10px;z-index:28;font-size:11px;font-weight:700;color:#8d6e00;box-shadow:0 1px 4px rgba(180,150,80,.15);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #MIS_banner.done{background:linear-gradient(180deg,rgba(200,245,210,.97),rgba(180,240,195,.95));border-bottom-color:#66bb6a;color:#1b7a3e}
 #MIS_banner .MIS_rw{font-size:10px;font-weight:700;color:#e67e22;flex-shrink:0}
+
+/* === R3: 건물 정보 팝오버 === */
+#INFO_card{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);width:min(300px,90vw);background:#fff;border:2px solid #c8dceb;border-radius:14px;padding:12px 14px;z-index:45;box-shadow:0 8px 28px rgba(40,80,140,.22);animation:sd .25s}
+.INFO_hd{display:flex;align-items:center;gap:8px;font-size:15px;color:#1976d2;margin-bottom:4px}
+.INFO_desc{font-size:11px;color:#5a7a9a;margin-bottom:6px;line-height:1.4}
+.INFO_warn{font-size:11px;font-weight:700;color:#c0392b;background:#ffe9e6;border-radius:6px;padding:3px 7px;margin-bottom:6px}
+.INFO_stats{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.INFO_stats span{font-size:11px;background:#f0f6fc;border:1px solid #dbe8f4;border-radius:6px;padding:2px 7px;color:#2c3e50}
+.INFO_bull{width:100%;background:#ffeceb;border:1px solid #ffb3ac;color:#c0392b;padding:7px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
+.INFO_bull:active{background:#ffd6d2}
+
+/* === R3: 첫 진입 튜토리얼 === */
+#TUT_ov{position:fixed;inset:0;background:rgba(20,40,70,.55);backdrop-filter:blur(5px);z-index:60;display:flex;align-items:center;justify-content:center;animation:sd .3s}
+.TUT_box{background:#fff;border-radius:18px;padding:22px 22px 18px;width:min(360px,90vw);max-height:85vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.TUT_box h2{font-size:18px;color:#1976d2;margin-bottom:12px;text-align:center}
+.TUT_box ul{list-style:none;padding:0;margin:0 0 14px}
+.TUT_box li{font-size:13px;color:#3a4a5a;padding:7px 0;border-bottom:1px solid #eef3f8;line-height:1.5}
+.TUT_box li b{color:#e67e22}
+.TUT_box button{width:100%;background:linear-gradient(180deg,#42a5f5,#1976d2);border:none;color:#fff;padding:12px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(25,118,210,.35)}
+.TUT_box button:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
@@ -202,10 +222,21 @@ function hexToRgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),
 function lighten(h,p){let[r,g,b]=hexToRgb(h);return`rgb(${Math.min(255,r+p)},${Math.min(255,g+p)},${Math.min(255,b+p)})`;}
 function darken(h,p){let[r,g,b]=hexToRgb(h);return`rgb(${Math.max(0,r-p)},${Math.max(0,g-p)},${Math.max(0,b-p)})`;}
 
+// R4: 화면 흔들림 (재해 임팩트)
+let FX_shakeT=0;
+function FX_shake(){FX_shakeT=performance.now()+450;}
 function draw(){
   ctx.clearRect(0,0,cvs.width,cvs.height);
   // 야간 오버레이 완전히 제거 - 항상 밝게 유지
   // (계절감/시간감은 통계패널의 Day/계절 텍스트로 표현)
+
+  // R4: 재해 흔들림 — camX/camY에 일시 오프셋 후 복원
+  let _shX=0,_shY=0;
+  if(FX_shakeT>0){
+    const left=FX_shakeT-performance.now();
+    if(left>0){const m=Math.min(8,left/55);_shX=(Math.random()-0.5)*m*2;_shY=(Math.random()-0.5)*m*2;camX+=_shX;camY+=_shY;}
+    else FX_shakeT=0;
+  }
 
   const hw=(TW/2)*zoom,hh=(TH/2)*zoom;
   for(let y=0;y<GH;y++){
@@ -218,8 +249,8 @@ function draw(){
       const useImg=IMG_READY&&IMG[cell.t]&&IMG[cell.t].complete&&IMG[cell.t].naturalWidth>0;
       // Ground tile
       ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();
-      // empty/road는 단색이 더 깔끔 (PNG 텍스처 반복 시 지저분)
-      ctx.fillStyle=cell.dmg>0?'#ffb8a8':baseC;ctx.fill();
+      // empty/road는 단색이 더 깔끔 (PNG 텍스처 반복 시 지저분). 빈 땅은 계절색 적용.
+      ctx.fillStyle=cell.dmg>0?'#ffb8a8':(cell.t==='empty'?SEASON_ground():baseC);ctx.fill();
       ctx.strokeStyle='rgba(120,160,200,0.12)';ctx.lineWidth=1;ctx.stroke();
 
       // 빈 땅에 나무/꽃 디테일 (랜덤이지만 좌표 기반 stable)
@@ -228,7 +259,7 @@ function draw(){
         if(seed<22){
           // 작은 나무
           const tx=sx+((seed%7)-3)*hw*0.15, ty=sy+((seed%5)-2)*hh*0.2;
-          ctx.fillStyle=seed<11?'#5cb85c':'#7cc77c';
+          ctx.fillStyle=seed<11?SEASON_treeCol(0):SEASON_treeCol(1);
           ctx.beginPath();ctx.arc(tx,ty,3*zoom,0,Math.PI*2);ctx.fill();
           ctx.fillStyle='#6b4423';
           ctx.fillRect(tx-zoom*0.4,ty,zoom*0.8,2*zoom);
@@ -247,6 +278,9 @@ function draw(){
         if(cell.dmg>0){
           ctx.font=`${Math.max(12,16*zoom)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
           ctx.fillText('🔥',sx,sy-imgH*0.4);
+        }else if(cell._dc&&zoom>0.6){
+          ctx.font=`${Math.max(10,13*zoom)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText('⚠️',sx,sy-imgH*0.45);
         }
       }else if(cell.t!=='empty'&&cell.t!=='road'){
         // 이미지 없으면 fallback: 기존 박스 렌더링
@@ -266,6 +300,9 @@ function draw(){
         if(cell.dmg>0){
           ctx.font=`${Math.max(8,10*zoom)}px sans-serif`;
           ctx.fillText('🔥',sx,sy-bh-hh*0.5);
+        }else if(cell._dc&&zoom>0.6){
+          ctx.font=`${Math.max(8,11*zoom)}px sans-serif`;ctx.textAlign='center';
+          ctx.fillText('⚠️',sx,sy-bh-hh*0.5);
         }
       }else if(cell.t==='road'){
         ctx.fillStyle='#95a5a6';
@@ -297,8 +334,12 @@ function draw(){
     ctx.beginPath();ctx.moveTo(sx,sy-hh);ctx.lineTo(sx+hw,sy);ctx.lineTo(sx,sy+hh);ctx.lineTo(sx-hw,sy);ctx.closePath();
     ctx.strokeStyle=bulldoze?'rgba(244,67,54,0.8)':'rgba(255,215,0,0.6)';ctx.lineWidth=2;ctx.stroke();
     ctx.fillStyle=bulldoze?'rgba(244,67,54,0.12)':'rgba(255,215,0,0.08)';ctx.fill();
+    GHOST_preview(hovG.x,hovG.y,sx,sy,hw,hh);
   }
+  SEASON_snow();
   FX_update();FX_draw(ctx);
+  // R4: 흔들림 오프셋 복원 (누적 방지)
+  if(_shX||_shY){camX-=_shX;camY-=_shY;}
   requestAnimationFrame(draw);
 }
 
@@ -351,7 +392,7 @@ function place(g){
     }
     return;
   }
-  if(grid[g.y][g.x].t!=='empty'){window.playSfx('error');popup('이미 건물이 있습니다!',false);return;}
+  if(grid[g.y][g.x].t!=='empty'){INFO_show(g.x,g.y);return;}
   const b=B[selTile];
   if(money<b.cost){window.playSfx('error');popup('💰 자금 부족!',false);return;}
   money-=b.cost;
@@ -365,7 +406,7 @@ function place(g){
 function simulate(){
   day++;
   nightPhase=(day%20)/20; // simple day/night cycle
-  if(day%30===0){season=(season+1)%4;} // season every 30 days
+  if(day%30===0){season=(season+1)%4;SEASON_applySky();popup(SEASONS[season]+'이 찾아왔습니다',true);} // season every 30 days
 
   let inc=0,exp=0,tHap=0,tSaf=0,tPop=0,tPow=0,tWat=0,uPow=0,uWat=0,jobs=0,bcount=0,popG=0;
   let fireStations=0,policeStations=0;
@@ -396,8 +437,19 @@ function simulate(){
 
   // Season multiplier
   const sMult=SEASON_MULT[season];
-  const netInc=Math.round(inc*sMult*(1+pop/1000))-exp-Math.round(loans*loanRate);
+  // R4: 도시 행정비용 — 인구가 커질수록 운영비 증가 (무한 흑자 억제, 후반 긴장감)
+  const adminCost=Math.round(pop*0.6+bcount*8);
+  const netInc=Math.round(inc*sMult*(1+pop/1000))-exp-adminCost-Math.round(loans*loanRate);
   money+=netInc;
+
+  // R4: 재정 위기 — 자금 고갈 시 긴장감 (적자 + 잔고 부족 → 인구 이탈 + 경고)
+  if(money<0){
+    const deficit=-money;money=0;
+    pop=Math.max(0,pop-Math.ceil(pop*0.03)-2); // 재정난으로 시민 이탈
+    if(day%2===0)popup('🚨 재정 위기! 적자로 시민 이탈 — 수입을 늘리세요',false);
+  }else if(money<2000&&netInc<0){
+    if(day%6===0)popup('⚠ 자금 부족 경고 — 곧 파산합니다',false);
+  }
 
   // Happiness
   hap=Math.max(0,Math.min(100,50+tHap-infraPenalty));
@@ -418,18 +470,19 @@ function simulate(){
   // Loan auto-deduction already in netInc
 
   // Random events (every ~15 days)
-  if(day%15===0&&Math.random()<0.35){
+  if(day%15===0&&Math.random()<0.42){
     const r=Math.random();
-    if(r<0.1&&saf<70){
-      // Fire
+    // 화재: 안전도 낮을수록 잦지만, 높아도 완전히 막진 못함 (소방서가 피해 경감)
+    const fireChance=0.12+(100-saf)/300; // saf95→0.13, saf50→0.29
+    if(r<fireChance){
       disaster('fire',fireStations);
-    }else if(r<0.18&&saf<60){
-      // Earthquake
-      disaster('quake',0);
-    }else if(r<0.24){
-      // Flood (more likely in summer)
-      if(season===1||Math.random()<0.3)disaster('flood',0);
-    }else if(r<0.35&&hap<40){
+    }else if(r<fireChance+0.07){
+      // 지진: 천재지변 — 안전도 무관 (낮은 확률)
+      disaster('quake',Math.floor(policeStations/2));
+    }else if(r<fireChance+0.14){
+      // 홍수: 여름에 더 빈번 (천재지변)
+      if(season===1||Math.random()<0.4)disaster('flood',0);
+    }else if(r<0.6&&hap<40){
       // Crime wave
       money=Math.max(0,money-2000);
       pop=Math.max(0,pop-Math.floor(pop*0.05));
@@ -469,16 +522,23 @@ function disaster(type,stations){
   if(type==='fire')count=Math.max(1,count-stations);
 
   const msgs={fire:'🔥 화재 발생!',quake:'🌍 지진 발생!',flood:'🌊 홍수 발생!'};
+  let destroyed=0,repairCost=0;
   for(let i=0;i<count;i++){
     const idx=Math.floor(Math.random()*buildings.length);
     const b=buildings.splice(idx,1)[0];
     if(type==='quake'&&Math.random()<0.3){
-      grid[b.y][b.x]={t:'empty',dmg:0}; // destroyed
+      grid[b.y][b.x]={t:'empty',dmg:0};destroyed++; // destroyed
     }else{
       grid[b.y][b.x].dmg=5; // damaged for 5 turns
+      repairCost+=300; // 복구 비용 발생 (긴장감)
     }
   }
-  popup(`${msgs[type]} ${count}개 건물 피해!`,false);
+  if(repairCost>0)money=Math.max(0,money-repairCost);
+  if(window.playSfx)window.playSfx('disaster');
+  if(typeof FX_shake==='function')FX_shake();
+  const extra=destroyed?` (${destroyed}개 붕괴)`:'';
+  const cost=repairCost?` 복구비 -${repairCost.toLocaleString()}`:'';
+  popup(`${msgs[type]} ${count}개 피해${extra}${cost}`,false);
 }
 
 // === UI ===
@@ -490,10 +550,11 @@ function updUI(){
   document.getElementById('sWat').textContent=`${usedWat}/${totalWat}`;
   document.getElementById('sDay').textContent=day;
   document.getElementById('sSea').textContent=SEASONS[season];
-  // Net income
-  let inc=0,exp=0;
-  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const b=B[grid[y][x].t];if(b.inc)inc+=b.inc;if(b.exp)exp+=b.exp;}
-  const net=Math.round(inc*SEASON_MULT[season]*(1+pop/1000))-exp-Math.round(loans*loanRate);
+  // Net income (행정비용 포함 - simulate와 일치)
+  let inc=0,exp=0,bc=0;
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const t=grid[y][x].t;if(t==='empty')continue;const b=B[t];if(b.inc)inc+=b.inc;if(b.exp)exp+=b.exp;bc++;}
+  const admin=Math.round(pop*0.6+bc*8);
+  const net=Math.round(inc*SEASON_MULT[season]*(1+pop/1000))-exp-admin-Math.round(loans*loanRate);
   const ne=document.getElementById('sNet');ne.textContent=net>=0?`+${net}`:`${net}`;ne.className='r '+(net>=0?'p':'n');
 }
 
@@ -551,6 +612,16 @@ function renderStats(){
   const netI=Math.round(inc*SEASON_MULT[season]*(1+pop/1000))-exp;
 
   let h=`<h3>📊 도시 통계</h3>`;
+  // R2: 현재 목표 진행
+  if(typeof MIS_LIST!=='undefined'){
+    h+=`<div class="sec">🎯 목표</div>`;
+    if(MIS_won||MIS_idx>=MIS_LIST.length){
+      h+=`<div class="sr"><span class="lb">상태</span><span class="vl" style="color:#27ae60">👑 모든 목표 달성!</span></div>`;
+    }else{
+      const m=MIS_LIST[MIS_idx];
+      h+=`<div class="sr"><span class="lb">[${MIS_idx+1}/${MIS_LIST.length}] ${m.desc}</span><span class="vl">+${m.reward.toLocaleString()}</span></div>`;
+    }
+  }
   h+=`<div class="sec">경제</div>`;
   h+=`<div class="sr"><span class="lb">총 수입</span><span class="vl">+${Math.round(inc*SEASON_MULT[season]*(1+pop/1000))}</span></div>`;
   h+=`<div class="sr"><span class="lb">총 지출</span><span class="vl">-${exp}</span></div>`;
@@ -1096,6 +1167,128 @@ function AUD_initBtn(){
   if(btn)btn.textContent=AUD_muted?'🔇':'🔊';
 }
 
+// === R1: 배치 고스트 프리뷰 + 인접 보너스 미리보기 ===
+function GHOST_preview(gx,gy,sx,sy,hw,hh){
+  if(bulldoze)return;
+  if(grid[gy][gx].t!=='empty')return;
+  const b=B[selTile];if(!b||selTile==='empty')return;
+  const img=IMG[selTile];
+  ctx.save();ctx.globalAlpha=0.5;
+  if(IMG_READY&&img&&img.complete&&img.naturalWidth>0){
+    RND_drawSprite(img,sx,sy,hw,hh,gx,gy);
+  }else{
+    const bh=(b.h||1)*18*zoom;
+    ctx.fillStyle=b.c;ctx.fillRect(sx-hw*0.4,sy-bh,hw*0.8,bh);
+  }
+  ctx.restore();
+  const canAfford=money>=b.cost;
+  const tips=[];
+  const isProducer=(b.cat!=='인프라')&&(b.inc||b.pop||b.job);
+  if(isProducer)tips.push(ADJ_roadAdjacent(gx,gy)?'🛣️연결':'⚠도로필요');
+  const nb=[ADJ_typeAt(gx-1,gy),ADJ_typeAt(gx+1,gy),ADJ_typeAt(gx,gy-1),ADJ_typeAt(gx,gy+1)];
+  if(selTile==='house'||selTile==='apt'||selTile==='mansion'){
+    let pk=0,po=0;nb.forEach(t=>{if(t==='park')pk++;else if(t==='factory'||t==='warehouse')po++;});
+    if(pk)tips.push('🌳행복+'+(pk*2));
+    if(po)tips.push('🏭행복-'+(po*3));
+  }
+  if(selTile==='shop'||selTile==='mall'||selTile==='office'){
+    if(nb.some(t=>t==='house'||t==='apt'||t==='mansion'))tips.push('💰수입+10%');
+  }
+  if(tips.length||!canAfford){
+    const label=(!canAfford?'💸자금부족 ':'')+tips.join('  ');
+    ctx.save();
+    ctx.font='bold 11px -apple-system,"Segoe UI",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const tw=ctx.measureText(label).width+12;
+    const ly=sy-hh-10;
+    ctx.fillStyle='rgba(20,30,45,0.85)';
+    if(ctx.roundRect){ctx.beginPath();ctx.roundRect(sx-tw/2,ly-9,tw,18,6);ctx.fill();}
+    else ctx.fillRect(sx-tw/2,ly-9,tw,18);
+    ctx.fillStyle=canAfford?'#ffe082':'#ff8a80';
+    ctx.fillText(label,sx,ly);
+    ctx.restore();
+  }
+}
+
+// === R2: 계절 시각 변화 (지면색/하늘/눈) ===
+const SEASON_GROUND=['#c5e8b0','#a6dd86','#e8d09e','#e9eff2']; // 봄 여름 가을 겨울
+const SEASON_TREE=[['#5cb85c','#7cc77c'],['#3a9d3a','#5cb85c'],['#e8a33d','#d4762a'],['#cfd8dc','#eceff1']];
+const SEASON_SKY=[
+  'linear-gradient(180deg,#d6efff 0%,#f0f9ff 55%,#ffffff 100%)',
+  'linear-gradient(180deg,#bce4ff 0%,#e8f7ff 55%,#ffffff 100%)',
+  'linear-gradient(180deg,#ffe6c0 0%,#fff4e0 55%,#fffaf2 100%)',
+  'linear-gradient(180deg,#d4dee8 0%,#eef3f7 55%,#ffffff 100%)'
+];
+function SEASON_ground(){return SEASON_GROUND[season]||SEASON_GROUND[0];}
+function SEASON_treeCol(i){return (SEASON_TREE[season]||SEASON_TREE[0])[i];}
+function SEASON_applySky(){const c=document.getElementById('gameCanvas');if(c)c.style.background=SEASON_SKY[season]||SEASON_SKY[0];}
+function SEASON_snow(){
+  if(season!==3)return;
+  ctx.save();ctx.fillStyle='rgba(255,255,255,0.85)';
+  const now=performance.now();
+  for(let i=0;i<48;i++){
+    const fx=(i*137.5+Math.sin(now*0.0006+i)*26)%cvs.width;
+    const fy=(i*53+now*0.035*(0.6+(i%4)*0.18))%cvs.height;
+    const r=1.2+(i%3)*0.7;
+    ctx.beginPath();ctx.arc(fx,fy,r,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+
+// === R3: 건물 정보 팝오버 + 첫 진입 튜토리얼 ===
+window.INFO_show=function(gx,gy){
+  const cell=grid[gy][gx];if(!cell||cell.t==='empty')return;
+  const b=B[cell.t];if(!b)return;
+  const old=document.getElementById('INFO_card');if(old)old.remove();
+  const card=document.createElement('div');card.id='INFO_card';
+  const stats=[];
+  if(b.inc)stats.push('💰 수입 +'+b.inc);
+  if(b.pop)stats.push('👥 인구 +'+b.pop);
+  if(b.job)stats.push('💼 일자리 +'+b.job);
+  if(b.hap)stats.push('😊 행복 '+(b.hap>0?'+':'')+b.hap);
+  if(b.saf)stats.push('🛡️ 안전 +'+b.saf);
+  if(b.pow)stats.push('⚡ 전력 '+(b.pow>0?'+':'')+b.pow);
+  if(b.wat)stats.push('💧 수도 '+(b.wat>0?'+':'')+b.wat);
+  if(b.exp)stats.push('📉 유지비 -'+b.exp);
+  let status='';
+  if(cell.dmg>0)status='<div class="INFO_warn">🔥 손상됨 ('+cell.dmg+'턴 복구중)</div>';
+  else if(cell._dc)status='<div class="INFO_warn">⚠ 도로 미연결 — 생산 50%</div>';
+  card.innerHTML='<div class="INFO_hd"><span style="font-size:22px">'+(b.ic||'🏢')+'</span> <b>'+b.n+'</b>'
+    +'<span style="margin-left:auto;cursor:pointer;font-size:18px" onclick="this.parentNode.parentNode.remove()">✕</span></div>'
+    +'<div class="INFO_desc">'+(b.d||'')+'</div>'+status
+    +'<div class="INFO_stats">'+stats.map(s=>'<span>'+s+'</span>').join('')+'</div>'
+    +'<button class="INFO_bull" onclick="INFO_demolish('+gx+','+gy+')">🗑️ 철거 (환불 '+Math.floor((b.cost||0)*0.3).toLocaleString()+')</button>';
+  document.body.appendChild(card);
+};
+window.INFO_demolish=function(gx,gy){
+  const cell=grid[gy][gx];
+  if(cell&&cell.t!=='empty'){
+    const old=B[cell.t];money+=Math.floor((old.cost||0)*0.3);
+    grid[gy][gx]={t:'empty',dmg:0};
+    if(window.playSfx)window.playSfx('bull');
+    popup('🗑️ 철거 완료 (환불 30%)',false);updUI();
+  }
+  const c=document.getElementById('INFO_card');if(c)c.remove();
+};
+function TUT_maybe(){
+  let seen=false;try{seen=localStorage.getItem('simcity_v3_tut')==='1';}catch(e){}
+  if(seen)return;
+  const ov=document.createElement('div');ov.id='TUT_ov';
+  ov.innerHTML='<div class="TUT_box"><h2>🏙️ 심시티에 오신 걸 환영합니다!</h2><ul>'
+    +'<li>👆 <b>탭</b>으로 건물 짓기 · 지어진 건물 <b>탭</b>하면 정보 보기</li>'
+    +'<li>🛣️ 건물은 <b>도로에 붙여야</b> 100% 작동 (⚠ = 미연결)</li>'
+    +'<li>🌳 주거지 옆 <b>공원</b>은 행복↑ · <b>공장</b>은 행복↓</li>'
+    +'<li>🏪 상점·쇼핑몰은 <b>주거지 옆</b>에서 수입 +10%</li>'
+    +'<li>🎯 상단 <b>목표</b> 달성 시 보상 · 🤏 두 손가락 확대축소</li>'
+    +'</ul><button onclick="TUT_close()">시작하기 🚀</button></div>';
+  document.body.appendChild(ov);
+}
+window.TUT_close=function(){
+  try{localStorage.setItem('simcity_v3_tut','1');}catch(e){}
+  const o=document.getElementById('TUT_ov');if(o)o.remove();
+  if(window.AUD_resume)window.AUD_resume();
+};
+
 /* === SUPERPOWER_INTEGRATED === */
 // === INIT ===
 buildCats();buildTiles();
@@ -1105,6 +1298,8 @@ for(let y=0;y<GH&&isEmpty;y++)for(let x=0;x<GW&&isEmpty;x++)if(grid[y][x].t!=='e
 if(isEmpty)buildDemoCity();
 MIS_render()
 AUD_initBtn()
+SEASON_applySky()
+TUT_maybe()
 window.addEventListener('pointerdown',AUD_resume,{once:true})
 window.addEventListener('touchstart',AUD_resume,{once:true})
 updUI();draw();startSim();
