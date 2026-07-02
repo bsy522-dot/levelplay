@@ -1,7 +1,7 @@
 {
   "name": "배움퀘스트 — 배우고, 올리고, 증명하라",
   "short_name": "배움퀘스트",
-  "description": "게이미피케이션 교육 플랫폼 v11.0. SM-2간격반복, 스트릭프리즈, 스킬마스터리트리Canvas, AI적응형퀴즈, 학습인증서PNG, 과목갭분석Canvas, 학습타이머분석, 힌트시스템, 112배지, 580+퀴즈로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v12.0. 학습라이벌AI, 업적쇼케이스Canvas, XP더블이벤트, 과목성적표PNG, 난이도티어, 학습하트, 과목대회, 스트릭마일스톤, 124배지, 595+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -135,6 +135,46 @@
       "name": "힌트 시스템",
       "url": "./index.html#hint",
       "description": "퀴즈 단계별 힌트"
+    },
+    {
+      "name": "학습 라이벌",
+      "url": "./index.html#rival",
+      "description": "AI 라이벌과 대결"
+    },
+    {
+      "name": "업적 쇼케이스",
+      "url": "./index.html#showcase",
+      "description": "업적 갤러리 Canvas"
+    },
+    {
+      "name": "XP 이벤트",
+      "url": "./index.html#xpevent",
+      "description": "XP 더블 럭키 드로우"
+    },
+    {
+      "name": "과목 성적표",
+      "url": "./index.html#report",
+      "description": "과목별 성적표 PNG"
+    },
+    {
+      "name": "난이도 티어",
+      "url": "./index.html#tier",
+      "description": "퀴즈 티어 시각화"
+    },
+    {
+      "name": "학습 하트",
+      "url": "./index.html#hearts",
+      "description": "하트 라이프 시스템"
+    },
+    {
+      "name": "과목 대회",
+      "url": "./index.html#contest",
+      "description": "AI 대결 퀴즈 대회"
+    },
+    {
+      "name": "스트릭 마일스톤",
+      "url": "./index.html#milestone",
+      "description": "연속 학습 보상"
     }
   ]
 }

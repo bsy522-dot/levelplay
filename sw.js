@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v43-auto';
+const CACHE_NAME = 'levelplay-v44-auto';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -18,6 +18,7 @@ const STATIC_ASSETS = [
   './v9_patch.js',
   './v10_patch.js',
   './v11_patch.js',
+  './v12_patch.js',
   './games/hangul-game.html',
   './games/typing-game.html',
   './games/color-game.html',
