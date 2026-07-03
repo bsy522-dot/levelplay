@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v44-auto';
+const CACHE_NAME = 'levelplay-v45-auto';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -20,6 +20,7 @@ const STATIC_ASSETS = [
   './v11_patch.js',
   './v12_patch.js',
   './games/hangul-game.html',
+  './games/eng-word-game.html',
   './games/typing-game.html',
   './games/color-game.html',
   './games/world-map-quiz.html',
@@ -34,8 +35,7 @@ const STATIC_ASSETS = [
   './games/memory-game.html',
   './games/piano-v3.html',
   './games/ViolinReal-v3.html',
-  './games/noraebang-v3.html',
-  // boxing-trainer-v5.html: 절대 캐시 안 함 (NEVER_CACHE_PATHS 참조)
+  './games/boxing-trainer-v5.html', // NEVER_CACHE_PATHS에도 존재 → 런타임은 항상 네트워크; 오프라인 HTML 셸만 프리캐시
   './games/three.r128.min.js',
   './games/golf-tracker-v3.html',
   './games/korean-rpg-v4.html',
@@ -125,7 +125,7 @@ const STATIC_ASSETS = [
   './games/space-explorer-3d/assets/textures/sun_normal.jpg',
   './games/space-explorer-3d/assets/textures/saturn_ring_normal.jpg',
   './games/simcity-v3.html',
-  './games/house-builder-v3.html',
+  './games/house-builder-v4.html',
   // 문명진화 v3.0 (e52576d1) — 폴더 진입 + 93개 자산
   './games/civilization-evolution/index.html',
   './games/civilization-evolution/assets/videos/era_0_stoneAge.mp4',
@@ -223,7 +223,46 @@ const STATIC_ASSETS = [
   './games/civilization-evolution/assets/sprites/vfx/water_splash.png',
   './games/space-explorer.html',
   './games/cooking-master.html',
-  './games/animal-farm.html'
+  './games/animal-farm.html',
+  // ── 공유 벤더 라이브러리 (오프라인 3D · P2P) ──
+  './games/_vendor/three-0.160.0/build/three.module.min.js',
+  './games/_vendor/three-0.160.0/build/three.module.js',
+  './games/_vendor/three-0.160.0/LICENSE',
+  './games/_vendor/three-0.160.0/examples/jsm/controls/OrbitControls.js',
+  './games/_vendor/three-0.160.0/examples/jsm/environments/RoomEnvironment.js',
+  './games/_vendor/three-0.160.0/examples/jsm/libs/ktx-parse.module.js',
+  './games/_vendor/three-0.160.0/examples/jsm/libs/zstddec.module.js',
+  './games/_vendor/three-0.160.0/examples/jsm/loaders/DRACOLoader.js',
+  './games/_vendor/three-0.160.0/examples/jsm/loaders/GLTFLoader.js',
+  './games/_vendor/three-0.160.0/examples/jsm/loaders/KTX2Loader.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/EffectComposer.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/MaskPass.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/OutlinePass.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/OutputPass.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/Pass.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/RenderPass.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/ShaderPass.js',
+  './games/_vendor/three-0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js',
+  './games/_vendor/three-0.160.0/examples/jsm/shaders/CopyShader.js',
+  './games/_vendor/three-0.160.0/examples/jsm/shaders/FXAAShader.js',
+  './games/_vendor/three-0.160.0/examples/jsm/shaders/LuminosityHighPassShader.js',
+  './games/_vendor/three-0.160.0/examples/jsm/shaders/OutputShader.js',
+  './games/_vendor/three-0.160.0/examples/jsm/utils/BufferGeometryUtils.js',
+  './games/_vendor/three-0.160.0/examples/jsm/utils/SkeletonUtils.js',
+  './games/_vendor/three-0.160.0/examples/jsm/utils/WorkerPool.js',
+  './games/_vendor/peerjs.min.js',
+  // ── 바이올린 리얼 샘플 음원 (11음) ──
+  './games/violin_samples/G3.mp3',
+  './games/violin_samples/A3.mp3',
+  './games/violin_samples/C4.mp3',
+  './games/violin_samples/E4.mp3',
+  './games/violin_samples/G4.mp3',
+  './games/violin_samples/A4.mp3',
+  './games/violin_samples/C5.mp3',
+  './games/violin_samples/E5.mp3',
+  './games/violin_samples/G5.mp3',
+  './games/violin_samples/A5.mp3',
+  './games/violin_samples/C6.mp3'
 ];
 
 // v2_patch.js 주입 (메인 앱 HTML에 스크립트 태그 삽입)

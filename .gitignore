@@ -20,3 +20,17 @@ data/_gen/
 data/*.bak
 node_modules/
 *.log
+
+# ── 내부 사업/개발 문서 (공개 Pages 배포 금지) ──
+게임_현황_보고서.html
+개선계획서.html
+결과보고서.html
+배움퀘스트_출시_시각가이드.html
+안드로이드_출시_검토보고서.html
+출시_실행안내서.html
+B2B_사업화_패키지.html
+PROGRESS.md
+_diag/
+
+# ── 개인 커리큘럼 원본 (이미 git 추적 중 → git rm --cached 필요) ──
+카카오톡_전체정리.txt

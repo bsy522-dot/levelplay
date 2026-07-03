@@ -222,8 +222,8 @@ function drawFF(){
 
 // ========== Experiment 2: Pendulum ==========
 let pd={length:200,angle:45,angleRad:0,omega:0,running:false,t:0,trail:[],periods:[],lastCross:0,crossCount:0};
-// Challenge: make period exactly 1.0 second
-const PD_CHALLENGE_TARGET=1.0;
+// Challenge: make period exactly 1.60 seconds (reachable: L=0.6m floor gives ~1.55s small-angle, ~1.62s at 45deg)
+const PD_CHALLENGE_TARGET=1.60;
 const PD_CHALLENGE_TOLERANCE=0.08;
 
 function renderExp2(app){
@@ -234,8 +234,8 @@ function renderExp2(app){
     ${challengeMode?`
     <div class="challenge-box">
       <h3>🏆 도전 과제</h3>
-      <p>줄 길이를 조절해서 주기를 정확히 <b>1.00초</b>로 맞추세요!</p>
-      <div class="target">목표: ${PD_CHALLENGE_TARGET}초 (±${PD_CHALLENGE_TOLERANCE}초)</div>
+      <p>줄 길이를 조절해서 주기를 정확히 <b>1.60초</b>로 맞추세요!</p>
+      <div class="target">목표: ${PD_CHALLENGE_TARGET.toFixed(2)}초 (±${PD_CHALLENGE_TOLERANCE}초)</div>
       <div id="challengeResult"></div>
     </div>`:`
     <div style="text-align:center;margin-bottom:8px">
@@ -367,7 +367,7 @@ function drawPD(){
   }
   if(challengeMode){
     ctx.fillStyle='#CE93D8';ctx.font='bold 13px Segoe UI';
-    ctx.fillText(`🏆 목표 주기: ${PD_CHALLENGE_TARGET}초`,W-170,24);
+    ctx.fillText(`🏆 목표 주기: ${PD_CHALLENGE_TARGET.toFixed(2)}초`,W-170,24);
   }
 }
 

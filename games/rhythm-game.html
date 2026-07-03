@@ -82,6 +82,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
 <script>
 'use strict';
 
+// ── Web Audio 합성 효과음 (외부 파일 없음) ──
+let ACTX=null;
+function ensureAudio(){ if(!ACTX){try{ACTX=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(ACTX&&ACTX.state==='suspended')ACTX.resume(); }
+function tone(f,d,type,g){ if(!ACTX)return; const o=ACTX.createOscillator(),v=ACTX.createGain(); o.type=type||'sine'; o.frequency.value=f; v.gain.setValueAtTime(g||0.12,ACTX.currentTime); v.gain.exponentialRampToValueAtTime(0.0001,ACTX.currentTime+(d||0.1)); o.connect(v); v.connect(ACTX.destination); o.start(); o.stop(ACTX.currentTime+(d||0.1)+0.02); }
+document.addEventListener('pointerdown',ensureAudio);
+document.addEventListener('keydown',ensureAudio);
+const LANE_TONES=[523,659,784,988];
+
 // 곡 데이터: [시간(ms), 레인(0-3)]
 // 곡1: 학교종 (쉬움, BPM 100 = 600ms per beat)
 const SONG_SCHOOL = {name:'학교종',emoji:'🔔',bpm:100,diff:'쉬움',
@@ -225,6 +233,7 @@ function showMenu(){
 }
 
 function startGame(s){
+  ensureAudio();
   songIdx=s;
   const song=SONGS[s];
   score=0;combo=0;maxCombo=0;perfects=0;greats=0;goods=0;misses=0;
@@ -243,6 +252,11 @@ function startGame(s){
   gameActive=true;
   if(animId)cancelAnimationFrame(animId);
   animId=requestAnimationFrame(gameLoop);
+
+  // 스타트 징글 (3음 상승)
+  tone(523,.12,'triangle',0.12);
+  setTimeout(()=>tone(659,.12,'triangle',0.12),120);
+  setTimeout(()=>tone(784,.18,'triangle',0.12),240);
 }
 
 function updateHUD(){
@@ -288,6 +302,7 @@ function gameLoop(now){
       misses++;combo=0;
       showJudge('miss');
       updateHUD();
+      tone(150,.15,'square',0.08);
     }
   }
 
@@ -319,13 +334,14 @@ function hitLane(lane){
 
   best.judged=true;
   let judge,pts;
-  if(bestDiff<=JUDGE_PERFECT){judge='perfect';pts=200;perfects++;}
-  else if(bestDiff<=JUDGE_GREAT){judge='great';pts=150;greats++;}
-  else if(bestDiff<=JUDGE_GOOD){judge='good';pts=100;goods++;}
-  else{judge='miss';pts=0;misses++;combo=0;showJudge('miss');updateHUD();
+  if(bestDiff<=JUDGE_PERFECT){judge='perfect';pts=200;perfects++;tone(880,.09);}
+  else if(bestDiff<=JUDGE_GREAT){judge='great';pts=150;greats++;tone(660,.09);}
+  else if(bestDiff<=JUDGE_GOOD){judge='good';pts=100;goods++;tone(523,.09);}
+  else{judge='miss';pts=0;misses++;combo=0;showJudge('miss');updateHUD();tone(150,.15,'square',0.08);
     if(best.el){best.el.classList.add('miss-anim');setTimeout(()=>{if(best.el&&best.el.parentNode)best.el.remove();},300);}
     return;
   }
+  tone(LANE_TONES[lane],.12,'triangle',0.10); // 히트 레인별 음 → 곡 느낌
 
   combo++;
   if(combo>maxCombo)maxCombo=combo;
@@ -353,6 +369,10 @@ function endGame(){
   const total=notes.length;
   const stars=getStars(score,total);
   saveBest(songIdx,stars,score);
+
+  // 종료 결과 사운드 (2음)
+  tone(784,.15,'triangle',0.12);
+  setTimeout(()=>tone(1047,.3,'triangle',0.12),160);
 
   const xp=stars>=3?40:stars>=2?25:stars>=1?15:5;
   sendXP(xp);

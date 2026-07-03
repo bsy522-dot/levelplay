@@ -156,7 +156,7 @@ function initStage(){
   let distractors=[];
   while(distractors.length<Math.min(4,correctPieces.length)){
     const r=allJamo[Math.random()*allJamo.length|0];
-    if(!correctPieces.includes(r)||distractors.includes(r)){
+    if(!correctPieces.includes(r)&&!distractors.includes(r)){
       distractors.push(r);
     }
   }

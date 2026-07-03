@@ -71,6 +71,8 @@ html.kid .subjc{border-radius:20px;padding:15px 13px 13px}
 html.kid .subjc .si{width:54px;height:54px;font-size:31px;border-radius:16px}
 html.kid .subjc .sn{font-size:15px}
 html.kid .subjc .sd{font-size:11px}
+/* 자동패치 좌측 FAB 레일이 본문 가리는 문제 — 모바일에서 전부 숨김(패치 재생성에도 견디게 index에 !important) */
+@media(max-width:520px){.v7-qa,.v8-qa,.v9-fab,.v10-fab{display:none!important}}
 /* 놀이탭 게임 전용 카드(4존) — .gc 재사용처와 격리 */
 .gcard{position:relative;background:var(--c1);border:1px solid rgba(139,92,246,.10);border-radius:var(--r);padding:0 0 30px;text-align:center;cursor:pointer;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.22);transition:transform .12s,border-color .12s,box-shadow .12s}
 .gcard:hover{border-color:var(--cy);transform:translateY(-2px)}
@@ -811,7 +813,7 @@ const GMS=[
 {nm:'주기율표',em:'⚗️',u:'games/periodic-table.html',d:'원소 기호·이름 퀴즈'},
 {nm:'피아노 마스터',em:'🎹',u:'games/piano-v3.html',d:'22곡 클래식+Synthesia+바이엘+연습모드'},
 {nm:'바이올린 리듬',em:'🎻',u:'games/ViolinReal-v3.html',d:'리듬게임 14곡+곡연주+학습30단계'},
-{nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',d:'StarVoice v4 — MPM음정엔진+옥타브보정+WebGL셰이더+15곡+S~D채점+공유카드'},
+{nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',d:'StarVoice v4 — MPM음정엔진+옥타브보정+WebGL셰이더+12곡+S~D채점+공유카드'},
 {nm:'복싱 트레이너',em:'🥊',u:'games/boxing-trainer-v5.html',d:'3D 복싱+커리어+10대전'},
 {nm:'골프 트래커',em:'⛳',u:'games/golf-tracker-v3.html',d:'스윙분석+통계+라운드'},
 {nm:'한국사 영웅전 v8 🆕',em:'⚔️',u:'games/korean-rpg-v8b/index.html',d:'영걸전 SRPG · 3D · SVG 인물 · 캐시 우회 새 빌드'},
@@ -921,7 +923,7 @@ function uN(){document.getElementById('hLv').textContent='Lv.'+U.lv+' '+(U.nk||'
 function isBm(type,id){return U.bookmarks.some(b=>b.type===type&&b.id===id);}
 function tgBm(e,type,id,nm){e.stopPropagation();const idx=U.bookmarks.findIndex(b=>b.type===type&&b.id===id);if(idx>=0){U.bookmarks.splice(idx,1);toast('북마크 해제');}else{U.bookmarks.push({type,id,nm});toast('북마크 추가');}sv();rAll();}
 function vc(v){const watched=U.seen&&U.seen[v.id];return'<div class="vc" onclick="playVid(\''+v.id+'\',\''+v.t.replace(/'/g,"\\'")+'\')">'+'<div class="thumb-wrap">'+'<img src="https://img.youtube.com/vi/'+v.id+'/mqdefault.jpg" loading="lazy" alt="'+v.t.replace(/"/g,'&quot;')+'">'+'<div class="play-overlay"><div>▶</div></div>'+(watched?'':'<span class="new-badge">NEW</span>')+'<button onclick="tgBm(event,\'vid\',\''+v.id+'\',\''+v.t.replace(/'/g,"\\'")+'\')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;font-size:16px;cursor:pointer;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;z-index:2">'+(isBm('vid',v.id)?'⭐':'☆')+'</button>'+'</div>'+'<div class="vt">'+v.t+'</div>'+'<div style="display:flex;align-items:center;gap:4px">'+'<span class="cat-pill">'+v.c+'</span>'+'<span class="vs" style="flex:1"></span>'+(watched?'<span style="color:var(--gn);font-size:10px">✓ 시청완료</span>':'')+'</div>'+(watched?'<div class="vid-progress"><div class="vid-progress-bar" style="width:100%"></div></div>':'')+'</div>';}
-function playVid(id,t){document.getElementById('moB').innerHTML='<div id="vidSpn" style="display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;background:var(--bg);border-radius:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div></div><div style="font-size:12px;font-weight:600;margin-top:8px">'+t+'</div>';document.getElementById('mo').classList.add('sh');const ifr=document.createElement('iframe');ifr.src='https://www.youtube.com/embed/'+id+'?autoplay=1';ifr.style.cssText='width:100%;aspect-ratio:16/9;border:none;border-radius:8px';ifr.allow='autoplay;fullscreen';ifr.allowFullscreen=true;ifr.onload=function(){const sp=document.getElementById('vidSpn');if(sp)sp.replaceWith(ifr);};document.getElementById('moB').prepend(ifr);ifr.style.display='none';ifr.onload=function(){const sp=document.getElementById('vidSpn');if(sp)sp.remove();ifr.style.display='';};if(!U.seen)U.seen={};if(!U.seen[id]){U.seen[id]=1;const vObj=V.find(x=>x.id===id);const vCat=vObj?vObj.c:'기타';if(!U.stats.videosByCategory[vCat])U.stats.videosByCategory[vCat]=0;U.stats.videosByCategory[vCat]++;xp(10,'영상: '+t);trackMission('video');sv();checkBadges();}}
+function playVid(id,t){document.getElementById('moB').innerHTML='<div id="vidSpn" style="display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;background:var(--bg);border-radius:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div></div><div style="font-size:12px;font-weight:600;margin-top:8px">'+t+'</div>';document.getElementById('mo').classList.add('sh');const ifr=document.createElement('iframe');ifr.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1';ifr.style.cssText='width:100%;aspect-ratio:16/9;border:none;border-radius:8px';ifr.allow='autoplay;fullscreen';ifr.allowFullscreen=true;ifr.onload=function(){const sp=document.getElementById('vidSpn');if(sp)sp.replaceWith(ifr);};document.getElementById('moB').prepend(ifr);ifr.style.display='none';ifr.onload=function(){const sp=document.getElementById('vidSpn');if(sp)sp.remove();ifr.style.display='';};if(!U.seen)U.seen={};if(!U.seen[id]){U.seen[id]=1;const vObj=V.find(x=>x.id===id);const vCat=vObj?vObj.c:'기타';if(!U.stats.videosByCategory[vCat])U.stats.videosByCategory[vCat]=0;U.stats.videosByCategory[vCat]++;xp(10,'영상: '+t);trackMission('video');sv();checkBadges();}}
 function sc(s){return'<div class="gc" style="position:relative" onclick="playSim(\''+s.u+'\',\''+s.nm+'\')"><button onclick="tgBm(event,\'sim\',\''+s.nm.replace(/'/g,"\\'")+'\',\''+s.nm.replace(/'/g,"\\'")+'\')" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:14px;cursor:pointer">'+(isBm('sim',s.nm)?'⭐':'☆')+'</button><div class="gi">'+s.ic+'</div><div class="gn">'+s.nm+'</div><div class="gd">'+s.d+'</div></div>';}
 function playSim(u,n){document.getElementById('moB').innerHTML='<div id="simSpn" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:450px;background:var(--bg);border-radius:8px;gap:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:11px;color:var(--t3)">실험 로딩 중...</div></div><div style="font-size:12px;font-weight:600;margin-top:6px">'+n+'</div>';const ifr=document.createElement('iframe');ifr.src=u;ifr.style.cssText='width:100%;height:450px;border:none;border-radius:8px;display:none';ifr.onload=function(){const sp=document.getElementById('simSpn');if(sp)sp.remove();ifr.style.display='';};document.getElementById('moB').prepend(ifr);document.getElementById('mo').classList.add('sh');xp(10,'실험');}
 const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8b/index.html']);
@@ -3532,6 +3534,30 @@ function renderLearningReport(){
 
 document.addEventListener('DOMContentLoaded',init);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){cG();cMo();closeBattle();if(_tutorOpen)toggleTutor();const ob=document.getElementById('onboardOverlay');if(ob&&ob.style.display==='flex'){ob.style.display='none';U.onboarded=true;sv();}}});
+/* ===== 뒤로가기(안드로이드/브라우저): 앱 종료 대신 한 단계 뒤로 ===== */
+function lpHandleBack(){
+  var gO=document.getElementById('gO');if(gO&&gO.classList.contains('sh')){try{cG();}catch(e){}return true;}
+  var mo=document.getElementById('mo');if(mo&&mo.classList.contains('sh')){try{cMo();}catch(e){}return true;}
+  var bt=document.getElementById('battleOverlay');if(bt&&bt.style.display==='flex'){try{closeBattle();}catch(e){}return true;}
+  var ob=document.getElementById('onboardOverlay');if(ob&&ob.style.display==='flex'){ob.style.display='none';try{U.onboarded=true;sv();}catch(e){}return true;}
+  var vq=document.querySelector('.v7-vidquiz-overlay');if(vq){vq.remove();return true;}
+  if(typeof cur!=='undefined'&&cur===1){
+    var ll=document.getElementById('learnLesson');if(ll&&ll.style.display!=='none'){try{backToUnits();}catch(e){}return true;}
+    var lu=document.getElementById('learnUnit');if(lu&&lu.style.display!=='none'){try{backToSubjects();}catch(e){}return true;}
+  }
+  if(typeof cur!=='undefined'&&cur!==0){try{go(0);}catch(e){}return true;}
+  return false;
+}
+(function(){
+  function trap(){try{history.pushState({lp:1},'',location.href);}catch(e){}}
+  var arm=false,t=null;trap();
+  window.addEventListener('popstate',function(){
+    if(lpHandleBack()){trap();arm=false;return;}
+    if(arm){arm=false;setTimeout(function(){history.back();},10);return;}
+    arm=true;trap();try{if(typeof toast==='function')toast('한 번 더 누르면 종료됩니다');}catch(e){}
+    clearTimeout(t);t=setTimeout(function(){arm=false;},2000);
+  });
+})();
 </script>
 <script src="v3_patch.js" defer></script>
 <script src="v4_patch.js" defer></script>

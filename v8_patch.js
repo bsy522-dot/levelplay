@@ -115,7 +115,7 @@ v8css.textContent=`
 .v8-qa{position:fixed;left:6px;top:50%;transform:translateY(-50%);z-index:990;display:flex;flex-direction:column;gap:4px}
 .v8-qa button{width:36px;height:36px;border-radius:10px;border:1px solid rgba(139,92,246,.15);background:rgba(10,10,26,.92);color:var(--tx);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);transition:.15s}
 .v8-qa button:hover{border-color:var(--cy);transform:scale(1.08)}
-@media(max-width:768px){.v8-qa{left:4px;gap:2px}.v8-qa button{width:32px;height:32px;font-size:14px}}
+@media(max-width:480px){.v8-qa{display:none}}
 `;
 document.head.appendChild(v8css);
 

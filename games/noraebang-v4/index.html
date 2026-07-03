@@ -1409,7 +1409,7 @@ const NOTE_NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 function freqToNote(f){if(!f||f<=0)return"";const n=12*Math.log2(f/440)+69;const nn=Math.round(n);return NOTE_NAMES[nn%12]+(Math.floor(nn/12)-1);}
 function transpose(f,semi){return f*Math.pow(2,semi/12);}
 
-// ===================== 15 SONGS =====================
+// ===================== 12 SONGS =====================
 const SONGS=[
 // --- 동요 ---
 {id:1,cat:"동요",title:"학교종이 땡땡땡",icon:"🏫",diff:"쉬움",dc:"diff-easy",bpm:120,

@@ -1,0 +1,2 @@
+Violin samples from nbrosowsky/tonejs-instruments (https://github.com/nbrosowsky/tonejs-instruments), based on VSCO2 Community Edition.
+Licensed under CC0 / MIT (public domain / permissive). Notes: G3, A3, C4, E4, G4, A4, C5, E5, G5, A5, C6.

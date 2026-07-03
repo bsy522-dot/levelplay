@@ -274,7 +274,7 @@ function renderResult(app){
       <div class="stars">${starStr(stars)}</div>
       <p>점수: ${score}점 / ${max}점${timerMode?' (시간제한)':''}</p>
       <p>정답: ${correct} / 오답: ${wrong}</p>
-      <p>정답률: ${total>0?Math.round(correct/(correct+wrong)*100):pct}%</p>
+      <p>정답률: ${(correct+wrong)>0?Math.round(correct/(correct+wrong)*100):0}%</p>
       <p class="best-record">최고 기록: ${getBest(level-1).score}점</p>
       <button class="retry" onclick="startLevel(${level})">다시 도전</button>
       ${canNext?`<button class="next-btn" onclick="startLevel(${level+1})">다음 레벨 →</button>`:''}
