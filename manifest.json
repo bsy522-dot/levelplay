@@ -1,7 +1,7 @@
 {
   "name": "배움퀘스트 — 배우고, 올리고, 증명하라",
   "short_name": "배움퀘스트",
-  "description": "게이미피케이션 교육 플랫폼 v12.0. 학습라이벌AI, 업적쇼케이스Canvas, XP더블이벤트, 과목성적표PNG, 난이도티어, 학습하트, 과목대회, 스트릭마일스톤, 124배지, 595+퀴즈로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v13.0. 랭크매치, 과목미니시험, 학습인사이트Canvas, 퀴즈만들기, 학습루틴빌더, 크로스워드퍼즐, 배지커스터마이저, 퀴즈배틀아레나, 136배지, 610+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -175,6 +175,46 @@
       "name": "스트릭 마일스톤",
       "url": "./index.html#milestone",
       "description": "연속 학습 보상"
+    },
+    {
+      "name": "랭크 매치",
+      "url": "./index.html#rank",
+      "description": "경쟁 랭크 매치"
+    },
+    {
+      "name": "과목 미니시험",
+      "url": "./index.html#exam",
+      "description": "과목별 시험 응시"
+    },
+    {
+      "name": "학습 인사이트",
+      "url": "./index.html#insight",
+      "description": "학습 분석 대시보드"
+    },
+    {
+      "name": "퀴즈 만들기",
+      "url": "./index.html#creator",
+      "description": "나만의 퀴즈 생성"
+    },
+    {
+      "name": "학습 루틴",
+      "url": "./index.html#routine",
+      "description": "일일 학습 체크리스트"
+    },
+    {
+      "name": "크로스워드",
+      "url": "./index.html#crossword",
+      "description": "융합 크로스워드 퍼즐"
+    },
+    {
+      "name": "배지 커스텀",
+      "url": "./index.html#badgecustom",
+      "description": "배지 컬렉션 꾸미기"
+    },
+    {
+      "name": "퀴즈 배틀",
+      "url": "./index.html#battle",
+      "description": "AI 대전 퀴즈 배틀"
     }
   ]
 }
