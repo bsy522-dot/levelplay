@@ -148,10 +148,11 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 .rest-screen h2{font-size:32px;color:var(--yellow);margin-bottom:10px}
 .rest-screen .timer{font-size:48px;font-weight:900;color:var(--text)}
 /* Training overlay */
-.train-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.train-overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:50;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding-left:3vw;pointer-events:none}
+@media(max-width:700px){.train-overlay{align-items:center;justify-content:flex-start;padding-left:0;padding-top:70px}}
 .train-overlay.hidden{display:none}
 .train-overlay *{pointer-events:auto}
-.train-hud{background:rgba(0,0,0,.6);border-radius:12px;padding:16px 24px;text-align:center;margin:8px}
+.train-hud{background:rgba(0,0,0,.6);border-radius:12px;padding:16px 24px;text-align:center;margin:8px;pointer-events:auto}
 .train-target{font-size:22px;font-weight:700;color:var(--accent);margin:8px 0}
 .train-combo-seq{display:flex;gap:8px;justify-content:center;margin:8px 0}
 .train-combo-item{padding:6px 14px;border-radius:8px;font-size:14px;font-weight:600;background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--border)}
@@ -208,6 +209,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <div class="menu-title" style="font-size:32px">트레이닝</div>
 <div class="menu-sub">능력치를 올려 더 강해지세요</div>
 <div id="trainStats" class="stats-bar"></div>
+<button class="menu-btn" onclick="showComboMenu()"><span class="icon">&#x1F4A5;</span> 콤비네이션 (NEW)<span class="sub">실전 콤보 반복 연습! 원투·훅·슬립·덕 — 시간제한 없음</span></button>
 <button class="menu-btn" onclick="startTraining('speedbag')"><span class="icon">&#x1F3AF;</span> 스피드백<span class="sub">리듬에 맞춰 탭! 스피드 향상</span></button>
 <button class="menu-btn" onclick="startTraining('heavybag')"><span class="icon">&#x1F94A;</span> 헤비백<span class="sub">콤보 연습! 파워 향상</span></button>
 <button class="menu-btn" onclick="startTraining('jumprope')"><span class="icon">&#x1F3C3;</span> 줄넘기<span class="sub">타이밍 게임! 스태미나 향상</span></button>
@@ -235,6 +237,13 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
   <button class="ctrl-btn atk" ontouchstart="metHit('uppercut')" onclick="metHit('uppercut')">어퍼컷</button>
 </div>
 <button class="menu-btn" style="width:280px;margin-top:14px" onclick="stopMetronome()"><span class="icon">&#x23F9;</span> 종료</button>
+</div>
+
+<!-- COMBINATION SELECT -->
+<div class="overlay hidden" id="comboMenu">
+<div class="menu-title" style="font-size:28px">&#x1F4A5; 콤비네이션 훈련</div>
+<div class="menu-sub">실전 복싱 넘버링 콤보를 반복 연습 (1=잽 2=크로스 3=훅 4=어퍼)</div>
+<div id="comboList" style="max-height:56vh;overflow-y:auto;width:min(420px,92vw);padding:0 4px"></div>
 </div>
 
 <!-- RECORDS -->
@@ -434,7 +443,7 @@ let scene, camera, renderer, clock;
 let orbitControls = null;
 let _userInteractedTime = 0;
 let fightCamManual = false; // 전투/스파링 중 카메라 수동 조작 모드 (드래그하면 자동→수동)
-function isFightCam() { return currentScreen === 'fight' || (currentScreen === 'train' && currentTraining && currentTraining.type === 'sparring'); }
+function isFightCam() { return currentScreen === 'fight' || (currentScreen === 'train' && currentTraining && currentTraining.active); }
 function resetFightCam() {
   fightCamManual = false;
   const b = document.getElementById('camModeBtn'); if (b) b.style.display = 'none';
@@ -513,6 +522,7 @@ function initThree() {
   buildRing();
   buildCrowd();
   buildFootGuides();
+  buildTrainProps();
   playerModel = buildBoxer(0xe63946, true);
   oppModel = buildBoxer(0x3b82f6, false);
   // Scale models to match ring proportions (v2 model is ~1.5m, ring expects ~4m figures)
@@ -1514,7 +1524,10 @@ let currentFight = null;
 let currentTraining = null;
 
 function hideAll() {
-  ['mainMenu', 'careerMenu', 'trainingMenu', 'recordsMenu', 'fightHud', 'controlsHint', 'fightResult', 'levelUp', 'trainResult', 'restScreen', 'mobileControls', 'trainOverlay', 'comboCounter', 'aiCoachMenu', 'multiplayerMenu', 'missionsMenu', 'metronomeMenu'].forEach(id => {
+  if (typeof heavybagProp !== 'undefined' && heavybagProp) heavybagProp.visible = false;
+  if (typeof speedbagProp !== 'undefined' && speedbagProp) speedbagProp.visible = false;
+  if (playerModel) { playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; }
+  ['mainMenu', 'careerMenu', 'trainingMenu', 'recordsMenu', 'fightHud', 'controlsHint', 'fightResult', 'levelUp', 'trainResult', 'restScreen', 'mobileControls', 'trainOverlay', 'comboCounter', 'aiCoachMenu', 'multiplayerMenu', 'missionsMenu', 'metronomeMenu', 'comboMenu'].forEach(id => {
     const el = $(id);
     if (el) el.classList.add('hidden');
   });
@@ -2159,6 +2172,7 @@ function goBack() {
   if (currentScreen === 'aiCoach') { stopAICam(); showMain(); return; }
   if (currentScreen === 'multiplayer') { try { _mpCleanup(); } catch(e){} showMain(); return; }
   if (currentScreen === 'metronome') { stopMetronome(); return; }
+  if (currentScreen === 'comboSelect') { showTraining(); return; }
   if (currentScreen === 'career' || currentScreen === 'training' || currentScreen === 'records' || currentScreen === 'missions') showMain();
   else if (currentScreen === 'fight' || currentScreen === 'train') {
     if (currentFight && currentFight.active) {
@@ -2270,6 +2284,8 @@ function updateFightHUD() {
 }
 
 function playerPunch(type) {
+  // 훈련 중 모바일 펀치 버튼 → 훈련 입력으로 위임
+  if (currentScreen === 'train' && currentTraining && currentTraining.active) { trainingInput(type); return; }
   const f = currentFight;
   if (!f || !f.active || f.phase !== 'fight') return;
   if (f.playerActionTime > 0) return;
@@ -2369,6 +2385,11 @@ function playerPunch(type) {
 }
 
 function playerDodge(dir) {
+  // 콤비네이션 훈련 중 모바일 방어 버튼 → 훈련 입력으로 위임
+  if (currentScreen === 'train' && currentTraining && currentTraining.active) {
+    if (currentTraining.type === 'combo') trainingInput(dir);
+    return;
+  }
   const f = currentFight;
   if (!f || !f.active || f.phase !== 'fight') return;
   if (f.playerDodgeTime > 0) return;
@@ -2760,6 +2781,88 @@ function showLevelUp() {
   render();
 }
 
+// ==================== TRAINING PROPS (3D 훈련 장비) ====================
+let heavybagProp = null, speedbagProp = null;
+let _trainPunch = null, _trainDodge = null;
+
+function buildTrainProps() {
+  const chainMat = new THREE.MeshStandardMaterial({ color: 0x8a8a8a, metalness: 0.85, roughness: 0.35 });
+  // 헤비백: 체인 + 빨간 원통 샌드백 (링 중앙)
+  heavybagProp = new THREE.Group();
+  const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.6, 8), chainMat);
+  chain.position.y = 5.0;
+  const bag = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.48, 2.4, 20), new THREE.MeshStandardMaterial({ color: 0xb3202e, roughness: 0.55 }));
+  bag.position.y = 3.0; bag.castShadow = true;
+  const capTop = new THREE.Mesh(new THREE.CylinderGeometry(0.57, 0.57, 0.22, 20), new THREE.MeshStandardMaterial({ color: 0x1c1c22, roughness: 0.8 }));
+  capTop.position.y = 4.25;
+  heavybagProp.add(chain, bag, capTop);
+  heavybagProp.visible = false;
+  heavybagProp.userData = { swing: 0, swingPhase: 0 };
+  scene.add(heavybagProp);
+  // 스피드백: 플랫폼 + 물방울 백
+  speedbagProp = new THREE.Group();
+  const plat = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.12, 20), new THREE.MeshStandardMaterial({ color: 0x5a3d2b, roughness: 0.7 }));
+  plat.position.y = 4.35;
+  const swivel = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.32, 8), chainMat);
+  swivel.position.y = 4.13;
+  const sbag = new THREE.Mesh(new THREE.SphereGeometry(0.34, 16, 14), new THREE.MeshStandardMaterial({ color: 0x8b1a1a, roughness: 0.5 }));
+  sbag.scale.y = 1.35; sbag.position.y = 3.62;
+  speedbagProp.add(plat, swivel, sbag);
+  speedbagProp.visible = false;
+  speedbagProp.userData = { hit: 0 };
+  scene.add(speedbagProp);
+}
+function setTrainProps(type) {
+  if (heavybagProp) { heavybagProp.visible = (type === 'heavybag' || type === 'combo'); heavybagProp.rotation.set(0, 0, 0); heavybagProp.userData.swing = 0; }
+  if (speedbagProp) { speedbagProp.visible = (type === 'speedbag'); speedbagProp.rotation.set(0, 0, 0); speedbagProp.userData.hit = 0; }
+}
+// 훈련용 슬립/덕 모션 (본 포즈 대신 그룹 기울임 — p: 0→1, sin으로 갔다가 복귀)
+function applyDodgePoseTrain(model, type, p) {
+  const k = Math.sin(Math.min(1, p) * Math.PI);
+  if (type === 'slipL') model.group.rotation.z = 0.26 * k;
+  else if (type === 'slipR') model.group.rotation.z = -0.26 * k;
+  else if (type === 'duck') model.group.position.y = -0.55 * k;
+}
+
+// ==================== COMBINATION TRAINING (실전 콤보 반복 연습) ====================
+const _comboActName = { jab: '잽(1)', cross: '크로스(2)', hook: '훅(3)', uppercut: '어퍼(4)', slipL: '슬립←(Q)', slipR: '슬립→(E)', duck: '덕(S)' };
+const COMBO_LIB = [
+  { name: '원투 (1-2)', lv: '기초', seq: ['jab', 'cross'] },
+  { name: '더블 잽 (1-1)', lv: '기초', seq: ['jab', 'jab'] },
+  { name: '잽 잽 크로스 (1-1-2)', lv: '기초', seq: ['jab', 'jab', 'cross'] },
+  { name: '원투 훅 (1-2-3)', lv: '중급', seq: ['jab', 'cross', 'hook'] },
+  { name: '투 쓰리 투 (2-3-2)', lv: '중급', seq: ['cross', 'hook', 'cross'] },
+  { name: '원투 훅 어퍼 (1-2-3-4)', lv: '중급', seq: ['jab', 'cross', 'hook', 'uppercut'] },
+  { name: '원투 - 슬립 - 크로스', lv: '고급', seq: ['jab', 'cross', 'slipL', 'cross'] },
+  { name: '원투 - 덕 - 훅', lv: '고급', seq: ['jab', 'cross', 'duck', 'hook'] },
+  { name: '잽 - 슬립 - 훅 크로스', lv: '고급', seq: ['jab', 'slipR', 'hook', 'cross'] },
+];
+let _comboSel = null;
+
+function showComboMenu() {
+  hideAll();
+  currentScreen = 'comboSelect';
+  $('comboMenu').classList.remove('hidden');
+  $('backBtn').classList.remove('hidden');
+  if (playerModel) playerModel.group.visible = false;
+  if (oppModel) oppModel.group.visible = false;
+  const lvColor = { '기초': 'var(--green)', '중급': 'var(--gold)', '고급': 'var(--accent)' };
+  let html = '', lastLv = '';
+  COMBO_LIB.forEach((c, i) => {
+    if (c.lv !== lastLv) { html += `<div style="font-size:13px;font-weight:800;color:${lvColor[c.lv]};margin:12px 0 4px;text-align:left">${c.lv}</div>`; lastLv = c.lv; }
+    html += `<button class="menu-btn" style="width:100%" onclick="startComboTraining(${i})"><span class="icon">&#x1F94A;</span> ${c.name}<span class="sub">${c.seq.map(a => _comboActName[a]).join(' → ')}</span></button>`;
+  });
+  $('comboList').innerHTML = html;
+}
+function startComboTraining(i) {
+  _comboSel = COMBO_LIB[i];
+  startTraining('combo');
+}
+function stopComboToMenu() {
+  if (currentTraining) currentTraining.active = false;
+  showComboMenu();
+}
+
 // ==================== TRAINING MINI-GAMES ====================
 function startTraining(type) {
   hideAll();
@@ -2767,7 +2870,11 @@ function startTraining(type) {
   $('backBtn').classList.remove('hidden');
   $('trainOverlay').classList.remove('hidden');
 
-  // Show 3D scene for sparring
+  _trainPunch = null; _trainDodge = null;
+  playerModel.group.rotation.z = 0; playerModel.group.position.y = 0;
+  setTrainProps(type);
+
+  // Show 3D scene
   if (type === 'sparring') {
     playerModel.group.visible = true;
     oppModel.group.visible = true;
@@ -2778,15 +2885,20 @@ function startTraining(type) {
     camera.lookAt(0, 3, 1);
     if ('ontouchstart' in window) $('mobileControls').classList.remove('hidden');
   } else {
-    playerModel.group.visible = false;
+    // 캐릭터 + 훈련 장비 표시 (샌드백을 향해 서기)
+    playerModel.group.visible = true;
     oppModel.group.visible = false;
-    camera.position.set(0, 4, 8);
-    camera.lookAt(0, 2.5, 0);
+    playerModel.group.position.set(0, 0, 2.1);
+    playerModel.group.rotation.y = Math.PI; // 장비(z=0)를 바라봄
+    resetFightCam();
+    camera.position.set(2.2, 4.6, 6.8);
+    camera.lookAt(0, 2.6, 0.6);
+    if ('ontouchstart' in window && (type === 'heavybag' || type === 'combo')) $('mobileControls').classList.remove('hidden');
   }
 
   currentTraining = {
     type, active: true,
-    timer: 30, score: 0, hits: 0, misses: 0,
+    timer: 30, score: 0, hits: 0, misses: 0, sets: 0,
     sbPhase: 0, sbTarget: 0, sbHit: false,
     hbCombo: [], hbTarget: [], hbIdx: 0,
     jrPhase: 0, jrSpeed: 2, jrJumping: false, jrY: 0,
@@ -2797,6 +2909,10 @@ function startTraining(type) {
     const combos = [['jab', 'cross'], ['jab', 'cross', 'hook'], ['jab', 'jab', 'cross'], ['hook', 'uppercut']];
     currentTraining.hbTarget = combos[Math.floor(Math.random() * combos.length)];
   }
+  if (type === 'combo') {
+    currentTraining.hbTarget = _comboSel.seq.slice();
+    if (typeof speak === 'function') speak(_comboSel.name + ' 연습 시작', { priority: 'high' });
+  }
 
   updateTrainOverlay();
 }
@@ -2805,16 +2921,32 @@ function updateTrainOverlay() {
   const t = currentTraining;
   if (!t || !t.active) return;
   const nameMap = { jab: '잽(1)', cross: '크로스(2)', hook: '훅(3)', uppercut: '어퍼(4)' };
-  const typeNames = { speedbag: '스피드백', heavybag: '헤비백', jumprope: '줄넘기', sparring: '스파링' };
+  const typeNames = { speedbag: '스피드백', heavybag: '헤비백', jumprope: '줄넘기', sparring: '스파링', combo: '콤비네이션' };
   let html = `<div class="train-hud">
     <div style="font-size:22px;font-weight:700;color:var(--accent)">${typeNames[t.type]}</div>
-    <div style="font-size:16px;margin:4px 0">점수: <b style="color:var(--gold)">${t.score}</b></div>
-    <div style="font-size:13px;color:var(--dim)">${Math.ceil(t.timer)}초 남음</div>
+    <div style="font-size:16px;margin:4px 0">점수: <b style="color:var(--gold)">${t.score}</b></div>`;
+  if (t.type === 'combo') {
+    html += `<div style="font-size:12px;color:var(--dim)">자유 연습 · 시간제한 없음</div>`;
+  } else {
+    html += `<div style="font-size:13px;color:var(--dim)">${Math.ceil(t.timer)}초 남음</div>
     <div style="width:200px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin:8px auto">
       <div style="width:${t.timer / 30 * 100}%;height:100%;background:var(--accent);border-radius:2px"></div>
     </div>`;
+  }
 
-  if (t.type === 'speedbag') {
+  if (t.type === 'combo') {
+    const acc = (t.hits + t.misses) > 0 ? Math.round(t.hits / (t.hits + t.misses) * 100) : 100;
+    html += `<div style="font-size:15px;font-weight:800;color:var(--gold);margin:8px 0 2px">${_comboSel.name}</div>
+    <div class="train-combo-seq">${t.hbTarget.map((p, i) =>
+      `<div class="train-combo-item ${i < t.hbIdx ? 'done' : i === t.hbIdx ? 'current' : ''}">${_comboActName[p]}</div>`
+    ).join('')}</div>
+    <div style="font-size:14px;margin-top:8px">세트 <b style="color:var(--green)">${t.sets}</b> · 정확도 <b>${acc}%</b></div>
+    <div style="font-size:11px;color:var(--dim);margin-top:6px">키보드 1·2·3·4 / Q=슬립← E=슬립→ S=덕</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+      <button class="confirm-btn" style="padding:8px 14px;font-size:13px" onclick="stopComboToMenu()">콤보 변경</button>
+      <button class="confirm-btn" style="padding:8px 14px;font-size:13px" onclick="endTraining()">훈련 종료</button>
+    </div>`;
+  } else if (t.type === 'speedbag') {
     var _sbColor = t.sbTarget ? 'var(--green)' : 'var(--dim)';
     var _sbText = t.sbTarget ? '지금! 탭하세요!' : '대기...';
     html += '<div class="train-target" style="color:' + _sbColor + ';font-size:28px;margin:16px 0">' + _sbText + '</div>'
@@ -2844,8 +2976,10 @@ function updateTraining(dt) {
   const t = currentTraining;
   if (!t || !t.active) return;
 
-  t.timer -= dt;
-  if (t.timer <= 0) { endTraining(); return; }
+  if (t.type !== 'combo') { // 콤비네이션은 시간제한 없는 자유 연습
+    t.timer -= dt;
+    if (t.timer <= 0) { endTraining(); return; }
+  }
 
   if (t.type === 'speedbag') {
     t.sbPhase += dt * 3;
@@ -2870,12 +3004,18 @@ function trainingInput(action) {
   if (!t || !t.active) return;
 
   if (t.type === 'speedbag') {
-    if (t.sbTarget) { t.score += 10; t.hits++; t.sbHit = true; setTimeout(() => { if (t) t.sbHit = false; }, 100); playPunch('light'); }
+    if (t.sbTarget) {
+      t.score += 10; t.hits++; t.sbHit = true; setTimeout(() => { if (t) t.sbHit = false; }, 100); playPunch('light');
+      _trainPunch = { type: Math.random() < 0.5 ? 'jab' : 'cross', t: 0.35 };
+      if (speedbagProp) speedbagProp.userData.hit = 1;
+    }
     else { t.misses++; }
   } else if (t.type === 'heavybag') {
     const expected = t.hbTarget[t.hbIdx];
     if (action === expected) {
       t.score += 15; t.hits++; t.hbIdx++; playPunch(action === 'hook' || action === 'uppercut' ? 'heavy' : 'light');
+      _trainPunch = { type: action, t: 0.35 };
+      if (heavybagProp) heavybagProp.userData.swing = Math.min(0.2, heavybagProp.userData.swing + 0.07);
       if (t.hbIdx >= t.hbTarget.length) {
         t.score += 30; t.hbIdx = 0;
         const combos = [['jab', 'cross'], ['jab', 'cross', 'hook'], ['jab', 'jab', 'cross'], ['hook', 'uppercut'], ['jab', 'cross', 'hook', 'uppercut']];
@@ -2883,6 +3023,28 @@ function trainingInput(action) {
         showComboText('콤보 완성!');
       }
     } else { t.misses++; t.hbIdx = 0; }
+  } else if (t.type === 'combo') {
+    const expected = t.hbTarget[t.hbIdx];
+    if (action === expected) {
+      t.hits++; t.hbIdx++;
+      if (action === 'slipL' || action === 'slipR' || action === 'duck') {
+        _trainDodge = { type: action, t: 0.4 };
+        if (typeof playStep === 'function') playStep();
+      } else {
+        t.score += 10;
+        _trainPunch = { type: action, t: 0.35 };
+        playPunch(action === 'hook' || action === 'uppercut' ? 'heavy' : 'light');
+        if (heavybagProp) heavybagProp.userData.swing = Math.min(0.22, heavybagProp.userData.swing + 0.08);
+      }
+      if (t.hbIdx >= t.hbTarget.length) {
+        t.hbIdx = 0; t.sets++; t.score += 25;
+        showComboText(t.sets + '세트! ' + _comboSel.name);
+        if (typeof speak === 'function' && t.sets % 5 === 0) speak(t.sets + '세트 완료. 좋아요!', { priority: 'normal' });
+      }
+    } else {
+      t.misses++; t.hbIdx = 0;
+      showComboText('처음부터!');
+    }
   } else if (t.type === 'jumprope') {
     if (!t.jrJumping) { t.jrJumping = true; t.jrPhase = 0; t.score += 5; t.hits++; playStep(); }
   } else if (t.type === 'sparring') {
@@ -2898,7 +3060,9 @@ function endTraining() {
   const t = currentTraining;
   t.active = false;
 
-  const statMap = { speedbag: 'speed', heavybag: 'power', jumprope: 'stamina', sparring: 'defense' };
+  playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; // 슬립/덕/점프 잔여 자세 복원
+
+  const statMap = { speedbag: 'speed', heavybag: 'power', jumprope: 'stamina', sparring: 'defense', combo: 'power' };
   const stat = statMap[t.type];
   const gain = Math.max(1, Math.floor(t.score / 50));
   save.stats[stat] = Math.min(99, save.stats[stat] + gain);
@@ -2906,11 +3070,12 @@ function endTraining() {
   save.xp += Math.floor(t.score / 5);
   saveSave();
 
-  const nameMap = { speedbag: '스피드백', heavybag: '헤비백', jumprope: '줄넘기', sparring: '스파링' };
+  const nameMap = { speedbag: '스피드백', heavybag: '헤비백', jumprope: '줄넘기', sparring: '스파링', combo: '콤비네이션' };
   $('trainOverlay').classList.add('hidden');
   $('trainResult').classList.remove('hidden');
   $('trainResult').innerHTML = `
     <h2>${nameMap[t.type]} 완료!</h2>
+    ${t.type === 'combo' ? `<div class="detail" style="color:var(--gold);font-size:15px">${_comboSel.name} × <b>${t.sets}세트</b></div>` : ''}
     <div class="detail">점수: <b>${t.score}</b></div>
     <div class="detail">히트: <b>${t.hits}</b> | 미스: <b>${t.misses}</b></div>
     <div class="detail" style="color:var(--green);margin-top:10px">${{ speed: '스피드', power: '파워', stamina: '스태미나', defense: '방어력' }[stat]} +${gain}</div>
@@ -2964,12 +3129,19 @@ function handleInput(code, dir) {
   if (currentScreen === 'train' && currentTraining && currentTraining.active && dir === 'down') {
     if (currentTraining.type === 'speedbag' || currentTraining.type === 'jumprope') {
       if (['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Space', 'KeyJ', 'KeyK', 'KeyL'].includes(code)) trainingInput('any');
-    } else if (currentTraining.type === 'heavybag' || currentTraining.type === 'sparring') {
+    } else if (currentTraining.type === 'heavybag' || currentTraining.type === 'sparring' || currentTraining.type === 'combo') {
       switch (code) {
         case 'Digit1': case 'KeyJ': trainingInput('jab'); break;
         case 'Digit2': case 'KeyK': trainingInput('cross'); break;
         case 'Digit3': case 'KeyL': trainingInput('hook'); break;
         case 'Digit4': case 'Semicolon': trainingInput('uppercut'); break;
+      }
+      if (currentTraining.type === 'combo') {
+        switch (code) {
+          case 'KeyQ': trainingInput('slipL'); break;
+          case 'KeyE': trainingInput('slipR'); break;
+          case 'KeyS': trainingInput('duck'); break;
+        }
       }
     }
   }
@@ -3082,15 +3254,46 @@ function update3DScene(time, dt) {
       );
     }
 
-  } else if (currentScreen === 'train' && currentTraining && currentTraining.type === 'sparring') {
+  } else if (currentScreen === 'train' && currentTraining && currentTraining.active) {
+    // 모든 훈련: 캐릭터 애니메이션 (펀치/슬립·덕/대기)
     resetBoxerPose(playerModel);
-    resetBoxerPose(oppModel);
-    animateBoxerIdle(playerModel, time);
-    animateBoxerIdle(oppModel, time);
+    if (_trainPunch && _trainPunch.t > 0) {
+      _trainPunch.t = Math.max(0, _trainPunch.t - dt);
+      animatePunch(playerModel, _trainPunch.type, 1 - _trainPunch.t / 0.35, false);
+    } else if (_trainDodge && _trainDodge.t > 0) {
+      _trainDodge.t = Math.max(0, _trainDodge.t - dt);
+      applyDodgePoseTrain(playerModel, _trainDodge.type, 1 - _trainDodge.t / 0.4);
+    } else {
+      animateBoxerIdle(playerModel, time);
+    }
+    if (currentTraining.type === 'sparring') {
+      resetBoxerPose(oppModel);
+      animateBoxerIdle(oppModel, time);
+    }
+    if (currentTraining.type === 'jumprope') playerModel.group.position.y = (currentTraining.jrY / 30) * 0.8;
+
+    // 훈련 장비 반응 (샌드백 스윙 · 스피드백 흔들림)
+    if (heavybagProp && heavybagProp.visible) {
+      const u = heavybagProp.userData;
+      u.swingPhase += dt * 6;
+      u.swing = Math.max(0, u.swing - dt * 0.1);
+      heavybagProp.rotation.x = Math.sin(u.swingPhase) * u.swing;
+      heavybagProp.rotation.z = Math.cos(u.swingPhase * 0.8) * u.swing * 0.5;
+    }
+    if (speedbagProp && speedbagProp.visible) {
+      const u = speedbagProp.userData;
+      u.hit = Math.max(0, u.hit - dt * 2.2);
+      speedbagProp.rotation.x = Math.sin(performance.now() * 0.035) * 0.3 * u.hit;
+    }
 
     if (!fightCamManual) {
-      camera.position.set(1.5, 5, 8);
-      camera.lookAt(0, 3, 1);
+      if (currentTraining.type === 'sparring') {
+        camera.position.set(1.5, 5, 8);
+        camera.lookAt(0, 3, 1);
+      } else {
+        camera.position.set(2.2, 4.6, 6.8);
+        camera.lookAt(0, 2.6, 0.6);
+      }
     }
   } else {
     // 메뉴/결과/리플레이 화면 — OrbitControls가 카메라 직접 컨트롤 (드래그 회전 + 핀치 줌)
