@@ -272,6 +272,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <div class="combo-popup" id="comboPopup"></div>
 <div class="combo-counter hidden" id="comboCounter"></div>
 <div class="controls-hint hidden" id="controlsHint">1/J=잽 2/K=크로스 3/L=훅 4/;=어퍼 | Q=슬립좌 E=슬립우 S=덕 | A=하이가드 D=로우가드</div>
+<button id="camModeBtn" onclick="resetFightCam()" title="카메라를 자동 연출로 되돌립니다" style="display:none;position:fixed;right:12px;top:118px;z-index:60;background:rgba(15,20,35,.88);color:#e8ecf4;border:1.5px solid #3b82f6;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.4)">📷 카메라 자동복귀</button>
 <div class="rest-screen hidden" id="restScreen"><h2>휴식</h2><div class="timer" id="restTimer">60</div><div style="font-size:13px;color:var(--dim);margin-top:10px">체력이 회복됩니다...</div></div>
 <div class="fight-result hidden" id="fightResult"></div>
 <div class="level-up hidden" id="levelUp"></div>
@@ -432,6 +433,12 @@ if(typeof THREE==='undefined'){
 let scene, camera, renderer, clock;
 let orbitControls = null;
 let _userInteractedTime = 0;
+let fightCamManual = false; // 전투/스파링 중 카메라 수동 조작 모드 (드래그하면 자동→수동)
+function isFightCam() { return currentScreen === 'fight' || (currentScreen === 'train' && currentTraining && currentTraining.type === 'sparring'); }
+function resetFightCam() {
+  fightCamManual = false;
+  const b = document.getElementById('camModeBtn'); if (b) b.style.display = 'none';
+}
 let ringGroup, playerModel, oppModel;
 let particles3D = [];
 let cameraShake = { x: 0, y: 0, amount: 0 };
@@ -512,8 +519,9 @@ function initThree() {
   playerModel.group.scale.setScalar(2.6);
   oppModel.group.scale.setScalar(2.6);
   playerModel.group.position.set(0, 0, 3);
+  playerModel.group.rotation.y = Math.PI; // 모델 기본 시선이 +z(카메라쪽)라 π 회전 → 상대를 마주봄 (카메라는 등 뒤)
   oppModel.group.position.set(0, 0, -1.5);
-  oppModel.group.rotation.y = Math.PI;
+  oppModel.group.rotation.y = 0; // 상대는 기본 +z 그대로 = 플레이어를 마주봄
   scene.add(playerModel.group);
   scene.add(oppModel.group);
 
@@ -533,7 +541,15 @@ function initThree() {
     orbitControls.autoRotate = true;
     orbitControls.autoRotateSpeed = 0.6;
     // 사용자가 드래그를 시작하면 자동회전을 멈추고, 손을 떼면 시각을 기록 → 3초 후 재개
-    orbitControls.addEventListener('start', () => { orbitControls.autoRotate = false; });
+    orbitControls.addEventListener('start', () => {
+      orbitControls.autoRotate = false;
+      // 전투/스파링 중 드래그 시작 → 카메라 수동 모드 전환 (📷 버튼으로 자동 복귀)
+      if (isFightCam() && !fightCamManual) {
+        fightCamManual = true;
+        orbitControls.target.set(0, 2.5, 0.75); // 두 복서의 중간 지점
+        const b = document.getElementById('camModeBtn'); if (b) b.style.display = 'block';
+      }
+    });
     orbitControls.addEventListener('end',   () => { _userInteractedTime = performance.now(); });
     orbitControls.update();
   }
@@ -2189,7 +2205,8 @@ function startFight(opp, isCareer, oppIdx) {
   playerModel.group.userData.baseX = 0;
   oppModel.group.userData.baseX = 0;
 
-  // Camera for fight
+  // Camera for fight (새 전투는 항상 자동 카메라로 시작)
+  resetFightCam();
   camera.position.set(1.5, 5, 8);
   camera.lookAt(0, 3, 1);
 
@@ -2756,6 +2773,7 @@ function startTraining(type) {
     oppModel.group.visible = true;
     playerModel.group.position.set(0, 0, 3);
     oppModel.group.position.set(0, 0, -1.5);
+    resetFightCam(); // 스파링도 자동 카메라로 시작
     camera.position.set(1.5, 5, 8);
     camera.lookAt(0, 3, 1);
     if ('ontouchstart' in window) $('mobileControls').classList.remove('hidden');
@@ -3047,11 +3065,13 @@ function update3DScene(time, dt) {
       cameraShake.y *= 0.9;
     }
 
-    // Dynamic camera follow
-    const camTarget = new THREE.Vector3(0, 3, 1);
-    camera.position.x = 1.5 + cameraShake.x + Math.sin(time * 0.3) * 0.1;
-    camera.position.y = 5 + cameraShake.y + Math.sin(time * 0.2) * 0.05;
-    camera.lookAt(camTarget);
+    // Dynamic camera follow (수동 카메라 모드에서는 사용자가 OrbitControls로 직접 제어)
+    if (!fightCamManual) {
+      const camTarget = new THREE.Vector3(0, 3, 1);
+      camera.position.x = 1.5 + cameraShake.x + Math.sin(time * 0.3) * 0.1;
+      camera.position.y = 5 + cameraShake.y + Math.sin(time * 0.2) * 0.05;
+      camera.lookAt(camTarget);
+    }
 
     // Flash overlay using ambient light (텍스처 배경 보존)
     if (f.flashAmount > 0.05 && scene.background && scene.background.isColor) {
@@ -3068,8 +3088,10 @@ function update3DScene(time, dt) {
     animateBoxerIdle(playerModel, time);
     animateBoxerIdle(oppModel, time);
 
-    camera.position.set(1.5, 5, 8);
-    camera.lookAt(0, 3, 1);
+    if (!fightCamManual) {
+      camera.position.set(1.5, 5, 8);
+      camera.lookAt(0, 3, 1);
+    }
   } else {
     // 메뉴/결과/리플레이 화면 — OrbitControls가 카메라 직접 컨트롤 (드래그 회전 + 핀치 줌)
     if (orbitControls) {
@@ -3086,16 +3108,16 @@ function update3DScene(time, dt) {
       camera.lookAt(0, 1.8, 0);
     }
   }
-  // 전투/스파링 진행 중에는 OrbitControls 비활성 + 자동회전 강제 off
-  // (전투 카메라가 camera.position/lookAt을 매 프레임 직접 덮어쓰므로 충돌 방지)
-  if (orbitControls && (currentScreen === 'fight' || (currentScreen === 'train' && currentTraining && currentTraining.type === 'sparring'))) {
-    orbitControls.enabled = false;
+  // 전투/스파링 진행 중: 드래그 감지를 위해 enabled는 유지하되,
+  // 수동 모드(fightCamManual) 전까지는 update()를 막아 전투 자동 카메라와 충돌 방지
+  if (orbitControls && isFightCam()) {
+    orbitControls.enabled = true;
     orbitControls.autoRotate = false;
+    if (fightCamManual) orbitControls.update();
+  } else if (orbitControls && orbitControls.enabled) {
+    // 메뉴/결과/리플레이 — 기존 동작 유지
+    orbitControls.update();
   }
-
-  // 매 프레임 공통 호출 — enabled일 때만 update해 전투 카메라 세팅을 덮어쓰지 않음
-  // (THREE.OrbitControls 미로드 시 orbitControls===null 가드)
-  if (orbitControls && orbitControls.enabled) orbitControls.update();
 
   updateParticles3D(dt);
 }
