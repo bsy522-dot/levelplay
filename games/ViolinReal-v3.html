@@ -68,6 +68,7 @@ html,body{width:100%;height:100%;overflow:hidden;touch-action:none;
 .nb:active,.nb.on{transform:scale(.94);
   background:rgba(255,215,0,.3);border-color:rgba(255,215,0,.45);
   color:#fff;box-shadow:0 0 10px rgba(255,215,0,.25);}
+.nb.sel{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.5);color:#ffe9a0;}
 .nb.highlight{animation:hlPulse .6s ease-in-out infinite;
   border-color:rgba(255,100,100,.6);box-shadow:0 0 12px rgba(255,100,100,.3);}
 @keyframes hlPulse{0%,100%{background:rgba(255,100,100,.15)}50%{background:rgba(255,100,100,.35)}}
@@ -645,20 +646,20 @@ const LESSONS=[];
   LESSONS.push({lv:3,title:'A현 개방현',desc:'A현을 활로 그어보세요',targets:[{s:2,f:0,count:4}]});
   LESSONS.push({lv:4,title:'E현 개방현',desc:'E현(가장 가는 줄)을 활로 그어보세요',targets:[{s:3,f:0,count:4}]});
   LESSONS.push({lv:5,title:'개방현 전체',desc:'G-D-A-E 순서로 연주하세요',targets:[{s:0,f:0,count:1},{s:1,f:0,count:1},{s:2,f:0,count:1},{s:3,f:0,count:1}]});
-  LESSONS.push({lv:6,title:'G현 1번손가락',desc:'G현의 1번 위치를 눌러보세요',targets:[{s:0,f:1,count:4}]});
-  LESSONS.push({lv:7,title:'D현 1번손가락',desc:'D현의 1번 위치를 눌러보세요',targets:[{s:1,f:1,count:4}]});
-  LESSONS.push({lv:8,title:'A현 1번손가락',desc:'A현의 1번 위치를 눌러보세요',targets:[{s:2,f:1,count:4}]});
-  LESSONS.push({lv:9,title:'E현 1번손가락',desc:'E현의 1번 위치를 눌러보세요',targets:[{s:3,f:1,count:4}]});
+  LESSONS.push({lv:6,title:'G현 1번손가락',desc:'G현의 1번 위치를 누르고 활로 그어보세요',targets:[{s:0,f:1,count:4}]});
+  LESSONS.push({lv:7,title:'D현 1번손가락',desc:'D현의 1번 위치를 누르고 활로 그어보세요',targets:[{s:1,f:1,count:4}]});
+  LESSONS.push({lv:8,title:'A현 1번손가락',desc:'A현의 1번 위치를 누르고 활로 그어보세요',targets:[{s:2,f:1,count:4}]});
+  LESSONS.push({lv:9,title:'E현 1번손가락',desc:'E현의 1번 위치를 누르고 활로 그어보세요',targets:[{s:3,f:1,count:4}]});
   LESSONS.push({lv:10,title:'1번손가락 전체',desc:'모든 현에서 1번 위치를 순서대로',targets:[{s:0,f:1,count:1},{s:1,f:1,count:1},{s:2,f:1,count:1},{s:3,f:1,count:1}]});
-  LESSONS.push({lv:11,title:'G현 2번손가락',desc:'G현의 2번 위치를 눌러보세요',targets:[{s:0,f:2,count:4}]});
-  LESSONS.push({lv:12,title:'D현 2번손가락',desc:'D현의 2번 위치를 눌러보세요',targets:[{s:1,f:2,count:4}]});
-  LESSONS.push({lv:13,title:'A현 2번손가락',desc:'A현의 2번 위치를 눌러보세요',targets:[{s:2,f:2,count:4}]});
-  LESSONS.push({lv:14,title:'E현 2번손가락',desc:'E현의 2번 위치를 눌러보세요',targets:[{s:3,f:2,count:4}]});
+  LESSONS.push({lv:11,title:'G현 2번손가락',desc:'G현의 2번 위치를 누르고 활로 그어보세요',targets:[{s:0,f:2,count:4}]});
+  LESSONS.push({lv:12,title:'D현 2번손가락',desc:'D현의 2번 위치를 누르고 활로 그어보세요',targets:[{s:1,f:2,count:4}]});
+  LESSONS.push({lv:13,title:'A현 2번손가락',desc:'A현의 2번 위치를 누르고 활로 그어보세요',targets:[{s:2,f:2,count:4}]});
+  LESSONS.push({lv:14,title:'E현 2번손가락',desc:'E현의 2번 위치를 누르고 활로 그어보세요',targets:[{s:3,f:2,count:4}]});
   LESSONS.push({lv:15,title:'2번손가락 전체',desc:'모든 현에서 2번 위치를 순서대로',targets:[{s:0,f:2,count:1},{s:1,f:2,count:1},{s:2,f:2,count:1},{s:3,f:2,count:1}]});
-  LESSONS.push({lv:16,title:'G현 3번손가락',desc:'G현의 3번 위치를 눌러보세요',targets:[{s:0,f:3,count:4}]});
-  LESSONS.push({lv:17,title:'D현 3번손가락',desc:'D현의 3번 위치를 눌러보세요',targets:[{s:1,f:3,count:4}]});
-  LESSONS.push({lv:18,title:'A현 3번손가락',desc:'A현의 3번 위치를 눌러보세요',targets:[{s:2,f:3,count:4}]});
-  LESSONS.push({lv:19,title:'E현 3번손가락',desc:'E현의 3번 위치를 눌러보세요',targets:[{s:3,f:3,count:4}]});
+  LESSONS.push({lv:16,title:'G현 3번손가락',desc:'G현의 3번 위치를 누르고 활로 그어보세요',targets:[{s:0,f:3,count:4}]});
+  LESSONS.push({lv:17,title:'D현 3번손가락',desc:'D현의 3번 위치를 누르고 활로 그어보세요',targets:[{s:1,f:3,count:4}]});
+  LESSONS.push({lv:18,title:'A현 3번손가락',desc:'A현의 3번 위치를 누르고 활로 그어보세요',targets:[{s:2,f:3,count:4}]});
+  LESSONS.push({lv:19,title:'E현 3번손가락',desc:'E현의 3번 위치를 누르고 활로 그어보세요',targets:[{s:3,f:3,count:4}]});
   LESSONS.push({lv:20,title:'3번손가락 전체',desc:'모든 현에서 3번 위치를 순서대로',targets:[{s:0,f:3,count:1},{s:1,f:3,count:1},{s:2,f:3,count:1},{s:3,f:3,count:1}]});
   LESSONS.push({lv:21,title:'G 장음계 (상행)',desc:'G-A-B-C-D를 순서대로',targets:[{s:0,f:0,count:1},{s:0,f:2,count:1},{s:0,f:4,count:1},{s:0,f:5,count:1},{s:1,f:0,count:1}]});
   LESSONS.push({lv:22,title:'G 장음계 (하행)',desc:'D-C-B-A-G를 순서대로',targets:[{s:1,f:0,count:1},{s:0,f:5,count:1},{s:0,f:4,count:1},{s:0,f:2,count:1},{s:0,f:0,count:1}]});
@@ -681,7 +682,7 @@ const SD=['rgba(68,238,68,.22)','rgba(204,85,255,.22)','rgba(68,221,238,.22)','r
 const SN=['G3','D4','A4','E5'];
 const SEMI=7;
 let audioOn=false,semi=[0,0,0,0],actS=-1,curN='';
-let bow={dn:false,px:0,py:0,lx:0,lt:0,spd:0,dir:1,str:-1,angle:-Math.PI*.22};
+let bow={dn:false,px:0,py:0,lx:0,lt:0,spd:0,dir:1,sdir:0,lastStrokeT:0,str:-1,angle:-Math.PI*.22};
 let vib=[0,0,0,0],vibP=[0,0,0,0],parts=[];
 let totalW=0,totalH=0,dpr=1,fbTop=0,fbBot=0;
 let osW=0;
@@ -721,9 +722,12 @@ function buildFB(){
     for(let si=0;si<4;si++){
       const b=document.createElement('div');b.className='nb';
       b.textContent=AE.nn(AE.freq(si,sm));b.dataset.s=si;b.dataset.m=sm;
-      b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();onNotePress(si,sm);b.classList.add('on');});
-      b.addEventListener('pointerup',()=>b.classList.remove('on'));
-      b.addEventListener('pointerleave',()=>b.classList.remove('on'));
+      let held=false;
+      b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();held=true;fingerDown(si,sm);b.classList.add('on');});
+      const rel=()=>{if(held){held=false;fingerUp(si,sm);}b.classList.remove('on');};
+      b.addEventListener('pointerup',rel);
+      b.addEventListener('pointercancel',rel);
+      b.addEventListener('pointerleave',rel);
       row.appendChild(b);
     }grid.appendChild(row);
   }
@@ -732,21 +736,40 @@ function buildOS(){
   const c=document.getElementById('osCol');
   for(let i=0;i<4;i++){
     const b=document.createElement('div');b.className='ob';b.dataset.i=i;b.textContent=SN[i];
-    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();onNotePress(i,0);b.classList.add('on');});
+    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();openString(i);b.classList.add('on');});
     b.addEventListener('pointerup',()=>b.classList.remove('on'));
     b.addEventListener('pointerleave',()=>b.classList.remove('on'));
     c.appendChild(b);
   }
 }
 
-function onNotePress(si,sm){
-  pickNote(si,sm);
-  if(currentMode==='rhythm'&&rhythmState&&rhythmState.active) rhythmHit(si,sm);
-  if(currentMode==='learn'&&learnState&&learnState.active) learnHit(si,sm);
-  if(currentMode==='perform'&&performState&&performState.active) performHit(si,sm);
+/* ── LEFT HAND (fingerboard) — updates fingering state ONLY.
+   No sound, no judgment from buttons: sound & judgment happen at a bow
+   stroke (or a pitch change under an active bow = slur). Multi-touch hold
+   is tracked; releasing falls back to the highest finger still held, and
+   when nothing is held the last fingering stays latched (desktop-friendly).
+   The open-string button = lifting all fingers on that string. */
+const heldF=[{},{},{},{}]; /* per string: {semitone:pressCount} of physically held touches */
+function fingerDown(si,sm){heldF[si][sm]=(heldF[si][sm]||0)+1;pickNote(si,sm);}
+function fingerUp(si,sm){
+  const h=heldF[si];
+  if(h[sm]){h[sm]--;if(h[sm]<=0)delete h[sm];}
+  const ks=Object.keys(h);
+  if(ks.length){const hi=Math.max.apply(null,ks.map(Number));if(semi[si]!==hi)pickNote(si,hi);}
+  /* nothing held → keep latch; the open-string button clears it */
 }
+function openString(si){heldF[si]={};pickNote(si,0);}
+function updFingerUI(si){
+  document.querySelectorAll('.nb[data-s="'+si+'"]').forEach(b=>b.classList.toggle('sel',+b.dataset.m===semi[si]));
+}
+function resetFingers(){for(let i=0;i<4;i++){heldF[i]={};semi[i]=0;updFingerUI(i);}}
 
-function pickNote(si,sm){semi[si]=sm;curN=sm===0?SN[si]:AE.nn(AE.freq(si,sm));if(bow.dn&&bow.str===si)AE.upd(si,sm,bow.spd);}
+function pickNote(si,sm){
+  const changed=semi[si]!==sm;
+  semi[si]=sm;curN=sm===0?SN[si]:AE.nn(AE.freq(si,sm));
+  if(bow.dn&&bow.str===si){AE.upd(si,sm,bow.spd);if(changed)bowStroke(si);} /* slur: pitch change under the bow sounds → judge it */
+  updFingerUI(si);
+}
 
 /* ═══════════════════════════════════════════════════════════
    BACKGROUND — Real Violin Shape
@@ -869,15 +892,23 @@ let BW=0,BH=0;
 
 function sFromX(px){let b=-1,bd=999;for(let i=0;i<4;i++){const d=Math.abs(px-strX(i));if(d<bd){bd=d;b=i;}}return bd<36?b:-1;}
 
+/* ── BOW STROKE = the moment a note is articulated. Sound and judgment are
+   coupled here. Fires on: bow touch-down, string crossing while dragging,
+   bow direction reversal (re-stroke for repeated notes), and pitch change
+   under the bow (slur, dispatched from pickNote). */
+function bowStroke(si){
+  bow.lastStrokeT=performance.now();
+  if(currentMode==='rhythm'&&rhythmState&&rhythmState.active)rhythmBow(si);
+  else if(currentMode==='learn'&&learnState&&learnState.active)learnBow(si);
+  else if(currentMode==='perform'&&performState&&performState.active)performBow(si);
+}
 bowCv.addEventListener('pointerdown',e=>{
   e.preventDefault();ensureA();
   const r=bowCv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
-  bow.dn=true;bow.px=px;bow.py=py;bow.lx=px;bow.lt=performance.now();
+  bow.dn=true;bow.px=px;bow.py=py;bow.lx=px;bow.lt=performance.now();bow.sdir=0;
   bow.str=sFromX(px);
   if(bow.str>=0){const n=AE.play(bow.str,semi[bow.str],.25);actS=bow.str;vib[bow.str]=.3;if(n)curN=n;mkP(bow.str,py);
-    if(currentMode==='rhythm'&&rhythmState&&rhythmState.active)rhythmBow(bow.str);
-    if(currentMode==='learn'&&learnState&&learnState.active)learnBow(bow.str);
-    if(currentMode==='perform'&&performState&&performState.active)performBow(bow.str);
+    bowStroke(bow.str);
   }
 });
 bowCv.addEventListener('pointermove',e=>{
@@ -885,13 +916,23 @@ bowCv.addEventListener('pointermove',e=>{
   const r=bowCv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
   const now=performance.now(),dx=px-bow.lx,dt=Math.max(1,now-bow.lt)/1000;
   bow.spd=Math.min(1,Math.abs(dx/dt)/(BW*1.1));
-  if(Math.abs(dx)>1)bow.dir=dx>0?1:-1;
+  if(Math.abs(dx)>1){
+    const ndir=dx>0?1:-1;
+    bow.dir=ndir;
+    if(bow.sdir===0)bow.sdir=ndir;
+    else if(ndir!==bow.sdir){
+      bow.sdir=ndir;
+      /* direction reversal = new bow stroke (up-bow ↔ down-bow): plays repeated notes without lifting */
+      if(bow.str>=0&&now-bow.lastStrokeT>120){mkP(bow.str,py);bowStroke(bow.str);}
+    }
+  }
   bow.px=px;bow.py=py;
   bow.angle+=((bow.dir>0?-Math.PI*.18:-Math.PI*.28)-bow.angle)*.12;
   const ns=sFromX(px);
   if(ns>=0&&ns!==bow.str){
     if(bow.str>=0){AE.stop(bow.str);vib[bow.str]*=.4;}
     bow.str=ns;const n=AE.play(ns,semi[ns],bow.spd);actS=ns;vib[ns]=bow.spd;if(n)curN=n;mkP(ns,py);
+    bowStroke(ns); /* crossing onto a string sounds it → judge it */
   }else if(ns>=0&&Math.abs(dx)>1){
     const n=AE.upd(ns,semi[ns],bow.spd);vib[ns]=bow.spd;actS=ns;if(n)curN=n;
   }else if(ns<0&&bow.str>=0){AE.stop(bow.str);actS=-1;bow.str=-1;}
@@ -1025,7 +1066,7 @@ function showRhythmSongSelect(){
   const progress=loadProgress();
   let html='<h2>🎵 리듬게임</h2>';
   const stepHint=selectedDifficulty==='step';
-  html+=`<div style="padding:4px 0;font-size:10px;color:${stepHint?'#ffd700':'rgba(201,169,110,.5)'};text-align:center;">${stepHint?'🐢 노트가 멈춰서 기다립니다. 맞는 음을 켜면 다음 음이 내려와요!':'노트가 떨어지면 정확한 타이밍에 맞춰 연주하세요!'}</div>`;
+  html+=`<div style="padding:4px 0;font-size:10px;color:${stepHint?'#ffd700':'rgba(201,169,110,.5)'};text-align:center;">${stepHint?'🐢 노트가 멈춰서 기다립니다. 운지를 누른 채 그 현을 활로 그으면 다음 음이 내려와요!':'타이밍에 맞춰 운지를 누른 채 그 현을 활로 긋기! 개방현 음은 활만 그으면 돼요'}</div>`;
 
   /* Difficulty selector */
   html+='<div class="diffRow">';
@@ -1178,6 +1219,7 @@ function startRhythmGame(songKey){
     waitPaused:false,
     waitPauseStart:0
   };
+  resetFingers(); /* song starts from all-open strings */
 
   document.getElementById('gameHud').style.display='block';
   document.getElementById('hudSong').textContent=song.name;
@@ -1200,17 +1242,10 @@ function resizeRhythmCv(){
   rc.setTransform(dpr,0,0,dpr,0,0);
 }
 
-function rhythmHit(si,sm){
-  if(!rhythmState||!rhythmState.active)return;
-  const key=si+'_'+sm;
-  rhythmState.notePressed[key]=performance.now();
-  checkRhythmHit(si,sm);
-}
-
+/* Called on every bow stroke: the sounding note = stroked string + fingering held on it */
 function rhythmBow(si){
   if(!rhythmState||!rhythmState.active)return;
   rhythmState.bowActive[si]=performance.now();
-  /* Also check with current finger for this string */
   checkRhythmHit(si,semi[si]);
 }
 
@@ -1228,20 +1263,37 @@ function checkRhythmHit(si,sm){
     }
     if(idx<0)return;
     const tn=st.notes[idx];
-    if(tn.s!==si||tn.f!==sm)return; /* wrong note → ignore */
-    const hasBowS=st.bowActive[si]&&(now-st.bowActive[si])<800;
-    const hasNoteS=st.notePressed[si+'_'+sm]&&(now-st.notePressed[si+'_'+sm])<800;
-    if(!hasBowS&&!hasNoteS)return;
+    if(tn.s!==si||tn.f!==sm){showJudge('다시!','#ff4444');return;} /* wrong note sounded → retry hint, no penalty */
     tn.judge='perfect';tn.hit=true;st.perfect++;st.combo++;
     st.maxCombo=Math.max(st.maxCombo,st.combo);
     st.multiplier=Math.min(4,1+Math.floor(st.combo/10));
     st.score+=100*st.multiplier;
     st.lastHitNote=tn;
-    delete st.notePressed[si+'_'+sm];
     showJudge('PERFECT!','#ffd700');
     AE.playSfx('perfect');
     tn.flashTimer=now;
     st.noteIdx=idx+1;
+    while(st.noteIdx<st.notes.length&&st.notes[st.noteIdx].hit)st.noteIdx++;
+    return;
+  }
+
+  /* WAIT-PAUSE (easy/practice): an overdue note froze the song — playing the
+     correct note (right string + right fingering, bowed) resumes it. Timing is
+     already lost, so it grades OK. */
+  if(st.waitPaused){
+    let wn=null;
+    for(let i=st.noteIdx;i<st.notes.length;i++){const w=st.notes[i];if(!w.hit&&!w.judge){wn=w;break;}}
+    if(!wn||wn.s!==si||wn.f!==sm)return;
+    wn.judge='ok';wn.hit=true;st.ok++;st.combo++;
+    st.multiplier=Math.min(4,1+Math.floor(st.combo/10));
+    st.score+=30*st.multiplier;
+    st.maxCombo=Math.max(st.maxCombo,st.combo);
+    st.lastHitNote=wn;
+    wn.flashTimer=now;
+    showJudge('OK','#44ee44');
+    st.startTime+=now-st.waitPauseStart;
+    st.waitPaused=false;
+    document.querySelectorAll('.nb.highlight,.ob.highlight').forEach(el=>el.classList.remove('highlight'));
     while(st.noteIdx<st.notes.length&&st.notes[st.noteIdx].hit)st.noteIdx++;
     return;
   }
@@ -1260,11 +1312,6 @@ function checkRhythmHit(si,sm){
   }
   if(bestIdx<0)return;
   const n=st.notes[bestIdx];
-
-  /* Check if bowing the right string too */
-  const hasBow=st.bowActive[si]&&(now-st.bowActive[si])<800;
-  const hasNote=st.notePressed[si+'_'+sm]&&(now-st.notePressed[si+'_'+sm])<800;
-  if(!hasBow&&!hasNote)return;
 
   if(bestDiff<=80){
     n.judge='perfect';n.hit=true;st.perfect++;st.combo++;
@@ -1290,15 +1337,6 @@ function checkRhythmHit(si,sm){
   if(n.hit){
     st.maxCombo=Math.max(st.maxCombo,st.combo);
     st.lastHitNote=n;
-    delete st.notePressed[si+'_'+sm];
-    /* If we were in wait-pause (easy mode), adjust startTime to compensate for pause duration */
-    if(st.waitPaused){
-      const pauseDur=performance.now()-st.waitPauseStart;
-      st.startTime+=pauseDur;
-      st.waitPaused=false;
-      /* Clear highlights */
-      document.querySelectorAll('.nb.highlight,.ob.highlight').forEach(el=>el.classList.remove('highlight'));
-    }
     /* Advance noteIdx past hit notes */
     while(st.noteIdx<st.notes.length&&st.notes[st.noteIdx].hit)st.noteIdx++;
   }
@@ -1415,7 +1453,7 @@ function renderRhythm(now){
   rc.shadowBlur=0;
   /* "여기서 터치!" 텍스트 */
   rc.fillStyle='rgba(255,215,0,.6)';rc.font='bold 10px sans-serif';rc.textAlign='right';
-  rc.fillText('▶ 여기서 터치!',RW-4,hitY-24);
+  rc.fillText('▶ 여기서 활긋기!',RW-4,hitY-24);
 
   /* Hit zone circles per string — 밝게 */
   for(let i=0;i<4;i++){
@@ -1512,9 +1550,16 @@ function renderRhythm(now){
       rc.fillStyle='#ffd700';rc.font='bold 14px Georgia';rc.globalAlpha=.95;
       rc.fillText('🎯 '+nextN.note+' 음을 켜세요',RW/2,38);
       rc.font='11px Georgia';rc.globalAlpha=.8;
-      rc.fillText(SNAMES[nextN.s]+'선 · '+(nextN.f>0?nextN.f+'번 손가락':'개방현'),RW/2,55);
+      rc.fillText(SNAMES[nextN.s]+'현 · '+(nextN.f>0?nextN.f+'번 운지 누르고 활긋기':'개방현 — 활만 긋기'),RW/2,55);
       rc.restore();
     }
+  }
+
+  /* EASY/PRACTICE wait-pause guidance */
+  if(st.waitPaused){
+    rc.save();rc.textAlign='center';rc.fillStyle='#ffd700';rc.font='bold 12px Georgia';rc.globalAlpha=.9;
+    rc.fillText('🎯 맞는 음을 활로 켜면 계속됩니다',RW/2,38);
+    rc.restore();
   }
 }
 
@@ -1614,7 +1659,7 @@ function showLessonSelect(){
   const panel=document.getElementById('panel');
   const progress=loadProgress();
   let html='<h2>📖 학습모드 - 레슨 선택</h2>';
-  html+='<div style="padding:4px 0;font-size:10px;color:rgba(201,169,110,.5);text-align:center;">단계별로 바이올린 연주를 배워보세요!</div>';
+  html+='<div style="padding:4px 0;font-size:10px;color:rgba(201,169,110,.5);text-align:center;">운지를 누른 채 현을 활로 긋기 · 개방현은 활만! 단계별로 배워보세요</div>';
 
   const groups=[
     {label:'개방현 (Lv.1-5)',start:0,end:5},
@@ -1664,7 +1709,8 @@ function startLesson(lv){
   const lesson=LESSONS[lv-1];if(!lesson)return;
   const seq=[];
   lesson.targets.forEach(t=>{for(let i=0;i<t.count;i++) seq.push({s:t.s,f:t.f,done:false});});
-  learnState={active:true,lv,lesson,seq,idx:0,bowHit:false,noteHit:false};
+  learnState={active:true,lv,lesson,seq,idx:0};
+  resetFingers(); /* lesson starts from all-open strings */
   const info=document.getElementById('lessonInfo');
   info.style.display='block';
   document.getElementById('lessonTitle').textContent='Lv.'+lv+' '+lesson.title;
@@ -1679,25 +1725,15 @@ function highlightCurrentLearnTarget(){
   highlightNote(t.s,t.f);
 }
 
-function learnHit(si,sm){
-  if(!learnState||!learnState.active)return;
-  const t=learnState.seq[learnState.idx];if(!t)return;
-  if(si===t.s&&sm===t.f){learnState.noteHit=true;checkLearnComplete();}
-}
-
+/* Judged at the moment of a bow stroke: the stroked string AND the fingering
+   held on it at that moment must both match the target. Open-string targets
+   (f=0) pass with a bow stroke alone — no button needed. */
 function learnBow(si){
   if(!learnState||!learnState.active)return;
   const t=learnState.seq[learnState.idx];if(!t)return;
-  if(si===t.s){learnState.bowHit=true;checkLearnComplete();}
-}
-
-function checkLearnComplete(){
-  if(!learnState)return;
-  const t=learnState.seq[learnState.idx];
-  const needNote=t.f>0;
-  const ok=needNote?(learnState.noteHit&&learnState.bowHit):learnState.bowHit;
-  if(ok){
-    t.done=true;learnState.idx++;learnState.bowHit=false;learnState.noteHit=false;
+  if(si===t.s&&semi[si]===t.f){
+    t.done=true;learnState.idx++;
+    showJudge('GOOD!','#ffd700');
     if(learnState.idx>=learnState.seq.length){finishLesson();}
     else{
       highlightCurrentLearnTarget();
@@ -1705,6 +1741,8 @@ function checkLearnComplete(){
       const noteName=next.f===0?SN[next.s]:AE.nn(AE.freq(next.s,next.f));
       speak('다음: '+noteName);
     }
+  }else{
+    showJudge('다시!','#ff4444'); /* the wrong note just sounded */
   }
 }
 
@@ -1764,7 +1802,7 @@ function showPerformSongSelect(){
   const panel=document.getElementById('panel');
   const progress=loadProgress();
   let html='<h2>🎶 곡연주 - 곡 선택</h2>';
-  html+='<div style="padding:4px 0;font-size:10px;color:rgba(201,169,110,.5);text-align:center;">반주와 함께 악보를 보며 연주하세요!</div>';
+  html+='<div style="padding:4px 0;font-size:10px;color:rgba(201,169,110,.5);text-align:center;">반주와 함께 연주하세요! 운지 누르고 활긋기 · 개방현은 활만</div>';
 
   Object.keys(SONGS).forEach(key=>{
     const song=SONGS[key];
@@ -1805,7 +1843,8 @@ function startPerformance(songKey){
   });
   performState={active:true,songKey,song,bpm,beatMs,timeline,totalMs:beatPos*beatMs,
     startTime:performance.now(),chordIdx:0,lastChordTime:0,accompaniment:true,noteIdx:0,
-    score:0,correct:0,partial:0,miss:0,combo:0,maxCombo:0,bowStr:-1,bowTime:0,lastNote:null};
+    score:0,correct:0,partial:0,miss:0,combo:0,maxCombo:0,bowStr:-1,bowTime:0};
+  resetFingers(); /* song starts from all-open strings */
   document.getElementById('sheetArea').style.display='block';
   resizeSheetCv();
   document.getElementById('gameHud').style.display='block';
@@ -1834,16 +1873,8 @@ function scheduleChords(){
   }
 }
 
-function performHit(si,sm){
-  if(!performState||!performState.active)return;
-  const st=performState;
-  const n=st.timeline[st.noteIdx];
-  if(!n||n.note==='R'||n.hit)return;
-  const elapsed=performance.now()-st.startTime;
-  if(elapsed<n.startMs-200||elapsed>n.endMs+200)return;
-  st.lastNote={s:si,f:sm};
-  checkPerformNote(si,sm);
-}
+/* Judged at the moment of a bow stroke: sounding note = stroked string +
+   fingering held on it. Wrong string sounds the wrong note → MISS. */
 function performBow(si){
   if(!performState||!performState.active)return;
   const st=performState;
@@ -1857,9 +1888,6 @@ function checkPerformNote(si,sm){
   if(!n||n.note==='R'||n.hit)return;
   const elapsed=now-st.startTime;
   if(elapsed<n.startMs-200||elapsed>n.endMs+200)return;
-  const hasBow=st.bowStr===n.s&&st.bowTime&&(now-st.bowTime)<1000;
-  const hasNote=st.lastNote&&st.lastNote.s===si&&st.lastNote.f===sm;
-  if(!hasBow&&!hasNote)return;
   if(si===n.s&&sm===n.f){
     n.hit=true;st.correct++;st.combo++;st.maxCombo=Math.max(st.maxCombo,st.combo);
     const mid=(n.startMs+n.endMs)/2;const diff=Math.abs(elapsed-mid);

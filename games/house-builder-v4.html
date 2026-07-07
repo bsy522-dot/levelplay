@@ -1062,6 +1062,10 @@ function rotateSelected(){
       removeMesh('furn_'+selFurn.id);
       addFurnMesh(selFurn,selRoom);
     }
+    status('🔄 가구 회전 완료');
+  }else{
+    // 2026-07-07 QA P2: 방 선택 상태에서 회전 버튼이 무반응이던 것에 안내 추가 (회전은 가구 전용)
+    status('🔄 회전은 가구를 선택한 뒤 사용할 수 있어요');
   }
 }
 

@@ -186,7 +186,8 @@ function updateTimer(){
 function renderGame(app){
   const diff=DIFFS[diffIdx];
   const elapsed=((Date.now()-timerStart)/1000)|0;
-  const cardSize=Math.min(Math.floor((480-24-diff.cols*8)/diff.cols),80);
+  const availW=Math.min(window.innerWidth,480);
+  const cardSize=Math.min(Math.floor((availW-24-diff.cols*8)/diff.cols),80);
 
   let gridHTML='';
   cards.forEach((c,i)=>{

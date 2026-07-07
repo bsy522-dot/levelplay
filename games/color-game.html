@@ -235,7 +235,7 @@ function answer(btn,sel,ans){
   }else{
     btn.classList.add('wrong');streak=0;
     [...btn.parentElement.children].forEach(b=>{
-      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+ans+"'")) b.classList.add('correct');
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("answer(this,'"+ans+"'")) b.classList.add('correct');
     });
   }
   setTimeout(()=>{qIdx++;render();},isCorrect?600:1200);

@@ -65,6 +65,22 @@ const BGM_TRACKS = {
     bass: [0, 4, 3, 0],
     loop: true
   },
+  // 마을/평화 — 목가 (triangle, 느린 템포, 장조) ★ 2026-07-07 QA: story의 bgm:"peace"가
+  // 트랙 미정의로 마을이 무음이던 버그 수정
+  peace: {
+    baseFreq: 293.66,     // D4
+    tempo: 0.60,
+    waveform: 'triangle',
+    melody: [
+      [0,2],[2,1],[4,1],
+      [5,2],[4,1],[2,1],
+      [0,1],[2,1],[4,2],
+      [2,1],[4,1],[0,2]
+    ],
+    bassFreq: 146.83,     // D3
+    bass: [0, 4, 5, 4],
+    loop: true
+  },
   // 승리 — 개선 (sine, 상승형, 짧게 끝남)
   victory: {
     baseFreq: 329.63,     // E4

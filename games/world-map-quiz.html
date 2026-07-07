@@ -25,7 +25,7 @@ h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
 .diff-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
 .back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
 .back-btn:hover{border-color:#aaa;color:#fff}
-.map-container{position:relative;width:100%;aspect-ratio:2/1;background:#16213e;border-radius:12px;overflow:hidden;margin-bottom:10px;border:2px solid #333}
+.map-container{position:relative;width:100%;aspect-ratio:100/85;background:#16213e;border-radius:12px;overflow:hidden;margin-bottom:10px;border:2px solid #333}
 .map-container svg{width:100%;height:100%}
 .country-dot{cursor:pointer;transition:all 0.2s}
 .country-dot:hover{r:8;fill:#FFD700}
@@ -206,8 +206,30 @@ function parseGdp(s){return parseFloat(s.replace(/[^0-9.]/g,''));}
 function comparePop(a,b){return parsePop(a.pop)>=parsePop(b.pop)?0:1;}
 function compareGdp(a,b){return parseGdp(a.gdp)>=parseGdp(b.gdp)?0:1;}
 
+function svgPoint(e){
+  // client coords -> viewBox coords, accounting for preserveAspectRatio 'meet' letterboxing
+  const svg=e.currentTarget;
+  const rect=svg.getBoundingClientRect();
+  const scale=Math.min(rect.width/100,rect.height/85);
+  const offX=(rect.width-100*scale)/2, offY=(rect.height-85*scale)/2;
+  return {x:(e.clientX-rect.left-offX)/scale, y:(e.clientY-rect.top-offY)/scale};
+}
+function nearestIdx(list,pt,maxDist){
+  let best=-1,bd=maxDist*maxDist;
+  list.forEach((c,i)=>{const dx=c.x-pt.x,dy=c.y-pt.y;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}});
+  return best;
+}
+function continentTap(e){
+  const i=nearestIdx(CONTINENTS,svgPoint(e),14);
+  if(i>=0)answerContinent(i);
+}
+function mapTap(e){
+  const i=nearestIdx(COUNTRIES,svgPoint(e),8);
+  if(i>=0)answerMap(i);
+}
+
 function renderMapContinent(){
-  let svg=`<div class="map-container"><svg viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg">`;
+  let svg=`<div class="map-container"><svg viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg" onclick="continentTap(event)" style="cursor:pointer">`;
   svg+=`<rect x="0" y="0" width="100" height="85" fill="#0a1628"/>`;
   svg+=`<path class="coastline" d="M5,10 L30,8 L32,15 L28,22 L30,30 L25,35 L20,42 L12,42 L8,35 L5,25Z"/>`;
   svg+=`<path class="coastline" d="M20,48 L32,45 L35,55 L33,65 L28,75 L22,80 L20,70 L18,60Z"/>`;
@@ -217,7 +239,7 @@ function renderMapContinent(){
   svg+=`<path class="coastline" d="M70,46 L82,44 L85,50 L80,55 L74,52Z"/>`;
   svg+=`<path class="coastline" d="M78,60 L92,58 L94,65 L90,73 L82,74 L78,68Z"/>`;
   CONTINENTS.forEach((c,i)=>{
-    svg+=`<circle cx="${c.x}" cy="${c.y}" r="8" fill="rgba(127,219,255,0.3)" stroke="#7FDBFF" stroke-width="1" style="cursor:pointer" onclick="answerContinent(${i})"/>`;
+    svg+=`<circle cx="${c.x}" cy="${c.y}" r="8" fill="rgba(127,219,255,0.3)" stroke="#7FDBFF" stroke-width="1" style="pointer-events:none"/>`;
     svg+=`<text x="${c.x}" y="${c.y+3}" fill="#7FDBFF" font-size="4" text-anchor="middle" font-weight="700" style="pointer-events:none">${c.name}</text>`;
   });
   svg+=`</svg></div>`;
@@ -229,7 +251,7 @@ function answerContinent(idx){
   answered=true;
   const q=questions[qIdx];
   if(CONTINENTS[idx].name===q.name){
-    score+=10+streak*2;streak++;correctCount++;sendXP(5);
+    score+=10+streak*2;streak++;correctCount++;
     showSimpleInfo(q.name,'✅ 정답!',true);
   }else{
     streak=0;
@@ -245,7 +267,7 @@ function showSimpleInfo(text,title,ok){
 }
 
 function renderMap(clickable){
-  let svg=`<div class="map-container"><svg viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg">`;
+  let svg=`<div class="map-container"><svg viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg"${clickable?' onclick="mapTap(event)" style="cursor:pointer"':''}>`;
   svg+=`<rect x="0" y="0" width="100" height="85" fill="#0a1628"/>`;
   svg+=`<path class="coastline" d="M5,10 L30,8 L32,15 L28,22 L30,30 L25,35 L20,42 L12,42 L8,35 L5,25Z"/>`;
   svg+=`<path class="coastline" d="M20,48 L32,45 L35,55 L33,65 L28,75 L22,80 L20,70 L18,60Z"/>`;
@@ -261,10 +283,9 @@ function renderMap(clickable){
   svg+=`<text class="continent-label" x="68" y="25">아시아</text>`;
   svg+=`<text class="continent-label" x="83" y="68">오세아니아</text>`;
   COUNTRIES.forEach((ct,i)=>{
-    const clk=clickable?`onclick="answerMap(${i})" style="cursor:pointer"`:'';
     const col=clickable?'#7FDBFF':'#FFD700';
     const r=clickable?4:3;
-    svg+=`<circle class="country-dot" id="dot${i}" cx="${ct.x}" cy="${ct.y}" r="${r}" fill="${col}" ${clk}/>`;
+    svg+=`<circle class="country-dot" id="dot${i}" cx="${ct.x}" cy="${ct.y}" r="${r}" fill="${col}" style="pointer-events:none"/>`;
     if(!clickable) svg+=`<text x="${ct.x}" y="${ct.y-4}" fill="#aaa" font-size="3" text-anchor="middle">${ct.name}</text>`;
   });
   svg+=`</svg></div>`;
@@ -292,7 +313,7 @@ function answerMap(idx){
   const clicked=COUNTRIES[idx];
   const dot=document.getElementById('dot'+idx);
   if(clicked.name===c.name){
-    dot.classList.add('correct');score+=10+streak*2;streak++;correctCount++;sendXP(10);showInfo(c,true);
+    dot.classList.add('correct');score+=10+streak*2;streak++;correctCount++;showInfo(c,true);
   }else{
     dot.classList.add('wrong');
     const ci=COUNTRIES.findIndex(x=>x.name===c.name);
@@ -312,7 +333,7 @@ function answerChoice(idx,val){
   else if(df.type==='flag_capital') isCorrect=(val===c.name);
 
   if(isCorrect){
-    btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;sendXP(10);showInfo(c,true);
+    btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;showInfo(c,true);
   }else{
     btn.classList.add('wrong');
     document.querySelectorAll('.ch-btn').forEach(b=>{
@@ -328,7 +349,7 @@ function answerStats(idx,isCorrect){
   answered=true;
   const btn=document.getElementById('ch'+idx);
   if(isCorrect){
-    btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;sendXP(10);
+    btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;
   }else{
     btn.classList.add('wrong');
     document.getElementById('ch'+(1-idx)).classList.add('correct');
@@ -356,8 +377,7 @@ function nextQ(){
 
 function renderResult(app){
   const max=questions.length*10;
-  const pct=Math.round(score/max*100);
-  const stars=getStars(score,max);
+  const stars=getStars(correctCount*10,max);
   saveBest(diffIdx,stars,score);
   const emoji=stars>=3?'🏆':stars>=2?'👍':'📚';
   const canNext=diffIdx<4&&stars>=1;

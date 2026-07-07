@@ -94,13 +94,13 @@ const PLANETS=[
   {q:'태양은 무엇으로 에너지를 만드나요?',o:['석탄 연소','수소 핵융합','전기 발전','화학 반응'],a:1},
   {q:'태양계 질량에서 태양이 차지하는 비율은?',o:['50%','75%','99.86%','30%'],a:2}
  ],surface:'#ff6600',surfaceAlt:'#cc4400',samples:['태양풍 입자','코로나 플라즈마','흑점 자기장 데이터']},
-{id:'mercury',name:'수성',color:'#aaa',r:6,orbit:65,speed:0.04,icon:'🪨',
+{id:'mercury',name:'수성',color:'#aaaaaa',r:6,orbit:65,speed:0.04,icon:'🪨',
  facts:['태양에 가장 가까운 행성입니다','낮 온도 430°C, 밤 온도 -180°C','대기가 거의 없어 온도차가 극심합니다','공전주기는 88일입니다'],
  quizzes:[
   {q:'수성의 낮 온도는?',o:['100°C','430°C','200°C','1000°C'],a:1},
   {q:'수성의 공전주기는?',o:['365일','88일','225일','30일'],a:1},
   {q:'수성에 대기가 거의 없는 이유는?',o:['중력이 약해서','태양이 멀어서','자전이 빨라서','물이 많아서'],a:0}
- ],surface:'#888',surfaceAlt:'#666',samples:['수성 암석','크레이터 먼지','금속 핵 파편']},
+ ],surface:'#888888',surfaceAlt:'#666666',samples:['수성 암석','크레이터 먼지','금속 핵 파편']},
 {id:'venus',name:'금성',color:'#ffcc44',r:9,orbit:95,speed:0.03,icon:'🌕',
  facts:['두꺼운 대기로 극심한 온실효과가 일어납니다','표면 온도 약 465°C로 수성보다 뜨겁습니다','지구와 비슷한 크기와 질량을 가졌습니다','자전 방향이 다른 행성과 반대입니다'],
  quizzes:[
@@ -115,13 +115,13 @@ const PLANETS=[
   {q:'지구의 공전주기는?',o:['365.25일','360일','400일','300일'],a:0},
   {q:'지구의 대기 주성분은?',o:['산소','이산화탄소','질소','수소'],a:2}
  ],surface:'#226644',surfaceAlt:'#1a4433',samples:['해수 샘플','토양 미생물','대기 조성 데이터']},
-{id:'moon',name:'달',color:'#ccc',r:4,orbit:148,speed:0.022,icon:'🌙',
+{id:'moon',name:'달',color:'#cccccc',r:4,orbit:148,speed:0.022,icon:'🌙',
  facts:['지구의 유일한 자연 위성입니다','1969년 닐 암스트롱이 최초로 달에 착륙했습니다','지구와의 평균 거리 384,400km','중력은 지구의 1/6입니다'],
  quizzes:[
   {q:'최초로 달에 착륙한 사람은?',o:['유리 가가린','닐 암스트롱','버즈 올드린','존 글렌'],a:1},
   {q:'달의 중력은 지구의 몇 분의 1?',o:['1/2','1/4','1/6','1/10'],a:2},
   {q:'달까지의 평균 거리는?',o:['38만 km','100만 km','10만 km','500만 km'],a:0}
- ],surface:'#999',surfaceAlt:'#777',samples:['달 암석','레골리스','운석 파편']},
+ ],surface:'#999999',surfaceAlt:'#777777',samples:['달 암석','레골리스','운석 파편']},
 {id:'mars',name:'화성',color:'#dd4422',r:8,orbit:175,speed:0.02,icon:'🔴',
  facts:['붉은 행성이라 불립니다 (산화철 때문)','올림푸스 산은 태양계에서 가장 높은 산(21.9km)입니다','NASA 탐사 로버들이 활동 중입니다','하루가 약 24시간 37분입니다'],
  quizzes:[
@@ -213,7 +213,8 @@ let G={
  recalcFuel(){
   let f=0;
   this.rocketParts.forEach(p=>{const pt=PARTS.find(x=>x.id===p);if(pt&&pt.fuel)f+=pt.fuel;});
-  this.maxFuel=Math.max(f,30);
+  // 바닥값 50: 기본 탱크(30)로는 천왕성(33)/해왕성(37) 이동비용을 영원히 못 넘어 소프트락이었음
+  this.maxFuel=Math.max(f,50);
  },
  getFuelCost(planet){
   let base=planet.orbit/10;
@@ -530,7 +531,7 @@ function playTravel(planet,cb){
 
 // ===== PLANET INFO =====
 function showPlanetInfo(p){
- G.currentPlanet=p;
+ // (currentPlanet는 실제 이동(travelTo) 시에만 설정 — 지도에서 정보만 봐도 HUD 위치가 그 행성으로 바뀌던 문제)
  const el=$('planet-info');
  const cost=G.getFuelCost(p);
  const collected=G.collected[p.id]||[];
@@ -555,6 +556,8 @@ function closePanels(){
   $(id).style.display='none';
  });
  $('nav-btns').innerHTML='';
+ // 탐사 중 패널(퀴즈 ✕/앨범/로켓/강화)을 닫아도 이동·채집·귀환 버튼 복원 — 터치 유저가 표면에서 UI 없이 갇히던 소프트락 방지
+ if(G.state==='explore')showExploreUI();
 }
 
 // ===== TRAVEL =====
@@ -603,13 +606,14 @@ G.collectSample=function(){
  });
  if(best===-1){this.toast('💎에 더 가까이 이동하세요!');return;}
  this.collected[p.id].push(best);
- this.samples++;
+ this.samples+=max; // 채집 도구 업그레이드(getCollectMax)가 실제로 효과를 내도록
  playSfx(600,0.2);setTimeout(()=>playSfx(800,0.3),150);
- this.toast(`💎 "${p.samples[best]}" 채집 완료!`);
+ this.toast(`💎 "${p.samples[best]}" 채집 완료!${max>1?` (도구 보너스 +${max-1})`:''}`);
  this.updateHUD();this.save();
 };
 
 G.refuel=function(){
+ if(this.fuel>=this.maxFuel){this.toast('⛽ 연료 탱크가 이미 가득 찼습니다!');return;}
  if(this.samples<5){this.toast('샘플 5개로 연료를 보급할 수 있습니다.');return;}
  this.samples-=5;this.fuel=Math.min(this.fuel+30,this.maxFuel);
  playSfx(200,0.3);
@@ -666,7 +670,8 @@ window.answerQuiz=function(idx){
    const passed=qs.correct===qs.planet.quizzes.length;
    if(passed){
     G.quizDone[qs.planet.id]=true;G.badges++;
-    G.toast(`🏅 ${qs.planet.name} 퀴즈 올클리어! 배지 획득!`);
+    G.samples+=5; // 퀴즈 보상: 탐사→퀴즈→연료 보급 루프가 실제로 돌게 함(전체 샘플 공급량 확보)
+    G.toast(`🏅 ${qs.planet.name} 퀴즈 올클리어! 배지 획득! (💎+5)`);
     playSfx(440,0.2);setTimeout(()=>playSfx(554,0.2),100);setTimeout(()=>playSfx(659,0.3),200);
    }else{
     G.toast(`${qs.correct}/${qs.planet.quizzes.length} 정답. 다시 도전하세요!`);
@@ -710,7 +715,8 @@ G.togglePart=function(pid){
  if(this.rocketParts.includes(pid)){
   if(part.cost===0){this.toast('기본 부품은 제거할 수 없습니다.');return;}
   this.rocketParts=this.rocketParts.filter(x=>x!==pid);
-  this.toast(`${part.name} 제거됨`);
+  if(part.cost>0)this.samples+=part.cost; // 제거 시 환불: 실수 두 번 탭으로 샘플이 증발하지 않게
+  this.toast(`${part.name} 제거됨 (💎${part.cost} 환불)`);
  }else{
   if(part.cost>0&&this.samples<part.cost){this.toast(`💎 ${part.cost}개 필요합니다.`);return;}
   if(part.cost>0)this.samples-=part.cost;
@@ -719,7 +725,7 @@ G.togglePart=function(pid){
   this.toast(`${part.name} 장착!`);
  }
  this.recalcFuel();
- this.fuel=Math.min(this.fuel,this.maxFuel);
+ if(part.fuel)this.fuel=Math.min(this.fuel,this.maxFuel); // 연료탱크 변경 시에만 클램프(안테나 구매로 연료가 깎이던 문제)
  this.updateHUD();this.save();
  this.showBuilder();
 };
@@ -850,6 +856,7 @@ initStars();
 G.load();
 G.recalcFuel();
 if(G.fuel<=0)G.fuel=G.maxFuel;
+G.fuel=Math.min(G.fuel,G.maxFuel); // 시작연료 100 > maxFuel 50이라 게이지가 한동안 안 움직이던(항상 만땅 표시) 문제
 G.updateHUD();
 gameLoop();
 </script>

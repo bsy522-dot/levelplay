@@ -1650,7 +1650,18 @@ function startRecording(){
   if(!micStream)return;
   try{recorder=new MediaRecorder(micStream);recordChunks=[];
   recorder.ondataavailable=e=>{if(e.data.size>0)recordChunks.push(e.data);};
-  recorder.onstop=()=>{recordedBlob=new Blob(recordChunks,{type:'audio/webm'});};
+  recorder.onstop=()=>{
+    recordedBlob=new Blob(recordChunks,{type:'audio/webm'});
+    // onstop fires async after endSong() already rendered the result screen — inject the play button now.
+    if(gState==='result'&&recordedBlob.size>0&&!document.getElementById('rPlay')){
+      const btns=document.querySelector('#resultScreen .res-btns');
+      if(btns){
+        const bp=document.createElement('button');bp.className='btn-play';bp.id='rPlay';bp.textContent='녹음 재생';
+        bp.onclick=()=>{const a=new Audio(URL.createObjectURL(recordedBlob));a.play();};
+        btns.insertBefore(bp,document.getElementById('rBack'));
+      }
+    }
+  };
   recorder.start();}catch(e){recorder=null;}
 }
 function stopRecording(){if(recorder&&recorder.state==='recording')recorder.stop();}
@@ -1736,9 +1747,23 @@ async function pickSong(song,isPractice){
   if(!micOn){
     document.getElementById('micPrompt').classList.add('show');
     document.getElementById('btnAllowMic').onclick=async()=>{
-      await startMic();document.getElementById('micPrompt').classList.remove('show');beginSing();
+      const ok=await startMic();document.getElementById('micPrompt').classList.remove('show');beginSing();
+      if(!ok){
+        const div=document.createElement('div');
+        div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(244,67,54,.92);color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:30;text-align:center;max-width:90%;';
+        div.textContent='마이크를 사용할 수 없어 점수 측정 없이 진행합니다';
+        document.getElementById('singScreen').appendChild(div);
+        setTimeout(()=>{div.style.transition='opacity .4s';div.style.opacity='0';setTimeout(()=>div.remove(),400);},3500);
+      }
     };
-    document.getElementById('btnSkipMic').onclick=()=>{document.getElementById('micPrompt').classList.remove('show');beginSing();};
+    document.getElementById('btnSkipMic').onclick=()=>{
+      document.getElementById('micPrompt').classList.remove('show');beginSing();
+      const div=document.createElement('div');
+      div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(33,150,243,.92);color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:30;text-align:center;max-width:90%;';
+      div.textContent='마이크 없이 감상 모드로 진행합니다 (점수 측정 없음)';
+      document.getElementById('singScreen').appendChild(div);
+      setTimeout(()=>{div.style.transition='opacity .4s';div.style.opacity='0';setTimeout(()=>div.remove(),400);},3500);
+    };
     return;
   }
   beginSing();
@@ -1831,7 +1856,7 @@ function gameLoop(){
     songDur=Infinity;// never end in loop mode
   }
 
-  if(!practiceMode&&elapsed>=curSong.dur){endSong();return;}
+  if(elapsed>=songDur){endSong();return;}
 
   // Timer
   const prog=Math.min(1,elapsed/curSong.dur);
@@ -1864,6 +1889,7 @@ function gameLoop(){
       // End previous note (if any) → judge & score
       if(curNoteId!==null&&window.KaraokeAudio){
         const res=KaraokeAudio.endNote();
+        if(micOn){
         const grade=res.grade;
         // Per-grade score & combo
         let pts=0;
@@ -1892,6 +1918,7 @@ function gameLoop(){
           KaraokeShader.setMode('perfect');
           setTimeout(()=>{if(shaderOn)KaraokeShader.setMode('singing');},350);
         }
+        }
       }
       // Start new note
       if(targetFreq&&window.KaraokeAudio)KaraokeAudio.startNote(targetFreq,curNote.t);
@@ -1901,6 +1928,7 @@ function gameLoop(){
     // Gap between notes — close the open note
     if(window.KaraokeAudio){
       const res=KaraokeAudio.endNote();
+      if(micOn){
       const grade=res.grade;
       let pts=0;
       if(grade==='PERFECT'){pts=100;hitN++;combo++;pitchSum+=100;rhythmSum+=100;}
@@ -1918,6 +1946,7 @@ function gameLoop(){
         if(combo>=20&&!comboMilestones[20]){comboMilestones[20]=true;KaraokeFX.comboRing(combo);}
         else if(combo>=10&&!comboMilestones[10]){comboMilestones[10]=true;KaraokeFX.comboRing(combo);}
         else if(combo>=5&&!comboMilestones[5]){comboMilestones[5]=true;KaraokeFX.comboRing(combo);}
+      }
       }
     }
     curNoteId=null;
@@ -2109,8 +2138,9 @@ function endSong(){
   const fs=totalN>0?Math.min(100,Math.round(score/Math.max(1,totalN))):0;
   const pitchAcc=totalN>0?Math.round(pitchSum/totalN):0;
   const rhythmAcc=totalN>0?Math.round(rhythmSum/totalN):0;
+  const noScore=totalN===0;
   const grade=getGrade(fs);const stars=getStars(fs);
-  if(!practiceMode)saveHS(curSong.id,fs,grade);
+  if(!practiceMode&&!noScore)saveHS(curSong.id,fs,grade);
 
   // v4: confetti on S grade; transition shader to result mode
   if(grade==='S'&&window.KaraokeFX)KaraokeFX.confetti(3500);
@@ -2120,21 +2150,22 @@ function endSong(){
   const r=document.getElementById('resultScreen');r.style.display='flex';
   r.innerHTML=`
     <div class="res-title">${practiceMode?'연습 완료!':'노래 완료!'}</div>
-    <div class="res-grade grade-${grade}">${grade}</div>
+    ${noScore?`<div class="res-score" style="margin:18px 0;font-size:18px;color:rgba(255,255,255,.65)">마이크 미사용 · 점수 측정 없음</div>`:`<div class="res-grade grade-${grade}">${grade}</div>
     <div class="res-score">${fs}점</div>
     <div class="res-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
     <div class="res-bars">
       <div class="res-bar-row"><div class="lbl">음정</div><div class="bar"><div class="bar-fill" style="width:${pitchAcc}%;background:linear-gradient(90deg,#ff6ab0,#a855f7)"></div></div><div class="val">${pitchAcc}%</div></div>
       <div class="res-bar-row"><div class="lbl">리듬</div><div class="bar"><div class="bar-fill" style="width:${rhythmAcc}%;background:linear-gradient(90deg,#4caf50,#2196f3)"></div></div><div class="val">${rhythmAcc}%</div></div>
     </div>
-    <div class="res-detail">최대 콤보: ${maxCombo} · 히트율: ${totalN>0?Math.round(hitN/totalN*100):0}%</div>
+    <div class="res-detail">최대 콤보: ${maxCombo} · 히트율: ${totalN>0?Math.round(hitN/totalN*100):0}%</div>`}
     <div class="res-btns">
       <button class="btn-retry" id="rRetry">다시 부르기</button>
       ${recordedBlob?'<button class="btn-play" id="rPlay">녹음 재생</button>':''}
-      <button class="btn-share" id="rShare">📷 공유 카드</button>
+      ${noScore?'':'<button class="btn-share" id="rShare">📷 공유 카드</button>'}
       <button class="btn-back" id="rBack">곡 선택</button>
     </div>`;
-  document.getElementById('rShare').onclick=()=>downloadShareCard();
+  const rShareBtn=document.getElementById('rShare');
+  if(rShareBtn)rShareBtn.onclick=()=>downloadShareCard();
   document.getElementById('rRetry').onclick=()=>pickSong(curSong,practiceMode);
   document.getElementById('rBack').onclick=()=>{
     gState='select';killSynth();
@@ -2231,8 +2262,9 @@ document.getElementById('btnPause').onclick=()=>{
   else{pauseAccum+=performance.now()-pauseT;}
 };
 document.getElementById('btnStop').onclick=()=>{if(gState==='singing')endSong();};
-document.getElementById('btnKeyUp').onclick=()=>{keyShift=Math.min(keyShift+1,6);};
-document.getElementById('btnKeyDn').onclick=()=>{keyShift=Math.max(keyShift-1,-6);};
+function showKeyFb(){const fb=document.getElementById('lineFb');if(!fb)return;fb.textContent='키 '+(keyShift>0?'+':'')+keyShift;fb.style.color='#c084fc';lastLineFbTime=performance.now();}
+document.getElementById('btnKeyUp').onclick=()=>{keyShift=Math.min(keyShift+1,6);showKeyFb();};
+document.getElementById('btnKeyDn').onclick=()=>{keyShift=Math.max(keyShift-1,-6);showKeyFb();};
 document.getElementById('btnMic').onclick=async()=>{if(micOn)stopMic();else await startMic();};
 document.getElementById('btnHS').onclick=()=>{
   const m=document.getElementById('hsModal');m.classList.add('show');

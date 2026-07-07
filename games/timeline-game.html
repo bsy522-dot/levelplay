@@ -180,13 +180,14 @@ function nextRound(){
   const count=DIFFS[diffIdx].count;
   currentEvents=pool.slice(0,count).sort((a,b)=>a.year-b.year);
   slots=new Array(count).fill(null);
+  poolOrder=shuffle(currentEvents.map((_,i)=>i));
+  judging=false;
   render();
 }
 
 function renderPlay(app){
   const count=DIFFS[diffIdx].count;
   const df=DIFFS[diffIdx];
-  const shuffled=shuffle(currentEvents);
   const placed=slots.filter(s=>s!==null).length;
 
   let slotLabel='';
@@ -211,8 +212,8 @@ function renderPlay(app){
         </div>`).join('')}
     </div>
     <div class="card-pool" id="pool">
-      ${shuffled.map((e,si)=>{
-        const oi=currentEvents.indexOf(e);
+      ${poolOrder.map(oi=>{
+        const e=currentEvents[oi];
         const isPlaced=slots.includes(oi);
         return `<div class="card ${isPlaced?'placed':''}" draggable="${!isPlaced}" id="card${oi}"
           onclick="cardClick(${oi})" ondragstart="dragStart(event,${oi})">${e.title}${diffIdx>=3?' ('+e.year+'년)':''}</div>`;
@@ -221,8 +222,9 @@ function renderPlay(app){
     <button class="check-btn" id="checkBtn" onclick="checkAnswer()" ${placed<count?'disabled':''}>✅ 정답 확인</button>`;
 }
 
-let selectedCard=-1;
+let selectedCard=-1,poolOrder=[],judging=false;
 function cardClick(idx){
+  if(judging) return;
   if(slots.includes(idx)) return;
   selectedCard=idx;
   document.querySelectorAll('.card-pool .card').forEach(c=>c.style.borderColor='#444');
@@ -230,6 +232,7 @@ function cardClick(idx){
   if(el) el.style.borderColor='#FFD700';
 }
 function slotClick(si){
+  if(judging) return;
   if(selectedCard===-1) return;
   if(slots[si]!==null) return;
   slots[si]=selectedCard;
@@ -238,6 +241,7 @@ function slotClick(si){
 }
 function removeFromSlot(ev,si){
   ev.stopPropagation();
+  if(judging) return;
   slots[si]=null;
   selectedCard=-1;
   renderPlay(document.getElementById('app'));
@@ -246,6 +250,7 @@ function dragStart(ev,idx){dragIdx=idx;ev.dataTransfer.setData('text/plain',idx)
 function ev(e){e.preventDefault();}
 function dropSlot(e,si){
   e.preventDefault();
+  if(judging) return;
   if(slots[si]!==null) return;
   const idx=parseInt(e.dataTransfer.getData('text/plain'));
   if(isNaN(idx)) return;
@@ -254,6 +259,10 @@ function dropSlot(e,si){
 }
 
 function checkAnswer(){
+  if(judging) return;
+  judging=true;
+  const btn=document.getElementById('checkBtn');
+  if(btn) btn.disabled=true;
   let correct=0;
   const slotsEl=document.querySelectorAll('.slot');
   for(let i=0;i<slots.length;i++){
@@ -263,7 +272,6 @@ function checkAnswer(){
   }
   const pts=correct*10;
   score+=pts;totalCorrect+=correct;totalPossible+=slots.length;
-  if(correct>0) sendXP(pts);
   setTimeout(()=>{showRoundInfo(correct);},800);
 }
 

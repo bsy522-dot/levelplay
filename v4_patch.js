@@ -67,7 +67,7 @@ css.textContent=`
 .v4-lvtest:hover{border-color:var(--cy);transform:translateY(-2px)}
 .v4-listen-btn{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:8px}
 .v4-listen-btn:hover{transform:scale(1.05)}
-.v4-progress-ring{position:fixed;bottom:calc(var(--nv,52px)+60px);left:12px;z-index:500}
+.v4-progress-ring{position:fixed;bottom:calc(var(--nv,52px) + 170px);left:12px;z-index:500}
 .v4-progress-ring svg{transform:rotate(-90deg)}
 .v4-progress-ring text{font-size:9px;font-weight:900;fill:var(--cy)}
 `;

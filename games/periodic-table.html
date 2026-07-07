@@ -56,6 +56,7 @@ h1{text-align:center;font-size:22px;margin:6px 0;color:#FFD700}
 .pt-cell.correct-cell{border-color:#4CAF50;box-shadow:0 0 8px rgba(76,175,80,0.5)}
 .pt-cell.wrong-cell{border-color:#E53935;box-shadow:0 0 8px rgba(229,57,53,0.5)}
 .pt-cell .num{font-size:7px;color:#aaa}.pt-cell .sym{font-size:12px}
+.scroll-hint{font-size:13px;font-weight:600;color:#7FDBFF;text-align:center;margin-top:4px}
 .pt-hint{text-align:center;font-size:18px;font-weight:700;color:#FFD700;padding:10px;background:rgba(0,0,0,0.3);border-radius:12px}
 
 .result{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center}
@@ -136,9 +137,12 @@ function getPool(){
   return ELEMENTS.filter(e=>e.n>=d.range[0]&&e.n<=d.range[1]);
 }
 
+let lastElN=-1;
 function genQuestion(){
   const pool=getPool();
-  currentEl=pool[Math.random()*pool.length|0];
+  let tries=0;
+  do{currentEl=pool[Math.random()*pool.length|0];}while(pool.length>1&&currentEl.n===lastElN&&++tries<8);
+  lastElN=currentEl.n;
   answered=false;selectedOpt=-1;feedbackText='';
   if(mode===1||mode===2){
     // mode1: symbol->name, mode2: name->symbol
@@ -165,7 +169,7 @@ function selectOpt(idx){
 
 function selectPTCell(n){
   if(answered)return;
-  answered=true;
+  answered=true;selectedOpt=n;
   const el=ELEMENTS.find(e=>e.n===n);
   if(el&&el.n===currentEl.n){
     correct++;score+=(diffLv+1)*10;
@@ -290,12 +294,14 @@ function renderPlay(app){
     // Mode 3: find on periodic table
     content=`
       <div class="pt-hint">🔍 "${currentEl.name}" (${currentEl.sym})의 위치를 찾으세요!</div>
-      <div style="width:100%;overflow-x:auto">
-        <div class="pt-grid" style="grid-template-columns:repeat(18,1fr);width:100%;min-width:360px">
+      <div style="width:100%;overflow-x:auto" id="ptScroll">
+        <div class="pt-grid" id="ptGrid" style="grid-template-columns:repeat(18,1fr);width:100%;min-width:360px">
           ${renderPTGame()}
         </div>
-      </div>`;
+      </div>
+      <div class="scroll-hint" id="ptScrollHint">◀ 좌우로 밀어서 표 전체를 보세요 ▶</div>`;
   }
+  const prevPtScroll=(()=>{const g=document.getElementById('ptGrid');return g?g.scrollLeft:0;})();
   app.innerHTML=`
     <div class="hud">
       <span class="sc">⭐ ${score}</span>
@@ -309,6 +315,12 @@ function renderPlay(app){
       <div class="feedback ${fbCls}">${feedbackText}</div>
     </div>
     <button class="back-btn" onclick="if(timerInterval)clearInterval(timerInterval);timerInterval=null;screen='menu';render()">← 메뉴로</button>`;
+  const pg=document.getElementById('ptGrid');
+  if(pg){
+    pg.scrollLeft=prevPtScroll;
+    const h=document.getElementById('ptScrollHint');
+    if(h&&pg.scrollWidth<=pg.clientWidth+2)h.style.display='none';
+  }
 }
 
 function renderPTGame(){

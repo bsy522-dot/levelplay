@@ -73,7 +73,7 @@ const ENG_LEVELS=[null,
   {nm:'대학(SAT/GRE)',desc:'대학·미국 시험 단어',ws:[{w:'Quintessential',k:'본질적인 전형'},{w:'Surreptitious',k:'은밀한'},{w:'Ephemeral',k:'순간적인'},{w:'Ubiquitous',k:'어디에나 있는'},{w:'Esoteric',k:'난해한'},{w:'Sycophant',k:'아첨꾼'},{w:'Obfuscate',k:'모호하게 하다'},{w:'Incongruous',k:'어울리지 않는'},{w:'Mellifluous',k:'감미로운'},{w:'Perspicacious',k:'통찰력 있는'},{w:'Recalcitrant',k:'반항적인'},{w:'Sanctimonious',k:'독선적인'}]}
 ];
 
-let screen='menu',lv=1,correct=0,total=0,streak=0,current=null,recent=[];
+let screen='menu',lv=1,correct=0,total=0,streak=0,maxStreak=0,current=null,recent=[];
 
 function $(id){return document.getElementById(id);}
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -108,7 +108,7 @@ function renderMenu(){
 }
 
 function startGame(l){
-  lv=l;correct=0;total=0;streak=0;recent=[];screen='play';
+  lv=l;correct=0;total=0;streak=0;maxStreak=0;recent=[];screen='play';
   pickNext();
   render();
 }
@@ -123,7 +123,7 @@ function pickNext(){
 }
 
 function renderPlay(){
-  if(correct>=10){screen='clear';saveBest(lv,true,streak);sendXP(20+lv*2);render();return;}
+  if(correct>=10){screen='clear';saveBest(lv,true,maxStreak);sendXP(20+lv*2);render();return;}
   const w=current;
   const pool=ENG_LEVELS[lv].ws;
   const wrongs=shuffle(pool.filter(x=>x.w!==w.w)).slice(0,3).map(x=>x.w);
@@ -142,7 +142,7 @@ function answer(btn,sel){
   total++;
   if(sel===current.w){
     btn.classList.add('correct');
-    correct++;streak++;
+    correct++;streak++;if(streak>maxStreak)maxStreak=streak;
     sendXP(lv);
     toast('Correct! +'+lv+'XP');
     setTimeout(()=>{pickNext();render();},650);
@@ -159,7 +159,7 @@ function renderClear(){
   const lvData=ENG_LEVELS[lv];
   let h='<button class="back" onclick="screen=\'menu\';render()">← 레벨 선택으로</button>';
   h+='<div class="clear-card"><div class="big">🎉</div><h2>Lv.'+lv+' '+lvData.nm+' 클리어!</h2>';
-  h+='<p>10개 정답 · 최대 연속 '+streak+'개<br>+'+(20+lv*2)+' XP 획득</p>';
+  h+='<p>10개 정답 · 최대 연속 '+maxStreak+'개<br>+'+(20+lv*2)+' XP 획득</p>';
   if(lv===10)h+='<p style="color:#FFD700;font-weight:700;font-size:16px">🏆 최종 레벨 정복!</p>';
   h+='</div>';
   h+='<div class="btn-row">';

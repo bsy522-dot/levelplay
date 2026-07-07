@@ -1304,6 +1304,8 @@ G.collectSample=function(){
 
 G.refuel=function(){
  if(this.samples<5){this.toast('샘플 5개로 연료를 보급할 수 있습니다.');return;}
+ // 2026-07-07 QA P2: 시작연료(100)>maxFuel(30) 상태에서 보급 시 연료가 30으로 깎이던 버그 — 보급은 절대 연료를 줄이지 않는다
+ if(this.fuel>=this.maxFuel){this.toast('연료가 이미 가득합니다!');return;}
  this.samples-=5;this.fuel=Math.min(this.fuel+30,this.maxFuel);
  sfx('upgrade');
  this.toast('⛽ 연료 30 보급 완료!');

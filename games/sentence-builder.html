@@ -190,10 +190,12 @@ function tapPlaced(idx){
 }
 
 function clearAll(){
-  placed.clear();placedOrder=[];feedbackText='';showTranslation=false;render();
+  if(showTranslation)return;
+  placed.clear();placedOrder=[];feedbackText='';render();
 }
 
 function submitAnswer(){
+  if(showTranslation)return;
   if(placedOrder.length!==currentAnswer.length)return;
   const attempt=placedOrder.map(id=>currentWords.find(w=>w.id===id).text);
   const isCorrect=attempt.every((w,i)=>w===currentAnswer[i]);

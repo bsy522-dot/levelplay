@@ -17,7 +17,7 @@ css.textContent=`
 .v3-hint-btn:disabled{opacity:.4;cursor:not-allowed}
 .v3-hint-text{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);border-radius:6px;padding:8px;margin-top:6px;font-size:11px;color:#fbbf24;animation:v3FadeIn .3s}
 @keyframes v3FadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.v3-timer{position:fixed;bottom:calc(var(--nv,52px)+60px);right:12px;background:var(--c1,#111127);border:1.5px solid rgba(139,92,246,.2);border-radius:12px;padding:10px 14px;z-index:800;font-size:11px;min-width:100px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.v3-timer{position:fixed;bottom:calc(var(--nv,52px) + 230px);right:12px;background:var(--c1,#111127);border:1.5px solid rgba(139,92,246,.2);border-radius:12px;padding:10px 14px;z-index:800;font-size:11px;min-width:100px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .v3-timer .time{font-size:22px;font-weight:900;background:var(--g1,linear-gradient(135deg,#8b5cf6,#06d6a0));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:4px 0}
 .v3-timer .label{font-size:9px;color:var(--t3,#8892a4)}
 .v3-timer button{margin-top:6px;padding:4px 10px;border:none;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer}
@@ -33,7 +33,7 @@ css.textContent=`
 .v3-flash-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:16px;cursor:pointer}
 .v3-flash-progress{font-size:10px;color:var(--t3);margin-top:10px}
 .v3-sr-badge{display:inline-block;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:4px;padding:1px 5px;font-size:8px;color:#ef4444;margin-left:4px}
-.v3-sound-toggle{position:fixed;bottom:calc(var(--nv,52px)+14px);left:12px;width:36px;height:36px;border-radius:50%;background:var(--c1,#111127);border:1px solid rgba(139,92,246,.15);color:var(--tx);font-size:16px;cursor:pointer;z-index:500;display:flex;align-items:center;justify-content:center}
+.v3-sound-toggle{position:fixed;bottom:calc(var(--nv,52px) + 130px);left:12px;width:36px;height:36px;border-radius:50%;background:var(--c1,#111127);border:1px solid rgba(139,92,246,.15);color:var(--tx);font-size:16px;cursor:pointer;z-index:500;display:flex;align-items:center;justify-content:center}
 .v3-daily-complete{background:linear-gradient(135deg,rgba(6,214,160,.15),rgba(139,92,246,.1));border:2px solid rgba(6,214,160,.3);border-radius:12px;padding:16px;text-align:center;margin:10px 0;animation:v3FadeIn .5s}
 .v3-daily-complete h3{font-size:14px;color:var(--cy,#06d6a0);margin-bottom:4px}
 .v3-quiz-type{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}

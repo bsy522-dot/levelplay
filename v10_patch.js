@@ -106,7 +106,7 @@ v10css.textContent=`
 .v10-fab button:hover{border-color:var(--cy);transform:scale(1.1)}
 @media(max-width:480px){.v10-fab{display:none}}
 /* Scroll nav bar */
-.v10-nav{position:fixed;bottom:calc(var(--nv)+4px);left:50%;transform:translateX(-50%);display:flex;gap:4px;background:rgba(17,17,39,.95);backdrop-filter:blur(12px);border:1px solid rgba(139,92,246,.15);border-radius:20px;padding:4px;z-index:800;max-width:90vw;overflow-x:auto;scrollbar-width:none}
+.v10-nav{position:fixed;bottom:calc(var(--nv) + 130px);left:50%;transform:translateX(-50%);display:flex;gap:4px;background:rgba(17,17,39,.95);backdrop-filter:blur(12px);border:1px solid rgba(139,92,246,.15);border-radius:20px;padding:4px;z-index:800;max-width:min(90vw,calc(100vw - 130px));overflow-x:auto;scrollbar-width:none}
 .v10-nav::-webkit-scrollbar{display:none}
 .v10-nav button{flex-shrink:0;padding:6px 10px;border:none;border-radius:16px;background:transparent;color:var(--t3);font:10px inherit;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
 .v10-nav button.active{background:rgba(6,214,160,.15);color:var(--cy)}

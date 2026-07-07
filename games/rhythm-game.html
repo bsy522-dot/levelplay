@@ -186,7 +186,8 @@ const patterns=[
   [0,1,2,3,0,1,2,3,3,2,1,0,3,2,1,0],
 ];
 for(const pat of patterns){
-  const step=pat.length>8?b/4:b/2;
+  // 16노트 패턴도 8분음표(b/2) 유지: b/4(107ms)는 초당 9.3타+같은레인 노트겹침(32px 노트가 31px 간격)으로 물리적으로 불가능했음
+  const step=b/2;
   for(let i=0;i<pat.length;i++){
     n.push([Math.round(t+i*step),pat[i]]);
   }
@@ -248,7 +249,7 @@ function startGame(s){
   updateHUD();
 
   stageH=document.getElementById('stage').offsetHeight;
-  startTime=performance.now()+1500; // 1.5s countdown
+  startTime=performance.now()+2200; // 2.2s lead-in (NOTE_TRAVEL 2000ms보다 길어야 첫 노트가 화면 중간에서 튀어나오지 않음)
   gameActive=true;
   if(animId)cancelAnimationFrame(animId);
   animId=requestAnimationFrame(gameLoop);
@@ -402,6 +403,7 @@ function endGame(){
 
 // Keyboard input
 document.addEventListener('keydown',e=>{
+  if(e.repeat)return; // 키 꾹 누름 자동반복이 노트를 조기 MISS로 갉아먹는 것 방지
   const idx=KEYS.indexOf(e.key.toLowerCase());
   if(idx>=0){
     e.preventDefault();
@@ -419,6 +421,22 @@ document.querySelectorAll('.key-btn').forEach(btn=>{
   btn.addEventListener('touchstart',activate,{passive:false});
   btn.addEventListener('mousedown',activate);
 });
+
+// 스테이지(노트 낙하 영역) 탭도 해당 레인 히트로 인정 — 하단 60px 버튼만으로는 빠른 곡 탭 정확도가 떨어짐. changedTouches 순회로 두 레인 동시 탭 지원
+(function(){
+  const stageEl=document.getElementById('stage');
+  stageEl.addEventListener('touchstart',e=>{
+    if(!gameActive)return;
+    e.preventDefault();
+    const r=stageEl.getBoundingClientRect();
+    for(const t of e.changedTouches){
+      const lane=Math.max(0,Math.min(3,Math.floor((t.clientX-r.left)/r.width*4)));
+      hitLane(lane);
+      const btn=document.querySelectorAll('.key-btn')[lane];
+      btn.classList.add('active');setTimeout(()=>btn.classList.remove('active'),100);
+    }
+  },{passive:false});
+})();
 
 showMenu();
 </script>

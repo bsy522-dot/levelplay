@@ -1454,12 +1454,20 @@ function skipTutorial(){
 function gatherNearest(){
 // 늑대가 근처에 있으면 먼저 공격
 if(attackThreats())return;
-let closest=null,minD=50;
+let closest=null,minD=50,blocked=null;
 G.worldResources.forEach(r=>{
 const dx=G.px-r.x,dy=G.py-r.y;
 const d=Math.sqrt(dx*dx+dy*dy);
-if(d<minD){minD=d;closest=r;}
+if(d<minD){
+if(getToolPower(r.type).canGather){minD=d;closest=r;}
+else blocked=r;
+}
 });
+if(!closest&&blocked){
+const bres=RESOURCES[blocked.type];
+showToast(`⚠ ${bres?bres.name:'자원'} 채집에는 더 좋은 도구가 필요합니다!`);
+return;
+}
 if(closest){
 closest.hp--;
 const res=RESOURCES[closest.type];

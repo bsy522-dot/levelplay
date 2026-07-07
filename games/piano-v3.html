@@ -1528,7 +1528,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
     setTimeout(() => { if (firstMidi > 0) scrollToMidi(firstMidi); }, 250);
   }
 
-  synthStartTime = performance.now() + (synthWaitMode ? 2500 : 1500); // lead-in (wait모드는 더 길게)
+  synthStartTime = performance.now() + (synthWaitMode ? 3000 : 2700); // lead-in: 낙하시간(2.5s)보다 길게 → 첫 노트도 화면 위 밖에서 진입
   synthRunning = true;
   synthPaused = false; synthPauseTime = 0;
 
@@ -1667,8 +1667,10 @@ function synthLoop() {
 
   let now = (performance.now() - synthStartTime) / 1000;
   const beatToSec = 60 / (synthBPM * synthSpeed);
-  // 매우 천천히: 1초당 화면의 10%만 이동
-  const pxPerSec = H * (synthWaitMode ? 0.10 : 0.15);
+  // 비트매니아식 고정 낙하: 화면 상단→판정선 도달 시간을 기기와 무관하게 LEAD_SEC초로 고정
+  // (H는 이미 물리픽셀(canvas.height = cssH*dpr)이므로 dpr을 다시 곱하지 않는다)
+  const LEAD_SEC = 2.5;
+  const pxPerSec = H / LEAD_SEC;
 
   // === Wait Mode: 노트가 떨어지지 않고 hit line 직전에 항상 고정 ===
   if (synthWaitMode && !synthAutoPlay) {
@@ -1684,6 +1686,9 @@ function synthLoop() {
     }
   }
 
+  // (검증용 read-only) 현재 낙하 파라미터 노출 — 게임 로직에 영향 없음
+  window.__synthDebug = {leadSec: LEAD_SEC, pxPerSec, H, dpr, noteH: 28*dpr, beatToSec, now};
+
   let allDone = true;
   let hasUnplayed = false;
 
@@ -1693,12 +1698,12 @@ function synthLoop() {
     const keyInfo = getKeyX(n.note);
     if (!keyInfo) return;
 
-    const noteBottom = H - (noteTimeSec - now) * pxPerSec * dpr;
-    const noteHeight = Math.max(noteDurSec * pxPerSec * dpr, 14*dpr);
+    const noteBottom = H - (noteTimeSec - now) * pxPerSec;
+    const noteHeight = 28*dpr; // 비트매니아식 고정 블록 — 음길이(duration)와 무관, 연속음도 또렷이 분리
     const noteTop = noteBottom - noteHeight;
 
-    // Off screen below = missed
-    if (noteTop > H + 50*dpr) {
+    // 판정선 통과 후 유예시간(판정 윈도우 0.4s보다 김)이 지나면 미스 — 화면 크기와 무관하게 균일
+    if (now - noteTimeSec > 0.45) {
       if (!n.played && !synthAutoPlay) {
         n.played = true; n.result = 'miss'; synthScore.miss++; synthScore.combo=0;
         document.getElementById('sc-miss').textContent = synthScore.miss;

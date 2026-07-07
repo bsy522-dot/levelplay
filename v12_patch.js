@@ -103,10 +103,15 @@ v12css.textContent=`
 .v12-milestone .ms-desc{font-size:10px;color:var(--t3)}
 .v12-milestone .ms-claim{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:none;background:var(--g1);color:#fff}
 /* Nav */
-.v12-nav{position:fixed;bottom:0;left:0;right:0;display:flex;overflow-x:auto;background:var(--c1);border-top:1px solid rgba(139,92,246,.1);z-index:999;padding:6px 4px;gap:2px;scrollbar-width:none}
+.v12-nav{position:fixed;bottom:calc(var(--nv) + 80px);left:0;right:0;display:flex;overflow-x:auto;background:var(--c1);border-top:1px solid rgba(139,92,246,.1);z-index:999;padding:6px 4px;gap:2px;scrollbar-width:none}
 .v12-nav::-webkit-scrollbar{display:none}
 .v12-nav button{flex:0 0 auto;padding:6px 10px;border:none;background:transparent;color:var(--t3);font:10px inherit;cursor:pointer;border-radius:6px;white-space:nowrap;transition:.15s}
 .v12-nav button:hover,.v12-nav button:active{background:rgba(6,214,160,.1);color:var(--cy)}
+/* 하단 고정 스트립 스택(메인nav 52 + v13 36 + v11 38 + v12 38 = ~164px) 아래로 콘텐츠·FAB가 깔리지 않도록 보정 */
+.pg{padding-bottom:calc(var(--nv) + 140px)}
+.fab{bottom:calc(var(--nv) + 130px)}
+.tutor-fab{bottom:calc(var(--nv) + 176px)}
+.tutor-panel{bottom:calc(var(--nv) + 230px)}
 `;
 document.head.appendChild(v12css);
 

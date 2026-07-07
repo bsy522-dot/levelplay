@@ -88,7 +88,7 @@ v11css.textContent=`
 .v11-hint .hint-step{padding:4px 0;border-bottom:1px solid rgba(251,191,36,.1);display:none}
 .v11-hint .hint-step.visible{display:block}
 /* Nav */
-.v11-nav{position:fixed;bottom:0;left:0;right:0;display:flex;overflow-x:auto;background:var(--c1);border-top:1px solid rgba(139,92,246,.1);z-index:999;padding:6px 4px;gap:2px;scrollbar-width:none}
+.v11-nav{position:fixed;bottom:calc(var(--nv) + 36px);left:0;right:0;display:flex;overflow-x:auto;background:var(--c1);border-top:1px solid rgba(139,92,246,.1);z-index:999;padding:6px 4px;gap:2px;scrollbar-width:none}
 .v11-nav::-webkit-scrollbar{display:none}
 .v11-nav button{flex:0 0 auto;padding:6px 10px;border:none;background:transparent;color:var(--t3);font:10px inherit;cursor:pointer;border-radius:6px;white-space:nowrap;transition:.15s}
 .v11-nav button:hover,.v11-nav button:active{background:rgba(6,214,160,.1);color:var(--cy)}

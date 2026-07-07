@@ -453,6 +453,17 @@
     line-height: 1;
     user-select: none;
   }
+
+  /* ★ 2026-07-07 QA P1 수정: 전투 중 모바일 dpad(조이스틱·A/B·대기 알약)가
+     하단 유닛 패널(공격/스킬/아이템/대기 + HP/MP/XP)을 덮어
+     패널의 '대기' 버튼 탭을 A 버튼이 가로채던 문제.
+     전투 모드에서는 조이스틱을 숨기고(타일 직접 터치로 대체),
+     A/B·대기 알약·줌 버튼을 유닛 패널 위로 올린다.
+     body.v8-mode-battle 클래스는 playBattleScene에서 토글. */
+  body.v8-mode-battle #v8-joystick { display: none; }
+  body.v8-mode-battle #v8-dpad-ab { bottom: 152px; }
+  body.v8-mode-battle #v8-dpad-menu { bottom: 158px; }
+  body.v8-mode-battle #v8-dpad-zoom { left: 14px; right: auto; bottom: 152px; }
 </style>
 </head>
 <body>
@@ -1206,6 +1217,8 @@ async function playBattleScene(scene) {
   initDPad();
   onDPadInput(handleDPadInput);
   showDPad();
+  // ★ 2026-07-07 QA P1: 전투용 dpad 레이아웃(조이스틱 숨김·버튼을 유닛 패널 위로)
+  document.body.classList.add('v8-mode-battle');
 
   GameState.turnManager.start();
 
@@ -1217,6 +1230,7 @@ async function playBattleScene(scene) {
   // 정리
   unbindCanvasClick();
   hideDPad();
+  document.body.classList.remove('v8-mode-battle');  // ★ 2026-07-07 QA P1
   disposeCursor();
   const _ti = State.updateCallbacks.indexOf(tickCursor);
   if (_ti >= 0) State.updateCallbacks.splice(_ti, 1);
@@ -1661,20 +1675,24 @@ function handleAction(action, unit) {
   }
 }
 
-// ── 입력: 캔버스 클릭 (타일/유닛) ─────────────────
+// ── 입력: 캔버스 클릭/터치 탭 (타일/유닛) ─────────────────
+// ★ 2026-07-07 QA 수정: tactical_cam.js가 touchstart에서 preventDefault()를 호출해
+//   모바일에서 synthetic click이 차단됨 → 전투 중 유닛/타일 터치가 전혀 안 먹던 P1 버그.
+//   touchend 기반 탭 감지를 병행 바인딩하고, ghost-click 가드로 이중발화를 방지한다.
 let _canvasBound = null;
 function bindCanvasClick() {
   if (_canvasBound) return;
   const dom = State.renderer.domElement;
-  const onClick = (e) => {
+
+  const handlePointAt = (clientX, clientY) => {
     if (isDialogueActive()) return;
     const tm = GameState.turnManager;
     if (!tm) return;
 
     // 화면좌표 → 그리드좌표 (Raycaster 이용)
     const rect = dom.getBoundingClientRect();
-    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    const ny = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const ny = -((clientY - rect.top) / rect.height) * 2 + 1;
     const ray = new THREE.Raycaster();
     ray.setFromCamera({ x: nx, y: ny }, State.camera);
 
@@ -1688,12 +1706,48 @@ function bindCanvasClick() {
 
     onTileClick(gx, gy);
   };
+
+  let _lastTouchTapAt = 0;
+  const onClick = (e) => {
+    // ghost click 가드 — 터치 탭 직후 도착하는 synthetic click 무시
+    if (performance.now() - _lastTouchTapAt < 700) return;
+    handlePointAt(e.clientX, e.clientY);
+  };
+
+  // 터치 탭 감지: 한 손가락 · 이동 12px 미만 · 500ms 이내 → 탭
+  let _tapStart = null;
+  const onTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      _tapStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: performance.now(), multi: false };
+    } else if (_tapStart) {
+      _tapStart.multi = true; // 핀치/두손가락 → 탭 아님
+    }
+  };
+  const onTouchEnd = (e) => {
+    const st = _tapStart;
+    if (e.touches.length > 0) return;      // 아직 손가락 남음
+    _tapStart = null;
+    if (!st || st.multi) return;
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    const dist = Math.hypot(t.clientX - st.x, t.clientY - st.y);
+    const dt = performance.now() - st.t;
+    if (dist > 12 || dt > 500) return;     // 드래그(카메라 팬)/롱프레스는 무시
+    _lastTouchTapAt = performance.now();
+    handlePointAt(t.clientX, t.clientY);
+  };
+
   dom.addEventListener('click', onClick);
-  _canvasBound = onClick;
+  dom.addEventListener('touchstart', onTouchStart, { passive: true });
+  dom.addEventListener('touchend', onTouchEnd, { passive: true });
+  _canvasBound = { onClick, onTouchStart, onTouchEnd };
 }
 function unbindCanvasClick() {
   if (!_canvasBound) return;
-  State.renderer.domElement.removeEventListener('click', _canvasBound);
+  const dom = State.renderer.domElement;
+  dom.removeEventListener('click', _canvasBound.onClick);
+  dom.removeEventListener('touchstart', _canvasBound.onTouchStart);
+  dom.removeEventListener('touchend', _canvasBound.onTouchEnd);
   _canvasBound = null;
 }
 

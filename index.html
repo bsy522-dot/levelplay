@@ -3247,13 +3247,15 @@ function init(){
   setupGlobalShortcuts();
   // PWA 서비스 워커 등록 (오프라인 캐시)
   if('serviceWorker' in navigator){
+    // 첫 방문(미제어 페이지)에서는 SW install+claim으로 인한 자동 새로고침 금지 — 온보딩 입력 유실 방지
+    const hadSW=!!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js').then(reg=>{
       reg.update();
       reg.addEventListener('updatefound',()=>{
         const nw=reg.installing;
         if(!nw)return;
         nw.addEventListener('statechange',()=>{
-          if(nw.state==='installed' && navigator.serviceWorker.controller){
+          if(nw.state==='installed' && hadSW){
             console.log('[SW] 새 버전 감지, 자동 새로고침');
             nw.postMessage({type:'SKIP_WAITING'});
             setTimeout(()=>location.reload(),500);
@@ -3263,7 +3265,7 @@ function init(){
       setInterval(()=>reg.update(), 60000);
     }).catch(e=>console.warn('SW 등록 실패:',e));
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
-      if(!window._swRel){window._swRel=true;location.reload();}
+      if(hadSW && !window._swRel){window._swRel=true;location.reload();}
     });
   }
 }

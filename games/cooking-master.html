@@ -40,11 +40,11 @@ canvas{display:block}
 <script>
 'use strict';
 const C=document.getElementById('gc'),X=C.getContext('2d'),UI=document.getElementById('ui');
-let W,H,dpr=1,state='menu',frame=0,touching=false,tx=0,ty=0,tapX=0,tapY=0,tapped=false;
+let W,H,dpr=1,state='menu',frame=0,touching=false,tx=0,ty=0,tapX=0,tapY=0,tapped=false,upTap=false;
 let coins=0,totalStars=0,playerLevel=1,equipment={stove:1,knife:1,pan:1};
 let currentRecipe=null,cookStep=0,cookScore=0,selectedIngredients=[],stepTimer=0,stepTarget=0;
 let dragItem=null,dragOX=0,dragOY=0,particles=[],steamPs=[];
-let restaurantMode=false,customers=[],orderTimer=0,servedCount=0;
+let restaurantMode=false,customers=[],orderTimer=0,servedCount=0,spawnAcc=0;
 let earnedStars={},scrollY=0,infoPopup=null,animT=0;
 
 // Audio — lazy 생성: 첫 제스처 시점에 만들어 autoplay 정책 위반 방지
@@ -291,10 +291,10 @@ function getXY(e){
 }
 C.addEventListener('touchstart',e=>{e.preventDefault();const p=getXY(e);tx=tapX=p.x;ty=tapY=p.y;touching=true;tapped=true;},{passive:false});
 C.addEventListener('touchmove',e=>{e.preventDefault();const p=getXY(e);tx=p.x;ty=p.y;},{passive:false});
-C.addEventListener('touchend',e=>{e.preventDefault();touching=false;},{passive:false});
+C.addEventListener('touchend',e=>{e.preventDefault();touching=false;if(Math.abs(tx-tapX)<12&&Math.abs(ty-tapY)<12)upTap=true;},{passive:false});
 C.addEventListener('mousedown',e=>{const p=getXY(e);tx=tapX=p.x;ty=tapY=p.y;touching=true;tapped=true;});
 C.addEventListener('mousemove',e=>{if(touching){tx=e.clientX;ty=e.clientY;}});
-C.addEventListener('mouseup',()=>{touching=false;});
+C.addEventListener('mouseup',()=>{touching=false;if(Math.abs(tx-tapX)<12&&Math.abs(ty-tapY)<12)upTap=true;});
 
 // Drawing helpers
 function fillRect(x,y,w,h,c){X.fillStyle=c;X.fillRect(x,y,w,h);}
@@ -471,8 +471,9 @@ function drawRecipeList(){
     }else{
      drawText('도전 →',W-30,cy+28,13,'#E65100','right',true);
     }
-    if(!locked&&tapped&&hitTest(20,cy,W-40,55,tapX,tapY)){
-     playSound('click');startCooking(r);tapped=false;
+    // 손가락을 뗀 시점(이동량<12px)에만 선택 — touchstart 즉시 선택은 스크롤 제스처가 전부 오발동돼 목록을 내릴 수 없었음
+    if(!locked&&upTap&&hitTest(20,cy,W-40,55,tapX,tapY)){
+     playSound('click');startCooking(r);upTap=false;tapped=false;
     }
    }
    cy+=65;
@@ -480,7 +481,7 @@ function drawRecipeList(){
   cy+=10;
  }
  // Scroll
- if(touching){scrollY=Math.max(0,scrollY-(ty-tapY)*.3);}
+ if(touching){const off=ty-tapY;if(Math.abs(off)>14)scrollY=Math.max(0,scrollY-off*.3);} // 14px 데드존: 탭 중 미세 떨림으로 목록이 흐르지 않게
 }
 
 // Cooking
@@ -678,7 +679,7 @@ function drawCookingStep(){
 
  // Progress bar for hold
  if(stype==='hold'){
-  holdTarget=step.includes('4초')?4:3;
+  holdTarget=(step.includes('4초')?4:3)*(1-0.1*(equipment.stove-1)); // 화구 업그레이드 '요리 시간 -10%' 실제 적용
   if(touching&&!stepComplete){
    holdProgress+=(window._dt||1/60);
    // Fire effect
@@ -729,8 +730,8 @@ function drawCookingStep(){
    }
   }
  }else{
-  // Tap
-  if(tapped&&!stepComplete&&!cookExitConfirm){
+  // Tap (비상구 ✕ 영역은 제외 — 탭 단계에서 ✕를 눌러도 단계가 완료돼버리던 문제)
+  if(tapped&&!stepComplete&&!cookExitConfirm&&!hitTest(W-48,H*.045,40,40,tapX,tapY)){
    stepComplete=true;cookScore+=20;playSound('chop');
    addParticle(tapX,tapY,'star');
    tapped=false;
@@ -784,10 +785,13 @@ function drawCookingStep(){
 
 function finishCooking(){
  const recipe=currentRecipe;
- const ingScore=Math.round((correctCount/totalPossible)*50);
+ // 틀린 재료 선택 감점(-0.5개분) — 기존엔 아무 페널티가 없어 재료를 아무거나 더 담아도 만점이었음
+ const wrongCount=selectedIngredients.filter(x=>!recipe.ingredients.includes(x)).length;
+ // 칼/팬 업그레이드 '재료 점수 +5'/'맛 점수 +5' 실제 적용 (레벨당 +5)
+ const ingScore=Math.max(0,Math.round(((correctCount-wrongCount*0.5)/totalPossible)*50))+(equipment.knife-1)*5;
  const maxStep=recipe.steps.length*20;
  const stepScore=Math.round((Math.min(cookScore,maxStep)/maxStep)*30);
- const presScore=Math.round((Math.min(cookScore,maxStep)/maxStep)*20); // C-5: 난수 제거, 수행도 기반
+ const presScore=Math.round((Math.min(cookScore,maxStep)/maxStep)*20)+(equipment.pan-1)*5; // C-5: 난수 제거, 수행도 기반
  const total=Math.min(100,ingScore+stepScore+presScore);
  if(state==='cooking_restaurant'){
   const reward=Math.floor(total/5)+5;
@@ -847,7 +851,7 @@ function drawResult(){
 // Restaurant Mode
 function startRestaurant(){
  if(totalStars<3){alert('⭐ 3개 이상 모아야 레스토랑을 열 수 있어요!');return;}
- restaurantMode=true;state='restaurant';customers=[];servedCount=0;orderTimer=180*60;
+ restaurantMode=true;state='restaurant';customers=[];servedCount=0;orderTimer=180*60;spawnAcc=0;
  spawnCustomer();
  document.getElementById('hud').classList.remove('hidden');
  document.getElementById('hud-timer').classList.remove('hidden');
@@ -872,14 +876,19 @@ function drawRestaurant(){
  fillRect(0,H*.55,W,8,'#5D4037');
  fillRect(0,H*.56,W,H*.44,'#8D6E63');
 
- orderTimer--;
+ // 실제 경과시간 기반(60fps 프레임 단위 환산) — 120Hz 기기에서 타이머/인내심이 2배속으로 돌던 문제
+ const rdt=(window._dt||1/60)*60;
+ orderTimer-=rdt;
+ // HUD 타이머 칩 실시간 갱신 (기존엔 ⏱ 0:00으로 얼어 있었음)
+ const remS=Math.max(0,Math.ceil(orderTimer/60));
+ document.getElementById('hud-timer').textContent='⏱ '+Math.floor(remS/60)+':'+String(remS%60).padStart(2,'0');
  if(orderTimer<=0){endRestaurant();return;}
 
  // Customers
  for(let i=customers.length-1;i>=0;i--){
   const c=customers[i];
-  if(c.x>c.targetX)c.x-=2;
-  c.patience-=.015;
+  if(c.x>c.targetX)c.x=Math.max(c.targetX,c.x-2*rdt);
+  c.patience-=.015*rdt;
 
   const cy=H*.45;
   // Customer
@@ -908,8 +917,9 @@ function drawRestaurant(){
   }
  }
 
- // Spawn timer
- if(frame%300===0&&customers.length<4)spawnCustomer();
+ // Spawn timer (프레임 카운트 대신 실시간 누적 — 주사율 무관 5초 간격)
+ spawnAcc+=rdt;
+ if(spawnAcc>=300){spawnAcc=0;if(customers.length<4)spawnCustomer();}
 
  // Back
  regBtn(10,H-45,70,30,'나가기','#8D6E63');
@@ -1000,7 +1010,7 @@ function drawEncyclopedia(){
   }
   cy+=5;
  }
- if(touching){scrollY=Math.max(0,scrollY-(ty-tapY)*.3);}
+ if(touching){const off=ty-tapY;if(Math.abs(off)>14)scrollY=Math.max(0,scrollY-off*.3);} // 14px 데드존: 탭 중 미세 떨림으로 목록이 흐르지 않게
 }
 
 // Main loop
@@ -1029,7 +1039,7 @@ function gameLoop(ts){
  }
 
  checkBtns();
- tapped=false;
+ tapped=false;upTap=false;
  requestAnimationFrame(gameLoop);
 }
 

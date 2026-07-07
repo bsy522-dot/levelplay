@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>타이핑 게임 - 떨어지는 단어</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:'Segoe UI',sans-serif;color:#fff}
-.wrap{max-width:480px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.wrap{max-width:480px;margin:0 auto;height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.4);font-size:16px;font-weight:700;z-index:10;flex-wrap:wrap;gap:4px}
 .hud .sc{color:#FFD700}.hud .sp{color:#7FDBFF}.hud .lv{color:#FF6B9D}
 .field{flex:1;position:relative;overflow:hidden;background:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)}
@@ -17,6 +17,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
 .input-area{padding:12px;background:rgba(0,0,0,0.5);z-index:10}
 .input-area input{width:100%;font-size:24px;padding:12px 16px;border:3px solid #444;border-radius:16px;background:#222;color:#fff;text-align:center;outline:none}
 .input-area input:focus{border-color:#FF6B9D}
+.input-area input.typo{border-color:#E53935;animation:typoshake 0.3s}
+@keyframes typoshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .danger-line{position:absolute;bottom:0;left:0;right:0;height:3px;background:#E53935;opacity:0.6}
 .menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(26,26,46,0.97);z-index:20;gap:12px;padding:16px}
 .menu h1{font-size:32px;color:#FFD700;margin-bottom:8px}
@@ -194,7 +196,20 @@ document.getElementById('inp').addEventListener('input',function(e){
 });
 
 document.getElementById('inp').addEventListener('keydown',function(e){
-  if(e.key==='Enter'){this.value='';}
+  if(e.key==='Enter'){
+    if(gameActive&&this.value.trim()!==''){
+      const inp=this;
+      inp.classList.add('typo');
+      setTimeout(()=>inp.classList.remove('typo'),350);
+    }
+    this.value='';
+  }
+});
+
+// 가상키보드 개폐 등으로 필드 높이가 바뀌면 판정선(fieldH) 재계산
+window.addEventListener('resize',function(){
+  const f=document.getElementById('field');
+  if(f&&f.offsetHeight>0)fieldH=f.offsetHeight;
 });
 
 function updateHUD(){

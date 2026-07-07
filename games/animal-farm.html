@@ -23,7 +23,7 @@ canvas{display:block;margin:0 auto}
 #topbar>div{display:flex;align-items:center;gap:6px}
 .tb{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:14px;padding:3px 10px;font-size:12px;cursor:pointer;pointer-events:auto}
 .tb:active{background:rgba(255,255,255,.3)}
-#bottombar{position:absolute;bottom:0;left:0;width:100%;display:flex;justify-content:center;gap:6px;padding:8px;background:rgba(0,0,0,.5);pointer-events:auto;flex-wrap:wrap}
+#bottombar{position:fixed;bottom:0;left:0;width:100%;display:flex;justify-content:center;gap:6px;padding:8px;background:rgba(0,0,0,.5);pointer-events:auto;flex-wrap:wrap;z-index:60}
 .bb{background:#4a7c3f;border:2px solid #6aad55;color:#fff;border-radius:10px;padding:6px 12px;font-size:12px;cursor:pointer;min-width:55px;text-align:center}
 .bb:active{background:#6aad55}
 .bb.sel{background:#e8a735;border-color:#ffd700}
@@ -82,13 +82,13 @@ canvas{display:block;margin:0 auto}
 #csend{background:#4a7c3f;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
 #csend:active{background:#6aad55}
 #csend:disabled{background:#888;cursor:wait}
-@media(max-width:480px){#cpanel{width:88vw}#cbtn{width:44px;height:44px;font-size:20px;bottom:60px}}
+@media(max-width:480px){#cpanel{width:88vw}#cbtn{width:44px;height:44px;font-size:20px;bottom:92px}}
 /* Zoom controls (right-bottom, above #cbtn) */
 #zoomCtl{position:fixed;right:10px;bottom:120px;display:flex;flex-direction:column;gap:6px;z-index:115;pointer-events:auto}
 #zoomCtl button{width:42px;height:42px;border-radius:50%;background:rgba(74,124,63,.92);color:#fff;border:2px solid #6aad55;font-size:20px;font-weight:bold;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
 #zoomCtl button:active{background:#6aad55}
 #zoomCtl .zlabel{background:rgba(0,0,0,.55);color:#fff;border-radius:14px;padding:2px 0;font-size:11px;text-align:center;border:1px solid rgba(255,255,255,.25)}
-@media(max-width:480px){#zoomCtl{bottom:114px}#zoomCtl button{width:38px;height:38px;font-size:18px}}
+@media(max-width:480px){#zoomCtl{bottom:146px}#zoomCtl button{width:38px;height:38px;font-size:18px}}
 /* Splash screen */
 #splash{position:fixed;inset:0;background:linear-gradient(135deg,#4a7c3f,#2d5a1e);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px;transition:opacity .55s ease;font-family:'Segoe UI',sans-serif}
 #splash.hide{opacity:0;pointer-events:none}
@@ -120,7 +120,7 @@ canvas{display:block;margin:0 auto}
 #tutBubble.top::before{top:auto;bottom:-12px;border-bottom:none;border-top:12px solid #e8a735;display:block}
 #tutHelp{position:fixed;left:10px;bottom:64px;width:42px;height:42px;border-radius:50%;background:rgba(74,124,63,.9);color:#fff;border:2px solid #6aad55;font-size:18px;cursor:pointer;z-index:120;box-shadow:0 3px 8px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;pointer-events:auto;font-weight:bold}
 #tutHelp:active{background:#6aad55}
-@media(max-width:480px){#tutHelp{width:38px;height:38px;font-size:16px;bottom:60px}}
+@media(max-width:480px){#tutHelp{width:38px;height:38px;font-size:16px;bottom:92px}}
 /* Bigger close button */
 #mpanel .close{width:36px;height:36px;border-radius:50%;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;line-height:1;border:2px solid #ccc;top:10px;right:10px}
 #mpanel .close:active{background:#ddd;color:#333}
@@ -235,15 +235,44 @@ function preloadSprites(){
   collect.forEach(path=>{
     const img=new Image();
     SPRITES[path]={img,ok:false};
-    img.onload=()=>{SPRITES[path].ok=true};
+    img.onload=()=>{
+      // 흰 배경 스프라이트 → 가장자리 연결 흰 픽셀만 투명 처리 (내부 흰색은 보존)
+      try{SPRITES[path].img=stripWhiteBg(img);}catch(e){}
+      SPRITES[path].ok=true;
+    };
     img.onerror=()=>{SPRITES[path].ok=false};
     img.src=path;
   });
 }
+// 가장자리에서 연결된 근백색 배경을 flood-fill로 투명화한 캔버스 반환
+function stripWhiteBg(img){
+  const w=img.naturalWidth,h=img.naturalHeight;
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+  const cx=cv.getContext('2d');cx.drawImage(img,0,0);
+  const id=cx.getImageData(0,0,w,h),d=id.data;
+  const isBg=i=>d[i]>=235&&d[i+1]>=235&&d[i+2]>=235&&d[i+3]>0;
+  const seen=new Uint8Array(w*h),stack=[];
+  for(let x=0;x<w;x++){stack.push(x,x+(h-1)*w);}
+  for(let y=0;y<h;y++){stack.push(y*w,y*w+w-1);}
+  while(stack.length){
+    const p=stack.pop();
+    if(seen[p])continue;seen[p]=1;
+    if(!isBg(p*4))continue;
+    d[p*4+3]=0;
+    const x=p%w,y=(p/w)|0;
+    if(x>0)stack.push(p-1);if(x<w-1)stack.push(p+1);
+    if(y>0)stack.push(p-w);if(y<h-1)stack.push(p+w);
+  }
+  cx.putImageData(id,0,0);
+  return cv;
+}
 function getSprite(path){
   if(!path)return null;
   const e=SPRITES[path];
-  if(e&&e.ok&&e.img&&e.img.complete&&e.img.naturalWidth>0)return e.img;
+  if(!e||!e.ok||!e.img)return null;
+  // stripWhiteBg 결과(canvas)거나, 정상 로드된 Image거나
+  if(e.img instanceof HTMLCanvasElement)return e.img;
+  if(e.img.complete&&e.img.naturalWidth>0)return e.img;
   return null;
 }
 preloadSprites();
@@ -793,6 +822,12 @@ G.animals.forEach(a=>{const ad=ANIMALS[a.type];feedCost+=ad.feedCost});
 if(G.money>=feedCost){G.money-=feedCost}
 else{showToast('사료비 부족! 동물들이 배고파요 😢')}
 
+// 회생 안전망: 돈도 없고(최저가 씨앗 미만) 동물·작물도 없으면 수입원이 영원히 0 → 소프트락 방지
+if(G.money<15&&G.animals.length===0&&G.crops.length===0){
+G.money+=50;
+showToast('🎁 마을에서 응원 지원금 50원을 보냈어요!');
+}
+
 // Season change every 7 days
 if(G.day%7===0){
 G.season=(G.season+1)%4;
@@ -1029,20 +1064,20 @@ showToast('제거했어요');
 
 // Market
 G.openMarket=function(){
-let html='<h2>🏪 시장</h2><p>현재 가격 (수요에 따라 변동)</p>';
+let html='<h2>🏪 시장</h2><p>현재 판매 가격</p>';
 html+='<div style="max-height:50vh;overflow-y:auto">';
 // Products from animals
 html+='<h3>🐄 축산물</h3>';
 for(const[k,v]of Object.entries(ANIMALS)){
 if(v.prodVal>0){
-const price=Math.round(v.prodVal*(0.8+Math.random()*0.4)*G.marketBonus);
+const price=Math.round(v.prodVal*G.marketBonus);
 html+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ddd">
 <span>${v.icon} ${v.product}</span><span style="color:#d4760a;font-weight:bold">${price}원</span></div>`;
 }
 }
 html+='<h3>🌱 농산물</h3>';
 for(const[k,v]of Object.entries(CROPS)){
-const price=Math.round(v.sellPrice*(0.8+Math.random()*0.4)*G.marketBonus);
+const price=Math.round(v.sellPrice*G.marketBonus);
 html+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #ddd">
 <span>${v.icon} ${v.name}</span><span style="color:#d4760a;font-weight:bold">${price}원</span></div>`;
 }

@@ -193,7 +193,7 @@ let nightPhase=0; // 0-1 for day/night
 // ISO
 const TW=48,TH=24;
 function iso(gx,gy){return{x:(gx-gy)*(TW/2)*zoom+camX,y:(gx+gy)*(TH/2)*zoom+camY};}
-function fromIso(sx,sy){const cx=(sx-camX)/zoom,cy=(sy-camY)/zoom;return{x:Math.floor((cx/(TW/2)+cy/(TH/2))/2),y:Math.floor((cy/(TH/2)-cx/(TW/2))/2)};}
+function fromIso(sx,sy){const cx=(sx-camX)/zoom,cy=(sy-camY)/zoom;return{x:Math.round((cx/(TW/2)+cy/(TH/2))/2),y:Math.round((cy/(TH/2)-cx/(TW/2))/2)};}
 
 // === ASSET IMAGES (ComfyUI 생성 PNG) ===
 const IMG={};let IMG_READY=false,IMG_LOADED=0,IMG_TOTAL=0;
@@ -387,6 +387,7 @@ function place(g){
       const old=B[grid[g.y][g.x].t];
       money+=Math.floor((old.cost||0)*0.3);
       grid[g.y][g.x]={t:'empty',dmg:0};
+      if(window.INFO_close)INFO_close(g.x,g.y);
       window.playSfx('bull');
       popup('🗑️ 철거 완료 (환불 30%)',false);
     }
@@ -590,6 +591,7 @@ document.getElementById('bBull').onclick=()=>{bulldoze=!bulldoze;document.getEle
 document.getElementById('bDemo').onclick=()=>{
   if(!confirm('현재 도시를 지우고 예시 도시를 새로 만듭니다. 진행할까요?'))return;
   for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)grid[y][x]={t:'empty',dmg:0};
+  if(window.INFO_close)INFO_close();
   buildDemoCity();updUI();
 };
 
@@ -725,6 +727,7 @@ window.doLoad=(slot)=>{
     MIS_idx=data.MIS_idx||0;MIS_won=!!data.MIS_won;MIS_render(); // missions: restore objective progress
     if(data.cityName)document.getElementById('cityName').textContent=data.cityName;
     document.getElementById('saveModal').style.display='none';
+    if(window.INFO_close)INFO_close();
     popup('📂 불러오기 완료!',true);updUI();
   }catch(e){popup('불러오기 실패',false);}
 };
@@ -1241,6 +1244,10 @@ window.INFO_show=function(gx,gy){
   const b=B[cell.t];if(!b)return;
   const old=document.getElementById('INFO_card');if(old)old.remove();
   const card=document.createElement('div');card.id='INFO_card';
+  card.dataset.g=gx+','+gy;
+  // 툴바를 가리지 않도록 툴바 높이 위에 배치
+  const _tb=document.getElementById('toolbar');
+  if(_tb)card.style.bottom=(_tb.offsetHeight+10)+'px';
   const stats=[];
   if(b.inc)stats.push('💰 수입 +'+b.inc);
   if(b.pop)stats.push('👥 인구 +'+b.pop);
@@ -1269,6 +1276,11 @@ window.INFO_demolish=function(gx,gy){
     popup('🗑️ 철거 완료 (환불 30%)',false);updUI();
   }
   const c=document.getElementById('INFO_card');if(c)c.remove();
+};
+// 카드가 가리키는 칸이 사라졌을 때(철거/불러오기/데모) 스테일 카드 닫기
+window.INFO_close=function(gx,gy){
+  const c=document.getElementById('INFO_card');if(!c)return;
+  if(gx===undefined||c.dataset.g===gx+','+gy)c.remove();
 };
 function TUT_maybe(){
   let seen=false;try{seen=localStorage.getItem('simcity_v3_tut')==='1';}catch(e){}

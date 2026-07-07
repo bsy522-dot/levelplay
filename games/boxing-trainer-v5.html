@@ -105,7 +105,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 .hp-label{font-size:11px;font-weight:700;min-width:40px}
 .stamina-bar{width:120px;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
 .stamina-bar .fill{height:100%;background:var(--yellow);border-radius:3px;transition:width .2s}
-.combo-popup{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:30;font-size:48px;font-weight:900;color:var(--accent2);text-shadow:0 0 20px rgba(255,107,53,.6);pointer-events:none;opacity:0;transition:opacity .3s}
+.combo-popup{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);z-index:60;font-size:48px;font-weight:900;color:var(--accent2);text-shadow:0 0 20px rgba(255,107,53,.6);pointer-events:none;opacity:0;transition:opacity .3s}
 .combo-counter{position:fixed;top:55%;right:20px;z-index:20;font-size:18px;font-weight:700;color:var(--accent2);text-shadow:0 0 10px rgba(255,107,53,.4);pointer-events:none;opacity:0;transition:opacity .3s}
 .combo-counter.hidden{display:none}
 /* Mobile controls */
@@ -231,10 +231,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <div id="metJudge" style="font-size:18px;font-weight:700;min-height:30px;margin-top:8px"></div>
 <div id="metScore" style="font-size:13px;color:var(--dim);margin-top:8px">정확도: 0% (0/0) · 콤보: 0</div>
 <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;justify-content:center">
-  <button class="ctrl-btn atk" ontouchstart="metHit('jab')" onclick="metHit('jab')">잽</button>
-  <button class="ctrl-btn atk" ontouchstart="metHit('cross')" onclick="metHit('cross')">크로스</button>
-  <button class="ctrl-btn atk" ontouchstart="metHit('hook')" onclick="metHit('hook')">훅</button>
-  <button class="ctrl-btn atk" ontouchstart="metHit('uppercut')" onclick="metHit('uppercut')">어퍼컷</button>
+  <button class="ctrl-btn atk" ontouchstart="event.preventDefault();metHit('jab')" onclick="metHit('jab')">잽</button>
+  <button class="ctrl-btn atk" ontouchstart="event.preventDefault();metHit('cross')" onclick="metHit('cross')">크로스</button>
+  <button class="ctrl-btn atk" ontouchstart="event.preventDefault();metHit('hook')" onclick="metHit('hook')">훅</button>
+  <button class="ctrl-btn atk" ontouchstart="event.preventDefault();metHit('uppercut')" onclick="metHit('uppercut')">어퍼컷</button>
 </div>
 <button class="menu-btn" style="width:280px;margin-top:14px" onclick="stopMetronome()"><span class="icon">&#x23F9;</span> 종료</button>
 </div>
@@ -292,17 +292,17 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <!-- Mobile controls -->
 <div class="mobile-controls hidden" id="mobileControls">
 <div class="ctrl-row">
-<div class="ctrl-btn def" ontouchstart="playerDodge('slipL')" onclick="playerDodge('slipL')">슬립←</div>
-<div class="ctrl-btn def" ontouchstart="playerDodge('duck')" onclick="playerDodge('duck')">덕</div>
-<div class="ctrl-btn def" ontouchstart="playerDodge('slipR')" onclick="playerDodge('slipR')">슬립→</div>
-<div class="ctrl-btn def" ontouchstart="playerGuard('high')" ontouchend="releaseGuard()" onclick="playerGuard('high')">하이가드</div>
-<div class="ctrl-btn def" ontouchstart="playerGuard('low')" ontouchend="releaseGuard()" onclick="playerGuard('low')">로우가드</div>
+<div class="ctrl-btn def" ontouchstart="event.preventDefault();playerDodge('slipL')" onclick="playerDodge('slipL')">슬립←</div>
+<div class="ctrl-btn def" ontouchstart="event.preventDefault();playerDodge('duck')" onclick="playerDodge('duck')">덕</div>
+<div class="ctrl-btn def" ontouchstart="event.preventDefault();playerDodge('slipR')" onclick="playerDodge('slipR')">슬립→</div>
+<div class="ctrl-btn def" ontouchstart="event.preventDefault();playerGuard('high')" ontouchend="releaseGuard()" onclick="playerGuard('high')">하이가드</div>
+<div class="ctrl-btn def" ontouchstart="event.preventDefault();playerGuard('low')" ontouchend="releaseGuard()" onclick="playerGuard('low')">로우가드</div>
 </div>
 <div class="ctrl-row">
-<div class="ctrl-btn atk" ontouchstart="playerPunch('jab')" onclick="playerPunch('jab')">잽</div>
-<div class="ctrl-btn atk" ontouchstart="playerPunch('cross')" onclick="playerPunch('cross')">크로스</div>
-<div class="ctrl-btn atk" ontouchstart="playerPunch('hook')" onclick="playerPunch('hook')">훅</div>
-<div class="ctrl-btn atk" ontouchstart="playerPunch('uppercut')" onclick="playerPunch('uppercut')">어퍼컷</div>
+<div class="ctrl-btn atk" ontouchstart="event.preventDefault();playerPunch('jab')" onclick="playerPunch('jab')">잽</div>
+<div class="ctrl-btn atk" ontouchstart="event.preventDefault();playerPunch('cross')" onclick="playerPunch('cross')">크로스</div>
+<div class="ctrl-btn atk" ontouchstart="event.preventDefault();playerPunch('hook')" onclick="playerPunch('hook')">훅</div>
+<div class="ctrl-btn atk" ontouchstart="event.preventDefault();playerPunch('uppercut')" onclick="playerPunch('uppercut')">어퍼컷</div>
 </div>
 </div>
 
@@ -1573,7 +1573,7 @@ function _metBeat() {
     beat.style.background = 'rgba(230,57,70,.6)';
     setTimeout(() => { beat.style.transform = 'scale(1)'; beat.style.background = 'rgba(230,57,70,.2)'; }, 100);
   }
-  // 새 타겟 펀치 (4비트마다 변경)
+  // 새 타겟 펀치 (매 비트마다 변경)
   if (_metBeatIdx % 1 === 0) {
     _metCurrentTarget = _metSeqs[Math.floor(Math.random() * _metSeqs.length)];
     const labels = { jab: 'JAB', cross: 'CROSS', hook: 'HOOK', uppercut: 'UPPERCUT' };
@@ -2784,6 +2784,7 @@ function showLevelUp() {
 // ==================== TRAINING PROPS (3D 훈련 장비) ====================
 let heavybagProp = null, speedbagProp = null;
 let _trainPunch = null, _trainDodge = null;
+let _lastTrainTs = 0, _lastTrainAct = null; // 터치 이중입력 백업 가드 (touchstart+합성 click)
 
 function buildTrainProps() {
   const chainMat = new THREE.MeshStandardMaterial({ color: 0x8a8a8a, metalness: 0.85, roughness: 0.35 });
@@ -3003,6 +3004,12 @@ function trainingInput(action) {
   const t = currentTraining;
   if (!t || !t.active) return;
 
+  // 이중입력 백업 가드: 같은 동작이 60ms 내 재입력되면 무시 (preventDefault가 본 수정, 이건 안전망)
+  // 60ms 초과 금지 — '더블 잽(1-1)' 같은 인간 최속 연타(~150ms)를 잡아먹으면 안 됨
+  const _now = performance.now();
+  if (_lastTrainAct === action && _now - _lastTrainTs < 60) return;
+  _lastTrainTs = _now; _lastTrainAct = action;
+
   if (t.type === 'speedbag') {
     if (t.sbTarget) {
       t.score += 10; t.hits++; t.sbHit = true; setTimeout(() => { if (t) t.sbHit = false; }, 100); playPunch('light');
@@ -3032,6 +3039,8 @@ function trainingInput(action) {
         if (typeof playStep === 'function') playStep();
       } else {
         t.score += 10;
+        // 진행 중이던 슬립/덕 모션 즉시 종료 (동결 방지: 렌더가 펀치 우선이라 덕지가 중간각도로 얼어붙음)
+        if (_trainDodge) { _trainDodge = null; playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; }
         _trainPunch = { type: action, t: 0.35 };
         playPunch(action === 'hook' || action === 'uppercut' ? 'heavy' : 'light');
         if (heavybagProp) heavybagProp.userData.swing = Math.min(0.22, heavybagProp.userData.swing + 0.08);
@@ -3043,6 +3052,15 @@ function trainingInput(action) {
       }
     } else {
       t.misses++; t.hbIdx = 0;
+      // 오답이어도 입력한 동작의 모션+사운드는 재생 (판정만 미스 — 무반응 어색함 해소)
+      if (action === 'jab' || action === 'cross' || action === 'hook' || action === 'uppercut') {
+        if (_trainDodge) { _trainDodge = null; playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; }
+        _trainPunch = { type: action, t: 0.35 };
+        playPunch(action === 'hook' || action === 'uppercut' ? 'heavy' : 'light');
+      } else if (action === 'slipL' || action === 'slipR' || action === 'duck') {
+        _trainDodge = { type: action, t: 0.4 };
+        if (typeof playStep === 'function') playStep();
+      }
       showComboText('처음부터!');
     }
   } else if (t.type === 'jumprope') {
@@ -3260,9 +3278,11 @@ function update3DScene(time, dt) {
     if (_trainPunch && _trainPunch.t > 0) {
       _trainPunch.t = Math.max(0, _trainPunch.t - dt);
       animatePunch(playerModel, _trainPunch.type, 1 - _trainPunch.t / 0.35, false);
+      if (_trainPunch.t === 0) _trainPunch = null; // 종료 프레임에 정리 (본 포즈는 resetBoxerPose가 매 프레임 복원)
     } else if (_trainDodge && _trainDodge.t > 0) {
       _trainDodge.t = Math.max(0, _trainDodge.t - dt);
       applyDodgePoseTrain(playerModel, _trainDodge.type, 1 - _trainDodge.t / 0.4);
+      if (_trainDodge.t === 0) { _trainDodge = null; playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; } // 잔존 기울기/높이 명시 복원
     } else {
       animateBoxerIdle(playerModel, time);
     }
