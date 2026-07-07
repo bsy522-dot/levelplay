@@ -15,6 +15,16 @@ const TYPE_SPEED_MS = 30;
 let _el = null;
 let _current = null;
 
+// 대화 표시 중 화면 전체 탭 진행에서 제외할 인터랙티브 요소
+// (버튼/메뉴/디패드/설정/오버레이 위 탭은 대화 진행으로 처리하지 않음)
+const INTERACTIVE_GUARD_SELECTOR = [
+  'button', 'a', 'input', 'select', 'textarea', 'label',
+  '[role="button"]',
+  '#v8-hud',
+  '#v8-dpad-root',
+  '.v8-overlay',
+].join(',');
+
 function _ensureBigPortraitStyles() {
   if (document.getElementById('v8-dlg-bp-style')) return;
   const s = document.createElement('style');
@@ -144,6 +154,7 @@ export class DialogueRunner {
     this.typingTimer = null;
     this._onClick = this._onClick.bind(this);
     this._onKey = this._onKey.bind(this);
+    this._onDocTap = this._onDocTap.bind(this);
     this.disposed = false;
   }
 
@@ -154,7 +165,11 @@ export class DialogueRunner {
     }
     _current = this;
     this.el.classList.add('v8-visible');
-    this.el.addEventListener('click', this._onClick);
+    // 대화 표시 중에는 화면 어디를 탭해도 진행 — 단, 버튼/메뉴/dpad/설정 등
+    // 인터랙티브 요소 위 탭은 제외(INTERACTIVE_GUARD_SELECTOR로 가드).
+    // bubble 단계에 document에서 잡으므로, canvas 등 하위 핸들러가 먼저 실행되어
+    // isDialogueActive()로 양보한 뒤에야 대화가 진행된다.
+    document.addEventListener('click', this._onDocTap);
     window.addEventListener('keydown', this._onKey);
     this._advance();
   }
@@ -177,6 +192,15 @@ export class DialogueRunner {
     } else {
       this._advance();
     }
+  }
+
+  // 화면 전체 탭 진행 — 대화 표시 중 + 인터랙티브 요소가 아닐 때만
+  _onDocTap(e) {
+    if (this.disposed) return;
+    if (!this.el.classList.contains('v8-visible')) return;
+    const t = e && e.target;
+    if (t && t.closest && t.closest(INTERACTIVE_GUARD_SELECTOR)) return;
+    this._onClick();
   }
 
   _advance() {
@@ -259,7 +283,7 @@ export class DialogueRunner {
     this.el.classList.remove('v8-visible');
     const bp = document.getElementById('v8-dlg-bigportrait');
     if (bp) bp.classList.remove('v8-show');
-    this.el.removeEventListener('click', this._onClick);
+    document.removeEventListener('click', this._onDocTap);
     window.removeEventListener('keydown', this._onKey);
     if (_current === this) _current = null;
     if (this.onComplete) {

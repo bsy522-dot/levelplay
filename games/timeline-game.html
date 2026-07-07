@@ -66,6 +66,30 @@ h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
 <script>
 'use strict';
 
+// Sound FX: WebAudio, lazy-created on first user input (autoplay policy)
+let sndCtx=null;
+function sndGet(){
+  try{
+    if(!sndCtx)sndCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(sndCtx.state==='suspended')sndCtx.resume();
+    return sndCtx;
+  }catch(e){return null;}
+}
+function sndTone(freq,dur,type,vol,delay){
+  const ac=sndGet();if(!ac)return;
+  try{
+    const t=ac.currentTime+(delay||0);
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g);g.connect(ac.destination);
+    o.start(t);o.stop(t+dur);
+  }catch(e){}
+}
+function playCorrectSound(){sndTone(523.25,0.15,'sine',0.12,0);sndTone(783.99,0.22,'sine',0.12,0.12);}
+function playWrongSound(){sndTone(140,0.3,'square',0.1,0);}
+
 const KOREA_EVENTS=[
 {year:668,title:'삼국통일 (신라)',desc:'신라가 백제와 고구려를 멸망시키고 한반도를 통일했습니다.',era:'고대'},
 {year:918,title:'고려 건국',desc:'왕건이 고려를 세우고 후삼국을 통일했습니다.',era:'고려'},
@@ -272,6 +296,7 @@ function checkAnswer(){
   }
   const pts=correct*10;
   score+=pts;totalCorrect+=correct;totalPossible+=slots.length;
+  if(correct===slots.length)playCorrectSound();else playWrongSound();
   setTimeout(()=>{showRoundInfo(correct);},800);
 }
 

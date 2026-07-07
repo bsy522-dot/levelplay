@@ -89,10 +89,15 @@ function tone(f,d,type,g){ if(!ACTX)return; const o=ACTX.createOscillator(),v=AC
 document.addEventListener('pointerdown',ensureAudio);
 document.addEventListener('keydown',ensureAudio);
 const LANE_TONES=[523,659,784,988];
+// 곡별 실제 멜로디 음높이(Hz) — 노트를 히트한 순서대로 재생(노트 수>멜로디 길이면 인덱스 순환)
+// 출처: noraebang-v4 수록곡 멜로디를 한 옥타브 올려 밝은 음역으로 정리
+const MELODY_SCHOOL=[784,784,880,880,784,784,659, 784,784,659,659,587, 784,784,880,880,784,784,659, 784,659,587,659,523]; // 학교종 (솔솔라라솔솔미…)
+const MELODY_ARIRANG=[440,523,587, 659,587,523, 440,523,440,392, 659,587,523, 440,523,523, 587,523,440, 440,523,587,659, 587,523,440, 523,523, 587,659,587,523, 440,523,440, 440]; // 아리랑
+const MELODY_CANON=[740,659,587,554,494,440,494,554]; // 캐논(파헬벨) 주제: F#5 E5 D5 C#5 B4 A4 B4 C#5
 
 // 곡 데이터: [시간(ms), 레인(0-3)]
 // 곡1: 학교종 (쉬움, BPM 100 = 600ms per beat)
-const SONG_SCHOOL = {name:'학교종',emoji:'🔔',bpm:100,diff:'쉬움',
+const SONG_SCHOOL = {name:'학교종',emoji:'🔔',bpm:100,diff:'쉬움',melody:MELODY_SCHOOL,
 notes:[
 // 학교 종이 땡땡땡
 [0,0],[600,1],[1200,2],[1800,3],
@@ -121,7 +126,7 @@ notes:[
 ]};
 
 // 곡2: 아리랑 (보통, BPM 120 = 500ms per beat)
-const SONG_ARIRANG = {name:'아리랑',emoji:'🏔️',bpm:120,diff:'보통',
+const SONG_ARIRANG = {name:'아리랑',emoji:'🏔️',bpm:120,diff:'보통',melody:MELODY_ARIRANG,
 notes:[
 // 아리랑 아리랑
 [0,0],[500,1],[1000,2],[1500,1],[2000,0],
@@ -164,7 +169,7 @@ notes:[
 ]};
 
 // 곡3: 캐논 (어려움, BPM 140 = ~428ms per beat)
-const SONG_CANON = {name:'캐논',emoji:'🎻',bpm:140,diff:'어려움',
+const SONG_CANON = {name:'캐논',emoji:'🎻',bpm:140,diff:'어려움',melody:MELODY_CANON,
 notes:(function(){
 const b=60000/140;const n=[];let t=0;
 // 캐논 베이스 패턴 반복
@@ -203,6 +208,7 @@ const JUDGE_PERFECT=50,JUDGE_GREAT=100,JUDGE_GOOD=150;
 let songIdx=0,gameActive=false,score=0,combo=0,maxCombo=0;
 let perfects=0,greats=0,goods=0,misses=0;
 let notes=[],startTime=0,animId=null,stageH=0;
+let melodyIdx=0; // 히트 순서 멜로디 재생 인덱스
 const NOTE_TRAVEL=2000; // ms for note to travel from top to hit zone
 
 function sendXP(amount){try{window.parent.postMessage({type:'xp',amount:amount,source:'rhythm-game'},'*');}catch(e){}}
@@ -237,7 +243,7 @@ function startGame(s){
   ensureAudio();
   songIdx=s;
   const song=SONGS[s];
-  score=0;combo=0;maxCombo=0;perfects=0;greats=0;goods=0;misses=0;
+  score=0;combo=0;maxCombo=0;perfects=0;greats=0;goods=0;misses=0;melodyIdx=0;
   notes=song.notes.map(([t,l])=>({time:t,lane:l,el:null,judged:false}));
 
   document.getElementById('menuScreen').style.display='none';
@@ -342,7 +348,10 @@ function hitLane(lane){
     if(best.el){best.el.classList.add('miss-anim');setTimeout(()=>{if(best.el&&best.el.parentNode)best.el.remove();},300);}
     return;
   }
-  tone(LANE_TONES[lane],.12,'triangle',0.10); // 히트 레인별 음 → 곡 느낌
+  // 히트 순서대로 곡 멜로디 음 재생 (노트 수>멜로디 길이면 순환) → 곡명과 실제 멜로디 일치
+  const _mel=SONGS[songIdx].melody;
+  if(_mel&&_mel.length){tone(_mel[melodyIdx%_mel.length],.12,'triangle',0.10);melodyIdx++;}
+  else{tone(LANE_TONES[lane],.12,'triangle',0.10);}
 
   combo++;
   if(combo>maxCombo)maxCombo=combo;

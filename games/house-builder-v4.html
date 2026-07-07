@@ -995,8 +995,15 @@ function placeRoom(x,z){
   const rt=ROOMS.find(r=>r.id===selRoomType);if(!rt)return;
   const cost=Math.round(rt.cost*MAT_COSTS[curMaterial]);
   if(budget<cost){status('💰 예산 부족!');return;}
+  const nx=x-Math.floor(rt.w/2),nz=z-Math.floor(rt.h/2);
+  // 같은 층 기존 방과 겹침 검사 — 내부가 겹치면 거부(모서리 접촉=인접 배치는 허용)
+  for(const r of rooms[currentFloor]){
+    if(nx<r.x+r.w&&nx+rt.w>r.x&&nz<r.z+r.h&&nz+rt.h>r.z){
+      status('🚫 다른 방과 겹쳐요! 빈 잔디밭에 놓아요');return;
+    }
+  }
   saveUndo();budget-=cost;
-  const room={id:nextId++,type:rt.id,x:x-Math.floor(rt.w/2),z:z-Math.floor(rt.h/2),w:rt.w,h:rt.h,
+  const room={id:nextId++,type:rt.id,x:nx,z:nz,w:rt.w,h:rt.h,
     wallColor:curWallColor.h,floorColor:curFloorType.c,floorType:curFloorType.id,
     material:curMaterial,windowStyle:curWindowStyle,furniture:[]};
   rooms[currentFloor].push(room);

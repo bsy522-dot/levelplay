@@ -953,6 +953,7 @@ function submitManualSwing() {
   analyzeSwing(data);
 }
 let currentRound = null;
+let _lastRoundSaveKey = null, _roundSaveLock = false; // 라운드 중복 저장 가드
 function getDefaultPars() {
   return [4,4,3,5,4,4,3,5,4, 4,3,5,4,4,3,4,5,4];
 }
@@ -1120,10 +1121,18 @@ function renderRoundSummary() {
 }
 function saveRound() {
   if (!currentRound) return;
+  if (_roundSaveLock) return; // 저장 직후 2초 잠금 — 버튼 연타 중복 저장 방지
+  const saveKey = JSON.stringify(currentRound.holes)+'|'+currentRound.course+'|'+currentRound.date;
+  if (saveKey === _lastRoundSaveKey) return; // 직전 저장과 동일 데이터면 무시
   const rounds = JSON.parse(localStorage.getItem('golfRounds')||'[]');
   currentRound.id = Date.now();
   rounds.unshift(currentRound);
   localStorage.setItem('golfRounds', JSON.stringify(rounds));
+  _lastRoundSaveKey = saveKey;
+  _roundSaveLock = true;
+  const _sb = document.getElementById('save-round-btn');
+  if (_sb) _sb.disabled = true;
+  setTimeout(()=>{ _roundSaveLock = false; const b=document.getElementById('save-round-btn'); if(b) b.disabled=false; }, 2000);
   playSound('success');
   renderRunningScore(); // Update handicap
   alert('라운드가 저장되었습니다!');

@@ -488,10 +488,11 @@ function drawRecipeList(){
 let holdProgress=0,holdTarget=3,ingredientSlots=[],stepComplete=false,ingredientPhase=true;
 let correctCount=0,totalPossible=0;
 let cookExitConfirm=false;   // 요리 중 나가기 모달 (C-3)
+let lastTapTiming=null;      // tap 타이밍 결과('green'|'miss') — 완료 피드백 표시용
 
 function startCooking(recipe){
  currentRecipe=recipe;cookStep=0;cookScore=0;
- selectedIngredients=[];stepTimer=0;holdProgress=0;
+ selectedIngredients=[];stepTimer=0;holdProgress=0;lastTapTiming=null;
  stepComplete=false;ingredientPhase=true;correctCount=0;
  totalPossible=recipe.ingredients.length;dragItem=null;
  particles=[];state='cooking';
@@ -730,11 +731,27 @@ function drawCookingStep(){
    }
   }
  }else{
-  // Tap (비상구 ✕ 영역은 제외 — 탭 단계에서 ✕를 눌러도 단계가 완료돼버리던 문제)
-  if(tapped&&!stepComplete&&!cookExitConfirm&&!hitTest(W-48,H*.045,40,40,tapX,tapY)){
-   stepComplete=true;cookScore+=20;playSound('chop');
-   addParticle(tapX,tapY,'star');
-   tapped=false;
+  // Tap: 좌우 왕복 타이밍 인디케이터 바 — 초록 존(넓게, 유아 친화)에서 탭하면 보너스, 밖이면 소폭 감점
+  // (비상구 ✕ 영역은 제외 — 탭 단계에서 ✕를 눌러도 단계가 완료돼버리던 문제)
+  if(!stepComplete&&!cookExitConfirm){
+   const trkX=W*.12,trkW=W*.76,trkY=H*.62,trkH=20;
+   const greenW=trkW*0.6,gz0=trkX+(trkW-greenW)/2,gz1=gz0+greenW; // 초록 존 = 트랙의 가운데 60%
+   const per=1.4,ph=(animT%per)/per,tri=ph<0.5?ph*2:2-ph*2,indX=trkX+tri*trkW; // 삼각파 좌우 왕복
+   drawText('타이밍 맞춰 탭! 🎯',W/2,trkY-12,12,'#E65100','center',true);
+   drawRoundRect(trkX,trkY,trkW,trkH,10,'#ECEFF1','#B0BEC5');
+   drawRoundRect(gz0,trkY,greenW,trkH,10,'rgba(76,175,80,.35)','#4CAF50');
+   X.fillStyle='#FF5252';X.beginPath();X.arc(indX,trkY+trkH/2,11,0,Math.PI*2);X.fill();
+   X.strokeStyle='#fff';X.lineWidth=2;X.stroke();
+   if(tapped&&!hitTest(W-48,H*.045,40,40,tapX,tapY)){
+    const inGreen=indX>=gz0&&indX<=gz1;
+    stepComplete=true;
+    cookScore+=inGreen?26:15; // 기본 완료 +20 기준: 초록 존 +6 보너스 / 밖 -5 감점
+    lastTapTiming=inGreen?'green':'miss';
+    playSound(inGreen?'ding':'chop');
+    addParticle(tapX,tapY,'star');
+    if(inGreen)addParticle(W/2,H*.45,'star');
+    tapped=false;
+   }
   }
  }
 
@@ -746,11 +763,15 @@ function drawCookingStep(){
  // Next step button
  if(stepComplete){
   drawText('✅ 완료!',W/2,H*.15,20,'#4CAF50','center',true);
+  if(stype!=='hold'&&stype!=='drag'&&lastTapTiming){
+   const _ok=lastTapTiming==='green';
+   drawText(_ok?'🎯 완벽한 타이밍! +6':'조금 빗나갔어요 -5',W/2,H*.115,13,_ok?'#2E7D32':'#EF6C00','center',true);
+  }
   const nbw=160,nbh=40;
   regBtn(W/2-nbw/2,H*.18,nbw,nbh,isLast?'요리 완성!':'다음 단계 →','#4CAF50');
   btns[btns.length-1].action=()=>{
    if(isLast){finishCooking();}
-   else{cookStep++;holdProgress=0;stepComplete=false;dragItem=null;}
+   else{cookStep++;holdProgress=0;stepComplete=false;dragItem=null;lastTapTiming=null;}
   };
  }
 
@@ -911,7 +932,7 @@ function drawRestaurant(){
    correctCount=c.recipe.ingredients.length;
    totalPossible=c.recipe.ingredients.length;
    ingredientPhase=false;cookStep=0;holdProgress=0;stepComplete=false;
-   cookScore=0;dragItem=null;
+   cookScore=0;dragItem=null;lastTapTiming=null;
    state='cooking_restaurant';customers.splice(i,1);
    break;
   }

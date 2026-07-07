@@ -54,6 +54,30 @@ h1{text-align:center;font-size:24px;margin:8px 0;color:#FFD700}
 <script>
 'use strict';
 
+// Sound FX: WebAudio, lazy-created on first user input (autoplay policy)
+let sndCtx=null;
+function sndGet(){
+  try{
+    if(!sndCtx)sndCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(sndCtx.state==='suspended')sndCtx.resume();
+    return sndCtx;
+  }catch(e){return null;}
+}
+function sndTone(freq,dur,type,vol,delay){
+  const ac=sndGet();if(!ac)return;
+  try{
+    const t=ac.currentTime+(delay||0);
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g);g.connect(ac.destination);
+    o.start(t);o.stop(t+dur);
+  }catch(e){}
+}
+function playCorrectSound(){sndTone(523.25,0.15,'sine',0.12,0);sndTone(783.99,0.22,'sine',0.12,0.12);}
+function playWrongSound(){sndTone(140,0.3,'square',0.1,0);}
+
 const LEVELS=[
   {name:'3단어',words:3,emoji:'🟢',cls:'l1'},
   {name:'5단어',words:5,emoji:'🔵',cls:'l2'},
@@ -200,11 +224,13 @@ function submitAnswer(){
   const attempt=placedOrder.map(id=>currentWords.find(w=>w.id===id).text);
   const isCorrect=attempt.every((w,i)=>w===currentAnswer[i]);
   if(isCorrect){
+    playCorrectSound();
     correct++;score+=LEVELS[lvl].words*10;
     feedbackText='✅ 정답!';showTranslation=true;
     render();
     setTimeout(()=>{qIdx++;loadQuestion();render();},2000);
   }else{
+    playWrongSound();
     feedbackText='❌ 틀렸습니다. 다시 시도하세요!';showTranslation=false;
     render();
   }

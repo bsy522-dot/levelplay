@@ -45,7 +45,8 @@ canvas{display:block}
 .upgrade-item{display:flex;justify-content:space-between;align-items:center;padding:10px;margin:6px 0;background:rgba(20,30,60,0.7);border-radius:8px;border:1px solid #334}
 .upgrade-item .cost{color:#ffd700;font-size:13px}
 #explore-surface{position:absolute;top:0;left:0;width:100%;height:100%;display:none}
-#nav-btns{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#nav-btns{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:min(340px,calc(100% - 16px));display:flex;gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:none}
+#nav-btns .btn{pointer-events:auto;padding:7px 12px;font-size:13px}
 #menu-bar{position:absolute;top:50px;right:8px;display:flex;flex-direction:column;gap:6px}
 .close-btn{position:absolute;top:10px;right:14px;background:none;border:none;color:#f66;font-size:22px;cursor:pointer}
 #toast{position:absolute;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,80,0,0.85);color:#0f0;padding:10px 20px;border-radius:8px;font-size:14px;display:none;z-index:99;border:1px solid #0a0}
@@ -467,11 +468,11 @@ function drawSurface(){
  // draw to main
  ctx.drawImage(surfaceCanvas,0,0);
  // planet info overlay
- ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,H-120,W,120);
- ctx.fillStyle='#ffd700';ctx.font='bold 16px sans-serif';ctx.textAlign='center';
- ctx.fillText(`${p.icon} ${p.name} 표면 탐사`,W/2,H-95);
+ ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,H-135,W,135);
+ ctx.fillStyle='#ffd700';ctx.font='bold 15px sans-serif';ctx.textAlign='center';
+ ctx.fillText(`${p.icon} ${p.name} 표면 탐사`,W/2,H-112);
  ctx.fillStyle='#8899bb';ctx.font='12px sans-serif';
- ctx.fillText('← → 이동 | 💎에 가까이 가서 채집 | 아래 버튼 사용',W/2,H-75);
+ ctx.fillText('← → 이동 | 💎에 가까이 가서 채집 | 아래 버튼 사용',W/2,H-93);
 }
 
 // ===== TRAVEL ANIMATION =====

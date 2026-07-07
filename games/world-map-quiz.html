@@ -56,11 +56,39 @@ h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
 .hidden{display:none!important}
 .stars{font-size:36px;margin:4px 0}
 .best-record{font-size:14px;color:#888}
+.cand-sheet{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:92%;max-width:400px;max-height:70vh;overflow-y:auto;background:#1e2a45;border:2px solid #7FDBFF;border-radius:16px;padding:14px;z-index:101;box-shadow:0 8px 32px rgba(0,0,0,0.6)}
+.cand-title{font-size:14px;color:#aaa;text-align:center;margin-bottom:6px}
+.cand-btn{display:block;width:100%;min-height:48px;padding:10px 14px;margin:6px 0;font-size:18px;font-weight:700;border:2px solid #444;border-radius:12px;background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;text-align:left}
+.cand-btn:active{transform:scale(0.97);border-color:#FFD700}
 </style>
 </head><body>
 <div class="wrap" id="app"></div>
 <script>
 'use strict';
+
+// Sound FX: WebAudio, lazy-created on first user input (autoplay policy)
+let sndCtx=null;
+function sndGet(){
+  try{
+    if(!sndCtx)sndCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(sndCtx.state==='suspended')sndCtx.resume();
+    return sndCtx;
+  }catch(e){return null;}
+}
+function sndTone(freq,dur,type,vol,delay){
+  const ac=sndGet();if(!ac)return;
+  try{
+    const t=ac.currentTime+(delay||0);
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g);g.connect(ac.destination);
+    o.start(t);o.stop(t+dur);
+  }catch(e){}
+}
+function playCorrectSound(){sndTone(523.25,0.15,'sine',0.12,0);sndTone(783.99,0.22,'sine',0.12,0.12);}
+function playWrongSound(){sndTone(140,0.3,'square',0.1,0);}
 
 const CONTINENTS=[
   {name:'아시아',x:70,y:30},{name:'유럽',x:48,y:20},{name:'북미',x:18,y:28},
@@ -223,9 +251,39 @@ function continentTap(e){
   const i=nearestIdx(CONTINENTS,svgPoint(e),14);
   if(i>=0)answerContinent(i);
 }
+const CAND_RADIUS=8;
+function candidatesWithin(pt,r){
+  const r2=r*r,arr=[];
+  COUNTRIES.forEach((c,i)=>{const dx=c.x-pt.x,dy=c.y-pt.y;const d=dx*dx+dy*dy;if(d<r2)arr.push({i,d});});
+  arr.sort((a,b)=>a.d-b.d);
+  return arr.map(o=>o.i);
+}
 function mapTap(e){
-  const i=nearestIdx(COUNTRIES,svgPoint(e),8);
-  if(i>=0)answerMap(i);
+  if(answered)return;
+  const pt=svgPoint(e);
+  const cands=candidatesWithin(pt,CAND_RADIUS);
+  if(cands.length===0)return;
+  if(cands.length===1){answerMap(cands[0]);return;}
+  showCandSheet(cands);
+}
+function removeCandSheet(){
+  const ov=document.getElementById('candOverlay');if(ov)ov.remove();
+  const s=document.getElementById('candSheet');if(s)s.remove();
+}
+function showCandSheet(cands){
+  removeCandSheet();
+  const ov=document.createElement('div');
+  ov.className='overlay';ov.id='candOverlay';ov.style.background='transparent';
+  ov.onclick=removeCandSheet;
+  const sheet=document.createElement('div');
+  sheet.className='cand-sheet';sheet.id='candSheet';
+  const btns=cands.map(i=>`<button class="cand-btn" onclick="confirmCand(${i})">${COUNTRIES[i].flag} ${COUNTRIES[i].name}</button>`).join('');
+  sheet.innerHTML=`<div class="cand-title">어느 나라를 선택하셨나요? (바깥을 누르면 취소)</div>${btns}`;
+  document.body.appendChild(ov);document.body.appendChild(sheet);
+}
+function confirmCand(i){
+  removeCandSheet();
+  answerMap(i);
 }
 
 function renderMapContinent(){
@@ -251,9 +309,11 @@ function answerContinent(idx){
   answered=true;
   const q=questions[qIdx];
   if(CONTINENTS[idx].name===q.name){
+    playCorrectSound();
     score+=10+streak*2;streak++;correctCount++;
     showSimpleInfo(q.name,'✅ 정답!',true);
   }else{
+    playWrongSound();
     streak=0;
     showSimpleInfo(q.name+' (오답: '+CONTINENTS[idx].name+')','❌ 오답!',false);
   }
@@ -313,8 +373,10 @@ function answerMap(idx){
   const clicked=COUNTRIES[idx];
   const dot=document.getElementById('dot'+idx);
   if(clicked.name===c.name){
+    playCorrectSound();
     dot.classList.add('correct');score+=10+streak*2;streak++;correctCount++;showInfo(c,true);
   }else{
+    playWrongSound();
     dot.classList.add('wrong');
     const ci=COUNTRIES.findIndex(x=>x.name===c.name);
     document.getElementById('dot'+ci).classList.add('correct');
@@ -333,8 +395,10 @@ function answerChoice(idx,val){
   else if(df.type==='flag_capital') isCorrect=(val===c.name);
 
   if(isCorrect){
+    playCorrectSound();
     btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;showInfo(c,true);
   }else{
+    playWrongSound();
     btn.classList.add('wrong');
     document.querySelectorAll('.ch-btn').forEach(b=>{
       if(df.type==='capital'&&b.textContent===c.capital) b.classList.add('correct');
@@ -349,8 +413,10 @@ function answerStats(idx,isCorrect){
   answered=true;
   const btn=document.getElementById('ch'+idx);
   if(isCorrect){
+    playCorrectSound();
     btn.classList.add('correct');score+=10+streak*2;streak++;correctCount++;
   }else{
+    playWrongSound();
     btn.classList.add('wrong');
     document.getElementById('ch'+(1-idx)).classList.add('correct');
     streak=0;
@@ -399,7 +465,7 @@ function renderResult(app){
 function goMenu(){screen='menu';render();}
 window.startDiff=startDiff;window.answerMap=answerMap;window.answerChoice=answerChoice;
 window.answerContinent=answerContinent;window.answerStats=answerStats;
-window.nextQ=nextQ;window.goMenu=goMenu;
+window.nextQ=nextQ;window.goMenu=goMenu;window.confirmCand=confirmCand;window.mapTap=mapTap;window.continentTap=continentTap;
 render();
 </script>
 </body></html>

@@ -57,6 +57,31 @@ html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-famil
 <script>
 'use strict';
 
+// Sound FX: WebAudio, lazy-created on first user input (autoplay policy)
+let sndCtx=null;
+function sndGet(){
+  try{
+    if(!sndCtx)sndCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(sndCtx.state==='suspended')sndCtx.resume();
+    return sndCtx;
+  }catch(e){return null;}
+}
+function sndTone(freq,dur,type,vol,delay){
+  const ac=sndGet();if(!ac)return;
+  try{
+    const t=ac.currentTime+(delay||0);
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    o.connect(g);g.connect(ac.destination);
+    o.start(t);o.stop(t+dur);
+  }catch(e){}
+}
+function playFlipSound(){sndTone(880,0.05,'triangle',0.1,0);}
+function playMatchSound(){sndTone(659.25,0.12,'sine',0.12,0);sndTone(987.77,0.2,'sine',0.12,0.1);}
+function playWrongSound(){sndTone(140,0.3,'square',0.1,0);}
+
 // 모드1: 이모지 매칭
 const EMOJI_PAIRS=['🍎','🍊','🍋','🍇','🍓','🍑','🍒','🥝','🌻','🌹','🦋','🐶','🐱','🐻','🐼','🦊','🐸','🐰','🌈','⭐','🎵','🎨','🚗','✈️','🏠','🎂','⚽','🎸'];
 
@@ -218,6 +243,7 @@ function flipCard(idx){
 
   flipped.push(idx);
   flips++;
+  playFlipSound();
 
   // Re-render to show flip
   renderGame(document.getElementById('app'));
@@ -228,6 +254,7 @@ function flipCard(idx){
     if(cards[a].pairId===cards[b].pairId){
       // Match!
       setTimeout(()=>{
+        playMatchSound();
         cards[a].matched=true;
         cards[b].matched=true;
         matched++;
@@ -242,6 +269,7 @@ function flipCard(idx){
     } else {
       // No match
       setTimeout(()=>{
+        playWrongSound();
         flipped=[];
         locked=false;
         renderGame(document.getElementById('app'));

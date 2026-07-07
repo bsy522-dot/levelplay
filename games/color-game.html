@@ -91,6 +91,26 @@ let questions=[], currentDiff=0;
 
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 function sendXP(amount){try{window.parent.postMessage({type:'xp',amount:amount,source:'color-game'},'*');}catch(e){}}
+// 효과음: WebAudio 인라인, 첫 사용자 입력 시 lazy 생성 (외부 파일 없음)
+let sndCtx=null;
+function sndInit(){
+  if(!sndCtx){try{sndCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}}
+  if(sndCtx&&sndCtx.state==='suspended'){try{sndCtx.resume();}catch(e){}}
+  return sndCtx;
+}
+function sndTone(freq,delay,dur,type,vol){
+  const ac=sndCtx;if(!ac)return;
+  const o=ac.createOscillator(),g=ac.createGain();
+  o.type=type;o.frequency.value=freq;
+  const t=ac.currentTime+delay;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(vol,t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(ac.destination);
+  o.start(t);o.stop(t+dur+0.05);
+}
+function sndCorrect(){if(!sndInit())return;sndTone(523.25,0,0.16,'sine',0.12);sndTone(783.99,0.11,0.22,'sine',0.12);}
+function sndWrong(){if(!sndInit())return;sndTone(150,0,0.28,'square',0.1);}
 
 function getBest(diff){
   try{return JSON.parse(localStorage.getItem('color_best_'+diff))||{stars:0,score:0,pct:0};}catch(e){return{stars:0,score:0,pct:0};}
@@ -232,8 +252,10 @@ function answer(btn,sel,ans){
   if(isCorrect){
     btn.classList.add('correct');correct++;streak++;score+=10+(streak>1?streak*2:0);
     sendXP(3);
+    sndCorrect();
   }else{
     btn.classList.add('wrong');streak=0;
+    sndWrong();
     [...btn.parentElement.children].forEach(b=>{
       if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("answer(this,'"+ans+"'")) b.classList.add('correct');
     });

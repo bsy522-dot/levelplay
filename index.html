@@ -929,6 +929,22 @@ function playSim(u,n){document.getElementById('moB').innerHTML='<div id="simSpn"
 const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8b/index.html']);
 function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();var _u=u+(u.indexOf('?')>=0?'&':'?')+'_cb='+Date.now();if(_3D_GAMES.has(u)){window.open(_u,'_blank');return;}document.getElementById('gT').textContent=n;document.getElementById('gF').src=_u;document.getElementById('gO').classList.add('sh');}
 function cG(){document.getElementById('gO').classList.remove('sh');document.getElementById('gF').src='';}
+/* 게임 XP 수신 브릿지: 게임 오버레이 iframe에서 온 {type:'xp',amount,source} 메시지만 인정(위조 source 차단) */
+window.addEventListener('message',function(e){
+  try{
+    var d=e.data;if(!d||d.type!=='xp')return;
+    var _gO=document.getElementById('gO'),_gF=document.getElementById('gF');
+    if(!_gO||!_gF)return;
+    if(!_gO.classList.contains('sh'))return;              // 오버레이가 열려 있을 때만
+    if(e.source!==_gF.contentWindow)return;               // 게임 iframe에서 온 것만
+    var raw=Number(d.amount);if(!isFinite(raw))return;
+    var amt=Math.max(1,Math.min(300,Math.round(raw)));    // 1~300 클램프
+    var src=(typeof d.source==='string'&&d.source)?d.source:'게임';
+    if(typeof xp==='function')xp(amt,'게임 보상: '+src);  // 기존 XP/레벨 루틴 재사용
+    if(typeof checkBadges==='function')checkBadges();      // 업적 갱신
+    if(typeof toast==='function')toast('+'+amt+' XP');
+  }catch(err){}
+});
 
 Object.defineProperty(Array.prototype,'shuffle',{value:function(){for(var i=this.length-1;i>0;i--){var j=Math.random()*(i+1)|0,t=this[i];this[i]=this[j];this[j]=t;}return this;},enumerable:false,writable:true,configurable:true});
 function getQuiz(){if(U.kidMode){return QUIZ.filter(q=>!q.age||q.age!=='adult');}return QUIZ;}
@@ -3572,5 +3588,6 @@ function lpHandleBack(){
 <script src="v11_patch.js" defer></script>
 <script src="v12_patch.js" defer></script>
 <script src="v13_patch.js" defer></script>
+<script src="nav_unify.js" defer></script>
 </body>
 </html>

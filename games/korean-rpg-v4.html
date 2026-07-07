@@ -1680,7 +1680,21 @@ function nextED(){
   const ev=evts[Math.floor(Math.random()*evts.length)];
   $('endurance-prompt').textContent=ev.p;
   const btn=$('endurance-btn');btn.style.display='none';
-  setTimeout(()=>{btn.style.display='block';btn.onclick=()=>{G.endHP-=ev.l*(.5+Math.random()*.5);if(G.endHP<0)G.endHP=0;sfx('def');$('endurance-prompt').textContent='인내 성공!';btn.style.display='none';setTimeout(nextED,800)}},500+Math.random()*800)
+  setTimeout(()=>{btn.style.display='block';btn.onclick=()=>{G.endHP-=ev.l*(.5+Math.random()*.5);if(G.endHP<=0){G.endHP=0;endFail();return}sfx('def');$('endurance-prompt').textContent=`인내 성공! (인내심 ${Math.ceil(G.endHP)})`;btn.style.display='none';setTimeout(nextED,800)}},500+Math.random()*800)
+}
+// 인내심(endHP) 소진 → 시련 실패 연출 + 재도전 분기
+function endFail(){
+  const btn=$('endurance-btn');btn.style.display='none';
+  $('endurance-fill').style.width='0%';
+  $('endurance-prompt').textContent='😣 인내심이 바닥났다... 유혹에 무너지고 말았다!';
+  sfx('lose');
+  setTimeout(()=>{
+    $('endurance-game').classList.remove('on');
+    startDlg([
+      {s:'웅녀',t:'아... 결국 유혹을 이기지 못했어요.'},
+      {s:'',t:'하지만 포기하지 않으면 다시 도전할 수 있다. 처음부터 21일을 다시 견뎌보자!'}
+    ],()=>{startEndurance()});
+  },1400);
 }
 
 // --- Quiz System ---

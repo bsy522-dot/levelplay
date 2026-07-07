@@ -209,8 +209,8 @@ const PARTS=[
 ];
 
 const UPGRADES=[
- {id:'suit1',name:'우주복 Mk2',desc:'행성 탐사 시간 +50%',cost:100,type:'suit',level:1},
- {id:'suit2',name:'우주복 Mk3',desc:'극한 환경 내성',cost:250,type:'suit',level:2},
+ {id:'suit1',name:'연료탱크 확장 Mk2',desc:'최대 연료 +20',cost:100,type:'suit',level:1},
+ {id:'suit2',name:'연료탱크 확장 Mk3',desc:'최대 연료 +40 (누적)',cost:250,type:'suit',level:2},
  {id:'tool1',name:'채집 도구 Mk2',desc:'샘플 채집 +1',cost:80,type:'tool',level:1},
  {id:'tool2',name:'채집 도구 Mk3',desc:'샘플 채집 +2',cost:200,type:'tool',level:2},
  {id:'rocket1',name:'추진 강화',desc:'연료 효율 20% 증가',cost:150,type:'rocket',level:1},
@@ -245,13 +245,13 @@ let G={
  load(){
   try{
    const d=JSON.parse(localStorage.getItem('space-explorer'));
-   if(d){Object.assign(this,d);this.recalcFuel();}
+   if(d){Object.assign(this,d);this.recalcFuel();this.fuel=Math.min(this.fuel,this.maxFuel);}
   }catch(e){}
  },
  recalcFuel(){
   let f=0;
   this.rocketParts.forEach(p=>{const pt=PARTS.find(x=>x.id===p);if(pt&&pt.fuel)f+=pt.fuel;});
-  this.maxFuel=Math.max(f,30);
+  this.maxFuel=Math.max(f,30) + (this.upgrades.suit||0)*20;
  },
  getFuelCost(planet){
   let base=planet.orbit/10;
@@ -1244,6 +1244,7 @@ G.travelTo=function(pid){
  this.currentPlanet=p;
  playTravel(p, ()=>{
   this.state='explore';
+  this.collected[p.id]=[]; // 재착륙 시 채집물 리스폰
   this.camX=0;
   this.explorerX=W/2;
   showExploreUI();
@@ -1284,7 +1285,7 @@ G.collectSample=function(){
  });
  if(best===-1){this.toast('💎에 더 가까이 이동하세요!');return;}
  this.collected[p.id].push(best);
- this.samples++;
+ this.samples += max;
  sfx('sample_collect');
  // VFX: 채집 위치에 골드 폭죽 (우주비행사/우주선 위치 우선, 없으면 행성 표면)
  try{
@@ -1298,7 +1299,7 @@ G.collectSample=function(){
   }
   spawnBurst(burstPos);
  }catch(e){}
- this.toast(`💎 "${p.samples[best]}" 채집 완료!`);
+ this.toast(`💎 "${p.samples[best]}" 채집! +${max}`);
  this.updateHUD();this.save();
 };
 
@@ -1355,6 +1356,8 @@ window.answerQuiz=function(idx){
  });
  if(idx===q.a){
   qs.correct++;
+  G.samples += 2;
+  G.updateHUD();
   sfx('quiz_correct');
  } else {
   sfx('quiz_wrong');
@@ -1506,6 +1509,7 @@ G.buyUpgrade=function(uid){
  if(G.upgrades[u.type]<u.level-1){G.toast('이전 단계를 먼저 구매하세요.');return;}
  G.samples-=u.cost;
  G.upgrades[u.type]=u.level;
+ G.recalcFuel();
  sfx('upgrade');
  G.toast(`⬆ ${u.name} 업그레이드 완료!`);
  G.updateHUD();G.save();
@@ -1635,6 +1639,7 @@ function gameLoop(now){
 G.load();
 G.recalcFuel();
 if(G.fuel <= 0) G.fuel = G.maxFuel;
+G.fuel = Math.min(G.fuel, G.maxFuel);
 G.updateHUD();
 requestAnimationFrame(gameLoop);
 
