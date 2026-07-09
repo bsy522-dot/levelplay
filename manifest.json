@@ -1,7 +1,7 @@
 {
   "name": "배움퀘스트 — 배우고, 올리고, 증명하라",
   "short_name": "배움퀘스트",
-  "description": "게이미피케이션 교육 플랫폼 v13.0. 랭크매치, 과목미니시험, 학습인사이트Canvas, 퀴즈만들기, 학습루틴빌더, 크로스워드퍼즐, 배지커스터마이저, 퀴즈배틀아레나, 136배지, 610+퀴즈로 레벨업!",
+  "description": "게이미피케이션 교육 플랫폼 v14.0. 학습마스터리히트맵, 스마트복습스케줄러SM-2, 스트릭타워빌더, 과목경쟁력레이더6축, 학습퀘스트맵, 오답패턴분석기, 성장시뮬레이터, 과목올림피아드8인AI, 148배지, 625+퀴즈로 레벨업!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
@@ -215,6 +215,46 @@
       "name": "퀴즈 배틀",
       "url": "./index.html#battle",
       "description": "AI 대전 퀴즈 배틀"
+    },
+    {
+      "name": "마스터리 히트맵",
+      "url": "./index.html#heatmap",
+      "description": "11과목 마스터리 히트맵"
+    },
+    {
+      "name": "스마트 복습",
+      "url": "./index.html#review",
+      "description": "SM-2 간격반복 스케줄러"
+    },
+    {
+      "name": "스트릭 타워",
+      "url": "./index.html#tower",
+      "description": "연속학습 타워 빌딩"
+    },
+    {
+      "name": "경쟁력 레이더",
+      "url": "./index.html#radar",
+      "description": "과목별 6축 경쟁력"
+    },
+    {
+      "name": "학습 퀘스트",
+      "url": "./index.html#quest",
+      "description": "RPG 학습 퀘스트 맵"
+    },
+    {
+      "name": "오답 분석기",
+      "url": "./index.html#wronganalyze",
+      "description": "오답 패턴 분석"
+    },
+    {
+      "name": "성장 시뮬레이터",
+      "url": "./index.html#simulate",
+      "description": "학습 성장 예측"
+    },
+    {
+      "name": "과목 올림피아드",
+      "url": "./index.html#olympiad",
+      "description": "8인 AI 토너먼트"
     }
   ]
 }
