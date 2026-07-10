@@ -1970,8 +1970,8 @@ async function _loadPoseLibs() {
   const result = $('aiCoachResult');
   if (result) { result.style.display = 'block'; result.innerHTML = '<div style="color:var(--dim)">⏳ MediaPipe 로드 중...</div>'; }
   try {
-    await _loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
-    await _loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js');
+    await _loadScript('./_vendor/mediapipe/camera_utils.js');
+    await _loadScript('./_vendor/mediapipe/pose/pose.js');
     _poseLoaded = true;
     return true;
   } catch (e) {
@@ -2016,7 +2016,7 @@ async function togglePoseTracking() {
   if (!await _loadPoseLibs()) return;
   if (typeof Pose === 'undefined') { $('aiCoachResult').innerHTML = '<div style="color:#e63946">Pose 글로벌 미발견</div>'; return; }
   if (!_poseInst) {
-    _poseInst = new Pose({ locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/pose/' + f });
+    _poseInst = new Pose({ locateFile: f => './_vendor/mediapipe/pose/' + f });
     _poseInst.setOptions({ modelComplexity: 1, smoothLandmarks: true, enableSegmentation: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
     _poseInst.onResults(res => {
       if (!res.poseLandmarks || !_poseActive) return;
