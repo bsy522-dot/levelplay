@@ -637,7 +637,7 @@ const V7_QUIZZES=[
   {q:'CSS에서 글자 색을 바꾸는 속성은?',a:['background-color','font-size','color','text-align'],c:2,subject:'코딩'},
   {q:'알고리즘의 시간 복잡도 O(1)의 의미는?',a:['선형 시간','상수 시간','로그 시간','지수 시간'],c:1,subject:'코딩'},
   {q:'영어 알파벳은 총 몇 글자인가?',a:['24개','26개','28개','30개'],c:1,subject:'영어'},
-  {q:'"Thank you"의 반대말은?',a:['Sorry','Welcome','You are welcome','Goodbye'],c:0,subject:'영어'},
+  {q:'"Thank you"에 대한 알맞은 응답은?',a:['Sorry','Welcome','You are welcome','Goodbye'],c:2,subject:'영어'},
   {q:'과거형으로 바꾸면: I go → I ___',a:['goed','went','gone','going'],c:1,subject:'영어'},
   {q:'"apple"의 복수형은?',a:['apples','applees','applis','apple'],c:0,subject:'영어'},
   {q:'영어로 "학교"는?',a:['Hospital','Library','School','Museum'],c:2,subject:'영어'},
