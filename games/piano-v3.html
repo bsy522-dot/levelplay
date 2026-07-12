@@ -55,7 +55,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .key-black.guide { background:linear-gradient(180deg,#3b82f6,#2563eb) !important; }
 .key-black.next-up { background:linear-gradient(180deg,#06b6d4,#0e7490) !important; box-shadow:0 0 10px #06b6d4 !important; animation:pulse-key 1s infinite; }
 .key-black.next-up-L { background:linear-gradient(180deg,#3b82f6,#1e40af) !important; box-shadow:0 0 10px #3b82f6 !important; animation:pulse-key 1s infinite; }
-.key-label { position:absolute; bottom:3px; left:50%; transform:translateX(-50%); font-size:7px; color:#999; pointer-events:none; white-space:nowrap; }
+.key-label { position:absolute; bottom:3px; left:50%; transform:translateX(-50%); font-size:7px; color:#333; background:#e5e7eb; border-radius:3px; padding:0 2px; line-height:1.5; font-weight:600; pointer-events:none; white-space:nowrap; }
 .key-black .key-label { color:#666; bottom:3px; font-size:6px; }
 
 /* Falling notes canvas */
@@ -124,6 +124,11 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 /* Modal */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:100; align-items:center; justify-content:center; }
 .modal-overlay.show { display:flex; }
+.opt-h { font-size:13px; font-weight:700; color:#9ca3af; margin-bottom:6px; text-align:left; }
+.opt-row { display:flex; gap:6px; }
+.opt-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 4px; font-size:14px; font-weight:800; color:#e5e7eb; background:#1f2430; border:2px solid #374151; border-radius:12px; cursor:pointer; }
+.opt-btn small { font-size:10px; font-weight:400; color:#9ca3af; }
+.opt-btn.sel { border-color:#06b6d4; background:#0e2a33; color:#67e8f9; box-shadow:0 0 10px rgba(6,182,212,.35); }
 .modal { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:380px; width:90%; text-align:center; }
 .modal h3 { margin-bottom:10px; font-size:18px; }
 .modal p { font-size:13px; color:var(--text2); margin-bottom:14px; line-height:1.6; }
@@ -279,6 +284,28 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     <button id="zoom-in" style="width:34px;height:26px;border:none;border-radius:8px;background:#333;color:#fff;font-size:15px;font-weight:900">＋</button>
   </div>
   <div id="piano-wrap"><div id="piano"></div></div>
+</div>
+
+<div class="modal-overlay" id="song-opt-modal">
+  <div class="modal" style="max-width:360px;width:92%">
+    <h3 id="song-opt-title" style="margin-bottom:10px">🎵 곡 옵션</h3>
+    <div class="opt-h">난이도 (속도)</div>
+    <div class="opt-row">
+      <button class="opt-btn" data-spd="60">🌱 쉬움<small>0.6배 천천히</small></button>
+      <button class="opt-btn" data-spd="80">⭐ 보통<small>0.8배</small></button>
+      <button class="opt-btn sel" data-spd="100">🔥 원곡<small>원래 빠르기</small></button>
+    </div>
+    <div class="opt-h" style="margin-top:12px">플레이 모드</div>
+    <div class="opt-row">
+      <button class="opt-btn sel" data-mode="normal">🎹 연습<small>박자대로 판정</small></button>
+      <button class="opt-btn" data-mode="wait">🐢 음표 대기<small>누를 때까지 정지</small></button>
+      <button class="opt-btn" data-mode="listen">🎧 듣기<small>자동 연주 감상</small></button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-secondary" id="song-opt-cancel" style="flex:1">취소</button>
+      <button class="btn btn-primary" id="song-opt-start" style="flex:2;font-weight:900">시작 ▶</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="result-modal">
@@ -530,6 +557,9 @@ document.documentElement.style.touchAction = 'pan-x pan-y';
 // ================ PIANO KEYBOARD ================
 let whiteKeyWidth = 20;
 let keyZoom = 1; // 건반 전용 확대 배율 (페이지 줌 아님) — 핀치/버튼으로 0.8~2.2
+let keyPosCache = []; // 캔버스 레인 가이드용 건반 위치 캐시 (리빌드 시 갱신)
+// 옥타브별 라벨 칩 색 (상용 앱식: 3=노랑 4=초록 5=청록 6=파랑)
+const OCT_CHIP = ['#e0cdb9','#f4c6c6','#f7d59c','#f9e08b','#b7f0c0','#a9e7e2','#b9c9f7','#d3bdf2','#ecbde4'];
 function buildPiano() {
   const piano = document.getElementById('piano');
   piano.innerHTML = '';
@@ -552,12 +582,13 @@ function buildPiano() {
     el.dataset.note = noteName(k);
     el.style.width = whiteKeyWidth + 'px';
     el.style.height = whiteHeight + 'px';
-    if (k.note === 'C') {
-      const lbl = document.createElement('span');
-      lbl.className = 'key-label';
-      lbl.textContent = 'C' + k.octave;
-      el.appendChild(lbl);
-    }
+    // 모든 흰건반에 옥타브 색상 라벨 칩 (상용 앱식 — 어느 건반인지 한눈에)
+    const lbl = document.createElement('span');
+    lbl.className = 'key-label';
+    lbl.textContent = noteName(k);
+    lbl.style.background = OCT_CHIP[k.octave] || '#e5e7eb';
+    lbl.style.fontSize = Math.max(6, Math.min(10, Math.round(whiteKeyWidth * 0.5))) + 'px';
+    el.appendChild(lbl);
     piano.appendChild(el);
   });
 
@@ -574,6 +605,13 @@ function buildPiano() {
     el.style.left = (prevWhiteCount * whiteKeyWidth - blackWidth / 2) + 'px';
     piano.appendChild(el);
   });
+
+  // 캔버스 레인 가이드용 위치 캐시 (offsetLeft 기준 — 매 프레임 DOM 측정 방지)
+  keyPosCache = [...piano.querySelectorAll('[data-midi]')].map(el => ({
+    x: el.offsetLeft, w: el.offsetWidth,
+    black: el.classList.contains('key-black'),
+    isC: !!el.dataset.note && el.dataset.note[0] === 'C' && el.dataset.note[1] !== '#'
+  }));
 
   setupPianoTouch();
 }
@@ -1697,21 +1735,25 @@ function synthLoop() {
   ctx.clearRect(0, 0, W, H);
 
   // Background grid lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
   ctx.lineWidth = 1;
   const pianoWrap = document.getElementById('piano-wrap');
   const scrollLeft = pianoWrap.scrollLeft;
   const canvasToKeyScale = W / pianoWrap.clientWidth;
 
-  // Draw vertical lines for each C key
-  ALL_KEYS.filter(k=>k.note==='C').forEach(k=>{
-    const el = document.querySelector(`[data-midi="${k.midi}"]`);
-    if(!el) return;
-    const pianoRect = pianoWrap.getBoundingClientRect();
-    const keyRect = el.getBoundingClientRect();
-    const x = (keyRect.left - pianoRect.left + pianoWrap.scrollLeft - scrollLeft) * canvasToKeyScale;
-    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
-  });
+  // 레인 가이드(상용 앱식): 검은건반 자리=어두운 스트라이프, 흰건반 경계=희미한 세로선, C=밝은 선
+  // 노트가 "어느 건반으로" 떨어지는지 눈에 보이게 한다. keyPosCache라 매 프레임 DOM 측정 없음
+  for (const kp of keyPosCache) {
+    const lx = (kp.x - scrollLeft) * canvasToKeyScale;
+    const lw = kp.w * canvasToKeyScale;
+    if (lx + lw < 0 || lx > W) continue;
+    if (kp.black) {
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.fillRect(lx, 0, lw, H);
+    } else {
+      ctx.strokeStyle = kp.isC ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.04)';
+      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, H); ctx.stroke();
+    }
+  }
 
   let now = (performance.now() - synthStartTime) / 1000;
   const beatToSec = 60 / (synthBPM * synthSpeed);
@@ -1967,15 +2009,39 @@ function scrollToMidi(midi) {
 // Click canvas to resume from practice-mode pause
 document.getElementById('synth-canvas').addEventListener('click', () => { if (synthPaused) resumeSynthesia(); });
 
+// ▶재생 → 곡 옵션 다이얼로그(난이도·플레이 모드) → 시작 (상용 앱식 흐름)
+let optSpd = 100, optMode = 'normal';
+const songOptModal = document.getElementById('song-opt-modal');
+songOptModal.querySelectorAll('.opt-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    const groupSel = b.dataset.spd !== undefined ? '[data-spd]' : '[data-mode]';
+    songOptModal.querySelectorAll('.opt-btn' + groupSel).forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    if (b.dataset.spd !== undefined) optSpd = parseInt(b.dataset.spd);
+    else optMode = b.dataset.mode;
+  });
+});
 document.getElementById('btn-play-synth').addEventListener('click', () => {
-  synthPracticeMode = false;
-  synthWaitMode = document.getElementById('wait-mode').checked;
   const songKey = document.getElementById('song-select').value;
   const song = SONGS[songKey];
   if (!song) return;
-  // wait 모드는 자동 끄기
-  const auto = synthWaitMode ? false : document.getElementById('auto-play').checked;
-  startSynthesia(song.notes, song.bpm, auto, null);
+  document.getElementById('song-opt-title').textContent = '🎵 ' + song.name;
+  songOptModal.classList.add('show');
+});
+document.getElementById('song-opt-cancel').addEventListener('click', () => songOptModal.classList.remove('show'));
+document.getElementById('song-opt-start').addEventListener('click', () => {
+  songOptModal.classList.remove('show');
+  const songKey = document.getElementById('song-select').value;
+  const song = SONGS[songKey];
+  if (!song) return;
+  // 옵션을 기존 컨트롤에 반영 (컨트롤바와 상태 동기 유지)
+  document.getElementById('speed').value = optSpd;
+  document.getElementById('speed-val').textContent = (optSpd / 100).toFixed(1) + 'x';
+  document.getElementById('wait-mode').checked = (optMode === 'wait');
+  document.getElementById('auto-play').checked = (optMode === 'listen');
+  synthPracticeMode = false;
+  synthWaitMode = (optMode === 'wait');
+  startSynthesia(song.notes, song.bpm, optMode === 'listen', null);
 });
 document.getElementById('btn-stop-synth').addEventListener('click', stopSynthesia);
 document.getElementById('speed').addEventListener('input', e => {

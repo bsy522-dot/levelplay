@@ -205,13 +205,41 @@ html,body{width:100%;height:100%;overflow:hidden;touch-action:none;
   cursor:pointer;border:1px solid rgba(255,215,0,.3);color:#ffd700;
   background:rgba(255,250,235,.08);margin:4px;}
 .goBtn:active{background:rgba(255,215,0,.2);}
+
+/* Input-mode cards (start overlay) */
+#modeCards{display:flex;gap:12px;justify-content:center;margin:2px auto 14px;flex-wrap:wrap;}
+.mcard{width:140px;min-height:150px;padding:12px 8px;border-radius:16px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.05);border:2.5px solid rgba(255,215,0,.16);
+  transition:transform .12s,border-color .12s,background .12s,box-shadow .12s;}
+.mcard.sel{border-color:#ffd700;background:rgba(255,215,0,.14);box-shadow:0 0 22px rgba(255,215,0,.35);}
+.mcard:active{transform:scale(.96);}
+.mcIcon{font-size:40px;margin-bottom:6px;line-height:1;}
+.mcTitle{font-size:18px;color:#fff;font-weight:800;letter-spacing:1px;}
+.mcSub{font-size:11px;color:#c9a96e;letter-spacing:3px;margin-top:3px;}
+.mcBadge{margin-top:10px;font-size:11px;color:#0d2a14;font-weight:800;
+  background:linear-gradient(135deg,#7CFF9E,#3CCB6E);border-radius:10px;padding:3px 9px;}
+.mcBadge.alt{color:#2a1a00;background:linear-gradient(135deg,#FFD98A,#E0A94A);}
+
+/* In-game input-mode toggle */
+#inputToggle{font-size:12px;font-weight:700;padding:2px 8px;border-radius:9px;cursor:pointer;
+  color:#ffd700;background:rgba(0,0,0,.28);border:1px solid rgba(255,215,0,.4);
+  letter-spacing:1px;white-space:nowrap;}
+#inputToggle:active{transform:scale(.92);}
+
+/* Rhythm speed buttons */
+.spdBtn{padding:4px 14px;border-radius:12px;font-size:10px;font-family:Georgia,serif;
+  cursor:pointer;border:1px solid rgba(255,215,0,.2);color:rgba(240,230,200,.7);
+  background:rgba(255,250,235,.06);transition:all .15s;}
+.spdBtn.active{background:rgba(255,215,0,.2);border-color:rgba(255,215,0,.5);color:#ffd700;}
+.spdBtn:active{transform:scale(.95);}
 </style>
 </head>
 <body>
 <div id="app">
 <canvas id="bgCv"></canvas>
 
-<div id="hd"><h1>🎻 Violin Real v3</h1><span id="modeLabel" style="font-size:9px;color:#5a3d20">자유연주</span></div>
+<div id="hd"><h1>🎻 Violin Real v3</h1><div style="display:flex;align-items:center;gap:7px"><span id="modeLabel" style="font-size:9px;color:#5a3d20">자유연주</span><div id="inputToggle">👆 터치</div></div></div>
 
 <div id="modeTabs">
   <div class="mtab active" data-mode="free">자유연주</div>
@@ -280,12 +308,22 @@ html,body{width:100%;height:100%;overflow:hidden;touch-action:none;
   <div style="font-size:54px;margin-bottom:8px">🎻</div>
   <div style="font-size:26px;color:#FFD700;font-weight:900;letter-spacing:2px">바이올린 리얼</div>
   <div style="font-size:12px;color:#c9a96e;letter-spacing:4px;margin:4px 0 14px">VIOLIN REAL</div>
-  <div style="font-size:17px;color:#fff;font-weight:700;line-height:1.6;margin-bottom:12px">🎯 진짜 바이올린처럼 활을 그어서<br>멋진 소리를 내 보세요!</div>
-  <div class="howto">
-    <div>🎵 <b>음 버튼</b>(왼쪽 G·D·A·E, 가운데 음이름)을 눌러<br>&nbsp;&nbsp;&nbsp;&nbsp;연주할 음을 골라요 <span style="color:#ff9d9d">— 아직 소리는 안 나요!</span></div>
-    <div>🎻 아래 <b>갈색 바이올린 몸통</b>을 손가락으로<br>&nbsp;&nbsp;&nbsp;&nbsp;<b>좌↔우로 문지르면</b> 그때 소리가 나요! (활 긋기)</div>
-    <div>👐 음 버튼을 <b>누른 채</b> 몸통을 문지르면 그 음이 연주돼요</div>
+  <div style="font-size:15px;color:#fff;font-weight:700;line-height:1.5;margin-bottom:10px">🎯 연주 방식을 골라 주세요</div>
+  <div id="modeCards">
+    <div class="mcard" data-im="nobow">
+      <div class="mcIcon">👆</div>
+      <div class="mcTitle">터치 연주</div>
+      <div class="mcSub">노보우</div>
+      <div class="mcBadge">🌱 초보 추천</div>
+    </div>
+    <div class="mcard" data-im="bow">
+      <div class="mcIcon">🎻</div>
+      <div class="mcTitle">활 긋기</div>
+      <div class="mcSub">리얼</div>
+      <div class="mcBadge alt">🎼 정통 방식</div>
+    </div>
   </div>
+  <div class="howto" id="howtoBox"></div>
   <div id="lpStartBtn">▶ 시작!</div>
   <div id="loadTxt" style="font-size:11px;color:rgba(201,169,110,.5);margin-top:12px;letter-spacing:1px"></div>
 </div></div>
@@ -721,6 +759,11 @@ let performState=null;
 let selectedDifficulty='normal';
 let practiceMode=false;
 
+/* Input method: 'nobow' (tap = instant sound) | 'bow' (select + rub). Default nobow. */
+let inputMode=(function(){try{return localStorage.getItem('violin_input_mode')||'nobow';}catch(e){return 'nobow';}})();
+/* Rhythm falling/judgment speed multiplier: 1 = normal, 0.75 = slower */
+let rhythmSpeed=1;
+
 /* localStorage helpers */
 function loadProgress(){
   try{return JSON.parse(localStorage.getItem('violinV3_progress')||'{}');}catch(e){return{};}
@@ -747,8 +790,10 @@ function buildFB(){
       const b=document.createElement('div');b.className='nb';
       b.textContent=AE.nn(AE.freq(si,sm));b.dataset.s=si;b.dataset.m=sm;
       let held=false;
-      b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();held=true;fingerDown(si,sm);b.classList.add('on');});
-      const rel=()=>{if(held){held=false;fingerUp(si,sm);}b.classList.remove('on');};
+      b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();held=true;
+        if(inputMode==='nobow')noBowDown(si,sm);else fingerDown(si,sm);
+        b.classList.add('on');});
+      const rel=()=>{if(held){held=false;if(inputMode==='nobow')noBowUp(si);else fingerUp(si,sm);}b.classList.remove('on');};
       b.addEventListener('pointerup',rel);
       b.addEventListener('pointercancel',rel);
       b.addEventListener('pointerleave',rel);
@@ -760,9 +805,13 @@ function buildOS(){
   const c=document.getElementById('osCol');
   for(let i=0;i<4;i++){
     const b=document.createElement('div');b.className='ob';b.dataset.i=i;b.textContent=SN[i];
-    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();openString(i);b.classList.add('on');});
-    b.addEventListener('pointerup',()=>b.classList.remove('on'));
-    b.addEventListener('pointerleave',()=>b.classList.remove('on'));
+    b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();
+      if(inputMode==='nobow')noBowDown(i,0);else openString(i);
+      b.classList.add('on');});
+    const obRel=()=>{if(inputMode==='nobow')noBowUp(i);b.classList.remove('on');};
+    b.addEventListener('pointerup',obRel);
+    b.addEventListener('pointercancel',obRel);
+    b.addEventListener('pointerleave',obRel);
     c.appendChild(b);
   }
 }
@@ -793,6 +842,24 @@ function pickNote(si,sm){
   semi[si]=sm;curN=sm===0?SN[si]:AE.nn(AE.freq(si,sm));
   if(bow.dn&&bow.str===si){AE.upd(si,sm,bow.spd);if(changed)bowStroke(si);} /* slur: pitch change under the bow sounds → judge it */
   updFingerUI(si);
+}
+
+/* ── NO-BOW (touch) input: tapping a note button plays it instantly and
+   articulates it for judgment — the exact code path a bow stroke uses.
+   Sets fingering first (so mode judgments read semi[si]), plays a sustained
+   voice, then dispatches bowStroke(si). Releasing stops the voice. Bow-mode
+   input is untouched: these run only when inputMode==='nobow'. */
+function noBowDown(si,sm){
+  pickNote(si,sm);                 /* set semi[si] + label (no sound: bow.dn is false) */
+  const n=AE.play(si,sm,.55);if(n)curN=n;
+  actS=si;vib[si]=.55;mkP(si,BH*.5);
+  freeHintDone=true;
+  bowStroke(si);                   /* reuse rhythm/learn/perform judgment */
+}
+function noBowUp(si){
+  AE.stop(si);
+  if(actS===si)actS=-1;
+  if(!bow.dn)curN='';
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1100,6 +1167,15 @@ function showRhythmSongSelect(){
   });
   html+='</div>';
 
+  /* Speed selector — applies to note falling & judgment timing */
+  html+='<div style="text-align:center;font-size:9px;color:rgba(201,169,110,.45);margin-top:6px">연주 속도</div>';
+  html+='<div class="diffRow">';
+  [{v:'1',l:'⚡ 보통 (1x)'},{v:'0.75',l:'🐢 느리게 (0.75x)'}].forEach(o=>{
+    const on=Math.abs(rhythmSpeed-parseFloat(o.v))<0.01;
+    html+=`<div class="spdBtn ${on?'active':''}" data-spd="${o.v}">${o.l}</div>`;
+  });
+  html+='</div>';
+
   /* Practice toggle */
   html+=`<div style="text-align:center;margin:4px 0;">
     <label style="font-size:10px;color:rgba(201,169,110,.6);cursor:pointer;">
@@ -1156,6 +1232,15 @@ function showRhythmSongSelect(){
     });
   });
 
+  /* Speed buttons */
+  panel.querySelectorAll('.spdBtn').forEach(btn=>{
+    btn.addEventListener('pointerdown',e=>{
+      e.preventDefault();e.stopPropagation();
+      rhythmSpeed=parseFloat(btn.dataset.spd)||1;
+      panel.querySelectorAll('.spdBtn').forEach(b=>b.classList.toggle('active',b===btn));
+    });
+  });
+
   /* Practice checkbox */
   const pracChk=document.getElementById('pracChk');
   if(pracChk) pracChk.addEventListener('change',()=>{practiceMode=pracChk.checked;});
@@ -1200,7 +1285,7 @@ function startRhythmCountdown(songKey){
 
 function startRhythmGame(songKey){
   const song=SONGS[songKey];
-  const speedMult=DIFF_SPEEDS[selectedDifficulty]||1.0;
+  const speedMult=(DIFF_SPEEDS[selectedDifficulty]||1.0)*(rhythmSpeed||1);
   const bpmAdj=Math.round(song.bpm*speedMult);
   const beatMs=60000/bpmAdj;
   const stepMode=selectedDifficulty==='step';
@@ -2080,7 +2165,7 @@ function frame(ts){
   if(!bow.dn)bow.spd*=Math.max(0,1-dt*10);
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=55*dt;p.life-=dt*2.8;if(p.life<=0)parts.splice(i,1);}
   renderBow();
-  document.getElementById('nd').textContent=bow.dn&&curN?curN:'';
+  document.getElementById('nd').textContent=((bow.dn||(inputMode==='nobow'&&actS>=0))&&curN)?curN:'';
   document.getElementById('freeHint').style.display=(audioOn&&currentMode==='free'&&!freeHintDone)?'block':'none';
 
   if(currentMode==='rhythm'){updateRhythm(ts);renderRhythm(ts);}
@@ -2098,6 +2183,44 @@ function frame(ts){
 function ensureA(){if(!audioOn){AE.init();audioOn=true;document.getElementById('ov').classList.add('H');}AE.res();}
 document.getElementById('ov').addEventListener('pointerdown',e=>{e.preventDefault();ensureA();});
 buildFB();buildOS();
+
+/* ═══════════════════════════════════════════════════════════
+   INPUT-MODE UI (touch-play vs. bow) — cards, toggle, hints
+   ═══════════════════════════════════════════════════════════ */
+function renderHowto(){
+  const box=document.getElementById('howtoBox');if(!box)return;
+  if(inputMode==='nobow'){
+    box.innerHTML='<div>👆 <b>음 버튼</b>(왼쪽 G·D·A·E, 가운데 음이름)을<br>&nbsp;&nbsp;&nbsp;&nbsp;<b>탭하면 바로 소리가 나요!</b></div>'
+      +'<div>🎵 음을 이어 눌러 멜로디를 연주해 보세요</div>';
+  }else{
+    box.innerHTML='<div>🎵 <b>음 버튼</b>(왼쪽 G·D·A·E, 가운데 음이름)을 눌러<br>&nbsp;&nbsp;&nbsp;&nbsp;연주할 음을 골라요 <span style="color:#ff9d9d">— 아직 소리는 안 나요!</span></div>'
+      +'<div>🎻 아래 <b>갈색 바이올린 몸통</b>을 손가락으로<br>&nbsp;&nbsp;&nbsp;&nbsp;<b>좌↔우로 문지르면</b> 그때 소리가 나요! (활 긋기)</div>'
+      +'<div>👐 음 버튼을 <b>누른 채</b> 몸통을 문지르면 그 음이 연주돼요</div>';
+  }
+}
+function updInputToggleUI(){
+  const t=document.getElementById('inputToggle');if(t)t.textContent=inputMode==='nobow'?'👆 터치':'🎻 활';
+}
+function updFreeHint(){
+  const h=document.getElementById('freeHint');if(!h)return;
+  h.innerHTML=inputMode==='nobow'
+    ?'💡 음 버튼을 <b>탭</b>하면 바로 소리가 나요!'
+    :'💡 음 버튼을 고른 뒤, 아래 몸통을 좌↔우로 <b>문지르면</b> 소리가 나요!';
+}
+function setInputMode(m){
+  inputMode=(m==='bow')?'bow':'nobow';
+  try{localStorage.setItem('violin_input_mode',inputMode);}catch(e){}
+  document.querySelectorAll('.mcard').forEach(c=>c.classList.toggle('sel',c.dataset.im===inputMode));
+  renderHowto();updInputToggleUI();updFreeHint();
+}
+document.querySelectorAll('.mcard').forEach(c=>{
+  c.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();setInputMode(c.dataset.im);});
+});
+document.getElementById('inputToggle').addEventListener('pointerdown',e=>{
+  e.preventDefault();e.stopPropagation();setInputMode(inputMode==='nobow'?'bow':'nobow');
+});
+setInputMode(inputMode); /* sync all input-mode UI to stored/default value */
+
 requestAnimationFrame(()=>{resize();requestAnimationFrame(frame);});
 window.addEventListener('resize',resize);
 
