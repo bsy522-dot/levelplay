@@ -62,6 +62,17 @@ h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
 .best-record{font-size:14px;color:#888}
 </style>
 </head><body>
+<div id="lpHowto" style="position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px">
+  <div style="font-size:64px;margin-bottom:10px">⏳</div>
+  <div style="font-size:28px;font-weight:900;color:#FFD700;margin-bottom:14px">시간여행 타임라인</div>
+  <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.6;margin-bottom:12px">🎯 역사 사건 카드를 오래된 순서대로<br>슬롯에 배치해요!</div>
+  <div style="font-size:16px;color:#eee;line-height:1.8;margin-bottom:22px;text-align:left">
+    👆 아래 카드를 탭해 선택(금색 테두리) → 원하는 순번 슬롯을 탭하면 배치!<br>
+    🖐️ 카드를 손가락으로 끌어서 슬롯에 놓아도 돼요<br>
+    🔄 슬롯에 놓은 카드를 다시 탭하면 뺄 수 있어요
+  </div>
+  <button onclick="document.getElementById('lpHowto').style.display='none'" style="padding:16px 48px;font-size:22px;font-weight:900;border:none;border-radius:16px;background:linear-gradient(135deg,#FFD700,#FF9800);color:#1a1a2e;cursor:pointer;box-shadow:0 4px 20px rgba(255,215,0,0.35)">▶ 시작!</button>
+</div>
 <div class="wrap" id="app"></div>
 <script>
 'use strict';
@@ -172,7 +183,7 @@ function renderMenu(app){
   app.innerHTML=`
     <h1>⏳ 시간여행 타임라인</h1>
     <div class="menu">
-      <p>역사적 사건을 시간순으로 올바르게 배치하세요!</p>
+      <p>역사적 사건을 시간순으로 올바르게 배치하세요!<br><span style="color:#7FDBFF">👆 카드 탭 → 슬롯 탭 (또는 카드를 끌어서 놓기)</span></p>
       <div class="cat-row">
         <button class="cat-btn ${category==='korea'?'active':''}" onclick="setCat('korea')">🇰🇷 한국사</button>
         <button class="cat-btn ${category==='world'?'active':''}" onclick="setCat('world')">🌍 세계사</button>
@@ -228,6 +239,7 @@ function renderPlay(app){
       <span class="cat">${diffIdx===4?'🔀':category==='korea'?'🇰🇷':'🌍'}</span>
     </div>
     <h1 style="font-size:16px;margin:4px 0;color:#aaa">사건을 오래된 순서대로 슬롯에 넣으세요 ${slotLabel}</h1>
+    <p style="text-align:center;font-size:13px;color:#7FDBFF;margin:0 0 2px">👆 카드 탭 → 슬롯 탭 (끌어서 놓기도 OK)</p>
     <div class="timeline-area" id="timeline">
       ${slots.map((s,i)=>`
         <div class="slot" id="slot${i}" onclick="slotClick(${i})" ondragover="ev(event)" ondrop="dropSlot(event,${i})">
@@ -281,6 +293,66 @@ function dropSlot(e,si){
   slots[si]=idx;dragIdx=-1;
   renderPlay(document.getElementById('app'));
 }
+
+// 모바일 터치 드래그 지원 (pointer events) — 데스크톱 마우스는 기존 HTML5 DnD 유지
+let pDrag=null;
+function pDragClear(){
+  if(!pDrag)return;
+  if(pDrag.ghost)pDrag.ghost.remove();
+  if(pDrag.el)pDrag.el.style.opacity='';
+  document.querySelectorAll('.slot.over').forEach(s=>s.classList.remove('over'));
+  pDrag=null;
+}
+function slotAtPoint(x,y){
+  const el=document.elementFromPoint(x,y);
+  return el&&el.closest?el.closest('.slot'):null;
+}
+document.addEventListener('pointerdown',function(e){
+  if(e.pointerType==='mouse')return;
+  if(judging||screen!=='play')return;
+  const cardEl=e.target&&e.target.closest?e.target.closest('.card-pool .card'):null;
+  if(!cardEl||cardEl.classList.contains('placed'))return;
+  const idx=parseInt((cardEl.id||'').replace('card',''),10);
+  if(isNaN(idx)||slots.includes(idx))return;
+  pDrag={idx:idx,el:cardEl,ghost:null,x0:e.clientX,y0:e.clientY,moved:false};
+});
+document.addEventListener('pointermove',function(e){
+  if(!pDrag)return;
+  if(!pDrag.moved){
+    if(Math.abs(e.clientX-pDrag.x0)+Math.abs(e.clientY-pDrag.y0)<10)return;
+    pDrag.moved=true;
+    const r=pDrag.el.getBoundingClientRect();
+    const g=pDrag.el.cloneNode(true);
+    g.classList.add('dragging');
+    g.style.width=r.width+'px';
+    document.body.appendChild(g);
+    pDrag.ghost=g;
+    pDrag.el.style.opacity='0.3';
+  }
+  if(e.cancelable)e.preventDefault();
+  const g=pDrag.ghost;
+  g.style.left=(e.clientX-g.offsetWidth/2)+'px';
+  g.style.top=(e.clientY-g.offsetHeight/2)+'px';
+  document.querySelectorAll('.slot.over').forEach(s=>s.classList.remove('over'));
+  const sl=slotAtPoint(e.clientX,e.clientY);
+  if(sl&&!sl.querySelector('.card'))sl.classList.add('over');
+},{passive:false});
+document.addEventListener('pointerup',function(e){
+  if(!pDrag)return;
+  const moved=pDrag.moved,idx=pDrag.idx;
+  const sl=moved?slotAtPoint(e.clientX,e.clientY):null;
+  pDragClear();
+  if(!moved){cardClick(idx);return;} // 이동 없는 탭=카드 선택 (click 합성 유무와 무관하게 보장, 중복 호출 무해)
+  if(judging)return;
+  if(sl){
+    const si=parseInt((sl.id||'').replace('slot',''),10);
+    if(!isNaN(si)&&slots[si]===null&&!slots.includes(idx)){
+      slots[si]=idx;selectedCard=-1;
+      renderPlay(document.getElementById('app'));
+    }
+  }
+});
+document.addEventListener('pointercancel',function(){pDragClear();});
 
 function checkAnswer(){
   if(judging) return;

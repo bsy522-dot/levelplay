@@ -71,7 +71,8 @@ canvas{display:block;position:absolute;top:0;left:0}
 .title-btn{padding:12px 30px;border:1px solid #5a3a1a;border-radius:8px;font-family:inherit;font-size:15px;font-weight:700;color:#e8dcc8;background:#6B1A0A;cursor:pointer;letter-spacing:2px;margin-top:10px}
 .title-btn:active{transform:scale(.96)}
 .title-btn2{background:#2a2a3e;font-size:11px;padding:8px 18px;margin-top:8px}
-.title-info{margin-top:16px;font-size:9px;color:#555;line-height:2.2;max-width:280px}
+.title-info{margin-top:12px;font-size:11px;color:#998;line-height:2;max-width:300px} /* 2026-07-12 QA P1: 9px #555 → 11px #998 시인성 개선 */
+.title-controls{margin-top:16px;font-size:13px;font-weight:700;color:#FFD700;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.35);border-radius:8px;padding:8px 14px;line-height:1.8;max-width:320px} /* 2026-07-12 QA P1: 조작법 전용 강조 박스 */
 .float-dmg{position:absolute;font-weight:900;pointer-events:none;z-index:30;animation:floatUp .8s ease-out forwards;text-shadow:0 1px 3px #000}
 @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}60%{opacity:1;transform:translateY(-30px) scale(1.1)}100%{opacity:0;transform:translateY(-50px) scale(.8)}}
 .dmg-phys{color:#ff6644;font-size:16px}.dmg-magic{color:#aa66ff;font-size:16px}.dmg-heal{color:#44ff66;font-size:16px}.dmg-crit{color:#ffdd00;font-size:20px}.dmg-miss{color:#888;font-size:14px}
@@ -120,6 +121,18 @@ canvas{display:block;position:absolute;top:0;left:0}
 </style>
 </head>
 <body>
+<!-- 2026-07-12 QA P1: 조작법 안내 오버레이 (게임 열면 가장 먼저 표시) -->
+<div id="lpHowto" style="position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px">
+  <div style="font-size:54px;margin-bottom:8px">&#9876;&#65039;</div>
+  <div style="font-size:26px;font-weight:900;color:#FFD700;margin-bottom:12px">한국사 영웅전</div>
+  <div style="font-size:17px;font-weight:700;color:#fff;line-height:1.6;margin-bottom:16px;max-width:340px">&#127919; 환웅과 단군이 되어 고조선을 세우는 모험!</div>
+  <div style="font-size:16px;color:#e8dcc8;line-height:1.9;text-align:left;max-width:340px;margin-bottom:22px">
+    &#128377;&#65039; 이동: 방향키/WASD 또는 왼쪽 아래 &#9650;&#9664;&#9654;&#9660; 버튼 (가고 싶은 곳 터치도 돼요)<br>
+    &#128172; 대화: 사람 근처에서 가운데 &#9673;(대화) 버튼 &middot; 대사창은 아무 곳이나 터치<br>
+    &#9876;&#65039; 전투: 내 차례에 공격&middot;방어&middot;기술 버튼을 눌러요
+  </div>
+  <button onclick="document.getElementById('lpHowto').style.display='none'" style="font-size:20px;font-weight:900;font-family:inherit;padding:14px 46px;border:none;border-radius:12px;background:linear-gradient(135deg,#FFD700,#c4956a);color:#3a2000;cursor:pointer;box-shadow:0 4px 16px rgba(255,215,0,.35)">&#9654; 시작!</button>
+</div>
 <canvas id="gameCanvas"></canvas>
 <div id="ui">
   <div id="hud">
@@ -187,11 +200,11 @@ canvas{display:block;position:absolute;top:0;left:0}
       <div class="title-sub">v4 &mdash; 1부 고조선 &middot; 환웅편 + 단군편</div>
       <div style="margin-top:16px"><button class="title-btn" onclick="openChapterSelect()">새 게임</button></div>
       <div><button class="title-btn title-btn2" onclick="openSaveScreen('load');document.getElementById('title-screen').style.display='none'">이어하기</button></div>
+      <div class="title-controls">&#128377;&#65039; 이동: 방향키&middot;WASD&middot;터치 &nbsp;&#128172; 대화: &#9673; 버튼</div>
       <div class="title-info">
         &#9656; 2개 챕터 &middot; 9개 에피소드 &middot; 보스전<br>
         &#9656; 병종 상성: 궁병 &gt; 보병 &gt; 기마병 &gt; 궁병<br>
         &#9656; 레벨 계승 시스템<br>
-        &#9656; 이동: 방향키/WASD/터치<br>
         &#9656; 역사 고증: 청동기 시대 무기/갑옷
       </div>
     </div>
@@ -201,7 +214,7 @@ canvas{display:block;position:absolute;top:0;left:0}
     <div class="dpad-btn" style="top:40px;left:0" onclick="tryMove(-1,0)">&#9664;</div>
     <div class="dpad-btn" style="top:40px;left:80px" onclick="tryMove(1,0)">&#9654;</div>
     <div class="dpad-btn" style="top:80px;left:40px" onclick="tryMove(0,1)">&#9660;</div>
-    <div class="dpad-btn" style="top:40px;left:40px;font-size:10px" onclick="interactNearby()">&#9673;</div>
+    <div class="dpad-btn" style="top:40px;left:40px;font-size:9px;flex-direction:column;line-height:1.1" onclick="interactNearby()"><span style="font-size:12px">&#9673;</span><span>대화</span></div><!-- 2026-07-12 QA P2: 대화 라벨 추가 -->
   </div>
 </div>
 
@@ -1810,7 +1823,7 @@ window.openSaveScreen=function(mode){
   for(let i=1;i<=5;i++){const d=localStorage.getItem(`krpg4_${i}`),sl=document.createElement('div');sl.className='save-slot';
     if(d){const p=JSON.parse(d);sl.innerHTML=`<h4>슬롯 ${i}</h4><p>Ch${p.chapter||1} ${p.sid||'?'} ${p.pn||'?'} Lv.${p.plv||'?'} ${p.date||''}</p>`}
     else sl.innerHTML=`<h4>슬롯 ${i}</h4><p>비어있음</p>`;
-    sl.onclick=()=>{if(mode==='save'){saveGame(i);closeSaveScreen();startDlg([{s:'',t:'저장 완료!'}],()=>{G.mode=G._pm||'map'})}else if(d){loadGame(i);closeSaveScreen()}};c.appendChild(sl)}
+    sl.onclick=()=>{if(mode==='save'){saveGame(i);closeSaveScreen();startDlg([{s:'',t:'저장 완료!'}],()=>{G.mode=G._pm||'map'})}else if(d){loadGame(i);closeSaveScreen()}else{sfx('miss');const p=sl.querySelector('p');if(p){p.textContent='저장된 게임이 없어요!';p.style.color='#f88'}}};c.appendChild(sl)}/* 2026-07-12 QA P2: 빈 슬롯 무반응 → 피드백 */
 };
 window.closeSaveScreen=function(){$('save-screen').style.display='none';if(G.mode==='save')G.mode=G._pm||'map'};
 
@@ -1885,11 +1898,11 @@ function resetTitleHTML(){
     <div class="title-sub">v4 &mdash; 1부 고조선 &middot; 환웅편 + 단군편</div>
     <div style="margin-top:16px"><button class="title-btn" onclick="openChapterSelect()">새 게임</button></div>
     <div><button class="title-btn title-btn2" onclick="openSaveScreen('load');document.getElementById('title-screen').style.display='none'">이어하기</button></div>
+    <div class="title-controls">&#128377;&#65039; 이동: 방향키&middot;WASD&middot;터치 &nbsp;&#128172; 대화: &#9673; 버튼</div>
     <div class="title-info">
       &#9656; 2개 챕터 &middot; 9개 에피소드 &middot; 보스전<br>
       &#9656; 병종 상성: 궁병 &gt; 보병 &gt; 기마병 &gt; 궁병<br>
       &#9656; 레벨 계승 시스템<br>
-      &#9656; 이동: 방향키/WASD/터치<br>
       &#9656; 역사 고증: 청동기 시대 무기/갑옷
     </div></div>`;
 }

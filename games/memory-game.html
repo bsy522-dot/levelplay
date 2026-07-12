@@ -11,7 +11,7 @@ html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-famil
 .hud{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.4);border-radius:12px;font-size:15px;font-weight:700;margin-bottom:8px;flex-wrap:wrap;gap:4px}
 .hud .fl{color:#7FDBFF}.hud .mt{color:#4CAF50}.hud .tm{color:#FF6B9D}
 
-.grid{display:grid;gap:8px;margin:auto 0;padding:8px 0;justify-content:center}
+.grid{display:grid;gap:8px;margin:12px 0 0;padding:8px 0;justify-content:center}
 .card{aspect-ratio:1;border-radius:14px;cursor:pointer;position:relative;perspective:600px;transition:transform 0.1s}
 .card:active{transform:scale(0.95)}
 .card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.4s}
@@ -51,8 +51,27 @@ html,body{width:100%;height:100%;overflow-x:hidden;background:#1a1a2e;font-famil
 .best-record{font-size:14px;color:#888;margin-top:4px}
 .retry{padding:14px 40px;font-size:22px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
 .menu-link{padding:10px 30px;font-size:18px;font-weight:700;border:2px solid #555;border-radius:14px;background:transparent;color:#aaa;cursor:pointer;margin-top:8px}
+
+#lpHowto{position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px}
+#lpHowto .hw-emoji{font-size:64px;line-height:1.2}
+#lpHowto .hw-title{font-size:28px;font-weight:900;color:#FFD700}
+#lpHowto .hw-goal{font-size:18px;font-weight:700;color:#7FDBFF;line-height:1.6}
+#lpHowto .hw-steps{font-size:17px;line-height:1.8;color:#eee;text-align:left;max-width:320px}
+#lpHowto .hw-start{margin-top:10px;padding:16px 56px;font-size:22px;font-weight:900;border:none;border-radius:18px;background:linear-gradient(135deg,#4CAF50,#81C784);color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(76,175,80,0.45);transition:transform 0.15s}
+#lpHowto .hw-start:active{transform:scale(0.95)}
 </style>
 </head><body>
+<div id="lpHowto">
+  <div class="hw-emoji">🃏</div>
+  <div class="hw-title">기억력 카드 게임</div>
+  <div class="hw-goal">🎯 똑같은 짝을 모두 찾아요!</div>
+  <div class="hw-steps">
+    👆 카드를 탭하면 뒤집혀요<br>
+    🧠 두 장이 짝이면 초록색 고정!<br>
+    ⭐ 적게 뒤집을수록 별 3개!
+  </div>
+  <button class="hw-start" onclick="document.getElementById('lpHowto').style.display='none'">▶ 시작!</button>
+</div>
 <div class="wrap" id="app"></div>
 <script>
 'use strict';
@@ -147,7 +166,7 @@ function renderMenu(app){
   app.innerHTML=`
     <div class="menu">
       <h1>🃏 기억력 카드</h1>
-      <p>카드를 뒤집어 짝을 맞추세요!<br>최소 뒤집기로 높은 별점을 받으세요.</p>
+      <p>👆 카드를 탭해서 뒤집고 짝을 맞추세요!<br>적게 뒤집을수록 별점이 높아요.</p>
       <div class="section-title">모드 선택</div>
       ${modeHTML}
       <div class="section-title">난이도</div>

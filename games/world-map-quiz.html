@@ -60,9 +60,29 @@ h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
 .cand-title{font-size:14px;color:#aaa;text-align:center;margin-bottom:6px}
 .cand-btn{display:block;width:100%;min-height:48px;padding:10px 14px;margin:6px 0;font-size:18px;font-weight:700;border:2px solid #444;border-radius:12px;background:rgba(255,255,255,0.06);color:#fff;cursor:pointer;text-align:left}
 .cand-btn:active{transform:scale(0.97);border-color:#FFD700}
+#lpHowto{position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px}
+#lpHowto .hw-emoji{font-size:64px;line-height:1}
+#lpHowto .hw-title{font-size:30px;font-weight:900;color:#FFD700}
+#lpHowto .hw-goal{font-size:18px;font-weight:700;color:#7FDBFF;line-height:1.6;max-width:420px}
+#lpHowto .hw-lines{font-size:16px;color:#eee;line-height:1.8;max-width:420px;text-align:left}
+#lpHowto .hw-start{margin-top:10px;padding:16px 56px;font-size:22px;font-weight:900;border:none;border-radius:18px;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#1a1a2e;cursor:pointer;box-shadow:0 4px 16px rgba(255,215,0,.35)}
+#lpHowto .hw-start:active{transform:scale(.95)}
+.tap-tip{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:rgba(0,0,0,0.25);border:1px dashed #3a4a6b;border-radius:12px;padding:14px;font-size:15px;color:#9fb3c8;text-align:center;line-height:1.7;min-height:64px;margin-bottom:10px}
 </style>
 </head><body>
 <div class="wrap" id="app"></div>
+<div id="lpHowto">
+  <div class="hw-emoji">🌍</div>
+  <div class="hw-title">세계지도 퀴즈</div>
+  <div class="hw-goal">🎯 세계 여러 나라의 위치·수도·국기·경제를 맞혀 별 3개를 모아요!</div>
+  <div class="hw-lines">
+    👆 <b style="color:#FFD700">쉬움·보통</b>: 지도 위에서 정답 위치를 직접 탭!<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;(가까운 나라가 여러 개면 목록이 떠요 — 그중에서 골라 탭)<br>
+    🔘 <b style="color:#FFD700">어려움·고급·마스터</b>: 아래 선택지 버튼 중 정답을 탭!<br>
+    ➡️ 정답 확인 팝업의 <b>[다음 →]</b> 버튼으로 계속 진행해요
+  </div>
+  <button class="hw-start" onclick="document.getElementById('lpHowto').style.display='none'">▶ 시작!</button>
+</div>
 <script>
 'use strict';
 
@@ -196,9 +216,11 @@ function renderPlay(app){
     // Easy: identify continent on map
     html+=`<div class="question-box"><div class="q-text">${q.name}</div><div class="q-sub">이 대륙의 위치를 지도에서 클릭하세요!</div></div>`;
     html+=renderMapContinent();
+    html+=`<div class="tap-tip">👆 지도에서 <b style="color:#fff">${q.name}</b> 대륙의 위치를 찾아 탭하세요!<br>💡 맞히면 ⭐ 점수, 연속 정답이면 🔥 보너스!</div>`;
   }else if(df.type==='location'){
     html+=`<div class="question-box"><div class="q-text">${q.name} ${q.flag}</div><div class="q-sub">이 나라의 위치를 지도에서 클릭하세요!</div></div>`;
     html+=renderMap(true);
+    html+=`<div class="tap-tip">👆 지도 위 파란 점 중 <b style="color:#fff">${q.name}</b>의 위치를 탭하세요!<br>🔍 가까운 나라가 여러 개면 목록이 떠요 — 그중에서 고르세요</div>`;
   }else if(df.type==='capital'){
     html+=`<div class="question-box"><div class="q-text">${q.name} ${q.flag}의 수도는?</div><div class="q-sub">${q.continent} · 인구 ${q.pop}</div></div>`;
     html+=renderMap(false);

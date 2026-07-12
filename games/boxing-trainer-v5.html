@@ -16,7 +16,7 @@
 <script>
 // 🚨 페이지 진입 즉시 구버전 SW + 캐시 강제 폭파 (v6.1+ 반영 보장)
 (function(){
-  var TARGET_BUILD = 'v6.4';
+  var TARGET_BUILD = 'v6.5';
   var SEEN_KEY = 'boxingV5_seen_build';
   try {
     var seen = localStorage.getItem(SEEN_KEY);
@@ -45,7 +45,16 @@
 :root{--bg:#0a0a10;--panel:rgba(14,14,22,.95);--accent:#e63946;--accent2:#ff6b35;--text:#f0f0f0;--dim:#6a6a7e;--border:rgba(255,255,255,.08);--green:#22c55e;--yellow:#eab308;--blue:#3b82f6;--gold:#ffd700}
 html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;overflow:hidden;height:100vh;width:100vw;touch-action:none;user-select:none}
 #c3d{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
-.overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(10,10,16,.65) 0%,rgba(10,10,16,.55) 50%,rgba(10,10,16,.75) 100%);backdrop-filter:blur(2px);pointer-events:auto}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:linear-gradient(180deg,rgba(10,10,16,.65) 0%,rgba(10,10,16,.55) 50%,rgba(10,10,16,.75) 100%);backdrop-filter:blur(2px);pointer-events:auto;overflow-y:auto;touch-action:pan-y;padding:12px 0}
+/* 세로중앙 유지 + 내용이 화면보다 크면 스크롤 (잘림 방지) */
+.overlay::before,.overlay::after{content:'';flex:1 1 0}
+/* 짧은 화면(폰 세로)에서 메인메뉴 압축 — 스크롤 없이 최대한 다 보이게 */
+@media(max-height:920px){
+#mainMenu img{height:90px!important}
+#mainMenu .menu-title{font-size:34px}
+#mainMenu .menu-sub{margin-bottom:12px}
+#mainMenu .menu-btn{padding:8px 20px;margin:3px auto}
+}
 #mainMenu, #careerMenu, #trainingMenu, #recordsMenu, #missionsMenu, #aiCoachMenu, #metronomeMenu, #multiplayerMenu{background:linear-gradient(180deg,rgba(10,10,16,.40) 0%,rgba(10,10,16,.30) 50%,rgba(10,10,16,.55) 100%);pointer-events:none}
 #mainMenu > *, #careerMenu > *, #trainingMenu > *, #recordsMenu > *, #missionsMenu > *, #aiCoachMenu > *, #metronomeMenu > *, #multiplayerMenu > *{pointer-events:auto}
 .overlay.hidden{display:none}
@@ -120,6 +129,18 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 .controls-hint{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:20;font-size:10px;color:var(--dim);text-align:center;background:var(--panel);padding:6px 16px;border-radius:20px;border:1px solid var(--border)}
 .controls-hint.hidden{display:none}
 @media(pointer:coarse){.controls-hint{display:none!important}}
+/* 터치기기용 전투 진입 안내 토스트 (모바일 컨트롤 위) */
+.touch-hint{position:fixed;bottom:160px;left:50%;transform:translateX(-50%);z-index:40;font-size:15px;font-weight:700;line-height:1.6;color:#fff;background:rgba(10,10,25,.9);padding:10px 18px;border-radius:24px;border:1px solid rgba(255,215,0,.5);pointer-events:none;text-align:center;max-width:92vw;transition:opacity .6s;word-break:keep-all;white-space:nowrap}
+.touch-hint.hidden{display:none}
+/* 조작법 안내 오버레이 (첫 화면) */
+#lpHowto{position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;overflow-y:auto;touch-action:pan-y}
+#lpHowto .hw-emoji{font-size:60px;line-height:1.2}
+#lpHowto .hw-title{font-size:30px;font-weight:900;color:#FFD700;letter-spacing:2px;margin:10px 0 14px}
+#lpHowto .hw-goal{font-size:17px;line-height:1.6;color:#f0f0f0;margin-bottom:14px;font-weight:700;max-width:340px;word-break:keep-all}
+#lpHowto .hw-line{font-size:16px;line-height:1.7;color:#e8e8f0;margin:3px 0;max-width:360px;word-break:keep-all}
+#lpHowto .hw-line b{color:#ffd700}
+#lpHowto .hw-start{margin-top:24px;padding:16px 54px;font-size:22px;font-weight:900;color:#fff;background:linear-gradient(135deg,#e63946,#ff6b35);border:none;border-radius:14px;cursor:pointer;letter-spacing:2px;box-shadow:0 4px 20px rgba(230,57,70,.45);touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,255,255,.2)}
+#lpHowto .hw-start:active{transform:scale(.96)}
 .level-up{position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.9)}
 .level-up.hidden{display:none}
 .level-up h2{font-size:36px;color:var(--gold);margin-bottom:20px;letter-spacing:4px}
@@ -163,6 +184,17 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <body>
 <canvas id="c3d"></canvas>
 <div class="build-tag" id="buildTag">v5.6 · loading…</div>
+
+<!-- HOW-TO OVERLAY (게임 열면 가장 먼저 보이는 조작법 안내) -->
+<div id="lpHowto">
+  <div class="hw-emoji">&#x1F94A;</div>
+  <div class="hw-title">복싱 트레이너</div>
+  <div class="hw-goal">&#x1F3AF; 펀치와 방어로 상대를 쓰러뜨리고 챔피언 벨트를 차지하세요!</div>
+  <div class="hw-line">&#x1F44A; 공격: 화면 아래 <b>잽 · 크로스 · 훅 · 어퍼컷</b> 버튼</div>
+  <div class="hw-line">&#x1F6E1;&#xFE0F; 방어: <b>슬립&#x2190; · 덕 · 슬립&#x2192;</b> 탭, <b>가드</b>는 꾹 누르기</div>
+  <div class="hw-line">&#x2328;&#xFE0F; 키보드: <b>1·2·3·4</b>=펀치 / <b>Q·E·S</b>=회피 / <b>A·D</b>=가드</div>
+  <button class="hw-start" onclick="document.getElementById('lpHowto').style.display='none'">&#x25B6; 시작!</button>
+</div>
 
 <!-- MAIN MENU -->
 <div class="overlay" id="mainMenu">
@@ -281,6 +313,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <div class="combo-popup" id="comboPopup"></div>
 <div class="combo-counter hidden" id="comboCounter"></div>
 <div class="controls-hint hidden" id="controlsHint">1/J=잽 2/K=크로스 3/L=훅 4/;=어퍼 | Q=슬립좌 E=슬립우 S=덕 | A=하이가드 D=로우가드</div>
+<div class="touch-hint hidden" id="touchHint">&#x1F44A; 아래 버튼으로 펀치!<br>&#x1F6E1;&#xFE0F; 슬립·덕·가드로 방어!</div>
 <button id="camModeBtn" onclick="resetFightCam()" title="카메라를 자동 연출로 되돌립니다" style="display:none;position:fixed;right:12px;top:118px;z-index:60;background:rgba(15,20,35,.88);color:#e8ecf4;border:1.5px solid #3b82f6;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.4)">📷 카메라 자동복귀</button>
 <div class="rest-screen hidden" id="restScreen"><h2>휴식</h2><div class="timer" id="restTimer">60</div><div style="font-size:13px;color:var(--dim);margin-top:10px">체력이 회복됩니다...</div></div>
 <div class="fight-result hidden" id="fightResult"></div>
@@ -325,7 +358,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 // ============================================================
 // BOXING TRAINER V5 — 3D Career Mode (Three.js)
 // ============================================================
-const BUILD_VERSION = 'v6.4-COMFYUI-ARENA-BG';
+const BUILD_VERSION = 'v6.5-HOWTO-MENUFIT';
 const $ = id => document.getElementById(id);
 (function setBuildTag(){const t=document.getElementById('buildTag');if(t)t.textContent=BUILD_VERSION+' · '+(new Date().toISOString().slice(11,19))+'Z';})();
 
@@ -1527,7 +1560,7 @@ function hideAll() {
   if (typeof heavybagProp !== 'undefined' && heavybagProp) heavybagProp.visible = false;
   if (typeof speedbagProp !== 'undefined' && speedbagProp) speedbagProp.visible = false;
   if (playerModel) { playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; }
-  ['mainMenu', 'careerMenu', 'trainingMenu', 'recordsMenu', 'fightHud', 'controlsHint', 'fightResult', 'levelUp', 'trainResult', 'restScreen', 'mobileControls', 'trainOverlay', 'comboCounter', 'aiCoachMenu', 'multiplayerMenu', 'missionsMenu', 'metronomeMenu', 'comboMenu'].forEach(id => {
+  ['mainMenu', 'careerMenu', 'trainingMenu', 'recordsMenu', 'fightHud', 'controlsHint', 'touchHint', 'fightResult', 'levelUp', 'trainResult', 'restScreen', 'mobileControls', 'trainOverlay', 'comboCounter', 'aiCoachMenu', 'multiplayerMenu', 'missionsMenu', 'metronomeMenu', 'comboMenu'].forEach(id => {
     const el = $(id);
     if (el) el.classList.add('hidden');
   });
@@ -2205,7 +2238,19 @@ function startFight(opp, isCareer, oppIdx) {
   $('fightHud').classList.remove('hidden');
   $('controlsHint').classList.remove('hidden');
   $('backBtn').classList.remove('hidden');
-  if ('ontouchstart' in window) $('mobileControls').classList.remove('hidden');
+  if ('ontouchstart' in window) {
+    $('mobileControls').classList.remove('hidden');
+    // 터치기기: 키보드 힌트 대신 조작 안내 토스트 6초 표시 (P1: 모바일 조작안내 부재)
+    const th = $('touchHint');
+    if (th) {
+      th.classList.remove('hidden'); th.style.opacity = '1';
+      clearTimeout(window._touchHintT);
+      window._touchHintT = setTimeout(() => {
+        th.style.opacity = '0';
+        setTimeout(() => th.classList.add('hidden'), 700);
+      }, 6000);
+    }
+  }
 
   $('oppNameHud').textContent = opp.name;
   callFightStart(opp.name);

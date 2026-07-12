@@ -64,7 +64,7 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 #walkBadge{position:fixed;top:50px;left:10px;z-index:80;background:rgba(255,140,40,.9);color:#fff;padding:4px 10px;border-radius:8px;font-size:11px;display:none;cursor:pointer}
 
 @media(max-width:600px){#panel{width:220px}#panel.hide+#panelToggle,#panelToggle{display:block}}
-@media(max-width:900px){#panelToggle{display:block}}
+@media(max-width:900px){#panelToggle{display:block}#btnPanel{display:none}}
 </style>
 </head>
 <body>
@@ -1365,7 +1365,7 @@ const TUT_COPY={
 };
 const TUT_STEPS=[
   {id:'welcome',target:null,trigger:'next'},
-  {id:'openMenu',target:()=>document.getElementById('panelToggle'),trigger:'panelOpen',pre:tutClosePanel},
+  {id:'openMenu',target:()=>{const pt=document.getElementById('panelToggle');return tutVisible(pt)?pt:document.getElementById('btnPanel');},trigger:'panelOpen',pre:tutClosePanel},
   {id:'pickRoom',target:()=>document.querySelector('#pcontent .item-btn'),trigger:'roomPicked',pre:()=>{tutOpenPanel();tutSwitchTab('rooms');}},
   {id:'placeRoom',target:tutCanvasRect,trigger:'roomPlaced',pre:()=>{tutClosePanel();tutFrameGround();}},
   {id:'furnTab',target:()=>document.querySelector('.ptab[data-t="furn"]'),trigger:'tab:furn',pre:tutOpenPanel},
@@ -1379,7 +1379,7 @@ function tutSwitchTab(t){curTab=t;document.querySelectorAll('.ptab').forEach(x=>
 function tutCanvasRect(){const c=document.getElementById('cvs3d').getBoundingClientRect();const s=Math.min(c.width,c.height)*0.42;return {left:c.left+c.width/2-s/2,top:c.top+c.height/2-s/2,width:s,height:s};}
 function tutFrameGround(){try{camera.position.set(5,17,9);controls.target.set(5,0,5);controls.update();}catch(e){}}
 function tutFirstFurnBtn(){return [...document.querySelectorAll('#pcontent .item-btn')].find(b=>{const o=b.getAttribute('onclick');return o&&o.indexOf('pickFurn')>=0;});}
-function tutVisible(el){return el&&el.offsetParent!==null&&el.getBoundingClientRect().width>0;}
+function tutVisible(el){if(!el)return false;const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=='hidden';}
 
 function ensureTutDom(){
   if(document.getElementById('tutStyle'))return;

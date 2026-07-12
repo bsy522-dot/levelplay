@@ -8,12 +8,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;font-family:-apple-system,'Segoe UI',sans-serif;overflow:hidden;height:100vh;user-select:none;touch-action:none}
 
-#topBar{position:fixed;top:0;left:0;right:0;height:48px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,251,255,.95));border-bottom:2px solid #c8dceb;display:flex;align-items:center;padding:0 10px;gap:8px;z-index:30;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;box-shadow:0 2px 8px rgba(100,150,200,.15)}
+#topBar{position:fixed;top:0;left:0;right:0;height:48px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(248,251,255,.95));border-bottom:2px solid #c8dceb;display:flex;align-items:center;padding:0 6px;gap:4px;z-index:30;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;box-shadow:0 2px 8px rgba(100,150,200,.15)}
 #topBar::-webkit-scrollbar{display:none}
-#cityName{font-size:14px;font-weight:900;color:#1976d2;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.st{display:flex;align-items:center;gap:3px;flex-shrink:0;font-size:12px}
-.st .i{font-size:14px}
-.st .v{font-weight:700;color:#e67e22;min-width:30px}
+#cityName{font-size:12px;font-weight:900;color:#1976d2;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.st{display:flex;align-items:center;gap:2px;flex-shrink:0;font-size:11px}
+.st .i{font-size:12px}
+.st .v{font-weight:700;color:#e67e22;min-width:0}
 .st .r{font-size:10px}
 .st .r.p{color:#27ae60}
 .st .r.n{color:#e74c3c}
@@ -586,7 +586,7 @@ function buildTiles(){
   });
 }
 
-document.getElementById('bBull').onclick=()=>{bulldoze=!bulldoze;document.getElementById('bBull').classList.toggle('act');document.getElementById('desc').textContent=bulldoze?'클릭하면 철거 (30% 환불)':'건물을 선택하세요';};
+document.getElementById('bBull').onclick=()=>{bulldoze=!bulldoze;document.getElementById('bBull').classList.toggle('act');document.getElementById('desc').textContent=bulldoze?'클릭하면 철거 (30% 환불)':(B[selTile]?B[selTile].d:'건물을 선택하세요');};
 
 document.getElementById('bDemo').onclick=()=>{
   if(!confirm('현재 도시를 지우고 예시 도시를 새로 만듭니다. 진행할까요?'))return;
@@ -1304,10 +1304,9 @@ window.TUT_close=function(){
 /* === SUPERPOWER_INTEGRATED === */
 // === INIT ===
 buildCats();buildTiles();
-// 그리드가 완전히 비어있으면 데모 도시 자동 생성 (저장 슬롯 유무 무관)
-let isEmpty=true;
-for(let y=0;y<GH&&isEmpty;y++)for(let x=0;x<GW&&isEmpty;x++)if(grid[y][x].t!=='empty')isEmpty=false;
-if(isEmpty)buildDemoCity();
+// 새 게임은 빈 땅에서 시작한다 — 데모 도시 자동 생성 제거 (미션 자동달성 방지).
+// 예시 도시가 보고 싶으면 하단 🏙️데모 버튼으로 수동 생성.
+document.getElementById('desc').textContent=B[selTile]?B[selTile].d:'건물을 선택하세요';
 MIS_render()
 AUD_initBtn()
 SEASON_applySky()

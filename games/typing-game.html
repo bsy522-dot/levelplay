@@ -20,7 +20,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
 .input-area input.typo{border-color:#E53935;animation:typoshake 0.3s}
 @keyframes typoshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .danger-line{position:absolute;bottom:0;left:0;right:0;height:3px;background:#E53935;opacity:0.6}
-.menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(26,26,46,0.97);z-index:20;gap:12px;padding:16px}
+.menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a2e;z-index:20;gap:12px;padding:16px}
 .menu h1{font-size:32px;color:#FFD700;margin-bottom:8px}
 .menu p{font-size:16px;color:#aaa;text-align:center;max-width:300px}
 .diff-btn{width:280px;padding:14px;font-size:20px;font-weight:700;border:none;border-radius:16px;cursor:pointer;color:#fff;transition:transform 0.15s;text-align:left}
@@ -30,9 +30,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
 .diff-btn.d3{background:linear-gradient(135deg,#FF9800,#FFB74D)}
 .diff-btn.d4{background:linear-gradient(135deg,#E53935,#EF5350)}
 .diff-btn.d5{background:linear-gradient(135deg,#9C27B0,#CE93D8)}
-.diff-btn.lock{opacity:0.5}
+.diff-btn.lock{opacity:0.55;filter:grayscale(0.5)}
+.diff-btn.shake{animation:lockshake 0.4s}
+@keyframes lockshake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+#lockMsg{display:none;font-size:15px;font-weight:700;color:#FFB74D;text-align:center;max-width:300px}
 .diff-btn .best-info{font-size:12px;display:block;margin-top:2px;opacity:0.8}
-.result{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(26,26,46,0.97);z-index:20;gap:12px;display:none;padding:16px}
+.result{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a2e;z-index:20;gap:12px;display:none;padding:16px}
 .result h2{font-size:32px;color:#FFD700}.result p{font-size:20px}.result .big{font-size:72px}
 .retry{padding:14px 40px;font-size:22px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;cursor:pointer;margin-top:8px}
 .next-btn{padding:14px 40px;font-size:22px;font-weight:700;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#81C784);color:#fff;cursor:pointer;margin-top:4px}
@@ -48,6 +51,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
     <h1>⌨️ 타이핑 게임</h1>
     <p>위에서 떨어지는 단어를 타이핑해서 없애세요!</p>
     <div id="diffBtns"></div>
+    <p id="lockMsg"></p>
   </div>
   <div class="hud">
     <span class="sc" id="scoreDisp">⭐ 0</span>
@@ -58,6 +62,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
   <div class="field" id="field"><div class="danger-line"></div></div>
   <div class="input-area"><input id="inp" type="text" placeholder="여기에 입력..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></div>
   <div class="result" id="resultScreen"></div>
+</div>
+<div id="lpHowto" style="position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center">
+  <div style="font-size:64px">⌨️</div>
+  <div style="font-size:30px;font-weight:900;color:#FFD700">타이핑 게임</div>
+  <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.6">🎯 떨어지는 단어를 모두 없애고 점수를 모으자!</div>
+  <div style="font-size:16px;color:#e8e8f5;line-height:1.7;max-width:340px;text-align:left">
+    ⌨️ 화면 <b style="color:#7FDBFF">아래 입력창</b>에 떨어지는 단어를 똑같이 입력해요<br>
+    ✨ 다 입력하면 단어가 <b style="color:#81C784">자동으로 사라져요</b> (엔터 필요 없음!)<br>
+    ❤️ 단어가 바닥에 닿으면 하트가 줄어요 — 하트가 다 없어지면 끝!
+  </div>
+  <button onclick="document.getElementById('lpHowto').style.display='none'" style="margin-top:8px;padding:16px 52px;font-size:24px;font-weight:900;border:none;border-radius:18px;background:linear-gradient(135deg,#FF6B9D,#FFD700);color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(255,107,157,0.5)">▶ 시작!</button>
 </div>
 <script>
 'use strict';
@@ -116,8 +131,22 @@ function buildMenu(){
     const b=getBest(i);
     const ul=isUnlocked(i);
     const bst=b.stars>0?`<span class="best-info">${starStr(b.stars)} 최고: ${b.score}점 / ${b.wpm} WPM</span>`:'';
-    return `<button class="diff-btn d${i+1} ${ul?'':'lock'}" onclick="${ul?`startGame(${i})`:''}">${d.emoji} ${d.name} (${d.desc})${bst}</button>`;
+    const lockInfo=ul?'':`<span class="best-info">🔒 잠김 — ${DIFFS[i-1].name}에서 별 ★ 1개를 얻으면 열려요</span>`;
+    return `<button class="diff-btn d${i+1} ${ul?'':'lock'}" onclick="${ul?`startGame(${i})`:`lockedTap(this,${i})`}">${ul?'':'🔒 '}${d.emoji} ${d.name} (${d.desc})${lockInfo}${bst}</button>`;
   }).join('');
+}
+
+let lockMsgTimer=null;
+function lockedTap(btn,i){
+  sndInit();sndWrong();
+  btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake');
+  const msg=document.getElementById('lockMsg');
+  if(msg){
+    msg.textContent='🔒 '+DIFFS[i-1].emoji+' '+DIFFS[i-1].name+' 단계에서 별 ★ 1개를 얻으면 열려요!';
+    msg.style.display='block';
+    if(lockMsgTimer)clearTimeout(lockMsgTimer);
+    lockMsgTimer=setTimeout(()=>{msg.style.display='none';},2500);
+  }
 }
 
 function showMenu(){

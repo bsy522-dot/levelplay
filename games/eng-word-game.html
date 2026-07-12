@@ -53,10 +53,29 @@ h1{text-align:center;font-size:26px;margin:6px 0;color:#FFD700}
 .act.menu-btn{background:rgba(255,255,255,.1);border:2px solid #555}
 .toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:rgba(0,0,0,.85);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .3s;z-index:99}
 .toast.on{opacity:1}
+#lpHowto{position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#lpHowto .hw-emoji{font-size:72px;margin-bottom:10px}
+#lpHowto .hw-title{font-size:28px;font-weight:900;color:#FFD700;margin-bottom:14px}
+#lpHowto .hw-goal{font-size:18px;font-weight:700;color:#7FDBFF;margin-bottom:16px;line-height:1.6}
+#lpHowto .hw-lines{font-size:17px;line-height:1.8;color:#fff;margin-bottom:26px;text-align:left}
+#lpHowto .hw-start{padding:16px 48px;font-size:22px;font-weight:900;color:#fff;border:none;border-radius:16px;background:linear-gradient(135deg,#4CAF50,#2196F3);cursor:pointer;box-shadow:0 4px 16px rgba(33,150,243,.5)}
+#lpHowto .hw-start:active{transform:scale(.95)}
+.play-guide{text-align:center;font-size:15px;color:#A8F0A0;margin-bottom:10px;line-height:1.6}
 </style>
 </head><body>
 <div class="wrap" id="app"></div>
 <div class="toast" id="toast"></div>
+<div id="lpHowto">
+  <div class="hw-emoji">🔤</div>
+  <div class="hw-title">영어 단어 맞히기</div>
+  <div class="hw-goal">🎯 한국어 뜻을 보고 영어 단어를 골라<br>10개 정답을 맞히면 클리어!</div>
+  <div class="hw-lines">
+    👆 먼저 Lv.1~10 중 원하는 레벨 버튼을 골라요<br>
+    🔤 문제가 나오면 4개 보기 중 정답을 눌러요<br>
+    💡 Lv.1은 쉬워요 · 숫자가 클수록 어려워요!
+  </div>
+  <button class="hw-start" onclick="document.getElementById('lpHowto').style.display='none'">▶ 시작!</button>
+</div>
 <script>
 'use strict';
 
@@ -153,6 +172,7 @@ function renderPlay(){
   h+='<div class="score-bar"><span class="sb-lv">Lv.'+lv+' '+lvData.nm+'</span><span class="sb-prog">'+correct+'/10</span><span class="sb-streak">🔥 '+streak+'</span></div>';
   if(w.e)h+='<div class="q-emoji">'+w.e+'</div>';
   h+='<div class="q-hint"><span class="q-kor">'+w.k+'</span><br>의 영어는?</div>';
+  h+='<div class="play-guide">👇 아래 4개 중 정답을 눌러요!</div>';
   h+='<div class="opts">'+opts.map(o=>'<button class="opt" onclick="answer(this,\''+o.replace(/'/g,"\\'")+'\')">'+o+'</button>').join('')+'</div>';
   $('app').innerHTML=h;
 }

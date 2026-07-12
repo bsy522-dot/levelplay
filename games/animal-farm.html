@@ -128,6 +128,21 @@ canvas{display:block;margin:0 auto}
 .tutPulse{animation:tutPulse 1.2s ease-in-out infinite;position:relative;z-index:7600}
 @keyframes tutPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.6),0 0 0 4px #ffd700}50%{box-shadow:0 0 0 14px rgba(255,215,0,0),0 0 0 4px #ffd700}}
 </style>
+<script>
+/* P0 fix: _assets/dialogues.json 은 배포에 존재하지 않아 dialogue_loader.js 의 첫 fetch 가
+   콘솔 404 를 남긴다. 공유 로더는 수정 불가하므로 이 게임에서만 해당 요청을
+   실존하는 폴백 파일로 재지향해 네트워크 404 자체를 없앤다. */
+(function(){
+  var _fetch=window.fetch;
+  window.fetch=function(input,init){
+    try{
+      var u=(typeof input==='string')?input:((input&&input.url)||'');
+      if(u.indexOf('_assets/dialogues.json')!==-1){input='_assets/dialogue_fallback.json';}
+    }catch(_){}
+    return _fetch.call(this,input,init);
+  };
+})();
+</script>
 <script defer src="_assets/dialogue_loader.js"></script>
 </head>
 <body>
@@ -522,7 +537,7 @@ ambient(){
 // Utility
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2000)}
 function showAchieve(a){const el=document.getElementById('achieve');el.innerHTML=a.icon+'<br>'+a.name+'<br><small>'+a.desc+'</small>';el.style.display='block';AU.achieve();setTimeout(()=>el.style.display='none',3000)}
-function closeModal(){document.getElementById('modal').classList.remove('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show');G.clockPaused=false}
 function openModal(html){document.getElementById('mcontent').innerHTML=html;document.getElementById('modal').classList.add('show');try{AU.modal()}catch(_){}}
 
 // ISO projection
@@ -799,7 +814,8 @@ document.getElementById('time').textContent=String(G.hour).padStart(2,'0')+':00'
 // Game Logic
 function gameTick(){
 G.tick++;
-if(G.tick%((60/G.speed)|0)===0){
+// 환영/튜토리얼 노출 중에는 게임 시계·성장 일시정지 (QA: 모달 읽는 동안 시간 경과 방지)
+if(!G.clockPaused&&G.tick%((60/G.speed)|0)===0){
 G.hour++;
 if(G.hour>=24){
 G.hour=0;G.day++;
@@ -1673,6 +1689,7 @@ const TUT={
       try{if(localStorage.getItem('animalFarmTutorialDone')==='1')return}catch(_){}
     }
     this.active=true;this.step=0;
+    G.clockPaused=true; // 튜토리얼 진행 중 게임 시간 정지
     document.getElementById('tutOv').classList.add('show');
     this.render();
   },
@@ -1687,6 +1704,7 @@ const TUT={
   skip(){this.finish()},
   finish(){
     this.active=false;
+    G.clockPaused=false; // 튜토리얼 종료 → 게임 시간 재개
     document.getElementById('tutOv').classList.remove('show');
     document.querySelectorAll('.tutPulse').forEach(el=>el.classList.remove('tutPulse'));
     try{localStorage.setItem('animalFarmTutorialDone','1')}catch(_){}
@@ -1780,6 +1798,7 @@ function showWelcome(){
   html+='🐔 시작 동물: 닭 1마리 + 헛간 1동<br>';
   html+='💡 동물·작물·건물을 사서 농장을 키워보세요!';
   html+='</div>';
+  G.clockPaused=true; // 환영 모달을 읽는 동안 게임 시간 정지
   html+='<button class="bb" style="width:100%;font-size:14px" onclick="closeModal();TUT.start(true)">📖 튜토리얼 시작</button>';
   html+='<button class="bb" style="width:100%;margin-top:6px;background:#888;border-color:#aaa" onclick="closeModal();try{localStorage.setItem(\'animalFarmTutorialDone\',\'1\')}catch(_){}">바로 시작하기</button>';
   openModal(html);
@@ -2040,7 +2059,8 @@ const CONS={
   // Register service worker — skip on file:// (won't work without HTTP)
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('sw.js', { scope: './' })
+      // sw.js 는 levelplay 루트에만 존재 (games/sw.js 는 404) → 루트 SW 를 games/ 스코프로 등록
+      navigator.serviceWorker.register('../sw.js', { scope: './' })
         .then(function(reg){
           console.log('[PWA] SW registered, scope:', reg.scope);
         })

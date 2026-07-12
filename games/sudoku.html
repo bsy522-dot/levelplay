@@ -42,9 +42,28 @@ h1{text-align:center;font-size:26px;margin:8px 0;color:#FFD700}
 .back-btn{background:none;border:2px solid #555;border-radius:12px;padding:8px 24px;font-size:16px;color:#aaa;cursor:pointer;margin-top:8px}
 .best-record{font-size:14px;color:#888}
 .memo-mode-indicator{font-size:13px;color:#CE93D8;font-weight:700;min-height:20px}
+#lpHowto{position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:14px}
+#lpHowto .hw-emoji{font-size:64px;line-height:1}
+#lpHowto .hw-title{font-size:32px;font-weight:900;color:#FFD700}
+#lpHowto .hw-goal{font-size:19px;font-weight:700;color:#fff;line-height:1.6}
+#lpHowto .hw-lines{font-size:17px;color:#e8e8f5;line-height:1.8;font-weight:600}
+#lpHowto .hw-lines div{margin:2px 0}
+#lpHowtoBtn{margin-top:10px;padding:16px 52px;font-size:22px;font-weight:900;border:none;border-radius:18px;background:linear-gradient(135deg,#4CAF50,#7FDBFF);color:#1a1a2e;cursor:pointer;box-shadow:0 4px 16px rgba(76,175,80,.45)}
+#lpHowtoBtn:active{transform:scale(.95)}
 </style>
 </head><body>
 <div class="wrap" id="app"></div>
+<div id="lpHowto">
+  <div class="hw-emoji">🔢</div>
+  <div class="hw-title">스도쿠</div>
+  <div class="hw-goal">🎯 모든 빈칸을 숫자로 채우면 승리!<br>가로줄·세로줄·박스에 같은 숫자는 딱 한 번씩!</div>
+  <div class="hw-lines">
+    <div>👆 빈칸을 먼저 탭해서 고르고</div>
+    <div>🔢 아래 숫자 버튼을 탭하면 입력돼요</div>
+    <div>📝 메모 &nbsp;·&nbsp; ⌫ 지우기 &nbsp;·&nbsp; 💡 힌트는 3번까지!</div>
+  </div>
+  <button id="lpHowtoBtn" onclick="document.getElementById('lpHowto').style.display='none'">▶ 시작!</button>
+</div>
 <script>
 'use strict';
 
@@ -224,7 +243,7 @@ function renderMenu(app){
   app.innerHTML=`
     <h1>🔢 스도쿠</h1>
     <div class="menu">
-      <p>빈칸에 숫자를 채워 모든 행, 열, 박스에 중복 없이 완성하세요!<br>힌트 3회, 메모 기능 사용 가능</p>
+      <p>빈칸에 숫자를 채워 모든 행, 열, 박스에 중복 없이 완성하세요!<br>👆 빈칸을 탭해서 고른 뒤, 아래 숫자 버튼을 눌러 입력해요<br>힌트 3회, 메모 기능 사용 가능</p>
       ${btns}
     </div>`;
 }

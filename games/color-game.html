@@ -51,6 +51,17 @@ h1{text-align:center;font-size:28px;margin:8px 0;color:#FF6B9D}
 </style>
 </head><body>
 <div class="wrap" id="app"></div>
+<div id="lpHowto" style="position:fixed;inset:0;z-index:99990;background:rgba(10,10,30,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff">
+  <div style="font-size:64px;margin-bottom:8px">🎨</div>
+  <div style="font-size:28px;font-weight:900;color:#FFD700;margin-bottom:14px">색깔 맞히기</div>
+  <div style="font-size:19px;font-weight:700;line-height:1.6;margin-bottom:14px">🎯 동그라미에 나온 색깔의 이름을 맞혀요!</div>
+  <div style="font-size:17px;line-height:1.8;margin-bottom:24px;max-width:340px;text-align:left">
+    👆 아래 4개 버튼 중에서 정답을 탭!<br>
+    ✅ 맞히면 초록, ❌ 틀리면 빨강 — 잠시 후 다음 문제<br>
+    🏅 먼저 메뉴에서 난이도(쉬움~마스터)를 골라 시작해요
+  </div>
+  <button onclick="document.getElementById('lpHowto').style.display='none'" style="background:linear-gradient(135deg,#FF6B9D,#FF9800);border:none;border-radius:20px;padding:18px 56px;font-size:24px;font-weight:900;color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(255,107,157,.45)">▶ 시작!</button>
+</div>
 <script>
 'use strict';
 
@@ -189,36 +200,37 @@ function renderPlay(app){
   if(qIdx>=questions.length){screen='result';render();return;}
   const q=questions[qIdx];
   const d=DIFFICULTIES[currentDiff];
+  const pool=currentDiff===0?COLORS.slice(0,6):COLORS; // 오답 보기도 난이도 팔레트로 제한 (쉬움=기본 6색)
   let optionsHtml='', hintText='', circleHex='';
 
   if(q.type==='name_ko'){
     circleHex=q.color.hex;
     hintText='이 색깔의 이름은?';
-    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const wrongs=shuffle(pool.filter(c=>c.hex!==q.color.hex)).slice(0,3);
     const opts=shuffle([q.color,...wrongs]);
     optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${o.ko}</button>`).join('');
   } else if(q.type==='name_en'){
     circleHex=q.color.hex;
     hintText='What color is this?';
-    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const wrongs=shuffle(pool.filter(c=>c.hex!==q.color.hex)).slice(0,3);
     const opts=shuffle([q.color,...wrongs]);
     optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${o.en}</button>`).join('');
   } else if(q.type==='name'){
     circleHex=q.color.hex;
     hintText=lang==='ko'?'이 색깔의 이름은?':'What color is this?';
-    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const wrongs=shuffle(pool.filter(c=>c.hex!==q.color.hex)).slice(0,3);
     const opts=shuffle([q.color,...wrongs]);
     optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${getName(o)}</button>`).join('');
   } else if(q.type==='english'){
     circleHex=q.color.hex;
     hintText='What is this color? (English only)';
-    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const wrongs=shuffle(pool.filter(c=>c.hex!==q.color.hex)).slice(0,3);
     const opts=shuffle([q.color,...wrongs]);
     optionsHtml=opts.map(o=>`<button class="opt-btn" onclick="answer(this,'${o.hex}','${q.color.hex}')">${o.en}</button>`).join('');
   } else if(q.type==='rgb'){
     circleHex=q.color.hex;
     hintText='이 색의 RGB 값은?';
-    const wrongs=shuffle(COLORS.filter(c=>c.hex!==q.color.hex)).slice(0,3);
+    const wrongs=shuffle(pool.filter(c=>c.hex!==q.color.hex)).slice(0,3);
     const opts=shuffle([q.color,...wrongs]);
     optionsHtml=opts.map(o=>`<button class="opt-btn" style="font-size:16px" onclick="answer(this,'${o.hex}','${q.color.hex}')">RGB(${o.rgb})</button>`).join('');
   } else if(q.type==='similar'){
