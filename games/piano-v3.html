@@ -30,7 +30,9 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 
 /* Content area */
 .content { flex:1; overflow:hidden; position:relative; }
-.panel { display:none; height:100%; flex-direction:column; }
+/* min-height:0 — 패널은 #app(flex column)의 축소 대상. 기본 min-height:auto면 자식(캔버스)의
+   콘텐츠 최소높이가 바닥이 되어 가로 화면에서 건반이 화면 밖으로 밀린다. */
+.panel { display:none; height:100%; min-height:0; flex-direction:column; }
 .panel.active { display:flex; }
 
 /* Piano container */
@@ -59,7 +61,9 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .key-black .key-label { color:#666; bottom:3px; font-size:6px; }
 
 /* Falling notes canvas */
-#synth-canvas { width:100%; flex:1; background:transparent; display:block; }
+/* min-height:0 필수 — 캔버스는 width/height 속성으로 종횡비를 갖는 replaced element라,
+   기본 min-height:auto면 "폭 ÷ 종횡비"가 최소높이가 된다(가로 화면에서 캔버스가 안 줄어들어 건반이 화면 밖으로 밀림). */
+#synth-canvas { width:100%; flex:1; min-height:0; background:transparent; display:block; }
 
 /* Controls common */
 .ctrl-bar { display:flex; gap:6px; padding:6px 10px; flex-wrap:wrap; align-items:center; background:var(--surface); border-bottom:1px solid var(--border); font-size:12px; }
@@ -134,6 +138,86 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .modal p { font-size:13px; color:var(--text2); margin-bottom:14px; line-height:1.6; }
 .modal .stars-big { font-size:28px; color:var(--yellow); margin-bottom:8px; }
 .modal .score-detail { font-size:12px; color:var(--text2); margin-bottom:12px; }
+
+/* Song browser (카드형 곡 목록) */
+#synth-stage { position:relative; flex:1; display:flex; flex-direction:column; min-height:0; }
+#song-browser { position:absolute; inset:0; z-index:6; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--bg); padding:10px 10px 18px; }
+#song-browser.hidden { display:none; }
+.sb-head { font-size:15px; font-weight:900; color:var(--text); padding:2px 2px 8px; letter-spacing:.5px; }
+.sb-head small { display:block; font-size:11px; font-weight:600; color:var(--text2); margin-top:2px; }
+.sb-sec { font-size:14px; font-weight:900; margin:10px 2px 7px; padding:4px 10px; border-radius:8px; display:inline-block; }
+.sb-sec.d1 { background:rgba(34,197,94,.18); color:#7ff0a8; border:1px solid rgba(34,197,94,.5); }
+.sb-sec.d2 { background:rgba(59,130,246,.18); color:#93c0ff; border:1px solid rgba(59,130,246,.5); }
+.sb-sec.d3 { background:rgba(239,68,68,.18); color:#ffa3a3; border:1px solid rgba(239,68,68,.5); }
+.song-card { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--surface2); border:2px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:8px; cursor:pointer; color:var(--text); }
+.song-card:active { border-color:var(--accent); background:#243055; }
+.song-card.done { border-color:rgba(234,179,8,.75); }
+.sc-thumb { width:52px; height:52px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:28px; background:#0d1424; border:1px solid var(--border); border-radius:12px; }
+.sc-body { flex:1; min-width:0; display:block; }
+.sc-title { display:block; font-size:16px; font-weight:900; color:#fff; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sc-sub { display:block; font-size:11px; font-weight:700; color:#a4b0c8; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sc-meta { display:flex; align-items:center; gap:6px; margin-top:5px; font-size:11px; font-weight:800; color:#c3ccdd; flex-wrap:wrap; }
+.sc-badge { padding:2px 7px; border-radius:999px; font-size:11px; font-weight:900; }
+.sc-badge.d1 { background:#22c55e; color:#062b14; }
+.sc-badge.d2 { background:#3b82f6; color:#04193c; }
+.sc-badge.d3 { background:#ef4444; color:#360606; }
+.sc-bar { display:block; height:8px; margin-top:6px; background:#0d1424; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+.sc-bar > i { display:block; height:100%; background:linear-gradient(90deg,#22c55e,#06b6d4); border-radius:999px; }
+.sc-pct { flex-shrink:0; width:52px; text-align:right; font-size:17px; font-weight:900; color:#06b6d4; }
+.sc-pct.zero { color:#7f8ca6; }
+.sc-pct small { display:block; font-size:14px; color:var(--yellow); }
+@media (max-width:300px) {
+  .sc-thumb { width:40px; height:40px; font-size:22px; }
+  .sc-title { font-size:14px; }
+  .sc-pct { width:42px; font-size:14px; }
+}
+
+/* 세로 모드 힌트 (가로 권장) — 한 번 닫으면 저장 */
+#lscape-hint { display:none; align-items:center; justify-content:center; gap:8px; padding:4px 10px; font-size:11px; font-weight:700; color:#cfe1ff; background:linear-gradient(90deg,rgba(74,125,255,.22),rgba(168,85,247,.22)); border-top:1px solid var(--border); flex-shrink:0; }
+#lscape-hint.show { display:flex; }
+#lscape-hint button { background:none; border:1px solid var(--border); color:#8892a8; border-radius:6px; width:24px; height:20px; font-size:11px; line-height:1; cursor:pointer; flex-shrink:0; }
+
+/* ================ 가로(landscape) 컴팩트 레이아웃 ================
+   단일 진실원천 = JS matchMedia('(orientation:landscape) and (max-height:560px)') → body.lscape 토글.
+   (데스크톱 창도 orientation=landscape이므로 max-height로 "폰 가로"만 겨냥한다) */
+body.lscape .header { display:none; }
+/* 탭: 아이콘+글씨를 한 줄로 (2줄 → 1줄, 높이 절반) */
+body.lscape .tab { display:flex; align-items:center; justify-content:center; gap:4px; padding:4px 2px; font-size:11px; }
+body.lscape .tab-icon { display:inline; font-size:15px; margin-bottom:0; }
+body.lscape .ctrl-bar { padding:2px 8px; gap:5px; font-size:11px; flex-wrap:nowrap; overflow-x:auto; white-space:nowrap; }
+body.lscape .ctrl-bar::-webkit-scrollbar { height:0; }
+body.lscape .ctrl-bar label, body.lscape .ctrl-bar .btn { flex-shrink:0; }
+body.lscape .ctrl-bar input[type="range"] { width:56px; }
+body.lscape .btn { padding:4px 10px; font-size:11px; }
+body.lscape .score-bar { padding:1px 8px; font-size:10px; gap:8px; }
+body.lscape #kb-zoom { padding:1px 8px; font-size:10px; gap:5px; }
+body.lscape #kb-zoom button { width:30px; height:20px; font-size:13px; }
+body.lscape #lscape-hint { display:none !important; }
+body.lscape .free-info { padding:6px 10px; gap:4px; font-size:11px; overflow-y:auto; }
+body.lscape .free-info .shortcut-grid { margin-top:4px; gap:2px 14px; }
+body.lscape .learn-list { padding:6px 10px; }
+body.lscape .lesson-view { padding:6px 10px; }
+/* 곡 목록: 가로에선 2열로 폭을 쓰고 카드를 낮춰 한 화면에 더 많이 (세로 189px 스테이지) */
+body.lscape #song-browser { padding:6px 10px 10px; }
+body.lscape .sb-head { font-size:12px; padding:0 2px 4px; }
+body.lscape .sb-head small { font-size:10px; }
+body.lscape #song-list { display:grid; grid-template-columns:1fr 1fr; gap:0 8px; }
+body.lscape #song-list .sb-sec { grid-column:1 / -1; margin:4px 2px 4px; font-size:12px; padding:3px 8px; }
+body.lscape .song-card { padding:5px 8px; margin-bottom:5px; gap:7px; border-radius:11px; }
+body.lscape .sc-thumb { width:34px; height:34px; font-size:19px; border-radius:9px; }
+body.lscape .sc-title { font-size:13px; }
+body.lscape .sc-sub { font-size:10px; }
+body.lscape .sc-meta { margin-top:3px; gap:4px; font-size:10px; }
+body.lscape .sc-badge { padding:1px 6px; font-size:10px; }
+body.lscape .sc-bar { height:6px; margin-top:4px; }
+body.lscape .sc-pct { width:40px; font-size:14px; }
+body.lscape .sc-pct small { font-size:12px; }
+/* 모달: 세로 공간이 좁으므로 스크롤 허용 */
+body.lscape .modal { max-height:92vh; overflow-y:auto; padding:12px 14px; max-width:440px; }
+body.lscape .modal h3 { font-size:15px; margin-bottom:6px; }
+body.lscape .opt-h { font-size:12px; margin-bottom:4px; }
+body.lscape .opt-btn { padding:6px 3px; font-size:12px; border-radius:10px; }
+body.lscape .opt-btn small { font-size:9px; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width:5px; height:5px; }
@@ -241,7 +325,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
   <!-- Synthesia -->
   <div class="panel" id="panel-synth">
     <div class="ctrl-bar">
-      <label>곡 <select id="song-select"></select></label>
+      <label id="song-select-label" style="display:none">곡 <select id="song-select"></select></label>
+      <button class="btn btn-secondary" id="btn-song-list">☰ 곡 목록</button>
       <label title="10% 매우 느림 ~ 200% 빠름">속도 <input type="range" id="speed" min="10" max="200" value="100"><span id="speed-val">1.0x</span></label>
       <button class="btn btn-primary" id="btn-play-synth">▶ 재생</button>
       <button class="btn btn-secondary" id="btn-stop-synth">■ 정지</button>
@@ -261,7 +346,13 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
         <span id="sc-progress-pct" style="font-size:10px">0%</span>
       </span>
     </div>
-    <canvas id="synth-canvas"></canvas>
+    <div id="synth-stage">
+      <canvas id="synth-canvas"></canvas>
+      <div id="song-browser">
+        <div class="sb-head">🎵 곡 목록<small>곡을 눌러 난이도와 모드를 고르고 연주해요</small></div>
+        <div id="song-list"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Record -->
@@ -274,6 +365,12 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <button class="btn btn-secondary" id="btn-rec-synth" disabled>🎮 Synthesia 재생</button>
     </div>
     <div class="rec-list" id="rec-list"></div>
+  </div>
+
+  <!-- 가로 권장 힌트 (세로에서만, 닫으면 저장) -->
+  <div id="lscape-hint">
+    <span>📱 가로로 돌리면 더 크게 연주할 수 있어요</span>
+    <button id="lscape-hint-x" aria-label="힌트 닫기">✕</button>
   </div>
 
   <!-- Piano keyboard -->
@@ -300,6 +397,12 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <button class="opt-btn sel" data-mode="normal">🎹 연습<small>박자대로 판정</small></button>
       <button class="opt-btn" data-mode="wait">🐢 음표 대기<small>누를 때까지 정지</small></button>
       <button class="opt-btn" data-mode="listen">🎧 듣기<small>자동 연주 감상</small></button>
+    </div>
+    <div class="opt-h" style="margin-top:12px">가이드 방식</div>
+    <div class="opt-row">
+      <button class="opt-btn" data-guide="staff">🎼 악보<small>오선지+음이름</small></button>
+      <button class="opt-btn sel" data-guide="waterfall">🌊 폭포<small>음길이 낙하바</small></button>
+      <button class="opt-btn" data-guide="circle">🔵 음표<small>음이름 원형</small></button>
     </div>
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn btn-secondary" id="song-opt-cancel" style="flex:1">취소</button>
@@ -513,6 +616,30 @@ function stopNoteImmediate(midi) {
 
 function releaseSustain() { sustainedNotes.forEach(m => releaseNote(m)); sustainedNotes.clear(); }
 
+// ================ 가로(랜드스케이프) 컴팩트 레이아웃 ================
+// 폰 가로만 겨냥한다(데스크톱 창도 orientation=landscape이므로 max-height로 구분).
+// CSS(body.lscape)와 JS가 같은 조건 하나만 본다 → 레이아웃/건반크기 불일치 불가.
+const LSCAPE_MQ = window.matchMedia('(orientation: landscape) and (max-height: 560px)');
+let isLandscape = LSCAPE_MQ.matches;
+const zoomOverride = {portrait: null, landscape: null}; // 사용자가 −/＋·핀치로 정한 값 (방향별로 기억)
+function baseWhiteWidth() { return window.innerWidth < 600 ? 14 : 20; }
+// 가로 기본 배율: 화면폭 ÷ 흰건반 17개(약 2.5옥타브)가 한눈에 들어오도록 자동 산정
+function autoKeyZoom() {
+  if (!isLandscape) return 1; // 세로는 기존 기본값 그대로 (회귀 금지)
+  return Math.max(0.8, Math.min(2.2, (window.innerWidth / 17) / baseWhiteWidth()));
+}
+function applyLayoutMode(force) {
+  const next = LSCAPE_MQ.matches;
+  if (!force && next === isLandscape) return false;
+  isLandscape = next;
+  document.body.classList.toggle('lscape', isLandscape);
+  const k = isLandscape ? 'landscape' : 'portrait';
+  keyZoom = zoomOverride[k] != null ? zoomOverride[k] : autoKeyZoom();
+  const zl = document.getElementById('zoom-label');
+  if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
+  return true;
+}
+
 // ================ 건반 전용 확대 (핀치 + 버튼) — 페이지 전체 줌 차단 ================
 function setKeyZoom(z) {
   z = Math.max(0.8, Math.min(2.2, z));
@@ -520,6 +647,7 @@ function setKeyZoom(z) {
   const wrap = document.getElementById('piano-wrap');
   const centerRatio = (wrap.scrollLeft + wrap.clientWidth / 2) / Math.max(1, wrap.scrollWidth);
   keyZoom = z;
+  zoomOverride[isLandscape ? 'landscape' : 'portrait'] = keyZoom; // 사용자 조정값은 방향별로 유지
   buildPiano();
   wrap.scrollLeft = centerRatio * wrap.scrollWidth - wrap.clientWidth / 2;
   const zl = document.getElementById('zoom-label');
@@ -566,8 +694,11 @@ function buildPiano() {
   const isMobile = window.innerWidth < 600;
   whiteKeyWidth = Math.round((isMobile ? 14 : 20) * keyZoom);
   const blackWidth = Math.round((isMobile ? 9 : 13) * keyZoom);
-  const whiteHeight = isMobile ? 105 : 130;
-  const blackHeight = isMobile ? 66 : 82;
+  // 가로: 화면 높이가 짧으므로 건반을 낮춘다(낙하 영역 확보). 세로는 기존 값 그대로.
+  const whiteHeight = isLandscape
+    ? Math.max(72, Math.min(96, Math.round(window.innerHeight * 0.23)))
+    : (isMobile ? 105 : 130);
+  const blackHeight = Math.round(whiteHeight * 0.63); // 105→66, 130→82 (기존과 동일)
 
   const whiteKeys = ALL_KEYS.filter(k => !isBlack(k.note));
   const totalWidth = whiteKeys.length * whiteKeyWidth;
@@ -1544,6 +1675,13 @@ let synthPracticeMode = false; // practice = pause on miss
 let synthWaitMode = false; // wait for correct key before advancing time
 let synthNotes = [], synthBPM = 120, synthSpeed = 1, synthAutoPlay = false;
 let synthStartTime = 0, synthTestId = null;
+let pendingSongKey = null, synthSongKey = null; // 곡 목록에서 시작한 곡 (완성도 기록용)
+// 가이드 방식: 'staff'(오선지) | 'waterfall'(음길이 낙하바, 기본) | 'circle'(음이름 원형)
+// 판정·타이밍 로직은 셋 다 동일 — synthLoop의 "그리기"만 분기한다.
+let guideMode = (() => {
+  const v = localStorage.getItem('piano-v3-guide');
+  return (v === 'staff' || v === 'circle' || v === 'waterfall') ? v : 'waterfall';
+})();
 let synthScore = {perfect:0, good:0, miss:0, combo:0, maxCombo:0};
 let onNoteCallback = null;
 let particles = []; // visual particles for hit effects
@@ -1590,11 +1728,14 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
   setTimeout(() => resizeSynthCanvas(), 50);
   setTimeout(() => resizeSynthCanvas(), 200);
 
+  if (typeof hideSongBrowser === 'function') hideSongBrowser(); // 낙하 화면이 보이도록 곡 목록 닫기
+
   synthNotes = notes.map((n,i) => ({...n, idx:i, played:false, result:null}));
   synthBPM = bpm;
   synthSpeed = parseInt(document.getElementById('speed').value) / 100;
   synthAutoPlay = autoPlay;
   synthTestId = testId;
+  synthSongKey = pendingSongKey; pendingSongKey = null;
   synthScore = {perfect:0, good:0, miss:0, combo:0, maxCombo:0};
   particles = [];
   judgmentTexts = [];
@@ -1724,6 +1865,283 @@ function resumeSynthesia() {
   synthAnimId = requestAnimationFrame(synthLoop);
 }
 
+// ================ 가이드 렌더러 (판정/타이밍은 건드리지 않음 — 그리기 전용) ================
+// 표시할 음이름 (한글 토글 반영)
+function noteLabelOf(name) {
+  return document.getElementById('show-korean')?.checked ? toKoreanNote(name) : name;
+}
+
+// 🌊 폭포 모드 — 음길이 비례 낙하 바 (기존 렌더 그대로)
+function drawNoteBar(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, glow) {
+  const drawY = noteBottom - noteHeight;
+  const r = 4 * dpr;
+  const x = keyX + 1, y = drawY, w = Math.max(keyW - 2, 2), h = noteHeight;
+
+  if (!n.played && Math.abs(noteBottom - ctx.canvas.height) < 60 * dpr) {
+    ctx.shadowColor = glow; ctx.shadowBlur = 15 * dpr;
+  }
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  if (h > 16 * dpr) {
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.font = `bold ${9*dpr}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(noteLabelOf(n.note), x + w/2, drawY + h/2 + 3*dpr);
+  }
+}
+
+// 🔵 떨어지는 음표 모드 — 음이름이 적힌 원형(색 = 옥타브), 긴 음은 꼬리로 표시
+function drawNoteCircle(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, glow) {
+  const H = ctx.canvas.height;
+  const oct = parseInt(n.note.slice(-1));
+  const base = OCT_CHIP[oct] || '#e5e7eb';
+  const r = Math.max(12*dpr, Math.min(keyW * 0.95, 22*dpr));
+  const cx = keyX + keyW / 2;
+  const cy = noteBottom - r; // 원의 아래쪽이 판정선에 닿는 순간이 정박
+
+  // 긴 음 꼬리 (음길이 유지)
+  if (noteHeight > r * 2.2) {
+    const tw = Math.max(3*dpr, keyW * 0.26);
+    ctx.globalAlpha = 0.45;
+    ctx.fillStyle = base;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(cx - tw/2, noteBottom - noteHeight, tw, noteHeight - r, tw/2)
+                  : ctx.rect(cx - tw/2, noteBottom - noteHeight, tw, noteHeight - r);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // 결과에 따른 링 색 (판정 결과 시각화 — 폭포 모드와 동일 규칙)
+  let ring = n.hand === 'L' ? '#3b82f6' : '#22c55e';
+  if (n.result === 'perfect') ring = '#22c55e';
+  else if (n.result === 'good') ring = '#eab308';
+  else if (n.result === 'miss') ring = '#ef4444';
+
+  if (!n.played && Math.abs(noteBottom - H) < 60*dpr) { ctx.shadowColor = ring; ctx.shadowBlur = 14*dpr; }
+  ctx.globalAlpha = n.result === 'miss' ? 0.45 : 1;
+  ctx.fillStyle = base;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = Math.max(2*dpr, r * 0.16);
+  ctx.strokeStyle = ring;
+  ctx.beginPath(); ctx.arc(cx, cy, r - ctx.lineWidth/2, 0, Math.PI*2); ctx.stroke();
+
+  // 음이름 (원 안, 어두운 글씨 — 파스텔 배경에서 고대비)
+  const label = noteLabelOf(n.note);
+  ctx.fillStyle = '#12203a';
+  ctx.textAlign = 'center';
+  let fs = Math.max(8*dpr, Math.min(r * 0.85, 13*dpr));
+  ctx.font = `900 ${fs}px sans-serif`;
+  while (ctx.measureText(label).width > r * 1.75 && fs > 7*dpr) {
+    fs -= 1*dpr; ctx.font = `900 ${fs}px sans-serif`;
+  }
+  ctx.fillText(label, cx, cy + fs * 0.36);
+  ctx.globalAlpha = 1;
+}
+
+// 🎼 악보 모드 — 캔버스 상단에 오선지(높은음자리표) + 음표 + 음이름, 현재 위치 커서
+const STAFF_WIN_SEC = 4.0;                    // 커서 오른쪽으로 보이는 시간
+const STAFF_DEG = {C:0, D:1, E:2, F:3, G:4, A:5, B:6};
+const DN_E4 = 30;                             // 오선 맨 아래 줄 = E4 (4*7 + 2)
+function staffPanelH(H, dpr) { return Math.min(170*dpr, H * 0.42); }
+function diatonicOf(name) {
+  const m = /^([A-G])(#?)(\d)$/.exec(name);
+  if (!m) return null;
+  return { dn: parseInt(m[3]) * 7 + STAFF_DEG[m[1]], sharp: m[2] === '#' };
+}
+
+function drawStaff(ctx, W, H, dpr, now, beatToSec) {
+  const PH = staffPanelH(H, dpr);
+  // 패널 배경 (낙하 노트를 가려 악보 영역을 확보)
+  ctx.fillStyle = '#0b1220';
+  ctx.fillRect(0, 0, W, PH);
+  ctx.fillStyle = 'rgba(6,182,212,0.35)';
+  ctx.fillRect(0, PH - 2*dpr, W, 2*dpr);
+
+  const SP = Math.max(8*dpr, Math.min(12*dpr, PH / 13));   // 오선 간격
+  const bottomY = PH * 0.44 + 2 * SP;                       // E4 줄
+  const yOf = dn => bottomY - (dn - DN_E4) * (SP / 2);
+  const clefW = 40 * dpr;
+  const cursorX = clefW + 58 * dpr;   // 커서 왼쪽에 "지나간 음" 여백 (~0.7초)
+  const pps = (W - cursorX - 8*dpr) / STAFF_WIN_SEC;        // 악보 가로 스크롤 속도
+  const yMin = 10 * dpr, yMax = PH - 22 * dpr;
+
+  // 오선 5줄
+  ctx.lineWidth = 1 * dpr;
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  for (let i = 0; i < 5; i++) {
+    const ly = bottomY - i * SP;
+    ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(W, ly); ctx.stroke();
+  }
+
+  // 마디선 (4/4 기준 4박마다)
+  const barSec = 4 * beatToSec;
+  if (barSec > 0.2) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    const first = Math.ceil((now - (cursorX - clefW) / pps) / barSec);
+    for (let b = first; ; b++) {
+      const bx = cursorX + (b * barSec - now) * pps;
+      if (bx > W) break;
+      if (bx < clefW) continue;
+      ctx.beginPath(); ctx.moveTo(bx, bottomY - 4*SP); ctx.lineTo(bx, bottomY); ctx.stroke();
+    }
+  }
+
+  // 현재 위치 커서 — 음표보다 "먼저" 그린다 (커서 선이 현재 음표/음이름을 가리지 않게)
+  ctx.strokeStyle = 'rgba(6,182,212,0.95)';
+  ctx.lineWidth = 2 * dpr;
+  ctx.beginPath();
+  ctx.moveTo(cursorX, bottomY - 4.8*SP); ctx.lineTo(cursorX, bottomY + 1.4*SP); ctx.stroke();
+  ctx.fillStyle = 'rgba(6,182,212,0.95)';
+  ctx.beginPath();
+  ctx.moveTo(cursorX - 5*dpr, bottomY - 5.4*SP);
+  ctx.lineTo(cursorX + 5*dpr, bottomY - 5.4*SP);
+  ctx.lineTo(cursorX, bottomY - 4.4*SP);
+  ctx.closePath(); ctx.fill();
+
+  // 음표들 (현재/다음 음) — 오른쪽에서 커서로 흘러온다
+  // 2패스로 그린다: ①덧줄·머리·기둥 ②음이름 칩.
+  // 칩을 나중에 그리면서 "머리 상자"를 피하게 해야, 왼손 저음 머리 위에 오른손 칩이 얹히지 않는다.
+  const showKR = document.getElementById('show-korean')?.checked;
+  const items = [];
+  synthNotes.forEach(n => {
+    const tSec = n.time * beatToSec;
+    const dt = tSec - now;
+    if (dt < -0.7 || dt > STAFF_WIN_SEC + 0.5) return;
+    const x = cursorX + dt * pps;
+    if (x < clefW + 6*dpr || x > W - 4*dpr) return;
+    const d = diatonicOf(n.note);
+    if (!d) return;
+    const rawY = yOf(d.dn);
+    const y = Math.max(yMin, Math.min(yMax, rawY));
+    const isNow = Math.abs(dt) < 0.18;
+
+    // 색: 손(왼=파랑/오른=초록) + 판정 결과
+    let col = n.hand === 'L' ? '#7aa8ff' : '#eaf2ff';
+    if (n.result === 'perfect') col = '#4ade80';
+    else if (n.result === 'good') col = '#facc15';
+    else if (n.result === 'miss') col = '#f87171';
+    const alpha = n.played && !n.result ? 0.4 : (dt < -0.2 ? 0.45 : 1);
+    items.push({n, x, y, d, isNow, col, alpha});
+  });
+
+  // ── 1패스: 덧줄 · 머리 · 기둥 · 임시표 (머리 상자를 기록해 둔다)
+  const headBoxes = [];
+  items.forEach(({n, x, y, d, isNow, col, alpha}) => {
+    ctx.globalAlpha = alpha;
+
+    // 머리 상자 (임시표 ♯ 폭까지 포함) — 2패스에서 칩이 피해갈 영역
+    const hw = SP * 0.62, hh = SP * 0.46;
+    headBoxes.push({x: x - hw - (d.sharp ? SP*1.5 : 0), y: y - hh, w: hw*2 + (d.sharp ? SP*1.5 : 0), h: hh*2});
+
+    // 덧줄 (ledger lines)
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1 * dpr;
+    const lw = SP * 0.95;
+    if (d.dn < DN_E4) for (let L = DN_E4 - 2; L >= d.dn; L -= 2) {
+      const ly = yOf(L); if (ly > yMax) break;
+      ctx.beginPath(); ctx.moveTo(x - lw, ly); ctx.lineTo(x + lw, ly); ctx.stroke();
+    }
+    if (d.dn > DN_E4 + 8) for (let L = DN_E4 + 10; L <= d.dn; L += 2) {
+      const ly = yOf(L); if (ly < yMin) break;
+      ctx.beginPath(); ctx.moveTo(x - lw, ly); ctx.lineTo(x + lw, ly); ctx.stroke();
+    }
+
+    // 머리 (기울인 타원)
+    if (isNow) { ctx.shadowColor = '#06b6d4'; ctx.shadowBlur = 12*dpr; }
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.ellipse(x, y, SP * 0.62, SP * 0.46, -0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // 기둥 (stem)
+    ctx.strokeStyle = col;
+    ctx.lineWidth = Math.max(1.4*dpr, SP * 0.14);
+    ctx.beginPath();
+    if (d.dn < DN_E4 + 4) { ctx.moveTo(x + SP*0.58, y); ctx.lineTo(x + SP*0.58, y - SP*3); }
+    else { ctx.moveTo(x - SP*0.58, y); ctx.lineTo(x - SP*0.58, y + SP*3); }
+    ctx.stroke();
+
+    // 임시표 ♯
+    if (d.sharp) {
+      ctx.fillStyle = col;
+      ctx.font = `bold ${SP*1.5}px serif`;
+      ctx.textAlign = 'right';
+      ctx.fillText('♯', x - SP*0.85, y + SP*0.5);
+    }
+    ctx.globalAlpha = 1;
+  });
+
+  // ── 2패스: 음이름 칩
+  // 칩은 오선 "아래 고정 행"에 놓는다. 음높이를 따라가면 높은 음의 칩이 오선 줄 위에 얹혀
+  // 줄이 글자를 관통한다(실측: A4·C5·D#5 칩에 줄 관통). 낮은 음은 제 머리보다 더 아래로 내린다.
+  // 그리고 머리 상자·다른 칩과 겹치면 생략한다 — 화음/양손 구간에서 글자가 뭉개지지 않게.
+  const chipBoxes = [];
+  const overlaps = (a, list) => list.some(c =>
+    a.x < c.x + c.w && a.x + a.w > c.x && a.y < c.y + c.h && a.y + a.h > c.y);
+  // 현재 음(isNow)이 자리를 먼저 차지하도록 앞으로 뺀다
+  const chipOrder = items.filter(it => it.isNow).concat(items.filter(it => !it.isNow));
+  chipOrder.forEach(({n, x, y, isNow, alpha}) => {
+    const label = showKR ? toKoreanNote(n.note) : n.note;
+    ctx.font = `900 ${9*dpr}px sans-serif`;
+    ctx.textAlign = 'center';
+    const tw2 = ctx.measureText(label).width;
+    const cy2 = Math.min(Math.max(y + SP * 1.75, bottomY + SP * 1.5), PH - 8*dpr);
+    const box = {x: x - tw2/2 - 3*dpr, y: cy2 - 8*dpr, w: tw2 + 6*dpr, h: 12*dpr};
+    if (overlaps(box, headBoxes) || overlaps(box, chipBoxes)) return;
+    chipBoxes.push(box);
+
+    ctx.globalAlpha = alpha;
+    const bx = box.x, by = box.y, bw = box.w, bh = box.h, br = 3*dpr;
+    ctx.fillStyle = isNow ? 'rgba(6,182,212,0.95)' : 'rgba(9,14,26,0.9)';
+    ctx.beginPath();
+    ctx.moveTo(bx+br,by); ctx.lineTo(bx+bw-br,by); ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);
+    ctx.lineTo(bx+bw,by+bh-br); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);
+    ctx.lineTo(bx+br,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);
+    ctx.lineTo(bx,by+br); ctx.quadraticCurveTo(bx,by,bx+br,by);
+    ctx.fill();
+    ctx.fillStyle = isNow ? '#04202a' : '#cfe0ff';
+    ctx.fillText(label, x, cy2 + 1*dpr);
+    ctx.globalAlpha = 1;
+  });
+
+  // 높은음자리표 (오선 위에 겹쳐 그린다)
+  drawTrebleClef(ctx, clefW * 0.55, bottomY, SP, dpr);
+}
+
+// 높은음자리표 — 폰트 의존 없이 캔버스 패스로 직접 그린다 (오프라인/글꼴 누락 안전)
+function drawTrebleClef(ctx, cx, bottomY, SP, dpr) {
+  const g4 = bottomY - SP;                 // G4 = 아래에서 둘째 줄 (나선 중심)
+  const s = SP / 8.6;                      // 자리표 전체 높이 ≈ 오선 높이의 1.7배
+  ctx.save();
+  ctx.translate(cx, g4);
+  ctx.scale(s, s);
+  ctx.strokeStyle = '#f1f5f9';
+  ctx.lineWidth = 2.6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);                                     // 나선 중심(G4)
+  ctx.bezierCurveTo(-7, -1, -8, -9, -1, -11);           // 왼쪽 소용돌이 → 위로
+  ctx.bezierCurveTo(6, -13, 7, -22, 1, -30);            // 위쪽 갈고리
+  ctx.bezierCurveTo(-4, -23, -4, -14, -1, -4);          // 몸통 내려오기
+  ctx.bezierCurveTo(1, 6, 4, 14, 4, 20);                // 아래로 뻗는 꼬리
+  ctx.bezierCurveTo(4, 27, -2, 29, -5, 25);             // 아래 갈고리
+  ctx.stroke();
+  ctx.beginPath();                                      // 아래 점
+  ctx.arc(-5.5, 22.5, 2.4, 0, Math.PI * 2);
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fill();
+  ctx.restore();
+}
+
 function synthLoop() {
   if (!synthRunning) return;
   if (synthPaused) return; // frozen while paused
@@ -1778,7 +2196,7 @@ function synthLoop() {
   }
 
   // (검증용 read-only) 현재 낙하 파라미터 노출 — 게임 로직에 영향 없음
-  window.__synthDebug = {leadSec: LEAD_SEC, pxPerSec, H, dpr, noteH: 'duration-based', beatToSec, now, keyZoom};
+  window.__synthDebug = {leadSec: LEAD_SEC, pxPerSec, H, dpr, noteH: 'duration-based', beatToSec, now, keyZoom, guideMode};
 
   let allDone = true;
   let hasUnplayed = false;
@@ -1819,35 +2237,10 @@ function synthLoop() {
     else if (n.hand==='L') { color='rgba(59,130,246,0.85)'; glow='#3b82f6'; }
     else { color='rgba(34,197,94,0.85)'; glow='#22c55e'; }
 
-    const drawY = Math.min(noteTop, noteBottom - noteHeight);
-    const r = 4*dpr;
-    const x = keyX+1, y = drawY, w = Math.max(keyW-2,2), h = noteHeight;
-
-    // Glow for upcoming notes
-    if (!n.played && Math.abs(noteBottom - H) < 60*dpr) {
-      ctx.shadowColor = glow;
-      ctx.shadowBlur = 15*dpr;
-    }
-
-    // Draw rounded rect
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Note label (영문 또는 한글)
-    if (h > 16*dpr) {
-      ctx.fillStyle = 'rgba(255,255,255,0.95)';
-      ctx.font = `bold ${9*dpr}px sans-serif`;
-      ctx.textAlign = 'center';
-      const showKR = document.getElementById('show-korean')?.checked;
-      const label = showKR ? toKoreanNote(n.note) : n.note;
-      ctx.fillText(label, x+w/2, drawY+h/2+3*dpr);
-    }
+    // === 렌더러 분기 (판정·타이밍은 위 로직 그대로, 그리기만 다르다) ===
+    // staff 모드도 낙하는 폭포 렌더를 쓰고, 상단에 오선지를 덧그린다(축소 표시).
+    if (guideMode === 'circle') drawNoteCircle(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, glow);
+    else drawNoteBar(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, glow);
 
     // Auto-play
     if (synthAutoPlay && !n.played && noteBottom >= H - 5*dpr) {
@@ -1867,6 +2260,10 @@ function synthLoop() {
       if (el && !el.classList.contains('pressed')) { el.classList.add('guide'); setTimeout(()=>el.classList.remove('guide'),150); }
     }
   });
+
+  // 🎼 악보 모드: 상단 오선지 패널 (낙하 노트 위에 덧그림)
+  const infoTop = guideMode === 'staff' ? staffPanelH(H, dpr) : 0;
+  if (guideMode === 'staff') drawStaff(ctx, W, H, dpr, now, beatToSec);
 
   // === 다음 칠 노트 건반 강조 (Wait Mode + 일반 모드) ===
   document.querySelectorAll('.next-up,.next-up-L').forEach(el => el.classList.remove('next-up','next-up-L'));
@@ -1907,7 +2304,7 @@ function synthLoop() {
       ctx.fillStyle = 'rgba(6,182,212,0.95)';
       ctx.font = `bold ${14*dpr}px sans-serif`;
       ctx.textAlign = 'center';
-      ctx.fillText(`⏸ ${noteList} 키를 누르세요`, W/2, 22*dpr);
+      ctx.fillText(`⏸ ${noteList} 키를 누르세요`, W/2, infoTop + 22*dpr);
     }
   }
 
@@ -1950,7 +2347,7 @@ function synthLoop() {
     ctx.fillStyle = 'rgba(6,182,212,0.8)';
     ctx.font = `bold ${20*dpr}px sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText(synthScore.combo + ' COMBO', W/2, 40*dpr);
+    ctx.fillText(synthScore.combo + ' COMBO', W/2, infoTop + 40*dpr);
   }
 
   if ((allDone && now > 2) || (!hasUnplayed && synthNotes.every(n=>n.played))) {
@@ -1978,6 +2375,28 @@ function synthLoop() {
       };
       // Refresh learn list stars
       renderLearnList();
+    } else if (synthSongKey && !synthAutoPlay) {
+      // 곡 목록에서 시작한 곡 → 완성도(정확도) 최고 기록 저장 + 결과 표시
+      const key = synthSongKey;
+      const song = SONGS[key];
+      const total = synthNotes.length || 1;
+      const pct = Math.max(0, Math.min(100, Math.round((synthScore.perfect + synthScore.good) / total * 100)));
+      if (pct > (progress['song:' + key] || 0)) { progress['song:' + key] = pct; saveProgress(); }
+      const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 40 ? 1 : 0;
+      document.getElementById('result-title').textContent = (song ? song.name : '연주') + ' 완주!';
+      document.getElementById('result-stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+      document.getElementById('result-body').innerHTML =
+        `<div class="score-detail" style="font-size:14px;font-weight:800;color:#06b6d4">완성도 ${pct}%${pct >= 90 ? ' ⭐' : ''}</div>` +
+        `<div class="score-detail">Perfect: ${synthScore.perfect} / Good: ${synthScore.good} / Miss: ${synthScore.miss}<br>최대 콤보: ${synthScore.maxCombo}<br>최고 기록: ${progress['song:' + key] || 0}%</div>`;
+      document.getElementById('result-modal').classList.add('show');
+      const _notes = synthNotes.map(n => ({note:n.note, time:n.time, duration:n.duration, hand:n.hand}));
+      const _bpm = synthBPM, _auto = synthAutoPlay;
+      document.getElementById('btn-result-retry').onclick = () => {
+        document.getElementById('result-modal').classList.remove('show');
+        pendingSongKey = key;
+        startSynthesia(_notes, _bpm, _auto, null);
+      };
+      showSongBrowser(); // 목록에 완성도 즉시 반영 (모달 뒤로)
     }
     return;
   }
@@ -2014,13 +2433,22 @@ let optSpd = 100, optMode = 'normal';
 const songOptModal = document.getElementById('song-opt-modal');
 songOptModal.querySelectorAll('.opt-btn').forEach(b => {
   b.addEventListener('click', () => {
-    const groupSel = b.dataset.spd !== undefined ? '[data-spd]' : '[data-mode]';
+    const groupSel = b.dataset.spd !== undefined ? '[data-spd]'
+                   : b.dataset.mode !== undefined ? '[data-mode]'
+                   : '[data-guide]';
     songOptModal.querySelectorAll('.opt-btn' + groupSel).forEach(x => x.classList.remove('sel'));
     b.classList.add('sel');
     if (b.dataset.spd !== undefined) optSpd = parseInt(b.dataset.spd);
-    else optMode = b.dataset.mode;
+    else if (b.dataset.mode !== undefined) optMode = b.dataset.mode;
+    else { guideMode = b.dataset.guide; localStorage.setItem('piano-v3-guide', guideMode); }
   });
 });
+// 저장된 가이드 방식을 모달에 복원 (기본 = 폭포)
+(function syncGuideSel() {
+  songOptModal.querySelectorAll('.opt-btn[data-guide]').forEach(x => {
+    x.classList.toggle('sel', x.dataset.guide === guideMode);
+  });
+})();
 document.getElementById('btn-play-synth').addEventListener('click', () => {
   const songKey = document.getElementById('song-select').value;
   const song = SONGS[songKey];
@@ -2041,9 +2469,12 @@ document.getElementById('song-opt-start').addEventListener('click', () => {
   document.getElementById('auto-play').checked = (optMode === 'listen');
   synthPracticeMode = false;
   synthWaitMode = (optMode === 'wait');
+  pendingSongKey = songKey; // 완성도 기록 대상
+  hideSongBrowser();
   startSynthesia(song.notes, song.bpm, optMode === 'listen', null);
 });
-document.getElementById('btn-stop-synth').addEventListener('click', stopSynthesia);
+document.getElementById('btn-stop-synth').addEventListener('click', () => { stopSynthesia(); showSongBrowser(); });
+document.getElementById('btn-song-list').addEventListener('click', () => { stopSynthesia(); showSongBrowser(); });
 document.getElementById('speed').addEventListener('input', e => {
   document.getElementById('speed-val').textContent = (e.target.value/100).toFixed(1)+'x';
 });
@@ -2077,6 +2508,122 @@ document.getElementById('auto-play').addEventListener('change', e => {
     sel.appendChild(og);
   });
 })();
+
+// ================ SONG BROWSER (카드형 곡 목록) ================
+const SONG_META = {
+  '비행기':        {emoji:'🎈', sub:'동요 · 첫 곡으로 딱'},
+  '학교종':        {emoji:'🔔', sub:'동요 · 김메리'},
+  '작은별':        {emoji:'✨', sub:'동요 · 프랑스 민요'},
+  '곰세마리':      {emoji:'🐻', sub:'동요 · 한국 창작동요'},
+  'AmazingGrace':  {emoji:'⛪', sub:'찬송가 · J. Newton'},
+  'clementine':    {emoji:'🤠', sub:'미국 민요 · 클레멘타인'},
+  'ode_to_joy':    {emoji:'🎼', sub:'클래식 · 베토벤'},
+  'minuet_g':      {emoji:'💃', sub:'클래식 · 바흐(페촐트)'},
+  'humoresque':    {emoji:'😊', sub:'클래식 · 드보르자크'},
+  '엘리제':        {emoji:'🌸', sub:'클래식 · 베토벤'},
+  '캐논':          {emoji:'💒', sub:'클래식 · 파헬벨'},
+  'air_on_g':      {emoji:'🎻', sub:'클래식 · 바흐'},
+  'traumerei':     {emoji:'🌙', sub:'클래식 · 슈만'},
+  'swan_lake':     {emoji:'🦢', sub:'발레 · 차이콥스키'},
+  'turkish_march': {emoji:'🥁', sub:'클래식 · 모차르트'},
+  'moonlight':     {emoji:'🌕', sub:'클래식 · 베토벤'},
+  'nocturne':      {emoji:'🌃', sub:'클래식 · 쇼팽'},
+  'spring':        {emoji:'🌷', sub:'클래식 · 비발디'},
+  'liebestraum':   {emoji:'💗', sub:'클래식 · 리스트'},
+  'hungarian5':    {emoji:'🎷', sub:'클래식 · 브람스'},
+  'river_flows':   {emoji:'🌊', sub:'뉴에이지 · 이루마'},
+  'la_campanella': {emoji:'🛎️', sub:'클래식 · 리스트(초절기교)'},
+};
+const SONG_ORDER = ['비행기','학교종','작은별','곰세마리','AmazingGrace','clementine',
+  'ode_to_joy','minuet_g','humoresque','엘리제','캐논','air_on_g','traumerei','swan_lake',
+  'turkish_march','moonlight','nocturne','spring','liebestraum','hungarian5','river_flows','la_campanella'];
+const DIFF_NAME = {1:'초급', 2:'중급', 3:'고급'};
+const DIFF_LABEL = {1:'🌱 초급', 2:'⭐ 중급', 3:'🔥 고급'};
+
+// 난이도 자동 산정: 노트 수·양손 여부·BPM(체감 난이도 = 초당 노트 수 + 화음 + 음역)
+const _diffCache = {};
+function songDifficulty(song) {
+  if (_diffCache[song.name] !== undefined) return _diffCache[song.name];
+  const N = song.notes;
+  if (!N.length) return 1;
+  let end = 0, hasL = false, hasR = false, minM = 999, maxM = -1;
+  const chord = {};
+  N.forEach(n => {
+    end = Math.max(end, n.time + n.duration);
+    if (n.hand === 'L') hasL = true; else hasR = true;
+    const t = Math.round(n.time * 4);
+    chord[t] = (chord[t] || 0) + 1;
+    const m = nameToMidi(n.note);
+    if (m > 0) { if (m < minM) minM = m; if (m > maxM) maxM = m; }
+  });
+  const sec = Math.max(1, end * 60 / song.bpm);
+  const density = N.length / sec;                        // 초당 노트 수 = 손가락 부담
+  const maxChord = Math.max.apply(null, Object.values(chord));
+  const span = maxM > 0 ? maxM - minM : 0;               // 음역(손 이동 폭)
+  let s = 0;
+  if (hasL && hasR) s += 2;                              // 양손
+  if (density >= 4.5) s += 3; else if (density >= 3) s += 2; else if (density >= 2) s += 1;
+  if (maxChord >= 3) s += 1;                             // 3음 이상 화음
+  if (span > 36) s += 1;                                 // 3옥타브 초과
+  if (N.length > 100) s += 1;                            // 긴 곡
+  if (song.bpm >= 120 && density < 4.5) s += 1;          // 빠른 템포 (밀도에 이미 반영된 곡은 중복 가산 제외)
+  const d = s <= 2 ? 1 : (s <= 5 ? 2 : 3);
+  _diffCache[song.name] = d;
+  return d;
+}
+function songPct(key) { return Math.round(progress['song:' + key] || 0); }
+
+function renderSongList() {
+  const host = document.getElementById('song-list');
+  if (!host) return;
+  const secs = {1:[], 2:[], 3:[]};
+  const keys = SONG_ORDER.filter(k => SONGS[k]).concat(Object.keys(SONGS).filter(k => !SONG_ORDER.includes(k)));
+  keys.forEach(k => secs[songDifficulty(SONGS[k])].push(k));
+  let html = '';
+  [1,2,3].forEach(d => {
+    if (!secs[d].length) return;
+    html += `<div class="sb-sec d${d}">${DIFF_LABEL[d]} · ${secs[d].length}곡</div>`;
+    secs[d].forEach(k => {
+      const s = SONGS[k];
+      const m = SONG_META[k] || {emoji:'🎵', sub:'피아노'};
+      const pct = songPct(k);
+      html += `<button class="song-card${pct >= 90 ? ' done' : ''}" data-key="${k}">`
+        + `<span class="sc-thumb">${m.emoji}</span>`
+        + `<span class="sc-body">`
+        +   `<span class="sc-title">${s.name}</span>`
+        +   `<span class="sc-sub">${m.sub}</span>`
+        +   `<span class="sc-meta"><span class="sc-badge d${d}">${DIFF_NAME[d]}</span><span>♩ ${s.bpm}</span><span>🎵 ${s.notes.length}음</span></span>`
+        +   `<span class="sc-bar"><i style="width:${pct}%"></i></span>`
+        + `</span>`
+        + `<span class="sc-pct${pct ? '' : ' zero'}">${pct}%${pct >= 90 ? '<small>⭐</small>' : ''}</span>`
+        + `</button>`;
+    });
+  });
+  host.innerHTML = html;
+  host.querySelectorAll('.song-card').forEach(card => {
+    card.addEventListener('click', () => openSongOptions(card.dataset.key));
+  });
+}
+
+// 카드 탭 → 기존 곡 옵션 모달 (드롭다운 값도 동기화해 기존 코드 호환)
+function openSongOptions(key) {
+  const song = SONGS[key];
+  if (!song) return;
+  const sel = document.getElementById('song-select');
+  if (sel) sel.value = key;
+  document.getElementById('song-opt-title').textContent = '🎵 ' + song.name;
+  songOptModal.classList.add('show');
+}
+function showSongBrowser() {
+  const b = document.getElementById('song-browser');
+  if (!b) return;
+  renderSongList();
+  b.classList.remove('hidden');
+}
+function hideSongBrowser() {
+  const b = document.getElementById('song-browser');
+  if (b) b.classList.add('hidden');
+}
 
 // ================ RECORDING ================
 let isRecording = false, recordStart = 0, recordBuffer = [];
@@ -2179,12 +2726,47 @@ window.deleteRecording = function(idx) {
 };
 
 // ================ INIT ================
+// 레이아웃이 바뀐 뒤 건반 스크롤 위치 복원 — 연주 중이면 "다음 칠 음"을 가운데로 (회전해도 곡이 안 깨짐)
+function rescrollAfterLayout() {
+  if (synthRunning && synthNotes.length) {
+    const n = synthNotes.find(x => !x.played) || synthNotes[0];
+    const m = nameToMidi(n.note);
+    if (m > 0) { scrollToMidi(m); return; }
+  }
+  scrollToMidi(60); // C4
+}
+
+let _layoutRaf = null;
+function onViewportChange() {
+  if (_layoutRaf) return; // 회전 시 resize + mq change 동시 발화 → 1프레임에 1번만 재구성
+  _layoutRaf = requestAnimationFrame(() => {
+    _layoutRaf = null;
+    applyLayoutMode();   // 세로↔가로 전환 시 body.lscape·건반 배율 갱신
+    buildPiano();
+    resizeSynthCanvas(); // 낙하 캔버스 높이 재계산 (노트 x는 건반 위치에서 매 프레임 산출됨)
+    rescrollAfterLayout();
+  });
+}
+
 function init() {
+  applyLayoutMode(true); // 건반을 만들기 전에 방향 판정 (가로면 배율·높이가 처음부터 맞게)
   buildPiano();
   buildKeyMap();
   initMIDI();
   renderLearnList();
   renderRecordings();
+  renderSongList();
+
+  // 세로 전용 힌트 — 터치기기 + 세로일 때만 (PC에서 "가로로 돌리세요"는 무의미). 닫으면 저장.
+  const hint = document.getElementById('lscape-hint');
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  if (hint && isTouch && isPortrait && localStorage.getItem('piano-v3-lshint') !== '1') hint.classList.add('show');
+  document.getElementById('lscape-hint-x').addEventListener('click', () => {
+    hint.classList.remove('show');
+    localStorage.setItem('piano-v3-lshint', '1');
+    resizeSynthCanvas();
+  });
 
   // Scroll to middle C
   setTimeout(() => {
@@ -2193,11 +2775,9 @@ function init() {
   }, 100);
 }
 
-window.addEventListener('resize', () => {
-  buildPiano();
-  resizeSynthCanvas();
-  scrollToMidi(60);
-});
+window.addEventListener('resize', onViewportChange);
+if (LSCAPE_MQ.addEventListener) LSCAPE_MQ.addEventListener('change', onViewportChange);
+else if (LSCAPE_MQ.addListener) LSCAPE_MQ.addListener(onViewportChange);
 window.addEventListener('load', init);
 </script>
 </body>
