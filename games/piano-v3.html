@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>피아노 마스터 v4</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -272,6 +272,12 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
   </div>
 
   <!-- Piano keyboard -->
+  <div id="kb-zoom" style="display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:2px 8px;background:rgba(0,0,0,.25);font-size:12px">
+    <span style="color:#888">건반 크기</span>
+    <button id="zoom-out" style="width:34px;height:26px;border:none;border-radius:8px;background:#333;color:#fff;font-size:15px;font-weight:900">−</button>
+    <span id="zoom-label" style="color:#bbb;min-width:38px;text-align:center">100%</span>
+    <button id="zoom-in" style="width:34px;height:26px;border:none;border-radius:8px;background:#333;color:#fff;font-size:15px;font-weight:900">＋</button>
+  </div>
   <div id="piano-wrap"><div id="piano"></div></div>
 </div>
 
@@ -480,14 +486,56 @@ function stopNoteImmediate(midi) {
 
 function releaseSustain() { sustainedNotes.forEach(m => releaseNote(m)); sustainedNotes.clear(); }
 
+// ================ 건반 전용 확대 (핀치 + 버튼) — 페이지 전체 줌 차단 ================
+function setKeyZoom(z) {
+  z = Math.max(0.8, Math.min(2.2, z));
+  if (Math.abs(z - keyZoom) < 0.01) return;
+  const wrap = document.getElementById('piano-wrap');
+  const centerRatio = (wrap.scrollLeft + wrap.clientWidth / 2) / Math.max(1, wrap.scrollWidth);
+  keyZoom = z;
+  buildPiano();
+  wrap.scrollLeft = centerRatio * wrap.scrollWidth - wrap.clientWidth / 2;
+  const zl = document.getElementById('zoom-label');
+  if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
+}
+document.getElementById('zoom-in').addEventListener('click', () => setKeyZoom(keyZoom + 0.2));
+document.getElementById('zoom-out').addEventListener('click', () => setKeyZoom(keyZoom - 0.2));
+// 두 손가락 핀치 = 건반 확대/축소 (건반 영역에서만)
+(function(){
+  const wrap = document.getElementById('piano-wrap');
+  const pts = new Map(); let baseDist = 0, baseZoom = 1, lastApply = 0;
+  wrap.addEventListener('pointerdown', e => {
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2) { const a = [...pts.values()]; baseDist = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]); baseZoom = keyZoom; }
+  });
+  wrap.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2 && baseDist > 30) {
+      e.preventDefault();
+      const a = [...pts.values()];
+      const d = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]);
+      const now = performance.now();
+      if (now - lastApply > 90) { lastApply = now; setKeyZoom(baseZoom * d / baseDist); }
+    }
+  }, {passive:false});
+  const clearPt = e => { pts.delete(e.pointerId); baseDist = 0; };
+  wrap.addEventListener('pointerup', clearPt);
+  wrap.addEventListener('pointercancel', clearPt);
+})();
+// 브라우저(페이지) 핀치줌 차단 — 확대는 건반에서만 일어나야 함
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.documentElement.style.touchAction = 'pan-x pan-y';
+
 // ================ PIANO KEYBOARD ================
 let whiteKeyWidth = 20;
+let keyZoom = 1; // 건반 전용 확대 배율 (페이지 줌 아님) — 핀치/버튼으로 0.8~2.2
 function buildPiano() {
   const piano = document.getElementById('piano');
   piano.innerHTML = '';
   const isMobile = window.innerWidth < 600;
-  whiteKeyWidth = isMobile ? 14 : 20;
-  const blackWidth = isMobile ? 9 : 13;
+  whiteKeyWidth = Math.round((isMobile ? 14 : 20) * keyZoom);
+  const blackWidth = Math.round((isMobile ? 9 : 13) * keyZoom);
   const whiteHeight = isMobile ? 105 : 130;
   const blackHeight = isMobile ? 66 : 82;
 
@@ -1528,7 +1576,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
     setTimeout(() => { if (firstMidi > 0) scrollToMidi(firstMidi); }, 250);
   }
 
-  synthStartTime = performance.now() + (synthWaitMode ? 3000 : 2700); // lead-in: 낙하시간(2.5s)보다 길게 → 첫 노트도 화면 위 밖에서 진입
+  synthStartTime = performance.now() + (synthWaitMode ? 2600 : 2100); // lead-in: 낙하시간(1.7s)보다 길게 → 첫 노트도 화면 위 밖에서 진입
   synthRunning = true;
   synthPaused = false; synthPauseTime = 0;
 
@@ -1669,7 +1717,8 @@ function synthLoop() {
   const beatToSec = 60 / (synthBPM * synthSpeed);
   // 비트매니아식 고정 낙하: 화면 상단→판정선 도달 시간을 기기와 무관하게 LEAD_SEC초로 고정
   // (H는 이미 물리픽셀(canvas.height = cssH*dpr)이므로 dpr을 다시 곱하지 않는다)
-  const LEAD_SEC = 2.5;
+  // 2.5→1.7초: 낙하가 굼떠 보인다는 피드백(0712) — 비트매니아 체감 속도로 상향
+  const LEAD_SEC = 1.7;
   const pxPerSec = H / LEAD_SEC;
 
   // === Wait Mode: 노트가 떨어지지 않고 hit line 직전에 항상 고정 ===
@@ -1687,7 +1736,7 @@ function synthLoop() {
   }
 
   // (검증용 read-only) 현재 낙하 파라미터 노출 — 게임 로직에 영향 없음
-  window.__synthDebug = {leadSec: LEAD_SEC, pxPerSec, H, dpr, noteH: 28*dpr, beatToSec, now};
+  window.__synthDebug = {leadSec: LEAD_SEC, pxPerSec, H, dpr, noteH: 'duration-based', beatToSec, now, keyZoom};
 
   let allDone = true;
   let hasUnplayed = false;
@@ -1699,7 +1748,8 @@ function synthLoop() {
     if (!keyInfo) return;
 
     const noteBottom = H - (noteTimeSec - now) * pxPerSec;
-    const noteHeight = 28*dpr; // 비트매니아식 고정 블록 — 음길이(duration)와 무관, 연속음도 또렷이 분리
+    // 음길이 비례 노트 바(진짜 비트매니아식): 긴 음=긴 바. 최소 22px, 연속음은 3px 틈으로 분리
+    const noteHeight = Math.max(22*dpr, noteDurSec*pxPerSec - 3*dpr);
     const noteTop = noteBottom - noteHeight;
 
     // 판정선 통과 후 유예시간(판정 윈도우 0.4s보다 김)이 지나면 미스 — 화면 크기와 무관하게 균일

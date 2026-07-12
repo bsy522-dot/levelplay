@@ -146,13 +146,13 @@ const MEL_CANON=(function(){
 })();
 
 const SONGS=[
-  {name:'학교종',emoji:'🔔',bpm:100,diff:'쉬움',mel:MEL_SCHOOL},
-  {name:'아리랑',emoji:'🏔️',bpm:90,diff:'보통',mel:MEL_ARIRANG},
-  {name:'캐논',emoji:'🎻',bpm:100,diff:'어려움',mel:MEL_CANON},
+  {name:'학교종',emoji:'🔔',bpm:112,diff:'쉬움',mel:MEL_SCHOOL},
+  {name:'아리랑',emoji:'🏔️',bpm:96,diff:'보통',mel:MEL_ARIRANG},
+  {name:'캐논',emoji:'🎻',bpm:112,diff:'어려움',mel:MEL_CANON},
 ];
 const KEYS=['d','f','j','k'];
 const JUDGE_PERFECT=60,JUDGE_GREAT=110,JUDGE_GOOD=160;
-const NOTE_TRAVEL=2000;      // 노트 낙하 시간(ms)
+const NOTE_TRAVEL=1400;      // 노트 낙하 시간(ms) — 2000→1400: 곡·낙하가 굼뜨다는 피드백(0712) 반영
 const COUNT_BEATS=4;         // 카운트인 비트 수
 
 // 음높이 → 레인: 곡에 나오는 음들을 낮은음부터 4등분 (멜로디 윤곽이 노트로 보임)
