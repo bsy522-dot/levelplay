@@ -12,7 +12,9 @@
   --green: #22c55e; --blue: #3b82f6; --red: #ef4444;
   --yellow: #eab308; --purple: #a855f7; --cyan: #06b6d4;
 }
-html, body { height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; overflow:hidden; touch-action:manipulation; user-select:none; }
+/* touch-action: manipulation은 핀치 '페이지 줌'을 허용한다 → pan-y로 좁혀 페이지 줌 원천 차단.
+   확대는 오직 건반 폭(keyZoom)만. 건반 영역은 pan-x로 좌우 스크롤 허용. */
+html, body { height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; overflow:hidden; touch-action:pan-y; user-select:none; }
 #app { display:flex; flex-direction:column; height:100%; }
 
 /* Header */
@@ -36,8 +38,14 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .panel.active { display:flex; }
 
 /* Piano container */
-#piano-wrap { flex-shrink:0; background:#0d1117; padding:2px 0 0; position:relative; overflow-x:auto; overflow-y:hidden; border-top:1px solid var(--border); -webkit-overflow-scrolling:touch; }
+#piano-wrap { flex-shrink:0; background:#0d1117; padding:2px 0 0; position:relative; overflow-x:auto; overflow-y:hidden; border-top:1px solid var(--border); -webkit-overflow-scrolling:touch; touch-action:pan-x; }
 #piano-wrap::-webkit-scrollbar { height:4px; }
+/* 건반 미니맵 스크롤 스트립 — 드래그/탭으로 좌우 이동 (상용 앱식) */
+#kb-strip { position:relative; height:22px; margin:0 8px 2px; background:#161b26; border:1px solid var(--border); border-radius:6px; overflow:hidden; touch-action:none; cursor:grab; flex-shrink:0; }
+#kb-strip .tick { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,.10); }
+#kb-strip .tick.c { background:rgba(255,255,255,.28); }
+#kb-strip-win { position:absolute; top:1px; bottom:1px; background:rgba(6,182,212,.28); border:2px solid #06b6d4; border-radius:5px; box-shadow:0 0 8px rgba(6,182,212,.5); }
+#kb-strip-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#94a3b8; pointer-events:none; }
 #piano-wrap::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 #piano { display:flex; position:relative; height:130px; margin:0; }
 .key-white { width:20px; height:130px; background:linear-gradient(180deg,#f5f5f5 0%,#e8e8e8 70%,#d8d8d8 100%); border:1px solid #888; border-top:none; border-radius:0 0 4px 4px; cursor:pointer; position:relative; z-index:1; flex-shrink:0; transition:background .06s; }
@@ -380,6 +388,7 @@ body.lscape .opt-btn small { font-size:9px; }
     <span id="zoom-label" style="color:#bbb;min-width:38px;text-align:center">100%</span>
     <button id="zoom-in" style="width:34px;height:26px;border:none;border-radius:8px;background:#333;color:#fff;font-size:15px;font-weight:900">＋</button>
   </div>
+  <div id="kb-strip"><div id="kb-strip-win"></div><div id="kb-strip-hint">◀ 좌우로 끌어 이동 ▶</div></div>
   <div id="piano-wrap"><div id="piano"></div></div>
 </div>
 
@@ -642,7 +651,7 @@ function applyLayoutMode(force) {
 
 // ================ 건반 전용 확대 (핀치 + 버튼) — 페이지 전체 줌 차단 ================
 function setKeyZoom(z) {
-  z = Math.max(0.8, Math.min(2.2, z));
+  z = Math.max(0.8, Math.min(3.4, z)); // 상한 3.4x — 손가락으로 편히 누를 만큼 넓어짐(상용 앱 수준)
   if (Math.abs(z - keyZoom) < 0.01) return;
   const wrap = document.getElementById('piano-wrap');
   const centerRatio = (wrap.scrollLeft + wrap.clientWidth / 2) / Math.max(1, wrap.scrollWidth);
@@ -652,6 +661,7 @@ function setKeyZoom(z) {
   wrap.scrollLeft = centerRatio * wrap.scrollWidth - wrap.clientWidth / 2;
   const zl = document.getElementById('zoom-label');
   if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
+  if (typeof renderStrip === 'function') renderStrip();
 }
 document.getElementById('zoom-in').addEventListener('click', () => setKeyZoom(keyZoom + 0.2));
 document.getElementById('zoom-out').addEventListener('click', () => setKeyZoom(keyZoom - 0.2));
@@ -678,9 +688,59 @@ document.getElementById('zoom-out').addEventListener('click', () => setKeyZoom(k
   wrap.addEventListener('pointerup', clearPt);
   wrap.addEventListener('pointercancel', clearPt);
 })();
-// 브라우저(페이지) 핀치줌 차단 — 확대는 건반에서만 일어나야 함
-document.addEventListener('gesturestart', e => e.preventDefault());
-document.documentElement.style.touchAction = 'pan-x pan-y';
+// ── 페이지 줌 원천 차단 (안드로이드 크롬은 user-scalable=no를 무시한다) ──
+// 두 손가락 touchmove를 preventDefault하면 브라우저 핀치줌 제스처 자체가 취소된다.
+// 확대는 오직 건반 폭(keyZoom)만 — 화면·글씨는 절대 커지지 않는다.
+document.addEventListener('touchmove', e => { if (e.touches.length > 1) e.preventDefault(); }, {passive:false});
+['gesturestart','gesturechange','gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault()));
+document.addEventListener('dblclick', e => e.preventDefault(), {passive:false});
+
+// ── 건반 미니맵 스트립: 드래그/탭으로 좌우 이동 ──
+function renderStrip() {
+  const strip = document.getElementById('kb-strip');
+  const wrap = document.getElementById('piano-wrap');
+  if (!strip || !wrap) return;
+  const win = document.getElementById('kb-strip-win');
+  const total = wrap.scrollWidth || 1;
+  const view = wrap.clientWidth;
+  const sw = strip.clientWidth;
+  // 눈금(C키 위치)은 리빌드 때만 다시 그린다
+  if (strip.dataset.total !== String(total)) {
+    strip.dataset.total = String(total);
+    strip.querySelectorAll('.tick').forEach(t => t.remove());
+    for (const kp of keyPosCache) {
+      if (kp.black) continue;
+      const t = document.createElement('div');
+      t.className = 'tick' + (kp.isC ? ' c' : '');
+      t.style.left = (kp.x / total * sw) + 'px';
+      strip.insertBefore(t, win);
+    }
+  }
+  const wpx = Math.max(24, view / total * sw);
+  win.style.width = wpx + 'px';
+  win.style.left = Math.min(sw - wpx, wrap.scrollLeft / total * sw) + 'px';
+  const hint = document.getElementById('kb-strip-hint');
+  if (hint) hint.style.display = view >= total - 2 ? 'flex' : 'none'; // 전체가 보이면 안내만
+}
+(function(){
+  const strip = document.getElementById('kb-strip');
+  const wrap = document.getElementById('piano-wrap');
+  let dragging = false;
+  const moveTo = clientX => {
+    const r = strip.getBoundingClientRect();
+    const total = wrap.scrollWidth, view = wrap.clientWidth;
+    const ratio = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    wrap.scrollLeft = Math.max(0, Math.min(total - view, ratio * total - view / 2));
+    renderStrip();
+  };
+  strip.addEventListener('pointerdown', e => { dragging = true; strip.setPointerCapture(e.pointerId); moveTo(e.clientX); e.preventDefault(); });
+  strip.addEventListener('pointermove', e => { if (dragging) { moveTo(e.clientX); e.preventDefault(); } });
+  const end = e => { dragging = false; try { strip.releasePointerCapture(e.pointerId); } catch(_) {} };
+  strip.addEventListener('pointerup', end);
+  strip.addEventListener('pointercancel', end);
+  wrap.addEventListener('scroll', renderStrip, {passive:true});
+  window.addEventListener('resize', renderStrip);
+})();
 
 // ================ PIANO KEYBOARD ================
 let whiteKeyWidth = 20;
@@ -745,11 +805,14 @@ function buildPiano() {
   }));
 
   setupPianoTouch();
+  if (typeof renderStrip === 'function') requestAnimationFrame(renderStrip);
 }
 
 function setupPianoTouch() {
   const piano = document.getElementById('piano');
+  const wrap = document.getElementById('piano-wrap');
   const pointerNotes = new Map(); // pointerId -> midi
+  const dragInfo = new Map();     // pointerId -> {x0, scroll0, mode:'key'|'scroll'}
 
   piano.addEventListener('pointerdown', e => {
     const key = e.target.closest('[data-midi]');
@@ -757,11 +820,31 @@ function setupPianoTouch() {
     e.preventDefault();
     const midi = parseInt(key.dataset.midi);
     pointerNotes.set(e.pointerId, midi);
+    dragInfo.set(e.pointerId, { x0: e.clientX, scroll0: wrap.scrollLeft, mode: 'key' });
     playNote(midi);
     key.setPointerCapture(e.pointerId);
   });
 
   piano.addEventListener('pointermove', e => {
+    const d = dragInfo.get(e.pointerId);
+    if (!d) return; // 이 포인터로 시작한 접촉이 아님
+    // 건반이 화면보다 넓을 때(확대 상태): 좌우로 끌면 스크롤로 전환 — 상용 앱식 이동
+    // ※ 스크롤 모드로 바뀌면 pointerNotes에서 빠지므로, 이 분기는 pointerNotes 가드보다 먼저 와야 한다
+    const overflow = wrap.scrollWidth - wrap.clientWidth > 4;
+    if (overflow) {
+      const dx = e.clientX - d.x0;
+      if (d.mode === 'scroll' || Math.abs(dx) > 14) {
+        if (d.mode !== 'scroll') {
+          d.mode = 'scroll';
+          const prev = pointerNotes.get(e.pointerId);
+          if (prev !== undefined) stopNote(prev);   // 스크롤로 전환되면 소리 끔
+          pointerNotes.delete(e.pointerId);
+        }
+        wrap.scrollLeft = d.scroll0 - dx;
+        renderStrip();
+        return;
+      }
+    }
     if (!pointerNotes.has(e.pointerId)) return;
     const el = document.elementFromPoint(e.clientX, e.clientY);
     if (!el) return;
@@ -782,6 +865,7 @@ function setupPianoTouch() {
       stopNote(midi);
       pointerNotes.delete(e.pointerId);
     }
+    dragInfo.delete(e.pointerId);
   };
   piano.addEventListener('pointerup', endHandler);
   piano.addEventListener('pointercancel', endHandler);
