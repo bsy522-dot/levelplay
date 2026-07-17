@@ -789,11 +789,11 @@ function buildFB(){
     for(let si=0;si<4;si++){
       const b=document.createElement('div');b.className='nb';
       b.textContent=AE.nn(AE.freq(si,sm));b.dataset.s=si;b.dataset.m=sm;
-      let held=false;
-      b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();held=true;
+      let held=0;
+      b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ensureA();held++;
         if(inputMode==='nobow')noBowDown(si,sm);else fingerDown(si,sm);
         b.classList.add('on');});
-      const rel=()=>{if(held){held=false;if(inputMode==='nobow')noBowUp(si);else fingerUp(si,sm);}b.classList.remove('on');};
+      const rel=e=>{if(held>0){held--;if(inputMode==='nobow')noBowUp(si);else fingerUp(si,sm,e&&e.pointerType);}if(held<=0)b.classList.remove('on');};
       b.addEventListener('pointerup',rel);
       b.addEventListener('pointercancel',rel);
       b.addEventListener('pointerleave',rel);
@@ -819,17 +819,19 @@ function buildOS(){
 /* ── LEFT HAND (fingerboard) — updates fingering state ONLY.
    No sound, no judgment from buttons: sound & judgment happen at a bow
    stroke (or a pitch change under an active bow = slur). Multi-touch hold
-   is tracked; releasing falls back to the highest finger still held, and
-   when nothing is held the last fingering stays latched (desktop-friendly).
+   is tracked; releasing falls back to the highest finger still held. With
+   nothing held, touch reverts to the open string (real violin) while mouse
+   keeps the last fingering latched (desktop single-pointer can't hold+bow).
    The open-string button = lifting all fingers on that string. */
 const heldF=[{},{},{},{}]; /* per string: {semitone:pressCount} of physically held touches */
 function fingerDown(si,sm){heldF[si][sm]=(heldF[si][sm]||0)+1;pickNote(si,sm);}
-function fingerUp(si,sm){
+function fingerUp(si,sm,ptype){
   const h=heldF[si];
   if(h[sm]){h[sm]--;if(h[sm]<=0)delete h[sm];}
   const ks=Object.keys(h);
   if(ks.length){const hi=Math.max.apply(null,ks.map(Number));if(semi[si]!==hi)pickNote(si,hi);}
-  /* nothing held → keep latch; the open-string button clears it */
+  else if(ptype!=='mouse'){if(semi[si]!==0)pickNote(si,0);} /* touch: lifting every finger returns the string to open, like a real violin */
+  /* mouse keeps the latch: a single pointer can't hold a finger while bowing; the open-string button clears it */
 }
 function openString(si){heldF[si]={};pickNote(si,0);}
 function updFingerUI(si){
