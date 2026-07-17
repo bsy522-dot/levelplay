@@ -20,16 +20,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
 .key-btn.active{background:rgba(255,107,157,0.3);color:#FF6B9D}
 .key-btn.k0{border-bottom:3px solid #E53935}.key-btn.k1{border-bottom:3px solid #2196F3}
 .key-btn.k2{border-bottom:3px solid #4CAF50}.key-btn.k3{border-bottom:3px solid #FFD700}
-.note{position:absolute;width:calc(25% - 8px);height:32px;border-radius:8px;z-index:3;animation:none;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.note{position:absolute;width:calc(25% - 8px);height:26px;border-radius:5px;z-index:3;animation:none;pointer-events:none;box-shadow:0 3px 10px rgba(0,0,0,0.35);border-bottom:5px solid rgba(255,255,255,0.92)}
 .note.l0{left:calc(0% + 4px);background:linear-gradient(135deg,#E53935,#EF5350)}
 .note.l1{left:calc(25% + 4px);background:linear-gradient(135deg,#2196F3,#42A5F5)}
 .note.l2{left:calc(50% + 4px);background:linear-gradient(135deg,#4CAF50,#66BB6A)}
 .note.l3{left:calc(75% + 4px);background:linear-gradient(135deg,#FFD700,#FFEB3B)}
 .note.hit-anim{transform:scale(1.3);opacity:0;transition:all 0.2s}
 .note.miss-anim{opacity:0.2;transition:opacity 0.3s}
-.judge{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:28px;font-weight:900;z-index:20;pointer-events:none;animation:judgeUp 0.5s ease-out forwards;text-shadow:0 2px 8px rgba(0,0,0,0.5)}
-@keyframes judgeUp{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-40px)}}
-.judge.perfect{color:#FFD700}.judge.great{color:#4CAF50}.judge.good{color:#2196F3}.judge.miss{color:#E53935}
+.judge{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);font-size:42px;font-weight:900;z-index:20;pointer-events:none;animation:judgePop 0.46s ease-out forwards;text-shadow:0 3px 10px rgba(0,0,0,0.6),0 0 22px currentColor;letter-spacing:1px;font-style:italic}
+@keyframes judgePop{0%{opacity:0;transform:translateX(-50%) scale(0.45)}18%{opacity:1;transform:translateX(-50%) scale(1.28)}42%{transform:translateX(-50%) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-34px) scale(1)}}
+.judge.perfect{color:#FFD700}.judge.great{color:#4CAF50}.judge.good{color:#29B6F6}.judge.bad{color:#FF9800}.judge.miss{color:#E53935}
+.judge .cb{display:block;font-size:16px;font-style:normal;letter-spacing:0;color:#FF6B9D;text-shadow:0 1px 4px rgba(0,0,0,0.6);margin-top:2px}
 .countdown{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-size:88px;font-weight:900;color:#FFD700;z-index:25;pointer-events:none;text-shadow:0 4px 20px rgba(0,0,0,0.6)}
 
 .menu{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,15,35,0.97);z-index:30;gap:12px;padding:16px}
@@ -56,12 +57,39 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
 .howto .steps{display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.5;color:#ddd;max-width:330px;text-align:left}
 .howto .steps b{color:#FFD700}
 .howto .go{padding:16px 60px;font-size:24px;font-weight:900;border:none;border-radius:18px;background:linear-gradient(135deg,#FFD700,#FFA726);color:#1a1a2e;cursor:pointer;margin-top:6px}
+
+/* HUD 실시간 컨트롤 (노트속도·가로모드) */
+.hud-ctrl{display:flex;align-items:center;gap:4px}
+.hud .mini{width:30px;height:30px;padding:0;font-size:15px;font-weight:900;border:1px solid rgba(255,255,255,0.25);border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center}
+.hud .mini:active{background:rgba(255,107,157,0.4)}
+#spdLabel{min-width:58px;text-align:center;font-size:13px;color:#7FDBFF}
+
+/* 메뉴 옵션 (재생 속도) */
+.opt-row{display:flex;align-items:center;gap:10px;margin:2px 0}
+.opt-lbl{font-size:14px;color:#ccc;min-width:96px;text-align:right}
+.opt-btns{display:flex;gap:6px}
+.opt-b{padding:7px 12px;font-size:15px;font-weight:700;border:1px solid rgba(255,255,255,0.2);border-radius:10px;background:rgba(255,255,255,0.06);color:#ccc;cursor:pointer}
+.opt-b.on{background:linear-gradient(135deg,#FF6B9D,#FF9A9E);color:#fff;border-color:transparent}
+
+/* 가로모드: 스테이지가 짧고 넓어져 노트 낙하가 짧고 시원 */
+@media (orientation:landscape){
+  .wrap{max-width:100%}
+  .key-row{height:52px}
+  .key-btn{font-size:20px}
+  .menu h1{font-size:26px;margin-bottom:0}
+  .menu{gap:8px;padding:10px}
+  .song-btn{padding:10px 16px;font-size:16px}
+}
 </style>
 </head><body>
 <div class="wrap" id="app">
   <div class="menu" id="menuScreen">
     <h1>🎵 리듬 게임</h1>
     <p>음악이 흐르면, 노트가 줄에 닿는 순간 그 줄을 탭!<br>키보드: D, F, J, K / 모바일: 터치</p>
+    <div class="opt-row">
+      <span class="opt-lbl">🎵 재생 속도</span>
+      <div class="opt-btns" id="playSpeedBtns"></div>
+    </div>
     <div id="songBtns"></div>
   </div>
   <div class="howto" id="howtoScreen">
@@ -78,6 +106,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
     <span class="sc" id="scoreDisp">⭐ 0</span>
     <span class="combo" id="comboDisp">🔥 0 콤보</span>
     <span class="song" id="songDisp"></span>
+    <span class="hud-ctrl">
+      <button class="mini" id="spdDown" title="노트 느리게">−</button>
+      <span id="spdLabel">노트 1.5</span>
+      <button class="mini" id="spdUp" title="노트 빠르게">+</button>
+      <button class="mini" id="lscapeBtn" title="가로/세로 전환">⛶</button>
+    </span>
   </div>
   <div class="stage" id="stage" style="display:none">
     <div class="lane-bg" style="left:0"></div>
@@ -146,27 +180,32 @@ const MEL_CANON=(function(){
 })();
 
 const SONGS=[
-  {name:'학교종',emoji:'🔔',bpm:112,diff:'쉬움',mel:MEL_SCHOOL},
-  {name:'아리랑',emoji:'🏔️',bpm:96,diff:'보통',mel:MEL_ARIRANG},
-  {name:'캐논',emoji:'🎻',bpm:112,diff:'어려움',mel:MEL_CANON},
+  {name:'학교종',emoji:'🔔',bpm:126,diff:'쉬움',mel:MEL_SCHOOL},
+  {name:'아리랑',emoji:'🏔️',bpm:108,diff:'보통',mel:MEL_ARIRANG},
+  {name:'캐논',emoji:'🎻',bpm:126,diff:'어려움',mel:MEL_CANON},
 ];
 const KEYS=['d','f','j','k'];
-const JUDGE_PERFECT=60,JUDGE_GREAT=110,JUDGE_GOOD=160;
-const NOTE_TRAVEL=1400;      // 노트 낙하 시간(ms) — 2000→1400: 곡·낙하가 굼뜨다는 피드백(0712) 반영
+const JUDGE_PERFECT=60,JUDGE_GREAT=110,JUDGE_GOOD=160,JUDGE_BAD=240;
+const BASE_TRAVEL=1400;      // 기준 낙하 시간(ms) — 실제 낙하 = BASE_TRAVEL / 노트속도
 const COUNT_BEATS=4;         // 카운트인 비트 수
+// 노트속도(하이스피드): 비트매니아식 스크롤 배속 — 높을수록 노트가 빨리·시원하게 떨어짐(판정시각은 음악에 고정)
+let scrollSpeed=Math.max(1.0,Math.min(3.0,parseFloat(localStorage.getItem('rhythm_scroll'))||1.5));
+let curTravel=BASE_TRAVEL/scrollSpeed;
+// 재생속도: 곡 템포 배속 — 음악과 노트가 함께 스케일되어 항상 싱크
+let playSpeed=parseFloat(localStorage.getItem('rhythm_play'))||1.0;
 
 // 음높이 → 레인: 곡에 나오는 음들을 낮은음부터 4등분 (멜로디 윤곽이 노트로 보임)
 function buildChart(song){
   const freqs=[...new Set(song.mel.map(n=>n[0]))].sort((a,b)=>a-b);
   const laneOf=f=>Math.min(3,Math.floor(freqs.indexOf(f)/freqs.length*4));
-  const beatMs=60000/song.bpm;
+  const beatMs=60000/song.bpm/playSpeed;
   let t=0;const chart=[];
   for(const[f,b]of song.mel){chart.push({time:Math.round(t),freq:f,lane:laneOf(f),el:null,judged:false});t+=b*beatMs;}
   return{chart,beatMs,lengthMs:Math.round(t)};
 }
 
 let songIdx=0,gameActive=false,score=0,combo=0,maxCombo=0;
-let perfects=0,greats=0,goods=0,misses=0;
+let perfects=0,greats=0,goods=0,bads=0,misses=0;
 let notes=[],animId=null,stageH=0,beatMs=600,songLen=0;
 let zeroPerf=0;              // 폴백 클록(performance.now 기준 0점)
 let zeroAudio=0;             // 오디오 클록 0점 (ACTX.currentTime 단위)
@@ -199,6 +238,7 @@ function stopSongAudio(){
 
 function showMenu(){
   buildMenu();
+  buildSpeedOpts();
   document.getElementById('menuScreen').style.display='flex';
   document.getElementById('howtoScreen').style.display='none';
   document.getElementById('resultScreen').style.display='none';
@@ -240,7 +280,7 @@ function startGame(s){
   const song=SONGS[s];
   const built=buildChart(song);
   notes=built.chart;beatMs=built.beatMs;songLen=built.lengthMs;
-  score=0;combo=0;maxCombo=0;perfects=0;greats=0;goods=0;misses=0;
+  score=0;combo=0;maxCombo=0;perfects=0;greats=0;goods=0;bads=0;misses=0;
 
   document.getElementById('resultScreen').style.display='none';
   document.getElementById('hud').style.display='flex';
@@ -251,7 +291,8 @@ function startGame(s){
   updateHUD();
 
   stageH=document.getElementById('stage').offsetHeight;
-  const leadMs=COUNT_BEATS*beatMs>=NOTE_TRAVEL+200?COUNT_BEATS*beatMs:NOTE_TRAVEL+200;
+  curTravel=BASE_TRAVEL/scrollSpeed;
+  const leadMs=COUNT_BEATS*beatMs>=curTravel+200?COUNT_BEATS*beatMs:curTravel+200;
 
   stopSongAudio();
   if(ACTX){
@@ -311,8 +352,8 @@ function gameLoop(){
   const hitY=stageH-72;
   for(const n of notes){
     if(n.judged){continue;}
-    // 노트 생성: 히트 시각 2초 전
-    if(!n.el&&elapsed>=n.time-NOTE_TRAVEL){
+    // 노트 생성: 히트 시각 curTravel(ms) 전 — 노트속도가 높을수록 늦게 나와 빨리 떨어짐
+    if(!n.el&&elapsed>=n.time-curTravel){
       const el=document.createElement('div');
       el.className='note l'+n.lane;
       document.getElementById('stage').appendChild(el);
@@ -320,10 +361,10 @@ function gameLoop(){
     }
     if(!n.el)continue;
     // 노트 이동: 판정선(hitY)에 정확히 n.time에 도달
-    const progress=(elapsed-n.time+NOTE_TRAVEL)/NOTE_TRAVEL;
+    const progress=(elapsed-n.time+curTravel)/curTravel;
     n.el.style.top=(progress*hitY)+'px';
-    // 자동 MISS
-    if(elapsed-n.time>JUDGE_GOOD+50){
+    // 자동 MISS (BAD 창까지 놓치면 미스)
+    if(elapsed-n.time>JUDGE_BAD+50){
       n.judged=true;
       n.el.classList.add('miss-anim');
       const el=n.el;setTimeout(()=>{if(el&&el.parentNode)el.remove();},300);
@@ -346,7 +387,7 @@ function hitLane(lane){
   for(const n of notes){
     if(n.judged||n.lane!==lane)continue;
     const diff=Math.abs(elapsed-n.time);
-    if(diff<bestDiff&&diff<=JUDGE_GOOD+50){bestDiff=diff;best=n;}
+    if(diff<bestDiff&&diff<=JUDGE_BAD){bestDiff=diff;best=n;}
   }
   if(!best)return;
 
@@ -356,8 +397,9 @@ function hitLane(lane){
   if(bestDiff<=JUDGE_PERFECT){judge='perfect';pts=200;perfects++;tone(1760,.04,'square',0.07);}
   else if(bestDiff<=JUDGE_GREAT){judge='great';pts=150;greats++;tone(1320,.04,'square',0.06);}
   else if(bestDiff<=JUDGE_GOOD){judge='good';pts=100;goods++;tone(990,.04,'square',0.05);}
-  else{judge='miss';pts=0;misses++;combo=0;showJudge('miss');updateHUD();
+  else{judge='bad';pts=20;bads++;combo=0;tone(392,.06,'sawtooth',0.05);
     if(best.el){best.el.classList.add('miss-anim');const el=best.el;setTimeout(()=>{if(el&&el.parentNode)el.remove();},300);}
+    score+=pts;showJudge('bad');updateHUD();
     return;
   }
 
@@ -372,10 +414,11 @@ function hitLane(lane){
 }
 
 function showJudge(type){
-  const labels={perfect:'PERFECT!',great:'GREAT!',good:'GOOD',miss:'MISS'};
+  const labels={perfect:'PERFECT',great:'GREAT',good:'GOOD',bad:'BAD',miss:'MISS'};
   const el=document.createElement('div');
   el.className='judge '+type;
-  el.textContent=labels[type];
+  const showCombo=combo>=2&&type!=='miss'&&type!=='bad';
+  el.innerHTML=labels[type]+(showCombo?`<span class="cb">${combo} COMBO</span>`:'');
   document.getElementById('stage').appendChild(el);
   setTimeout(()=>el.remove(),500);
 }
@@ -404,11 +447,12 @@ function endGame(){
     <div class="stars">${starStr(stars)}</div>
     <p>⭐ 점수: ${score}</p>
     <p>🔥 최대 콤보: ${maxCombo}</p>
-    <p style="font-size:16px;color:#aaa">
-      <span style="color:#FFD700">Perfect: ${perfects}</span> /
-      <span style="color:#4CAF50">Great: ${greats}</span> /
-      <span style="color:#2196F3">Good: ${goods}</span> /
-      <span style="color:#E53935">Miss: ${misses}</span>
+    <p style="font-size:15px;color:#aaa">
+      <span style="color:#FFD700">Perfect ${perfects}</span> ·
+      <span style="color:#4CAF50">Great ${greats}</span> ·
+      <span style="color:#29B6F6">Good ${goods}</span> ·
+      <span style="color:#FF9800">Bad ${bads}</span> ·
+      <span style="color:#E53935">Miss ${misses}</span>
     </p>
     <p style="font-size:16px;color:#7FDBFF">+${xp} XP 획득!</p>
     <div class="best-record">최고 기록: ${prev.score}점 ${starStr(prev.stars)}</div>
@@ -454,6 +498,43 @@ document.querySelectorAll('.key-btn').forEach(btn=>{
     }
   },{passive:false});
 })();
+
+// ── 컨트롤: 재생속도(메뉴)·노트속도(HUD 하이스피드)·가로모드 ──
+function buildSpeedOpts(){
+  const wrap=document.getElementById('playSpeedBtns');
+  if(!wrap)return;
+  wrap.innerHTML=[0.75,1,1.25,1.5].map(v=>
+    `<button class="opt-b${v===playSpeed?' on':''}" data-ps="${v}">${v}×</button>`).join('');
+  wrap.querySelectorAll('.opt-b').forEach(b=>b.addEventListener('click',()=>{
+    playSpeed=parseFloat(b.dataset.ps);localStorage.setItem('rhythm_play',playSpeed);buildSpeedOpts();
+  }));
+}
+function updateSpdLabel(){const el=document.getElementById('spdLabel');if(el)el.textContent='노트 '+scrollSpeed.toFixed(1);}
+function nudgeScroll(d){
+  scrollSpeed=Math.max(1.0,Math.min(3.0,Math.round((scrollSpeed+d)*100)/100));
+  curTravel=BASE_TRAVEL/scrollSpeed;
+  localStorage.setItem('rhythm_scroll',scrollSpeed);
+  updateSpdLabel();
+}
+document.getElementById('spdUp').addEventListener('click',()=>nudgeScroll(0.25));
+document.getElementById('spdDown').addEventListener('click',()=>nudgeScroll(-0.25));
+
+let isLandscape=false;
+function toggleLandscape(){
+  const el=document.documentElement;
+  if(!isLandscape){
+    const fs=el.requestFullscreen?el.requestFullscreen():Promise.reject();
+    Promise.resolve(fs).then(()=>{
+      if(screen.orientation&&screen.orientation.lock)return screen.orientation.lock('landscape');
+    }).catch(()=>{}).finally(()=>{isLandscape=true;});
+  }else{
+    try{if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();}catch(e){}
+    if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+    isLandscape=false;
+  }
+}
+document.getElementById('lscapeBtn').addEventListener('click',toggleLandscape);
+updateSpdLabel();
 
 // 자동 검증 훅 (Playwright QA용)
 window.__rhythmDebug={get notes(){return notes;},get elapsed(){return gameActive?elapsedMs():null;},hitLane,SONGS,buildChart};
