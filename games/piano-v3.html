@@ -651,22 +651,48 @@ function applyLayoutMode(force) {
   return true;
 }
 
-// 가로 전환: 매니페스트가 세로 고정(orientation:portrait)이라 물리 회전이 막힘 →
-// 풀스크린 진입 후 화면 방향을 강제로 가로 잠금(안드로이드 크롬). 다시 누르면 세로 복귀.
+// 잠깐 뜨는 안내 토스트
+function pianoToast(msg) {
+  let t = document.getElementById('piano-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'piano-toast';
+    t.style.cssText = 'position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:9999;max-width:86%;padding:12px 16px;border-radius:12px;background:rgba(17,24,39,.96);color:#e5e7eb;font-size:13px;font-weight:600;line-height:1.5;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5);border:1px solid #374151;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._h);
+  t._h = setTimeout(() => { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; }, 3600);
+}
+
+// 가로 전환 — 3단 폴백. 매니페스트/OS가 가로를 막아도 최대한 시도하고, 안 되면 안내.
+//  1) screen.orientation.lock('landscape')  (설치형 PWA는 풀스크린 없이도 됨)
+//  2) requestFullscreen() 후 lock            (브라우저 탭)
+//  3) 둘 다 실패 → 자동회전 켜기 안내 토스트
 // 방향이 바뀌면 LSCAPE_MQ change/resize가 발화해 기존 반응형(body.lscape)이 이어받는다.
 let _forcedLandscape = false;
+function _lockLandscape() {
+  const doLock = () => (screen.orientation && screen.orientation.lock)
+    ? screen.orientation.lock('landscape')
+    : Promise.reject(new Error('no orientation.lock'));
+  return doLock().catch(() => {
+    const el = document.documentElement;
+    const fs = el.requestFullscreen ? el.requestFullscreen() : Promise.reject(new Error('no fullscreen'));
+    return Promise.resolve(fs).then(doLock);
+  });
+}
 function toggleLandscape() {
-  const el = document.documentElement;
   if (!_forcedLandscape) {
-    const fs = el.requestFullscreen ? el.requestFullscreen() : Promise.reject();
-    Promise.resolve(fs)
-      .then(() => (screen.orientation && screen.orientation.lock) ? screen.orientation.lock('landscape') : null)
-      .catch(() => {})
-      .finally(() => { _forcedLandscape = true; });
+    _forcedLandscape = true;
+    _lockLandscape().catch(() => {
+      _forcedLandscape = false;
+      pianoToast('가로 전환이 기기에서 막혀 있어요. 화면 자동회전을 켠 뒤 폰을 옆으로 돌려주세요. (또는 건반 크기 +로 크게)');
+    });
   } else {
+    _forcedLandscape = false;
     try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
     if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
-    _forcedLandscape = false;
   }
 }
 
@@ -2282,8 +2308,8 @@ function synthLoop() {
   const beatToSec = 60 / (synthBPM * synthSpeed);
   // 비트매니아식 고정 낙하: 화면 상단→판정선 도달 시간을 기기와 무관하게 LEAD_SEC초로 고정
   // (H는 이미 물리픽셀(canvas.height = cssH*dpr)이므로 dpr을 다시 곱하지 않는다)
-  // 2.5→1.7초: 낙하가 굼떠 보인다는 피드백(0712) — 비트매니아 체감 속도로 상향
-  const LEAD_SEC = 1.7;
+  // 2.5→1.7→1.35초: 낙하가 굼뜨다는 피드백(0712·0717) — 비트매니아 체감 속도로 상향
+  const LEAD_SEC = 1.35;
   const pxPerSec = H / LEAD_SEC;
 
   // === Wait Mode: 노트가 떨어지지 않고 hit line 직전에 항상 고정 ===
@@ -2313,9 +2339,9 @@ function synthLoop() {
     if (!keyInfo) return;
 
     const noteBottom = H - (noteTimeSec - now) * pxPerSec;
-    // 노트 바 높이: 음길이 비례하되 상한(화면 16%)으로 제한 → 비트매니아식 짧은 탭 노트.
-    // 상한이 없으면 느린 속도(예: 0.3x)에서 음길이가 초 단위로 늘어나 노트가 화면보다 길어진다.
-    const noteHeight = Math.max(20*dpr, Math.min(noteDurSec*pxPerSec - 3*dpr, H * 0.16));
+    // 노트 바 높이: 음길이에 살짝 비례하되 상한 38px(고정)로 제한 → 비트매니아식 짧은 탭 노트.
+    // 화면16% 상한은 큰 화면서 79px까지 커져 "노트가 길다"는 피드백(0717) → 짧은 고정값으로.
+    const noteHeight = Math.max(16*dpr, Math.min(noteDurSec*pxPerSec - 3*dpr, 38*dpr));
     const noteTop = noteBottom - noteHeight;
 
     // 판정선 통과 후 유예시간(판정 윈도우 0.4s보다 김)이 지나면 미스 — 화면 크기와 무관하게 균일
