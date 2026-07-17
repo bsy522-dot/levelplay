@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v60-pianoshort';
+const CACHE_NAME = 'levelplay-v61-swfresh';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -334,6 +334,21 @@ self.addEventListener('fetch', event => {
           cached ? injectV2Patch(cached) : caches.match('./index.html').then(fb => fb ? injectV2Patch(fb) : undefined)
         )
       )
+    );
+    return;
+  }
+
+  // 게임 HTML 문서는 항상 네트워크 우선 → 새 배포가 즉시 반영(캐시우선이면 옛 게임코드가 계속 나옴).
+  // 오프라인일 때만 캐시로 폴백. (게임 내부 자산 json/이미지/모델은 아래 캐시우선 유지)
+  if (url.pathname.includes('/games/') && url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(event.request))
     );
     return;
   }

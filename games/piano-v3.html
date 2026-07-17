@@ -2920,5 +2920,17 @@ if (LSCAPE_MQ.addEventListener) LSCAPE_MQ.addEventListener('change', onViewportC
 else if (LSCAPE_MQ.addListener) LSCAPE_MQ.addListener(onViewportChange);
 window.addEventListener('load', init);
 </script>
+<script>
+// 새 버전 자동 반영: 열 때 SW 업데이트 확인 + 새 워커가 제어를 잡으면 1회 새로고침(옛 캐시 탈출)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.update(); }).catch(() => {});
+  let _swReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_swReloaded) return;
+    _swReloaded = true;
+    location.reload();
+  });
+}
+</script>
 </body>
 </html>
