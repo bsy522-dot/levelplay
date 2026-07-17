@@ -341,7 +341,6 @@ body.lscape .opt-btn small { font-size:9px; }
       <label><input type="checkbox" id="auto-play"> 자동</label>
       <label title="노트가 판정선에서 멈춤 → 그 건반을 누르면 다음 음이 내려옴 (왕초보 한음씩)"><input type="checkbox" id="wait-mode"> 🐢한음씩</label>
       <label title="도/레/미 한글 표시"><input type="checkbox" id="show-korean"> 한글</label>
-      <button class="btn btn-secondary" id="btn-lscape" title="가로 화면으로 전환 (다시 누르면 세로)">⛶ 가로</button>
     </div>
     <div class="score-bar" id="synth-score" style="display:none">
       <span class="s-perfect">P:<b id="sc-perfect">0</b></span>
@@ -378,8 +377,7 @@ body.lscape .opt-btn small { font-size:9px; }
 
   <!-- 가로 권장 힌트 (세로에서만, 닫으면 저장) -->
   <div id="lscape-hint">
-    <span>📱 더 크게 연주하려면</span>
-    <button id="lscape-hint-go" style="width:auto;padding:0 10px;color:#cfe1ff">⛶ 가로로 전환</button>
+    <span>💡 건반이 작으면 아래 <b>건반 크기 ＋</b> 로 키워요</span>
     <button id="lscape-hint-x" aria-label="힌트 닫기">✕</button>
   </div>
 
@@ -979,11 +977,13 @@ function initMIDI() {
 // ================ TAB NAVIGATION ================
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
+    // 탭 이동 시 재생 중이던 Synthesia(소리·낙하) 정지 — 소리가 계속 나던 버그(0717)
+    if (typeof stopSynthesia === 'function') stopSynthesia();
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-    if (tab.dataset.tab === 'synth') resizeSynthCanvas();
+    if (tab.dataset.tab === 'synth') { if (typeof showSongBrowser === 'function') showSongBrowser(); resizeSynthCanvas(); }
   });
 });
 
@@ -2308,8 +2308,8 @@ function synthLoop() {
   const beatToSec = 60 / (synthBPM * synthSpeed);
   // 비트매니아식 고정 낙하: 화면 상단→판정선 도달 시간을 기기와 무관하게 LEAD_SEC초로 고정
   // (H는 이미 물리픽셀(canvas.height = cssH*dpr)이므로 dpr을 다시 곱하지 않는다)
-  // 2.5→1.7→1.35초: 낙하가 굼뜨다는 피드백(0712·0717) — 비트매니아 체감 속도로 상향
-  const LEAD_SEC = 1.35;
+  // 낙하 시간(초): 1.35는 너무 빠르다는 피드백(0717) → 1.7로. 어린이 반응 여유 확보
+  const LEAD_SEC = 1.7;
   const pxPerSec = H / LEAD_SEC;
 
   // === Wait Mode: 노트가 떨어지지 않고 hit line 직전에 항상 고정 ===
@@ -2339,9 +2339,8 @@ function synthLoop() {
     if (!keyInfo) return;
 
     const noteBottom = H - (noteTimeSec - now) * pxPerSec;
-    // 노트 바 높이: 음길이에 살짝 비례하되 상한 38px(고정)로 제한 → 비트매니아식 짧은 탭 노트.
-    // 화면16% 상한은 큰 화면서 79px까지 커져 "노트가 길다"는 피드백(0717) → 짧은 고정값으로.
-    const noteHeight = Math.max(16*dpr, Math.min(noteDurSec*pxPerSec - 3*dpr, 38*dpr));
+    // 노트 바 높이: 음길이에 살짝 비례하되 상한 30px(고정)로 제한 → 짧은 탭 노트("길다" 피드백 0717).
+    const noteHeight = Math.max(15*dpr, Math.min(noteDurSec*pxPerSec - 3*dpr, 30*dpr));
     const noteTop = noteBottom - noteHeight;
 
     // 판정선 통과 후 유예시간(판정 윈도우 0.4s보다 김)이 지나면 미스 — 화면 크기와 무관하게 균일
@@ -2541,6 +2540,10 @@ function stopSynthesia() {
   if (synthAnimId) cancelAnimationFrame(synthAnimId);
   onNoteCallback = null;
   particles = []; judgmentTexts = [];
+  // 재생 중이던 모든 음 즉시 정지 — 정지/탭이동 후에도 소리가 계속 나던 버그(0717)
+  if (typeof activeNotes !== 'undefined') {
+    for (const midi of [...activeNotes.keys()]) { try { stopNoteImmediate(midi); } catch (e) {} }
+  }
   const canvas = document.getElementById('synth-canvas');
   if (canvas) { const c=canvas.getContext('2d'); if(c) c.clearRect(0,0,canvas.width,canvas.height); }
   document.querySelectorAll('.guide,.hit-perfect,.hit-good,.hit-miss,.next-up,.next-up-L').forEach(el => {
@@ -2899,15 +2902,6 @@ function init() {
     localStorage.setItem('piano-v3-lshint', '1');
     resizeSynthCanvas();
   });
-  // 가로 전환 버튼(컨트롤바 + 힌트) — 풀스크린+가로잠금
-  document.getElementById('btn-lscape').addEventListener('click', toggleLandscape);
-  const lgo = document.getElementById('lscape-hint-go');
-  if (lgo) lgo.addEventListener('click', () => {
-    toggleLandscape();
-    hint.classList.remove('show');
-    localStorage.setItem('piano-v3-lshint', '1');
-  });
-
   // Scroll to middle C
   setTimeout(() => {
     scrollToMidi(60); // C4
