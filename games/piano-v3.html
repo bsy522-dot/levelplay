@@ -341,6 +341,7 @@ body.lscape .opt-btn small { font-size:9px; }
       <label><input type="checkbox" id="auto-play"> 자동</label>
       <label title="노트가 판정선에서 멈춤 → 그 건반을 누르면 다음 음이 내려옴 (왕초보 한음씩)"><input type="checkbox" id="wait-mode"> 🐢한음씩</label>
       <label title="도/레/미 한글 표시"><input type="checkbox" id="show-korean"> 한글</label>
+      <button class="btn btn-secondary" id="btn-lscape" title="가로 화면으로 전환 (다시 누르면 세로)">⛶ 가로</button>
     </div>
     <div class="score-bar" id="synth-score" style="display:none">
       <span class="s-perfect">P:<b id="sc-perfect">0</b></span>
@@ -377,7 +378,8 @@ body.lscape .opt-btn small { font-size:9px; }
 
   <!-- 가로 권장 힌트 (세로에서만, 닫으면 저장) -->
   <div id="lscape-hint">
-    <span>📱 가로로 돌리면 더 크게 연주할 수 있어요</span>
+    <span>📱 더 크게 연주하려면</span>
+    <button id="lscape-hint-go" style="width:auto;padding:0 10px;color:#cfe1ff">⛶ 가로로 전환</button>
     <button id="lscape-hint-x" aria-label="힌트 닫기">✕</button>
   </div>
 
@@ -647,6 +649,25 @@ function applyLayoutMode(force) {
   const zl = document.getElementById('zoom-label');
   if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
   return true;
+}
+
+// 가로 전환: 매니페스트가 세로 고정(orientation:portrait)이라 물리 회전이 막힘 →
+// 풀스크린 진입 후 화면 방향을 강제로 가로 잠금(안드로이드 크롬). 다시 누르면 세로 복귀.
+// 방향이 바뀌면 LSCAPE_MQ change/resize가 발화해 기존 반응형(body.lscape)이 이어받는다.
+let _forcedLandscape = false;
+function toggleLandscape() {
+  const el = document.documentElement;
+  if (!_forcedLandscape) {
+    const fs = el.requestFullscreen ? el.requestFullscreen() : Promise.reject();
+    Promise.resolve(fs)
+      .then(() => (screen.orientation && screen.orientation.lock) ? screen.orientation.lock('landscape') : null)
+      .catch(() => {})
+      .finally(() => { _forcedLandscape = true; });
+  } else {
+    try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    _forcedLandscape = false;
+  }
 }
 
 // ================ 건반 전용 확대 (핀치 + 버튼) — 페이지 전체 줌 차단 ================
@@ -1688,22 +1709,22 @@ function openLesson(id) {
   };
   document.getElementById('btn-demo').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(30);
+    setSpeed(80);   // 감상: 0.3→0.8배 (너무 느리다는 피드백 0717)
     startSynthesia(lesson.notes, baseBPM, true, null);
   };
   document.getElementById('btn-wait').onclick = () => {
     synthPracticeMode = false; synthWaitMode = true;
-    setSpeed(30);
+    setSpeed(80);   // 기다림: 노트가 판정선에서 대기하므로 속도는 진입 낙하에만 영향
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-practice').onclick = () => {
     synthPracticeMode = true; synthWaitMode = false;
-    setSpeed(25);
+    setSpeed(70);   // 연습: 0.25→0.7배
     startSynthesia(lesson.notes, baseBPM, false, null);
   };
   document.getElementById('btn-test').onclick = () => {
     synthPracticeMode = false; synthWaitMode = false;
-    setSpeed(50);
+    setSpeed(100);  // 테스트: 원곡 빠르기
     startSynthesia(lesson.notes, baseBPM, false, id);
   };
 }
@@ -2292,8 +2313,9 @@ function synthLoop() {
     if (!keyInfo) return;
 
     const noteBottom = H - (noteTimeSec - now) * pxPerSec;
-    // 음길이 비례 노트 바(진짜 비트매니아식): 긴 음=긴 바. 최소 22px, 연속음은 3px 틈으로 분리
-    const noteHeight = Math.max(22*dpr, noteDurSec*pxPerSec - 3*dpr);
+    // 노트 바 높이: 음길이 비례하되 상한(화면 16%)으로 제한 → 비트매니아식 짧은 탭 노트.
+    // 상한이 없으면 느린 속도(예: 0.3x)에서 음길이가 초 단위로 늘어나 노트가 화면보다 길어진다.
+    const noteHeight = Math.max(20*dpr, Math.min(noteDurSec*pxPerSec - 3*dpr, H * 0.16));
     const noteTop = noteBottom - noteHeight;
 
     // 판정선 통과 후 유예시간(판정 윈도우 0.4s보다 김)이 지나면 미스 — 화면 크기와 무관하게 균일
@@ -2850,6 +2872,14 @@ function init() {
     hint.classList.remove('show');
     localStorage.setItem('piano-v3-lshint', '1');
     resizeSynthCanvas();
+  });
+  // 가로 전환 버튼(컨트롤바 + 힌트) — 풀스크린+가로잠금
+  document.getElementById('btn-lscape').addEventListener('click', toggleLandscape);
+  const lgo = document.getElementById('lscape-hint-go');
+  if (lgo) lgo.addEventListener('click', () => {
+    toggleLandscape();
+    hint.classList.remove('show');
+    localStorage.setItem('piano-v3-lshint', '1');
   });
 
   // Scroll to middle C
