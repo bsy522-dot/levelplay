@@ -813,11 +813,10 @@ const GMS=[
 {nm:'주기율표',em:'⚗️',u:'games/periodic-table.html',d:'원소 기호·이름 퀴즈'},
 {nm:'피아노 마스터',em:'🎹',u:'games/piano-v3.html',d:'22곡 클래식+Synthesia+바이엘+연습모드'},
 {nm:'바이올린 리듬',em:'🎻',u:'games/ViolinReal-v3.html',d:'리듬게임 14곡+곡연주+학습30단계'},
-{nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',d:'StarVoice v4 — MPM음정엔진+옥타브보정+WebGL셰이더+12곡+S~D채점+공유카드'},
+{nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',d:'StarVoice v4.1 — 옥타브무관 채점+지연보정+MPM음정엔진+WebGL셰이더+12곡+S~D채점+공유카드'},
 {nm:'복싱 트레이너',em:'🥊',u:'games/boxing-trainer-v5.html',d:'3D 복싱+커리어+10대전'},
 {nm:'골프 트래커',em:'⛳',u:'games/golf-tracker-v3.html',d:'스윙분석+통계+라운드'},
-{nm:'한국사 영웅전 v8 🆕',em:'⚔️',u:'games/korean-rpg-v8b/index.html',d:'영걸전 SRPG · 3D · SVG 인물 · 캐시 우회 새 빌드'},
-{nm:'한국사 영웅전 (구)',em:'⚔️',u:'games/korean-rpg-v4.html',d:'고조선RPG 환웅+단군편'},
+{nm:'한국사 영웅전 v8',em:'⚔️',u:'games/korean-rpg-v8b/index.html',d:'영걸전식 3D 전략 RPG — 환웅의 시련, 고조선의 서막'},
 {nm:'심시티 빌더',em:'🏙️',u:'games/simcity-v3.html',d:'도시건설+경제+재난'},
 {nm:'집짓기',em:'🏠',u:'games/house-builder-v4.html',d:'진짜 3D+그림자+시간/날씨+워크스루'},
 {nm:'문명 진화 ✨',em:'🏛️',u:'games/civilization-evolution/index.html',d:'AI 픽셀아트 24장+동적BGM+AI내레이터 · 석기→현대 7시대'},
@@ -1902,7 +1901,7 @@ GAME_CATS['심시티 빌더']='creative';GAME_CATS['집짓기']='creative';GAME_
 GAME_CATS['별빛 대모험']='kids';GAME_CATS['별빛 RPG']='kids';GAME_CATS['색깔 맞히기']='kids';GAME_CATS['기억력 카드']='kids';
 GAME_CATS['별빛 대모험 v2']='kids';GAME_CATS['별빛 RPG v2']='kids';
 // 버전/이모지 표기로 매핑 누락됐던 게임 보강
-GAME_CATS['노래방 v4 ✨']='music';GAME_CATS['한국사 영웅전 v8 🆕']='history';GAME_CATS['한국사 영웅전 (구)']='history';
+GAME_CATS['노래방 v4 ✨']='music';GAME_CATS['한국사 영웅전 v8']='history';
 GAME_CATS['별빛 RPG v3 ✨']='kids';GAME_CATS['하츄핑 UNIFIED v4 🌸']='kids';GAME_CATS['문명 진화 ✨']='history';
 GAME_CATS['우주 탐험 3D ✨']='science';GAME_CATS['동물농장 타이쿤']='creative';
 
@@ -2196,8 +2195,8 @@ const GAME_META={
 '문장 만들기':{d:2,xp:20,min:5,hook:'이 단어들, 이을 수 있어?'},'주기율표':{d:3,xp:25,min:5,hook:'몇 개나 알고 있어?'},
 '피아노 마스터':{d:2,xp:20,min:8,hook:'오늘 몇 곡 완주할까?'},'바이올린 리듬':{d:2,xp:20,min:7,hook:'끝 단계까지 갈 수 있어?'},
 '노래방 v4 ✨':{d:2,xp:20,min:5,hook:'내 음정 몇 점짜리일까?'},'복싱 트레이너':{d:2,xp:20,min:6,hook:'챔피언벨트 딸 수 있어?'},
-'골프 트래커':{d:3,xp:22,min:0,hook:'내 스윙 몇 타짜리일까?'},'한국사 영웅전 v8 🆕':{d:3,xp:25,min:0,hook:'천하를 제패할 영웅은?'},
-'한국사 영웅전 (구)':{d:2,xp:20,min:0,hook:'네 영웅, 왕좌에 오를까?'},'심시티 빌더':{d:2,xp:20,min:0,hook:'내 도시, 재난 버텨낼까?'},
+'골프 트래커':{d:3,xp:22,min:0,hook:'내 스윙 몇 타짜리일까?'},'한국사 영웅전 v8':{d:3,xp:25,min:0,hook:'천하를 제패할 영웅은?'},
+'심시티 빌더':{d:2,xp:20,min:0,hook:'내 도시, 재난 버텨낼까?'},
 '집짓기':{d:2,xp:20,min:0,hook:'내 집 설계, 몇 층까지?'},'별빛 대모험 v2':{d:1,xp:12,min:0,hook:'보스 이길 수 있어?'},
 '별빛 RPG v2':{d:2,xp:20,min:0,hook:'엔딩까지 갈 수 있어?'},'별빛 RPG v3 ✨':{d:2,xp:20,min:0,hook:'숨겨진 엔딩 찾을 수 있어?'},
 '하츄핑 UNIFIED v4 🌸':{d:1,xp:15,min:0,hook:'엔딩까지 갈 수 있어?'},'문명 진화 ✨':{d:2,xp:20,min:0,hook:'인류 끝까지 이끌 수 있어?'},

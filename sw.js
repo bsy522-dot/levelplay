@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v62-violinopen';
+const CACHE_NAME = 'levelplay-v64-noraebang';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -41,7 +41,6 @@ const STATIC_ASSETS = [
   './games/boxing-trainer-v5.html', // NEVER_CACHE_PATHS에도 존재 → 런타임은 항상 네트워크; 오프라인 HTML 셸만 프리캐시
   './games/three.r128.min.js',
   './games/golf-tracker-v3.html',
-  './games/korean-rpg-v4.html',
   // 한국사 영웅전 v8b — 폴더형 (ES Module + JSON 데이터)
   './games/korean-rpg-v8b/index.html',
   './games/korean-rpg-v8b/assets/portraits/hwanoong.png',
