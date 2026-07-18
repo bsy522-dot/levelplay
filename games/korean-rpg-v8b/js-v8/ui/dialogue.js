@@ -253,6 +253,7 @@ export class DialogueRunner {
       const artEl = bp.querySelector('.v8-bp-art');
       const nameEl = bp.querySelector('.v8-bp-name');
       if (line.text && pid && artEl) {
+        // 큰 초상 우선순위: PNG(애니메이션급 25종) > SVG > emoji
         if (p.image) {
           artEl.innerHTML = `<img src="${p.image}" alt="${pid}">`;
           bp.classList.add('v8-svg-art');

@@ -45,20 +45,30 @@ function findUnitDef(id, unitsData) {
 }
 
 // 바닥 무대 세트
+// PMREM 환경광 + ACES + bloom에서 밝은 알베도는 하얗게 탄다 — 감광 헬퍼
+function dimGroup(g, factor) {
+  g.traverse((o) => {
+    if (o.isMesh && o.material && o.material.color) {
+      o.material = o.material.clone();
+      o.material.color.multiplyScalar(factor);
+    }
+  });
+}
+
 function buildStageSet(setKind) {
   const g = new THREE.Group();
 
   if (setKind === 'heaven') {
-    // 황금빛 구름 단상
+    // 황금빛 구름 단상 (bloom 과노출 방지 — 어두운 황토 톤)
     const plat = new THREE.Mesh(
       new THREE.CylinderGeometry(4.2, 5.0, 0.5, 36),
-      new THREE.MeshStandardMaterial({ color: 0xfff4e0, roughness: 0.9, metalness: 0.0 })
+      new THREE.MeshStandardMaterial({ color: 0xa08e70, roughness: 0.9, metalness: 0.0 })
     );
     plat.position.y = -0.25;
     plat.receiveShadow = true;
     g.add(plat);
     // 단상 가장자리 작은 구름 봉우리
-    const puffMat = new THREE.MeshStandardMaterial({ color: 0xfffaf0, roughness: 1.0 });
+    const puffMat = new THREE.MeshStandardMaterial({ color: 0x968868, roughness: 1.0 });
     for (let i = 0; i < 10; i++) {
       const ang = (i / 10) * Math.PI * 2;
       const s = 0.5 + (i % 3) * 0.22;
@@ -67,10 +77,11 @@ function buildStageSet(setKind) {
       puff.position.set(Math.cos(ang) * 4.4, -0.1, Math.sin(ang) * 4.4);
       g.add(puff);
     }
-    // 뒤편 하늘 제단
+    // 뒤편 하늘 제단 (감광)
     const altar = buildAltar({});
     altar.position.set(0, 0, -2.6);
     altar.scale.setScalar(1.35);
+    dimGroup(altar, 0.62);
     g.add(altar);
   } else if (setKind === 'council') {
     // 회의장 — 나무 바닥 + 중앙 모닥불 + 뒤편 망루
@@ -136,7 +147,7 @@ export function buildDialogueStage({ background, cast, unitsData }) {
       unitData: { id: c.id, name: def.name || c.name },
     });
     tintUnit(mesh, def.colors);
-    mesh.scale.setScalar(1.15);
+    mesh.scale.setScalar(1.3);
     mesh.position.copy(pos);
     mesh.lookAt(pos.x + faceDir.x, pos.y, pos.z + faceDir.z);
     group.add(mesh);
@@ -145,14 +156,14 @@ export function buildDialogueStage({ background, cast, unitsData }) {
   };
 
   if (host) {
-    const hostPos = RIGHT.clone().multiplyScalar(-1.5);
+    const hostPos = RIGHT.clone().multiplyScalar(-1.25);
     hostPos.y = 0;
     placeActor(host, hostPos, RIGHT);
   }
   guests.forEach((c, i) => {
     // 우측에 호(arc) 배치 — 1명이면 정면 맞은편, 여럿이면 부챗살
-    const spread = guests.length > 1 ? (i - (guests.length - 1) / 2) * 0.95 : 0;
-    const pos = RIGHT.clone().multiplyScalar(1.5 + Math.abs(spread) * 0.25);
+    const spread = guests.length > 1 ? (i - (guests.length - 1) / 2) * 0.85 : 0;
+    const pos = RIGHT.clone().multiplyScalar(1.25 + Math.abs(spread) * 0.25);
     // 화면 안쪽(카메라 쪽 대각)으로 벌리기
     const DEPTH = new THREE.Vector3(1, 0, 1).normalize();
     pos.add(DEPTH.clone().multiplyScalar(spread));
@@ -181,7 +192,7 @@ export function buildDialogueStage({ background, cast, unitsData }) {
     group,
     actors,
     center: { x: 0, z: 0 },
-    camSize: castArr.length >= 4 ? 5.2 : 4.4,
+    camSize: castArr.length >= 4 ? 4.4 : 3.4,
 
     /** 현재 대사 화자 강조 — 링 이동 + 짧은 홉 */
     focus(speakerId) {

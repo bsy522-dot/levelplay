@@ -26,11 +26,16 @@ export const TILE = {
 const EXTRA_H = [0.00, 0.00, 0.06, 0.30, -0.08, 0.00, 0.00];
 
 // 타일별 재질 — 인덱스 0~6
+// ★ 2026-07-17: 산 전용 어두운 암석 재질 — MAT.stone(밝은 회백)이 전구처럼 하얗게
+//   빛나던 문제. 실루엣이 어두워야 전장 가독성이 산다.
+const MTN_MAT = new THREE.MeshStandardMaterial({ color: 0x6b6055, roughness: 1.0, metalness: 0.0 });
+const SNOW_MAT = new THREE.MeshStandardMaterial({ color: 0xb8b2a8, roughness: 1.0, metalness: 0.0 });
+
 const TILE_MAT = [
   MAT.grass,      // 0 PLAIN
   MAT.grassDark,  // 1 GRASS
   MAT.grass,      // 2 FOREST (바닥, 트리는 장식)
-  MAT.stone,      // 3 MOUNTAIN
+  MTN_MAT,        // 3 MOUNTAIN
   MAT.dirt,       // 4 WATER (바닥, 수면은 장식)
   MAT.path,       // 5 ROAD
   MAT.dirt,       // 6 SINDANSU (바닥 흙, 신단수는 장식)
@@ -99,12 +104,13 @@ export function buildTile(type, x, z) {
       break;
     }
     case TILE.MOUNTAIN: {
-      const rock = new THREE.Mesh(_cache.rockBig, MAT.stone);
+      const rock = new THREE.Mesh(_cache.rockBig, MTN_MAT);
       rock.position.y = totalH + 0.35;
       rock.castShadow = true;
       g.add(rock);
 
-      const snow = new THREE.Mesh(_cache.rockTip, MAT.snow);
+      // ★ 2026-07-17: 눈덮개가 bloom에 가로등처럼 빛나던 문제 — 무광 회백으로
+      const snow = new THREE.Mesh(_cache.rockTip, SNOW_MAT);
       snow.position.y = totalH + 0.75;
       g.add(snow);
 

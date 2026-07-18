@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v64-noraebang';
+const CACHE_NAME = 'levelplay-v65-rpg-overhaul';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -65,6 +65,7 @@ const STATIC_ASSETS = [
   './games/korean-rpg-v8b/js-v8/battle/ai.js',
   './games/korean-rpg-v8b/js-v8/battle/weather.js',
   './games/korean-rpg-v8b/js-v8/battle/highlights.js',
+  './games/korean-rpg-v8b/js-v8/battle/objectives.js',
   './games/korean-rpg-v8b/js-v8/camera/switcher.js',
   './games/korean-rpg-v8b/js-v8/camera/tactical_cam.js',
   './games/korean-rpg-v8b/js-v8/camera/character_cam.js',
@@ -73,6 +74,8 @@ const STATIC_ASSETS = [
   './games/korean-rpg-v8b/js-v8/world/town.js',
   './games/korean-rpg-v8b/js-v8/world/npc.js',
   './games/korean-rpg-v8b/js-v8/world/squad.js',
+  './games/korean-rpg-v8b/js-v8/world/dialogue_stage.js',
+  './games/korean-rpg-v8b/js-v8/graphics/environment.js',
   './games/korean-rpg-v8b/js-v8/ui/hud.js',
   './games/korean-rpg-v8b/js-v8/ui/action_queue.js',
   './games/korean-rpg-v8b/js-v8/ui/dialogue.js',
@@ -92,6 +95,30 @@ const STATIC_ASSETS = [
   './games/korean-rpg-v8b/js-v8/data/story_ep2.json',
   './games/korean-rpg-v8b/js-v8/data/portraits.json',
   './games/korean-rpg-v8b/js-v8/data/portraits_data.js',
+  // 고품질 SVG 초상 barrel (2026-07-17 전면 개편)
+  './games/korean-rpg-v8b/js-v8/ui/portraits/index.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/cheonmujang.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/dangun.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/gatekeeper.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hojok_archer.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hojok_chief.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hojok_rider.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hojok_shaman.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hojok_warrior.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hwanin.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hwanwoong.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/hwashin.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/merchant.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/noigong.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/pungbaek.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/sanryeong.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/sinha_general.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/sujang.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/tavern_master.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/traveler.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/ungnyeo.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/unsa.js',
+  './games/korean-rpg-v8b/js-v8/ui/portraits/usa.js',
   // 노래방 v4 — 폴더형 (PWA 별도 manifest + 아이콘)
   './games/noraebang-v4/index.html',
   './games/noraebang-v4/manifest.json',

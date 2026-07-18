@@ -79,7 +79,7 @@ function resolveImage(unit) {
   return null;
 }
 
-/** PNG image 우선, 없으면 SVG, 그래도 없으면 emoji fallback */
+/** PNG(애니메이션급 25종) 우선 → SVG → emoji fallback */
 function paintPortrait(el, unit) {
   if (!el) return;
   const img = resolveImage(unit);

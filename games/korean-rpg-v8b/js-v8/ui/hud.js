@@ -20,6 +20,7 @@
 //   필수(턴·날씨·HP/MP/XP·액션·행동큐)는 항상 유지. 모든 토글은 display 제어만 — DOM 삭제 없음.
 
 import portraitsData from '../data/portraits_data.js';
+import { getPortraitSVG as _getPortraitSVG } from './portrait_art.js';
 
 const WEATHER_ICON = {
   clear: '☀️', rain: '🌧️', snow: '❄️', fog: '🌫️'
@@ -261,7 +262,17 @@ export function showUnitPanel(unit, opts = {}) {
 
   const portrait = portraitsData[unit.portraitId || unit.id] || { emoji: '🧍', color: '#888' };
   const pEl = _root.querySelector('#v8-up-portrait');
-  pEl.textContent = portrait.emoji;
+  // ★ 2026-07-17: 고품질 SVG 초상 우선, 없으면 emoji
+  {
+    let svg = null;
+    try { svg = _getPortraitSVG ? _getPortraitSVG(unit.portraitId || unit.id) : null; } catch (e) { svg = null; }
+    if (svg) {
+      pEl.innerHTML = svg;
+      pEl.style.overflow = 'hidden';
+    } else {
+      pEl.textContent = portrait.emoji;
+    }
+  }
   pEl.style.borderColor = portrait.color;
 
   _root.querySelector('#v8-up-name').textContent = unit.name || unit.id || '—';

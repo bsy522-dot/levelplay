@@ -16,7 +16,9 @@ import * as THREE from 'three';
 
 export const ENV_THEMES = {
   dawn: {
-    skyTop: 0x2a2050, skyHorizon: 0xd88a4a, skyBottom: 0x3a2438,
+    // skyBottom은 지면 톤과 일치 — 모바일 세로 전투에서 화면 하단에 돔 하부가
+    // 보라 띠로 비치던 문제 (5단계 비서B 검증 지적)
+    skyTop: 0x2a2050, skyHorizon: 0xd88a4a, skyBottom: 0x2f3a26,
     ground: 0x4a5a38, groundFar: 0x2c3626,
     mountain: 0x3a2e48, mountainFar: 0x2a2240,
     cloud: 0xf0d8c0, cloudOpacity: 0.85,
@@ -32,22 +34,23 @@ export const ENV_THEMES = {
     fog: { color: 0x9ec0d8, near: 30, far: 100 },
   },
   heaven: {
-    skyTop: 0x6a4a9a, skyHorizon: 0xffd890, skyBottom: 0xe8b060,
+    // 과노출 방지 — bloom+ACES에서 하얗게 타지 않도록 채도/명도 절제
+    skyTop: 0x54408a, skyHorizon: 0xd8a860, skyBottom: 0xb08048,
     ground: null,   // 천계는 땅 대신 구름바다
     groundFar: null,
-    mountain: 0x8a68b8, mountainFar: 0xa888cc,
-    cloud: 0xfff2dc, cloudOpacity: 0.95,
-    sun: { color: 0xffe8a0, y: 30, dist: 90, size: 10 },
-    fog: { color: 0xd8a868, near: 24, far: 85 },
+    mountain: 0x7a58a8, mountainFar: 0x9878bc,
+    cloud: 0x9a8c74, cloudOpacity: 0.92,
+    sun: { color: 0xf0d890, y: 30, dist: 90, size: 7 },
+    fog: { color: 0x9a7848, near: 20, far: 70 },
   },
   sunset: {
-    skyTop: 0x48286a, skyHorizon: 0xff9860, skyBottom: 0xc05838,
+    skyTop: 0x48286a, skyHorizon: 0xd87848, skyBottom: 0x984830,
     ground: null,
     groundFar: null,
     mountain: 0x5a3458, mountainFar: 0x744878,
-    cloud: 0xffd8b8, cloudOpacity: 0.95,
-    sun: { color: 0xff9040, y: 14, dist: 80, size: 12 },
-    fog: { color: 0xa05848, near: 24, far: 85 },
+    cloud: 0xc8a488, cloudOpacity: 0.92,
+    sun: { color: 0xe08040, y: 14, dist: 80, size: 9 },
+    fog: { color: 0x804838, near: 20, far: 70 },
   },
 };
 

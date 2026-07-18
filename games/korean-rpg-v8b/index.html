@@ -378,15 +378,18 @@
     z-index: 200;
     pointer-events: none;
     font-family: 'Nanum Myeongjo','Batang','Malgun Gothic',serif;
-    font-size: clamp(44px, 7vw, 96px);
+    /* ★ 2026-07-17: 배경 필 추가 — 밝은 전장 위에서 유령 글자처럼 보이던 문제 */
+    font-size: clamp(30px, 4.6vw, 58px);
     font-weight: 900;
     color: #ffd700;
-    text-shadow:
-      0 0 24px #ff6a00,
-      0 0 48px rgba(255,140,40,.6),
-      0 6px 18px #000,
-      0 2px 0 #4a2008;
-    -webkit-text-stroke: 2px #2a1208;
+    background: linear-gradient(180deg, rgba(40,22,8,.94), rgba(14,8,3,.94));
+    border-top: 2px solid #ffd700;
+    border-bottom: 2px solid #ffd700;
+    padding: 14px 48px;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-shadow: 0 0 18px rgba(255,140,40,.55), 0 3px 8px #000;
+    box-shadow: 0 6px 28px rgba(0,0,0,.55), 0 0 32px rgba(255,170,60,.25);
     opacity: 0;
     transition: opacity .35s ease-out, transform .45s cubic-bezier(.2,.8,.3,1);
     letter-spacing: 10px;
@@ -403,7 +406,7 @@
   /* 첫 턴 가이드 — 화면 우상단 (영걸전 안내문) */
   #v8-first-turn-hint {
     position: fixed;
-    top: 14%; right: 16px;
+    top: 14%; right: 108px;   /* 미니맵(우상단 80px)을 가리지 않게 */
     z-index: 180;
     pointer-events: none;
     font-family: 'Nanum Myeongjo','Batang','Malgun Gothic',serif;
@@ -550,9 +553,6 @@
   ③ <span style="color:#ff7a7a">빨간 칸</span>의 적 공격<br>
   ④ 우측 패널의 [공격/스킬/대기]
 </div>
-
-<!-- FPS 디버그 -->
-<div id="fps-debug" style="display:none"></div>
 
 <!-- Three.js importmap -->
 <script type="importmap">
@@ -705,11 +705,7 @@ const DEBUG = URL_PARAMS.get('debug') === '1';
 const FORCE_EP = URL_PARAMS.get('ep');
 const DLOG = (...a) => { if (DEBUG) console.log('[v8]', ...a); };
 
-// 디버그 HUD
-if (DEBUG) {
-  const d = document.getElementById('fps-debug');
-  d.style.cssText = 'position:fixed;top:58px;left:10px;z-index:9999;background:rgba(0,0,0,.7);color:#ffd700;padding:6px 10px;border-radius:4px;font-family:monospace;font-size:11px;white-space:pre;pointer-events:none;display:block;line-height:1.5';
-}
+// (fps-debug 잔재 제거 — 실제 FPS 표시는 engine.js의 #v8-debug가 담당, 2026-07-17)
 
 window.__v8SetLoadingMsg('모듈 로딩...');
 
@@ -960,7 +956,7 @@ function showTitle() {
         else if (act === 'ep2') {
           // EP.2 — 데이터만 있으면 시작, 아니면 안내
           if (DATA.story_ep2) startEpisode('ep2');
-          else alert('EP.2는 추후 업데이트 예정입니다.');
+          else showTurnBanner('EP.2 데이터를 불러오지 못했습니다', 1500);
         } else if (act === 'settings') {
           openSettings({ cameraLocked: false });
         }
@@ -1064,7 +1060,7 @@ async function playDialogueScene(scene) {
 
     stage = buildDialogueStage({ background: scene.background, cast, unitsData: DATA.units });
     State.scene.add(stage.group);
-    applyBossLight(State.scene);   // 황금 키라이트 — 무대 톤
+    applyTownLight(State.scene);   // 부드러운 확산광 — 보스라이트(1.4)는 bloom 과노출 유발
     try { assertLightStandard(State.scene); } catch (e) { console.error(e); }
     if (stage.fog && State.scene.fog) {
       State.scene.fog.color.set(stage.fog.color);
@@ -1085,7 +1081,11 @@ async function playDialogueScene(scene) {
     sw.setLockMode(null);
     await sw.switchTo('tactical', 0, { force: true });
     ts.target.set(0, 0.55, 0);
-    ts.camSize = stage.camSize;
+    // 세로 화면(모바일)은 직교 카메라 가로폭이 좁아 배우가 잘림 — aspect 보정
+    const _stAspect = window.innerWidth / window.innerHeight;
+    ts.camSize = _stAspect < 1
+      ? stage.camSize * Math.min(2.0, 0.72 / _stAspect)
+      : stage.camSize;
     ts.azimuth = Math.PI / 4;
     ts.elevation = 0.62;
     sw.setLockMode('tactical');
@@ -1238,9 +1238,10 @@ async function playBattleScene(scene) {
   // 영걸전 표준: 맵 전체가 한눈에 보이는 줌. 시작은 무조건 줌아웃.
   // 맵 width/height와 화면 비율로 자동, 큰 맵 적극 수용 + 여유 마진.
   const _aspect = window.innerWidth / window.innerHeight;
-  const _byW = (mapData.width  * TILE_SIZE * 0.75) / Math.max(_aspect, 0.5);
-  const _byH = (mapData.height * TILE_SIZE * 0.75);
-  const _autoSize = Math.max(_byW, _byH, 14);   // 최소 14 — 시작은 항상 줌아웃
+  // ★ 2026-07-17: 시작 줌을 더 가깝게 — 유닛이 콩알만 하던 문제 (줌아웃은 -/핀치로 가능)
+  const _byW = (mapData.width  * TILE_SIZE * 0.6) / Math.max(_aspect, 0.5);
+  const _byH = (mapData.height * TILE_SIZE * 0.6);
+  const _autoSize = Math.max(_byW, _byH, 8.5);
   GameState.switcher.tacticalState.camSize = Math.min(
     GameState.switcher.tacticalState.camSizeMax,
     Math.max(GameState.switcher.tacticalState.camSizeMin, _autoSize)
@@ -1252,8 +1253,14 @@ async function playBattleScene(scene) {
 
   // HUD 갱신 — 승리 조건 표시 포함 (영걸전식 목표 명시)
   setHUDScene('battle');
+  // ★ 실제 종료 조건과 표시 일치: 맵 objective(label)가 최우선 (2단계 팀장 검증 지적)
   let objectiveText = '적 전멸';
-  if (scene.victoryCondition === 'defeat_boss' && scene.bossId) {
+  const _mapObj = mapData.objective;
+  if (_mapObj && _mapObj.label) {
+    objectiveText = _mapObj.label;
+  } else if (_mapObj && _mapObj.type === 'defeat_target' && _mapObj.targetId) {
+    objectiveText = `적장 ${enemyDefs[_mapObj.targetId]?.name || _mapObj.targetId} 격파`;
+  } else if (scene.victoryCondition === 'defeat_boss' && scene.bossId) {
     const bossDef = enemyDefs[scene.bossId];
     objectiveText = `적장 ${bossDef?.name || scene.bossId} 격파`;
   } else if (scene.victoryCondition === 'survive' && scene.turnLimit) {
@@ -2116,6 +2123,13 @@ function updateHUDAlive() {
   }
 }
 
+// 유닛 머리 위 HP바(Sprite 빌보드) 일괄 표시/숨김 — 시네마틱 몰입용 (4단계 사장 검증 지적)
+function setUnitHudsVisible(v) {
+  for (const u of (GameState.units || [])) {
+    if (u.mesh) u.mesh.traverse(o => { if (o.isSprite) o.visible = v; });
+  }
+}
+
 function showTurnBanner(text, duration = 1200) {
   const b = document.getElementById('v8-turn-banner');
   b.textContent = text;
@@ -2493,17 +2507,24 @@ async function playExplorationScene(scene) {
     const blgHit = nearestInteractable(playerUnit, buildingList, 1.8);
     if (blgHit) {
       _hideMobileUI();
-      const hasTrigger = !!(blgHit.trigger && scene.triggers && scene.triggers[blgHit.trigger]);
       const r = await _runTrigger(blgHit.trigger, blgHit);
       _showMobileUI();
       if (r.exited) return;
-      // ★ 2026-07-17 수정: 트리거가 정의된 출구는 트리거(exitScene)가 탈출을 결정한다.
-      //   기존엔 조건 미충족(문지기 만류)에도 무조건 탈출하던 버그.
-      if (!hasTrigger && blgHit.id === scene.exitTrigger) {
+      // ★ 2026-07-17 수정: '조건형' 트리거(ep1_depart 등)는 자신이 exitScene으로
+      //   탈출을 결정한다 — 조건 미충족(문지기 만류)에도 무조건 탈출하던 버그 수정.
+      //   레거시 배열형 트리거(EP2 council)는 기존대로 대사 후 탈출.
+      if (!_trigControlsExit(blgHit.trigger) && blgHit.id === scene.exitTrigger) {
         _requestExit('exitTrigger_match');
       }
       return;
     }
+  }
+
+  // 트리거가 스스로 탈출(exitScene)을 관리하는 조건형인지
+  function _trigControlsExit(trigId) {
+    const t = trigId && scene.triggers ? scene.triggers[trigId] : null;
+    return !!(t && !Array.isArray(t) &&
+      (t.type === 'condition' || t.exitScene !== undefined || t.ifMet || t.ifNotMet));
   }
 
   // ★ ESC/B = 무조건 탈출이 아니라 성문 규칙을 따른다 (회의 전 출진 방지)
@@ -2511,8 +2532,9 @@ async function playExplorationScene(scene) {
     const gateB = buildingList.find(b => b.id === scene.exitTrigger);
     if (gateB && gateB.trigger && scene.triggers && scene.triggers[gateB.trigger]) {
       _hideMobileUI();
-      await _runTrigger(gateB.trigger, gateB);
+      const r = await _runTrigger(gateB.trigger, gateB);
       _showMobileUI();
+      if (!r.exited && !_trigControlsExit(gateB.trigger)) _requestExit('esc');
       return;
     }
     _requestExit('esc');
@@ -2595,11 +2617,14 @@ function _showExplorationHint(title) {
     'text-align:center',
     'box-shadow:0 2px 12px rgba(255,200,60,0.18)'
   ].join(';');
+  // 터치 기기엔 터치 기준 안내 (WASD/ESC는 폰에서 무의미 — 5단계 검증 지적)
+  const isTouch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  const controls = isTouch
+    ? '이동: 조이스틱 · 대화/조사: A · 출진: B'
+    : '이동: WASD/방향키 · 대화: E/Enter · 출진: ESC';
   h.innerHTML = `
     <div style="font-size:17px;font-weight:700;margin-bottom:4px;">${title}</div>
-    <div style="font-size:12px;color:#e8d0a0;font-weight:400;">
-      이동: WASD / 방향키 / D-pad · 대화: E / 대화버튼 · 나가기: ESC
-    </div>
+    <div style="font-size:12px;color:#e8d0a0;font-weight:400;word-break:keep-all;">${controls}</div>
   `;
   document.body.appendChild(h);
   return h;
@@ -2612,16 +2637,34 @@ async function playCinematicScene(scene) {
   window.__v8CurrentScene = 'cinematic:' + (scene.id || '?');
   window.__lastTrigger = 'playCinematicScene:start';
 
+  // ★ 시네마틱 몰입: 전투 잔재(HP바·행동완료 반투명) 정리
+  setUnitHudsVisible(false);
+  for (const u of (GameState.units || [])) {
+    if (u.mesh) setUnitActed(u.mesh, false);
+  }
+
   // ★ 2026-07-17: 3D 콘텐츠가 없으면 배경 무대 구축 (검은 허공 방지)
   let cineStage = null;
   let cineSavedCam = null;
+  let cineTick = null;
   const cineHas3D = State.scene && State.scene.children.some(
     c => !c.isLight && !c.isCamera
   );
   if (!cineHas3D) {
-    cineStage = buildDialogueStage({ background: scene.background, cast: [], unitsData: DATA.units });
+    // 시네마틱에 대사(lines)가 있으면 등장 인물도 무대에 세운다 (EP2 오프닝)
+    const cineCast = [];
+    {
+      const seen = new Set();
+      for (const ln of (scene.lines || [])) {
+        const pid = ln.speakerId || ln.portrait;
+        if (!pid || pid === 'narrator' || seen.has(pid)) continue;
+        seen.add(pid);
+        cineCast.push({ id: pid, name: ln.speaker || pid });
+      }
+    }
+    cineStage = buildDialogueStage({ background: scene.background, cast: cineCast, unitsData: DATA.units });
     State.scene.add(cineStage.group);
-    applyBossLight(State.scene);
+    applyTownLight(State.scene);
     if (cineStage.fog && State.scene.fog) {
       State.scene.fog.color.set(cineStage.fog.color);
       State.scene.fog.near = cineStage.fog.near;
@@ -2636,10 +2679,13 @@ async function playCinematicScene(scene) {
     sw.setLockMode(null);
     await sw.switchTo('tactical', 0, { force: true });
     ts.target.set(0, 0.55, 0);
-    ts.camSize = 5.5;
+    const _cnAspect = window.innerWidth / window.innerHeight;
+    ts.camSize = _cnAspect < 1 ? 5.5 * Math.min(2.0, 0.72 / _cnAspect) : 5.5;
     ts.azimuth = Math.PI / 4;
     ts.elevation = 0.62;
     sw.setLockMode('tactical');
+    cineTick = () => cineStage.tick(performance.now() / 1000);
+    State.updateCallbacks.push(cineTick);
   }
 
   if (scene.bgm) {
@@ -2684,8 +2730,32 @@ async function playCinematicScene(scene) {
 
   if (wasLocked) GameState.switcher.setLockMode(wasLocked);
 
+  // ★ 시네마틱 대사(lines) 재생 — 기존엔 조용히 버려지던 데이터 (EP2 오프닝)
+  if (scene.lines && scene.lines.length) {
+    await new Promise(r => new DialogueRunner(scene.lines, r, {
+      compactPortrait: true,
+      onLine: (line) => {
+        if (cineStage) {
+          const pos = cineStage.focus(line.speakerId || line.portrait);
+          if (pos) {
+            const ts = GameState.switcher.tacticalState;
+            ts.target.x = pos.x * 0.45;
+            ts.target.z = pos.z * 0.45;
+          }
+        }
+      },
+    }).start());
+  }
+
+  // 유닛 HP바 복원 (다음 씬 대비)
+  setUnitHudsVisible(true);
+
   // 무대 정리 + 카메라 복원
   if (cineStage) {
+    if (cineTick) {
+      const _ci = State.updateCallbacks.indexOf(cineTick);
+      if (_ci >= 0) State.updateCallbacks.splice(_ci, 1);
+    }
     cineStage.dispose(State.scene);
     const sw = GameState.switcher;
     sw.setLockMode(null);
@@ -2742,19 +2812,38 @@ if (DEBUG) {
     tm.selectUnit(u);
     const foes = GameState.enemies.filter(e => e.hp > 0);
     if (!foes.length) return 'no-foes';
-    foes.sort((a, b) => manhattan(u, a) - manhattan(u, b));
+
+    const hurt = GameState.allies.filter(a => a.hp > 0 && a.hp / a.mhp < 0.55)
+      .sort((a, b) => a.hp / a.mhp - b.hp / b.mhp)[0];
+    const skillId = u.skills?.[0];
+    const skillDef = skillId ? DATA.skills[skillId] : null;
+    const canCast = skillDef && (u.mp || 0) >= (skillDef.mp || 0);
+    const isHealer = canCast && skillDef.type && skillDef.type.startsWith('heal');
+
+    // 이동 목표: 치유자는 다친 아군 곁, 나머지는 HP 낮은 적
+    foes.sort((a, b) => (a.hp - b.hp) || (manhattan(u, a) - manhattan(u, b)));
     const foe = foes[0];
+    const tgt = (isHealer && hurt && hurt !== u) ? hurt : foe;
     const tiles = calcMoveRange(u, GameState.map, GameState.units);
-    let best = { x: u.x, y: u.y }, bd = Math.abs(u.x - foe.x) + Math.abs(u.y - foe.y);
+    let best = { x: u.x, y: u.y };
+    let bd = Math.abs(u.x - tgt.x) + Math.abs(u.y - tgt.y);
     for (const t of tiles) {
       const occupied = GameState.units.some(o => o !== u && o.hp > 0 && o.x === t.x && o.y === t.y);
       if (occupied) continue;
-      const d = Math.abs(t.x - foe.x) + Math.abs(t.y - foe.y);
+      const d = Math.abs(t.x - tgt.x) + Math.abs(t.y - tgt.y);
       if (d < bd) { bd = d; best = t; }
     }
     await animateMove(u.mesh, u, best, 200);
     tm.confirmMove(u, { x: best.x, y: best.y });
-    if (manhattan(u, foe) <= (u.rng || 1)) {
+
+    // 행동: 치유 > 공격스킬(사거리 내) > 평타 > 대기
+    if (isHealer && hurt && manhattan(u, hurt) <= (skillDef.rng || 1)) {
+      await performSkill(u, skillDef, [hurt]);
+    } else if (canCast && !isHealer && manhattan(u, foe) <= (skillDef.rng || 1)) {
+      const targets = (skillDef.type === 'single' || skillDef.type === 'multi' || skillDef.type === 'charge')
+        ? [foe] : [{ x: foe.x, y: foe.y }];
+      await performSkill(u, skillDef, targets);
+    } else if (manhattan(u, foe) <= (u.rng || 1)) {
       await performAttack(u, foe);
     } else {
       handleAction('wait', u);

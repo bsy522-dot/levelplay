@@ -4,6 +4,7 @@
 // 현재 행동자(selected)는 활성 테두리.
 
 import portraitsData from '../data/portraits_data.js';
+import { getPortraitSVG } from './portrait_art.js';
 
 let _root = null;
 let _items = [];
@@ -140,7 +141,15 @@ export function updateActionQueue(units, opts = {}) {
     por.className = 'v8-aq-portrait';
     por.style.borderColor = p.color;
     por.style.background = p.bgColor || 'rgba(0,0,0,.3)';
-    por.textContent = p.emoji;
+    // ★ 2026-07-17: 고품질 SVG 초상 우선, 없으면 emoji
+    const svg = getPortraitSVG(u.portraitId || u.id);
+    if (svg) {
+      por.innerHTML = svg;
+      por.style.overflow = 'hidden';
+      por.style.borderRadius = '50%';
+    } else {
+      por.textContent = p.emoji;
+    }
 
     const info = document.createElement('div');
     info.className = 'v8-aq-info';

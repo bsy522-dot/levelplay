@@ -151,7 +151,6 @@
       ],
       "rewards": {
         "items": [
-          { "id": "cheonbuin", "qty": 1 },
           { "id": "cb_mirror", "qty": 1 },
           { "id": "cb_sword", "qty": 1 },
           { "id": "cb_bell", "qty": 1 }

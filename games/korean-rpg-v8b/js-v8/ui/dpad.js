@@ -135,7 +135,7 @@ const STYLE = `
 
 #v8-dpad-shoulder {
   position: absolute;
-  left: 14px; right: 14px; top: 8px;
+  left: 14px; right: 14px; top: 48px;  /* 상단 HUD 바(44px)와 겹치지 않게 */
   display: flex; justify-content: space-between;
   pointer-events: none;
 }
