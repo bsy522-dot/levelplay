@@ -279,7 +279,7 @@ body.lscape .opt-btn small { font-size:9px; }
 </div>
 <div id="app">
   <div class="header">
-    <span class="header-title">Piano Master v4 <span style="font-size:10px;color:#22c55e;font-weight:700">빌드 0718B</span></span>
+    <span class="header-title">Piano Master v4 <span style="font-size:10px;color:#22c55e;font-weight:700">빌드 0718C</span></span>
     <div class="header-info">
       <span id="midi-status">MIDI: 대기</span>
       <span id="octave-display">C4</span>
@@ -703,6 +703,7 @@ function setKeyZoom(z) {
   keyZoom = z;
   zoomOverride[isLandscape ? 'landscape' : 'portrait'] = keyZoom; // 사용자 조정값은 방향별로 유지
   buildPiano();
+  if (typeof resizeSynthCanvas === 'function') resizeSynthCanvas(); // 건반 높이 변화 → 낙하 캔버스 재계산
   wrap.scrollLeft = centerRatio * wrap.scrollWidth - wrap.clientWidth / 2;
   const zl = document.getElementById('zoom-label');
   if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
@@ -799,10 +800,20 @@ function buildPiano() {
   const isMobile = window.innerWidth < 600;
   whiteKeyWidth = Math.round((isMobile ? 14 : 20) * keyZoom);
   const blackWidth = Math.round((isMobile ? 9 : 13) * keyZoom);
-  // 가로: 화면 높이가 짧으므로 건반을 낮춘다(낙하 영역 확보). 세로는 기존 값 그대로.
-  const whiteHeight = isLandscape
-    ? Math.max(72, Math.min(96, Math.round(window.innerHeight * 0.23)))
-    : (isMobile ? 105 : 130);
+  // 건반 높이(0718): 연주/학습/녹음 탭은 건반이 주인공 → 화면 절반가량 채움(빈 공간 제거).
+  //  Synthesia 탭은 낙하 캔버스 확보 위해 낮게 유지(기본 105/130, 확대 시만 커짐).
+  const baseWhiteH = isMobile ? 105 : 130;
+  const synthActive = !!document.getElementById('panel-synth') && document.getElementById('panel-synth').classList.contains('active');
+  let whiteHeight;
+  if (isLandscape) {
+    whiteHeight = Math.max(72, Math.min(96, Math.round(window.innerHeight * 0.23)));
+  } else if (synthActive) {
+    whiteHeight = Math.min(Math.round(baseWhiteH * keyZoom), Math.round(window.innerHeight * 0.5));
+  } else {
+    // 화면의 48%~60%(확대할수록 조금 더 크게) — 얇은 띠+빈 공간 문제(0718) 해소
+    const frac = Math.min(0.6, 0.48 + (keyZoom - 1) * 0.06);
+    whiteHeight = Math.max(baseWhiteH, Math.round(window.innerHeight * frac));
+  }
   const blackHeight = Math.round(whiteHeight * 0.63); // 105→66, 130→82 (기존과 동일)
 
   const whiteKeys = ALL_KEYS.filter(k => !isBlack(k.note));
@@ -983,6 +994,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    buildPiano(); // 탭별 건반 높이 적용(연주=크게 / Synthesia=낮게)
     if (tab.dataset.tab === 'synth') { if (typeof showSongBrowser === 'function') showSongBrowser(); resizeSynthCanvas(); }
   });
 });
