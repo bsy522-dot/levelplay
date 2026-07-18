@@ -13,7 +13,7 @@
       "camera": "tactical",
       "background": "heaven_clouds",
       "lines": [
-        { "speakerId": "hwanin", "speaker": "환인", "text": "아들아, 어찌 북방 거친 땅을 원하느냐. 남쪽이 뭐가 좋다고." },
+        { "speakerId": "hwanin", "speaker": "환인", "text": "아들아, 하늘의 자리를 두고 어찌 저 거친 인간 세상을 원하느냐." },
         { "speakerId": "hwanwoong", "speaker": "환웅", "text": "홍익인간 — 널리 인간을 이롭게 하고자 합니다." },
         { "speakerId": "hwanin", "speaker": "환인", "text": "말이 아닌 몸으로 보여라. 천장들이 네 길을 막을 것이다." },
         { "speakerId": "hwanin", "speaker": "환인", "text": "천무장, 뇌공, 화신, 산령, 수장 — 다섯 시련이다." }
@@ -115,18 +115,6 @@
       }
     },
     {
-      "id": "tutorial",
-      "type": "tutorial",
-      "camera": "tactical_locked",
-      "lines": [
-        { "speakerId": "narrator", "speaker": "해설", "text": "유닛을 클릭해 파란 타일로 이동하십시오." },
-        { "speakerId": "narrator", "speaker": "해설", "text": "공격·스킬·아이템·대기 중 선택할 수 있습니다." },
-        { "speakerId": "narrator", "speaker": "해설", "text": "환웅의 '천부인·뇌격'은 범위 공격입니다 — 적 밀집 지역에 쓰십시오." },
-        { "speakerId": "narrator", "speaker": "해설", "text": "우사의 '치유의 비'는 아군을 회복시킵니다." },
-        { "speakerId": "narrator", "speaker": "해설", "text": "신단수 타일 근처에서는 매 턴 HP가 회복됩니다." }
-      ]
-    },
-    {
       "id": "battle",
       "type": "battle",
       "mapId": "ep1_trial",
@@ -142,7 +130,10 @@
       "turnLimit": 0,
       "preLines": [
         { "speakerId": "cheonmujang", "speaker": "천무장", "text": "환인의 아들이여, 이 시련을 넘지 못하면 인간 세상은 네 것이 될 수 없다!" },
-        { "speakerId": "hwanwoong", "speaker": "환웅", "text": "시련이 무거울수록 — 뜻은 더 높이 선다." }
+        { "speakerId": "hwanwoong", "speaker": "환웅", "text": "시련이 무거울수록 — 뜻은 더 높이 선다." },
+        { "speakerId": "pungbaek", "speaker": "풍백", "text": "천왕이시여, 아군을 골라 파란 칸으로 이동시키고, 붉은 칸의 적을 치십시오." },
+        { "speakerId": "usa", "speaker": "우사", "text": "환웅님의 '천부인·뇌격'은 밀집한 적에게, 저의 '치유의 비'는 다친 아군에게 쓰십시오." },
+        { "speakerId": "unsa", "speaker": "운사", "text": "신단수 곁의 아군은 매 턴 기운을 회복합니다. 지형을 이용하십시오." }
       ]
     },
     {

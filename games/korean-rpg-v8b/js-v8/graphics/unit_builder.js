@@ -79,6 +79,7 @@ export function buildUnit({ isAlly = true, isLeader = false, unitData = null } =
   const body = new THREE.Mesh(_cache.body, armorMat);
   body.position.y = 0.40;
   body.castShadow = true;
+  body.userData.part = 'armor';
   g.add(body);
 
   // ── 리더 구리 단추 ──
@@ -99,6 +100,8 @@ export function buildUnit({ isAlly = true, isLeader = false, unitData = null } =
   const a2 = a1.clone();
   a2.position.x = 0.19;
   a2.rotation.z = -0.18;
+  a1.userData.part = 'armor';
+  a2.userData.part = 'armor';
   g.add(a1, a2);
 
   // ── 머리 ──
@@ -139,6 +142,7 @@ export function buildUnit({ isAlly = true, isLeader = false, unitData = null } =
     const cape = new THREE.Mesh(_cache.cape, capeMat);
     cape.position.set(0, 0.44, -0.12);
     cape.rotation.x = 0.15;
+    cape.userData.part = 'cape';
     g.add(cape);
   }
 
@@ -150,6 +154,7 @@ export function buildUnit({ isAlly = true, isLeader = false, unitData = null } =
 
     const flag = new THREE.Mesh(_cache.flag, capeMat);
     flag.position.set(0.19, 0.86, -0.14);
+    flag.userData.part = 'flag';
     g.add(flag);
   }
 
@@ -192,4 +197,25 @@ export function setUnitActed(unitGroup, acted) {
 // ─────────────────────────────────────────────
 export function faceTowards(unitGroup, worldVec3) {
   unitGroup.lookAt(worldVec3.x, unitGroup.position.y, worldVec3.z);
+}
+
+// ─────────────────────────────────────────────
+// 유닛 개별 색 입히기 — units.json colors {armor, cape, flag} 반영.
+// setUnitActed와 같은 규약(_matCloned)으로 싱글톤 재질을 오염시키지 않는다.
+// ─────────────────────────────────────────────
+export function tintUnit(unitGroup, colors) {
+  if (!colors) return;
+  unitGroup.traverse((o) => {
+    if (!o.isMesh || !o.material || !o.userData.part) return;
+    const hex = colors[o.userData.part] || (o.userData.part === 'cape' ? colors.flag : null);
+    if (!hex) return;
+    if (!o.userData._matCloned) {
+      o.material = Array.isArray(o.material)
+        ? o.material.map((m) => m.clone())
+        : o.material.clone();
+      o.userData._matCloned = true;
+    }
+    const apply = (m) => { m.color.set(hex); m.needsUpdate = true; };
+    if (Array.isArray(o.material)) o.material.forEach(apply); else apply(o.material);
+  });
 }

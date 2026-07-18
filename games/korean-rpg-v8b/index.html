@@ -80,6 +80,10 @@
     color: #ffaaaa;
     font-family: monospace;
     text-align: left;
+    /* 진단 강화: 모바일에서 텍스트 복사 가능 — 사용자가 직접 메시지 보낼 수 있도록 */
+    user-select: text;
+    -webkit-user-select: text;
+    -webkit-touch-callout: default;
   }
   #v8-error button {
     margin-top: 16px;
@@ -196,6 +200,9 @@
     font-weight: 900;
     margin: 0 0 6px;
     letter-spacing: 8px;
+    word-break: keep-all;      /* "영웅전"이 "영웅/전"으로 쪼개지지 않게 */
+    text-wrap: balance;
+    text-align: center;
     color: #ffe266;
     text-shadow:
       0 0 22px #ffb000,
@@ -565,11 +572,34 @@
     const loadEl = document.getElementById('v8-loading');
     let reported = false;
 
-    function show(msg) {
+    // 진단 컨텍스트 수집기 — show() 호출 시점의 게임 상태 첨부
+    function _collectDiagContext() {
+      const lines = [];
+      try {
+        // engine.State는 모듈이라 직접 접근 불가 → window.__v8State에 미러링 (engine 측이 채워줌)
+        const st = window.__v8State || null;
+        if (st) {
+          lines.push('mode: ' + (st.mode || '?'));
+        }
+        if (window.__lastTrigger) {
+          lines.push('lastTrigger: ' + String(window.__lastTrigger));
+        }
+        if (window.__v8LastLoadingMsg) {
+          lines.push('lastLoadingMsg: ' + window.__v8LastLoadingMsg);
+        }
+        if (typeof window.__v8CurrentScene === 'string') {
+          lines.push('scene: ' + window.__v8CurrentScene);
+        }
+      } catch (_) { /* 진단 수집 실패는 무시 */ }
+      return lines.length ? '\n\n[진단]\n' + lines.join('\n') : '';
+    }
+
+    function show(msg, extra) {
       if (reported) return;
       reported = true;
       if (loadEl) loadEl.style.display = 'none';
-      errMsg.textContent = msg;
+      const diag = _collectDiagContext();
+      errMsg.textContent = String(msg) + (extra ? '\n' + extra : '') + diag;
       errEl.classList.add('v8-visible');
     }
 
@@ -604,19 +634,37 @@
     // CDN 매치를 더 정확히 (Three.js 모듈 경로만)
     const isThreeCdnUrl = (u) => typeof u === 'string' && /unpkg\.com\/three@/.test(u);
 
+    // 스택을 첫 3줄로 자르는 헬퍼 — 모바일 화면에 다 안 들어가서 핵심만
+    function _trimStack(stack) {
+      if (!stack) return '';
+      const top = String(stack).split('\n').slice(0, 4).join('\n'); // 메시지+상위 3 frame
+      return top;
+    }
+    function _fileLoc(e) {
+      if (!e) return '';
+      const f = e.filename || '';
+      const ln = e.lineno != null ? ':' + e.lineno : '';
+      const col = e.colno != null ? ':' + e.colno : '';
+      return f ? ('at ' + f + ln + col) : '';
+    }
+
     window.addEventListener('error', (e) => {
       if (e.filename && isThreeCdnUrl(e.filename) && /import|module|script/i.test(e.message || '')) {
         show('Three.js CDN 로드 실패: ' + e.message + '\n\n네트워크 또는 차단 도구 확인.');
       } else if (e.error && e.error.stack) {
-        show(e.error.stack);
+        // 진단 강화: 메시지 한 줄 + filename:line + stack 상위 3 frame
+        const loc = _fileLoc(e);
+        const head = (e.message || e.error.message || 'Error') + (loc ? '\n' + loc : '');
+        show(head, _trimStack(e.error.stack));
       } else {
-        show(e.message || 'Unknown error');
+        show(e.message || 'Unknown error', _fileLoc(e));
       }
     });
     window.addEventListener('unhandledrejection', (e) => {
       const reason = e.reason;
-      const msg = reason?.stack || reason?.message || String(reason);
-      show(msg);
+      const head = reason?.message || String(reason);
+      const stack = reason?.stack ? _trimStack(reason.stack) : '';
+      show('[Promise rejected] ' + head, stack);
     });
 
     window.__v8ShowError = show;
@@ -694,7 +742,7 @@ import {
   showHoverTile, clearHighlights, removeHighlight
 } from './js-v8/battle/highlights.js';
 
-import { initHUD, updateHUD, showUnitPanel, hideUnitPanel, setMinimap, onAction as onHudAction, onCameraChange as onHudCamChange, onSettings as onHudSettings } from './js-v8/ui/hud.js';
+import { initHUD, updateHUD, showUnitPanel, hideUnitPanel, setMinimap, setHUDScene, onAction as onHudAction, onCameraChange as onHudCamChange, onSettings as onHudSettings } from './js-v8/ui/hud.js';
 import { initActionQueue, updateActionQueue, setActionQueueActive, hideActionQueue, showActionQueue } from './js-v8/ui/action_queue.js';
 import { DialogueRunner, showDialogue, hideDialogue, isDialogueActive } from './js-v8/ui/dialogue.js';
 import { openSettings, getSettings, saveSettings, onSettingsChange } from './js-v8/ui/settings.js';
@@ -703,6 +751,7 @@ import { CutinOverlay, registerPortraits as registerCutinPortraits, registerPort
 import { getPortraitSVG } from './js-v8/ui/portrait_art.js';
 import { initCursor, disposeCursor, getCursor, setCursor, moveCursor, hideCursor, showCursor, tickCursor } from './js-v8/ui/cursor.js';
 import { initDPad, onDPadInput, showDPad, hideDPad } from './js-v8/ui/dpad.js';
+import { initAttackPreview, showAttackPreview, hideAttackPreview, registerPortraits as registerApPortraits, registerPortraitArt as registerApPortraitArt } from './js-v8/ui/attack_preview.js';
 // dpad.js 키보드 핸들러가 다이얼로그 활성 시 양보할 수 있도록 전역 노출
 window.isDialogueActive = isDialogueActive;
 
@@ -712,6 +761,9 @@ import {
   placeAtGrid, clearTown, tickInteractionMark
 } from './js-v8/world/town.js';
 import { buildNPC, placeNPC, tickNPCMark, faceNPCTowardsPlayer } from './js-v8/world/npc.js';
+// ★ 2026-07-17 전면 개편: 배경 환경(하늘·지평선) + 대화 3D 무대
+import { buildEnvironment } from './js-v8/graphics/environment.js';
+import { buildDialogueStage } from './js-v8/world/dialogue_stage.js';
 // ★ fullloop-3d 이식 (2026-04-17): 분대 포메이션
 import { buildSquad, updateSquadCasualties, getBattleDisplayMode } from './js-v8/world/squad.js';
 
@@ -828,6 +880,13 @@ hideActionQueue(); // 전투 진입 시 노출
 const cutinOverlay = new CutinOverlay(document.getElementById('ui-root'));
 GameState.cutinOverlay = cutinOverlay;
 
+// ── 공격 미리보기 패널 (영걸전식 데미지/명중/반격 예측) ──────
+try {
+  initAttackPreview(document.body);  // body 직접 mount — z-index 460으로 레이어 보장(타이틀의 ui-root 숨김 영향 회피)
+  registerApPortraits(DATA.portraits);
+  registerApPortraitArt(getPortraitSVG);
+} catch (e) { console.warn('[attack_preview] init 실패(무시):', e); }
+
 setMinimap(
   () => {
     return (GameState.units || []).map(u => ({
@@ -879,6 +938,7 @@ onSettingsChange((s) => {
 // ── 타이틀 플로우 ────────────────────────────────
 function showTitle() {
   setMode('title');
+  setHUDScene('title');
   const t = document.getElementById('v8-title');
   t.classList.remove('v8-hidden');
   hideUnitPanel();
@@ -932,6 +992,8 @@ async function startEpisode(epId) {
 
     for (const scene of story.scenes) {
       GameState.currentScene = scene;
+      window.__v8CurrentScene = (scene.type || '?') + ':' + (scene.id || '?');
+      window.__lastTrigger = 'scene:' + scene.id;
       DLOG('Scene:', scene.id, scene.type);
 
       try {
@@ -973,109 +1035,110 @@ async function startEpisode(epId) {
 // ── Scene: Dialogue ──────────────────────────────
 async function playDialogueScene(scene) {
   setMode('dialogue');
-  // 3D 씬에 콘텐츠가 없을 때(오프닝 등) 배경 오버레이 표시
+  setHUDScene('dialogue');
+  window.__v8CurrentScene = 'dialogue:' + (scene.id || '?');
+  window.__lastTrigger = 'playDialogueScene:start';
+
+  // 전장/마을이 이미 있으면 그 위에서 대화 (영걸전식).
+  // 없으면(오프닝·천계·회의장) 3D 무대를 세워 캐릭터들이 실제로 서서 대화한다.
+  // ★ 2026-07-17 근본수정: 씬에 상주하는 카메라/조명을 '콘텐츠'로 오인해
+  //   항상 has3D=true가 되던 버그 — 검은 허공의 진짜 원인.
   const has3D = State.scene && State.scene.children.some(
-    c => c.type !== 'AmbientLight' && c.type !== 'DirectionalLight' && c.type !== 'HemisphereLight'
+    c => !c.isLight && !c.isCamera
   );
-  let dlgBg = null;
+
+  let stage = null;
+  let savedCam = null;
+  let stageTick = null;
+
   if (!has3D) {
-    dlgBg = document.createElement('div');
-    dlgBg.id = 'v8-dlg-cinematic-bg';
-    dlgBg.style.cssText = [
-      'position:fixed','inset:0','z-index:8','overflow:hidden',
-      // 영걸전 톤 — 위쪽 황금 햇살, 가운데 산수화 안개, 아래 짙은 보라
-      'background:' +
-        'radial-gradient(ellipse 70% 40% at 50% 8%, rgba(255,200,90,0.45) 0%, transparent 70%),' +
-        'radial-gradient(ellipse 90% 60% at 50% 100%, rgba(60,30,80,0.65) 0%, transparent 70%),' +
-        'linear-gradient(180deg, #1a0e28 0%, #2a1838 35%, #1a0e1f 70%, #050308 100%)',
-      'pointer-events:none',
-    ].join(';');
-
-    // 거대 한자 워터마크
-    const deco = document.createElement('div');
-    deco.style.cssText = [
-      'position:absolute','top:42%','left:50%',
-      'transform:translate(-50%,-50%)',
-      'color:rgba(255,180,60,0.07)',
-      'font-size:clamp(220px, 50vw, 600px)',
-      'font-weight:900','letter-spacing:24px',
-      'white-space:nowrap','pointer-events:none',
-      'text-shadow:0 0 60px rgba(255,140,40,0.12)',
-    ].join(';');
-    deco.textContent = scene.bgText || '古朝鮮';
-    dlgBg.appendChild(deco);
-
-    // 산 실루엣 (clip-path)
-    const mtn = document.createElement('div');
-    mtn.style.cssText = [
-      'position:absolute','left:0','right:0','bottom:0','height:35vh',
-      'background:linear-gradient(180deg, rgba(40,20,10,0) 0%, rgba(20,10,40,0.7) 60%, #050308 100%)',
-      'clip-path:polygon(0% 100%, 0% 65%, 8% 50%, 16% 60%, 25% 35%, 33% 55%, 42% 30%, 50% 50%, 58% 35%, 66% 55%, 75% 30%, 84% 50%, 92% 35%, 100% 55%, 100% 100%)',
-      'pointer-events:none',
-    ].join(';');
-    dlgBg.appendChild(mtn);
-
-    // 광선 (회전 애니, 인라인 keyframes는 못 쓰니 transform만)
-    const ray = document.createElement('div');
-    ray.style.cssText = [
-      'position:absolute','top:-20%','left:25%','width:50%','height:120%',
-      'background:linear-gradient(105deg, rgba(255,210,90,0) 0%, rgba(255,210,90,0.18) 35%, rgba(255,180,60,0.32) 50%, rgba(255,210,90,0.18) 65%, rgba(255,210,90,0) 100%)',
-      'transform:rotate(-12deg)','filter:blur(2px)',
-      'pointer-events:none',
-    ].join(';');
-    dlgBg.appendChild(ray);
-
-    // 부유 입자 (CSS @keyframes는 inline 안 됨 — 한 번만 정의)
-    if (!document.getElementById('v8-dlg-bg-style')) {
-      const sty = document.createElement('style');
-      sty.id = 'v8-dlg-bg-style';
-      sty.textContent = `
-        @keyframes v8DlgFloat {
-          0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
-          12%  { opacity: 0.85; }
-          88%  { opacity: 0.85; }
-          100% { transform: translateY(-12vh)  rotate(360deg); opacity: 0; }
-        }
-        .v8-dlg-particle {
-          position: absolute;
-          color: rgba(255,200,90,0.6);
-          font-size: 18px;
-          text-shadow: 0 0 10px rgba(255,160,60,0.7);
-          animation: v8DlgFloat linear infinite;
-          pointer-events: none;
-          z-index: 1;
-        }
-      `;
-      document.head.appendChild(sty);
+    // ── 등장 인물 도출 (대사 등장 순, 해설 제외) ──
+    const cast = [];
+    const seen = new Set();
+    for (const ln of (scene.lines || [])) {
+      const pid = ln.speakerId || ln.portrait;
+      if (!pid || pid === 'narrator' || seen.has(pid)) continue;
+      seen.add(pid);
+      cast.push({ id: pid, name: ln.speaker || pid });
     }
-    [
-      { l:8,  s:18, d:14, dl:-2 },
-      { l:22, s:14, d:18, dl:-7 },
-      { l:36, s:22, d:12, dl:-4 },
-      { l:50, s:12, d:20, dl:-1 },
-      { l:64, s:18, d:15, dl:-9 },
-      { l:78, s:14, d:17, dl:-3 },
-      { l:90, s:20, d:13, dl:-6 },
-    ].forEach((p,i) => {
-      const sp = document.createElement('span');
-      sp.className = 'v8-dlg-particle';
-      sp.style.cssText = `left:${p.l}%; font-size:${p.s}px; animation-duration:${p.d}s; animation-delay:${p.dl}s;`;
-      sp.textContent = (i % 3 === 0) ? '✦' : (i % 3 === 1) ? '❋' : '✧';
-      dlgBg.appendChild(sp);
-    });
 
-    document.body.appendChild(dlgBg);
+    stage = buildDialogueStage({ background: scene.background, cast, unitsData: DATA.units });
+    State.scene.add(stage.group);
+    applyBossLight(State.scene);   // 황금 키라이트 — 무대 톤
+    try { assertLightStandard(State.scene); } catch (e) { console.error(e); }
+    if (stage.fog && State.scene.fog) {
+      State.scene.fog.color.set(stage.fog.color);
+      State.scene.fog.near = stage.fog.near;
+      State.scene.fog.far = stage.fog.far;
+    }
+
+    // ── 카메라: tactical 근접 고정 — 무대 중앙 ──
+    const sw = GameState.switcher;
+    const ts = sw.tacticalState;
+    savedCam = {
+      lock: sw.lockMode,
+      target: ts.target.clone(),
+      camSize: ts.camSize,
+      azimuth: ts.azimuth,
+      elevation: ts.elevation,
+    };
+    sw.setLockMode(null);
+    await sw.switchTo('tactical', 0, { force: true });
+    ts.target.set(0, 0.55, 0);
+    ts.camSize = stage.camSize;
+    ts.azimuth = Math.PI / 4;
+    ts.elevation = 0.62;
+    sw.setLockMode('tactical');
+
+    stageTick = () => stage.tick(performance.now() / 1000);
+    State.updateCallbacks.push(stageTick);
   }
+
   await new Promise((resolve) => {
-    const runner = new DialogueRunner(scene.lines || [], resolve);
+    const runner = new DialogueRunner(scene.lines || [], resolve, {
+      compactPortrait: true,   // 무대/전장이 보여야 하므로 초상은 좌하단 소형
+      onLine: (line) => {
+        const pid = line.speakerId || line.portrait;
+        if (stage) {
+          const pos = stage.focus(pid);
+          if (pos) {
+            // 카메라를 화자 쪽으로 살짝
+            const ts = GameState.switcher.tacticalState;
+            ts.target.x = pos.x * 0.45;
+            ts.target.z = pos.z * 0.45;
+          }
+        } else {
+          // 전장/마을 위 대화 — 화자가 필드 유닛이면 카메라 팬
+          const u = (GameState.units || []).find(x => x.id === pid && x.hp > 0);
+          if (u) { const w = gridToWorld(u.x, u.y); panTacticalTo(w.x, w.z, 380); }
+        }
+      },
+    });
     runner.start();
   });
-  if (dlgBg) dlgBg.remove();
+
+  if (stage) {
+    const ti = State.updateCallbacks.indexOf(stageTick);
+    if (ti >= 0) State.updateCallbacks.splice(ti, 1);
+    stage.dispose(State.scene);
+    const sw = GameState.switcher;
+    sw.setLockMode(null);
+    if (savedCam) {
+      const ts = sw.tacticalState;
+      ts.target.copy(savedCam.target);
+      ts.camSize = savedCam.camSize;
+      ts.azimuth = savedCam.azimuth;
+      ts.elevation = savedCam.elevation;
+      if (savedCam.lock) sw.setLockMode(savedCam.lock);
+    }
+  }
 }
 
 // ── Scene: Battle ────────────────────────────────
 async function playBattleScene(scene) {
   setMode('battle');
+  window.__v8CurrentScene = 'battle:' + (scene.id || scene.mapId || '?');
+  window.__lastTrigger = 'playBattleScene:start';
   GameState.flags.battleResult = null;
   GameState.flags._hintShown = false;
   showActionQueue();
@@ -1097,6 +1160,20 @@ async function playBattleScene(scene) {
   const terrainGroup = buildTileMap(mapData.terrain);
   State.scene.add(terrainGroup);
   GameState.terrain3d = terrainGroup;
+
+  // ★ 2026-07-17: 배경 환경 (하늘 돔·지평선·원경 산) — 검은 허공 제거
+  {
+    const envCx = mapData.width * TILE_SIZE / 2;
+    const envCz = mapData.height * TILE_SIZE / 2;
+    const env = buildEnvironment(scene.env || 'dawn', { centerX: envCx, centerZ: envCz });
+    State.scene.add(env);
+    GameState.env3d = env;
+    if (env.userData.fog && State.scene.fog) {
+      State.scene.fog.color.set(env.userData.fog.color);
+      State.scene.fog.near = env.userData.fog.near;
+      State.scene.fog.far = env.userData.fog.far;
+    }
+  }
 
   // 날씨
   applyWeather(scene.weather || 'clear', GameState);
@@ -1173,7 +1250,15 @@ async function playBattleScene(scene) {
   const camLocked = (scene.camera === 'tactical_locked');
   GameState.switcher.setLockMode(camLocked ? 'tactical' : null);
 
-  // HUD 갱신
+  // HUD 갱신 — 승리 조건 표시 포함 (영걸전식 목표 명시)
+  setHUDScene('battle');
+  let objectiveText = '적 전멸';
+  if (scene.victoryCondition === 'defeat_boss' && scene.bossId) {
+    const bossDef = enemyDefs[scene.bossId];
+    objectiveText = `적장 ${bossDef?.name || scene.bossId} 격파`;
+  } else if (scene.victoryCondition === 'survive' && scene.turnLimit) {
+    objectiveText = `${scene.turnLimit}턴 생존`;
+  }
   updateHUD({
     turn: 1, side: 'ally',
     weather: GameState.weather.id,
@@ -1181,11 +1266,21 @@ async function playBattleScene(scene) {
     enemyAlive: GameState.enemies.filter(u => u.hp > 0).length,
     camMode: 'tactical',
     camLocked,
+    objective: objectiveText,
   });
 
-  // 프리라인 (진입 대사)
+  // 프리라인 (진입 대사) — 전장 위에서, 화자 유닛으로 카메라 팬 (영걸전식)
   if (scene.preLines && scene.preLines.length) {
-    await new Promise(r => new DialogueRunner(scene.preLines, r).start());
+    setHUDScene('dialogue');
+    await new Promise(r => new DialogueRunner(scene.preLines, r, {
+      compactPortrait: true,
+      onLine: (line) => {
+        const pid = line.speakerId || line.portrait;
+        const u = GameState.units.find(x => x.id === pid && x.hp > 0);
+        if (u) { const w = gridToWorld(u.x, u.y); panTacticalTo(w.x, w.z, 380); }
+      },
+    }).start());
+    setHUDScene('battle');
   }
 
   // BGM
@@ -1238,6 +1333,18 @@ async function playBattleScene(scene) {
   hideActionQueue();
 
   if (GameState.flags.battleResult === 'victory') {
+    // ★ 2026-07-17: 승리 후 대사(postLines) — 전장 위에서 (기존엔 무시되던 데이터)
+    if (scene.postLines && scene.postLines.length) {
+      setHUDScene('dialogue');
+      await new Promise(r => new DialogueRunner(scene.postLines, r, {
+        compactPortrait: true,
+        onLine: (line) => {
+          const pid = line.speakerId || line.portrait;
+          const u = GameState.units.find(x => x.id === pid);
+          if (u) { const w = gridToWorld(u.x, u.y); panTacticalTo(w.x, w.z, 380); }
+        },
+      }).start());
+    }
     audio.playBGM('victory');
     await showVictoryScreen(scene);
   } else if (GameState.flags.battleResult === 'defeat') {
@@ -1318,6 +1425,11 @@ function placeUnitMesh(mesh, unit) {
 }
 
 function clearBattleScene() {
+  // 배경 환경 정리
+  if (GameState.env3d) {
+    State.scene.remove(GameState.env3d);
+    GameState.env3d = null;
+  }
   // HP바 빌보드 정리
   for (const u of (GameState.units || [])) detachUnitHud(u);
   if (GameState._hudTick) {
@@ -1349,6 +1461,9 @@ function wireTurnManager(tm) {
 
     // HUD/액션 갱신
     updateHUDAlive();
+
+    // 공격 미리보기는 타겟팅 단계에서만 — 그 외 단계 진입 시 숨김
+    if (to !== PHASE.ALLY_TARGETING) { try { hideAttackPreview(); } catch (e) {} }
 
     if (to === PHASE.ALLY_SELECT) {
       clearHighlights();
@@ -1399,6 +1514,7 @@ function wireTurnManager(tm) {
           setCursor(cand[0].x, cand[0].y, true);
         }
       }
+      _refreshAttackPreview();
     } else if (to === PHASE.ENEMY) {
       clearHighlights();
       hideUnitPanel();
@@ -1464,6 +1580,23 @@ async function panTacticalTo(worldX, worldZ, durationMs = 380) {
     }
     requestAnimationFrame(step);
   });
+}
+
+// ── 공격 미리보기 갱신 (커서 위치의 적 기준) ──────
+function _refreshAttackPreview() {
+  try {
+    const tm = GameState.turnManager;
+    const pa = GameState.pendingAction;
+    if (!tm || tm.currentPhase !== PHASE.ALLY_TARGETING || !pa || !pa.unit) {
+      hideAttackPreview(); return;
+    }
+    if (pa.type !== 'attack') { hideAttackPreview(); return; }  // 스킬은 추후
+    const c = getCursor();
+    const target = (GameState.enemies || []).find(en => en.hp > 0 && en.x === c.x && en.y === c.y);
+    if (!target) { hideAttackPreview(); return; }
+    if (manhattan(pa.unit, target) > (pa.unit.rng || 1)) { hideAttackPreview(); return; }
+    showAttackPreview({ attacker: pa.unit, target, skill: null, weather: GameState.weather, map: GameState.map });
+  } catch (e) { /* graceful — 미리보기는 부가 기능 */ }
 }
 
 // ── 적 턴 실행 ─────────────────────────────────
@@ -1539,6 +1672,8 @@ function handleDPadInput(cmd) {
     if (tm.currentPhase === PHASE.ENEMY) return;
     showCursor();
     moveCursor(cmd);
+    // 타겟팅 중이면 커서 위치 적 기준 공격 미리보기 갱신
+    if (tm.currentPhase === PHASE.ALLY_TARGETING) _refreshAttackPreview();
     return;
   }
 
@@ -1637,7 +1772,7 @@ function handleAction(action, unit) {
       GameState.enemies.some(e => e.hp > 0 && e.x === t.x && e.y === t.y)
     );
     if (!targetable.length) {
-      alert('공격 범위 내 적이 없습니다.');
+      showTurnBanner('공격 범위 내 적이 없습니다', 1100);
       return;
     }
     clearHighlights();
@@ -1647,11 +1782,11 @@ function handleAction(action, unit) {
   } else if (action === 'skill') {
     // 첫 번째 스킬 자동 선택 (MVP)
     const skillId = unit.skills?.[0];
-    if (!skillId) { alert('사용 가능한 스킬이 없습니다.'); return; }
+    if (!skillId) { showTurnBanner('사용 가능한 스킬이 없습니다', 1100); return; }
     const skillDef = DATA.skills[skillId];
-    if (!skillDef) { alert('스킬 정의 없음: ' + skillId); return; }
+    if (!skillDef) { showTurnBanner('스킬 정의 없음: ' + skillId, 1100); return; }
     if ((unit.mp || 0) < (skillDef.mp || 0)) {
-      alert(`MP 부족 (${unit.mp}/${skillDef.mp})`);
+      showTurnBanner(`MP 부족 (${unit.mp}/${skillDef.mp})`, 1100);
       return;
     }
     clearHighlights();
@@ -1820,6 +1955,7 @@ function onTileClick(gx, gy) {
 
 // ── 공격/스킬 실행 ───────────────────────────────
 async function performAttack(attacker, target) {
+  try { hideAttackPreview(); } catch (e) {}
   clearHighlights();
   // 컷인 활성 (3D 카메라 + HTML 오버레이 병행 트리거)
   await GameState.switcher.enableAutoCutin(attacker.mesh, target.mesh);
@@ -2047,6 +2183,9 @@ function _detachSelectionRing() {
 // WASD/방향키로 이동, E로 NPC/건물 상호작용, ESC로 다음 씬(exitTrigger).
 async function playExplorationScene(scene) {
   setMode('exploration');
+  // 진단 표식 — 에러 발생 시 어느 씬이었는지 알 수 있도록
+  window.__v8CurrentScene = 'exploration:' + (scene.id || scene.mapId || '?');
+  window.__lastTrigger = 'playExplorationScene:start';
 
   const mapId = scene.mapId;
   const mapData = DATA.maps[mapId];
@@ -2069,6 +2208,18 @@ async function playExplorationScene(scene) {
   State.scene.add(townGroup);
   GameState.townGroup = townGroup;
   GameState.terrain3d = townGroup; // 카메라 raycast 장애물 소스
+
+  // ★ 2026-07-17: 마을 배경 환경 (파란 하늘·지평선) — 허공에 뜬 섬 해소
+  const townEnv = buildEnvironment('day', {
+    centerX: mapData.width * TILE_SIZE / 2,
+    centerZ: mapData.height * TILE_SIZE / 2,
+  });
+  State.scene.add(townEnv);
+  if (townEnv.userData.fog && State.scene.fog) {
+    State.scene.fog.color.set(townEnv.userData.fog.color);
+    State.scene.fog.near = townEnv.userData.fog.near;
+    State.scene.fog.far = townEnv.userData.fog.far;
+  }
 
   // NPC 배치
   const npcMeshes = [];
@@ -2123,13 +2274,15 @@ async function playExplorationScene(scene) {
   }
   await GameState.switcher.switchTo(targetCam, 700, { force: true });
 
-  // HUD
+  // HUD — 마을 모드: 위치 라벨만 (턴/병력 숨김)
+  setHUDScene('exploration');
   updateHUD({
     turn: 1, side: 'ally',
     weather: 'clear',
     allyAlive: 1, enemyAlive: 0,
     camMode: targetCam,
     camLocked: false,
+    location: mapData.name || '마을',
   });
   hideUnitPanel();
 
@@ -2156,7 +2309,7 @@ async function playExplorationScene(scene) {
     else if (cmd === 'left')  _stepPlayer(-1, 0);
     else if (cmd === 'right') _stepPlayer(1,  0);
     else if (cmd === 'a' || cmd === 'menu') _tryInteract();
-    else if (cmd === 'b') _requestExit('esc');
+    else if (cmd === 'b') _tryExitViaGate();
   });
   // (대화 전용 별도 버튼 미사용 — A 버튼이 대화 겸함)
   const dpad = { parentNode: null };       // 호환용 더미 (cleanup 안전)
@@ -2175,7 +2328,7 @@ async function playExplorationScene(scene) {
       _tryInteract();
     }
     if (e.key === 'Escape') {
-      _requestExit('esc');
+      _tryExitViaGate();
     }
   };
   const onKeyUp = (e) => {
@@ -2214,6 +2367,7 @@ async function playExplorationScene(scene) {
   let animating = false;
   function _stepPlayer(dx, dy) {
     if (animating) return;
+    window.__lastTrigger = '_stepPlayer(' + dx + ',' + dy + ')@' + playerUnit.x + ',' + playerUnit.y;
     const from = { x: playerUnit.x, y: playerUnit.y };
     const ok = tryMovePlayer(playerUnit, mapData, buildingList, npcList, dx, dy);
     if (!ok) return;
@@ -2234,6 +2388,7 @@ async function playExplorationScene(scene) {
   //   (A) 배열  = DialogueRunner에 바로 전달 (legacy / EP.2용)
   //   (B) 객체  = {type, lines, setFlag, grant, requireFlag, ifMet, ifNotMet, oncePerFlag, exitScene}
   async function _runTrigger(triggerId, hitObj) {
+    window.__lastTrigger = '_runTrigger:' + triggerId;
     const t = scene.triggers?.[triggerId];
     if (!t) return { exited: false };
 
@@ -2338,19 +2493,35 @@ async function playExplorationScene(scene) {
     const blgHit = nearestInteractable(playerUnit, buildingList, 1.8);
     if (blgHit) {
       _hideMobileUI();
+      const hasTrigger = !!(blgHit.trigger && scene.triggers && scene.triggers[blgHit.trigger]);
       const r = await _runTrigger(blgHit.trigger, blgHit);
       _showMobileUI();
       if (r.exited) return;
-      if (blgHit.id === scene.exitTrigger) {
+      // ★ 2026-07-17 수정: 트리거가 정의된 출구는 트리거(exitScene)가 탈출을 결정한다.
+      //   기존엔 조건 미충족(문지기 만류)에도 무조건 탈출하던 버그.
+      if (!hasTrigger && blgHit.id === scene.exitTrigger) {
         _requestExit('exitTrigger_match');
       }
       return;
     }
   }
 
+  // ★ ESC/B = 무조건 탈출이 아니라 성문 규칙을 따른다 (회의 전 출진 방지)
+  async function _tryExitViaGate() {
+    const gateB = buildingList.find(b => b.id === scene.exitTrigger);
+    if (gateB && gateB.trigger && scene.triggers && scene.triggers[gateB.trigger]) {
+      _hideMobileUI();
+      await _runTrigger(gateB.trigger, gateB);
+      _showMobileUI();
+      return;
+    }
+    _requestExit('esc');
+  }
+
   let exitReason = null;
   let resolveExit = null;
   function _requestExit(reason) {
+    window.__lastTrigger = '_requestExit:' + reason;
     if (exitReason) return;
     exitReason = reason;
     if (resolveExit) resolveExit();
@@ -2398,6 +2569,7 @@ async function playExplorationScene(scene) {
   State.scene.remove(playerMesh);
   for (const m of npcMeshes) State.scene.remove(m);
   if (townGroup.parent) State.scene.remove(townGroup);
+  if (townEnv.parent) State.scene.remove(townEnv);
   GameState.townGroup = null;
   GameState.terrain3d = null;
   GameState.playerMesh = null;
@@ -2413,7 +2585,7 @@ function _showExplorationHint(title) {
   const h = document.createElement('div');
   h.id = 'v8-explore-hint';
   h.style.cssText = [
-    'position:fixed', 'top:14px', 'left:50%', 'transform:translateX(-50%)',
+    'position:fixed', 'top:52px', 'left:50%', 'transform:translateX(-50%)',
     'z-index:240', 'pointer-events:none',
     'padding:10px 18px',
     'background:rgba(26,20,40,0.78)',
@@ -2436,19 +2608,54 @@ function _showExplorationHint(title) {
 // ── Scene: Cinematic (엔딩 내레이션) ─────────────
 async function playCinematicScene(scene) {
   setMode('dialogue');
+  setHUDScene('dialogue');
+  window.__v8CurrentScene = 'cinematic:' + (scene.id || '?');
+  window.__lastTrigger = 'playCinematicScene:start';
+
+  // ★ 2026-07-17: 3D 콘텐츠가 없으면 배경 무대 구축 (검은 허공 방지)
+  let cineStage = null;
+  let cineSavedCam = null;
+  const cineHas3D = State.scene && State.scene.children.some(
+    c => !c.isLight && !c.isCamera
+  );
+  if (!cineHas3D) {
+    cineStage = buildDialogueStage({ background: scene.background, cast: [], unitsData: DATA.units });
+    State.scene.add(cineStage.group);
+    applyBossLight(State.scene);
+    if (cineStage.fog && State.scene.fog) {
+      State.scene.fog.color.set(cineStage.fog.color);
+      State.scene.fog.near = cineStage.fog.near;
+      State.scene.fog.far = cineStage.fog.far;
+    }
+    const sw = GameState.switcher;
+    const ts = sw.tacticalState;
+    cineSavedCam = {
+      lock: sw.lockMode, target: ts.target.clone(),
+      camSize: ts.camSize, azimuth: ts.azimuth, elevation: ts.elevation,
+    };
+    sw.setLockMode(null);
+    await sw.switchTo('tactical', 0, { force: true });
+    ts.target.set(0, 0.55, 0);
+    ts.camSize = 5.5;
+    ts.azimuth = Math.PI / 4;
+    ts.elevation = 0.62;
+    sw.setLockMode('tactical');
+  }
 
   if (scene.bgm) {
     audio.stopBGM();
     audio.playBGM(scene.bgm);
   }
 
-  // 카메라 분대 모드로 일시 전환 (잠금 해제)
-  const wasLocked = GameState.switcher.lockMode;
-  GameState.switcher.setLockMode(null);
-  if (scene.camera === 'squad') {
-    await GameState.switcher.switchTo('squad', 800);
-  } else if (scene.camera === 'character_hwanwoong') {
-    await GameState.switcher.switchTo('character', 800);
+  // 카메라 분대 모드로 일시 전환 (잠금 해제) — 무대 모드일 땐 무대 카메라 유지
+  const wasLocked = cineStage ? null : GameState.switcher.lockMode;
+  if (!cineStage) {
+    GameState.switcher.setLockMode(null);
+    if (scene.camera === 'squad') {
+      await GameState.switcher.switchTo('squad', 800);
+    } else if (scene.camera === 'character_hwanwoong') {
+      await GameState.switcher.switchTo('character', 800);
+    }
   }
 
   const cine = document.getElementById('v8-cinematic');
@@ -2476,6 +2683,21 @@ async function playCinematicScene(scene) {
   });
 
   if (wasLocked) GameState.switcher.setLockMode(wasLocked);
+
+  // 무대 정리 + 카메라 복원
+  if (cineStage) {
+    cineStage.dispose(State.scene);
+    const sw = GameState.switcher;
+    sw.setLockMode(null);
+    if (cineSavedCam) {
+      const ts = sw.tacticalState;
+      ts.target.copy(cineSavedCam.target);
+      ts.camSize = cineSavedCam.camSize;
+      ts.azimuth = cineSavedCam.azimuth;
+      ts.elevation = cineSavedCam.elevation;
+      if (cineSavedCam.lock) sw.setLockMode(cineSavedCam.lock);
+    }
+  }
 }
 
 // ── EP 예고 ────────────────────────────────────
@@ -2505,6 +2727,43 @@ const s = getSettings();
 audio.setBGMVolume(s.bgmVolume / 100);
 audio.setSFXVolume(s.sfxVolume / 100);
 
+// 전역 노출 (디버그) — 에피소드 시작 전에 노출해야 QA가 진행 중 상태를 읽을 수 있다
+if (DEBUG) {
+  window.v8 = { GameState, State, DATA, startEpisode, audio, THREE };
+
+  // ★ QA 자동 플레이 헬퍼 — 실제 게임 함수(selectUnit/confirmMove/performAttack)로
+  //   아군 1기를 한 수 진행. 사람 플레이와 동일 경로.
+  window.v8.qaAutoAllyStep = async function qaAutoAllyStep() {
+    const tm = GameState.turnManager;
+    if (!tm) return 'no-tm';
+    if (tm.currentPhase !== PHASE.ALLY_SELECT) return 'phase:' + tm.currentPhase;
+    const u = (GameState.allies || []).find(a => a.hp > 0 && !a.acted);
+    if (!u) return 'no-ready-ally';
+    tm.selectUnit(u);
+    const foes = GameState.enemies.filter(e => e.hp > 0);
+    if (!foes.length) return 'no-foes';
+    foes.sort((a, b) => manhattan(u, a) - manhattan(u, b));
+    const foe = foes[0];
+    const tiles = calcMoveRange(u, GameState.map, GameState.units);
+    let best = { x: u.x, y: u.y }, bd = Math.abs(u.x - foe.x) + Math.abs(u.y - foe.y);
+    for (const t of tiles) {
+      const occupied = GameState.units.some(o => o !== u && o.hp > 0 && o.x === t.x && o.y === t.y);
+      if (occupied) continue;
+      const d = Math.abs(t.x - foe.x) + Math.abs(t.y - foe.y);
+      if (d < bd) { bd = d; best = t; }
+    }
+    await animateMove(u.mesh, u, best, 200);
+    tm.confirmMove(u, { x: best.x, y: best.y });
+    if (manhattan(u, foe) <= (u.rng || 1)) {
+      await performAttack(u, foe);
+    } else {
+      handleAction('wait', u);
+    }
+    return 'ok';
+  };
+  console.log('[v8] debug globals: window.v8 (+qaAutoAllyStep)');
+}
+
 // EP 강제 실행 (디버그)
 if (FORCE_EP === '1') {
   await startEpisode('ep1');
@@ -2512,12 +2771,6 @@ if (FORCE_EP === '1') {
   await startEpisode('ep2');
 } else {
   showTitle();
-}
-
-// 전역 노출 (디버그)
-if (DEBUG) {
-  window.v8 = { GameState, State, DATA, startEpisode, audio, THREE };
-  console.log('[v8] debug globals: window.v8');
 }
 </script>
 </body>

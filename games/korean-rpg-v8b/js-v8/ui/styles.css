@@ -476,3 +476,27 @@
   outline: 2px solid var(--v8-gold);
   outline-offset: 2px;
 }
+
+/* ═══════════ 2026-07-17 전면 개편: 씬 모드별 HUD ═══════════ */
+/* 병력 카운터 스타일 */
+#v8-ally-count .v8-cnt-ally  { color: #7ec8ff; font-style: normal; }
+#v8-ally-count .v8-cnt-enemy { color: #ff8a7a; font-style: normal; }
+#v8-ally-count i { color: #8a7a5a; font-style: normal; font-size: 11px; }
+#v8-turn-side.v8-side-enemy { color: #ff8a7a; }
+#v8-objective { color: #e8c14a; }
+#v8-location { color: #ffd700; font-weight: 700; letter-spacing: 1px; }
+
+/* 씬별 표시 제어 */
+#v8-hud.v8-scene-dialogue #v8-hud-top,
+#v8-hud.v8-scene-dialogue #v8-minimap,
+#v8-hud.v8-scene-title #v8-hud-top,
+#v8-hud.v8-scene-title #v8-minimap { display: none !important; }
+
+#v8-hud.v8-scene-exploration #v8-turn-badge,
+#v8-hud.v8-scene-exploration #v8-ally-count,
+#v8-hud.v8-scene-exploration #v8-objective { display: none !important; }
+
+#v8-hud.v8-scene-battle #v8-location { display: none !important; }
+
+/* 마을(비전투)에서는 L/R 유닛 사이클 버튼 숨김 */
+body:not(.v8-mode-battle) #v8-dpad-shoulder { display: none !important; }

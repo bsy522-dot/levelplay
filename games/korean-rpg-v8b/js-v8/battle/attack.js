@@ -9,6 +9,7 @@
 //   crit 10% → *1.5
 //   typeAdv → *1.5 / *0.75 / *1
 //
+// 명중/회피 개념 없음 — 모든 공격은 항상 명중 (확률 변수는 크리·데미지 분산뿐).
 // 반격: 근접(rng=1) + 생존 + 사거리 안이면 자동 반격 (dmg-2)
 
 import { manhattan, terrainDefBonus } from './movement.js';
@@ -95,6 +96,69 @@ export function canCounter(defender, attacker) {
   if (defender.hp <= 0) return false;
   if ((defender.rng || 1) < manhattan(defender, attacker)) return false;
   return true;
+}
+
+// ─────────────────────────────────────────────
+// calcPreview — 완전 순수 (부수효과 0, 무작위 0)
+//   calcDamage는 randInt(0,5) 분산 + 10% 크리로 호출마다 결과가 달라
+//   미리보기엔 부적합 → 동일 공식을 결정적으로 풀어 "예상 범위"를 돌려준다.
+//   반환: { min, max, crit, critPct, typeMod, element, counter? }
+//     min/max  : 데미지 분산(+0~5) 양 끝 (크리 미적용 평타값)
+//     critPct  : 크리티컬 확률(%) — calcDamage의 randInt(1,10)===1 기반 10%
+//     counter  : 근접 평타 시 예상 반격 { min, max } (스킬은 반격 없음)
+// ─────────────────────────────────────────────
+function _baseDamage(attacker, target, skill, weather, map) {
+  // calcDamage의 결정적 부분만 추출 (randInt/crit 제외)
+  const atkMod = (weather?.atkMod) || 0;
+  const tile = map?.terrain?.[target.y]?.[target.x];
+  const tDef = terrainDefBonus(tile);
+
+  let base;
+  if (skill) {
+    const byDmg = skill.dmg || 0;
+    const byPw  = Math.floor(effectiveAtk(attacker) * (skill.pw || 1.0));
+    base = Math.max(byDmg, byPw);
+  } else {
+    base = effectiveAtk(attacker) + atkMod;
+  }
+
+  if (skill?.element && target.weakTo === skill.element) base = Math.floor(base * 1.25);
+  if (weather?.id === 'rain' && skill?.element === 'fire') base = Math.floor(base * 0.7);
+
+  // 분산 전 코어 데미지 (randInt(0,5) 이전)
+  return Math.max(1, base - effectiveDef(target) - tDef);
+}
+
+export function calcPreview(attacker, target, skill, weather, map) {
+  if (!attacker || !target) return null;
+
+  const tMod = typeAdv(attacker.unitType, target.unitType);
+  const core = _baseDamage(attacker, target, skill, weather, map);
+
+  // 데미지 분산 +randInt(0,5) → min=core, max=core+5
+  const min = Math.max(1, Math.floor(core * tMod));
+  const max = Math.max(1, Math.floor((core + 5) * tMod));
+
+  const out = {
+    min, max,
+    crit: false,            // 미리보기는 크리 확정 표기 안 함
+    critPct: 10,            // randInt(1,10)===1 → 10%
+    typeMod: tMod,
+    element: skill?.element || 'slash',
+  };
+
+  // 예상 반격 (근접 평타, 타겟이 한 방에 죽지 않는다는 가정 하의 상한 시나리오)
+  //   실제 executeAttack은 killed가 아닐 때만 반격 → 미리보기는 "가능성"만 표시
+  if (!skill && canCounter(target, attacker)) {
+    const cCore = _baseDamage(target, attacker, null, weather, map);
+    const cMod  = typeAdv(target.unitType, attacker.unitType);
+    // 반격은 -2 (executeAttack 라인 142)
+    const cMin = Math.max(1, Math.floor(cCore * cMod) - 2);
+    const cMax = Math.max(1, Math.floor((cCore + 5) * cMod) - 2);
+    out.counter = { min: cMin, max: cMax };
+  }
+
+  return out;
 }
 
 // ─────────────────────────────────────────────

@@ -23,6 +23,12 @@ export const State = {
   updateCallbacks: [], // [ (dt, elapsed) => void ] — 매 프레임 실행
 };
 
+// 진단용: 전역 에러 핸들러(korean-rpg-v8.html)가 State.mode를 읽을 수 있도록
+// 같은 객체 참조를 window에 노출. 읽기 전용 가정 — 외부에서 변경하지 말 것.
+if (typeof window !== 'undefined') {
+  window.__v8State = State;
+}
+
 // ─────────────────────────────────────────────
 // Debug overlay (FPS + 폴리곤 카운터)
 // ─────────────────────────────────────────────
@@ -138,8 +144,22 @@ export function initEngine(opts = {}) {
       try { cb(dt, elapsed); } catch (e) { console.error('[engine] update cb err', e); }
     }
 
+    // 가설1 방어: State.camera가 일시적으로 falsy인 프레임이 생기면 local camera로 fallback.
+    // composerHandle/renderPass가 어떤 이유로 사라지면 setCamera 호출을 건너뛰고 warn만.
     const cam = State.camera || camera;
-    if (composerHandle.renderPass.camera !== cam) composerHandle.setCamera(cam);
+    if (composerHandle && composerHandle.renderPass) {
+      if (composerHandle.renderPass.camera !== cam) {
+        if (cam) {
+          composerHandle.setCamera(cam);
+        } else if (!window.__v8WarnedNullCam) {
+          window.__v8WarnedNullCam = true;
+          console.warn('[engine] State.camera and local camera both falsy — skip setCamera');
+        }
+      }
+    } else if (!window.__v8WarnedNullComposer) {
+      window.__v8WarnedNullComposer = true;
+      console.warn('[engine] composerHandle missing — skip setCamera');
+    }
     composerHandle.composer.render(dt);
 
     // Debug HUD

@@ -72,24 +72,47 @@ function _ensureBigPortraitStyles() {
       border: 1.5px solid rgba(255,220,150,0.35);
       pointer-events: none;
     }
-    /* 이름 라벨 */
-    #v8-dlg-bigportrait::after {
-      content: attr(data-name);
+    /* 이름 라벨 — 카드 하단 안쪽(overflow:hidden에 잘리지 않게 내부 배치) */
+    #v8-dlg-bigportrait .v8-bp-name {
       position: absolute;
-      bottom: -42px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0; right: 0; bottom: 0;
+      z-index: 2;
+      text-align: center;
       font-family: 'Noto Serif KR', serif;
-      font-size: clamp(20px, 3.5vw, 32px);
+      font-size: clamp(16px, 2.6vw, 26px);
       font-weight: 900;
       color: var(--bp-color, #ffd700);
-      letter-spacing: 6px;
-      text-shadow: 0 2px 10px #000, 0 0 18px rgba(255,180,40,.7), 0 0 36px rgba(255,140,40,.4);
-      white-space: nowrap;
-      padding: 6px 18px;
-      background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(40,20,8,0.7) 30%, rgba(40,20,8,0.7) 70%, rgba(0,0,0,0) 100%);
-      border-top: 2px solid rgba(255,180,60,.5);
-      border-bottom: 2px solid rgba(255,180,60,.5);
+      letter-spacing: 5px;
+      text-shadow: 0 2px 8px #000, 0 0 14px rgba(255,180,40,.8);
+      padding: 22px 8px 8px;
+      background: linear-gradient(180deg, rgba(10,6,2,0) 0%, rgba(10,6,2,0.75) 55%, rgba(10,6,2,0.92) 100%);
+      pointer-events: none;
+      border-radius: 0 0 18px 18px;
+    }
+    #v8-dlg-bigportrait .v8-bp-art {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; border-radius: 18px;
+    }
+    #v8-dlg-bigportrait .v8-bp-art > svg { width: 100%; height: 100%; }
+    #v8-dlg-bigportrait .v8-bp-art > img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    /* 3D 무대 컴팩트 모드 — 무대가 보이도록 초상을 좌하단 소형으로 */
+    #v8-dlg-bigportrait.v8-compact {
+      top: auto;
+      bottom: calc(24% + 20px);
+      left: 3vw;
+      width: clamp(110px, 17vw, 190px);
+      height: clamp(140px, 21vw, 240px);
+      font-size: clamp(70px, 12vw, 140px);
+    }
+    @media (max-width: 720px) {
+      #v8-dlg-bigportrait.v8-compact {
+        bottom: calc(28% + 16px);
+        width: clamp(96px, 26vw, 150px);
+        height: clamp(120px, 32vw, 190px);
+      }
     }
     @media (max-width: 720px) {
       #v8-dlg-bigportrait {
@@ -98,7 +121,7 @@ function _ensureBigPortraitStyles() {
         height: clamp(180px, 48vw, 280px);
         font-size: clamp(100px, 28vw, 180px);
       }
-      #v8-dlg-bigportrait::after { bottom: -34px; font-size: clamp(16px, 4.5vw, 24px); letter-spacing: 4px; }
+      #v8-dlg-bigportrait .v8-bp-name { font-size: clamp(14px, 4vw, 20px); letter-spacing: 3px; }
     }
     /* SVG 모드 — 일러스트가 박스를 채움 */
     #v8-dlg-bigportrait.v8-svg-art {
@@ -119,9 +142,10 @@ function _ensureElement() {
   if (_el) return _el;
   _ensureBigPortraitStyles();
 
-  // 큰 화자 portrait (배경 일러스트 역할)
+  // 큰 화자 portrait (배경 일러스트 역할) — 내부에 아트 컨테이너 + 이름표
   const bp = document.createElement('div');
   bp.id = 'v8-dlg-bigportrait';
+  bp.innerHTML = '<div class="v8-bp-art"></div><div class="v8-bp-name"></div>';
   document.body.appendChild(bp);
 
   const el = document.createElement('div');
@@ -140,9 +164,10 @@ function _ensureElement() {
 }
 
 export class DialogueRunner {
-  constructor(lines, onComplete) {
+  constructor(lines, onComplete, opts = {}) {
     this.lines = Array.isArray(lines) ? lines : [];
     this.onComplete = onComplete;
+    this.opts = opts;   // { onLine(line, index), compactPortrait }
     this.index = -1;
     this.charIdx = 0;
     this.typing = false;
@@ -165,6 +190,10 @@ export class DialogueRunner {
     }
     _current = this;
     this.el.classList.add('v8-visible');
+    if (this.opts.compactPortrait) {
+      const bp = document.getElementById('v8-dlg-bigportrait');
+      if (bp) bp.classList.add('v8-compact');
+    }
     // 대화 표시 중에는 화면 어디를 탭해도 진행 — 단, 버튼/메뉴/dpad/설정 등
     // 인터랙티브 요소 위 탭은 제외(INTERACTIVE_GUARD_SELECTOR로 가드).
     // bubble 단계에 document에서 잡으므로, canvas 등 하위 핸들러가 먼저 실행되어
@@ -221,28 +250,35 @@ export class DialogueRunner {
     // 우선순위: PNG image > SVG > emoji fallback
     const bp = document.getElementById('v8-dlg-bigportrait');
     if (bp) {
-      if (line.text && pid) {
+      const artEl = bp.querySelector('.v8-bp-art');
+      const nameEl = bp.querySelector('.v8-bp-name');
+      if (line.text && pid && artEl) {
         if (p.image) {
-          bp.innerHTML = `<img src="${p.image}" alt="${pid}" style="width:100%;height:100%;object-fit:cover;border-radius:14px;display:block">`;
+          artEl.innerHTML = `<img src="${p.image}" alt="${pid}">`;
           bp.classList.add('v8-svg-art');
         } else {
           const svg = getPortraitSVG(pid);
           if (svg) {
-            bp.innerHTML = svg;
+            artEl.innerHTML = svg;
             bp.classList.add('v8-svg-art');
           } else {
-            bp.innerHTML = '';
-            bp.textContent = p.emoji;
+            artEl.innerHTML = '';
+            artEl.textContent = p.emoji;
             bp.classList.remove('v8-svg-art');
           }
         }
-        bp.dataset.name = line.speaker || pid;
+        if (nameEl) nameEl.textContent = line.speaker || pid;
         bp.style.setProperty('--bp-color', p.color || '#ffd700');
         bp.style.borderColor = p.color || '#c4956a';
         bp.classList.add('v8-show');
       } else {
         bp.classList.remove('v8-show');
       }
+    }
+
+    // 외부 훅 — 3D 무대 화자 강조/카메라 팬 등
+    if (this.opts.onLine) {
+      try { this.opts.onLine(line, this.index); } catch (e) { console.error('[dialogue] onLine err', e); }
     }
 
     this.textEl.textContent = '';
@@ -282,7 +318,7 @@ export class DialogueRunner {
     if (this.typingTimer) { clearTimeout(this.typingTimer); this.typingTimer = null; }
     this.el.classList.remove('v8-visible');
     const bp = document.getElementById('v8-dlg-bigportrait');
-    if (bp) bp.classList.remove('v8-show');
+    if (bp) { bp.classList.remove('v8-show'); bp.classList.remove('v8-compact'); }
     document.removeEventListener('click', this._onDocTap);
     window.removeEventListener('keydown', this._onKey);
     if (_current === this) _current = null;

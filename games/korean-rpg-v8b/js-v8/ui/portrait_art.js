@@ -630,16 +630,327 @@ const ART = {
     <ellipse cx="109" cy="118" rx="2.2" ry="1.5" fill="#a070ff"/>
     ${mouth(100, 138, 6)}
   </svg>`,
+
+  // ── 마을 NPC ────────────────────────────────────
+
+  // 마을 어른 — 흰 수염, 베이지 한복, 따뜻한 흙빛
+  elder: `<svg ${SIZE}>
+    <defs><linearGradient id="bg-elder" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0d0c0"/><stop offset="100%" stop-color="#5a4838"/>
+    </linearGradient></defs>
+    <rect width="200" height="280" fill="url(#bg-elder)"/>
+    <!-- 한복 도포 (바랜 베이지) -->
+    <path d="M55 160 Q50 210 55 270 L145 270 Q150 210 145 160 Q120 152 100 152 Q80 152 55 160 Z" fill="#cdb898" stroke="#6a5238" stroke-width="1.5"/>
+    <path d="M100 158 L100 268" stroke="#6a5238" stroke-width="2"/>
+    <!-- 옷고름 -->
+    <path d="M95 162 L95 195 M85 175 L95 170" stroke="#8a6840" stroke-width="2"/>
+    <!-- 띠 -->
+    <rect x="55" y="225" width="90" height="8" fill="#a08868" stroke="#5a4828"/>
+    <!-- 머리 -->
+    ${face(100, 110, 30, '#e8c8a8')}
+    <!-- 흰 머리카락 (성긴 정수리) -->
+    <path d="M75 95 Q78 78 100 75 Q122 78 125 95 L123 100 Q100 88 77 100 Z" fill="#e8e4dc" stroke="#aaa" stroke-width="0.8"/>
+    <!-- 갓 (검은 갓) -->
+    <ellipse cx="100" cy="74" rx="44" ry="8" fill="#1a1208" stroke="#0a0500" stroke-width="1.2"/>
+    <path d="M76 74 Q100 56 124 74 L122 76 Q100 62 78 76 Z" fill="#2a1808" stroke="#0a0500" stroke-width="1.2"/>
+    <!-- 주름 (이마) -->
+    <path d="M82 100 Q100 96 118 100" stroke="#8a6a4a" fill="none" stroke-width="0.8" opacity="0.7"/>
+    <path d="M85 106 Q100 103 115 106" stroke="#8a6a4a" fill="none" stroke-width="0.8" opacity="0.6"/>
+    <!-- 흰 수염 (긴) -->
+    <path d="M80 132 Q88 175 100 182 Q112 175 120 132" fill="#f4f0e8" stroke="#bbb" stroke-width="1"/>
+    <path d="M86 142 Q100 172 114 142" fill="#fff" opacity="0.7"/>
+    <!-- 흰 콧수염 -->
+    <path d="M86 124 Q100 128 114 124" stroke="#d8d0c4" stroke-width="2.5" fill="none"/>
+    <!-- 자상한 눈 (살짝 처진) -->
+    <ellipse cx="91" cy="113" rx="2" ry="1.3" fill="#000"/>
+    <ellipse cx="109" cy="113" rx="2" ry="1.3" fill="#000"/>
+    <path d="M82 110 Q91 106 100 110" stroke="#5a3a2a" fill="none" stroke-width="1.2"/>
+    <path d="M100 110 Q109 106 118 110" stroke="#5a3a2a" fill="none" stroke-width="1.2"/>
+    <!-- 눈가 주름 -->
+    <path d="M78 116 L84 118 M122 116 L116 118" stroke="#8a6a4a" stroke-width="0.8" opacity="0.7"/>
+  </svg>`,
+
+  // 사냥꾼 — 녹색 가죽 조끼, 활, 구릿빛 얼굴
+  hunter: `<svg ${SIZE}>
+    <defs><linearGradient id="bg-hunter" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a8c0a0"/><stop offset="100%" stop-color="#1a2818"/>
+    </linearGradient></defs>
+    <rect width="200" height="280" fill="url(#bg-hunter)"/>
+    <!-- 나뭇잎 (배경) -->
+    ${[[30,60],[170,80],[20,180],[180,160]].map(([x,y]) =>
+      `<path d="M${x} ${y} Q${x+6} ${y-8} ${x+10} ${y} Q${x+6} ${y+8} ${x} ${y} Z" fill="#3a5a2a" opacity="0.55"/>`).join('')}
+    <!-- 활 (우측) -->
+    <path d="M155 90 Q175 160 155 230" stroke="#3a2010" stroke-width="3.5" fill="none"/>
+    <line x1="155" y1="92" x2="155" y2="228" stroke="#cdc0a8" stroke-width="0.8"/>
+    <!-- 가죽 끈 (어깨 활끈) -->
+    <line x1="155" y1="95" x2="80" y2="160" stroke="#5a3818" stroke-width="2.5"/>
+    <!-- 가죽 조끼 (녹색) -->
+    <path d="M55 160 Q50 210 55 270 L145 270 Q150 210 145 160 Q120 152 100 152 Q80 152 55 160 Z" fill="#4a6838" stroke="#1a2810" stroke-width="1.5"/>
+    <!-- 안쪽 셔츠 (어두운 갈색) -->
+    <path d="M85 160 L100 170 L115 160 L115 200 L85 200 Z" fill="#3a2818" opacity="0.85"/>
+    <!-- 가죽끈 (가슴) -->
+    <line x1="68" y1="180" x2="132" y2="180" stroke="#3a2010" stroke-width="2"/>
+    <line x1="68" y1="200" x2="132" y2="200" stroke="#3a2010" stroke-width="2"/>
+    <!-- 어깨 가죽 패치 -->
+    <ellipse cx="58" cy="160" rx="13" ry="8" fill="#5a7848" stroke="#1a2810"/>
+    <ellipse cx="142" cy="160" rx="13" ry="8" fill="#5a7848" stroke="#1a2810"/>
+    <!-- 머리 -->
+    ${face(100, 112, 28, '#c89060')}
+    <!-- 어두운 머리카락 (헝클어진) -->
+    <path d="M70 102 Q72 75 100 70 Q128 75 130 102 L128 108 Q115 88 100 92 Q85 88 72 108 Z" fill="#2a1808"/>
+    <path d="M78 78 L82 70 M95 70 L98 62 M112 72 L116 64" stroke="#2a1808" stroke-width="2"/>
+    <!-- 머리띠 (가죽) -->
+    <rect x="70" y="100" width="60" height="5" fill="#5a3818" stroke="#2a1808"/>
+    <!-- 깃털 -->
+    <path d="M125 80 Q130 60 134 55 Q132 65 130 85" fill="#5a7848" stroke="#2a3818"/>
+    <!-- 거친 얼굴 (수염 그루터기) -->
+    <path d="M82 130 Q100 134 118 130 L118 138 Q100 142 82 138 Z" fill="#2a1808" opacity="0.3"/>
+    ${eyes(100, 114, 8)}
+    ${mouth(100, 132, 6)}
+    <!-- 흉터 (볼) -->
+    <line x1="118" y1="118" x2="124" y2="128" stroke="#7a3020" stroke-width="1.2"/>
+  </svg>`,
+
+  // 상인 — 황금색 조끼, 통통한 친절한 얼굴, 미소
+  shopkeeper: `<svg ${SIZE}>
+    <defs><radialGradient id="bg-shop" cx="50%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#fff0cc"/><stop offset="60%" stop-color="#cd9020"/><stop offset="100%" stop-color="#3a2008"/>
+    </radialGradient></defs>
+    <rect width="200" height="280" fill="url(#bg-shop)"/>
+    <!-- 동전 흩날림 -->
+    ${[[30,70],[170,60],[40,150],[160,170],[25,210]].map(([x,y]) =>
+      `<circle cx="${x}" cy="${y}" r="4" fill="#ffd700" stroke="#aa7020" stroke-width="0.8" opacity="0.85"/>`).join('')}
+    <!-- 도포 (속) -->
+    <path d="M55 165 Q50 215 55 270 L145 270 Q150 215 145 165 Q120 157 100 157 Q80 157 55 165 Z" fill="#e8d098" stroke="#6a4818" stroke-width="1.5"/>
+    <!-- 황금 조끼 (위) -->
+    <path d="M62 165 L62 240 Q70 245 100 245 Q130 245 138 240 L138 165 Q120 158 100 158 Q80 158 62 165 Z" fill="#e0a830" stroke="#5a3a08" stroke-width="1.5"/>
+    <!-- 조끼 깃 -->
+    <path d="M62 165 L100 195 L138 165" fill="none" stroke="#5a3a08" stroke-width="1.5"/>
+    <!-- 동전 가슴 단추 -->
+    <circle cx="100" cy="200" r="5" fill="#ffd700" stroke="#5a3a08"/>
+    <circle cx="100" cy="220" r="5" fill="#ffd700" stroke="#5a3a08"/>
+    <!-- 허리 전대 (돈주머니 끈) -->
+    <rect x="62" y="232" width="76" height="8" fill="#aa7020" stroke="#5a3a08"/>
+    <!-- 머리 (통통한 둥근) -->
+    ${face(100, 114, 33, '#fadcb8')}
+    <!-- 통통한 볼 -->
+    <ellipse cx="78" cy="124" rx="6" ry="4" fill="#ffc090" opacity="0.7"/>
+    <ellipse cx="122" cy="124" rx="6" ry="4" fill="#ffc090" opacity="0.7"/>
+    <!-- 갓 (낮은 둥근 모자) -->
+    <ellipse cx="100" cy="85" rx="38" ry="10" fill="#8a5818" stroke="#3a2008" stroke-width="1.2"/>
+    <path d="M70 85 Q100 64 130 85" fill="#aa7020" stroke="#3a2008" stroke-width="1.2"/>
+    <circle cx="100" cy="68" r="4" fill="#ffd700" stroke="#5a3a08"/>
+    <!-- 짧은 검은 머리 -->
+    <path d="M75 100 Q90 95 100 96 Q110 95 125 100" fill="#3a2010"/>
+    <!-- 친근한 눈 (반달) -->
+    <path d="M85 113 Q91 117 97 113" stroke="#1a0a00" fill="none" stroke-width="2" stroke-linecap="round"/>
+    <path d="M103 113 Q109 117 115 113" stroke="#1a0a00" fill="none" stroke-width="2" stroke-linecap="round"/>
+    <!-- 환한 미소 -->
+    <path d="M86 136 Q100 146 114 136" stroke="#5a2a1a" fill="#ffc090" stroke-width="1.8"/>
+    <path d="M88 138 Q100 144 112 138" fill="#fff" opacity="0.85"/>
+    <!-- 작은 콧수염 -->
+    <path d="M90 128 Q100 131 110 128" stroke="#3a2010" stroke-width="2" fill="none"/>
+  </svg>`,
+
+  // 주막 주인 — 갈색 앞치마, 환한 미소, 호탕한 중년
+  tavern_master: `<svg ${SIZE}>
+    <defs><linearGradient id="bg-tav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8d0a8"/><stop offset="100%" stop-color="#4a2a10"/>
+    </linearGradient></defs>
+    <rect width="200" height="280" fill="url(#bg-tav)"/>
+    <!-- 술병/술잔 -->
+    <ellipse cx="35" cy="220" rx="10" ry="14" fill="#5a3818" stroke="#2a1808" stroke-width="1.2"/>
+    <rect x="32" y="195" width="6" height="14" fill="#5a3818" stroke="#2a1808"/>
+    <ellipse cx="35" cy="220" rx="6" ry="4" fill="#cd8030" opacity="0.6"/>
+    <ellipse cx="165" cy="225" rx="9" ry="6" fill="#cd8030" stroke="#5a3818" stroke-width="1.2"/>
+    <!-- 안쪽 옷 (탁한 갈색) -->
+    <path d="M55 160 Q50 210 55 270 L145 270 Q150 210 145 160 Q120 152 100 152 Q80 152 55 160 Z" fill="#7a5028" stroke="#2a1808" stroke-width="1.5"/>
+    <!-- 갈색 앞치마 (위) -->
+    <path d="M70 160 L70 270 L130 270 L130 160 Q115 158 100 158 Q85 158 70 160 Z" fill="#8a5828" stroke="#3a1808" stroke-width="1.5"/>
+    <!-- 앞치마 끈 (어깨로) -->
+    <line x1="78" y1="160" x2="75" y2="178" stroke="#3a1808" stroke-width="2.5"/>
+    <line x1="122" y1="160" x2="125" y2="178" stroke="#3a1808" stroke-width="2.5"/>
+    <!-- 앞치마 주머니 -->
+    <rect x="85" y="215" width="30" height="20" fill="#6a3818" stroke="#3a1808" stroke-width="1.2"/>
+    <!-- 앞치마 얼룩 -->
+    <ellipse cx="105" cy="195" rx="8" ry="4" fill="#3a1808" opacity="0.5"/>
+    <!-- 머리 (큰 둥근) -->
+    ${face(100, 112, 32, '#f0c898')}
+    <!-- 통통한 턱 -->
+    <ellipse cx="100" cy="138" rx="22" ry="10" fill="#f0c898" stroke="#8a5a2a" stroke-width="0.8"/>
+    <!-- 뒤로 빗은 검은 머리 -->
+    <path d="M70 96 Q72 75 100 72 Q128 75 130 96 L128 102 Q100 86 72 102 Z" fill="#1a0a00"/>
+    <!-- 머릿수건 (붉은) -->
+    <rect x="68" y="92" width="64" height="6" fill="#8a3010" stroke="#3a1010" stroke-width="0.8"/>
+    <!-- 풍성한 콧수염 (호쾌) -->
+    <path d="M78 128 Q88 138 100 134 Q112 138 122 128" stroke="#2a1008" stroke-width="3.5" fill="#3a1808"/>
+    <path d="M82 124 Q90 130 100 128 Q110 130 118 124" stroke="#2a1008" stroke-width="2" fill="none"/>
+    <!-- 호쾌한 눈 (반달 미소) -->
+    <path d="M82 113 Q90 117 98 113" stroke="#1a0a00" fill="none" stroke-width="2" stroke-linecap="round"/>
+    <path d="M102 113 Q110 117 118 113" stroke="#1a0a00" fill="none" stroke-width="2" stroke-linecap="round"/>
+    <!-- 활짝 웃는 입 -->
+    <path d="M84 142 Q100 152 116 142" stroke="#3a1808" fill="#cd6020" stroke-width="2"/>
+    <path d="M86 143 L114 143" stroke="#fff" stroke-width="2.5"/>
+    <!-- 붉은 볼 (술기운) -->
+    <ellipse cx="76" cy="124" rx="5" ry="3" fill="#cd5040" opacity="0.55"/>
+    <ellipse cx="124" cy="124" rx="5" ry="3" fill="#cd5040" opacity="0.55"/>
+  </svg>`,
+
+  // 도구상 상인 — 모래빛 도포, 도구 주머니, 마른 얼굴
+  merchant: `<svg ${SIZE}>
+    <defs><linearGradient id="bg-merc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0c898"/><stop offset="100%" stop-color="#4a3818"/>
+    </linearGradient></defs>
+    <rect width="200" height="280" fill="url(#bg-merc)"/>
+    <!-- 도구 (망치/낫 실루엣) -->
+    <line x1="28" y1="100" x2="28" y2="160" stroke="#3a2010" stroke-width="2.5"/>
+    <rect x="22" y="92" width="14" height="10" fill="#5a4030" stroke="#2a1808"/>
+    <path d="M172 110 Q180 120 175 145 L170 142 Q170 122 168 112 Z" fill="#8a8080" stroke="#3a3030" stroke-width="1.2"/>
+    <line x1="172" y1="110" x2="172" y2="160" stroke="#3a2010" stroke-width="2.5"/>
+    <!-- 도포 (모래빛) -->
+    <path d="M55 160 Q50 210 55 270 L145 270 Q150 210 145 160 Q120 152 100 152 Q80 152 55 160 Z" fill="#c8a878" stroke="#5a3818" stroke-width="1.5"/>
+    <path d="M100 158 L100 268" stroke="#5a3818" stroke-width="2"/>
+    <!-- 허리띠 -->
+    <rect x="55" y="220" width="90" height="8" fill="#7a5028" stroke="#3a1808"/>
+    <!-- 도구 주머니 (좌) -->
+    <rect x="62" y="225" width="22" height="28" fill="#8a6038" stroke="#3a2008" stroke-width="1.2"/>
+    <line x1="62" y1="235" x2="84" y2="235" stroke="#3a2008" stroke-width="1"/>
+    <!-- 도구 주머니 (우) -->
+    <rect x="116" y="225" width="22" height="28" fill="#8a6038" stroke="#3a2008" stroke-width="1.2"/>
+    <line x1="116" y1="235" x2="138" y2="235" stroke="#3a2008" stroke-width="1"/>
+    <!-- 주머니 밖으로 도구 끝 -->
+    <line x1="70" y1="225" x2="68" y2="218" stroke="#5a4030" stroke-width="2"/>
+    <line x1="78" y1="225" x2="80" y2="216" stroke="#5a4030" stroke-width="2"/>
+    <line x1="128" y1="225" x2="130" y2="218" stroke="#5a4030" stroke-width="2"/>
+    <!-- 머리 (마른 갸름한) -->
+    ${face(100, 112, 26, '#dab890')}
+    <!-- 마른 광대 (그림자) -->
+    <path d="M78 122 Q82 128 84 134" stroke="#a08060" fill="none" stroke-width="1" opacity="0.5"/>
+    <path d="M122 122 Q118 128 116 134" stroke="#a08060" fill="none" stroke-width="1" opacity="0.5"/>
+    <!-- 짧은 흑발 (가르마) -->
+    <path d="M76 100 Q80 78 100 75 Q120 78 124 100 L122 105 Q100 90 78 105 Z" fill="#2a1808"/>
+    <path d="M100 75 L98 100" stroke="#1a0a00" stroke-width="1"/>
+    <!-- 머릿수건 (얇은 회색) -->
+    <rect x="74" y="98" width="52" height="4" fill="#8a7858" stroke="#3a2818"/>
+    <!-- 영악한 가는 눈 -->
+    <path d="M84 113 L94 113" stroke="#1a0a00" stroke-width="2"/>
+    <path d="M106 113 L116 113" stroke="#1a0a00" stroke-width="2"/>
+    <ellipse cx="89" cy="113" rx="1.5" ry="1.2" fill="#000"/>
+    <ellipse cx="111" cy="113" rx="1.5" ry="1.2" fill="#000"/>
+    <!-- 가는 콧수염 -->
+    <path d="M90 126 Q100 128 110 126" stroke="#2a1808" stroke-width="1.5" fill="none"/>
+    <!-- 살짝 비뚤어진 입 -->
+    <path d="M90 134 Q100 138 112 134" stroke="#3a1808" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+    <!-- 염소 수염 (턱) -->
+    <path d="M97 138 Q98 145 100 148 Q102 145 103 138" fill="#2a1808" stroke="#1a0a00" stroke-width="0.8"/>
+  </svg>`,
+
+  // 나그네 — 후드 망토, 먼지 묻은 얼굴, 신비한 미소
+  traveler: `<svg ${SIZE}>
+    <defs><linearGradient id="bg-trav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c8b088"/><stop offset="100%" stop-color="#2a1808"/>
+    </linearGradient></defs>
+    <rect width="200" height="280" fill="url(#bg-trav)"/>
+    <!-- 멀리 산 실루엣 (지나온 길) -->
+    <path d="M0 200 L40 175 L80 195 L120 170 L160 190 L200 175 L200 280 L0 280 Z" fill="#3a2818" opacity="0.45"/>
+    <!-- 먼지 -->
+    ${[[30,150],[170,160],[60,90],[140,80]].map(([x,y]) =>
+      `<circle cx="${x}" cy="${y}" r="2" fill="#cdb898" opacity="0.55"/>`).join('')}
+    <!-- 망토 (긴, 양쪽으로 드리워짐) -->
+    <path d="M40 175 L20 270 L80 270 L70 175" fill="#5a3818" stroke="#2a1808" stroke-width="1.5"/>
+    <path d="M160 175 L180 270 L120 270 L130 175" fill="#5a3818" stroke="#2a1808" stroke-width="1.5"/>
+    <!-- 가운데 도포 (탁한 갈색) -->
+    <path d="M55 165 Q50 215 55 270 L145 270 Q150 215 145 165 Q120 157 100 157 Q80 157 55 165 Z" fill="#7a5838" stroke="#2a1808" stroke-width="1.5"/>
+    <!-- 망토 잠금 (둥근 청동) -->
+    <circle cx="100" cy="170" r="6" fill="#8a6028" stroke="#3a2008" stroke-width="1.5"/>
+    <circle cx="100" cy="170" r="2.5" fill="#cd9020"/>
+    <!-- 등에 멘 짐 (어깨 위로 끈) -->
+    <line x1="78" y1="165" x2="75" y2="200" stroke="#3a2008" stroke-width="2"/>
+    <line x1="122" y1="165" x2="125" y2="200" stroke="#3a2008" stroke-width="2"/>
+    <!-- 머리 -->
+    ${face(100, 116, 28, '#cda080')}
+    <!-- 후드 (반쯤 내려진) -->
+    <path d="M62 100 Q60 70 100 60 Q140 70 138 100 L138 130 Q132 110 130 110 L70 110 Q68 110 62 130 Z" fill="#3a2010" stroke="#1a0a00" stroke-width="1.5"/>
+    <!-- 후드 그림자 (얼굴 위쪽) -->
+    <path d="M72 108 Q72 100 100 98 Q128 100 128 108 L128 116 Q100 108 72 116 Z" fill="#1a0a00" opacity="0.4"/>
+    <!-- 헝클어진 머리 -->
+    <path d="M78 110 Q82 100 95 105 Q105 100 118 108" stroke="#2a1808" stroke-width="1.5" fill="#3a2010"/>
+    <!-- 먼지 묻은 얼굴 (옅은 그림자) -->
+    <ellipse cx="85" cy="130" rx="6" ry="2" fill="#5a3818" opacity="0.3"/>
+    <ellipse cx="115" cy="130" rx="6" ry="2" fill="#5a3818" opacity="0.3"/>
+    <!-- 신비로운 눈 (한쪽만 살짝 보이게) -->
+    <ellipse cx="91" cy="120" rx="2.2" ry="1.4" fill="#1a0a00"/>
+    <ellipse cx="109" cy="120" rx="2.2" ry="1.4" fill="#1a0a00"/>
+    <path d="M82 117 Q91 114 100 117" stroke="#3a1808" fill="none" stroke-width="1.2"/>
+    <path d="M100 117 Q109 114 118 117" stroke="#3a1808" fill="none" stroke-width="1.2"/>
+    <!-- 반쪽 미소 (수수께끼) -->
+    <path d="M92 138 Q100 142 110 137" stroke="#3a1808" fill="none" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- 얇은 수염 그루터기 -->
+    <path d="M84 138 Q100 140 116 138" stroke="#2a1808" stroke-width="0.8" opacity="0.5" fill="none"/>
+  </svg>`,
+
+  // 문지기 — 회색 가죽 갑옷, 투구, 무표정
+  gatekeeper: `<svg ${SIZE}>
+    <defs><linearGradient id="bg-gate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a0a0a0"/><stop offset="100%" stop-color="#202020"/>
+    </linearGradient></defs>
+    <rect width="200" height="280" fill="url(#bg-gate)"/>
+    <!-- 성문 기둥 (배경) -->
+    <rect x="10" y="30" width="14" height="240" fill="#3a3a3a" opacity="0.5"/>
+    <rect x="176" y="30" width="14" height="240" fill="#3a3a3a" opacity="0.5"/>
+    <path d="M10 30 L24 30 L100 16 L176 30 L190 30" stroke="#5a5a5a" stroke-width="2" fill="none" opacity="0.5"/>
+    <!-- 창 (좌측) -->
+    <line x1="42" y1="60" x2="42" y2="245" stroke="#3a2818" stroke-width="3"/>
+    <path d="M42 60 L36 44 L48 44 Z" fill="#c0c0c8" stroke="#3a3a4a" stroke-width="1"/>
+    <rect x="38" y="68" width="8" height="5" fill="#5a3818"/>
+    <!-- 회색 가죽 갑옷 -->
+    <path d="M55 160 Q50 210 55 270 L145 270 Q150 210 145 160 Q120 152 100 152 Q80 152 55 160 Z" fill="#6a6a6a" stroke="#1a1a1a" stroke-width="1.5"/>
+    <!-- 가죽 판 (가슴 패널) -->
+    <path d="M75 168 L100 162 L125 168 L125 215 L100 220 L75 215 Z" fill="#4a4a4a" stroke="#1a1a1a" stroke-width="1.2"/>
+    <!-- 리벳 (가죽 못) -->
+    ${[[80,175],[120,175],[80,205],[120,205],[100,168],[100,212]].map(([x,y]) =>
+      `<circle cx="${x}" cy="${y}" r="1.8" fill="#8a8a8a" stroke="#2a2a2a" stroke-width="0.6"/>`).join('')}
+    <!-- 어깨 보호대 -->
+    <ellipse cx="58" cy="160" rx="14" ry="9" fill="#5a5a5a" stroke="#1a1a1a"/>
+    <ellipse cx="142" cy="160" rx="14" ry="9" fill="#5a5a5a" stroke="#1a1a1a"/>
+    <!-- 허리띠 -->
+    <rect x="55" y="225" width="90" height="8" fill="#3a3a3a" stroke="#1a1a1a"/>
+    <rect x="96" y="223" width="8" height="12" fill="#8a8a8a" stroke="#1a1a1a"/>
+    <!-- 머리 -->
+    ${face(100, 114, 28, '#c0a888')}
+    <!-- 투구 (회색 강철) -->
+    <path d="M65 100 Q65 55 100 48 Q135 55 135 100" fill="#5a5a5a" stroke="#1a1a1a" stroke-width="1.5"/>
+    <!-- 투구 정수리 장식 -->
+    <ellipse cx="100" cy="50" rx="4" ry="10" fill="#3a3a3a"/>
+    <path d="M100 38 L100 28" stroke="#3a3a3a" stroke-width="2"/>
+    <!-- 투구 측면 -->
+    <path d="M65 100 L62 130 L72 130 L75 105 Z" fill="#4a4a4a" stroke="#1a1a1a" stroke-width="1.2"/>
+    <path d="M135 100 L138 130 L128 130 L125 105 Z" fill="#4a4a4a" stroke="#1a1a1a" stroke-width="1.2"/>
+    <!-- 투구 앞 가로띠 -->
+    <rect x="65" y="98" width="70" height="5" fill="#3a3a3a" stroke="#1a1a1a"/>
+    <!-- 코 가드 (얼굴 가운데 세로) -->
+    <rect x="98" y="100" width="4" height="22" fill="#5a5a5a" stroke="#1a1a1a" stroke-width="0.8"/>
+    <!-- 무표정한 눈 -->
+    <ellipse cx="89" cy="114" rx="2" ry="1.3" fill="#1a1a1a"/>
+    <ellipse cx="111" cy="114" rx="2" ry="1.3" fill="#1a1a1a"/>
+    <path d="M82 111 L96 111" stroke="#1a1a1a" stroke-width="1.5"/>
+    <path d="M104 111 L118 111" stroke="#1a1a1a" stroke-width="1.5"/>
+    <!-- 굳게 다문 입 -->
+    <path d="M88 134 L112 134" stroke="#3a2818" stroke-width="2" stroke-linecap="round"/>
+  </svg>`,
 };
 
 // ─────────────────────────────────────────────
 // API
 // ─────────────────────────────────────────────
+// 2026-07-17 초상 전면 재제작 — portraits/ 고품질판 우선, 기존 ART 폴백
+import PORTRAITS_HQ from './portraits/index.js';
+
 export function getPortraitSVG(id) {
   if (!id) return null;
-  return ART[id] || null;
+  return PORTRAITS_HQ[id] || ART[id] || null;
 }
 
 export function hasPortraitArt(id) {
-  return !!ART[id];
+  return !!(PORTRAITS_HQ[id] || ART[id]);
 }

@@ -8,6 +8,7 @@
 // Pure logic + EventTarget. 렌더링은 호출측이 phase change 리스너로 처리.
 
 import { State } from '../core/engine.js';
+import { evaluateObjective, hasObjective } from './objectives.js';
 
 // ─────────────────────────────────────────────
 // Phase 상수
@@ -135,8 +136,33 @@ export class TurnManager extends EventTarget {
   }
 
   // ── 전투 상태 ──
+  // map.objective가 있으면 비전멸 조건(생존/도달/격파/보호)을 우선 평가하고,
+  // 없으면 기존 전멸 판정으로 폴백한다(호환성 보장).
+  // 평가 중 예외가 나면 안전하게 전멸 로직으로 떨어진다(graceful degradation).
   checkVictory() {
     const alive = (arr) => arr.some((u) => u.hp > 0);
+    const map = this.ctx && this.ctx.map;
+
+    // ── objective 기반 판정 ──
+    if (hasObjective(map)) {
+      try {
+        const res = evaluateObjective(map.objective, {
+          allies: this.ctx.allies,
+          enemies: this.ctx.enemies,
+          turn: this.turn,
+        });
+        // progressText는 HTML이 턴배너/HUD에 표시할 수 있게 보관(선택적 소비)
+        this.lastProgressText = res.progressText || '';
+        if (res.win)  return 'victory';
+        if (res.lose) return 'defeat';
+        return null;
+      } catch (e) {
+        // objective 평가 실패 시 기존 전멸 로직으로 폴백
+        console.warn('[objective] 평가 실패 — 전멸 폴백:', e);
+      }
+    }
+
+    // ── 기존 전멸 판정(폴백/기본) ──
     if (!alive(this.ctx.enemies)) return 'victory';
     if (!alive(this.ctx.allies))  return 'defeat';
     return null;
