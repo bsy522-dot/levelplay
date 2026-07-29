@@ -1,0 +1,800 @@
+{
+ "_doc": "LevelPlay 콘텐츠 라이브러리 — build_content_library.py 가 생성. 직접 수정하지 말 것.",
+ "sets": [
+  {
+   "curriculum": "math",
+   "dynamic": [],
+   "units": [
+    {
+     "nm": "🎬 수학이 태어난 날 (만화·소설)",
+     "lessons": [
+      {
+       "t": "1화. 하나에 하나씩",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 지금으로부터 약 4만 년 전, 마지막 빙하기</span><h3>제1화 〈하나에 하나씩〉</h3><p style=\"color:var(--t3);margin:0 0 10px;font-size:12px\">1대1 대응 — 수의 탄생</p><p style=\"margin:0 0 10px\">글자도 숫자도 없던 시대. 그러나 인류는 이미 짐승의 뼈에 눈금을 새기기 시작했다. 오늘날 남아프리카에서 발견된 '레봄보 뼈'에는, 그 무렵 새겨진 눈금 스물아홉 개가 지금도 남아 있다 — 인류가 남긴 가장 오래된 '셈'의 흔적이다.</p><p style=\"margin:0 0 10px\">그 첫 눈금이 그어지던, 어느 빙하기의 겨울 이야기다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📜 이야기</div><p style=\"margin:0 0 10px\">눈 덮인 들판에, 사슴 무리가 가득했다.</p><p style=\"margin:0 0 10px\">에나는 언덕에 서서 그 무리를 가만히 바라보았다.</p><p style=\"margin:0 0 10px\">\"오늘은… 어제보다 더 많아 보여.\"</p><p style=\"margin:0 0 10px\">하지만 '많아 보여'는 그저 느낌일 뿐이었다. 정말 늘어난 건지, 아니면 몇 마리가 사라진 건지, 눈으로는 알 수가 없었다. 무리는 언제나 그냥 '많아 보였'으니까.</p><p style=\"margin:0 0 10px\">에나는 나뭇가지를 집어 들었다. 그리고 사슴을 한 마리씩 눈으로 짚으며, 눈밭에 줄을 하나씩 그었다.</p><p style=\"margin:0 0 10px\">\"한 마리에 한 줄… 한 마리에 한 줄…\"</p><p style=\"margin:0 0 10px\">사슴 하나에 줄 하나. 또 한 마리에, 또 한 줄. 얼마인지 큰 수로 부를 줄은 몰라도 괜찮았다. 그저 하나에 하나씩, 짝만 맞추면 되니까.</p><p style=\"margin:0 0 10px\">그때 남동생 카르가 달려왔다.</p><p style=\"margin:0 0 10px\">\"누나, 뭐 그려? 눈 그림 놀이야?\"</p><p style=\"margin:0 0 10px\">에나는 대답 대신 빙그레 웃었다. 이건 놀이가 아니라, 사슴 무리를 눈밭에 고스란히 옮겨 담는 일이었다.</p><p style=\"margin:0 0 10px\">해가 뉘엿뉘엿 질 무렵, 두 아이는 동굴로 돌아왔다.</p><p style=\"margin:0 0 10px\">에나는 눈밭에 그었던 줄을, 넓적한 뼈에 하나씩 그대로 새겼다. 눈이 녹아도 지워지지 않도록.</p><p style=\"margin:0 0 10px\">\"이걸로… 내일도 셀 수 있어!\"</p><p style=\"margin:0 0 10px\">내일 다시 무리를 보며 이 줄과 하나씩 짝지어 보면, 무엇이 늘었는지 무엇이 사라졌는지 한눈에 알 수 있을 테니까.</p><p style=\"margin:0 0 10px\">하나와 하나를 짝짓는 것.</p><p style=\"margin:0 0 10px\">이것이 바로 '1대1 대응' — 수학의 첫 걸음이었다.</p><p style=\"margin:0 0 10px\">*</p><div style=\"margin-top:10px;padding:10px;border-radius:8px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25)\"><div style=\"font-weight:700;margin-bottom:6px\">🏛 역사노트</div><p style=\"margin:0 0 6px;color:#93c5fd\">✅ 레봄보 뼈(약 4만 년 전, 남아프리카)와 이샹고 뼈(약 2만 년 전, 콩고)는 실제로 눈금이 새겨진 뼈 유물이다. 인류가 아주 오래전부터 '하나씩' 표시해 수를 다뤘음을 보여 준다.</p><p style=\"margin:0 0 6px;color:#fcd34d\">🤔 다만 그 눈금을 누가, 왜, 어떻게 처음 긋게 됐는지는 기록이 없다. 이 이야기는 학자들이 추정하는 방식(하나에 하나씩 짝짓는 '1대1 대응')에 기대어 그려 본 상상이다.</p></div><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🖼 만화판도 보기 (5쪽)</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 6px\">먼저 그린 만화판입니다. 등장인물과 사건이 위 이야기와 조금 다릅니다.</p><details><summary style=\"cursor:pointer;color:var(--t3);font-size:12px\">만화 5쪽 펼치기</summary><div style=\"margin-top:8px\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e01/p1.jpg\" alt=\"제1화 하나에 하나씩 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e01/p2.jpg\" alt=\"제1화 하나에 하나씩 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e01/p3.jpg\" alt=\"제1화 하나에 하나씩 3쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e01/p4.jpg\" alt=\"제1화 하나에 하나씩 4쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e01/p5.jpg\" alt=\"제1화 하나에 하나씩 5쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"></div></details>",
+       "quiz": [
+        {
+         "q": "에나가 사슴 한 마리를 볼 때마다 눈밭에 한 줄씩 그은 방법을 뭐라고 하나요?",
+         "a": [
+          "1대1 대응",
+          "곱셈",
+          "나눗셈",
+          "어림하기"
+         ],
+         "c": 0
+        },
+        {
+         "q": "눈금이 새겨진 실제 유물로, 약 4만 년 전 남아프리카에서 발견된 뼈는?",
+         "a": [
+          "레봄보 뼈",
+          "이샹고 뼈",
+          "린드 파피루스",
+          "함무라비 비석"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "수학의 역사 1대1 대응"
+      },
+      {
+       "t": "2화. 뼈에 새긴 재산",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 약 2만 년 전, 빙하기의 강가</span><h3>제2화 〈뼈에 새긴 재산〉</h3><p style=\"color:var(--t3);margin:0 0 10px;font-size:12px\">덧셈의 탄생</p><p style=\"margin:0 0 10px\">콩고에서 발견된 '이샹고 뼈'에는, 눈금이 여러 무리로 나뉘어 나란히 새겨져 있다. 한 번에 다 그은 게 아니라, 있던 눈금에 새 눈금을 '더해' 나간 흔적이다.</p><p style=\"margin:0 0 10px\">눈금과 눈금을 이어 붙이기 시작하던, 그 무렵의 이야기다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📜 이야기</div><p style=\"margin:0 0 10px\">에나의 뼈에는 이제 부족의 재산이 눈금으로 적혀 있었다. 잡은 사슴도, 말린 고기도, 하나에 하나씩.</p><p style=\"margin:0 0 10px\">어느 날, 사냥꾼들이 새 사슴을 잔뜩 메고 돌아왔다. 어제까지의 사슴에, 오늘 잡은 사슴이 보태진 것이다.</p><p style=\"margin:0 0 10px\">\"이제 다 해서 얼마지?\" 누군가 물었다.</p><p style=\"margin:0 0 10px\">카르가 자신 있게 나섰다. \"내가 셀게! 하나, 둘…\" 그런데 처음 눈금부터 다시 세자니, 그 수가 너무 많았다. \"으… 어디까지 셌더라?\"</p><p style=\"margin:0 0 10px\">새것이 들어올 때마다 있던 것까지 처음부터 다시 세는 건, 볼 때마다 고역이었다.</p><p style=\"margin:0 0 10px\">에나는 뼈를 물끄러미 바라보다가, 나뭇가지를 집었다.</p><p style=\"margin:0 0 10px\">\"다시 안 세도 돼. 새로 온 만큼만, 있던 눈금 옆에 이어 그으면 되잖아.\"</p><p style=\"margin:0 0 10px\">그녀는 이미 새겨진 눈금 끝에, 오늘 잡은 사슴만큼만 줄을 이어 그었다. 하나, 또 하나, 또 하나.</p><p style=\"margin:0 0 10px\">있던 눈금은 그대로 둔 채, 새것을 그 옆에 붙였을 뿐이었다. 그런데 뼈 전체가, 딱 늘어난 만큼의 재산이 되어 있었다.</p><p style=\"margin:0 0 10px\">\"봐. 있던 거랑 새로 온 게, 한 줄로 이어졌어.\"</p><p style=\"margin:0 0 10px\">카르의 눈이 커졌다. \"처음부터 다시 안 세도… 늘어난 만큼만 이으면 되는구나!\"</p><p style=\"margin:0 0 10px\">그날부터 새 사냥감이 들어올 때마다, 부족은 뼈에 눈금을 이어 새겼다. 있던 것에 새것을 보태는 일. 두 번 다시, 처음부터 셀 필요가 없었다.</p><p style=\"margin:0 0 10px\">있던 것에 새로 온 것을 이어 붙이는 것.</p><p style=\"margin:0 0 10px\">이것이 바로 '덧셈'의 탄생이었다.</p><p style=\"margin:0 0 10px\">*</p><div style=\"margin-top:10px;padding:10px;border-radius:8px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25)\"><div style=\"font-weight:700;margin-bottom:6px\">🏛 역사노트</div><p style=\"margin:0 0 6px;color:#93c5fd\">✅ '이샹고 뼈'(약 2만 년 전, 콩고)의 눈금은 여러 무리로 나뉘어 있어, 인류가 눈금을 더해 가며 셈했음을 보여 준다. 눈금(탈리)은 세계 곳곳에서 나오는, 가장 오래된 계산의 흔적이다.</p><p style=\"margin:0 0 6px;color:#fcd34d\">🤔 다만 그들이 '더하기'를 정확히 어떻게 떠올렸는지는 기록이 없어, 이 이야기는 그 시작을 그려 본 상상이다.</p></div><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🖼 만화판도 보기 (5쪽)</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 6px\">먼저 그린 만화판입니다. 등장인물과 사건이 위 이야기와 조금 다릅니다.</p><details><summary style=\"cursor:pointer;color:var(--t3);font-size:12px\">만화 5쪽 펼치기</summary><div style=\"margin-top:8px\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e02/p1.jpg\" alt=\"제2화 뼈에 새긴 재산 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e02/p2.jpg\" alt=\"제2화 뼈에 새긴 재산 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e02/p3.jpg\" alt=\"제2화 뼈에 새긴 재산 3쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e02/p4.jpg\" alt=\"제2화 뼈에 새긴 재산 4쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e02/p5.jpg\" alt=\"제2화 뼈에 새긴 재산 5쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"></div></details>",
+       "quiz": [
+        {
+         "q": "이미 새긴 눈금 뒤에 눈금을 '이어서' 새기는 일은 어떤 계산이 될까요?",
+         "a": [
+          "덧셈",
+          "뺄셈",
+          "나눗셈",
+          "제곱"
+         ],
+         "c": 0
+        },
+        {
+         "q": "덧셈이 필요해진 까닭으로 가장 알맞은 것은?",
+         "a": [
+          "가진 것에 새로 얻은 것을 합쳐 세야 해서",
+          "물건을 똑같이 나눠야 해서",
+          "사라진 것을 알아야 해서",
+          "글자를 만들어야 해서"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "수학의 역사 덧셈의 탄생"
+      },
+      {
+       "t": "3화. 사라진 고기",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 약 2만 년 전, 빙하기의 동굴</span><h3>제3화 〈사라진 고기〉</h3><p style=\"color:var(--t3);margin:0 0 10px;font-size:12px\">뺄셈의 탄생</p><p style=\"margin:0 0 10px\">글도 숫자도 없던 시절, 사람들은 이미 뼈에 눈금을 새겨 재산을 셌다. 늘어나는 것은 눈금을 이어 그으면 됐다. 그런데 줄어드는 것은 — 어떻게 적어야 했을까.</p><p style=\"margin:0 0 10px\">사라진 것을 처음으로 '기록'하던, 그 무렵의 이야기다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📜 이야기</div><p style=\"margin:0 0 10px\">어느 아침, 에나는 동굴의 고기 더미가 어쩐지 줄어든 것 같았다.</p><p style=\"margin:0 0 10px\">\"어제보다… 적어 보여.\"</p><p style=\"margin:0 0 10px\">하지만 '적어 보여'는 느낌일 뿐이었다. 정말 없어졌는지, 없어졌다면 얼마나인지는 알 수 없었다. 에나는 지난겨울 배운 방법을 떠올렸다.</p><p style=\"margin:0 0 10px\">그녀는 뼈의 눈금과 고기를 하나씩 짝지어 나갔다. 이 눈금엔 고기 하나, 이 눈금에도 하나… 그러다 손이 멈췄다.</p><p style=\"margin:0 0 10px\">\"눈금은 있는데… 고기가 없어!\"</p><p style=\"margin:0 0 10px\">눈금 몇 개가, 짝지을 고기를 잃은 채 덩그러니 남아 있었다. 밤사이 무언가 사라진 것이다. 짝이 맞지 않으면 사라진 것 — 지난겨울 배운 그대로였다.</p><p style=\"margin:0 0 10px\">\"그럼 그 눈금을 지워?\" 카르가 물었다.</p><p style=\"margin:0 0 10px\">\"지우면 안 돼.\" 에나가 고개를 저었다. \"지우면, 원래 얼마였는지까지 사라지잖아.\"</p><p style=\"margin:0 0 10px\">대신 에나는 고기를 잃은 눈금 위에, 가위표를 하나씩 그었다. \"이건 '없어진 것' 표시야.\"</p><p style=\"margin:0 0 10px\">있던 눈금은 그대로 두고, 사라진 것에만 가위표. 이제 뼈만 보아도 알 수 있었다. 전체 눈금에서 가위표를 뺀 만큼이, 지금 남은 고기였다.</p><p style=\"margin:0 0 10px\">그날부터 부족은 무언가 없어질 때마다, 지우지 않고 가위표로 남겼다. 잃은 것도 어엿한 기록이었다.</p><p style=\"margin:0 0 10px\">있던 것에서 사라진 것을 덜어 표시하는 것.</p><p style=\"margin:0 0 10px\">이것이 바로 '뺄셈'의 시작이었다.</p><p style=\"margin:0 0 10px\">*</p><div style=\"margin-top:10px;padding:10px;border-radius:8px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25)\"><div style=\"font-weight:700;margin-bottom:6px\">🏛 역사노트</div><p style=\"margin:0 0 6px;color:#93c5fd\">✅ 눈금(탈리) 뼈는 인류가 수를 '기록'한 가장 오래된 방법으로, 세계 곳곳에서 발견된다.</p><p style=\"margin:0 0 6px;color:#fcd34d\">🤔 '없어진 것'을 표시해 빼는 방법을 선사시대 사람들이 정확히 어떻게 했는지는 기록이 없다. 이 이야기는 뺄셈이 '잃은 것도 기억하려는 마음'에서 시작됐으리라는 상상이다.</p></div><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🖼 만화판도 보기 (5쪽)</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 6px\">먼저 그린 만화판입니다. 등장인물과 사건이 위 이야기와 조금 다릅니다.</p><details><summary style=\"cursor:pointer;color:var(--t3);font-size:12px\">만화 5쪽 펼치기</summary><div style=\"margin-top:8px\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e03/p1.jpg\" alt=\"제3화 사라진 고기 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e03/p2.jpg\" alt=\"제3화 사라진 고기 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e03/p3.jpg\" alt=\"제3화 사라진 고기 3쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e03/p4.jpg\" alt=\"제3화 사라진 고기 4쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e03/p5.jpg\" alt=\"제3화 사라진 고기 5쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"></div></details>",
+       "quiz": [
+        {
+         "q": "처음 세어 둔 눈금과 지금 남은 것을 짝지어 '없어진 만큼'을 알아내는 계산은?",
+         "a": [
+          "뺄셈",
+          "덧셈",
+          "곱셈",
+          "나눗셈"
+         ],
+         "c": 0
+        },
+        {
+         "q": "뺄셈이 있으면 무엇을 알 수 있나요?",
+         "a": [
+          "얼마나 줄었는지",
+          "얼마나 무거운지",
+          "며칠이 지났는지",
+          "누가 힘센지"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "수학의 역사 뺄셈의 탄생"
+      },
+      {
+       "t": "4화. 바구니 하나에 큰 표시 하나",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 약 만 년 전, 빙하기가 저물 무렵</span><h3>제4화 〈바구니 하나에 큰 표시 하나〉</h3><p style=\"color:var(--t3);margin:0 0 10px;font-size:12px\">곱셈의 탄생</p><p style=\"margin:0 0 10px\">사람들은 이제 눈금으로 더하고 뺄 줄 알았다. 그러나 같은 것이 아주 많아지면, 하나씩 새기는 일은 여전히 끝이 없었다. 훗날 바빌로니아 사람들이 점토판에 '곱셈표'를 새기기 수천 년 전, 그 씨앗이 움트던 이야기다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📜 이야기</div><p style=\"margin:0 0 10px\">가을, 열매가 지천이었다. 카르는 열매를 한 알씩 뼈에 새기고 있었다.</p><p style=\"margin:0 0 10px\">\"한 알에 눈금 하나, 한 알에 눈금 하나…\"</p><p style=\"margin:0 0 10px\">그러나 열매는 바구니째 쏟아졌고, 새기는 손이 도무지 따라가질 못했다. 급기야 카르의 손에 쥐가 났다.</p><p style=\"margin:0 0 10px\">\"으아… 손이 안 펴져!\"</p><p style=\"margin:0 0 10px\">그때 에나가 바구니들을 물끄러미 바라보았다. 이 바구니도 가득, 저 바구니도 가득. 담긴 양이 어느 것이나 엇비슷했다.</p><p style=\"margin:0 0 10px\">\"바구니마다… 거의 같은 만큼이잖아.\"</p><p style=\"margin:0 0 10px\">에나는 열매를 한 바구니 가득 채운 다음, 뼈에 큰 눈금을 딱 하나 그었다.</p><p style=\"margin:0 0 10px\">\"가득 찬 바구니 하나에, 큰 표시 하나.\"</p><p style=\"margin:0 0 10px\">알알이 셀 필요가 없었다. 바구니가 다 같은 양이니, 바구니를 세면 곧 열매를 센 셈이었다.</p><p style=\"margin:0 0 10px\">\"봐. 큰 표시 다섯이면, 바구니 다섯. 열매를 하나하나 안 세도 돼.\"</p><p style=\"margin:0 0 10px\">카르의 눈이 번쩍 뜨였다. \"같은 묶음은… 묶음째로 세면 되는구나!\"</p><p style=\"margin:0 0 10px\">그날부터 부족은 같은 양은 바구니로 묶어, 큰 표시 하나로 셈했다. 더는 손에 쥐가 날 일도 없었다.</p><p style=\"margin:0 0 10px\">같은 양을 묶어 한 번에 세는 것.</p><p style=\"margin:0 0 10px\">이것이 바로 '곱셈'의 씨앗이었다.</p><p style=\"margin:0 0 10px\">*</p><div style=\"margin-top:10px;padding:10px;border-radius:8px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25)\"><div style=\"font-weight:700;margin-bottom:6px\">🏛 역사노트</div><p style=\"margin:0 0 6px;color:#93c5fd\">✅ '같은 묶음이 몇 묶음'이라는 이 생각은 훗날 실제 곱셈으로 자랐다 — 기원전 1800년경 바빌로니아 점토판에는 곱셈표가 남아 있다.</p><p style=\"margin:0 0 6px;color:#fcd34d\">🤔 선사시대 사람들이 바구니로 묶어 세었다는 직접 기록은 없다. 이 이야기는 곱셈이 '같은 것을 되풀이해 세는 수고'에서 시작됐으리라는 상상이다.</p></div><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🖼 만화판도 보기 (5쪽)</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 6px\">먼저 그린 만화판입니다. 등장인물과 사건이 위 이야기와 조금 다릅니다.</p><details><summary style=\"cursor:pointer;color:var(--t3);font-size:12px\">만화 5쪽 펼치기</summary><div style=\"margin-top:8px\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e04/p1.jpg\" alt=\"제4화 바구니 하나에 큰 표시 하나 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e04/p2.jpg\" alt=\"제4화 바구니 하나에 큰 표시 하나 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e04/p3.jpg\" alt=\"제4화 바구니 하나에 큰 표시 하나 3쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e04/p4.jpg\" alt=\"제4화 바구니 하나에 큰 표시 하나 4쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s1e04/p5.jpg\" alt=\"제4화 바구니 하나에 큰 표시 하나 5쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"></div></details>",
+       "quiz": [
+        {
+         "q": "'같은 수가 여러 번 되풀이되는 것'을 한 번에 세는 계산은?",
+         "a": [
+          "곱셈",
+          "덧셈",
+          "뺄셈",
+          "비교"
+         ],
+         "c": 0
+        },
+        {
+         "q": "한 바구니에 5개씩 담은 바구니가 4개면 모두 몇 개일까요?",
+         "a": [
+          "20개",
+          "9개",
+          "15개",
+          "24개"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "수학의 역사 곱셈의 탄생"
+      },
+      {
+       "t": "5화. 공평한 바구니",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 약 만 년 전, 강가의 부족</span><h3>제5화 〈공평한 바구니〉</h3><p style=\"color:var(--t3);margin:0 0 10px;font-size:12px\">나눗셈의 탄생</p><p style=\"margin:0 0 10px\">더하고, 빼고, 묶어 세는 법까지 익힌 사람들. 그러나 여럿이 함께 살자면, 나누는 일에서 늘 다툼이 났다. 훗날 이집트 서기들이 빵을 똑같이 나누는 계산을 파피루스에 적기 오래전, 그 시작의 이야기다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📜 이야기</div><p style=\"margin:0 0 10px\">사람들이 큰 물고기를 잔뜩 잡아 왔다. 그런데 나누려 하자 이내 싸움이 났다.</p><p style=\"margin:0 0 10px\">\"저쪽이 더 많잖아!\" \"내 게 제일 작아!\"</p><p style=\"margin:0 0 10px\">누구는 많이, 누구는 적게 — 눈대중으로 나누니 아무도 만족하지 못했다.</p><p style=\"margin:0 0 10px\">에나가 물고기를 한곳에 모으고, 빈 바구니를 나란히 놓았다.</p><p style=\"margin:0 0 10px\">\"눈대중 말고, 하나씩 돌아가며 주자.\"</p><p style=\"margin:0 0 10px\">첫 바구니에 하나, 다음 바구니에 하나, 그다음에도 하나. 한 바퀴가 끝나면, 다시 첫 바구니부터.</p><p style=\"margin:0 0 10px\">물고기가 다 떨어질 때까지, 하나씩 하나씩 돌렸다.</p><p style=\"margin:0 0 10px\">다 나누고 보니, 모든 바구니에 물고기가 똑같이 세 마리씩 들어 있었다.</p><p style=\"margin:0 0 10px\">\"봐. 다 똑같아. 공평해!\"</p><p style=\"margin:0 0 10px\">카르가 손뼉을 쳤다. \"돌아가며 하나씩 주니까… 저절로 똑같아지네!\"</p><p style=\"margin:0 0 10px\">그날부터 부족은 무엇이든 하나씩 돌아가며 나눴다. 눈대중의 다툼은 사라지고, 바구니마다 꼭 같은 몫이 담겼다.</p><p style=\"margin:0 0 10px\">전체를 똑같은 몫으로 나누는 것.</p><p style=\"margin:0 0 10px\">이것이 바로 '나눗셈'의 탄생이었다.</p><p style=\"margin:0 0 10px\">*</p><div style=\"margin-top:10px;padding:10px;border-radius:8px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25)\"><div style=\"font-weight:700;margin-bottom:6px\">🏛 역사노트</div><p style=\"margin:0 0 6px;color:#93c5fd\">✅ 똑같이 나누는 셈은 훗날 실제 기록으로 남았다 — 고대 이집트의 린드 파피루스(약 3600년 전)에는 빵을 사람 수대로 공평히 나누는 계산이 적혀 있다.</p><p style=\"margin:0 0 6px;color:#fcd34d\">🤔 선사시대 사람들이 '하나씩 돌아가며' 나눴다는 직접 기록은 없다. 이 이야기는 나눗셈이 '공평하게 나누려는 마음'에서 시작됐으리라는 상상이다.</p></div>",
+       "quiz": [
+        {
+         "q": "여럿이 똑같이 나눠 가지려 할 때 쓰는 계산은?",
+         "a": [
+          "나눗셈",
+          "곱셈",
+          "덧셈",
+          "뺄셈"
+         ],
+         "c": 0
+        },
+        {
+         "q": "고기 12덩이를 4명이 똑같이 나누면 한 사람 몫은?",
+         "a": [
+          "3덩이",
+          "4덩이",
+          "6덩이",
+          "8덩이"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "수학의 역사 나눗셈의 탄생"
+      },
+      {
+       "t": "6화. 최초의 영수증",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 기원전 3300년경, 메소포타미아의 도시 우루크</span><h3>제6화 〈최초의 영수증〉</h3><p style=\"color:var(--t3);margin:0 0 10px;font-size:12px\">수메르 — 기록의 탄생</p><p style=\"margin:0 0 10px\">빙하기가 끝나고, 사람들은 강가에 모여 도시를 세웠다. 밀과 보리를 창고에 쌓고 신전이 그것을 관리하던 시대. 이 무렵 수메르 사람들은 물건을 세려고 작은 점토 조각 '토큰'을 빚어 썼다. 그리고 바로 이 토큰에서, 인류 최초의 '글자'가 태어난다.</p><p style=\"margin:0 0 10px\">그 시작은 뜻밖에도, 곡물창고의 사소한 다툼이었다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📜 이야기</div><p style=\"margin:0 0 10px\">지구라트 아래 곡물창고. 수염 난 농부 루갈이 삿대질을 하며 언성을 높였다.</p><p style=\"margin:0 0 10px\">\"내가 맡긴 보리는 열 항아리야!\"</p><p style=\"margin:0 0 10px\">창고지기 견습 에나는 진땀을 뺐다. \"분명… 일곱이었는데…\"</p><p style=\"margin:0 0 10px\">맡긴 사람도 지킨 사람도 '기억'으로만 우기니, 끝날 리가 없었다.</p><p style=\"margin:0 0 10px\">풀 죽은 에나 옆에서, 진흙 장난꾸러기 카르가 흙을 동글동글 굴리고 있었다.</p><p style=\"margin:0 0 10px\">\"항아리마다 구슬 하나씩 만들면 되잖아?\"</p><p style=\"margin:0 0 10px\">에나의 눈이 번쩍 뜨였다. 항아리 하나에 구슬 하나 — 저 먼 옛날, 눈밭에서 사슴을 줄에 짝짓던 그 방법. 하나에 하나씩이었다.</p><p style=\"margin:0 0 10px\">에나는 보리 항아리 일곱 개 앞에, 점토 구슬 일곱 개를 나란히 놓았다.</p><p style=\"margin:0 0 10px\">\"맡기면 구슬을 하나 보태고, 찾아가면 하나 덜어낸다.\"</p><p style=\"margin:0 0 10px\">더하고 빼는 일이, 구슬 단지 하나에 고스란히 담겼다. 이제 우길 것도 없었다.</p><p style=\"margin:0 0 10px\">\"…일곱이 맞군.\" 루갈이 머쓱하게 머리를 긁었다.</p><p style=\"margin:0 0 10px\">곡식 하나에 구슬 하나. 점토 구슬이, 인류의 '장부'가 되었다.</p><p style=\"margin:0 0 10px\">그런데 욕심 많은 루갈이, 한밤중에 구슬 단지에 몰래 구슬을 더 넣으려다 들켰다.</p><p style=\"margin:0 0 10px\">\"구슬을 아무나 만지면, 장부가 아니야!\" 에나가 소리쳤다.</p><p style=\"margin:0 0 10px\">사제가 나섰다. 구슬을 둥근 점토 봉투에 넣고, 원통 도장을 꾹 눌러 봉인했다.</p><p style=\"margin:0 0 10px\">\"이제 아무도 못 바꾼다.\"</p><p style=\"margin:0 0 10px\">그런데 카르가 고개를 갸웃했다. \"…안에 몇 개 들었는지는, 어떻게 봐?\"</p><p style=\"margin:0 0 10px\">봉해 버리니, 깨기 전엔 알 수가 없었다.</p><p style=\"margin:0 0 10px\">에나는 잠시 생각하더니, 봉인하기 전에 봉투 겉면에 구슬을 하나하나 꾹꾹 눌러 자국을 남겼다.</p><p style=\"margin:0 0 10px\">\"겉에 새겨 두면, 깨지 않아도 알 수 있어!\"</p><p style=\"margin:0 0 10px\">봉투 안에는 구슬, 겉에는 그 개수만큼의 자국. 안과 밖이 똑같았다.</p><p style=\"margin:0 0 10px\">며칠 뒤. 카르가 보니, 에나는 구슬도 봉투도 없이 그냥 납작한 점토판에 자국만 꾹꾹 새기고 있었다.</p><p style=\"margin:0 0 10px\">\"어? 그럼… 구슬은 왜 필요해?\"</p><p style=\"margin:0 0 10px\">에나의 손이 멈췄다. 정말 그랬다. 겉의 자국만으로 충분하다면, 안의 구슬은 더 이상 필요 없었다.</p><p style=\"margin:0 0 10px\">구슬은 사라지고, 자국만 남았다. 그 자국이 곧 '숫자'이자 '글자'였다.</p><p style=\"margin:0 0 10px\">인류 최초의 글쓰기는, 시도 노래도 아닌 — 곡식 몇 항아리를 적은 '영수증'이었다.</p><p style=\"margin:0 0 10px\">*</p><div style=\"margin-top:10px;padding:10px;border-radius:8px;background:rgba(96,165,250,.10);border:1px solid rgba(96,165,250,.25)\"><div style=\"font-weight:700;margin-bottom:6px\">🏛 역사노트</div><p style=\"margin:0 0 6px;color:#93c5fd\">✅ 점토 토큰(기원전 8000년경부터)·토큰을 봉인한 점토 봉투 '불라'(겉면에 개수 자국이 찍힌 유물이 실제로 출토)·인류 최초의 문자 기록인 우루크 점토판(대부분 보리와 맥주의 배급 장부)은 모두 실제 유물이다.</p><p style=\"margin:0 0 6px;color:#fcd34d\">🤔 '토큰 → 봉투 자국 → 점토판 문자'라는 발전 순서는 고고학자 드니즈 슈맨트-베세라의 유력한 학설이며, 에나와 카르의 이야기는 그 학설을 따라 그려 본 상상이다.</p></div><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🖼 만화판도 보기 (5쪽)</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 6px\">먼저 그린 만화판입니다. 등장인물과 사건이 위 이야기와 조금 다릅니다.</p><details><summary style=\"cursor:pointer;color:var(--t3);font-size:12px\">만화 5쪽 펼치기</summary><div style=\"margin-top:8px\"><img loading=\"lazy\" src=\"assets/comics/math_history/s2e01/p1.jpg\" alt=\"제6화 최초의 영수증 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s2e01/p2.jpg\" alt=\"제6화 최초의 영수증 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s2e01/p3.jpg\" alt=\"제6화 최초의 영수증 3쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s2e01/p4.jpg\" alt=\"제6화 최초의 영수증 4쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/math_history/s2e01/p5.jpg\" alt=\"제6화 최초의 영수증 5쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"></div></details>",
+       "quiz": [
+        {
+         "q": "메소포타미아에서 물건의 수를 점토판에 남긴 까닭은?",
+         "a": [
+          "주고받은 것을 나중에도 확인하려고",
+          "그림을 예쁘게 그리려고",
+          "점토가 남아돌아서",
+          "왕이 심심해서"
+         ],
+         "c": 0
+        },
+        {
+         "q": "수메르 사람들이 수를 적을 때 쓴 재료는?",
+         "a": [
+          "점토판",
+          "비단",
+          "종이",
+          "유리"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "수학의 역사 수메르"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "curriculum": "history",
+   "dynamic": [
+    "한국사"
+   ],
+   "units": [
+    {
+     "nm": "📜 아침의 나라 임금님들 (고조선 만화)",
+     "lessons": [
+      {
+       "t": "1화. 곰님, 100일만 참으세요!",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 고조선의 시작 — 단군신화</span><h3>1화. 곰님, 100일만 참으세요!</h3><p style=\"margin:0 0 10px\">아주 오랜 옛날, 하늘의 아들 환웅이 사람들을 널리 이롭게 하려고 땅으로 내려왔습니다. 곰과 호랑이가 찾아와 사람이 되게 해 달라고 빌었고, 환웅은 쑥과 마늘을 주며 굴에서 햇빛을 보지 말고 견디라고 했습니다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📖 만화로 보기 (5쪽)</div><img loading=\"lazy\" src=\"assets/comics/k_history/gojoseon_e01/p1.jpg\" alt=\"1화. 곰님, 100일만 참으세요! 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/gojoseon_e01/p2.jpg\" alt=\"1화. 곰님, 100일만 참으세요! 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/gojoseon_e01/p3.jpg\" alt=\"1화. 곰님, 100일만 참으세요! 3쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/gojoseon_e01/p4.jpg\" alt=\"1화. 곰님, 100일만 참으세요! 4쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/gojoseon_e01/p5.jpg\" alt=\"1화. 곰님, 100일만 참으세요! 5쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🏛 역사노트 — 어디까지가 기록일까?</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 8px\">[기록]=사서에 직접 적힌 것 · [전승]=옛 책이 전하는 이야기 · [상상]=만화를 위해 그려 본 장면</p><p style=\"margin:0 0 6px;color:#fcd34d\"><b>[전승]</b> 단군 이야기는 고려 시대에 일연이 쓴 《삼국유사》(1281년)와 이승휴의 《제왕운기》에 실려 전해집니다.</p><p style=\"margin:0 0 6px;color:#fcd34d\"><b>[전승]</b> 《삼국유사》에는 환웅이 '백 일 동안 햇빛을 보지 말라'고 했지만, 곰은 삼칠일(21일) 만에 여자의 몸이 되었다고 적혀 있습니다.</p><p style=\"margin:0 0 6px;color:#fcd34d\"><b>[전승]</b> 웅녀가 낳은 아들 단군왕검이 아사달에 도읍을 정하고 나라 이름을 조선이라 했다고 전합니다.</p><p style=\"margin:0 0 6px;color:#c4b5fd\"><b>[상상]</b> 곰과 호랑이가 나눈 대화, 굴 안에서의 하루하루는 기록에 없습니다. 이야기를 위해 그려 본 장면입니다.</p>",
+       "quiz": [
+        {
+         "q": "단군 이야기가 실려 전해지는 고려 시대 책은?",
+         "a": [
+          "삼국유사",
+          "동의보감",
+          "목민심서",
+          "훈민정음"
+         ],
+         "c": 0
+        },
+        {
+         "q": "《삼국유사》에서 곰이 사람의 몸이 되기까지 걸린 기간은?",
+         "a": [
+          "삼칠일(21일)",
+          "백 일",
+          "일 년",
+          "하루"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "고조선의 시작 — 단군신화"
+      },
+      {
+       "t": "특별편. 꺼지지 않는 등불 — 전등사",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 강화 정족산의 오래된 절</span><h3>특별편. 꺼지지 않는 등불 — 전등사</h3><p style=\"margin:0 0 10px\">인천 강화도 정족산 자락에는 전등사라는 오래된 절이 있습니다. 이름의 뜻은 '등불을 전하는 절'입니다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📖 만화로 보기 (2쪽)</div><img loading=\"lazy\" src=\"assets/comics/k_history/sp_jeondeungsa/p1.jpg\" alt=\"특별편. 꺼지지 않는 등불 — 전등사 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/sp_jeondeungsa/p2.jpg\" alt=\"특별편. 꺼지지 않는 등불 — 전등사 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🏛 역사노트 — 어디까지가 기록일까?</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 8px\">[기록]=사서에 직접 적힌 것 · [전승]=옛 책이 전하는 이야기 · [상상]=만화를 위해 그려 본 장면</p><p style=\"margin:0 0 6px;color:#fcd34d\"><b>[전승]</b> 고구려 소수림왕 때 아도 화상이 세웠고 처음 이름은 진종사였다고 전합니다.</p><p style=\"margin:0 0 6px;color:#fcd34d\"><b>[전승]</b> 고려 충렬왕의 왕비 정화궁주가 옥으로 만든 등을 바친 뒤로 '전등사'라 불렸다고 전해집니다.</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 조선 시대에는 이곳 정족산사고에 《조선왕조실록》을 보관했습니다.</p>",
+       "quiz": [
+        {
+         "q": "전등사가 있는 섬은?",
+         "a": [
+          "강화도",
+          "제주도",
+          "울릉도",
+          "거제도"
+         ],
+         "c": 0
+        },
+        {
+         "q": "조선 시대에 전등사 곁 정족산사고에 보관한 것은?",
+         "a": [
+          "조선왕조실록",
+          "팔만대장경",
+          "직지심체요절",
+          "훈민정음 해례본"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "강화 정족산의 오래된 절"
+      },
+      {
+       "t": "특별편. 하늘에 닿은 제단 — 참성단",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 마니산 꼭대기의 돌 제단</span><h3>특별편. 하늘에 닿은 제단 — 참성단</h3><p style=\"margin:0 0 10px\">강화도 마니산 꼭대기에는 돌을 쌓아 만든 네모난 제단이 있습니다. 아래는 둥글고 위는 네모난 모양으로, 하늘과 땅을 함께 담았다고 이야기합니다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📖 만화로 보기 (2쪽)</div><img loading=\"lazy\" src=\"assets/comics/k_history/sp_chamseongdan/p1.jpg\" alt=\"특별편. 하늘에 닿은 제단 — 참성단 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/sp_chamseongdan/p2.jpg\" alt=\"특별편. 하늘에 닿은 제단 — 참성단 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🏛 역사노트 — 어디까지가 기록일까?</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 8px\">[기록]=사서에 직접 적힌 것 · [전승]=옛 책이 전하는 이야기 · [상상]=만화를 위해 그려 본 장면</p><p style=\"margin:0 0 6px;color:#fcd34d\"><b>[전승]</b> 단군이 하늘에 제사를 지내려고 쌓았다고 전해 옵니다.</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 고려 시대부터 나라에서 이곳에 제사를 올린 기록이 남아 있고, 조선 시대에도 여러 차례 고쳐 쌓았습니다.</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 지금도 전국체육대회의 성화를 이곳에서 채화합니다.</p>",
+       "quiz": [
+        {
+         "q": "참성단이 있는 산은?",
+         "a": [
+          "마니산",
+          "한라산",
+          "설악산",
+          "지리산"
+         ],
+         "c": 0
+        },
+        {
+         "q": "참성단에서 지금도 하는 일은?",
+         "a": [
+          "전국체전 성화 채화",
+          "국회 개회식",
+          "수학능력시험",
+          "임금 즉위식"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "마니산 꼭대기의 돌 제단"
+      },
+      {
+       "t": "특별편. 거인의 돌 탁자 — 부근리 고인돌",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 청동기 시대의 무덤</span><h3>특별편. 거인의 돌 탁자 — 부근리 고인돌</h3><p style=\"margin:0 0 10px\">강화 부근리에는 커다란 돌 두 개가 기둥처럼 서고 그 위에 넓적한 돌이 얹힌 탁자 모양의 고인돌이 있습니다. 청동기 시대 사람들이 만든 무덤입니다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📖 만화로 보기 (2쪽)</div><img loading=\"lazy\" src=\"assets/comics/k_history/sp_bugeunri/p1.jpg\" alt=\"특별편. 거인의 돌 탁자 — 부근리 고인돌 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/sp_bugeunri/p2.jpg\" alt=\"특별편. 거인의 돌 탁자 — 부근리 고인돌 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🏛 역사노트 — 어디까지가 기록일까?</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 8px\">[기록]=사서에 직접 적힌 것 · [전승]=옛 책이 전하는 이야기 · [상상]=만화를 위해 그려 본 장면</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 위에 얹은 덮개돌은 길이가 6미터가 넘고 무게는 수십 톤으로 추정됩니다.</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 이런 모양을 탁자식(북방식) 고인돌이라고 부릅니다.</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 2000년에 고창·화순·강화의 고인돌 유적이 유네스코 세계유산으로 등재되었습니다.</p><p style=\"margin:0 0 6px;color:#c4b5fd\"><b>[상상]</b> 돌을 어떻게 옮기고 올렸는지는 정확한 기록이 없어, 통나무와 흙 언덕을 쓰는 방법 등이 추정되고 있습니다.</p>",
+       "quiz": [
+        {
+         "q": "고인돌은 무엇으로 쓰인 것으로 보나요?",
+         "a": [
+          "무덤",
+          "집",
+          "다리",
+          "우물"
+         ],
+         "c": 0
+        },
+        {
+         "q": "강화 고인돌 유적이 유네스코 세계유산이 된 해는?",
+         "a": [
+          "2000년",
+          "1950년",
+          "1980년",
+          "2015년"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "청동기 시대의 무덤"
+      },
+      {
+       "t": "특별편. 열두 기의 돌 가족 — 오상리 고인돌",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 한자리에 모인 고인돌 무리</span><h3>특별편. 열두 기의 돌 가족 — 오상리 고인돌</h3><p style=\"margin:0 0 10px\">강화 내가면 오상리에는 고인돌 여러 기가 한자리에 모여 있습니다. 크기가 저마다 달라, 마치 한 가족이 나란히 선 것처럼 보입니다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📖 만화로 보기 (2쪽)</div><img loading=\"lazy\" src=\"assets/comics/k_history/sp_osangri/p1.jpg\" alt=\"특별편. 열두 기의 돌 가족 — 오상리 고인돌 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/sp_osangri/p2.jpg\" alt=\"특별편. 열두 기의 돌 가족 — 오상리 고인돌 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🏛 역사노트 — 어디까지가 기록일까?</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 8px\">[기록]=사서에 직접 적힌 것 · [전승]=옛 책이 전하는 이야기 · [상상]=만화를 위해 그려 본 장면</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 발굴 조사에서 고인돌 아래 무덤방과 함께 간석기·토기 조각 등이 나왔습니다.</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 부근리 고인돌과 같은 탁자식이지만 크기는 훨씬 작습니다.</p><p style=\"margin:0 0 6px;color:#c4b5fd\"><b>[상상]</b> 무리 지은 고인돌의 주인들이 실제로 한 가족이었는지는 알 수 없습니다.</p>",
+       "quiz": [
+        {
+         "q": "오상리 고인돌의 특징으로 알맞은 것은?",
+         "a": [
+          "여러 기가 한자리에 모여 있다",
+          "하나만 외따로 있다",
+          "흙으로 쌓았다",
+          "쇠로 만들었다"
+         ],
+         "c": 0
+        },
+        {
+         "q": "고인돌을 만든 시대는?",
+         "a": [
+          "청동기 시대",
+          "조선 시대",
+          "고려 시대",
+          "삼국 시대"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "한자리에 모인 고인돌 무리"
+      },
+      {
+       "t": "특별편. 배를 닮은 한옥 교회 — 강화성당",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#a78bfa;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">📜 한옥으로 지은 성당</span><h3>특별편. 배를 닮은 한옥 교회 — 강화성당</h3><p style=\"margin:0 0 10px\">강화읍 언덕 위에는 기와지붕을 얹은 한옥 성당이 있습니다. 밖에서 보면 우리 옛집인데, 문을 열고 들어가면 서양 성당의 모습입니다.</p><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">📖 만화로 보기 (2쪽)</div><img loading=\"lazy\" src=\"assets/comics/k_history/sp_ganghwa_church/p1.jpg\" alt=\"특별편. 배를 닮은 한옥 교회 — 강화성당 1쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><img loading=\"lazy\" src=\"assets/comics/k_history/sp_ganghwa_church/p2.jpg\" alt=\"특별편. 배를 닮은 한옥 교회 — 강화성당 2쪽\" style=\"width:100%;border-radius:8px;display:block;margin:8px 0;background:rgba(255,255,255,.04)\"><div style=\"font-weight:700;margin:14px 0 6px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)\">🏛 역사노트 — 어디까지가 기록일까?</div><p style=\"font-size:11px;color:var(--t3);margin:0 0 8px\">[기록]=사서에 직접 적힌 것 · [전승]=옛 책이 전하는 이야기 · [상상]=만화를 위해 그려 본 장면</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 대한성공회 강화성당은 1900년에 세워진, 현재 남아 있는 가장 오래된 한옥 성당입니다.</p><p style=\"margin:0 0 6px;color:#93c5fd\"><b>[기록]</b> 밖은 한옥의 팔작지붕, 안은 서양 교회의 바실리카 구조로 되어 있습니다.</p><p style=\"margin:0 0 6px;color:#fcd34d\"><b>[전승]</b> 언덕 위 자리와 긴 건물 모양이 배를 닮았다 하여 '노아의 방주'에 빗대어 이야기합니다.</p>",
+       "quiz": [
+        {
+         "q": "강화성당이 지어진 해는?",
+         "a": [
+          "1900년",
+          "1392년",
+          "1945년",
+          "2000년"
+         ],
+         "c": 0
+        },
+        {
+         "q": "강화성당의 특징은?",
+         "a": [
+          "밖은 한옥, 안은 서양 성당 구조",
+          "전체가 벽돌로 된 고딕 양식",
+          "돌로 쌓은 석굴",
+          "나무로 만든 탑"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "한옥으로 지은 성당"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "curriculum": "music",
+   "dynamic": [],
+   "units": [
+    {
+     "nm": "🎹 어린 모차르트의 첫 작품",
+     "lessons": [
+      {
+       "t": "다섯 살 모차르트의 첫 선율 🎹 안단테 다장조 K.1a",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.1a</span><h3>다섯 살 모차르트의 첫 선율 🎹 안단테 다장조 K.1a</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/ycR5HKSsuII\" title=\"다섯 살 모차르트의 첫 선율 🎹 안단테 다장조 K.1a\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">모차르트가 다섯 살이던 1761년, 잘츠부르크에서 남긴 가장 이른 작품 중 하나입니다.</p><p style=\"margin:0 0 6px\">안단테 다장조 K.1a — 모차르트의 음악 여정이 여기서 시작됩니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.1a</p><p style=\"margin:0 0 6px\">🎹 작곡: 1761년 · 잘츠부르크 (모차르트 5세)</p><p style=\"margin:0 0 6px\">📜 악보: IMSLP 원본 기반</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.1a",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.1a"
+      },
+      {
+       "t": "세 살, 음표가 나비처럼 날아든 날 🎹 모차르트 알레그로 다장조 K.1b",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.1b</span><h3>세 살, 음표가 나비처럼 날아든 날 🎹 모차르트 알레그로 다장조 K.1b</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/OoVsFC55zsc\" title=\"세 살, 음표가 나비처럼 날아든 날 🎹 모차르트 알레그로 다장조 K.1b\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">누나 난네를의 연주를 바닥에 앉아 듣던 세 살의 볼프강.</p><p style=\"margin:0 0 6px\">그 귀에 음표들이 나비처럼 날아듭니다.</p><p style=\"margin:0 0 6px\">그 아이가 다섯 살(1761년)에 남긴 알레그로 다장조 K.1b — 난네를 노트북의 기록.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.1b</p><p style=\"margin:0 0 6px\">🎹 작곡: 1761년 · 잘츠부르크 (모차르트 5세)</p><p style=\"margin:0 0 6px\">📜 악보: 원본 기반 (Wikimedia/난네를 노트북)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.1b",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.1b"
+      },
+      {
+       "t": "혼자 배운 다섯 살의 기적 🎹 모차르트 알레그로 바장조 K.1c",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.1c</span><h3>혼자 배운 다섯 살의 기적 🎹 모차르트 알레그로 바장조 K.1c</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/mD_HlpF2bsY\" title=\"혼자 배운 다섯 살의 기적 🎹 모차르트 알레그로 바장조 K.1c\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">아무도 가르쳐 준 적이 없습니다.</p><p style=\"margin:0 0 6px\">1761년, 다섯 살 볼프강이 혼자 익힌 연주를 들은 아버지 레오폴트의 손이 떨립니다.</p><p style=\"margin:0 0 6px\">알레그로 바장조 K.1c — 난네를 노트북에 기록된 어린 천재의 흔적.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.1c</p><p style=\"margin:0 0 6px\">🎹 작곡: 1761년 · 잘츠부르크 (모차르트 5세)</p><p style=\"margin:0 0 6px\">📜 악보: IMSLP 원본 기반</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.1c",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.1c"
+      },
+      {
+       "t": "모차르트 미뉴엣 바장조 K.1d 🎹 유년기의 춤곡",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.1d</span><h3>모차르트 미뉴엣 바장조 K.1d 🎹 유년기의 춤곡</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/L5aYInyaSAU\" title=\"모차르트 미뉴엣 바장조 K.1d 🎹 유년기의 춤곡\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">모차르트의 유년기 미뉴엣, 바장조 K.1d.</p><p style=\"margin:0 0 6px\">3박자의 우아한 춤곡입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.1d</p><p style=\"margin:0 0 6px\">🎹 형식: 미뉴엣(Minuet) · 바장조(F major)</p><p style=\"margin:0 0 6px\">📜 악보: IMSLP 원본 기반</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.1d",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.1d"
+      },
+      {
+       "t": "볼프강은 다르다 🎹 모차르트 미뉴엣 사장조 K.1e",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.1e</span><h3>볼프강은 다르다 🎹 모차르트 미뉴엣 사장조 K.1e</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/HEhnMRVRHXs\" title=\"볼프강은 다르다 🎹 모차르트 미뉴엣 사장조 K.1e\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">거리의 아이들과는 다른 다섯 살.</p><p style=\"margin:0 0 6px\">잘츠부르크의 저녁, 볼프강의 발걸음엔 이미 음악이 흐릅니다.</p><p style=\"margin:0 0 6px\">미뉴엣 사장조 K.1e — 난네를 노트북의 기록.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.1e</p><p style=\"margin:0 0 6px\">🎹 작곡: 1761년 · 잘츠부르크 (모차르트 5세)</p><p style=\"margin:0 0 6px\">📜 악보: 원본 기반</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.1e",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.1e"
+      },
+      {
+       "t": "모차르트 K.1a–K.1b 🎹 안단테 & 알레그로",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.1ab</span><h3>모차르트 K.1a–K.1b 🎹 안단테 &amp; 알레그로</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/hIYCfMFxbNs\" title=\"모차르트 K.1a–K.1b 🎹 안단테 &amp; 알레그로\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">모차르트가 다섯 살에 쓴 가장 이른 작품들 — 안단테 다장조 K.1a와 알레그로 다장조 K.1b. 1761년 잘츠부르크.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.1a–K.1b</p><p style=\"margin:0 0 6px\">🎹 작곡: 1761년 · 잘츠부르크 (모차르트 5세)</p><p style=\"margin:0 0 6px\">📜 악보: 원본 기반</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.1ab",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.1ab"
+      },
+      {
+       "t": "모차르트 미뉴엣 바장조 K.2 🎹",
+       "lv": 1,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.2</span><h3>모차르트 미뉴엣 바장조 K.2 🎹</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/gB_YOcJJbNE\" title=\"모차르트 미뉴엣 바장조 K.2 🎹\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">모차르트의 유년기 미뉴엣, 바장조 K.2.</p><p style=\"margin:0 0 6px\">잘츠부르크 시절의 짧고 사랑스러운 춤곡입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.2</p><p style=\"margin:0 0 6px\">🎹 형식: 미뉴엣(Minuet) · 바장조(F major)</p><p style=\"margin:0 0 6px\">📜 악보: Mutopia 원본 기반</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.2",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.2"
+      }
+     ]
+    },
+    {
+     "nm": "🎹 피아노 소나타",
+     "lessons": [
+      {
+       "t": "모차르트 피아노 소나타 2번 바장조 K.280 🎹 1775 잘츠부르크",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.280</span><h3>모차르트 피아노 소나타 2번 바장조 K.280 🎹 1775 잘츠부르크</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/JQDOzTwVhxA\" title=\"모차르트 피아노 소나타 2번 바장조 K.280 🎹 1775 잘츠부르크\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크에서 작곡된 모차르트의 피아노 소나타 2번 바장조 K.280입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.280</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 바장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.280",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.280"
+      },
+      {
+       "t": "모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.281</span><h3>모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/68L-bvDOipU\" title=\"모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크에서 작곡된 모차르트의 피아노 소나타 3번 내림나장조 K.281입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.281</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 내림나장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.281",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.281"
+      },
+      {
+       "t": "모차르트 피아노 소나타 5번 사장조 K.283 🎹 1775 잘츠부르크",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.283</span><h3>모차르트 피아노 소나타 5번 사장조 K.283 🎹 1775 잘츠부르크</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/uK5Wdc6AMNM\" title=\"모차르트 피아노 소나타 5번 사장조 K.283 🎹 1775 잘츠부르크\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크에서 작곡된 모차르트의 피아노 소나타 5번 사장조 K.283입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.283</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 사장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.283",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.283"
+      },
+      {
+       "t": "모차르트 피아노 소나타 7번 다장조 K.309 🎹 1777 만하임",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.309</span><h3>모차르트 피아노 소나타 7번 다장조 K.309 🎹 1777 만하임</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/ExWN02ww_VM\" title=\"모차르트 피아노 소나타 7번 다장조 K.309 🎹 1777 만하임\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1777년 만하임, 로자 카나비히를 위해 작곡된 모차르트의 피아노 소나타 7번 다장조 K.309입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.309</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 다장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.309",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.309"
+      },
+      {
+       "t": "모차르트 피아노 소나타 8번 가단조 K.310 🎹 1778 파리",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.310</span><h3>모차르트 피아노 소나타 8번 가단조 K.310 🎹 1778 파리</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/dWMtm_bGRf0\" title=\"모차르트 피아노 소나타 8번 가단조 K.310 🎹 1778 파리\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1778년 파리, 어머니를 잃은 직후 작곡한 모차르트의 비극적인 피아노 소나타 8번 가단조 K.310입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.310</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 가단조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.310",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.310"
+      },
+      {
+       "t": "모차르트 피아노 소나타 9번 라장조 K.311 🎹 1777 만하임",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.311</span><h3>모차르트 피아노 소나타 9번 라장조 K.311 🎹 1777 만하임</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/cQX2iJfZCXc\" title=\"모차르트 피아노 소나타 9번 라장조 K.311 🎹 1777 만하임\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1777년 만하임에서 작곡된 모차르트의 피아노 소나타 9번 라장조 K.311입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.311</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 라장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.311",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.311"
+      },
+      {
+       "t": "모차르트 피아노 소나타 11번 '터키 행진곡' K.331 🎹 1783 빈",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.331</span><h3>모차르트 피아노 소나타 11번 '터키 행진곡' K.331 🎹 1783 빈</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/6oGXpNuZPYA\" title=\"모차르트 피아노 소나타 11번 '터키 행진곡' K.331 🎹 1783 빈\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1783년 빈에서 작곡된 모차르트의 가장 유명한 피아노 소나타 11번 K.331, 그 3악장 '터키 행진곡(Rondo alla Turca)'입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.331</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 가장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.331",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.331"
+      },
+      {
+       "t": "모차르트 피아노 소나타 12번 바장조 K.332 🎹",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.332</span><h3>모차르트 피아노 소나타 12번 바장조 K.332 🎹</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/noYqiJBrxrI\" title=\"모차르트 피아노 소나타 12번 바장조 K.332 🎹\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">모차르트의 피아노 소나타 12번 바장조 K.332 — 건반 위의 드라마라 불리는 명작입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.332</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 바장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.332",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.332"
+      },
+      {
+       "t": "모차르트 피아노 소나타 13번 내림나장조 K.333 🎹",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.333</span><h3>모차르트 피아노 소나타 13번 내림나장조 K.333 🎹</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/7Jk7QvJBgRg\" title=\"모차르트 피아노 소나타 13번 내림나장조 K.333 🎹\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">모차르트의 피아노 소나타 13번 내림나장조 K.333 — 노래하듯 흐르는 선율의 소나타입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.333</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 내림나장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.333",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.333"
+      },
+      {
+       "t": "모차르트 피아노 소나타 16번 다장조 '쉬운 소나타' K.545 🎹 1788 빈",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.545</span><h3>모차르트 피아노 소나타 16번 다장조 '쉬운 소나타' K.545 🎹 1788 빈</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/GU1Yk6cg7qc\" title=\"모차르트 피아노 소나타 16번 다장조 '쉬운 소나타' K.545 🎹 1788 빈\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1788년 빈에서 작곡된 모차르트의 피아노 소나타 16번 다장조 K.545 — '쉬운 소나타(Sonata facile)'로 사랑받는 명작입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.545</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 다장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.545",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.545"
+      }
+     ]
+    },
+    {
+     "nm": "🎻 협주곡",
+     "lessons": [
+      {
+       "t": "17세의 첫 피아노 협주곡 🎹 모차르트 K.175 라장조 하이라이트",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.175</span><h3>17세의 첫 피아노 협주곡 🎹 모차르트 K.175 라장조 하이라이트</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/XS-Cp8hawjc\" title=\"17세의 첫 피아노 협주곡 🎹 모차르트 K.175 라장조 하이라이트\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1773년 잘츠부르크, 17세의 모차르트가 쓴 첫 피아노 협주곡입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.175</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 협주곡 제5번 · 라장조 · 1악장 Allegro</p><p style=\"margin:0 0 6px\">📜 음원: 원전 악보 기반 MIDI 시퀀스(MIDIworld, seq. B.Fisher) 렌더링</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.175",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.175"
+      },
+      {
+       "t": "모차르트 피아노 협주곡 5번 라장조 K.175 1악장 🎹 17세의 첫 협주곡",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.175</span><h3>모차르트 피아노 협주곡 5번 라장조 K.175 1악장 🎹 17세의 첫 협주곡</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/-LdP0ca_DRE\" title=\"모차르트 피아노 협주곡 5번 라장조 K.175 1악장 🎹 17세의 첫 협주곡\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1773년 잘츠부르크, 17세의 모차르트가 쓴 첫 피아노 협주곡입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.175</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 협주곡 제5번 · 라장조 · 1악장 Allegro</p><p style=\"margin:0 0 6px\">📜 음원: 원전 악보 기반 MIDI 시퀀스(MIDIworld, seq. B.Fisher) 렌더링</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.175",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.175"
+      },
+      {
+       "t": "모차르트 바이올린 협주곡 5번 가장조 '터키' K.219 🎻 1775",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.219</span><h3>모차르트 바이올린 협주곡 5번 가장조 '터키' K.219 🎻 1775</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/VUstIzHVsJU\" title=\"모차르트 바이올린 협주곡 5번 가장조 '터키' K.219 🎻 1775\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크, 터키풍 리듬이 인상적인 모차르트의 마지막 바이올린 협주곡 5번 가장조 K.219입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.219</p><p style=\"margin:0 0 6px\">🎻 형식: 바이올린 협주곡 · 가장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.219",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.219"
+      },
+      {
+       "t": "모차르트 피아노 협주곡 20번 라단조 K.466 🎹 1785 빈",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.466</span><h3>모차르트 피아노 협주곡 20번 라단조 K.466 🎹 1785 빈</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/YC_4iiCmryQ\" title=\"모차르트 피아노 협주곡 20번 라단조 K.466 🎹 1785 빈\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1785년 빈에서 작곡된 모차르트의 피아노 협주곡 20번 라단조 K.466 — 베토벤이 가장 사랑한 어둡고 극적인 협주곡입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.466</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 협주곡 · 라단조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.466",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.466"
+      },
+      {
+       "t": "모차르트 피아노 협주곡 21번 다장조 K.467 '엘비라 마디간' 🎹 1785 빈",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.467</span><h3>모차르트 피아노 협주곡 21번 다장조 K.467 '엘비라 마디간' 🎹 1785 빈</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/LX5N5jy27KM\" title=\"모차르트 피아노 협주곡 21번 다장조 K.467 '엘비라 마디간' 🎹 1785 빈\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1785년 빈에서 작곡된 모차르트의 피아노 협주곡 21번 다장조 K.467 — 영화 '엘비라 마디간'으로 유명한 2악장의 아름다움으로 사랑받습니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.467</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 협주곡 · 다장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.467",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.467"
+      },
+      {
+       "t": "모차르트 피아노 협주곡 23번 가장조 K.488 🎹 1786 빈",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.488</span><h3>모차르트 피아노 협주곡 23번 가장조 K.488 🎹 1786 빈</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/7ej8mveNL-I\" title=\"모차르트 피아노 협주곡 23번 가장조 K.488 🎹 1786 빈\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1786년 빈에서 작곡된 모차르트의 피아노 협주곡 23번 가장조 K.488 — 우아함과 깊은 서정이 어우러진 걸작입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.488</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 협주곡 · 가장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 이 영상은 실제 악보에서 만든 MIDI인지 4중 검증(음정·조성·곡·템포)을 통과한 것만 실었습니다.</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.488",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.488"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1716,6 +1716,8 @@ async function openSubjectNew(subjectId){
   const jsonSubj=cm[getAgeGroup()]&&cm[getAgeGroup()][subjectId];
   if(!jsonSubj){document.getElementById('unitList').innerHTML='<div style="text-align:center;padding:20px;color:var(--t3)">과목 데이터가 없습니다</div>';return;}
   curSubjData=convertSubject(jsonSubj,meta.nm,meta.ic);
+  // 콘텐츠 라이브러리의 dynamic 단원(예: 한국사 만화) 덧붙이기
+  ((window._EXTRA_UNITS&&window._EXTRA_UNITS[subjectId])||[]).forEach(u=>{if(!curSubjData.units.some(x=>x.nm===u.nm))curSubjData.units.push(u);});
   _renderSubjectUnits(curSubjData);
 }
 function _renderSubjectUnits(s){
@@ -1785,6 +1787,20 @@ fetch('data/lessons_coding.json').then(r=>r.json()).then(d=>{if(window._extraLes
 fetch('data/lessons_english.json').then(r=>r.json()).then(d=>{if(window._extraLessons)window._extraLessons.push(...d);else window._extraLessons=d;}).catch(()=>{});
 fetch('data/lessons_music.json').then(r=>r.json()).then(d=>{if(window._extraLessons)window._extraLessons.push(...d);else window._extraLessons=d;}).catch(()=>{});
 fetch('data/videos_round9.json').then(r=>r.json()).then(d=>{d.forEach(v=>{if(!V.find(x=>x.id===v.id))V.push(v);});}).catch(()=>{});
+// 콘텐츠 라이브러리(만화·소설·영상) 병합 — build_content_library.py 가 생성
+// curriculum 키는 CURRICULUM에 직접 편입(과목카드 레슨수까지 반영), dynamic은 커리큘럼JSON 과목에 덧붙임
+window._EXTRA_UNITS={};
+fetch('data/content_library.json').then(r=>r.json()).then(d=>{
+  (d.sets||[]).forEach(set=>{
+    (set.units||[]).forEach(u=>{
+      if(!u||!u.nm||!Array.isArray(u.lessons))return;
+      const ck=set.curriculum;
+      if(ck&&CURRICULUM[ck]&&!CURRICULUM[ck].units.some(x=>x.nm===u.nm))CURRICULUM[ck].units.push(u);
+      (set.dynamic||[]).forEach(id=>{(window._EXTRA_UNITS[id]=window._EXTRA_UNITS[id]||[]).push(u);});
+    });
+  });
+  try{if(typeof renderSubjects==='function')renderSubjects();}catch(e){}
+}).catch(()=>{});
 let engLv=1,engCorrect=0,engInGame=false,engCurrent=null;
 function _engBox(){return document.getElementById('engContent');}
 function _engScore(){return document.getElementById('engScore');}
