@@ -500,24 +500,6 @@
      "nm": "🎹 피아노 소나타",
      "lessons": [
       {
-       "t": "모차르트 피아노 소나타 2번 바장조 K.280 🎹 1775 잘츠부르크",
-       "lv": 2,
-       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.280</span><h3>모차르트 피아노 소나타 2번 바장조 K.280 🎹 1775 잘츠부르크</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/JQDOzTwVhxA\" title=\"모차르트 피아노 소나타 2번 바장조 K.280 🎹 1775 잘츠부르크\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크에서 작곡된 모차르트의 피아노 소나타 2번 바장조 K.280입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.280</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 바장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 악보 MIDI 출처(신뢰 장부)가 확인됐고, 2026-07-31 재대조에서 영상 소리가 그 악보의 실제 대목과 일치함을 확인했습니다.</p>",
-       "quiz": [
-        {
-         "q": "이 곡의 쾨헬번호(작품 번호)는?",
-         "a": [
-          "K.280",
-          "Op.1",
-          "BWV.1",
-          "Hob.1"
-         ],
-         "c": 0
-        }
-       ],
-       "vq": "모차르트 K.280"
-      },
-      {
        "t": "모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775",
        "lv": 2,
        "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.281</span><h3>모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/68L-bvDOipU\" title=\"모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크에서 작곡된 모차르트의 피아노 소나타 3번 내림나장조 K.281입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.281</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 내림나장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 악보 MIDI 출처(신뢰 장부)가 확인됐고, 2026-07-31 재대조에서 영상 소리가 그 악보의 실제 대목과 일치함을 확인했습니다.</p>",
@@ -534,24 +516,6 @@
         }
        ],
        "vq": "모차르트 K.281"
-      },
-      {
-       "t": "모차르트 피아노 소나타 5번 사장조 K.283 🎹 1775 잘츠부르크",
-       "lv": 2,
-       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.283</span><h3>모차르트 피아노 소나타 5번 사장조 K.283 🎹 1775 잘츠부르크</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/uK5Wdc6AMNM\" title=\"모차르트 피아노 소나타 5번 사장조 K.283 🎹 1775 잘츠부르크\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크에서 작곡된 모차르트의 피아노 소나타 5번 사장조 K.283입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.283</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 사장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 악보 MIDI 출처(신뢰 장부)가 확인됐고, 2026-07-31 재대조에서 영상 소리가 그 악보의 실제 대목과 일치함을 확인했습니다.</p>",
-       "quiz": [
-        {
-         "q": "이 곡의 쾨헬번호(작품 번호)는?",
-         "a": [
-          "K.283",
-          "Op.1",
-          "BWV.1",
-          "Hob.1"
-         ],
-         "c": 0
-        }
-       ],
-       "vq": "모차르트 K.283"
       },
       {
        "t": "모차르트 피아노 소나타 7번 다장조 K.309 🎹 1777 만하임",
@@ -719,24 +683,6 @@
         }
        ],
        "vq": "모차르트 K.219"
-      },
-      {
-       "t": "모차르트 피아노 협주곡 20번 라단조 K.466 🎹 1785 빈",
-       "lv": 3,
-       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.466</span><h3>모차르트 피아노 협주곡 20번 라단조 K.466 🎹 1785 빈</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/YC_4iiCmryQ\" title=\"모차르트 피아노 협주곡 20번 라단조 K.466 🎹 1785 빈\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1785년 빈에서 작곡된 모차르트의 피아노 협주곡 20번 라단조 K.466 — 베토벤이 가장 사랑한 어둡고 극적인 협주곡입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.466</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 협주곡 · 라단조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·조성 검증)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 악보 MIDI 출처(신뢰 장부)가 확인됐고, 2026-07-31 재대조에서 영상 소리가 그 악보의 실제 대목과 일치함을 확인했습니다.</p>",
-       "quiz": [
-        {
-         "q": "이 곡의 쾨헬번호(작품 번호)는?",
-         "a": [
-          "K.466",
-          "Op.1",
-          "BWV.1",
-          "Hob.1"
-         ],
-         "c": 0
-        }
-       ],
-       "vq": "모차르트 K.466"
       }
      ]
     }

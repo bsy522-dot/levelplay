@@ -370,8 +370,8 @@ def build_khistory():
 # ────────────────────────────── 3. 모차르트 MV ──────────────────────────────
 MOZART_UNITS = [
     ("🎹 어린 모차르트의 첫 작품", ["K1a", "K1b", "K1c", "K1d", "K1e", "K1ab", "K2"], 1),
-    ("🎹 피아노 소나타", ["K280", "K281", "K283", "K309", "K310", "K311", "K331", "K332", "K333", "K545"], 2),
-    ("🎻 협주곡", ["K175_long", "K219", "K466"], 3),
+    ("🎹 피아노 소나타", ["K281", "K309", "K310", "K311", "K331", "K332", "K333", "K545"], 2),
+    ("🎻 협주곡", ["K175_long", "K219"], 3),
 ]
 
 # ── 오디오 진위 등급 (2026-07-31 전수 재감정) ──────────────────────────────
@@ -380,16 +380,37 @@ MOZART_UNITS = [
 #   B = 검증 기록은 없으나, 신뢰 MIDI 출처장부 확인 + 곡 일치 재대조 통과(발췌 위치까지 확인)
 # 어느 등급도 아닌 것은 아예 싣지 않는다(아래 EXCLUDED).
 VERIFY_A = {"K1a", "K1b", "K1c", "K1d", "K1e", "K2", "K331", "K175_long"}
-VERIFY_B = {"K1ab", "K280", "K281", "K283", "K309", "K310", "K311", "K332", "K333",
-            "K545", "K219", "K466"}
-# 재감정에서 원본 MIDI 어느 구간과도 일치하지 않아 보류 — 재빌드·재검증 전까지 게재 금지
+VERIFY_B = {"K1ab", "K281", "K309", "K310", "K311", "K332", "K333", "K545", "K219"}
+# 재감정에서 문제가 확인돼 게재 금지 — 재빌드·재검증 전까지 풀지 말 것
 EXCLUDED = {
-    "K467": "영상 오디오가 K.467 MIDI 어느 구간과도 불일치(최고 0.394) + wav↔MIDI 0.088",
-    "K488": "영상 오디오가 K.488 MIDI 어느 구간과도 불일치(최고 0.399) + wav↔MIDI 0.031",
+    "K280": "★무음 영상 — 로컬 -90.4dBFS, 유튜브 업로드본도 -116dBFS(2026-08-03 확인)",
+    "K283": "★무음 영상 — 로컬 -90.4dBFS, 유튜브 업로드본도 -116dBFS(2026-08-03 확인)",
+    "K466": "★무음 영상 — 로컬 -90.4dBFS, 유튜브 업로드본도 -116dBFS(2026-08-03 확인)",
+    "K467": "★무음 영상 — -90.4dBFS(정상곡은 -13~-36dBFS)",
+    "K488": "★무음 영상 — -90.4dBFS",
     "K175": "쇼츠 오디오가 검증 통과분 롱폼 오디오와 불일치(0.297) — 롱폼으로 대체 게재",
     "K3": "출처 미상 MIDI로 회수(private)",
     "K4": "출처 미상 MIDI로 회수(private)",
 }
+
+# 무음 자동 차단 — ★상관 검사보다 먼저 볼 것.
+# 무음 영상은 잡음끼리 우연히 상관이 맞아(0.52~0.55) 곡 대조를 통과해 버린다.
+# 실제로 K.280·K.283·K.466 이 이 함정으로 한 차례 게재됐다가 적발됐다.
+SILENCE_DBFS = -70.0      # 정상 음악 -13~-41dBFS / 무음 파일 -90.4dBFS
+
+
+def mean_volume_dbfs(video_path):
+    """ffmpeg volumedetect 로 평균 음량(dBFS)을 잰다. 못 재면 None."""
+    import subprocess
+    try:
+        r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", video_path,
+                            "-af", "volumedetect", "-f", "null", "-"],
+                           capture_output=True, text=True, timeout=120,
+                           encoding="utf-8", errors="replace")
+        m = re.search(r"mean_volume:\s*(-?[\d.]+) dB", (r.stderr or "") + (r.stdout or ""))
+        return float(m.group(1)) if m else None
+    except Exception:
+        return None
 
 
 def clean_title(t):
@@ -430,6 +451,16 @@ def build_mozart():
             if k not in VERIFY_A and k not in VERIFY_B:
                 warnings.append("진위 등급 미부여 → 제외: %s" % k)
                 continue
+            # 무음 게이트 — 영상 파일이 있으면 매 빌드마다 음량을 실측해 막는다
+            vf = meta.get(k, {}).get("file")
+            if vf:
+                vp = os.path.join(MOZART_SRC, vf.replace("/", os.sep))
+                if os.path.isfile(vp):
+                    db = mean_volume_dbfs(vp)
+                    if db is not None and db < SILENCE_DBFS:
+                        warnings.append("무음 영상 → 제외: %s (%.1f dBFS)" % (k, db))
+                        skipped.append("%s — 무음 실측 %.1f dBFS" % (k, db))
+                        continue
             md = meta.get(k, {})
             vid = v["videoId"]
 
