@@ -370,9 +370,27 @@ def build_khistory():
 # ────────────────────────────── 3. 모차르트 MV ──────────────────────────────
 MOZART_UNITS = [
     ("🎹 어린 모차르트의 첫 작품", ["K1a", "K1b", "K1c", "K1d", "K1e", "K1ab", "K2"], 1),
-    ("🎹 피아노 소나타", ["K281", "K309", "K310", "K311", "K331", "K332", "K333", "K545"], 2),
-    ("🎻 협주곡", ["K175_long", "K219"], 3),
+    ("🎹 피아노 소나타", ["K280", "K281", "K283", "K309", "K310", "K311", "K331",
+                    "K332", "K333", "K545", "K265"], 2),
+    ("🎻 협주곡·교향곡·실내악", ["K175_long", "K219", "K453", "K466", "K467", "K488",
+                        "K299", "K183", "K465"], 3),
 ]
+
+# 오디오 복구본을 저장소에 직접 실은 곡 (유튜브본은 아직 무음이라 임베드 대신 자체 탑재)
+# 2026-08-03 무음 10곡을 신뢰 MIDI에서 재렌더 → 음높이 일치 0.87~0.96 확인 후 게재.
+SELF_HOSTED = {
+    "K280": ("피아노 소나타 2번 바장조 K.280", "1775 잘츠부르크"),
+    "K283": ("피아노 소나타 5번 사장조 K.283", "1775 잘츠부르크"),
+    "K265": ("'반짝반짝 작은 별' 주제에 의한 변주곡 K.265", "널리 알려진 그 선율"),
+    "K466": ("피아노 협주곡 20번 라단조 K.466", "1785 빈"),
+    "K467": ("피아노 협주곡 21번 다장조 K.467 '엘비라 마디간'", "1785 빈"),
+    "K488": ("피아노 협주곡 23번 가장조 K.488", "1786 빈"),
+    "K453": ("피아노 협주곡 17번 사장조 K.453", "1784 빈"),
+    "K183": ("교향곡 25번 사단조 K.183", "1773 잘츠부르크 · 17세의 '작은 사단조'"),
+    "K299": ("플루트와 하프를 위한 협주곡 다장조 K.299", "1778 파리"),
+    "K465": ("현악 4중주 19번 다장조 K.465 '불협화음'", "1785 빈"),
+}
+VIDEO_DIR = "assets/videos/mozart"
 
 # ── 오디오 진위 등급 (2026-07-31 전수 재감정) ──────────────────────────────
 # upload_metadata 의 verified 플래그만 믿지 않고 verify_song 을 직접 재실행해 분류했다.
@@ -383,11 +401,8 @@ VERIFY_A = {"K1a", "K1b", "K1c", "K1d", "K1e", "K2", "K331", "K175_long"}
 VERIFY_B = {"K1ab", "K281", "K309", "K310", "K311", "K332", "K333", "K545", "K219"}
 # 재감정에서 문제가 확인돼 게재 금지 — 재빌드·재검증 전까지 풀지 말 것
 EXCLUDED = {
-    "K280": "★무음 영상 — 로컬 -90.4dBFS, 유튜브 업로드본도 -116dBFS(2026-08-03 확인)",
-    "K283": "★무음 영상 — 로컬 -90.4dBFS, 유튜브 업로드본도 -116dBFS(2026-08-03 확인)",
-    "K466": "★무음 영상 — 로컬 -90.4dBFS, 유튜브 업로드본도 -116dBFS(2026-08-03 확인)",
-    "K467": "★무음 영상 — -90.4dBFS(정상곡은 -13~-36dBFS)",
-    "K488": "★무음 영상 — -90.4dBFS",
+    # ↓ 유튜브 업로드본은 아직 무음. 오디오를 복구해 저장소 자체 탑재로 대체 게재 중
+    #   (SELF_HOSTED 참조). 유튜브 재업로드 시 이쪽으로 되돌릴 것.
     "K175": "쇼츠 오디오가 검증 통과분 롱폼 오디오와 불일치(0.297) — 롱폼으로 대체 게재",
     "K3": "출처 미상 MIDI로 회수(private)",
     "K4": "출처 미상 MIDI로 회수(private)",
@@ -441,6 +456,37 @@ def build_mozart():
     for unit_nm, keys, lv in MOZART_UNITS:
         lessons = []
         for k in keys:
+            # ── 자체 탑재(오디오 복구본) ──
+            if k in SELF_HOSTED:
+                rel = "%s/%s.mp4" % (VIDEO_DIR, k)
+                p = os.path.join(HERE, rel)
+                if not os.path.isfile(p):
+                    warnings.append("복구 영상 없음 → 제외: %s" % k); continue
+                db = mean_volume_dbfs(p)
+                if db is None or db < SILENCE_DBFS:
+                    warnings.append("무음 → 제외: %s (%.1f dBFS)" % (k, db or -99))
+                    skipped.append("%s — 무음 %.1f dBFS" % (k, db or -99)); continue
+                title, era = SELF_HOSTED[k]
+                kn = "K." + k[1:]
+                html = [badge("🎼 쾨헬번호 " + kn, "#f0abfc")]
+                html.append("<h3>%s</h3>" % esc(title))
+                html.append('<p style="color:var(--t3);margin:0 0 8px;font-size:12px">%s</p>' % esc(era))
+                html.append(
+                    '<video controls preload="metadata" playsinline '
+                    'style="width:100%%;border-radius:10px;display:block;margin:10px 0;background:#000">'
+                    '<source src="%s" type="video/mp4">브라우저가 영상을 지원하지 않습니다.</video>' % rel)
+                html.append('<p style="margin-top:10px;font-size:11px;color:var(--t3)">'
+                            '✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. '
+                            '음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>')
+                lessons.append({
+                    "t": title, "lv": lv, "content": "".join(html),
+                    "quiz": [{"q": "이 곡의 쾨헬번호(작품 번호)는?",
+                              "a": [kn, "Op.1", "BWV.1", "Hob.1"], "c": 0}],
+                    "vq": "모차르트 " + kn,
+                })
+                n_vid += 1
+                continue
+
             v = up.get(k)
             if not v:
                 warnings.append("업로드 장부에 없음: %s" % k)

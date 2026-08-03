@@ -500,6 +500,24 @@
      "nm": "🎹 피아노 소나타",
      "lessons": [
       {
+       "t": "피아노 소나타 2번 바장조 K.280",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.280</span><h3>피아노 소나타 2번 바장조 K.280</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1775 잘츠부르크</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K280.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.280",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.280"
+      },
+      {
        "t": "모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775",
        "lv": 2,
        "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.281</span><h3>모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775</h3><div style=\"position:relative;width:100%;padding-bottom:56.25%;border-radius:10px;overflow:hidden;margin:10px 0;background:#000\"><iframe src=\"https://www.youtube.com/embed/68L-bvDOipU\" title=\"모차르트 피아노 소나타 3번 내림나장조 K.281 🎹 1775\" loading=\"lazy\" style=\"position:absolute;inset:0;width:100%;height:100%;border:0\" allow=\"accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture\" allowfullscreen></iframe></div><p style=\"margin:0 0 6px\">1775년 잘츠부르크에서 작곡된 모차르트의 피아노 소나타 3번 내림나장조 K.281입니다.</p><p style=\"margin:0 0 6px\">🎼 쾨헬번호: K.281</p><p style=\"margin:0 0 6px\">🎹 형식: 피아노 소나타 · 내림나장조</p><p style=\"margin:0 0 6px\">📜 악보: 원본 MIDI 기반(출처·곡 검증 완료)</p><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 악보 MIDI 출처(신뢰 장부)가 확인됐고, 2026-07-31 재대조에서 영상 소리가 그 악보의 실제 대목과 일치함을 확인했습니다.</p>",
@@ -516,6 +534,24 @@
         }
        ],
        "vq": "모차르트 K.281"
+      },
+      {
+       "t": "피아노 소나타 5번 사장조 K.283",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.283</span><h3>피아노 소나타 5번 사장조 K.283</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1775 잘츠부르크</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K283.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.283",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.283"
       },
       {
        "t": "모차르트 피아노 소나타 7번 다장조 K.309 🎹 1777 만하임",
@@ -642,11 +678,29 @@
         }
        ],
        "vq": "모차르트 K.545"
+      },
+      {
+       "t": "'반짝반짝 작은 별' 주제에 의한 변주곡 K.265",
+       "lv": 2,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.265</span><h3>'반짝반짝 작은 별' 주제에 의한 변주곡 K.265</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">널리 알려진 그 선율</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K265.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.265",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.265"
       }
      ]
     },
     {
-     "nm": "🎻 협주곡",
+     "nm": "🎻 협주곡·교향곡·실내악",
      "lessons": [
       {
        "t": "모차르트 피아노 협주곡 5번 라장조 K.175 1악장 🎹 17세의 첫 협주곡",
@@ -683,6 +737,132 @@
         }
        ],
        "vq": "모차르트 K.219"
+      },
+      {
+       "t": "피아노 협주곡 17번 사장조 K.453",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.453</span><h3>피아노 협주곡 17번 사장조 K.453</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1784 빈</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K453.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.453",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.453"
+      },
+      {
+       "t": "피아노 협주곡 20번 라단조 K.466",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.466</span><h3>피아노 협주곡 20번 라단조 K.466</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1785 빈</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K466.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.466",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.466"
+      },
+      {
+       "t": "피아노 협주곡 21번 다장조 K.467 '엘비라 마디간'",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.467</span><h3>피아노 협주곡 21번 다장조 K.467 '엘비라 마디간'</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1785 빈</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K467.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.467",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.467"
+      },
+      {
+       "t": "피아노 협주곡 23번 가장조 K.488",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.488</span><h3>피아노 협주곡 23번 가장조 K.488</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1786 빈</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K488.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.488",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.488"
+      },
+      {
+       "t": "플루트와 하프를 위한 협주곡 다장조 K.299",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.299</span><h3>플루트와 하프를 위한 협주곡 다장조 K.299</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1778 파리</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K299.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.299",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.299"
+      },
+      {
+       "t": "교향곡 25번 사단조 K.183",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.183</span><h3>교향곡 25번 사단조 K.183</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1773 잘츠부르크 · 17세의 '작은 사단조'</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K183.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.183",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.183"
+      },
+      {
+       "t": "현악 4중주 19번 다장조 K.465 '불협화음'",
+       "lv": 3,
+       "content": "<span style=\"display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;color:#f0abfc;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);margin-bottom:8px\">🎼 쾨헬번호 K.465</span><h3>현악 4중주 19번 다장조 K.465 '불협화음'</h3><p style=\"color:var(--t3);margin:0 0 8px;font-size:12px\">1785 빈</p><video controls preload=\"metadata\" playsinline style=\"width:100%;border-radius:10px;display:block;margin:10px 0;background:#000\"><source src=\"assets/videos/mozart/K465.mp4\" type=\"video/mp4\">브라우저가 영상을 지원하지 않습니다.</video><p style=\"margin-top:10px;font-size:11px;color:var(--t3)\">✅ 출처가 확인된 악보 MIDI에서 소리를 다시 만들어 실었습니다. 음높이 대조로 같은 곡임을 확인했습니다(일치도 0.87~0.96).</p>",
+       "quiz": [
+        {
+         "q": "이 곡의 쾨헬번호(작품 번호)는?",
+         "a": [
+          "K.465",
+          "Op.1",
+          "BWV.1",
+          "Hob.1"
+         ],
+         "c": 0
+        }
+       ],
+       "vq": "모차르트 K.465"
       }
      ]
     }
