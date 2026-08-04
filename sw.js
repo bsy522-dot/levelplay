@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v70-audio-restored';
+const CACHE_NAME = 'levelplay-v71-saxophone';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -39,6 +39,7 @@ const STATIC_ASSETS = [
   './games/memory-game.html',
   './games/piano-v3.html',
   './games/ViolinReal-v3.html',
+  './games/saxophone-v2.html',
   './games/boxing-trainer-v5.html', // NEVER_CACHE_PATHS에도 존재 → 런타임은 항상 네트워크; 오프라인 HTML 셸만 프리캐시
   './games/three.r128.min.js',
   './games/golf-tracker-v3.html',
