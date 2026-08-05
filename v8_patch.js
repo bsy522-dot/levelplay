@@ -123,7 +123,7 @@ document.head.appendChild(v8css);
 function v8RenderPathMap(container){
   const wrap=document.createElement('div');
   wrap.className='v8-pathmap';
-  wrap.innerHTML='<div class="sec">🗺️ 학습 경로 맵</div><canvas id="v8PathCanvas" width="640" height="360"></canvas><div class="v8-pathmap-legend"><span><span class="dot" style="background:#22c55e"></span> 완료</span><span><span class="dot" style="background:#8b5cf6"></span> 진행중</span><span><span class="dot" style="background:#334155"></span> 미시작</span><span><span class="dot" style="background:#fbbf24"></span> 추천</span></div>';
+  wrap.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg> 학습 경로 맵</div><canvas id="v8PathCanvas" width="640" height="360"></canvas><div class="v8-pathmap-legend"><span><span class="dot" style="background:#22c55e"></span> 완료</span><span><span class="dot" style="background:#8b5cf6"></span> 진행중</span><span><span class="dot" style="background:#334155"></span> 미시작</span><span><span class="dot" style="background:#fbbf24"></span> 추천</span></div>';
   container.appendChild(wrap);
   setTimeout(()=>{
     const c=_el('v8PathCanvas');if(!c)return;
@@ -192,7 +192,7 @@ function v8RenderPathMap(container){
 function v8RenderMasteryTree(container){
   const wrap=document.createElement('div');
   wrap.className='v8-mastery';
-  wrap.innerHTML='<div class="sec">🌳 과목 마스터리 트리</div><canvas id="v8MasteryCanvas" width="640" height="320"></canvas><div class="v8-mastery-info" id="v8MasteryInfo"></div>';
+  wrap.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-tree"/></svg> 과목 마스터리 트리</div><canvas id="v8MasteryCanvas" width="640" height="320"></canvas><div class="v8-mastery-info" id="v8MasteryInfo"></div>';
   container.appendChild(wrap);
   setTimeout(()=>{
     const c=_el('v8MasteryCanvas');if(!c)return;
@@ -266,7 +266,7 @@ function v8RenderSandbox(container){
   wrap.className='v8-sandbox';
   let opts='';
   V8_CODE_CHALLENGES.forEach((ch,i)=>{opts+='<option value="'+i+'">'+ch.title+'</option>';});
-  wrap.innerHTML='<div class="sec">💻 코딩 샌드박스</div><select id="v8CodeSelect">'+opts+'</select><div id="v8CodeDesc" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div><textarea id="v8CodeEditor" spellcheck="false"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="v8-run" onclick="v8RunCode()">▶ 실행</button><button class="v8-run" style="border-color:rgba(251,191,36,.2);color:var(--gd);background:rgba(251,191,36,.06)" onclick="v8ShowHint()">💡 힌트</button></div><div id="v8CodeOutput" class="v8-output"></div><div id="v8CodeResult"></div>';
+  wrap.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-code"/></svg> 코딩 샌드박스</div><select id="v8CodeSelect">'+opts+'</select><div id="v8CodeDesc" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div><textarea id="v8CodeEditor" spellcheck="false"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="v8-run" onclick="v8RunCode()">▶ 실행</button><button class="v8-run" style="border-color:rgba(251,191,36,.2);color:var(--gd);background:rgba(251,191,36,.06)" onclick="v8ShowHint()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bulb"/></svg> 힌트</button></div><div id="v8CodeOutput" class="v8-output"></div><div id="v8CodeResult"></div>';
   container.appendChild(wrap);
   const sel=_el('v8CodeSelect');
   if(sel){
@@ -334,7 +334,7 @@ let v8FocusInterval=null,v8FocusRemaining=0,v8FocusRunning=false,v8FocusSessions
 function v8RenderFocusTimer(container){
   const wrap=document.createElement('div');
   wrap.className='v8-focus';
-  wrap.innerHTML='<div class="sec" style="justify-content:center">⏱️ 집중 학습 타이머</div><div class="v8-focus-time" id="v8FocusTime">25:00</div><div class="v8-focus-btns"><button onclick="v8SetFocus(15)">15분</button><button onclick="v8SetFocus(25)" class="active">25분</button><button onclick="v8SetFocus(45)">45분</button><button onclick="v8StartFocus()" id="v8FocusStartBtn">▶ 시작</button></div><div class="v8-focus-stat"><span>오늘 세션: <b id="v8FocusSessions">0</b></span><span>총 집중: <b id="v8FocusTotal">0</b>분</span></div>';
+  wrap.innerHTML='<div class="sec" style="justify-content:center"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg> 집중 학습 타이머</div><div class="v8-focus-time" id="v8FocusTime">25:00</div><div class="v8-focus-btns"><button onclick="v8SetFocus(15)">15분</button><button onclick="v8SetFocus(25)" class="active">25분</button><button onclick="v8SetFocus(45)">45분</button><button onclick="v8StartFocus()" id="v8FocusStartBtn">▶ 시작</button></div><div class="v8-focus-stat"><span>오늘 세션: <b id="v8FocusSessions">0</b></span><span>총 집중: <b id="v8FocusTotal">0</b>분</span></div>';
   container.appendChild(wrap);
   const u=U();
   v8FocusSessions=u.v8focusSessions||0;
@@ -398,7 +398,7 @@ function v8UpdateFocusDisplay(){
 function v8RenderGallery(container){
   const wrap=document.createElement('div');
   wrap.className='v8-gallery';
-  wrap.innerHTML='<div class="sec">🏆 업적 갤러리</div><canvas id="v8GalleryCanvas" width="640" height="280"></canvas><div class="v8-gallery-stats" id="v8GalleryStats"></div>';
+  wrap.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> 업적 갤러리</div><canvas id="v8GalleryCanvas" width="640" height="280"></canvas><div class="v8-gallery-stats" id="v8GalleryStats"></div>';
   container.appendChild(wrap);
   setTimeout(()=>{
     const c=_el('v8GalleryCanvas');if(!c)return;
@@ -493,7 +493,7 @@ function v8RenderMissions(container){
   wrap.className='v8-missions';
   const missions=v8GetDailyMissions();
   const u=U();
-  let h='<div class="sec">📋 오늘의 미션</div>';
+  let h='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> 오늘의 미션</div>';
   let completed=0;
   missions.forEach(m=>{
     const prog=m.check(u);
@@ -539,7 +539,7 @@ let v8ReviewIdx=0,v8ReviewItems=[];
 function v8RenderReview(container){
   const wrap=document.createElement('div');
   wrap.className='v8-review';
-  wrap.innerHTML='<div class="sec">🔄 스마트 복습</div><div id="v8ReviewArea"></div>';
+  wrap.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 스마트 복습</div><div id="v8ReviewArea"></div>';
   container.appendChild(wrap);
   v8ReviewItems=v8GetReviewItems();
   v8ReviewIdx=0;
@@ -580,7 +580,7 @@ window.v8ReviewRate=function(rating){
 function v8RenderLeaderboard(container){
   const wrap=document.createElement('div');
   wrap.className='v8-leader';
-  wrap.innerHTML='<div class="sec">🏅 학습 리더보드</div><canvas id="v8LeaderCanvas" width="640" height="300"></canvas>';
+  wrap.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-medal"/></svg> 학습 리더보드</div><canvas id="v8LeaderCanvas" width="640" height="300"></canvas>';
   container.appendChild(wrap);
   setTimeout(()=>{
     const c=_el('v8LeaderCanvas');if(!c)return;
@@ -631,7 +631,7 @@ function v8RenderLeaderboard(container){
 function v8RenderHeatmap(container){
   const wrap=document.createElement('div');
   wrap.className='v8-heatmap';
-  wrap.innerHTML='<div class="sec">📅 학습 히트맵</div><canvas id="v8HeatmapCanvas" width="640" height="160"></canvas><div class="v8-heatmap-info"><span id="v8HeatmapTotal"></span><span id="v8HeatmapStreak"></span></div>';
+  wrap.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg> 학습 히트맵</div><canvas id="v8HeatmapCanvas" width="640" height="160"></canvas><div class="v8-heatmap-info"><span id="v8HeatmapTotal"></span><span id="v8HeatmapStreak"></span></div>';
   container.appendChild(wrap);
   setTimeout(()=>{
     const c=_el('v8HeatmapCanvas');if(!c)return;
@@ -842,7 +842,7 @@ function v8InjectProfile(){
   if(target)profilePage.insertBefore(frag,target.nextSibling);
   v8InjectTier();
   const badgeDiv=document.createElement('div');
-  badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec">🌟 v8 배지 ('+((U().v8badges||[]).length)+'/'+V8_BADGES.length+')</div><div class="v4-badge-grid">'+V8_BADGES.map(function(b){var u=U();var earned=(u.v8badges||[]).includes(b.id);return '<div class="v4-badge-item'+(earned?'':' locked')+'" title="'+b.desc+'"><span class="v4-badge-icon">'+(earned?b.ic:'🔒')+'</span><span class="v4-badge-name">'+b.nm+'</span></div>';}).join('')+'</div></div>';
+  badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> v8 배지 ('+((U().v8badges||[]).length)+'/'+V8_BADGES.length+')</div><div class="v4-badge-grid">'+V8_BADGES.map(function(b){var u=U();var earned=(u.v8badges||[]).includes(b.id);return '<div class="v4-badge-item'+(earned?'':' locked')+'" title="'+b.desc+'"><span class="v4-badge-icon">'+(earned?b.ic:'🔒')+'</span><span class="v4-badge-name">'+b.nm+'</span></div>';}).join('')+'</div></div>';
   frag.appendChild(badgeDiv);
   profilePage.appendChild(badgeDiv);
 }

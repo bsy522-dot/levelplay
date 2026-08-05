@@ -209,11 +209,11 @@ function renderRankedPanel(){
   const tier=getRankTier(r.rp);
   const nextTier=V13_RANKS[V13_RANKS.indexOf(tier)+1]||tier;
   const pct=nextTier.min>tier.min?Math.round((r.rp-tier.min)/(nextTier.min-tier.min)*100):100;
-  let h=`<div class="v13-ranked"><h3>🏆 랭크 매치</h3>`;
-  h+=`<div class="v13-rank-card"><div class="v13-rank-icon">${tier.icon}</div><div class="v13-rank-info"><div class="v13-rank-name">${tier.name}</div><div class="v13-rank-pts">${r.rp} RP · ${r.wins}승 ${r.losses}패</div></div></div>`;
+  let h=`<div class="v13-ranked"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> 랭크 매치</h3>`;
+  h+=`<div class="v13-rank-card"><div class="v13-rank-icon">${window.ico(tier.icon)}</div><div class="v13-rank-info"><div class="v13-rank-name">${tier.name}</div><div class="v13-rank-pts">${r.rp} RP · ${r.wins}승 ${r.losses}패</div></div></div>`;
   h+=`<div style="height:6px;background:var(--bg);border-radius:3px;margin:8px 0;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--g1);border-radius:3px"></div></div>`;
   h+=`<div style="font-size:10px;color:var(--t3);margin-bottom:10px">다음: ${nextTier.name} (${nextTier.min} RP)</div>`;
-  h+=`<button class="v13-btn" onclick="v13StartRankMatch()">⚔️ 매치 시작</button>`;
+  h+=`<button class="v13-btn" onclick="v13StartRankMatch()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 매치 시작</button>`;
   h+=`</div>`;
   return h;
 }
@@ -228,7 +228,7 @@ function v13StartRankMatch(){
   function showQ(){
     if(idx>=pool.length){finishMatch(score,aiScore);return;}
     const q=pool[idx];
-    let h=`<div class="v13-exam"><h3>⚔️ 랭크 매치 (${idx+1}/5)</h3>`;
+    let h=`<div class="v13-exam"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 랭크 매치 (${idx+1}/5)</h3>`;
     h+=`<div class="v13-exam-q"><div class="q-num">${q.subj}</div><div class="q-text">${q.q}</div>`;
     h+=`<div class="v13-exam-opts">`;
     q.o.forEach((opt,i)=>{
@@ -258,7 +258,7 @@ function v13StartRankMatch(){
     if(u.v13.rank.rp>=1000&&u.v13.achievements&&!u.v13.achievements.includes('rank_gold')){u.v13.achievements.push('rank_gold');}
     S(u);
     v13Sfx(result==='WIN'?'rank_up':'rank_down');
-    let h=`<div class="v13-ranked"><h3>🏆 결과: ${result}</h3>`;
+    let h=`<div class="v13-ranked"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> 결과: ${result}</h3>`;
     h+=`<div style="text-align:center;padding:16px"><div style="font-size:32px;margin-bottom:8px">${result==='WIN'?'🎉':result==='LOSE'?'😔':'🤝'}</div>`;
     h+=`<div style="font-size:14px;font-weight:700">${myScore} vs ${aiScore} (AI)</div>`;
     h+=`<div style="font-size:12px;color:${rpChange>=0?'var(--gn)':'var(--rd)'};margin-top:4px">${rpChange>=0?'+':''}${rpChange} RP</div>`;
@@ -272,12 +272,12 @@ function v13StartRankMatch(){
 // ===== FEATURE 2: Subject Mini Exam =====
 function renderExamPanel(){
   const subjects=['수학','과학','국어','영어','사회','역사'];
-  let h=`<div class="v13-panel"><h3>📋 과목 미니시험</h3>`;
+  let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> 과목 미니시험</h3>`;
   h+=`<div style="display:flex;flex-wrap:wrap;gap:4px">`;
   subjects.forEach(s=>{
     h+=`<button class="v13-btn" onclick="v13StartExam('${s}')">${s}</button>`;
   });
-  h+=`<button class="v13-btn" style="border-color:var(--gd);color:var(--gd)" onclick="v13StartExam('전체')">🎯 전체</button>`;
+  h+=`<button class="v13-btn" style="border-color:var(--gd);color:var(--gd)" onclick="v13StartExam('전체')"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-target"/></svg> 전체</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -291,7 +291,7 @@ window.v13StartExam=function(subj){
   function showExamQ(){
     if(idx>=pool.length){finishExam();return;}
     const q=pool[idx];
-    let h=`<div class="v13-exam"><h3>📋 ${subj} 시험 (${idx+1}/${pool.length})</h3>`;
+    let h=`<div class="v13-exam"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> ${subj} 시험 (${idx+1}/${pool.length})</h3>`;
     h+=`<div class="v13-exam-q"><div class="q-num">${q.subj} #${idx+1}</div><div class="q-text">${q.q}</div>`;
     h+=`<div class="v13-exam-opts">`;
     q.o.forEach((opt,i)=>{
@@ -316,7 +316,7 @@ window.v13StartExam=function(subj){
     S(u);
     v13Sfx(pct>=70?'exam_pass':'exam_fail');
     if(pct===100)v13Sfx('exam_perfect');
-    let h=`<div class="v13-exam"><h3>📋 시험 결과</h3>`;
+    let h=`<div class="v13-exam"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> 시험 결과</h3>`;
     h+=`<div style="text-align:center;padding:16px"><div style="font-size:40px;margin-bottom:8px">${grade}</div>`;
     h+=`<div style="font-size:14px;font-weight:700">${score}/${pool.length} (${pct}%)</div>`;
     h+=`<div style="font-size:11px;color:var(--t3);margin-top:4px">과목: ${subj}</div>`;
@@ -329,10 +329,10 @@ window.v13StartExam=function(subj){
 
 // ===== FEATURE 3: Learning Insights Dashboard Canvas =====
 function renderInsightsCanvas(){
-  let h=`<div class="v13-panel"><h3>📊 학습 인사이트</h3>`;
+  let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg> 학습 인사이트</h3>`;
   h+=`<div class="v13-canvas-wrap"><canvas id="v13InsightCanvas" width="560" height="320"></canvas></div>`;
-  h+=`<button class="v13-btn" style="margin-top:8px" onclick="v13DrawInsights()">🔄 분석 갱신</button>`;
-  h+=`<button class="v13-btn" style="margin-top:8px;margin-left:4px" onclick="v13ExportInsights()">📥 PNG 저장</button>`;
+  h+=`<button class="v13-btn" style="margin-top:8px" onclick="v13DrawInsights()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 분석 갱신</button>`;
+  h+=`<button class="v13-btn" style="margin-top:8px;margin-left:4px" onclick="v13ExportInsights()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-download"/></svg> PNG 저장</button>`;
   h+=`</div>`;
   return h;
 }
@@ -348,11 +348,13 @@ window.v13DrawInsights=function(){
   const subjects=['수학','과학','국어','영어','사회','역사','음악','미술','체육','코딩','도덕'];
   const colors=['#8b5cf6','#06d6a0','#fbbf24','#ef4444','#3b82f6','#ec4899','#f97316','#14b8a6','#a855f7','#22c55e','#6366f1'];
 
-  // Background
-  ctx.fillStyle='#111127';ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#e2e8f0';ctx.font='bold 14px sans-serif';
+  // Background — 라이트 기본, :root.dark 일 때만 다크로 그린다
+  const _dk=document.documentElement.classList.contains('dark');
+  const _cBg=_dk?'#111127':'#FFFFFF', _cTx=_dk?'#e2e8f0':'#1A2140', _cMu=_dk?'#94a3b8':'#525C7A';
+  ctx.fillStyle=_cBg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=_cTx;ctx.font='bold 14px sans-serif';
   ctx.fillText('학습 인사이트 대시보드',20,28);
-  ctx.font='10px sans-serif';ctx.fillStyle='#94a3b8';
+  ctx.font='10px sans-serif';ctx.fillStyle=_cMu;
   ctx.fillText(_today()+' 기준',20,44);
 
   // Bar chart - subject XP
@@ -371,9 +373,9 @@ window.v13DrawInsights=function(){
     grd.addColorStop(0,d.color);grd.addColorStop(1,d.color+'44');
     ctx.fillStyle=grd;
     ctx.beginPath();ctx.roundRect(x,startY-barH,barW,barH,4);ctx.fill();
-    ctx.fillStyle='#94a3b8';ctx.font='9px sans-serif';ctx.textAlign='center';
+    ctx.fillStyle=_cMu;ctx.font='9px sans-serif';ctx.textAlign='center';
     ctx.fillText(d.name.slice(0,2),x+barW/2,startY+14);
-    ctx.fillStyle='#e2e8f0';ctx.font='bold 9px sans-serif';
+    ctx.fillStyle=_cTx;ctx.font='bold 9px sans-serif';
     ctx.fillText(d.xp,x+barW/2,startY-barH-6);
   });
   ctx.textAlign='left';
@@ -382,7 +384,7 @@ window.v13DrawInsights=function(){
   const totalXP=xpData.reduce((s,d)=>s+d.xp,0);
   const streak=u.streak||0;
   const quizTotal=u.quizTotal||Math.floor(Math.random()*200)+50;
-  ctx.fillStyle='#e2e8f0';ctx.font='bold 11px sans-serif';
+  ctx.fillStyle=_cTx;ctx.font='bold 11px sans-serif';
   ctx.fillText('총 XP: '+totalXP,430,80);
   ctx.fillText('스트릭: '+streak+'일',430,100);
   ctx.fillText('퀴즈: '+quizTotal+'문',430,120);
@@ -408,15 +410,15 @@ window.v13ExportInsights=function(){
 
 // ===== FEATURE 4: Custom Quiz Creator =====
 function renderQuizCreator(){
-  let h=`<div class="v13-panel"><h3>✏️ 퀴즈 만들기</h3>`;
+  let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pencil"/></svg> 퀴즈 만들기</h3>`;
   h+=`<div style="font-size:11px;color:var(--t3);margin-bottom:8px">나만의 퀴즈를 만들어 보세요!</div>`;
   h+=`<input id="v13CQ" placeholder="문제를 입력하세요" style="width:100%;padding:8px;background:var(--c2);border:1px solid rgba(139,92,246,.2);border-radius:6px;color:var(--tx);font:12px inherit;margin-bottom:6px">`;
   h+=`<input id="v13CO1" placeholder="보기 1 (정답)" style="width:100%;padding:6px;background:var(--c2);border:1px solid rgba(34,197,94,.2);border-radius:6px;color:var(--gn);font:11px inherit;margin-bottom:4px">`;
   h+=`<input id="v13CO2" placeholder="보기 2" style="width:100%;padding:6px;background:var(--c2);border:1px solid rgba(139,92,246,.15);border-radius:6px;color:var(--tx);font:11px inherit;margin-bottom:4px">`;
   h+=`<input id="v13CO3" placeholder="보기 3" style="width:100%;padding:6px;background:var(--c2);border:1px solid rgba(139,92,246,.15);border-radius:6px;color:var(--tx);font:11px inherit;margin-bottom:4px">`;
   h+=`<input id="v13CO4" placeholder="보기 4" style="width:100%;padding:6px;background:var(--c2);border:1px solid rgba(139,92,246,.15);border-radius:6px;color:var(--tx);font:11px inherit;margin-bottom:8px">`;
-  h+=`<button class="v13-btn" onclick="v13SaveCustomQuiz()">💾 저장</button>`;
-  h+=`<button class="v13-btn" style="margin-left:4px" onclick="v13PlayCustomQuiz()">▶️ 내 퀴즈 풀기</button>`;
+  h+=`<button class="v13-btn" onclick="v13SaveCustomQuiz()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg> 저장</button>`;
+  h+=`<button class="v13-btn" style="margin-left:4px" onclick="v13PlayCustomQuiz()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-playarrow"/></svg> 내 퀴즈 풀기</button>`;
   const u=U();const count=(u.v13&&u.v13.customQuizzes)?u.v13.customQuizzes.length:0;
   h+=`<div style="font-size:10px;color:var(--t3);margin-top:6px">저장된 퀴즈: ${count}개</div>`;
   h+=`</div>`;
@@ -449,7 +451,7 @@ window.v13PlayCustomQuiz=function(){
   let score=0,idx=0;
   function showCQ(){
     if(idx>=pool.length){
-      let h=`<div class="v13-panel"><h3>✏️ 내 퀴즈 결과</h3>`;
+      let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pencil"/></svg> 내 퀴즈 결과</h3>`;
       h+=`<div style="text-align:center;font-size:24px;margin:12px 0">${score}/${pool.length}</div>`;
       h+=`<button class="v13-btn" onclick="v13RefreshFeatures()">돌아가기</button></div>`;
       const el=document.querySelector('.v13-panel');
@@ -459,7 +461,7 @@ window.v13PlayCustomQuiz=function(){
     const q=pool[idx];
     const opts=[...q.o].sort(()=>Math.random()-.5);
     const correctIdx=opts.indexOf(q.o[q.a]);
-    let h=`<div class="v13-panel"><h3>✏️ 내 퀴즈 (${idx+1}/${pool.length})</h3>`;
+    let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pencil"/></svg> 내 퀴즈 (${idx+1}/${pool.length})</h3>`;
     h+=`<div class="v13-exam-q"><div class="q-text">${q.q}</div><div class="v13-exam-opts">`;
     opts.forEach((opt,i)=>{
       h+=`<div class="v13-exam-opt" onclick="v13CustomQAnswer(${i},${correctIdx})">${opt}</div>`;
@@ -492,7 +494,7 @@ function renderRoutineBuilder(){
 
   const doneCount=r.items.filter(i=>i.done).length;
   const pct=Math.round(doneCount/r.items.length*100);
-  let h=`<div class="v13-panel"><h3>📅 학습 루틴</h3>`;
+  let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg> 학습 루틴</h3>`;
   h+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">`;
   h+=`<div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--g1);border-radius:3px"></div></div>`;
   h+=`<span style="font-size:11px;font-weight:700;color:var(--cy)">${pct}%</span></div>`;
@@ -525,7 +527,7 @@ window.v13ToggleRoutine=function(idx){
 // ===== FEATURE 6: Cross-Subject Crossword Canvas =====
 function renderCrossword(){
   const puzzle=V13_CROSSWORDS[Math.floor(Math.random()*V13_CROSSWORDS.length)];
-  let h=`<div class="v13-panel"><h3>🧩 크로스워드 퍼즐</h3>`;
+  let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-puzzle"/></svg> 크로스워드 퍼즐</h3>`;
   h+=`<div id="v13CWArea" style="margin-bottom:8px"></div>`;
   h+=`<div id="v13CWClues" style="font-size:11px;color:var(--t3)"></div>`;
   h+=`<div style="margin-top:8px"><input id="v13CWInput" placeholder="답 입력 후 Enter" style="padding:6px 10px;background:var(--c2);border:1px solid rgba(139,92,246,.2);border-radius:6px;color:var(--tx);font:12px inherit;width:70%">`;
@@ -618,14 +620,14 @@ window.v13CheckCW=function(){
 
 // ===== FEATURE 7: Badge Showcase Customizer Canvas =====
 function renderBadgeCustomizer(){
-  let h=`<div class="v13-panel"><h3>🎨 배지 커스터마이저</h3>`;
+  let h=`<div class="v13-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-art"/></svg> 배지 커스터마이저</h3>`;
   h+=`<div class="v13-canvas-wrap"><canvas id="v13BadgeCanvas" width="600" height="360"></canvas></div>`;
   h+=`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">`;
   const themes=[{name:'보라',c1:'#8b5cf6',c2:'#6d28d9'},{name:'초록',c1:'#06d6a0',c2:'#059669'},{name:'금색',c1:'#fbbf24',c2:'#d97706'},{name:'빨강',c1:'#ef4444',c2:'#dc2626'},{name:'파랑',c1:'#3b82f6',c2:'#2563eb'},{name:'핑크',c1:'#ec4899',c2:'#db2777'}];
   themes.forEach((t,i)=>{
     h+=`<button class="v13-btn" onclick="v13DrawBadge(${i})" style="border-color:${t.c1};color:${t.c1}">${t.name}</button>`;
   });
-  h+=`</div><button class="v13-btn" style="margin-top:8px" onclick="v13ExportBadge()">📥 PNG 저장</button>`;
+  h+=`</div><button class="v13-btn" style="margin-top:8px" onclick="v13ExportBadge()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-download"/></svg> PNG 저장</button>`;
   h+=`</div>`;
   return h;
 }
@@ -722,11 +724,11 @@ function renderBattleArena(){
     {name:'수학박사',icon:'🔢',skill:3}
   ];
 
-  let h=`<div class="v13-battle"><h3>⚔️ 퀴즈 배틀</h3>`;
+  let h=`<div class="v13-battle"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 퀴즈 배틀</h3>`;
   h+=`<div style="font-size:11px;color:var(--t3);margin-bottom:8px">${b.wins}승 ${b.losses}패 ${b.draws}무</div>`;
   h+=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">`;
   opponents.forEach((op,i)=>{
-    h+=`<div class="v13-rank-card" style="cursor:pointer" onclick="v13StartBattle(${i})"><div class="v13-rank-icon">${op.icon}</div><div class="v13-rank-info"><div class="v13-rank-name">${op.name}</div><div class="v13-rank-pts">실력 ${'★'.repeat(op.skill)}${'☆'.repeat(5-op.skill)}</div></div></div>`;
+    h+=`<div class="v13-rank-card" style="cursor:pointer" onclick="v13StartBattle(${i})"><div class="v13-rank-icon">${window.ico(op.icon)}</div><div class="v13-rank-info"><div class="v13-rank-name">${op.name}</div><div class="v13-rank-pts">실력 ${'★'.repeat(op.skill)}${'☆'.repeat(5-op.skill)}</div></div></div>`;
   });
   h+=`</div></div>`;
   return h;
@@ -752,7 +754,7 @@ window.v13StartBattle=function(opIdx){
     const oppCorrect=Math.random()<(opp.skill*0.18);
     if(oppCorrect)oppScore++;
 
-    let h=`<div class="v13-battle"><h3>⚔️ vs ${opp.icon} ${opp.name} (${idx+1}/5)</h3>`;
+    let h=`<div class="v13-battle"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> vs ${opp.icon} ${opp.name} (${idx+1}/5)</h3>`;
     h+=`<div class="v13-battle-vs"><div class="v13-battle-player"><div class="v13-battle-avatar" style="background:rgba(6,214,160,.2)">🧑</div><div class="v13-battle-score">${myScore}</div></div>`;
     h+=`<div style="font-size:16px;font-weight:900;color:var(--t3)">VS</div>`;
     h+=`<div class="v13-battle-player"><div class="v13-battle-avatar" style="background:rgba(239,68,68,.2)">${opp.icon}</div><div class="v13-battle-score">${oppScore}</div></div></div>`;
@@ -781,7 +783,7 @@ window.v13StartBattle=function(opIdx){
     if(u.v13.battle.wins>=5&&!u.v13.achievements.includes('battle_5wins')){u.v13.achievements.push('battle_5wins');v13Sfx('achieve_v13');}
     S(u);
     v13Sfx(result==='WIN'?'battle_win':'rank_down');
-    let h=`<div class="v13-battle"><h3>⚔️ 배틀 결과: ${result}</h3>`;
+    let h=`<div class="v13-battle"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 배틀 결과: ${result}</h3>`;
     h+=`<div style="text-align:center;padding:16px"><div style="font-size:36px;margin-bottom:8px">${result==='WIN'?'🎉🏆':result==='LOSE'?'😢':'🤝'}</div>`;
     h+=`<div style="font-size:14px;font-weight:700">나 ${myScore} : ${oppScore} ${opp.name}</div></div>`;
     h+=`<button class="v13-btn" onclick="v13RefreshFeatures()">돌아가기</button></div>`;
@@ -904,14 +906,14 @@ window.v13RefreshFeatures=function(){
   }
 
   let h='';
-  h+=`<div class="sec" id="v13sec-rank">🏆 v13 랭크 매치</div>`+renderRankedPanel();
-  h+=`<div class="sec" id="v13sec-exam">📋 과목 미니시험</div>`+renderExamPanel();
-  h+=`<div class="sec" id="v13sec-insight">📊 학습 인사이트</div>`+renderInsightsCanvas();
-  h+=`<div class="sec" id="v13sec-creator">✏️ 퀴즈 만들기</div>`+renderQuizCreator();
-  h+=`<div class="sec" id="v13sec-routine">📅 학습 루틴</div>`+renderRoutineBuilder();
-  h+=`<div class="sec" id="v13sec-cw">🧩 크로스워드 퍼즐</div>`+renderCrossword();
-  h+=`<div class="sec" id="v13sec-badge">🎨 배지 커스터마이저</div>`+renderBadgeCustomizer();
-  h+=`<div class="sec" id="v13sec-battle">⚔️ 퀴즈 배틀</div>`+renderBattleArena();
+  h+=`<div class="sec" id="v13sec-rank"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> v13 랭크 매치</div>`+renderRankedPanel();
+  h+=`<div class="sec" id="v13sec-exam"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> 과목 미니시험</div>`+renderExamPanel();
+  h+=`<div class="sec" id="v13sec-insight"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg> 학습 인사이트</div>`+renderInsightsCanvas();
+  h+=`<div class="sec" id="v13sec-creator"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pencil"/></svg> 퀴즈 만들기</div>`+renderQuizCreator();
+  h+=`<div class="sec" id="v13sec-routine"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg> 학습 루틴</div>`+renderRoutineBuilder();
+  h+=`<div class="sec" id="v13sec-cw"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-puzzle"/></svg> 크로스워드 퍼즐</div>`+renderCrossword();
+  h+=`<div class="sec" id="v13sec-badge"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-art"/></svg> 배지 커스터마이저</div>`+renderBadgeCustomizer();
+  h+=`<div class="sec" id="v13sec-battle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 퀴즈 배틀</div>`+renderBattleArena();
   container.innerHTML=h;
 
   setTimeout(()=>{

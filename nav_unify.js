@@ -44,6 +44,44 @@
     return matchesName(el) || matchesShape(el);
   }
 
+  /* ---------- 칩 아이콘: 이모지 → 스프라이트 SVG ----------
+     v10~v14 패치가 버튼 글자에 이모지를 직접 박아 넣는다("🏆 랭크").
+     패치 파일을 하나씩 고치면 v15에서 또 되살아나므로, 흡수하는 이 지점에서 한 번에 바꾼다.
+     ①이모지를 떼어 라벨만 남기고 ②index.html의 icoId()로 심볼을 찾아 앞에 붙인다.
+     onclick은 속성/프로퍼티라 innerHTML 교체로 사라지지 않는다. */
+  var EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}←-⇿⌀-➿⬀-⯿\u{FE0E}\u{FE0F}\u{200D}\u{20E3}]/gu;
+
+  function decorate(btn){
+    if(!btn || btn.dataset.lpIco === '1') return;
+    var raw = (btn.textContent || '').replace(/\s+/g, ' ').trim();
+    if(!raw) return;
+    var emo = (raw.match(EMOJI_RE) || []).join('');
+    var label = raw.replace(EMOJI_RE, '').replace(/\s+/g, ' ').trim();
+    if(!label) return;
+    var id = (typeof window.icoId === 'function') ? window.icoId(label, emo) : null;
+    if(!id) return;                      // index.html 아이콘 시스템이 아직 없으면 다음 폴링에서 재시도
+    btn.dataset.lpIco = '1';
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'ico');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', '#' + id);
+    svg.appendChild(use);
+    var sp = document.createElement('span');
+    sp.className = 'lpuni-l';
+    sp.textContent = label;
+    btn.textContent = '';
+    btn.appendChild(svg);
+    btn.appendChild(sp);
+  }
+
+  function decorateAll(){
+    if(!uni) return;
+    var bs = uni.querySelectorAll('button');
+    for(var i = 0; i < bs.length; i++) decorate(bs[i]);
+  }
+
   /* ---------- 흡수 ---------- */
 
   function ensureUni(){
@@ -84,6 +122,8 @@
       strip.style.visibility = 'hidden';
     }
 
+    decorateAll();
+
     // 통합 스트립은 항상 맨 마지막 형제여야 다른 스트립에 덮이지 않는다
     if(uni.nextElementSibling) document.body.appendChild(uni);
   }
@@ -102,14 +142,17 @@
     st.id = 'lpUnifiedNavStyle';
     st.textContent = [
       /* 통합 스트립 — 기존 v13-nav 톤 */
-      '#lpUnifiedNav{position:fixed;bottom:var(--nv);left:0;right:0;height:36px;background:rgba(10,10,26,.95);',
-      '-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid rgba(139,92,246,.06);',
+      '#lpUnifiedNav{position:fixed;bottom:var(--nv);left:0;right:0;height:36px;background:rgba(255,255,255,.95);',
+      '-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid rgba(139,92,246,.14);',
       'display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;z-index:998;scrollbar-width:none;gap:2px;padding:0 4px;box-sizing:border-box}',
+      ':root.dark #lpUnifiedNav{background:rgba(10,10,26,.95);border-top-color:rgba(139,92,246,.06)}',
       '#lpUnifiedNav::-webkit-scrollbar{display:none}',
       '#lpUnifiedNav button{flex:0 0 auto;padding:4px 10px;margin:0;height:26px;border:1px solid rgba(139,92,246,.12);border-radius:14px;',
       'background:var(--c2);color:var(--t3);font:10px/1.2 inherit;cursor:pointer;white-space:nowrap;transition:.15s;',
       'display:inline-flex;align-items:center;justify-content:center;flex-direction:row;gap:3px}',
       '#lpUnifiedNav button span{font-size:11px}',
+      '#lpUnifiedNav button .ico{width:1em;height:1em;font-size:14px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
+      '#lpUnifiedNav button .lpuni-l{font-size:10px;line-height:1}',
       '#lpUnifiedNav button:hover,#lpUnifiedNav button.on{border-color:var(--cy);color:var(--cy);background:rgba(6,214,160,.08)}',
       '#lpUnifiedNav .lpuni-sep{flex:0 0 auto;width:1px;height:20px;align-self:center;background:rgba(139,92,246,.25);margin:0 4px}',
       /* 하단 점유 축소(88px)에 맞춘 위치 복원 오버라이드 — 나중에 주입되어 패치 CSS를 이김 */

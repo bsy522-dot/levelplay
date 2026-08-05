@@ -306,24 +306,37 @@ def build_math():
         html = [badge("📜 " + (nv["era"] or "수학의 첫걸음"))]
         html.append("<h3>제%d화 〈%s〉</h3>" % (ep["no"], esc(ep["title"])))
         html.append('<p style="color:var(--t3);margin:0 0 10px;font-size:12px">%s</p>' % esc(ep["theme"]))
-        if nv["opening"]:
-            html.append(paras(nv["opening"]))
 
-        # 소설이 정본(2026-07-07 확정 3부 템플릿) — 본문으로 펼쳐 둔다.
-        if nv["body"]:
-            html.append(section("📜 이야기"))
-            html.append(paras(nv["body"]))
-        html.append(note_block(nv["note"]))
-
-        # 만화판은 2026-07-03~04 제작본으로 등장인물·사건이 소설과 다르다.
-        # 정본과 섞이지 않도록 접어서 별도 표기해 싣는다. (재제작 시 이 블록을 본문으로 올릴 것)
         if rels:
-            html.append(section("🖼 만화판도 보기 (%d쪽)" % len(rels)))
-            html.append('<p style="font-size:11px;color:var(--t3);margin:0 0 6px">'
-                        '먼저 그린 만화판입니다. 등장인물과 사건이 위 이야기와 조금 다릅니다.</p>')
-            html.append("<details><summary style=\"cursor:pointer;color:var(--t3);font-size:12px\">"
-                        "만화 %d쪽 펼치기</summary><div style=\"margin-top:8px\">%s</div></details>"
-                        % (len(rels), img_tags(rels, "제%d화 %s" % (ep["no"], ep["title"]))))
+            # A안(2026-08-05 확정) — 만화가 본편이다.
+            # 한국사만화와 같은 방식으로 접지 않고 맨 위에 펼쳐 싣는다.
+            html.append(section("📖 만화로 보기 (%d쪽)" % len(rels)))
+            html.append(img_tags(rels, "제%d화 %s" % (ep["no"], ep["title"])))
+            html.append(note_block(nv["note"]))
+
+            # 소설은 곁가지 읽을거리로 내린다.
+            # 만화보다 먼저 쓴 글이라 등장인물·사건이 만화와 조금 다르다.
+            if nv["opening"] or nv["body"]:
+                html.append(section("📖 확장 이야기 (글로 더 읽기)"))
+                html.append('<p style="font-size:11px;color:var(--t3);margin:0 0 6px">'
+                            '같은 이야기를 글로 길게 풀어 쓴 읽을거리입니다. '
+                            '등장인물과 장면은 위 만화와 조금 다릅니다.</p>')
+                inner = []
+                if nv["opening"]:
+                    inner.append(paras(nv["opening"]))
+                if nv["body"]:
+                    inner.append(paras(nv["body"]))
+                html.append("<details><summary style=\"cursor:pointer;color:var(--t3);font-size:12px\">"
+                            "글로 된 이야기 펼치기</summary><div style=\"margin-top:8px\">%s</div></details>"
+                            % "".join(inner))
+        else:
+            # 아직 만화가 없는 회차 — 소설이 본편이다. 접지 않고 그대로 펼쳐 둔다.
+            if nv["opening"]:
+                html.append(paras(nv["opening"]))
+            if nv["body"]:
+                html.append(section("📜 이야기"))
+                html.append(paras(nv["body"]))
+            html.append(note_block(nv["note"]))
 
         lessons.append({
             "t": "%d화. %s" % (ep["no"], ep["title"]),

@@ -69,9 +69,13 @@ html,body{width:100%;height:100%;overflow:hidden;touch-action:none;
   background:rgba(255,215,0,.3);border-color:rgba(255,215,0,.45);
   color:#fff;box-shadow:0 0 10px rgba(255,215,0,.25);}
 .nb.sel{background:rgba(255,215,0,.22);border-color:rgba(255,215,0,.5);color:#ffe9a0;}
-.nb.highlight{animation:hlPulse .6s ease-in-out infinite;
-  border-color:rgba(255,100,100,.6);box-shadow:0 0 12px rgba(255,100,100,.3);}
-@keyframes hlPulse{0%,100%{background:rgba(255,100,100,.15)}50%{background:rgba(255,100,100,.35)}}
+.nb.highlight,.ob.highlight{animation:hlPulse .55s ease-in-out infinite;
+  border-color:#ff6b6b;color:#fff;position:relative;z-index:4;}
+@keyframes hlPulse{
+  0%,100%{transform:scale(1);background:rgba(255,90,90,.18);
+    box-shadow:0 0 8px rgba(255,90,90,.5),0 0 3px rgba(255,215,0,.4);}
+  50%{transform:scale(1.09);background:rgba(255,90,90,.42);
+    box-shadow:0 0 20px rgba(255,90,90,.95),0 0 9px rgba(255,215,0,.65);}}
 
 /* Bow zone — COMPLETELY clear for dragging */
 #bz{flex:1;position:relative;z-index:2;min-height:180px;overflow:hidden;}
@@ -1145,6 +1149,18 @@ function highlightNote(s,f){
   else{const btn=document.querySelector(`.nb[data-s="${s}"][data-m="${f}"]`);if(btn)btn.classList.add('highlight');}
 }
 
+/* Guided-mode target highlight (rhythm 🐢한음씩 / 쉬움): re-applies only when the
+   target note changes, so the pulse animation isn't restarted on every frame. */
+function setGuideHighlight(st,s,f){
+  const key=s+':'+f;
+  if(st._hlKey===key)return;
+  st._hlKey=key;highlightNote(s,f);
+}
+function clearGuideHighlight(st){
+  if(st._hlKey==null)return;
+  st._hlKey=null;clearHighlights();
+}
+
 /* ═══════════════════════════════════════════════════════════
    RHYTHM GAME MODE — v3 Enhanced
    ═══════════════════════════════════════════════════════════ */
@@ -1405,7 +1421,7 @@ function checkRhythmHit(si,sm){
     showJudge('OK','#44ee44');
     st.startTime+=now-st.waitPauseStart;
     st.waitPaused=false;
-    document.querySelectorAll('.nb.highlight,.ob.highlight').forEach(el=>el.classList.remove('highlight'));
+    clearGuideHighlight(st);
     while(st.noteIdx<st.notes.length&&st.notes[st.noteIdx].hit)st.noteIdx++;
     return;
   }
@@ -1458,6 +1474,17 @@ function updateRhythm(now){
   if(!rhythmState||!rhythmState.active)return;
   const st=rhythmState;
 
+  /* Guided modes (🐢한음씩 / 쉬움): blink the fingering button for the note to play next */
+  if(st.stepMode||st.difficulty==='easy'){
+    let gn=null;
+    for(let i=st.noteIdx;i<st.notes.length;i++){
+      const c=st.notes[i];
+      if(c.hit||c.judge||c.note==='R'||c.s<0)continue;
+      gn=c;break;
+    }
+    if(gn)setGuideHighlight(st,gn.s,gn.f);else clearGuideHighlight(st);
+  }
+
   /* STEP MODE: 노트가 판정선까지 내려와 멈추고 대기 → 맞는 음을 누르면 다음 노트가 내려옴. no miss / no health */
   if(st.stepMode){
     let nextN=null;
@@ -1492,12 +1519,12 @@ function updateRhythm(now){
         /* Highlight what to press */
         st.waitPaused=true;
         st.waitPauseStart=now;
-        highlightNote(n.s,n.f);
+        setGuideHighlight(st,n.s,n.f);
         return; /* Freeze progression */
       }
       if(st.waitPaused){
         /* Still waiting for correct note in easy mode */
-        highlightNote(n.s,n.f);
+        setGuideHighlight(st,n.s,n.f);
         return;
       }
       n.judge='miss';n.hit=true;
@@ -1704,6 +1731,7 @@ function showGameOver(){
 
 function finishRhythm(){
   const st=rhythmState;
+  clearGuideHighlight(st);
   const total=st.notes.length;
   const pct=total>0?Math.round((st.perfect*100+st.good*70+st.ok*40)/(total*100)*100):0;
   const starCount=pct>=90?3:pct>=70?2:pct>=50?1:0;

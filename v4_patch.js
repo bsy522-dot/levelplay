@@ -294,17 +294,17 @@ window.endTimeAttack=endTimeAttack;
 
 // ===== 4. Learning Stories =====
 const STORIES=[
-  {id:'math_shop',title:'&#x1F6D2; 마트에서 수학 쓰기',cat:'수학',scenes:[
+  {id:'math_shop',ic:'i-cart',title:'마트에서 수학 쓰기',cat:'수학',scenes:[
     {speaker:'엄마',text:'오늘 마트에 왔어! 사과 한 봉지에 3,500원이고, 3봉지 사야 해. 얼마가 필요할까?',choices:[{text:'3,500 x 3 = 10,500원이요!',correct:true,reply:'맞아! 곱셈을 잘 활용했네.'},{text:'3,500 + 3 = 3,503원이요?',correct:false,reply:'곱셈이 필요해. 3,500을 3번 더하는 거야.'}]},
     {speaker:'엄마',text:'좋아! 그런데 2만원을 내면 거스름돈은 얼마일까?',choices:[{text:'20,000 - 10,500 = 9,500원이요!',correct:true,reply:'정확해! 뺄셈도 완벽하네.'},{text:'20,000 - 3,500 = 16,500원?',correct:false,reply:'총 금액 10,500원을 빼야 해.'}]},
     {speaker:'엄마',text:'우유가 30% 할인 중이야. 원래 2,000원이면 할인 후 가격은?',choices:[{text:'1,400원이요! (2000 x 0.7)',correct:true,reply:'백분율 계산을 잘했어! 수학 천재구나.'},{text:'600원이요?',correct:false,reply:'600원은 할인 금액이야. 원래 가격에서 빼야지!'}]}
   ]},
-  {id:'science_plant',title:'&#x1F331; 식물의 비밀 탐험',cat:'과학',scenes:[
+  {id:'science_plant',ic:'i-leaf',title:'식물의 비밀 탐험',cat:'과학',scenes:[
     {speaker:'박사님',text:'이 식물의 잎이 초록색인 이유를 알고 있니?',choices:[{text:'엽록소 때문이에요!',correct:true,reply:'맞아! 엽록소가 빛을 흡수해서 광합성을 해.'},{text:'물감을 칠해서요?',correct:false,reply:'자연에는 물감이 없어. 엽록소라는 색소 때문이야.'}]},
     {speaker:'박사님',text:'광합성에 필요한 3가지는 무엇일까?',choices:[{text:'빛, 물, 이산화탄소요!',correct:true,reply:'정확해! 이 세 가지로 포도당과 산소를 만들어.'},{text:'흙, 비, 바람이요?',correct:false,reply:'흙은 영양분을 주지만 광합성 재료는 빛, 물, CO2야.'}]},
     {speaker:'박사님',text:'광합성으로 나오는 기체는?',choices:[{text:'산소(O2)요!',correct:true,reply:'맞아! 우리가 숨 쉬는 산소는 식물 덕분이야.'},{text:'이산화탄소(CO2)요?',correct:false,reply:'CO2는 재료야. 결과물은 산소(O2)란다.'}]}
   ]},
-  {id:'history_joseon',title:'&#x1F3EF; 조선 시대 여행',cat:'한국사',scenes:[
+  {id:'history_joseon',ic:'i-korea',title:'조선 시대 여행',cat:'한국사',scenes:[
     {speaker:'세종대왕',text:'나는 백성들이 글을 못 읽어 안타까워서 새 문자를 만들었노라. 이것의 이름은?',choices:[{text:'훈민정음이옵니다!',correct:true,reply:'그렇도다! 백성을 가르치는 바른 소리라는 뜻이니라.'},{text:'한문이옵니다?',correct:false,reply:'한문은 중국 글자이니라. 내가 만든 것은 훈민정음이로다.'}]},
     {speaker:'세종대왕',text:'훈민정음은 몇 년에 반포되었느냐?',choices:[{text:'1446년이옵니다!',correct:true,reply:'맞도다! 잘 알고 있구나.'},{text:'1392년이옵니다?',correct:false,reply:'1392년은 조선 건국 년도이니라. 훈민정음은 1446년이로다.'}]},
     {speaker:'장영실',text:'소인은 세종대왕님을 모시는 과학자입니다. 소인이 만든 물시계의 이름은?',choices:[{text:'자격루입니다!',correct:true,reply:'맞습니다! 스스로 때를 알려주는 물시계입니다.'},{text:'해시계입니다?',correct:false,reply:'해시계는 앙부일구입니다. 물시계는 자격루이지요.'}]}
@@ -422,7 +422,7 @@ function v4CheckBadges(){
 
 function renderBadgeSection(){
   const u=U();const earned=u.v4badges||[];
-  let h='<div style="margin-bottom:10px"><div class="sec">&#x1F3C5; 배지 컬렉션 ('+earned.length+'/'+BADGES.length+')</div>';
+  let h='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-medal"/></svg> 배지 컬렉션 ('+earned.length+'/'+BADGES.length+')</div>';
   h+='<div class="v4-badge-grid">';
   BADGES.forEach(b=>{
     const has=earned.includes(b.id);
@@ -471,7 +471,7 @@ function v4ListenQuiz(){
   const mo=_el('moB');
   if(mo){
     mo.innerHTML='<div style="text-align:center;padding:10px"><div style="font-size:36px;margin-bottom:8px">&#x1F3A7;</div><h3 style="font-size:15px;font-weight:700;margin-bottom:4px">듣기 퀴즈</h3><p style="font-size:11px;color:var(--t2);margin-bottom:12px">잘 들어보세요!</p>'+
-      '<button class="v4-listen-btn" onclick="speechSynthesis.speak(new SpeechSynthesisUtterance(\''+q.text.replace(/'/g,'\\&#39;')+'\'));document.querySelector(\'.v4-listen-btn\').lastChild.textContent=\' 다시 듣기\'">&#x1F50A; 듣기</button>'+
+      '<button class="v4-listen-btn" onclick="speechSynthesis.speak(new SpeechSynthesisUtterance(\''+q.text.replace(/'/g,'\\&#39;')+'\'));document.querySelector(\'.v4-listen-btn\').lastChild.textContent=\' 다시 듣기\'"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sound"/></svg> 듣기</button>'+
       '<div style="font-size:13px;font-weight:600;margin:12px 0">'+q.q+'</div>'+
       '<div class="mq-opts">'+opts.map(o=>'<button class="mq-opt" onclick="v4ListenAnswer(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';
     const modal=_el('mo');if(modal)modal.classList.add('sh');
@@ -558,58 +558,58 @@ function v4InjectHome(){
 
   // Mastery Challenge Card
   const masteryCard=document.createElement('div');
-  masteryCard.innerHTML='<div class="sec">&#x1F3AF; 마스터리 챌린지</div>'+
+  masteryCard.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-target"/></svg> 마스터리 챌린지</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'+
-    '<div class="gc" onclick="startMastery(\'수학\')"><div class="gi">&#x1F522;</div><div class="gn">수학</div></div>'+
-    '<div class="gc" onclick="startMastery(\'과학\')"><div class="gi">&#x1F52C;</div><div class="gn">과학</div></div>'+
-    '<div class="gc" onclick="startMastery(\'한국사\')"><div class="gi">&#x1F1F0;&#x1F1F7;</div><div class="gn">한국사</div></div>'+
-    '<div class="gc" onclick="startMastery(\'코딩\')"><div class="gi">&#x1F4BB;</div><div class="gn">코딩</div></div>'+
-    '<div class="gc" onclick="startMastery(\'음악\')"><div class="gi">&#x1F3B5;</div><div class="gn">음악</div></div>'+
-    '<div class="gc" onclick="startMastery(\'\')" style="background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(139,92,246,.05));border-color:rgba(251,191,36,.15)"><div class="gi">&#x1F30D;</div><div class="gn">전체 랜덤</div></div></div>';
+    '<div class="gc" onclick="startMastery(\'수학\')"><div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-math"/></svg> </div><div class="gn">수학</div></div>'+
+    '<div class="gc" onclick="startMastery(\'과학\')"><div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-science"/></svg> </div><div class="gn">과학</div></div>'+
+    '<div class="gc" onclick="startMastery(\'한국사\')"><div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-korea"/></svg> </div><div class="gn">한국사</div></div>'+
+    '<div class="gc" onclick="startMastery(\'코딩\')"><div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-code"/></svg> </div><div class="gn">코딩</div></div>'+
+    '<div class="gc" onclick="startMastery(\'음악\')"><div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-music"/></svg> </div><div class="gn">음악</div></div>'+
+    '<div class="gc" onclick="startMastery(\'\')" style="background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(139,92,246,.05));border-color:rgba(251,191,36,.15)"><div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-globe"/></svg> </div><div class="gn">전체 랜덤</div></div></div>';
   footer.parentNode.insertBefore(masteryCard,footer);
 
   // Time Attack
   const taCard=document.createElement('div');
-  taCard.innerHTML='<div class="sec">&#x23F1; 타임어택</div>'+
+  taCard.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-timer"/></svg> 타임어택</div>'+
     '<div class="gc" onclick="startTimeAttack()" style="background:linear-gradient(135deg,rgba(239,68,68,.08),rgba(251,191,36,.05));border-color:rgba(239,68,68,.12);text-align:left;display:flex;align-items:center;gap:12px;padding:14px">'+
-    '<div style="font-size:32px">&#x26A1;</div><div><div style="font-size:14px;font-weight:700">60초 스피드 퀴즈!</div>'+
+    '<div style="font-size:32px;color:var(--gd);display:flex"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg></div><div><div style="font-size:14px;font-weight:700">60초 스피드 퀴즈!</div>'+
     '<div style="font-size:10px;color:var(--t3)">제한시간 안에 최대한 많이 풀기 | 최고기록: '+(U().taHighScore||0)+'점</div></div></div>';
   footer.parentNode.insertBefore(taCard,footer);
 
   // Learning Stories
   const storyCard=document.createElement('div');
-  storyCard.innerHTML='<div class="sec">&#x1F4D6; 학습 스토리</div>'+
+  storyCard.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-book"/></svg> 학습 스토리</div>'+
     '<div style="display:grid;grid-template-columns:1fr;gap:6px">'+
     STORIES.map(s=>{
       const done=(U().storiesCompleted||[]).includes(s.id);
       return '<div class="gc" onclick="startStory(\''+s.id+'\')" style="text-align:left;display:flex;align-items:center;gap:10px;padding:12px">'+
-        '<div style="font-size:24px">'+s.title.split(' ')[0]+'</div><div style="flex:1"><div style="font-size:12px;font-weight:600">'+s.title+'</div>'+
+        '<div style="font-size:24px;color:var(--p);display:flex">'+window.ico(s.ic||'i-book')+'</div><div style="flex:1"><div style="font-size:12px;font-weight:600">'+s.title+'</div>'+
         '<div style="font-size:9px;color:var(--t3)">'+s.cat+(done?' &#x2705; 완료':'')+'</div></div></div>';
     }).join('')+'</div>';
   footer.parentNode.insertBefore(storyCard,footer);
 
   // Listening Quiz
   const listenCard=document.createElement('div');
-  listenCard.innerHTML='<div class="sec">&#x1F3A7; 듣기 퀴즈</div>'+
+  listenCard.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-music"/></svg> 듣기 퀴즈</div>'+
     '<div class="gc" onclick="v4ListenQuiz()" style="text-align:left;display:flex;align-items:center;gap:12px;padding:14px">'+
-    '<div style="font-size:28px">&#x1F50A;</div><div><div style="font-size:13px;font-weight:700">듣고 맞히기</div>'+
+    '<div style="font-size:28px;color:var(--p);display:flex"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sound"/></svg></div><div><div style="font-size:13px;font-weight:700">듣고 맞히기</div>'+
     '<div style="font-size:10px;color:var(--t3)">음성을 듣고 문제를 풀어보세요</div></div></div>';
   footer.parentNode.insertBefore(listenCard,footer);
 
   // Calendar
   const calDiv=document.createElement('div');calDiv.id='v4CalArea';
   const calSec=document.createElement('div');
-  calSec.innerHTML='<div class="sec">&#x1F4C5; 학습 달력</div>';
+  calSec.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg> 학습 달력</div>';
   footer.parentNode.insertBefore(calSec,footer);
   calDiv.innerHTML=renderCalendar(v4CalYear,v4CalMonth);
   footer.parentNode.insertBefore(calDiv,footer);
 
   // Level Test
   const lvCard=document.createElement('div');
-  lvCard.innerHTML='<div class="sec">&#x1F4CA; 레벨 테스트</div>'+
+  lvCard.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg> 레벨 테스트</div>'+
     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">'+
     ['수학','과학','한국사','코딩','영어','음악'].map(c=>
-      '<div class="gc" onclick="startLevelTest(\''+c+'\')" style="padding:10px"><div class="gi" style="font-size:20px">&#x1F4CA;</div><div class="gn" style="font-size:10px">'+c+'</div></div>'
+      '<div class="gc" onclick="startLevelTest(\''+c+'\')" style="padding:10px"><div class="gi" style="font-size:20px"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg> </div><div class="gn" style="font-size:10px">'+c+'</div></div>'
     ).join('')+'</div>';
   footer.parentNode.insertBefore(lvCard,footer);
 

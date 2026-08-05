@@ -264,7 +264,7 @@ function renderPomodoro(){
     <div class="controls">
       <button class="v10-btn" onclick="v10PomoToggle()">${p.running?'⏸ 일시정지':'▶ 시작'}</button>
       <button class="v10-btn" onclick="v10PomoReset()">\u{1F504} 초기화</button>
-      <button class="v10-btn" onclick="v10PomoSkip()">⏭ 다음</button>
+      <button class="v10-btn" onclick="v10PomoSkip()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-skip"/></svg> 다음</button>
     </div>
     <div style="display:flex;gap:16px;justify-content:center;font-size:10px;color:var(--t3)">
       <span>\u{1F345} 세션: <b style="color:var(--cy)">${p.sessions}</b></span>
@@ -345,7 +345,7 @@ function renderFlashcardBuilder(){
     <div class="create-form">
       <input type="text" id="v10FlashFront" placeholder="앞면 (문제/단어)" maxlength="100">
       <input type="text" id="v10FlashBack" placeholder="뒷면 (정답/뜻)" maxlength="200">
-      <button class="v10-btn" onclick="v10CreateFlash()">➕ 카드 추가</button>
+      <button class="v10-btn" onclick="v10CreateFlash()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-plus"/></svg> 카드 추가</button>
     </div>
     ${cards.length>6?`<div style="font-size:9px;color:var(--t3);text-align:center;margin-top:4px">+ ${cards.length-6}장 더</div>`:''}
   </div>`;

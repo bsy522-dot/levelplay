@@ -265,7 +265,7 @@ function renderWrongNotesEnhanced(){
   const notes=u.wrongNotes||[];
   if(!notes.length)return '';
   const {grouped,SUBJ_MAP}=getWrongNotesBySubject();
-  let h='<div class="v7-wrong-wrap"><div class="sec">📝 오답노트 분석</div>';
+  let h='<div class="v7-wrong-wrap"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-note"/></svg> 오답노트 분석</div>';
   h+='<div style="font-size:10px;color:var(--t3);margin-bottom:10px">총 '+notes.length+'개 오답 | 과목별 분류 + 재시도</div>';
   const subjects=Object.keys(grouped).sort((a,b)=>grouped[b].length-grouped[a].length);
   subjects.forEach(subj=>{
@@ -276,7 +276,7 @@ function renderWrongNotesEnhanced(){
       h+='<div class="v7-wrong-item"><div class="v7-wrong-q">'+(item.question||item.q||'문제')+'</div>';
       h+='<div class="v7-wrong-ans">내 답: <span class="wrong">'+(item.myAnswer||item.selected||'?')+'</span> → 정답: <span class="correct">'+(item.correctAnswer||item.correct||'?')+'</span></div>';
       if(explain)h+='<div class="v7-wrong-explain">💡 '+explain+'</div>';
-      h+='<button class="v7-retry-btn" onclick="v7RetryQuestion('+notes.indexOf(item)+')">🔄 다시 풀기</button></div>';
+      h+='<button class="v7-retry-btn" onclick="v7RetryQuestion('+notes.indexOf(item)+')"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 다시 풀기</button></div>';
     });
     if(items.length>3)h+='<div style="font-size:9px;color:var(--t3);padding:4px">... 외 '+(items.length-3)+'개</div>';
     h+='</div>';
@@ -297,7 +297,7 @@ window.v7RetryQuestion=function(idx){
     const overlay=document.createElement('div');
     overlay.className='v7-vidquiz-overlay';
     overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
-    let h='<div class="v7-vidquiz"><h3>🔄 오답 재시도</h3>';
+    let h='<div class="v7-vidquiz"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 오답 재시도</h3>';
     h+='<div class="vq-q">'+match.q+'</div><div class="vq-opts">';
     match.a.map(function(_,i){return i;}).shuffle().forEach(function(oi){
       h+='<button data-idx="'+oi+'" data-correct="'+match.c+'">'+match.a[oi]+'</button>';
@@ -341,7 +341,7 @@ function triggerPostVideoQuiz(lessonId){
   const qs=[q1,q2];
   function renderQ(idx){
     const q=qs[idx];
-    let h='<div class="v7-vidquiz"><h3>📺 영상 이해도 체크 ('+(idx+1)+'/2)</h3>';
+    let h='<div class="v7-vidquiz"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-video"/></svg> 영상 이해도 체크 ('+(idx+1)+'/2)</h3>';
     h+='<div class="vq-q">'+q.q+'</div><div class="vq-opts">';
     q.a.map(function(_,i){return i;}).shuffle().forEach(function(oi){
       h+='<button data-idx="'+oi+'" data-correct="'+q.c+'">'+q.a[oi]+'</button>';
@@ -358,7 +358,7 @@ function triggerPostVideoQuiz(lessonId){
         setTimeout(()=>{
           if(idx<1)renderQ(idx+1);
           else{
-            overlay.innerHTML='<div class="v7-vidquiz" style="text-align:center"><h3>📺 이해도 결과</h3><div style="font-size:32px;font-weight:900;margin:14px 0">'+score+'/2</div><div style="font-size:12px;color:var(--t3);margin-bottom:14px">'+(score===2?'완벽한 이해! +30 XP':score===1?'좋아요! +15 XP':'다시 영상을 봐보세요')+'</div><button class="v7-milestone-close" onclick="this.closest(\'.v7-vidquiz-overlay\').remove()">닫기</button></div>';
+            overlay.innerHTML='<div class="v7-vidquiz" style="text-align:center"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-video"/></svg> 이해도 결과</h3><div style="font-size:32px;font-weight:900;margin:14px 0">'+score+'/2</div><div style="font-size:12px;color:var(--t3);margin-bottom:14px">'+(score===2?'완벽한 이해! +30 XP':score===1?'좋아요! +15 XP':'다시 영상을 봐보세요')+'</div><button class="v7-milestone-close" onclick="this.closest(\'.v7-vidquiz-overlay\').remove()">닫기</button></div>';
             const u=U();u.xp=(u.xp||0)+score*15;S(u);
           }
         },1200);
@@ -443,9 +443,9 @@ function renderAccessibilityPanel(){
   const u=U();
   const hc=u.v7highContrast||false;
   const fs=u.v7fontScale||'100';
-  let h='<div style="margin-bottom:10px"><div class="sec">♿ 접근성 설정</div>';
+  let h='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg> 접근성 설정</div>';
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
-  h+='<button onclick="v7ToggleHC()" style="padding:8px 14px;border-radius:8px;border:1px solid rgba(139,92,246,.15);background:'+(hc?'rgba(6,214,160,.15)':'var(--c2)')+';color:var(--tx);font:11px inherit;font-weight:600;cursor:pointer">'+(hc?'✅':'⬜')+' 고대비 모드</button>';
+  h+='<button onclick="v7ToggleHC()" style="padding:8px 14px;border-radius:8px;border:1px solid rgba(139,92,246,.15);background:'+(hc?'rgba(6,214,160,.15)':'var(--c2)')+';color:var(--tx);font:11px inherit;font-weight:600;cursor:pointer">'+(hc?'✅':'<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-contrast"/></svg>')+' 고대비 모드</button>';
   h+='<button onclick="v7SetFontScale(\'100\')" style="padding:8px 14px;border-radius:8px;border:1px solid '+(fs==='100'?'var(--cy)':'rgba(139,92,246,.15)')+';background:var(--c2);color:var(--tx);font:11px inherit;cursor:pointer">가 1x</button>';
   h+='<button onclick="v7SetFontScale(\'125\')" style="padding:8px 14px;border-radius:8px;border:1px solid '+(fs==='125'?'var(--cy)':'rgba(139,92,246,.15)')+';background:var(--c2);color:var(--tx);font:11px inherit;cursor:pointer">가 1.25x</button>';
   h+='<button onclick="v7SetFontScale(\'150\')" style="padding:8px 14px;border-radius:8px;border:1px solid '+(fs==='150'?'var(--cy)':'rgba(139,92,246,.15)')+';background:var(--c2);color:var(--tx);font:11px inherit;cursor:pointer">가 1.5x</button>';
@@ -520,7 +520,7 @@ function generateParentCard(){
   const overlay=document.createElement('div');
   overlay.className='v7-vidquiz-overlay';
   overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
-  overlay.innerHTML='<div style="text-align:center"><canvas id="v7shareCanvas"></canvas><div style="display:flex;gap:8px;justify-content:center;margin-top:12px"><button class="v7-milestone-close" onclick="v7DownloadCard()">📥 다운로드</button><button class="v7-milestone-close" onclick="v7CopyCard()">📋 복사</button><button class="v7-milestone-close" onclick="this.closest(\'.v7-vidquiz-overlay\').remove()">닫기</button></div></div>';
+  overlay.innerHTML='<div style="text-align:center"><canvas id="v7shareCanvas"></canvas><div style="display:flex;gap:8px;justify-content:center;margin-top:12px"><button class="v7-milestone-close" onclick="v7DownloadCard()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-download"/></svg> 다운로드</button><button class="v7-milestone-close" onclick="v7CopyCard()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> 복사</button><button class="v7-milestone-close" onclick="this.closest(\'.v7-vidquiz-overlay\').remove()">닫기</button></div></div>';
   document.body.appendChild(overlay);
   const target=overlay.querySelector('#v7shareCanvas');
   target.width=600;target.height=380;
@@ -549,7 +549,7 @@ window.v7CopyCard=function(){
 };
 
 function renderShareSection(){
-  return '<div class="v7-share-wrap"><div class="sec">👨‍👩‍👧 학부모 공유 카드</div><div style="font-size:11px;color:var(--t3)">주간 학습 현황을 이미지로 만들어 부모님께 보여드리세요!</div><button class="v7-share-btn" onclick="generateParentCard()">📊 학습 리포트 생성</button></div>';
+  return '<div class="v7-share-wrap"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg> 학부모 공유 카드</div><div style="font-size:11px;color:var(--t3)">주간 학습 현황을 이미지로 만들어 부모님께 보여드리세요!</div><button class="v7-share-btn" onclick="generateParentCard()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg> 학습 리포트 생성</button></div>';
 }
 
 // ===== 8. Adaptive SM-2 Re-queue (Weak Spots) =====
@@ -585,7 +585,7 @@ function renderNotesSection(){
   const notes=u.v7notes||{};
   const noteText=notes[lastLesson]||'';
   if(!lastLesson)return '';
-  return '<div class="v7-notes"><div class="sec">📒 학습 노트</div><div style="font-size:10px;color:var(--t3);margin-bottom:6px">마지막 학습: '+lastLesson+'</div><textarea id="v7noteArea" placeholder="배운 내용을 메모하세요...">'+noteText.replace(/</g,'&lt;')+'</textarea><button class="v7-notes-save" onclick="v7SaveNote()">💾 저장</button></div>';
+  return '<div class="v7-notes"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-note"/></svg> 학습 노트</div><div style="font-size:10px;color:var(--t3);margin-bottom:6px">마지막 학습: '+lastLesson+'</div><textarea id="v7noteArea" placeholder="배운 내용을 메모하세요...">'+noteText.replace(/</g,'&lt;')+'</textarea><button class="v7-notes-save" onclick="v7SaveNote()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-save"/></svg> 저장</button></div>';
 }
 
 window.v7SaveNote=function(){
@@ -797,7 +797,7 @@ function v7InjectProfile(){
   const target=p4.querySelector('.v6-badge-section')||p4.querySelector('.v5-badge-section')||p4.querySelector('.v4-badge-section');
   if(target){
     const badgeDiv=document.createElement('div');badgeDiv.className='v7-badge-section';
-    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec">🌟 v7 배지 ('+((U().v7badges||[]).length)+'/'+V7_BADGES.length+')</div><div class="v4-badge-grid">'+renderV7Badges()+'</div></div>';
+    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> v7 배지 ('+((U().v7badges||[]).length)+'/'+V7_BADGES.length+')</div><div class="v4-badge-grid">'+renderV7Badges()+'</div></div>';
     target.parentNode.insertBefore(badgeDiv,target.nextSibling);
   }
 }

@@ -117,11 +117,11 @@ function renderMasteryHeatmap(){
     });
     S(u);
   }
-  let h=`<div class="v14-panel"><h3>🗺️ 학습 마스터리 히트맵</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg> 학습 마스터리 히트맵</h3>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14HeatmapCanvas" width="580" height="340"></canvas></div>`;
   h+=`<div class="v14-row">`;
-  h+=`<button class="v14-btn" onclick="v14PracticeMastery()">📝 약점 연습</button>`;
-  h+=`<button class="v14-btn" onclick="v14ExportHeatmap()">📥 PNG 저장</button>`;
+  h+=`<button class="v14-btn" onclick="v14PracticeMastery()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-note"/></svg> 약점 연습</button>`;
+  h+=`<button class="v14-btn" onclick="v14ExportHeatmap()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-download"/></svg> PNG 저장</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -205,7 +205,7 @@ function renderReviewScheduler(){
   const u=U();if(!u.v14)u.v14={};
   if(!u.v14.reviews)u.v14.reviews=SUBJECTS.map((s,i)=>({subj:s,lastReview:_today(),interval:1,ease:2.5,reps:0,nextDate:_today()}));
   S(u);
-  let h=`<div class="v14-panel"><h3>🔄 스마트 복습 스케줄러</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 스마트 복습 스케줄러</h3>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14ReviewCanvas" width="560" height="300"></canvas></div>`;
   h+=`<div class="v14-row">`;
   SUBJECTS.forEach((s,i)=>{
@@ -281,11 +281,11 @@ window.v14DoReview=function(idx){
 function renderStreakTower(){
   const u=U();if(!u.v14)u.v14={};
   if(!u.v14.streakTower){u.v14.streakTower={floors:0,bestFloor:0,todayBuilt:false,history:[]};S(u);}
-  let h=`<div class="v14-panel"><h3>🏗️ 스트릭 타워 빌더</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-build"/></svg> 스트릭 타워 빌더</h3>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14TowerCanvas" width="400" height="380"></canvas></div>`;
   h+=`<div class="v14-row">`;
-  h+=`<button class="v14-btn" onclick="v14BuildFloor()">🧱 층 쌓기</button>`;
-  h+=`<button class="v14-btn" onclick="v14ResetTower()">🔄 리셋</button>`;
+  h+=`<button class="v14-btn" onclick="v14BuildFloor()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-build"/></svg> 층 쌓기</button>`;
+  h+=`<button class="v14-btn" onclick="v14ResetTower()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 리셋</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -366,14 +366,14 @@ function renderSubjectRadar(){
     });
     S(u);
   }
-  let h=`<div class="v14-panel"><h3>📡 과목 경쟁력 레이더</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-radar"/></svg> 과목 경쟁력 레이더</h3>`;
   h+=`<select class="v14-select" id="v14RadarSubj" onchange="v14DrawRadar()">`;
   SUBJECTS.forEach((s,i)=>{h+=`<option value="${s}">${s}</option>`;});
   h+=`</select>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14RadarCanvas" width="460" height="400"></canvas></div>`;
   h+=`<div class="v14-row">`;
-  h+=`<button class="v14-btn" onclick="v14TrainSubject()">💪 훈련하기</button>`;
-  h+=`<button class="v14-btn" onclick="v14CompareSubjects()">🔄 비교</button>`;
+  h+=`<button class="v14-btn" onclick="v14TrainSubject()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg> 훈련하기</button>`;
+  h+=`<button class="v14-btn" onclick="v14CompareSubjects()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 비교</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -485,11 +485,11 @@ function renderQuestMap(){
     ];
     S(u);
   }
-  let h=`<div class="v14-panel"><h3>🗡️ 학습 퀘스트 맵</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 학습 퀘스트 맵</h3>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14QuestCanvas" width="560" height="340"></canvas></div>`;
   h+=`<div class="v14-row">`;
-  h+=`<button class="v14-btn" onclick="v14AdvanceQuest()">⚔️ 퀘스트 진행</button>`;
-  h+=`<button class="v14-btn" onclick="v14ClaimReward()">🎁 보상 수령</button>`;
+  h+=`<button class="v14-btn" onclick="v14AdvanceQuest()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 퀘스트 진행</button>`;
+  h+=`<button class="v14-btn" onclick="v14ClaimReward()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gift"/></svg> 보상 수령</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -578,11 +578,11 @@ function renderWrongAnalyzer(){
     });
     S(u);
   }
-  let h=`<div class="v14-panel"><h3>🔍 오답 패턴 분석기</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-search"/></svg> 오답 패턴 분석기</h3>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14WrongCanvas" width="560" height="340"></canvas></div>`;
   h+=`<div class="v14-row">`;
-  h+=`<button class="v14-btn" onclick="v14AnalyzeWrong()">🔬 분석하기</button>`;
-  h+=`<button class="v14-btn" onclick="v14WrongDrill()">📝 오답 드릴</button>`;
+  h+=`<button class="v14-btn" onclick="v14AnalyzeWrong()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-science"/></svg> 분석하기</button>`;
+  h+=`<button class="v14-btn" onclick="v14WrongDrill()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-note"/></svg> 오답 드릴</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -659,14 +659,14 @@ window.v14WrongDrill=function(){
 function renderGrowthSim(){
   const u=U();if(!u.v14)u.v14={};
   if(!u.v14.simData){u.v14.simData={dailyHours:2,weeks:12,subject:'국어',simulated:false};S(u);}
-  let h=`<div class="v14-panel"><h3>🔮 학습 성장 시뮬레이터</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spark"/></svg> 학습 성장 시뮬레이터</h3>`;
   h+=`<div class="v14-row">`;
   h+=`<label style="font-size:11px">일일 학습: <input type="range" id="v14SimHours" min="1" max="8" value="2" oninput="v14UpdateSimLabel()" style="width:80px"><span id="v14SimHoursLabel">2시간</span></label>`;
   h+=`<label style="font-size:11px">기간: <select class="v14-select" id="v14SimWeeks"><option value="4">4주</option><option value="8">8주</option><option value="12" selected>12주</option><option value="24">24주</option><option value="52">52주</option></select></label>`;
   h+=`</div>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14SimCanvas" width="560" height="320"></canvas></div>`;
   h+=`<div class="v14-row">`;
-  h+=`<button class="v14-btn" onclick="v14RunSim()">🚀 시뮬레이션 실행</button>`;
+  h+=`<button class="v14-btn" onclick="v14RunSim()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spark"/></svg> 시뮬레이션 실행</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -742,7 +742,7 @@ function renderOlympiad(){
     S(u);
   }
   const rivals=['학습봇 알파','퀴즈마스터','지식왕 AI','두뇌전사','문제풀이 로봇','천재학생 시뮬','기억력 대왕','논리왕 제타'];
-  let h=`<div class="v14-panel"><h3>🏆 과목 올림피아드</h3>`;
+  let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> 과목 올림피아드</h3>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14OlympiadCanvas" width="560" height="360"></canvas></div>`;
   h+=`<div class="v14-row">`;
   h+=`<select class="v14-select" id="v14OlympiadSubj">`;
@@ -751,7 +751,7 @@ function renderOlympiad(){
   h+=`<select class="v14-select" id="v14OlympiadRival">`;
   rivals.forEach((r,i)=>{h+=`<option value="${i}">${r} (${'⭐'.repeat(Math.min(5,Math.floor(i/1.5)+1))})</option>`;});
   h+=`</select>`;
-  h+=`<button class="v14-btn" onclick="v14StartOlympiad()">⚔️ 대전 시작</button>`;
+  h+=`<button class="v14-btn" onclick="v14StartOlympiad()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 대전 시작</button>`;
   h+=`</div></div>`;
   return h;
 }
@@ -912,14 +912,14 @@ function v14RefreshFeatures(){
     target.appendChild(container);
   }
   let h='';
-  h+=`<div class="sec" id="v14sec-heatmap">🗺️ v14 학습 마스터리 히트맵</div>`+renderMasteryHeatmap();
-  h+=`<div class="sec" id="v14sec-review">🔄 스마트 복습 스케줄러</div>`+renderReviewScheduler();
-  h+=`<div class="sec" id="v14sec-tower">🏗️ 스트릭 타워 빌더</div>`+renderStreakTower();
-  h+=`<div class="sec" id="v14sec-radar">📡 과목 경쟁력 레이더</div>`+renderSubjectRadar();
-  h+=`<div class="sec" id="v14sec-quest">🗡️ 학습 퀘스트 맵</div>`+renderQuestMap();
-  h+=`<div class="sec" id="v14sec-wrong">🔍 오답 패턴 분석기</div>`+renderWrongAnalyzer();
-  h+=`<div class="sec" id="v14sec-sim">🔮 학습 성장 시뮬레이터</div>`+renderGrowthSim();
-  h+=`<div class="sec" id="v14sec-olympiad">🏆 과목 올림피아드</div>`+renderOlympiad();
+  h+=`<div class="sec" id="v14sec-heatmap"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg> v14 학습 마스터리 히트맵</div>`+renderMasteryHeatmap();
+  h+=`<div class="sec" id="v14sec-review"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 스마트 복습 스케줄러</div>`+renderReviewScheduler();
+  h+=`<div class="sec" id="v14sec-tower"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-build"/></svg> 스트릭 타워 빌더</div>`+renderStreakTower();
+  h+=`<div class="sec" id="v14sec-radar"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-radar"/></svg> 과목 경쟁력 레이더</div>`+renderSubjectRadar();
+  h+=`<div class="sec" id="v14sec-quest"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 학습 퀘스트 맵</div>`+renderQuestMap();
+  h+=`<div class="sec" id="v14sec-wrong"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-search"/></svg> 오답 패턴 분석기</div>`+renderWrongAnalyzer();
+  h+=`<div class="sec" id="v14sec-sim"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spark"/></svg> 학습 성장 시뮬레이터</div>`+renderGrowthSim();
+  h+=`<div class="sec" id="v14sec-olympiad"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> 과목 올림피아드</div>`+renderOlympiad();
   container.innerHTML=h;
 
   setTimeout(()=>{

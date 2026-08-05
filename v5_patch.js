@@ -110,13 +110,13 @@ function v5sfx(type){
 
 // ===== 1. Weekly League System =====
 const LEAGUE_TIERS=[
-  {name:'브론즈',icon:'\u{1F949}',color:'#cd7f32',min:0,next:100},
-  {name:'실버',icon:'\u{1F948}',color:'#c0c0c0',min:100,next:250},
-  {name:'골드',icon:'\u{1F947}',color:'#fbbf24',min:250,next:500},
-  {name:'플래티넘',icon:'\u{1F48E}',color:'#8b5cf6',min:500,next:1000},
-  {name:'다이아몬드',icon:'\u{1F4A0}',color:'#06d6a0',min:1000,next:2000},
-  {name:'마스터',icon:'\u{1F451}',color:'#ef4444',min:2000,next:5000},
-  {name:'챔피언',icon:'\u{1F3C6}',color:'#ff6b6b',min:5000,next:99999}
+  {name:'브론즈',icon:'i-medal',color:'#cd7f32',min:0,next:100},
+  {name:'실버',icon:'i-medal',color:'#c0c0c0',min:100,next:250},
+  {name:'골드',icon:'i-medal',color:'#fbbf24',min:250,next:500},
+  {name:'플래티넘',icon:'i-gem',color:'#8b5cf6',min:500,next:1000},
+  {name:'다이아몬드',icon:'i-gem',color:'#06d6a0',min:1000,next:2000},
+  {name:'마스터',icon:'i-crown',color:'#ef4444',min:2000,next:5000},
+  {name:'챔피언',icon:'i-trophy',color:'#ff6b6b',min:5000,next:99999}
 ];
 
 const AI_PLAYERS=[
@@ -182,17 +182,17 @@ function renderLeague(){
   const allPlayers=[{name:u.nickname||'나',xp:league.weekXP||0,isMe:true},...(league.aiPlayers||[])];
   allPlayers.sort((a,b)=>b.xp-a.xp);
   let h='<div class="v5-league"><div class="v5-league-header">';
-  h+='<div class="v5-league-icon">'+tier.icon+'</div>';
+  h+='<div class="v5-league-icon" style="color:'+tier.color+'">'+window.ico(tier.icon)+'</div>';
   h+='<div class="v5-league-info"><div class="v5-league-tier" style="color:'+tier.color+'">'+tier.name+' 리그</div>';
   h+='<div class="v5-league-sub">이번 주 순위</div></div>';
   h+='<div class="v5-league-xp">'+(league.weekXP||0)+' XP</div></div>';
   h+='<div class="v5-league-bar"><div class="v5-league-fill" style="width:'+Math.round(pct*100)+'%;background:'+tier.color+'"></div></div>';
   h+='<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3)"><span>'+tier.name+'</span>'+(nextTier?'<span>'+nextTier.name+' ('+tier.next+' XP)</span>':'<span>MAX</span>')+'</div>';
   h+='<div class="v5-league-ranks" style="margin-top:10px">';
-  const medals=['\u{1F947}','\u{1F948}','\u{1F949}'];
+  const medals=[window.ico('i-medal'),window.ico('i-medal'),window.ico('i-medal')];
   allPlayers.slice(0,5).forEach((p,i)=>{
     const me=p.isMe?' style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)"':'';
-    h+='<div class="v5-league-rank"'+me+'><span class="lr-pos">'+(medals[i]||(i+1))+'</span><span class="lr-name">'+(p.isMe?'\u{1F464} ':'')+p.name+'</span><span class="lr-xp">'+p.xp+' XP</span></div>';
+    h+='<div class="v5-league-rank"'+me+'><span class="lr-pos">'+(medals[i]||(i+1))+'</span><span class="lr-name">'+(p.isMe?window.ico('i-user')+' ':'')+p.name+'</span><span class="lr-xp">'+p.xp+' XP</span></div>';
   });
   h+='</div></div>';
   return h;
@@ -220,7 +220,9 @@ function renderRadarChart(){
   canvas.width=300;canvas.height=300;
   const ctx=canvas.getContext('2d');
   const cx=150,cy=155,r=110,n=RADAR_SUBJECTS.length;
-  ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,300,300);
+  const _dk=document.documentElement.classList.contains('dark');
+  const _cBg=_dk?'#0a0a1a':'#FFFFFF', _cMu=_dk?'#94a3b8':'#525C7A', _cAc=_dk?'#8b5cf6':'#6641E8', _cDot=_dk?'#06d6a0':'#00734F';
+  ctx.fillStyle=_cBg;ctx.fillRect(0,0,300,300);
   for(let ring=5;ring>=1;ring--){
     ctx.beginPath();
     const rr=r*ring/5;
@@ -238,7 +240,7 @@ function renderRadarChart(){
     ctx.lineTo(cx+r*Math.cos(angle),cy+r*Math.sin(angle));
     ctx.strokeStyle='rgba(139,92,246,.08)';ctx.stroke();
     const lx=cx+(r+18)*Math.cos(angle);const ly=cy+(r+18)*Math.sin(angle);
-    ctx.font='bold 9px sans-serif';ctx.fillStyle='#94a3b8';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold 9px sans-serif';ctx.fillStyle=_cMu;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(RADAR_SUBJECTS[i],lx,ly);
   }
   ctx.beginPath();
@@ -250,21 +252,21 @@ function renderRadarChart(){
   });
   ctx.closePath();
   ctx.fillStyle='rgba(139,92,246,.15)';ctx.fill();
-  ctx.strokeStyle='#8b5cf6';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle=_cAc;ctx.lineWidth=2;ctx.stroke();
   scores.forEach((s,i)=>{
     const angle=(Math.PI*2*i/n)-(Math.PI/2);
     const val=r*s/100;
     const x=cx+val*Math.cos(angle);const y=cy+val*Math.sin(angle);
-    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle='#06d6a0';ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle=_cDot;ctx.fill();
   });
-  ctx.font='bold 11px sans-serif';ctx.fillStyle='#8b5cf6';ctx.textAlign='center';
+  ctx.font='bold 11px sans-serif';ctx.fillStyle=_cAc;ctx.textAlign='center';
   ctx.fillText('과목별 마스터리',cx,16);
   return canvas;
 }
 
 function renderRadarSection(){
   const canvas=renderRadarChart();
-  let h='<div class="v5-radar-wrap"><div class="sec" style="justify-content:center">\u{1F4CA} 과목별 실력 레이더</div>';
+  let h='<div class="v5-radar-wrap"><div class="sec" style="justify-content:center"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-radar"/></svg> 과목별 실력 레이더</div>';
   h+='<div id="v5radarArea"></div>';
   h+='<div class="v5-radar-legend">';
   const scores=getSubjectScores();
@@ -336,7 +338,7 @@ function renderRoadmap(){
   const u=U();
   let currentIdx=-1;
   ROADMAP.forEach((node,i)=>{if(node.check(u))currentIdx=i;});
-  let h='<div class="v5-roadmap"><div class="sec">\u{1F5FA} 학습 로드맵</div>';
+  let h='<div class="v5-roadmap"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg> 학습 로드맵</div>';
   h+='<div style="font-size:10px;color:var(--t3);margin-bottom:10px">진행: '+(currentIdx+1)+'/'+ROADMAP.length+'</div>';
   h+='<div class="v5-road-path">';
   ROADMAP.forEach((node,i)=>{
@@ -345,7 +347,7 @@ function renderRoadmap(){
     const locked=i>currentIdx+1;
     h+='<div class="v5-road-node">';
     h+='<div class="v5-road-dot'+(done?' done':(isCurrent?' current':' locked'))+'">'+
-      (done?'✓':(isCurrent?'→':'\u{1F512}'))+'</div>';
+      (done?'✓':(isCurrent?'→':window.ico('i-lock')))+'</div>';
     h+='<div class="v5-road-info"><div class="v5r-name"'+(locked?' style="opacity:.4"':'')+'>'+node.name+'</div>';
     h+='<div class="v5r-desc"'+(locked?' style="opacity:.3"':'')+'>'+node.desc+'</div></div></div>';
   });
@@ -390,7 +392,7 @@ function renderShield(){
   const u=U();
   const earned=u.shieldEarnedThisWeek===getWeekKey();
   let h='<div class="v5-shield"><div class="v5-shield-row">';
-  h+='<div class="v5-shield-icon">\u{1F6E1}</div>';
+  h+='<div class="v5-shield-icon" style="color:var(--p)"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg></div>';
   h+='<div class="v5-shield-info"><div class="v5-shield-title">스트릭 실드</div>';
   h+='<div class="v5-shield-desc">학습을 못 한 날에도 스트릭을 지켜줘요</div></div>';
   h+='<div class="v5-shield-count">'+count+'</div></div>';
@@ -586,7 +588,7 @@ function v5InjectHome(){
   const footer=p0.querySelector('[style*="margin-top:24px"]');if(!footer)return;
 
   const leagueDiv=document.createElement('div');
-  leagueDiv.innerHTML='<div class="sec">\u{1F3C6} 주간 리그</div>'+renderLeague();
+  leagueDiv.innerHTML='<div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> 주간 리그</div>'+renderLeague();
   footer.parentNode.insertBefore(leagueDiv,footer);
 
   const radarDiv=document.createElement('div');
@@ -606,7 +608,7 @@ function v5InjectHome(){
   footer.parentNode.insertBefore(shieldDiv,footer);
 
   const shareDiv=document.createElement('div');
-  shareDiv.innerHTML='<button class="v5-share-btn" onclick="v5ShowShareCard();var u=JSON.parse(localStorage.getItem(\'lp_user\')||\'{}\');u.sharedOnce=true;localStorage.setItem(\'lp_user\',JSON.stringify(u));">\u{1F4F1} 내 성적 공유 카드 만들기</button>';
+  shareDiv.innerHTML='<button class="v5-share-btn" onclick="v5ShowShareCard();var u=JSON.parse(localStorage.getItem(\'lp_user\')||\'{}\');u.sharedOnce=true;localStorage.setItem(\'lp_user\',JSON.stringify(u));"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg> 내 성적 공유 카드 만들기</button>';
   footer.parentNode.insertBefore(shareDiv,footer);
 
   earnShield();
@@ -619,7 +621,7 @@ function v5InjectProfile(){
   const target=p4.querySelector('.v4-badge-section')||p4.querySelector('[style*="background:var(--c1)"]');
   if(target){
     const badgeDiv=document.createElement('div');badgeDiv.className='v5-badge-section';
-    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec">\u{1F31F} v5 배지 ('+((U().v5badges||[]).length)+'/'+V5_BADGES.length+')</div><div class="v4-badge-grid">'+renderV5Badges()+'</div></div>';
+    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> v5 배지 ('+((U().v5badges||[]).length)+'/'+V5_BADGES.length+')</div><div class="v4-badge-grid">'+renderV5Badges()+'</div></div>';
     target.parentNode.insertBefore(badgeDiv,target.nextSibling);
   }
 }

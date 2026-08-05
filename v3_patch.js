@@ -156,7 +156,7 @@ function updateXPDisplay(){
 function showDailyComplete(){
   const el=document.createElement('div');
   el.className='v3-daily-complete';
-  el.innerHTML='<h3>🎉 일일 목표 달성!</h3><p style="font-size:11px;color:var(--t2)">오늘의 학습 목표를 달성했습니다. 내일도 힘내세요!</p>';
+  el.innerHTML='<h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-spark"/></svg> 일일 목표 달성!</h3><p style="font-size:11px;color:var(--t2)">오늘의 학습 목표를 달성했습니다. 내일도 힘내세요!</p>';
   const target=document.getElementById('v3XPGoal');
   if(target&&target.parentNode)target.parentNode.insertBefore(el,target.nextSibling);
   setTimeout(()=>{if(el.parentNode)el.parentNode.removeChild(el);},5000);
@@ -378,8 +378,8 @@ function renderFlashcard(){
       <div class="v3-flash-back"><div style="color:var(--cy)">${card.back}</div></div>
     </div>
     <div class="v3-flash-nav">
-      <button onclick="v3FlashAnswer(false)" style="background:rgba(239,68,68,.2);color:#ef4444">❌ 모르겠다</button>
-      <button onclick="v3FlashAnswer(true)" style="background:rgba(34,197,94,.2);color:#22c55e">✅ 알고있다</button>
+      <button onclick="v3FlashAnswer(false)" style="background:rgba(239,68,68,.2);color:#ef4444"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cross"/></svg> 모르겠다</button>
+      <button onclick="v3FlashAnswer(true)" style="background:rgba(34,197,94,.2);color:#22c55e"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> 알고있다</button>
     </div>
     <div class="v3-flash-progress">${flashIdx+1} / ${flashCards.length}</div>`;
 }
@@ -466,7 +466,7 @@ function renderFillQuiz(container){
     <input class="v3-fill-input" id="v3FillAns" placeholder="정답을 입력하세요" onkeydown="if(event.key==='Enter')v3CheckFill()">
     <div style="display:flex;gap:6px;margin-top:8px;justify-content:center">
       <button class="bt bp" onclick="v3CheckFill()">확인</button>
-      <button class="v3-hint-btn" onclick="v3ShowFillHint()">💡 힌트</button>
+      <button class="v3-hint-btn" onclick="v3ShowFillHint()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bulb"/></svg> 힌트</button>
     </div>
     <div id="v3FillHint" style="display:none"></div>
     <div id="v3FillResult"></div>
@@ -511,8 +511,8 @@ function renderTFQuiz(container){
   container.innerHTML=`<div class="qz" style="margin-bottom:8px">
     <div class="qz-q">${q.cat} | ${q.q}</div>
     <div class="v3-tf-btns">
-      <button onclick="v3CheckTF(this,true,${q.a})">⭕ 맞다</button>
-      <button onclick="v3CheckTF(this,false,${q.a})">❌ 틀리다</button>
+      <button onclick="v3CheckTF(this,true,${q.a})"><svg class="ico" aria-hidden="true" focusable="false" style="color:var(--gn)"><use href="#i-check"/></svg> 맞다</button>
+      <button onclick="v3CheckTF(this,false,${q.a})"><svg class="ico" aria-hidden="true" focusable="false" style="color:var(--rd)"><use href="#i-cross"/></svg> 틀리다</button>
     </div>
   </div>`;
   container._currentTF=q;
@@ -573,14 +573,14 @@ function injectV3Widgets(){
 
   // New Quiz Types Section
   const quizSection=document.createElement('div');
-  quizSection.innerHTML=`<div class="cat-subsec" style="margin-top:12px">✍️ 빈칸 채우기 퀴즈</div>`;
+  quizSection.innerHTML=`<div class="cat-subsec" style="margin-top:12px"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pencil"/></svg> 빈칸 채우기 퀴즈</div>`;
   const fillContainer=document.createElement('div');
   fillContainer.setAttribute('data-v3-fill','1');
   quizSection.appendChild(fillContainer);
   renderFillQuiz(fillContainer);
 
   const tfSection=document.createElement('div');
-  tfSection.innerHTML=`<div class="cat-subsec" style="margin-top:12px">⭕❌ O/X 퀴즈</div>`;
+  tfSection.innerHTML=`<div class="cat-subsec" style="margin-top:12px"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> O/X 퀴즈</div>`;
   const tfContainer=document.createElement('div');
   tfContainer.setAttribute('data-v3-tf','1');
   tfSection.appendChild(tfContainer);
@@ -603,13 +603,13 @@ function injectV3Widgets(){
     const flashBtn=document.createElement('div');
     flashBtn.className='gc';
     flashBtn.onclick=window.v3OpenFlashcard;
-    flashBtn.innerHTML='<div class="gi">🃏</div><div class="gn">플래시카드</div><div class="gd">간격반복 학습</div>';
+    flashBtn.innerHTML='<div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cards"/></svg> </div><div class="gn">플래시카드</div><div class="gd">간격반복 학습</div>';
     toolsGrid.appendChild(flashBtn);
 
     const timerBtn=document.createElement('div');
     timerBtn.className='gc';
     timerBtn.onclick=window.v3ShowTimer;
-    timerBtn.innerHTML='<div class="gi">🍅</div><div class="gn">집중 타이머</div><div class="gd">뽀모도로 25분</div>';
+    timerBtn.innerHTML='<div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pomo"/></svg> </div><div class="gn">집중 타이머</div><div class="gd">뽀모도로 25분</div>';
     toolsGrid.appendChild(timerBtn);
 
     const dueCards=getDueCards();
@@ -618,7 +618,7 @@ function injectV3Widgets(){
       reviewBtn.className='gc';
       reviewBtn.style.border='1.5px solid rgba(239,68,68,.3)';
       reviewBtn.onclick=window.v3OpenFlashcard;
-      reviewBtn.innerHTML='<div class="gi">📖</div><div class="gn">복습 필요</div><div class="gd">'+dueCards.length+'개 카드</div>';
+      reviewBtn.innerHTML='<div class="gi"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-book"/></svg> </div><div class="gn">복습 필요</div><div class="gd">'+dueCards.length+'개 카드</div>';
       toolsGrid.insertBefore(reviewBtn,toolsGrid.firstChild);
     }
   }

@@ -251,7 +251,7 @@ window.v6DownloadCert=function(){
 function renderCertSection(){
   const u=U();
   const certs=u.certsEarned||[];
-  let h='<div class="v6-cert-wrap"><div class="sec">🎓 학습 성취 증명서</div>';
+  let h='<div class="v6-cert-wrap"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-trophy"/></svg> 학습 성취 증명서</div>';
   if(certs.length>0){
     h+='<div style="font-size:10px;color:var(--t3);margin-bottom:8px">획득한 증명서: '+certs.length+'개</div>';
     certs.slice(-3).forEach(c=>{
@@ -261,7 +261,7 @@ function renderCertSection(){
   }else{
     h+='<div style="font-size:10px;color:var(--t3)">과목 학습을 완료하면 증명서를 받을 수 있어요!</div>';
   }
-  h+='<button class="v6-cert-btn" onclick="v6ShowCertificate(\'나의 학습 여정\',' +(u.level||1)+','+(u.xp||0)+')">📜 증명서 발급받기</button>';
+  h+='<button class="v6-cert-btn" onclick="v6ShowCertificate(\'나의 학습 여정\',' +(u.level||1)+','+(u.xp||0)+')"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-scroll"/></svg> 증명서 발급받기</button>';
   h+='</div>';
   return h;
 }
@@ -299,7 +299,7 @@ function renderFlashcards(){
   const total=FLASHCARDS.length;
   const card=FLASHCARDS[v6FlashIdx%total];
 
-  let h='<div class="v6-flash-wrap"><div class="sec">📚 플래시카드 학습</div>';
+  let h='<div class="v6-flash-wrap"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-book"/></svg> 플래시카드 학습</div>';
   h+='<div style="font-size:10px;color:var(--t3);margin-bottom:8px">복습: '+flashStats.reviewed+'회 | 숙달: '+flashStats.mastered+'개</div>';
   h+='<div class="v6-flash-card" id="v6flashCard" onclick="v6FlipCard()">';
   h+='<div class="v6-flash-front">'+card.front+'</div>';
@@ -307,8 +307,8 @@ function renderFlashcards(){
   h+='<div class="v6-flash-hint">탭하여 뒤집기 • <span style="color:var(--p)">'+card.cat+'</span></div>';
   h+='</div>';
   h+='<div class="v6-flash-controls">';
-  h+='<button class="v6-hard" onclick="v6FlashAnswer(false)">❌ 모르겠어요</button>';
-  h+='<button class="v6-easy" onclick="v6FlashAnswer(true)">✅ 알고 있어요!</button>';
+  h+='<button class="v6-hard" onclick="v6FlashAnswer(false)"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cross"/></svg> 모르겠어요</button>';
+  h+='<button class="v6-easy" onclick="v6FlashAnswer(true)"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> 알고 있어요!</button>';
   h+='</div>';
   h+='<div class="v6-flash-progress">';
   for(let i=0;i<Math.min(total,10);i++){
@@ -354,7 +354,7 @@ window.v6EarnGems=v6EarnGems;
 function renderGemBar(){
   const gems=getGems();
   let h='<div class="v6-gem-bar">';
-  h+='<span class="v6-gem-icon">💎</span>';
+  h+='<span class="v6-gem-icon" style="color:var(--p)"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-gem"/></svg></span>';
   h+='<span class="v6-gem-count">'+gems+' 💎</span>';
   h+='<button class="v6-gem-shop-btn" onclick="v6ShowGemInfo()">상점</button>';
   h+='</div>';
@@ -459,7 +459,7 @@ function renderDailyChallenge(){
   const quizzes=getDailyQuizzes();
 
   let h='<div class="v6-daily" id="v6dailyWrap"><div class="v6-daily-header">';
-  h+='<span class="v6d-icon">⚡</span>';
+  h+='<span class="v6d-icon" style="color:var(--gd)"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg></span>';
   h+='<div class="v6d-info"><div class="v6d-title">오늘의 퀵즈 도전</div>';
   h+='<div class="v6d-sub">5문제 실력 테스트</div></div>';
 
@@ -544,13 +544,13 @@ function renderSubjectProgress(){
   const subjects=['수학','과학','한국사','코딩','영어','음악','체육','미술','사회','경제','건강'];
   const icons={'수학':'🔢','과학':'🔬','한국사':'🇰🇷','코딩':'💻','영어':'🔤','음악':'🎵','체육':'⚽','미술':'🎨','사회':'🏘','경제':'📈','건강':'💚'};
 
-  let h='<div class="v6-subj-progress"><div class="sec">📊 과목별 진도</div>';
+  let h='<div class="v6-subj-progress"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chart"/></svg> 과목별 진도</div>';
   subjects.forEach(s=>{
     const cat=byCategory[s]||{total:0,correct:0};
     const pct=cat.total>0?Math.round(cat.correct/cat.total*100):0;
     const color=SUBJ_COLORS[s]||'#8b5cf6';
     h+='<div class="v6-subj-row">';
-    h+='<span class="v6-subj-icon">'+(icons[s]||'📖')+'</span>';
+    h+='<span class="v6-subj-icon" style="color:'+color+'">'+window.ico(s,icons[s]||'📖')+'</span>';
     h+='<span class="v6-subj-name">'+s+'</span>';
     h+='<div class="v6-subj-bar"><div class="v6-subj-fill" style="width:'+pct+'%;background:'+color+'"></div></div>';
     h+='<span class="v6-subj-pct" style="color:'+color+'">'+pct+'%</span>';
@@ -593,7 +593,7 @@ function renderAvatarCard(){
   h+='<div class="v6-avatar-circle" style="background:linear-gradient(135deg,'+bg+'22,'+bg+'11)">'+avatar+'</div>';
   h+='<div class="v6-avatar-info">';
   h+='<div class="v6-avatar-name">'+name+'</div>';
-  h+='<div class="v6-avatar-title">🏅 '+title+'</div>';
+  h+='<div class="v6-avatar-title"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-medal"/></svg> '+title+'</div>';
   h+='<div class="v6-avatar-level">Lv.'+lv+' • '+(u.xp||0)+' XP • '+(u.gems||0)+' 💎</div>';
   h+='</div></div>';
   return h;
@@ -816,7 +816,7 @@ function v6InjectProfile(){
   const target=p4.querySelector('.v5-badge-section')||p4.querySelector('.v4-badge-section')||p4.querySelector('[style*="background:var(--c1)"]');
   if(target){
     const badgeDiv=document.createElement('div');badgeDiv.className='v6-badge-section';
-    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec">🌟 v6 배지 ('+((U().v6badges||[]).length)+'/'+V6_BADGES.length+')</div><div class="v4-badge-grid">'+renderV6Badges()+'</div></div>';
+    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> v6 배지 ('+((U().v6badges||[]).length)+'/'+V6_BADGES.length+')</div><div class="v4-badge-grid">'+renderV6Badges()+'</div></div>';
     target.parentNode.insertBefore(badgeDiv,target.nextSibling);
   }
 }

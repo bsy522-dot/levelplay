@@ -20,26 +20,31 @@
   var TOP_ANCHOR = 'catContent';
 
   var GROUPS = [
-    { id: 'lpgChallenge', title: '🎯 도전과 대결',
+    { id: 'lpgChallenge', title: '도전과 대결', icon: 'i-sword',
       keys: ['마스터리 챌린지', '타임어택', '학습 스토리', '듣기 퀴즈', '레벨 테스트', '주간 리그', '랭크 매치'] },
-    { id: 'lpgStats', title: '📊 기록과 통계',
+    { id: 'lpgStats', title: '기록과 통계', icon: 'i-chart',
       keys: ['학습 달력', '실력 레이더', '학습 로드맵', '과목별 진도', '히트맵', '주간 학습', '플래시카드'] },
-    { id: 'lpgReward', title: '🎁 보상과 공유',
+    { id: 'lpgReward', title: '보상과 공유', icon: 'i-gift',
       keys: ['스트릭 실드', '성적 공유', '상점', 'XP 부스트', '학부모', '증명서', '학습자'] },
-    { id: 'lpgEtc', title: '🧰 그 밖의 기능', keys: [] }   // 위에 안 걸리는 것 전부
+    { id: 'lpgEtc', title: '그 밖의 기능', icon: 'i-gear', keys: [] }   // 위에 안 걸리는 것 전부
   ];
 
   /* 만화·영상 바로가기 — [과목ID(어른), 과목ID(아이), 커리큘럼키, 단원명 조각] */
   var HUB = [
-    { ic: '🎬', t: '수학이 태어난 날', d: '만화 6화 · 수학이 왜 태어났는지',
+    { ic: 'i-comic', t: '수학이 태어난 날', d: '만화 6화 · 수학이 왜 태어났는지',
       adult: '수학', kid: '수학', key: 'math', unit: '수학이 태어난 날' },
-    { ic: '📜', t: '아침의 나라 임금님들', d: '고조선 만화 6편 · 단군부터 강화도까지',
+    { ic: 'i-scroll', t: '아침의 나라 임금님들', d: '고조선 만화 6편 · 단군부터 강화도까지',
       adult: '역사', kid: '한국사', key: 'history', unit: '아침의 나라' },
-    { ic: '🎻', t: '모차르트 명곡', d: '영상 23편 · 다섯 살의 첫 곡부터',
+    { ic: 'i-music', t: '모차르트 명곡', d: '영상 23편 · 다섯 살의 첫 곡부터',
       adult: '음악', kid: '음악', key: 'music', unit: '모차르트' }
   ];
 
   /* ★U는 let 선언이라 window.U 가 아니다 — 맨이름으로 읽어야 아이/어른 모드를 안다 */
+  /* 이모지 금지(DESIGN_SPEC §0-3) — index.html 스프라이트를 참조한다 */
+  function svgIco(id) {
+    return '<svg class="ico" aria-hidden="true" focusable="false"><use href="#' + (id || 'i-star') + '"/></svg>';
+  }
+
   function isKid() { try { return typeof U !== 'undefined' && !!U.kidMode; } catch (e) { return false; } }
 
   /* ---------- 바로가기: 학습탭 → 과목 → 해당 단원으로 스크롤 ---------- */
@@ -91,12 +96,12 @@
     var box = document.createElement('div');
     box.id = 'lpContentHub';
     box.dataset.lpTidy = 'keep';
-    var html = '<div class="sec" style="font-size:13px">📚 만화·영상으로 배우기</div>'
+    var html = '<div class="sec" style="font-size:13px">' + svgIco('i-comic') + ' 만화·영상으로 배우기</div>'
              + '<div class="lp-hub">';
     for (var i = 0; i < HUB.length; i++) {
       var h = HUB[i];
       html += '<div class="lp-hubc" onclick="lpGoContent(' + i + ')">'
-            + '<div class="lp-hubi">' + h.ic + '</div>'
+            + '<div class="lp-hubi">' + svgIco(h.ic) + '</div>'
             + '<div class="lp-hubx"><div class="lp-hubt">' + h.t + '</div>'
             + '<div class="lp-hubd">' + h.d + '</div></div>'
             + '<div class="lp-huba">›</div></div>';
@@ -124,7 +129,7 @@
     d.id = g.id;
     d.className = 'lp-grp';
     d.dataset.lpTidy = 'group';
-    d.innerHTML = '<summary><span class="lp-grpt">' + g.title + '</span>'
+    d.innerHTML = '<summary><span class="lp-grpt">' + svgIco(g.icon) + ' ' + g.title + '</span>'
                 + '<span class="lp-grpn"></span></summary><div class="lp-grpb"></div>';
     p0.appendChild(d);
     return d;
@@ -195,9 +200,11 @@
       'border:1px solid rgba(139,92,246,.3);cursor:pointer;transition:.15s}',
       '.lp-hubc:active{transform:scale(.985)}',
       '.lp-hubc:hover{border-color:var(--cy,#06d6a0)}',
-      '.lp-hubi{font-size:24px;flex:0 0 auto;width:38px;text-align:center}',
+      '.lp-hubi{font-size:24px;flex:0 0 auto;width:38px;display:flex;align-items:center;justify-content:center;color:var(--p,#6641E8)}',
+      '.lp-hubi .ico,.lp-grpt .ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
+      '.lp-grpt{display:inline-flex;align-items:center;gap:6px}',
       '.lp-hubx{flex:1 1 auto;min-width:0}',
-      '.lp-hubt{font-size:13px;font-weight:700;color:var(--t1,#fff)}',
+      '.lp-hubt{font-size:13px;font-weight:700;color:var(--tx,#1A2140)}',
       '.lp-hubd{font-size:10px;color:var(--t3,#8b8ba7);margin-top:2px}',
       '.lp-huba{flex:0 0 auto;font-size:18px;color:var(--t3,#8b8ba7)}',
       /* 접이식 그룹 */

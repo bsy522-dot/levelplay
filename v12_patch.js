@@ -283,7 +283,7 @@ function renderShowcasePanel(){
   let h='<div class="v12-showcase v12-panel" id="v12showcasePanel"><h3>\u{1F3C6} 업적 쇼케이스</h3>';
   h+='<canvas id="v12showcaseCanvas" style="width:100%;border-radius:8px"></canvas>';
   h+='<div style="display:flex;gap:6px;justify-content:center">';
-  h+='<button class="v12-btn" onclick="renderShowcaseCanvas()">🔄 새로고침</button>';
+  h+='<button class="v12-btn" onclick="renderShowcaseCanvas()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-repeat"/></svg> 새로고침</button>';
   h+='<button class="v12-btn" onclick="exportShowcase()">\u{1F4E5} PNG 다운로드</button>';
   h+='</div></div>';
   return h;
@@ -324,7 +324,7 @@ function startXPEvent(){
 
 function renderXPEventPanel(){
   const ev=checkXPEvent();
-  let h='<div class="v12-xpevent" id="v12xpEventPanel"><h3>⚡ XP 더블 이벤트</h3>';
+  let h='<div class="v12-xpevent" id="v12xpEventPanel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg> XP 더블 이벤트</h3>';
   if(ev.active){
     const remain=Math.max(0,Math.ceil((ev.endTime-Date.now())/60000));
     h+='<div class="xp-multi">x'+ev.multiplier+'</div>';
@@ -584,7 +584,7 @@ function loseHeart(){
 
 function renderHeartsPanel(){
   const hearts=checkHeartRefill();
-  let h='<div class="v12-hearts" id="v12heartsPanel"><h3>❤️ 학습 하트</h3>';
+  let h='<div class="v12-hearts" id="v12heartsPanel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-heart"/></svg> 학습 하트</h3>';
   h+='<div class="heart-row">';
   for(let i=0;i<hearts.max;i++){
     h+='<span class="heart'+(i<hearts.current?'':' empty')+'">❤️</span>';
@@ -686,7 +686,7 @@ function renderContestPanel(){
     }
     h+='<div style="text-align:center">';
     h+='<div style="font-size:11px;color:var(--t3);margin-bottom:8px">총 '+cs.totalWins+'승 · '+cs.history.length+'회 참가</div>';
-    h+='<button class="v12-btn" onclick="startContest()" style="font-weight:700">⚔️ 대회 시작!</button>';
+    h+='<button class="v12-btn" onclick="startContest()" style="font-weight:700"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-sword"/></svg> 대회 시작!</button>';
     h+='</div>';
   }
   h+='</div>';
