@@ -32,6 +32,24 @@
   ];
   var SB = {}; SUBJ.forEach(function (s) { SB[s.k] = s; });
 
+  /* ================================================================
+     1-b. 홈 상단 과목 탭 순서 — 가나다순도, SUBJ 선언순도 아니다.
+     실측(lpIaCoverage, 아이 뱅크 1,082개) 기준으로 점수를 매겨 정렬했다.
+       점수 = 전체 항목수 + 3 × (영상+만화+게임+실험)
+       레슨·퀴즈가 전체의 74%라 총량만 보면 "탭할 것"이 적은 과목이 앞에 온다.
+       아이가 실제로 누르는 것은 보고/노는 것이므로 그쪽에 3배 가중.
+       과학 387 · 음악 321 · 수학 229 · 언어 224 · 마음건강 167 · 세계사 161
+       한국사 148 · 코딩 139 · 체육 135 · 예술 96 · 경제사회 79
+     편집 판단 1건: 한국사를 7위→5위로 올렸다. 이 앱의 두 만화 시리즈 중 하나
+     (아침의 나라 임금님들 7편)와 가장 큰 게임(한국사 영웅전 v8)이 여기 있고,
+     한국 사용자에게는 표제 과목이다. 그 외에는 점수 순서 그대로다.
+     ================================================================ */
+  var HOME_ORDER = ['science', 'music', 'math', 'language', 'history', 'mind', 'world', 'coding', 'sports', 'art', 'society'];
+  /* '추천' 탭 = 지금까지의 홈 전체. 액센트는 고정 인디고 —
+     var(--p)는 다크에서 #8b5cf6 이라 흰 글씨가 4.28:1 로 AA 미달이다. #4F46E5 는 6.3:1. */
+  var REC_KEY = '__rec';
+  var REC_TAB = { k: REC_KEY, nm: '추천', ac: '#4F46E5', sym: 'i-star' };
+
   /* 과목 → 학습탭 과목 타일 id (아이/어른 모드에서 이름이 다르다) */
   var S2TILE = {
     math:     { kid: '수학',     adult: '수학' },
@@ -223,6 +241,10 @@
   function tier() { var t = u().ageTier; return (t === 'toddler' || t === 'elementary' || t === 'teen' || t === 'adult') ? t : ''; }
   function isKid() { var t = tier(); if (t) return t === 'toddler' || t === 'elementary'; return !!u().kidMode; }
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  /* 원본 단원명에 이모지가 섞여 있다(예: "📗 아침의 나라 임금님들").
+     아이콘 자리에는 전용 SVG만 쓰기로 했으므로 표시용 문자열에서는 걷어낸다. */
+  var EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu;
+  function deco(s) { return String(s == null ? '' : s).replace(EMOJI_RE, '').replace(/\s{2,}/g, ' ').trim(); }
   function svg(id, cls) { return '<svg class="ico' + (cls ? ' ' + cls : '') + '" aria-hidden="true" focusable="false"><use href="#' + (id || 'i-star') + '"/></svg>'; }
   /* 과목 액센트를 저알파 틴트로. 고정 밝은색(ti)을 배경에 깔면 다크 모드에서 흰 글씨가 죽는다.
      알파 틴트는 --bg 위에 얹히므로 라이트/다크 어느 쪽이든 글자색(--tx)이 그대로 산다. */
@@ -231,6 +253,23 @@
     if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
     var n = parseInt(h, 16);
     return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+  /* 다크에서 과목 액센트를 흰쪽으로 섞는다. 알파 틴트와 달리 어두운 배경 위에서도
+     아이콘 선이 살아난다(#1D4ED8 같은 진한 남색이 검정 위에서 안 보이던 문제). */
+  function lighten(hex, a) {
+    var h = String(hex).replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return 'rgb(' + Math.round(r + (255 - r) * a) + ',' + Math.round(g + (255 - g) * a) + ',' + Math.round(b + (255 - b) * a) + ')';
+  }
+  /* 검정쪽으로 섞는다. 형식 배지(.lp-kd)는 밝은 고정 틴트(ti) 위에 액센트 글씨를 얹는데
+     경제·사회(#A16207 on #FCF3E0)만 4.46:1 로 AA(4.5) 미달이었다(개편 전부터).
+     ti 가 항상 밝으므로 글씨를 어둡게 하면 11과목 전부 단조 증가한다. */
+  function shade(hex, a) {
+    var h = String(hex).replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    var n = parseInt(h, 16);
+    return 'rgb(' + Math.round(((n >> 16) & 255) * (1 - a)) + ',' + Math.round(((n >> 8) & 255) * (1 - a)) + ',' + Math.round((n & 255) * (1 - a)) + ')';
   }
 
   function vTags(title) {
@@ -445,7 +484,7 @@
   /* ================================================================
      5. 과목 허브 (p5)
      ================================================================ */
-  var curHub = null, curChip = 'all', HUB_MORE = {};
+  var curHub = null, curChip = 'all', HUB_MORE = {}, curHubOpt = null;
 
   function counts(k) {
     var b = idx().by[k] || {}, c = { video: 0, comic: 0, lesson: 0, game: 0, quiz: 0, sim: 0 };
@@ -521,7 +560,7 @@
     if (list.length > lim) h += '<button class="bt bs lp-more" onclick="lpHubMore(\'' + esc(key) + '\')">+ ' + (list.length - lim) + '개 더 보기</button>';
     return h;
   }
-  window.lpHubMore = function (key) { HUB_MORE[key] = 1; renderHub(curHub); };
+  window.lpHubMore = function (key) { HUB_MORE[key] = 1; renderHub(curHub, curHubOpt); };
 
   function gameCard(it) {
     var g = it.g, s = SB[it.s];
@@ -529,7 +568,7 @@
       return '<div class="gcard lp-simcard" onclick="lpOpenItem(' + it.i + ')">'
         + '<div class="gth gthp" style="--pc:' + s.ac + '">' + svg('i-science', 'gthp-i') + '</div>'
         + '<div class="band" style="background:' + s.ac + '"></div>'
-        + '<div class="gn">' + esc(it.t) + '</div><div class="gd">' + esc(it.d || '') + '</div>'
+        + '<div class="gn">' + esc(it.t) + '</div><div class="gd">' + esc(deco(it.d)) + '</div>'
         + '<div class="play">▶ 실험하기</div></div>';
     }
     var m = (typeof GAME_META !== 'undefined' && GAME_META[g.nm]) || { d: 2, xp: 15, min: 5, hook: g.d };
@@ -555,14 +594,52 @@
     return '<div class="lp-row" onclick="lpOpenItem(' + it.i + ')" role="button" tabindex="0">'
       + thumb
       + '<div class="lp-rx"><div class="lp-rt">' + esc(it.t) + '</div>'
-      + '<div class="lp-rd"><span class="lp-kd" style="background:' + s.ti + ';color:' + s.ac + '">' + KIND_LABEL[it.kind] + '</span>' + esc(it.d || '') + '</div></div>'
+      + '<div class="lp-rd"><span class="lp-kd" style="background:' + s.ti + ';color:' + shade(s.ac, .14) + '">' + KIND_LABEL[it.kind] + '</span>' + esc(deco(it.d)) + '</div></div>'
       + (it.done ? '<span class="lp-done">완료</span>' : '<span class="lp-arr">›</span>')
       + '</div>';
   }
 
-  function renderHub(k) {
-    var host = document.getElementById('subjHub'); if (!host || !SB[k]) return;
-    curHub = k;
+  /* 과목 화면의 주 액션 — 화면당 딱 하나 (벤치마크: 첫 화면은 "지금 뭘 하지?"에 답해야 한다).
+     이미 한 게 있으면 '이어서 하기', 없으면 '시작하기'. 대상은 아직 안 한 첫 배우기 항목.
+     칩 필터와 무관하게 과목 전체에서 고른다 — 필터를 바꿨다고 주 액션이 사라지면 안 된다. */
+  function primaryCard(k) {
+    var s = SB[k], bucket = idx().by[k] || [];
+    if (!bucket.length) return '';
+    var doneN = 0;
+    for (var d = 0; d < bucket.length; d++) if (bucket[d].done) doneN++;
+    function of(kinds) { return bucket.filter(function (it) { return kinds.indexOf(it.kind) >= 0; }); }
+    var pool = of(['video', 'comic', 'lesson']);
+    if (!pool.length) pool = of(['game', 'sim']);
+    if (!pool.length) pool = bucket.slice();
+    pool = interleave(pool);
+    var pick = null;
+    for (var i = 0; i < pool.length; i++) if (!pool[i].done) { pick = pool[i]; break; }
+    if (!pick) pick = pool[0];
+    if (!pick) return '';
+    var sub = KIND_LABEL[pick.kind] || '';
+    if (pick.d) sub += ' · ' + deco(pick.d);
+    return '<button class="lp-pact" style="--sc:' + s.ac + ';--scs:' + tint(s.ac, .34) + '"'
+      + ' onclick="lpOpenItem(' + pick.i + ')">'
+      + '<span class="lp-pai">' + svg(KIND_SYM[pick.kind]) + '</span>'
+      + '<span class="lp-pax">'
+      + '<span class="lp-pak">' + esc(s.nm) + (doneN ? ' 이어서 하기' : ' 시작하기') + '</span>'
+      + '<span class="lp-pat">' + esc(pick.t) + '</span>'
+      + '<span class="lp-pad">' + esc(sub) + '</span>'
+      + '</span>'
+      + '<span class="lp-paa">' + svg('i-play') + '</span></button>'
+      + '<div class="lp-pacm">' + esc(s.nm) + ' 전체 ' + bucket.length + '개'
+      + (doneN ? ' · 이미 한 것 ' + doneN + '개' : '') + '</div>';
+  }
+
+  /* host 를 갈아끼울 수 있게 했다. 홈 상단 탭('lpHomeSubj')과 과목 허브 패널('subjHub')이
+     같은 렌더러를 쓴다 — 두 번째 렌더러를 만들지 않는다. 내부 id 는 host 별로 접두어를 붙여
+     같은 id 가 문서에 두 번 생기지 않게 한다. */
+  function renderHub(k, opt) {
+    opt = opt || curHubOpt || {};
+    var hostId = opt.host || 'subjHub';
+    var host = document.getElementById(hostId); if (!host || !SB[k]) return;
+    var home = !!opt.home;
+    curHub = k; curHubOpt = opt;
     var s = SB[k], bucket = idx().by[k] || [];
     var f = curChip;
     function pick(kinds) {
@@ -587,27 +664,30 @@
     next.sort(function (a, b) { return (KIND_ORDER[a.kind] - KIND_ORDER[b.kind]) || (a.i - b.i); });
     next = next.slice(0, 6);
 
-    var h = '<div class="lp-hubhead" style="--sc:' + s.ac + ';background:' + tint(s.ac, .13) + '">'
+    /* 홈에서는 과목 이름이 이미 상단 탭에 켜져 있다. 머리말 대신 주 액션 카드를 놓는다. */
+    var h = home
+      ? primaryCard(k)
+      : ('<div class="lp-hubhead" style="--sc:' + s.ac + ';background:' + tint(s.ac, .13) + '">'
       + '<button class="bt bs lp-back" onclick="lpBackToSubjects()">←</button>'
       /* ★클래스 이름은 lp-sh* — home_tidy.js 가 이미 .lp-hubi/.lp-hubt/.lp-hubc 를
          '만화·영상으로 배우기' 카드에 쓰고 있어서 같은 이름을 쓰면 홈 카드가 망가진다. */
       + '<span class="lp-shi" style="color:' + s.ac + '">' + svg(s.sym) + '</span>'
       + '<span class="lp-sht">' + esc(s.nm) + '</span>'
-      + '<span class="lp-shc">' + bucket.length + '개</span></div>'
-      + '<div class="lp-chips" id="lpHubChips">'
+      + '<span class="lp-shc">' + bucket.length + '개</span></div>');
+    h += '<div class="lp-chips" id="' + hostId + '-chips">'
       + CHIPS.map(function (c) {
           var n = c[0] === 'all' ? bucket.length : bucket.filter(function (it) { return it.kind === c[0] || (c[0] === 'game' && it.kind === 'sim'); }).length;
           if (!n && c[0] !== 'all') return '';
           return '<button class="bt ' + (f === c[0] ? 'bp' : 'bs') + '" onclick="lpHubChip(\'' + c[0] + '\')">' + svg(c[2]) + '<span>' + c[1] + ' ' + n + '</span></button>';
         }).join('')
       + '</div>'
-      + '<div id="lpHubBody">';
+      + '<div id="' + hostId + '-body">';
 
     h += zone('배우기', 'i-book', learn, k, { lim: 9, mix: true });
     h += zone('해보기', 'i-play', play, k, { poster: true, lim: 8 });
     if (check.length) {
       h += '<div class="sec lp-zh">' + svg('i-note') + ' 확인<span class="lp-zn">' + check.length + '</span></div>'
-        + '<div id="lpHubQuiz"></div>'
+        + '<div id="' + hostId + '-qz"></div>'
         + '<button class="bt bp lp-more" onclick="lpFullQuiz(\'' + k + '\')">' + esc(s.nm) + ' 퀴즈 ' + check.length + '문항 전체 도전</button>';
     }
     if (next.length) {
@@ -617,25 +697,28 @@
     }
     if (!learn.length && !play.length && !check.length && !next.length)
       h += '<div style="padding:24px;text-align:center;color:var(--t3);font-size:12px">이 형식의 내용이 아직 없어요</div>';
+    /* 홈에서도 과목 허브 패널(p5)로 가는 문을 남긴다 — 하단 '과목' 탭이 사라졌으므로. */
+    if (home) h += '<button class="bt bs lp-more" onclick="lpOpenSubject(\'' + k + '\')">'
+      + svg('i-grid') + ' ' + esc(s.nm) + ' 과목 화면으로 · 다른 과목 전체 보기</button>';
     h += '</div>';
     host.innerHTML = h;
     host.style.display = '';
-    var home = document.getElementById('subjHome'); if (home) home.style.display = 'none';
+    if (!home) { var sh = document.getElementById('subjHome'); if (sh) sh.style.display = 'none'; }
 
     if (check.length) {
-      var qa = document.getElementById('lpHubQuiz');
+      var qa = document.getElementById(hostId + '-qz');
       if (qa && typeof renderQuiz === 'function') { try { renderQuiz(qa, check.slice(0, 3).map(function (o) { return o.q; })); } catch (e) {} }
     }
-    var p5 = document.getElementById('p5'); if (p5) p5.scrollTop = 0;
+    if (!home) { var p5 = document.getElementById('p5'); if (p5) p5.scrollTop = 0; }
   }
 
-  window.lpOpenSubject = function (k) { curChip = 'all'; HUB_MORE = {}; try { go(5); } catch (e) {} renderHub(k); ensureCM(); };
-  window.lpHubChip = function (f) { curChip = f; renderHub(curHub); };
+  window.lpOpenSubject = function (k) { curChip = 'all'; HUB_MORE = {}; try { go(5); } catch (e) {} renderHub(k, { host: 'subjHub' }); ensureCM(); };
+  window.lpHubChip = function (f) { curChip = f; renderHub(curHub, curHubOpt); };
   window.lpBackToSubjects = function () {
     var hub = document.getElementById('subjHub'), home = document.getElementById('subjHome');
     if (hub) hub.style.display = 'none';
     if (home) { home.style.display = ''; renderSubjectList(); }
-    curHub = null;
+    curHub = null; curHubOpt = null;
   };
   window.lpFullQuiz = function (k) {
     var pool = (idx().by[k] || []).filter(function (o) { return o.kind === 'quiz'; }).map(function (o) { return o.q; });
@@ -646,6 +729,85 @@
     document.getElementById('mo').classList.add('sh');
     setTimeout(function () { var a = document.getElementById('lpQzArea'); if (a && typeof renderQuiz === 'function') renderQuiz(a, sel); }, 40);
   };
+
+  /* ================================================================
+     5-b. 홈 상단 과목 탭 스트립 (IPTV 장르바)
+     오너 지적: "메인이 뒤로 밀려있고 서브아이템이 메인에 나오는 느낌".
+     과목이 이 앱의 메인이다. 홈 첫 줄에 과목을 놓고, 지금까지의 홈 전체는
+     '추천' 탭 하나로 접어 넣는다. 지운 것은 없다.
+     ================================================================ */
+  var homeTab = REC_KEY;
+
+  function homeTabDefs() {
+    var out = [REC_TAB], seen = {};
+    HOME_ORDER.forEach(function (k) { if (SB[k] && !seen[k]) { seen[k] = 1; out.push(SB[k]); } });
+    SUBJ.forEach(function (s) { if (!seen[s.k]) { seen[s.k] = 1; out.push(s); } });   /* 새 과목이 늘어도 빠지지 않게 */
+    return out;
+  }
+
+  function renderHomeTabs() {
+    var host = document.getElementById('lpSubjTabs'); if (!host) return;
+    if (host.getAttribute('data-lp-built') !== '1') {
+      host.innerHTML = homeTabDefs().map(function (s) {
+        return '<button class="st" role="tab" data-k="' + s.k + '" aria-selected="false" tabindex="-1"'
+          + ' style="--sc:' + s.ac + ';--scl:' + lighten(s.ac, .5) + ';--stb:' + tint(s.ac, .34)
+          + ';--scs:' + tint(s.ac, .32) + '"'
+          + ' onclick="lpHomeTab(\'' + s.k + '\')">' + svg(s.sym) + '<span>' + esc(s.nm) + '</span></button>';
+      }).join('');
+      host.setAttribute('data-lp-built', '1');
+    }
+    syncHomeTabs(false);
+    measureStrip();
+  }
+
+  /* 스트립 실측 높이를 #p0 에 심는다. 연령대(유아 46px 알약)마다 높이가 달라서 상수로 못 박으면
+     카테고리 줄이 겹치거나 뜬다. */
+  function measureStrip() {
+    var host = document.getElementById('lpSubjTabs'), p0 = document.getElementById('p0');
+    if (!host || !p0) return;
+    var apply = function () {
+      var h = host.offsetHeight;
+      if (h > 0) p0.style.setProperty('--lp-stabh', h + 'px');
+    };
+    apply();
+    setTimeout(apply, 120);
+  }
+
+  function syncHomeTabs(scroll) {
+    var host = document.getElementById('lpSubjTabs'); if (!host) return;
+    var act = null;
+    [].slice.call(host.children).forEach(function (b) {
+      var on = b.getAttribute('data-k') === homeTab;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.setAttribute('tabindex', on ? '0' : '-1');
+      if (on) act = b;
+    });
+    if (!act || scroll === false) return;
+    /* 켜진 탭을 가운데로. scrollIntoView 는 세로 스크롤까지 건드려서 쓰지 않는다. */
+    var left = Math.max(0, act.offsetLeft - (host.clientWidth - act.offsetWidth) / 2);
+    try { host.scrollTo({ left: left, behavior: 'smooth' }); } catch (e) { host.scrollLeft = left; }
+  }
+
+  window.lpHomeTab = function (k) {
+    var p0 = document.getElementById('p0'), body = document.getElementById('lpHomeSubj');
+    if (k !== REC_KEY && !SB[k]) k = REC_KEY;
+    homeTab = k;
+    if (k === REC_KEY) {
+      if (p0) p0.classList.remove('lp-subjmode');
+      if (body) { body.style.display = 'none'; body.innerHTML = ''; }
+      curHub = null; curHubOpt = null;
+    } else {
+      if (p0) p0.classList.add('lp-subjmode');
+      if (body) body.style.display = '';
+      curChip = 'all'; HUB_MORE = {};
+      renderHub(k, { host: 'lpHomeSubj', home: true });
+      ensureCM();
+    }
+    syncHomeTabs(true);
+    if (p0) p0.scrollTop = 0;
+  };
+  window.lpHomeTabState = function () { return homeTab; };
 
   /* ================================================================
      6. 이어서 시트 — 게임 끝 / 레슨 끝
@@ -806,6 +968,8 @@
       ? '과목 11개와, 내용이 서로 겹치는 곳을 선으로 이었어요. 동그라미를 눌러 보세요.'
       : (SB[MAP.focus] ? SB[MAP.focus].nm + ' — 대표 12개. 초록은 이미 한 것, 누르면 열려요.' : '');
     host.innerHTML = '<div class="sec">' + svg('i-map') + ' 배움 지도</div>'
+      /* 하단 '과목' 탭을 뺐으므로 과목 허브(p5)로 가는 상시 입구를 여기 둔다 */
+      + '<button class="bt bs lp-allsubj" onclick="go(5)">' + svg('i-grid') + ' 전체 과목 목록 열기 (11과목)</button>'
       + '<div class="lp-mapsub" id="lpMapSub">' + esc(sub) + '</div>'
       + '<div class="lp-mapbox"><canvas id="lpMapCv"></canvas></div>'
       + (MAP.level ? '<button class="bt bs" style="width:100%;margin-top:8px" onclick="lpMapBack()">← 전체 과목 지도</button>' : '')
@@ -871,7 +1035,12 @@
       host.id = 'lpQuickJump';
       host.innerHTML = '<div class="sec">' + svg('i-grid') + ' 빠른 이동</div>'
         + '<div style="font-size:10px;color:var(--t3);margin:-4px 0 6px">홈 아래쪽 기능들로 바로 갑니다</div>'
-        + '<div id="lpQuickJumpRow" class="lp-qjr"></div>';
+        + '<div id="lpQuickJumpRow" class="lp-qjr">'
+        /* 하단 '과목' 탭이 사라진 뒤의 상시 입구 — 과목 허브(p5)·예전 학습/놀이 화면 */
+        + '<button onclick="go(5)">' + svg('i-book') + ' 과목 전체</button>'
+        + '<button onclick="lpGoLegacy(1,\'subjectGrid\')">' + svg('i-grid') + ' 예전 학습 화면</button>'
+        + '<button onclick="lpGoLegacy(2,\'allGm\')">' + svg('i-play') + ' 게임 전체</button>'
+        + '</div>';
       var pc = document.getElementById('profileCard');
       if (pc && pc.nextSibling) p4.insertBefore(host, pc.nextSibling); else p4.insertBefore(host, p4.firstChild);
     }
@@ -915,6 +1084,11 @@
       ['renderRecommendations', 'renderHeroBanner', 'renderTodayOne'].forEach(function (fn) {
         try { if (typeof window[fn] === 'function') window[fn](); } catch (e) {}
       });
+      /* 연령을 바꾸면 색인(아이/성인 뱅크)이 통째로 갈린다 — 켜져 있는 과목 탭도 다시 그린다 */
+      try {
+        renderHomeTabs();
+        if (homeTab !== REC_KEY) renderHub(homeTab, { host: 'lpHomeSubj', home: true });
+      } catch (e) {}
       return r;
     };
     w._lpRerender = 1; window.lpApplyAgeTier = w;
@@ -1041,6 +1215,54 @@
       '.v3-sound-toggle{bottom:calc(var(--nv,52px) + 14px)}',
       '.v4-progress-ring{bottom:calc(var(--nv,52px) + 64px)}',
       '.v3-timer{bottom:calc(var(--nv,52px) + 70px)}',
+      /* ===== 홈 상단 과목 탭 스트립 (IPTV 장르바) =====
+         .pg 가 스크롤 컨테이너라 sticky top:0 이 패널 최상단에 고정된다.
+         헤더(제목·검색·알림)는 스트립보다 위에 있어 함께 스크롤되므로 겹치지 않는다. */
+      /* z-index 는 .cat-tabs-wrap(추천 학습 카테고리 줄, sticky top:0 z-index:100)보다 위여야 한다.
+         그대로 두면 홈을 내렸을 때 카테고리 줄이 과목 스트립을 덮는다.
+         카테고리 줄은 --lp-stabh(스트립 실측 높이)만큼 아래로 내려 두 줄로 쌓는다. */
+      '#p0 .cat-tabs-wrap{top:var(--lp-stabh,58px)}',
+      '.lp-stab{position:sticky;top:0;z-index:120;display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;'
+        + 'background:var(--bg);padding:8px 0 9px;margin:0 0 10px;scrollbar-width:none;'
+        + '-webkit-overflow-scrolling:touch;border-bottom:1px solid rgba(139,92,246,.16)}',
+      '.lp-stab::-webkit-scrollbar{display:none}',
+      '.lp-stab .st{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;'
+        + 'padding:8px 13px;min-height:38px;border-radius:999px;cursor:pointer;font:700 12px/1.1 inherit;'
+        + 'border:1.5px solid var(--stb);background:var(--c1);color:var(--tx);'
+        + 'transition:background .15s,color .15s,border-color .15s}',
+      '.lp-stab .st .ico{width:1em;height:1em;font-size:15px;flex:0 0 auto;color:var(--sc);'
+        + 'fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}',
+      '.lp-stab .st.on{background:var(--sc);border-color:var(--sc);color:#fff;box-shadow:0 2px 9px var(--scs)}',
+      '.lp-stab .st.on .ico{color:#fff}',
+      /* 다크: 진한 액센트는 검정 위에서 선이 안 보인다 → 흰쪽으로 섞은 값 사용 */
+      ':root.dark .lp-stab .st .ico{color:var(--scl)}',
+      ':root.dark .lp-stab .st.on .ico{color:#fff}',
+      /* 유아: 글자·터치 타깃을 키운다. nowrap + flex:0 0 auto 라 줄바꿈·잘림이 없다 */
+      ':root[data-age="toddler"] .lp-stab .st{font-size:13.5px;padding:10px 15px;min-height:46px;gap:6px}',
+      ':root[data-age="toddler"] .lp-stab .st .ico{font-size:18px}',
+      /* 과목 탭이 켜지면 홈의 "추천" 내용(마스코트·오늘의 한 가지·만화선반·일일과제·추천학습·
+         home_tidy 접이식 그룹·vN 패치 블록·푸터)을 통째로 접는다. 지우지 않고 감추기만 한다.
+         :not() 목록만 남기므로 나중에 붙는 블록도 자동으로 접힌다. */
+      '#p0.lp-subjmode > *:not(#lpHomeHdr):not(#lpSubjTabs):not(#lpHomeSubj):not(#srchWrap):not(#srchRes){display:none!important}',
+      /* 주 액션 카드 — 화면당 하나. 글자는 전부 #fff(11개 액센트 모두 흰 글씨 4.9:1 이상) */
+      '.lp-pact{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:13px 14px;'
+        + 'margin-bottom:6px;border:none;border-radius:var(--r);background:var(--sc);color:#fff;'
+        + 'cursor:pointer;box-shadow:0 3px 12px var(--scs);font-family:inherit}',
+      '.lp-pact:active{transform:scale(.99)}',
+      '.lp-pai{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center}',
+      '.lp-pai .ico{width:1em;height:1em;font-size:20px;fill:none;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}',
+      '.lp-pax{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}',
+      '.lp-pak{font-size:10px;font-weight:700;color:#fff}',
+      '.lp-pat{font-size:15px;font-weight:900;color:#fff;line-height:1.25;overflow:hidden;'
+        + 'text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}',
+      '.lp-pad{font-size:10px;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}',
+      '.lp-paa{flex:0 0 auto;display:flex}',
+      '.lp-paa .ico{width:1em;height:1em;font-size:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}',
+      '.lp-pacm{font-size:10px;color:var(--t2);margin:0 2px 10px}',
+      ':root[data-age="toddler"] .lp-pat{font-size:17px}',
+      ':root[data-age="toddler"] .lp-pak,:root[data-age="toddler"] .lp-pad{font-size:11px}',
+      '.lp-allsubj{width:100%;margin-bottom:10px;font-size:12px;padding:9px;display:inline-flex;align-items:center;justify-content:center;gap:6px}',
+      '.lp-allsubj .ico{width:1em;height:1em;font-size:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
       /* 과목 허브 */
       '.lp-hubhead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r);margin-bottom:8px;border-left:4px solid var(--sc)}',
       '.lp-hubhead .lp-back{font-size:14px;padding:2px 9px;line-height:1.1}',
@@ -1129,12 +1351,26 @@
   }
 
   window.lpOnGo = function (i) {
-    if (i === 5) { if (curHub) renderHub(curHub); else renderSubjectList(); ensureCM(); }
+    if (i === 0) {
+      renderHomeTabs();
+      if (homeTab !== REC_KEY) { renderHub(homeTab, { host: 'lpHomeSubj', home: true }); ensureCM(); }
+    }
+    if (i === 5) {
+      /* 홈 상단 탭이 켜 둔 curHub 는 p5 와 무관하다 — p5 는 자기 host 로 열렸을 때만 복원한다. */
+      if (curHub && curHubOpt && curHubOpt.host === 'subjHub') renderHub(curHub, { host: 'subjHub' });
+      else {
+        var hb = document.getElementById('subjHub'); if (hb) hb.style.display = 'none';
+        var sh2 = document.getElementById('subjHome'); if (sh2) sh2.style.display = '';
+        renderSubjectList();
+      }
+      ensureCM();
+    }
     if (i === 6) { renderMap(); }
   };
 
   function boot() {
     style();
+    renderHomeTabs();
     renderSubjectList();
     foldHero();
     wrapGame();
@@ -1150,9 +1386,11 @@
     window.addEventListener('resize', function () {
       var p6 = document.getElementById('p6');
       if (p6 && p6.classList.contains('on')) drawMap();
+      measureStrip();
     });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();
+

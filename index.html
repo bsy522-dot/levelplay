@@ -751,7 +751,15 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 <div class="notif-panel" id="notifPanel"><div class="np-header"><h3>알림</h3><button class="np-close" onclick="closeNotifPanel()">&#x2715;</button></div><div class="np-body" id="notifList"></div></div>
 
 <div class="pg on" id="p0" role="tabpanel" aria-label="홈">
-<div style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">배움퀘스트</div><button class="srch-btn" id="srchBtn" onclick="toggleSearch()" aria-label="검색" aria-expanded="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-search"/></svg></button><button class="notif-btn" onclick="toggleNotifPanel()" aria-label="알림 센터"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bell"/></svg></span><span class="notif-count" id="notifCount">0</span></button><div style="font-size:10px;color:var(--t3);margin-left:8px" id="hLv">Lv.1</div></div>
+<div id="lpHomeHdr" style="display:flex;align-items:center;margin-bottom:8px"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1">배움퀘스트</div><button class="srch-btn" id="srchBtn" onclick="toggleSearch()" aria-label="검색" aria-expanded="false"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-search"/></svg></button><button class="notif-btn" onclick="toggleNotifPanel()" aria-label="알림 센터"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bell"/></svg></span><span class="notif-count" id="notifCount">0</span></button><div style="font-size:10px;color:var(--t3);margin-left:8px" id="hLv">Lv.1</div></div>
+
+<!-- 과목 상단 탭(IPTV 장르바) — 홈의 1차 내비게이션. 내용은 ia_hub.js 가 채운다.
+     '추천'은 오늘의 한 가지·만화영상·일일과제 등 기존 홈 전체를 그대로 담고,
+     과목 탭을 고르면 그 과목 콘텐츠가 이 화면에서 바로 렌더된다(이동 없음). -->
+<div class="lp-stab" id="lpSubjTabs" role="tablist" aria-label="과목 선택"></div>
+<div id="srchWrap" style="position:relative;margin-bottom:10px;display:none"><input class="fi" id="srchIn" placeholder="무엇을 배워볼까? 영상, 퀴즈, 실험, 게임 검색..." oninput="doSearch(this.value)" style="padding-left:32px;padding-top:10px;padding-bottom:10px;font-size:13px;border-radius:10px;border:1.5px solid rgba(139,92,246,.2);background:linear-gradient(135deg,var(--bg),rgba(139,92,246,.03))"><span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;color:var(--t3);display:flex"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-search"/></svg></span></div>
+<div id="srchRes" style="display:none;margin-bottom:10px"></div>
+<div id="lpHomeSubj" style="display:none" role="tabpanel" aria-label="과목 내용"></div>
 
 <!-- 마스코트 인사 + 오늘의 한 가지 (DESIGN_SPEC §3·§5 — 첫 화면의 주 액션은 딱 하나) -->
 <div class="mhero" id="mascotHero">
@@ -760,9 +768,6 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 </div>
 <button class="mh-cta" id="mhCta" onclick="lpTodayOne()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg><span class="mh-ct"><span>오늘의 한 가지</span><span class="mh-c2" id="mhCtaSub">시작할 준비 완료</span></span></button>
 <div id="greetingBar" style="display:none;font-size:12px;color:var(--t2);margin-bottom:8px;padding:8px 12px;background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(6,214,160,.04));border-radius:10px;border:1px solid rgba(139,92,246,.08)"></div>
-
-<div id="srchWrap" style="position:relative;margin-bottom:10px;display:none"><input class="fi" id="srchIn" placeholder="무엇을 배워볼까? 영상, 퀴즈, 실험, 게임 검색..." oninput="doSearch(this.value)" style="padding-left:32px;padding-top:10px;padding-bottom:10px;font-size:13px;border-radius:10px;border:1.5px solid rgba(139,92,246,.2);background:linear-gradient(135deg,var(--bg),rgba(139,92,246,.03))"><span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;color:var(--t3);display:flex"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-search"/></svg></span></div>
-<div id="srchRes" style="display:none;margin-bottom:10px"></div>
 
 <div id="heroBanner"></div>
 <div id="streakHome" style="margin-bottom:8px"></div>
@@ -829,7 +834,7 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 <!-- 글자 크기 -->
 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(139,92,246,.08)"><span style="font-size:12px;font-weight:600" data-i18n="font_size">글자 크기</span><div style="display:flex;gap:4px"><button class="bt" id="fsSmall" onclick="setFontSize('small')" style="font-size:10px;padding:4px 8px" data-i18n="font_small">작게</button><button class="bt" id="fsNormal" onclick="setFontSize('normal')" style="font-size:10px;padding:4px 8px" data-i18n="font_normal">보통</button><button class="bt" id="fsLarge" onclick="setFontSize('large')" style="font-size:10px;padding:4px 8px" data-i18n="font_large">크게</button></div></div><div style="font-size:9px;color:var(--t3);margin-top:4px" data-i18n="font_size_desc">화면 글자 크기를 조절합니다</div>
 <!-- 단축키 안내 -->
-<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(139,92,246,.08)"><div style="font-size:12px;font-weight:600;margin-bottom:6px" data-i18n="shortcuts">단축키</div><div style="font-size:9px;color:var(--t3);margin-bottom:6px" data-i18n="shortcuts_desc">키보드로 빠르게 이동할 수 있어요</div><ul class="shortcut-list"><li><span data-i18n="shortcut_esc">모달 닫기</span><span class="shortcut-key">ESC</span></li><li><span data-i18n="shortcut_tab">탭 전환</span><span class="shortcut-key">1~5</span></li><li><span data-i18n="shortcut_search">검색</span><span class="shortcut-key">S</span></li><li><span data-i18n="shortcut_arrow">탭 네비게이션</span><span class="shortcut-key">&larr; &rarr;</span></li></ul></div>
+<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(139,92,246,.08)"><div style="font-size:12px;font-weight:600;margin-bottom:6px" data-i18n="shortcuts">단축키</div><div style="font-size:9px;color:var(--t3);margin-bottom:6px" data-i18n="shortcuts_desc">키보드로 빠르게 이동할 수 있어요</div><ul class="shortcut-list"><li><span data-i18n="shortcut_esc">모달 닫기</span><span class="shortcut-key">ESC</span></li><li><span data-i18n="shortcut_tab">탭 전환</span><span class="shortcut-key">1~4</span></li><li><span data-i18n="shortcut_search">검색</span><span class="shortcut-key">S</span></li><li><span data-i18n="shortcut_arrow">탭 네비게이션</span><span class="shortcut-key">&larr; &rarr;</span></li></ul></div>
 </div><div style="margin-top:8px"><button class="share-btn" onclick="shareProfile()" aria-label="내 성과 공유"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg> <span data-i18n="share_profile">내 성과 공유</span></button></div><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> 학습 리포트</div><div id="learningReportArea"></div><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg> 내 학습 여정</div><div id="learningJourneyArea" style="background:var(--c1);border-radius:var(--r);padding:10px;margin-bottom:8px"></div><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-scroll"/></svg> 활동</div><div id="tl"></div><div style="margin-top:12px;text-align:center"><button class="bt bp" id="exportBtn" onclick="exportData()" style="font-size:10px;margin-right:4px">데이터 백업</button><button class="bt bp" id="importBtn" onclick="document.getElementById('importFile').click()" style="font-size:10px">데이터 복원</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"></div>
 <div style="margin-top:8px;text-align:center"><button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp6');location.reload()}" style="font-size:9px">초기화</button></div>
 <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(139,92,246,.06);text-align:center">
@@ -861,7 +866,6 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
      go(1)/go(2) 를 부르는 기존 호출부도 그대로 동작한다(탭은 '과목'이 켜진다). -->
 <nav role="tablist" aria-label="메인 네비게이션">
 <button class="on" role="tab" aria-selected="true" tabindex="0" onclick="go(0)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-home"/></svg></span><span class="nav-label" data-i18n="nav_home">홈</span><span id="navReviewBadge" style="display:none;position:absolute;top:2px;right:50%;transform:translateX(14px);min-width:14px;height:14px;border-radius:7px;background:var(--rd);color:#fff;font-size:8px;font-weight:700;text-align:center;line-height:14px;padding:0 3px"></span></button>
-<button role="tab" aria-selected="false" tabindex="-1" onclick="go(5)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-book"/></svg></span><span class="nav-label" data-i18n="nav_subject">과목</span></button>
 <button role="tab" aria-selected="false" tabindex="-1" onclick="go(6)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg></span><span class="nav-label" data-i18n="nav_map">지도</span></button>
 <button role="tab" aria-selected="false" tabindex="-1" onclick="go(3)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chat"/></svg></span><span class="nav-label" data-i18n="nav_comm">커뮤</span></button>
 <button role="tab" aria-selected="false" tabindex="-1" onclick="go(4)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg></span><span class="nav-label" data-i18n="nav_me">나</span></button>
@@ -1304,8 +1308,12 @@ const UTS=[{id:'calc',ic:'🧮',nm:'계산기'},{id:'unit',ic:'📏',nm:'단위�
    go(i) 의 i 는 여전히 '패널 번호'라서 기존 go(1)=학습 / go(2)=놀이 호출부가 그대로 산다.
    달라진 건 하단 탭 하이라이트뿐 — 학습·놀이·과목허브는 모두 '과목' 탭(슬롯1)으로 표시한다. */
 const pgs=['p0','p1','p2','p3','p4','p5','p6'];let cur=0;
-const NAV_SLOT=[0,1,1,3,4,1,2];   /* 패널 → 하단 탭 슬롯 */
-const NAV_PANEL=[0,5,6,3,4];      /* 하단 탭 슬롯 → 기본 패널 */
+/* 하단 탭 4칸: 홈(p0) · 지도(p6) · 커뮤(p3) · 나(p4).
+   '과목'은 홈 상단 탭 스트립으로 올라갔으므로 하단에서 뺐다. 패널은 하나도 지우지 않았다 —
+   학습(p1)·놀이(p2)·과목허브(p5)는 그대로 살아 있고 go(1)/go(2)/go(5) 호출부도 전부 동작한다
+   (그때 하단은 '홈'이 켜진다). p5 진입로는 지도 탭 상단 버튼·지도 중심 노드·'나' 탭 빠른이동. */
+const NAV_SLOT=[0,0,0,2,3,0,1];   /* 패널 → 하단 탭 슬롯 */
+const NAV_PANEL=[0,6,3,4];        /* 하단 탭 슬롯 → 기본 패널 */
 function go(i){if(typeof i!=='number'||!pgs[i])i=0;const prev=cur;pgs.forEach((p,j)=>{const el=document.getElementById(p);if(!el)return;el.classList.remove('slide-left');if(j!==i&&j<i)el.classList.add('slide-left');el.classList.toggle('on',i===j);});const slot=(NAV_SLOT[i]==null?0:NAV_SLOT[i]);document.querySelectorAll('nav button[role="tab"]').forEach((b,j)=>{b.classList.toggle('on',j===slot);b.setAttribute('aria-selected',j===slot?'true':'false');b.setAttribute('tabindex',j===slot?'0':'-1');});cur=i;const _fb=document.getElementById('fab');if(_fb)_fb.classList.toggle('sh',i===3);if(U.tabsVisited&&!U.tabsVisited.includes(i)){U.tabsVisited.push(i);sv();checkBadges();}if(typeof window.lpOnGo==='function'){try{window.lpOnGo(i);}catch(e){console.warn('[IA] lpOnGo',e);}}}
 function ckNk(){if(!U.nk)document.getElementById('nkM').style.display='flex';}
 function sanIn(s){return String(s==null?'':s).replace(/[<>]/g,'');}
@@ -3580,7 +3588,12 @@ function lpTierFits(title,desc){
     if(LP_HARD_TOPICS.test(s))return false;
     return true;
   }
-  if(tier==='elementary'){ return !/성인-/.test(s); }
+  if(tier==='elementary'){
+    // 초등도 한글 제목만. 영어 제목 영상은 Crash Course/Kurzgesagt 같은 성인 강의뿐이고,
+    // 정작 우리 영어 학습 콘텐츠는 제목이 한글이다("영어 단어 Lv.1~10").
+    if(!/[가-힣]/.test(String(title||'')))return false;
+    return !/성인-/.test(s) && !LP_HARD_TOPICS.test(s);
+  }
   return true;                                                // 중고등·성인은 제한 없음
 }
 window.lpTierFits=lpTierFits;
@@ -3779,10 +3792,10 @@ function setupGlobalShortcuts(){
     const onboard=document.getElementById('onboardOverlay');
     const modalOpen=(mo&&mo.classList.contains('sh'))||(battle&&battle.style.display==='flex')||(onboard&&onboard.style.display==='flex');
     if(modalOpen)return;
-    if(e.key>='1'&&e.key<='5'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();go(NAV_PANEL[parseInt(e.key)-1]);return;}
+    if(e.key>='1'&&e.key<='4'&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();go(NAV_PANEL[parseInt(e.key)-1]);return;}
     if((e.key==='s'||e.key==='S')&&!e.ctrlKey&&!e.altKey&&!e.metaKey){e.preventDefault();go(0);setTimeout(()=>{if(typeof toggleSearch==='function')toggleSearch(true);const inp=document.getElementById('srchIn');if(inp)inp.focus();},100);return;}
-    if(e.key==='ArrowLeft'&&!e.ctrlKey&&!e.altKey){e.preventDefault();go(NAV_PANEL[((NAV_SLOT[cur]||0)-1+5)%5]);return;}
-    if(e.key==='ArrowRight'&&!e.ctrlKey&&!e.altKey){e.preventDefault();go(NAV_PANEL[((NAV_SLOT[cur]||0)+1)%5]);return;}
+    if(e.key==='ArrowLeft'&&!e.ctrlKey&&!e.altKey){e.preventDefault();go(NAV_PANEL[((NAV_SLOT[cur]||0)-1+NAV_PANEL.length)%NAV_PANEL.length]);return;}
+    if(e.key==='ArrowRight'&&!e.ctrlKey&&!e.altKey){e.preventDefault();go(NAV_PANEL[((NAV_SLOT[cur]||0)+1)%NAV_PANEL.length]);return;}
   });
 }
 
