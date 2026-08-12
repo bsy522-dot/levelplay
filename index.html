@@ -2176,7 +2176,36 @@ function openLesson(ui,li){
 }
 function backToSubjects(){document.getElementById('learnMain').style.display='';document.getElementById('learnUnit').style.display='none';}
 function backToUnits(){document.getElementById('learnUnit').style.display='';document.getElementById('learnLesson').style.display='none';}
-function vidSearchLesson(ui,li){var s=curSubjData;if(!s||!s.units[ui]||!s.units[ui].lessons[li])return;var l=s.units[ui].lessons[li];var q=(l.vq&&(''+l.vq).trim())?(''+l.vq):((s.nm||'')+' '+l.t);window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank');}
+/* ★예전에는 유튜브 검색 결과 페이지를 새 창으로 열었다. 아이가 쓰는 앱에서
+   걸러지지 않은 인터넷을 그대로 여는 셈이어서, 안전 문제이자 콘텐츠 등급이
+   17세 이상으로 올라가는 원인이었다. 앱 안에 이미 선별해 둔 영상 목록에서만
+   찾아 앱 안에서 재생한다. 맞는 영상이 없으면 앱을 벗어나지 않고 알려 준다. */
+function lpPlayCurated(id){var list=[];try{list=getV()}catch(e){list=[]}
+  for(var i=0;i<list.length;i++){if(list[i].id===id){playVid(list[i].id,list[i].t);return;}}
+  try{toast('영상을 찾지 못했어요')}catch(e){}}
+function vidSearchLesson(ui,li){
+  var s=curSubjData;if(!s||!s.units[ui]||!s.units[ui].lessons[li])return;
+  var l=s.units[ui].lessons[li];
+  var q=(l.vq&&(''+l.vq).trim())?(''+l.vq):((s.nm||'')+' '+l.t);
+  var words=String(q).toLowerCase().split(/[\s,·()]+/).filter(function(w){return w.length>1});
+  var list=[];try{list=getV()}catch(e){list=[]}
+  var hits=list.map(function(v){
+    var hay=((v.t||'')+' '+(v.c||'')).toLowerCase(),sc=0;
+    words.forEach(function(w){if(hay.indexOf(w)>=0)sc++;});
+    return {v:v,sc:sc};
+  }).filter(function(o){return o.sc>0}).sort(function(a,b){return b.sc-a.sc}).slice(0,8);
+  if(!hits.length){try{toast('이 레슨에 맞는 영상이 아직 없어요')}catch(e){}return;}
+  if(hits.length===1){playVid(hits[0].v.id,hits[0].v.t);return;}
+  var b=document.getElementById('moB');
+  if(!b){playVid(hits[0].v.id,hits[0].v.t);return;}
+  var esc=function(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+  b.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:8px">'+esc(l.t)+' — 관련 영상</div>'
+    +hits.map(function(o){
+      return '<button class="bt bs" style="display:block;width:100%;text-align:left;margin-bottom:6px;padding:10px" onclick="lpPlayCurated(\''+esc(o.v.id)+'\')">'
+        +esc(o.v.t)+'<div style="font-size:10px;color:var(--t3);margin-top:2px">'+esc(o.v.c||'')+'</div></button>';
+    }).join('');
+  var mo=document.getElementById('mo');if(mo)mo.classList.add('sh');
+}
 
 // 영어 단어 게임 (기본 20개, JSON 로드 시 300개로 확장)
 const ENG_LEVELS=[null,
