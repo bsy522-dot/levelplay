@@ -330,14 +330,15 @@
     /* --- 레슨·만화 (빌트인 CURRICULUM + content_library 병합분) --- */
     if (typeof CURRICULUM !== 'undefined') Object.keys(CURRICULUM).forEach(function (ck) {
       var c = CURRICULUM[ck]; if (!c || !c.units) return;
-      c.units.forEach(function (unit) {
+      c.units.forEach(function (unit, ui) {
         var r = resolveUnit(ck, unit.nm);
         if (!r) { unmapped.push('unit[' + ck + ']:' + unit.nm); r = { s: ['society'], kind: 'lesson', t: [] }; }
-        (unit.lessons || []).forEach(function (l) {
+        (unit.lessons || []).forEach(function (l, li) {
           /* 만화는 첫 컷을 썸네일로 쓴다 — 콘텐츠 HTML의 첫 <img src> 추출 */
           var mi = (l && l.content) ? String(l.content).match(/<img[^>]+src="([^"]+)"/i) : null;
+          /* ★ui/li = CURRICULUM 안의 단원·레슨 번호. 이게 있으면 화면을 훑지 않고 바로 연다. */
           push(items, { kind: r.kind, t: l.t, d: unit.nm, s: r.s[0], also: r.s.slice(1), tag: r.t,
-            ck: ck, unit: unit.nm, th: mi ? mi[1] : '', done: false });
+            ck: ck, ui: ui, li: li, unit: unit.nm, th: mi ? mi[1] : '', done: false });
         });
       });
     });
@@ -454,6 +455,26 @@
      과목을 열고, 단원 목록이 그려질 때까지 훑다가, 제목이 맞는 카드를 눌러 준다. */
   function openLessonItem(it) {
     var kid = isKid();
+
+    /* ★빠른 길 — CURRICULUM 안에 있는 항목(만화 전부 포함)은 단원·레슨 번호를 알고 있다.
+       화면을 훑어 제목 맞는 카드를 찾는 방식은 만화가 다른 타일에 있으면 실패해서
+       "자연수와 덧셈뺄셈" 같은 엉뚱한 목록만 남았다. 번호가 있으면 바로 연다. */
+    if (it.ck && typeof it.ui === 'number' && typeof it.li === 'number'
+        && typeof openSubject === 'function' && typeof openLesson === 'function') {
+      try {
+        go(1);
+        openSubject(it.ck);
+        setTimeout(function () {
+          try {
+            openLesson(it.ui, it.li);
+            var ttl = document.getElementById('learnLesson');
+            if (ttl) ttl.scrollIntoView({ block: 'start' });
+          } catch (e) {}
+        }, 60);
+        return;
+      } catch (e) { /* 실패하면 아래 기존 경로로 내려간다 */ }
+    }
+
     var tile = it.tile || (S2TILE[it.s] ? (kid ? S2TILE[it.s].kid : S2TILE[it.s].adult) : null);
     try { go(1); } catch (e) {}
     var tried = {};
