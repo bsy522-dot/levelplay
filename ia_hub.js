@@ -225,9 +225,14 @@
     { m: '미술',              s: ['art'],     kind: 'lesson', t: [] }
   ];
 
-  var KIND_LABEL = { video: '영상', comic: '만화', lesson: '레슨', game: '게임', quiz: '퀴즈', sim: '실험' };
-  var KIND_SYM   = { video: 'i-video', comic: 'i-comic', lesson: 'i-book', game: 'i-play', quiz: 'i-note', sim: 'i-science' };
+  /* story = 만화 시리즈의 회차인데 그림 없이 글로만 된 것.
+     '수학이 태어난 날' 16화 중 7~16화가 여기 해당한다(회차당 1,300~1,570자).
+     예전에는 이 10편도 '만화'로 분류돼서, 만화만 골라 보다가 눌렀는데 그림이
+     한 장도 없는 일이 생겼다. 있는 그대로 '이야기'라고 부른다. */
+  var KIND_LABEL = { video: '영상', comic: '만화', story: '이야기', lesson: '레슨', game: '게임', quiz: '퀴즈', sim: '실험' };
+  var KIND_SYM   = { video: 'i-video', comic: 'i-comic', story: 'i-book', lesson: 'i-book', game: 'i-play', quiz: 'i-note', sim: 'i-science' };
   var CHIPS = [['all', '전체', 'i-grid'], ['video', '영상', 'i-video'], ['comic', '만화', 'i-comic'],
+               ['story', '이야기', 'i-book'],
                ['lesson', '레슨', 'i-book'], ['game', '게임', 'i-play'], ['quiz', '퀴즈', 'i-note']];
 
   /* ================================================================
@@ -336,8 +341,16 @@
         (unit.lessons || []).forEach(function (l, li) {
           /* 만화는 첫 컷을 썸네일로 쓴다 — 콘텐츠 HTML의 첫 <img src> 추출 */
           var mi = (l && l.content) ? String(l.content).match(/<img[^>]+src="([^"]+)"/i) : null;
+          /* ★부르는 이름과 실물이 같아야 한다. 단원 이름만 보고 종류를 정하면
+             '만화'인데 그림이 없고 '영상'인데 영상이 없는 항목이 생긴다.
+             실측: 만화 단원 23편 중 10편에 컷이 없었고, 모차르트 3개 단원
+             27편 중 10편에 영상이 없었다. 실물을 보고 정한다. */
+          var _c = (l && l.content) ? String(l.content) : '';
+          var kd = r.kind;
+          if (kd === 'comic' && !/<img[^>]+src="[^"]*comics\//i.test(_c)) kd = 'story';
+          if (kd === 'video' && !/<iframe|youtube\.com|youtu\.be/i.test(_c)) kd = 'lesson';
           /* ★ui/li = CURRICULUM 안의 단원·레슨 번호. 이게 있으면 화면을 훑지 않고 바로 연다. */
-          push(items, { kind: r.kind, t: l.t, d: unit.nm, s: r.s[0], also: r.s.slice(1), tag: r.t,
+          push(items, { kind: kd, t: l.t, d: unit.nm, s: r.s[0], also: r.s.slice(1), tag: r.t,
             ck: ck, ui: ui, li: li, unit: unit.nm, th: mi ? mi[1] : '', done: false });
         });
       });
@@ -374,7 +387,7 @@
     (function dedupeLessons() {
       var seen = {};
       items.forEach(function (it) {
-        if (it.kind !== 'lesson' && it.kind !== 'comic') return;
+        if (it.kind !== 'lesson' && it.kind !== 'comic' && it.kind !== 'story') return;
         var key = it.kind + '|' + it.s + '|' + it.t;
         var prev = seen[key];
         if (!prev) { seen[key] = it; return; }
@@ -404,7 +417,7 @@
   /* ================================================================
      3. 이어서 — 같은 과목 먼저, 그다음 태그가 겹치는 다른 과목
      ================================================================ */
-  var KIND_ORDER = { comic: 0, video: 1, lesson: 2, game: 3, sim: 4, quiz: 5 };
+  var KIND_ORDER = { comic: 0, story: 1, video: 2, lesson: 3, game: 4, sim: 5, quiz: 6 };
 
   function related(it, opt) {
     opt = opt || {};
@@ -465,11 +478,7 @@
         go(1);
         openSubject(it.ck);
         setTimeout(function () {
-          try {
-            openLesson(it.ui, it.li);
-            var ttl = document.getElementById('learnLesson');
-            if (ttl) ttl.scrollIntoView({ block: 'start' });
-          } catch (e) {}
+          try { openLesson(it.ui, it.li); } catch (e) {}   /* 맨 위로 올리는 건 openLesson 이 한다 */
         }, 60);
         return;
       } catch (e) { /* 실패하면 아래 기존 경로로 내려간다 */ }
@@ -486,12 +495,7 @@
       if (list) {
         var cards = list.querySelectorAll('.gc');
         for (var i = 0; i < cards.length; i++) {
-          if (cards[i].textContent.indexOf(it.t) >= 0) {
-            cards[i].click();
-            var ttl = document.getElementById('learnLesson');
-            if (ttl) ttl.scrollIntoView({ block: 'start' });
-            return;
-          }
+          if (cards[i].textContent.indexOf(it.t) >= 0) { cards[i].click(); return; }
         }
       }
       n++;
@@ -508,7 +512,7 @@
   var curHub = null, curChip = 'all', HUB_MORE = {}, curHubOpt = null;
 
   function counts(k) {
-    var b = idx().by[k] || {}, c = { video: 0, comic: 0, lesson: 0, game: 0, quiz: 0, sim: 0 };
+    var b = idx().by[k] || {}, c = { video: 0, comic: 0, story: 0, lesson: 0, game: 0, quiz: 0, sim: 0 };
     (idx().by[k] || []).forEach(function (it) { c[it.kind] = (c[it.kind] || 0) + 1; });
     return c;
   }
@@ -520,13 +524,13 @@
           + '<div style="font-size:11px;color:var(--t3);margin:-4px 0 8px">영상·만화·레슨·게임·퀴즈가 과목 안에 함께 있어요</div>'
           + '<div class="g2" id="lpSubjGrid">';
     SUBJ.forEach(function (s) {
-      var c = counts(s.k), tot = c.video + c.comic + c.lesson + c.game + c.quiz + c.sim;
+      var c = counts(s.k), tot = c.video + c.comic + c.story + c.lesson + c.game + c.quiz + c.sim;
       var done = (idx().by[s.k] || []).filter(function (o) { return o.done; }).length;
       var pct = tot ? Math.round(done / tot * 100) : 0;
       h += '<div class="subjc" style="--sc:' + s.ac + '" onclick="lpOpenSubject(\'' + s.k + '\')" role="button" tabindex="0">'
         + '<div class="si">' + svg(s.sym) + '</div>'
         + '<div class="sn">' + esc(s.nm) + '</div>'
-        + '<div class="sd">영상 ' + (c.video) + ' · 게임 ' + (c.game + c.sim) + ' · 레슨 ' + (c.lesson + c.comic) + '</div>'
+        + '<div class="sd">영상 ' + (c.video) + ' · 게임 ' + (c.game + c.sim) + ' · 읽을거리 ' + (c.lesson + c.comic + c.story) + '</div>'
         + '<div class="sp"><div class="sp-f" style="width:' + pct + '%"></div></div>'
         + '<div class="spx">전체 <b>' + tot + '</b>개 · 퀴즈 ' + c.quiz + '</div>'
         + '</div>';
@@ -629,7 +633,7 @@
     var doneN = 0;
     for (var d = 0; d < bucket.length; d++) if (bucket[d].done) doneN++;
     function of(kinds) { return bucket.filter(function (it) { return kinds.indexOf(it.kind) >= 0; }); }
-    var pool = of(['video', 'comic', 'lesson']);
+    var pool = of(['video', 'comic', 'story', 'lesson']);
     if (!pool.length) pool = of(['game', 'sim']);
     if (!pool.length) pool = bucket.slice();
     pool = interleave(pool);
@@ -670,7 +674,7 @@
         return true;
       });
     }
-    var learn = pick(['video', 'comic', 'lesson']);
+    var learn = pick(['video', 'comic', 'story', 'lesson']);
     var play = pick(['game', 'sim']);
     var check = pick(['quiz']);
 
@@ -734,7 +738,13 @@
   }
 
   window.lpOpenSubject = function (k) { curChip = 'all'; HUB_MORE = {}; try { go(5); } catch (e) {} renderHub(k, { host: 'subjHub' }); ensureCM(); };
-  window.lpHubChip = function (f) { curChip = f; renderHub(curHub, curHubOpt); };
+  /* 필터를 바꾸면 목록이 통째로 갈리므로 맨 위부터 보여 준다.
+     안 그러면 아래로 내려둔 자리에 다른 목록이 들어와 엉뚱한 중간부터 보인다. */
+  window.lpHubChip = function (f) {
+    curChip = f; renderHub(curHub, curHubOpt);
+    var p = document.getElementById((curHubOpt && curHubOpt.home) ? 'p0' : 'p5');
+    if (p) { p.scrollTop = 0; try { requestAnimationFrame(function () { p.scrollTop = 0; }); } catch (e) {} }
+  };
   window.lpBackToSubjects = function () {
     var hub = document.getElementById('subjHub'), home = document.getElementById('subjHome');
     if (hub) hub.style.display = 'none';
@@ -845,7 +855,7 @@
   }
   window.lpShowNext = function (i) {
     var it = idx().items[i]; if (!it) return;
-    var rel = related(it, { kinds: ['comic', 'video', 'lesson', 'quiz'], max: 6 });
+    var rel = related(it, { kinds: ['comic', 'story', 'video', 'lesson', 'quiz'], max: 6 });
     if (!nextSheet('이어서', esc(it.t) + ' 와(과) 이어지는 내용', rel)) try { toast('이어질 내용이 아직 없어요'); } catch (e) {}
   };
   function itemByGameName(nm) {
@@ -1154,7 +1164,7 @@
         var it = lastGame ? itemByGameName(lastGame) : null;
         lastGame = null;
         if (!it) return;
-        var rel = related(it, { kinds: ['comic', 'video', 'lesson', 'quiz'], max: 6 });
+        var rel = related(it, { kinds: ['comic', 'story', 'video', 'lesson', 'quiz'], max: 6 });
         if (rel.length) setTimeout(function () { nextSheet('이어서', it.t + ' 다음엔 이런 것', rel); }, 320);
       };
       wc._lpWrap = 1; window.cG = wc;
@@ -1165,7 +1175,7 @@
       pendingExternal = false;
       var it = lastGame ? itemByGameName(lastGame) : null; lastGame = null;
       if (!it) return;
-      var rel = related(it, { kinds: ['comic', 'video', 'lesson', 'quiz'], max: 6 });
+      var rel = related(it, { kinds: ['comic', 'story', 'video', 'lesson', 'quiz'], max: 6 });
       if (rel.length) setTimeout(function () { nextSheet('이어서', it.t + ' 다음엔 이런 것', rel); }, 600);
     });
   }
@@ -1185,7 +1195,7 @@
     var title = (document.getElementById('lessonTitle') || {}).textContent || '';
     if (!title) return;
     var a = idx().items, it = null;
-    for (var i = 0; i < a.length; i++) if ((a[i].kind === 'lesson' || a[i].kind === 'comic' || a[i].kind === 'video') && a[i].t === title) { it = a[i]; break; }
+    for (var i = 0; i < a.length; i++) if ((a[i].kind === 'lesson' || a[i].kind === 'comic' || a[i].kind === 'story' || a[i].kind === 'video') && a[i].t === title) { it = a[i]; break; }
     if (!it) {   /* 커리큘럼 마스터가 아직 안 왔거나 이름이 조금 다르면 과목만이라도 잡는다 */
       var sn = ((document.getElementById('unitTitle') || {}).textContent || '').trim();
       for (var j = 0; j < a.length; j++) if (a[j].kind === 'game' && sn && sn.indexOf(SB[a[j].s].nm) >= 0) { it = a[j]; break; }
@@ -1207,7 +1217,7 @@
   window.lpIaCoverage = function () {
     var I = idx(), rows = [];
     SUBJ.forEach(function (s) {
-      var c = { video: 0, comic: 0, lesson: 0, game: 0, sim: 0, quiz: 0 };
+      var c = { video: 0, comic: 0, story: 0, lesson: 0, game: 0, sim: 0, quiz: 0 };
       (I.by[s.k] || []).forEach(function (it) { c[it.kind]++; });
       rows.push({ key: s.k, nm: s.nm, video: c.video, comic: c.comic, lesson: c.lesson,
         game: c.game, sim: c.sim, quiz: c.quiz, total: (I.by[s.k] || []).length });

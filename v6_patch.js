@@ -738,7 +738,7 @@ const V6_BADGES=[
   {id:'quiz_300',nm:'퀵즈 300',ic:'📝',desc:'300문제 풀기',check:u=>(u.quizTotal||0)>=300},
   {id:'xp_5000',nm:'XP 5천',ic:'⭐',desc:'5000 XP 달성',check:u=>(u.xp||0)>=5000},
   {id:'streak_14',nm:'2주 연속',ic:'🔥',desc:'14일 연속 학습',check:u=>(u.streakDays||0)>=14},
-  {id:'v6_all',nm:'v6 올라운더',ic:'🌟',desc:'v6 기능 전부 사용',check:u=>{return(u.certsEarned||[]).length>0&&((u.flashStats||{}).reviewed||0)>0&&!!u.avatar&&!!(u.dailyChallenge&&u.dailyChallenge.done);}}
+  {id:'v6_all',nm:'올라운더',ic:'🌟',desc:'v6 기능 전부 사용',check:u=>{return(u.certsEarned||[]).length>0&&((u.flashStats||{}).reviewed||0)>0&&!!u.avatar&&!!(u.dailyChallenge&&u.dailyChallenge.done);}}
 ];
 
 function v6CheckBadges(){
@@ -816,7 +816,7 @@ function v6InjectProfile(){
   const target=p4.querySelector('.v5-badge-section')||p4.querySelector('.v4-badge-section')||p4.querySelector('[style*="background:var(--c1)"]');
   if(target){
     const badgeDiv=document.createElement('div');badgeDiv.className='v6-badge-section';
-    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> v6 배지 ('+((U().v6badges||[]).length)+'/'+V6_BADGES.length+')</div><div class="v4-badge-grid">'+renderV6Badges()+'</div></div>';
+    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> 도전과 수집 배지 ('+((U().v6badges||[]).length)+'/'+V6_BADGES.length+')</div><div class="v4-badge-grid">'+renderV6Badges()+'</div></div>';
     target.parentNode.insertBefore(badgeDiv,target.nextSibling);
   }
 }

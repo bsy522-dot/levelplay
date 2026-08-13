@@ -621,7 +621,7 @@ function v5InjectProfile(){
   const target=p4.querySelector('.v4-badge-section')||p4.querySelector('[style*="background:var(--c1)"]');
   if(target){
     const badgeDiv=document.createElement('div');badgeDiv.className='v5-badge-section';
-    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> v5 배지 ('+((U().v5badges||[]).length)+'/'+V5_BADGES.length+')</div><div class="v4-badge-grid">'+renderV5Badges()+'</div></div>';
+    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> 리그와 등급 배지 ('+((U().v5badges||[]).length)+'/'+V5_BADGES.length+')</div><div class="v4-badge-grid">'+renderV5Badges()+'</div></div>';
     target.parentNode.insertBefore(badgeDiv,target.nextSibling);
   }
 }

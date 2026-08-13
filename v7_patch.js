@@ -688,8 +688,8 @@ const V7_BADGES=[
   {id:'goal_setter',icon:'🎯',name:'목표 설정자',desc:'관심 과목 TOP 3 설정 완료'},
   {id:'note_taker',icon:'📒',name:'메모 습관',desc:'학습 노트 5개 이상 작성'},
   {id:'weak_improver',icon:'📈',name:'약점 개선가',desc:'약점 과목 오답률 50% 감소'},
-  {id:'quiz_350',icon:'🧠',name:'퀴즈 마스터 v7',desc:'총 퀴즈 350문제 이상 풀기'},
-  {id:'v7_explorer',icon:'🌟',name:'v7 탐험가',desc:'v7.0 신기능 5개 이상 사용'}
+  {id:'quiz_350',icon:'🧠',name:'퀴즈 마스터',desc:'총 퀴즈 350문제 이상 풀기'},
+  {id:'v7_explorer',icon:'🌟',name:'탐험가',desc:'v7.0 신기능 5개 이상 사용'}
 ];
 
 function checkV7Badges(){
@@ -797,7 +797,7 @@ function v7InjectProfile(){
   const target=p4.querySelector('.v6-badge-section')||p4.querySelector('.v5-badge-section')||p4.querySelector('.v4-badge-section');
   if(target){
     const badgeDiv=document.createElement('div');badgeDiv.className='v7-badge-section';
-    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> v7 배지 ('+((U().v7badges||[]).length)+'/'+V7_BADGES.length+')</div><div class="v4-badge-grid">'+renderV7Badges()+'</div></div>';
+    badgeDiv.innerHTML='<div style="margin-bottom:10px"><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-star"/></svg> 꾸준함 배지 ('+((U().v7badges||[]).length)+'/'+V7_BADGES.length+')</div><div class="v4-badge-grid">'+renderV7Badges()+'</div></div>';
     target.parentNode.insertBefore(badgeDiv,target.nextSibling);
   }
 }

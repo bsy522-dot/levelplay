@@ -823,7 +823,7 @@ function renderV13Nav(){
     {icon:'🧩',label:'크로스워드',fn:'v13ScrollTo("v13sec-cw")'},
     {icon:'🎨',label:'배지',fn:'v13ScrollTo("v13sec-badge")'},
     {icon:'⚔️',label:'배틀',fn:'v13ScrollTo("v13sec-battle")'},
-    {icon:'❓',label:'v13퀴즈',fn:'v13ShowQuiz()'}
+    {icon:'❓',label:'단원퀴즈',fn:'v13ShowQuiz()'}
   ];
   items.forEach(item=>{
     const btn=document.createElement('button');
