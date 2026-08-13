@@ -1064,14 +1064,21 @@
     if (!host) {
       host = document.createElement('div');
       host.id = 'lpQuickJump';
+      /* ★패치가 쌓이면서 이 줄에 칩이 44개까지 늘었다(실측). 한 화면을 통째로
+         잡아먹어서 '나' 탭이 5.7화면 분량이 됐다 — 오너 말로 "정신이 하나도 없다".
+         자주 쓰는 세 개만 밖에 두고 나머지는 접는다. 지운 건 하나도 없다. */
       host.innerHTML = '<div class="sec">' + svg('i-grid') + ' 빠른 이동</div>'
         + '<div style="font-size:10px;color:var(--t3);margin:-4px 0 6px">홈 아래쪽 기능들로 바로 갑니다</div>'
-        + '<div id="lpQuickJumpRow" class="lp-qjr">'
+        + '<div class="lp-qjr">'
         /* 하단 '과목' 탭이 사라진 뒤의 상시 입구 — 과목 허브(p5)·예전 학습/놀이 화면 */
         + '<button onclick="go(5)">' + svg('i-book') + ' 과목 전체</button>'
         + '<button onclick="lpGoLegacy(1,\'subjectGrid\')">' + svg('i-grid') + ' 예전 학습 화면</button>'
         + '<button onclick="lpGoLegacy(2,\'allGm\')">' + svg('i-play') + ' 게임 전체</button>'
-        + '</div>';
+        + '</div>'
+        + '<details id="lpQuickJumpMore" style="margin-top:8px">'
+        + '<summary id="lpQuickJumpSum" style="cursor:pointer;font-size:12px;font-weight:700;padding:11px 2px;min-height:44px;display:flex;align-items:center">그 밖의 기능 더 보기</summary>'
+        + '<div id="lpQuickJumpRow" class="lp-qjr" style="margin-top:6px"></div>'
+        + '</details>';
       var pc = document.getElementById('profileCard');
       if (pc && pc.nextSibling) p4.insertBefore(host, pc.nextSibling); else p4.insertBefore(host, p4.firstChild);
     }
@@ -1079,6 +1086,8 @@
     var row = document.getElementById('lpQuickJumpRow');
     var btns = [].slice.call(uni.children);
     for (var i = 0; i < btns.length; i++) if (row) row.appendChild(btns[i]);   /* 노드 이동 = onclick 보존 */
+    var sum = document.getElementById('lpQuickJumpSum');
+    if (sum && row) sum.textContent = '그 밖의 기능 더 보기 (' + row.querySelectorAll('button').length + '개)';
     uni.style.display = 'none';
   }
 
