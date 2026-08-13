@@ -387,7 +387,9 @@
     (function dedupeLessons() {
       var seen = {};
       items.forEach(function (it) {
-        if (it.kind !== 'lesson' && it.kind !== 'comic' && it.kind !== 'story') return;
+        /* ★퀴즈도 중복 제거 대상에 넣는다 — 같은 문항("한글을 만든 왕은?")이 원본 데이터에
+           서로 다른 분류표로 두 번 들어가 있어 한국사 퀴즈 목록에 두 번 떴다. */
+        if (it.kind !== 'lesson' && it.kind !== 'comic' && it.kind !== 'story' && it.kind !== 'quiz') return;
         var key = it.kind + '|' + it.s + '|' + it.t;
         var prev = seen[key];
         if (!prev) { seen[key] = it; return; }
@@ -670,7 +672,10 @@
     function pick(kinds) {
       return bucket.filter(function (it) {
         if (kinds.indexOf(it.kind) < 0) return false;
-        if (f !== 'all' && it.kind !== f) return false;
+        /* ★칩 숫자는 실험(sim)을 '게임'에 합쳐 세는데, 정작 목록에서는 걸러내고 있었다.
+           과학 배지 20 → 실제 8개, 음악 6 → 5개, 체육 5 → 2개. 실험 12종이 숫자에만
+           있고 화면에는 없었다. 세는 기준과 보여 주는 기준을 같게 맞춘다. */
+        if (f !== 'all' && it.kind !== f && !(f === 'game' && it.kind === 'sim')) return false;
         return true;
       });
     }
@@ -1329,7 +1334,10 @@
       /* 화면 위에 떠서 본문을 가리던 잔여 위젯 정리.
          진도 링은 홈의 '일일 목표' 막대와 같은 정보라 숨기고, 소리 버튼은 하단 바 바로 위로 붙인다. */
       '.v4-progress-ring{display:none!important}',
-      '.v3-sound-toggle{bottom:calc(var(--nv) + 10px)!important;left:10px!important;width:34px!important;height:34px!important;opacity:.9}',
+      /* ★왼쪽 아래에 두면 퀴즈 답 버튼 왼쪽 모서리를 침범해서 답 대신 음소거가 눌린다.
+         로봇 단추와 같은 오른쪽 줄로 올려 겹치는 자리를 한 군데로 모은다.
+         크기는 44px 미만으로 내리지 않는다(아이 손가락). */
+      '.v3-sound-toggle{bottom:calc(var(--nv) + 124px)!important;left:auto!important;right:12px!important;opacity:.9}',
       '.lp-rths{display:flex;align-items:center;justify-content:center;font-size:19px}',
       '.lp-rths .ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
       '.lp-rx{flex:1 1 auto;min-width:0}',

@@ -647,6 +647,18 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 .qz-hint-btn,.qz-formative .qz-hint-btn{min-height:44px;padding:6px 10px;font-size:11px;
   display:inline-flex;align-items:center}
 .bt{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+/* ★가로로 돌리면 화면 왼쪽이 검은 아이콘 막대로 4겹 덮였다.
+   v7·v8·v9·v10 패치가 서로 모른 채 각각 같은 자리(left 6~8px, top 50%)에
+   세로 툴바를 넣었고, 숨김 조건이 @media(max-width:480px) 뿐이라 가로(915px)에서
+   전부 나타나 겹쳤다. 실측: 폭 36px·세로 약 320px 막대가 화면 높이의 78%를 가림.
+   여기 있는 기능은 '나' 탭 빠른 이동에 이미 전부 있다. 폰 앱이므로 항상 숨긴다. */
+.v7-qa,.v8-qa,.v9-fab,.v10-fab{display:none !important}
+
+/* ★스피커 단추가 화면 왼쪽 아래에 떠 있어서 퀴즈 답 버튼 왼쪽 모서리를 침범했다.
+   답 대신 음소거가 눌릴 수 있다. 로봇 단추와 같은 오른쪽 줄로 올려 겹치는
+   자리를 한 군데로 모은다. */
+.v3-sound-toggle{left:auto !important;right:12px !important;bottom:calc(var(--nv,52px) + 124px) !important}
+
 .st{min-height:44px}                                  /* 상단 과목 탭 — 실측 38px 였다 */
 #srchBtn,#v3SoundToggle,.notif-btn{min-width:44px;min-height:44px}  /* 돋보기 31x27, 스피커 28x28, 알림 26x26 */
 .comm-cats button,.comm-sort button{min-height:40px}  /* 커뮤 분류 53x30, 정렬 62x28 */
@@ -1330,7 +1342,7 @@ const pgs=['p0','p1','p2','p3','p4','p5','p6'];let cur=0;
    (그때 하단은 '홈'이 켜진다). p5 진입로는 지도 탭 상단 버튼·지도 중심 노드·'나' 탭 빠른이동. */
 const NAV_SLOT=[0,0,0,2,3,0,1];   /* 패널 → 하단 탭 슬롯 */
 const NAV_PANEL=[0,6,3,4];        /* 하단 탭 슬롯 → 기본 패널 */
-function go(i){if(typeof i!=='number'||!pgs[i])i=0;const prev=cur;pgs.forEach((p,j)=>{const el=document.getElementById(p);if(!el)return;el.classList.remove('slide-left');if(j!==i&&j<i)el.classList.add('slide-left');el.classList.toggle('on',i===j);});const slot=(NAV_SLOT[i]==null?0:NAV_SLOT[i]);document.querySelectorAll('nav button[role="tab"]').forEach((b,j)=>{b.classList.toggle('on',j===slot);b.setAttribute('aria-selected',j===slot?'true':'false');b.setAttribute('tabindex',j===slot?'0':'-1');});cur=i;const _fb=document.getElementById('fab');if(_fb)_fb.classList.toggle('sh',i===3);if(U.tabsVisited&&!U.tabsVisited.includes(i)){U.tabsVisited.push(i);sv();checkBadges();}if(typeof window.lpOnGo==='function'){try{window.lpOnGo(i);}catch(e){console.warn('[IA] lpOnGo',e);}}}
+function go(i){/* 뱃지 축하창이 떠 있는 채로 화면을 옮기면 새 화면 위에 얹혀 있었다 */try{document.querySelectorAll('.badge-modal-overlay').forEach(function(e){e.remove();});}catch(e){}if(typeof i!=='number'||!pgs[i])i=0;const prev=cur;pgs.forEach((p,j)=>{const el=document.getElementById(p);if(!el)return;el.classList.remove('slide-left');if(j!==i&&j<i)el.classList.add('slide-left');el.classList.toggle('on',i===j);});const slot=(NAV_SLOT[i]==null?0:NAV_SLOT[i]);document.querySelectorAll('nav button[role="tab"]').forEach((b,j)=>{b.classList.toggle('on',j===slot);b.setAttribute('aria-selected',j===slot?'true':'false');b.setAttribute('tabindex',j===slot?'0':'-1');});cur=i;const _fb=document.getElementById('fab');if(_fb)_fb.classList.toggle('sh',i===3);if(U.tabsVisited&&!U.tabsVisited.includes(i)){U.tabsVisited.push(i);sv();checkBadges();}if(typeof window.lpOnGo==='function'){try{window.lpOnGo(i);}catch(e){console.warn('[IA] lpOnGo',e);}}}
 function ckNk(){if(!U.nk)document.getElementById('nkM').style.display='flex';}
 function sanIn(s){return String(s==null?'':s).replace(/[<>]/g,'');}
 /* 가입 게이트에서 연령을 한 번만 묻는다. 미선택 시 기본값 = 초등. */
@@ -3274,6 +3286,8 @@ function showBadgeModal(bd){
   overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
   document.body.appendChild(overlay);
   setTimeout(()=>{if(overlay.parentNode)overlay.remove();},5000);
+  /* 배경을 눌러도 닫히고 5초 뒤 저절로 닫힌다. 다만 그 5초 사이에 화면을 옮기면
+     새 화면 위에 그대로 얹혀 있어서, go() 에서도 걷어내도록 해 두었다. */
 }
 function renderBadgeArea(){
   const el=document.getElementById('badgeArea');if(!el)return;
