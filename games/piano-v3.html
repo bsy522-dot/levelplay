@@ -634,7 +634,9 @@ const zoomOverride = {portrait: null, landscape: null}; // 사용자가 −/＋�
 function baseWhiteWidth() { return window.innerWidth < 600 ? 14 : 20; }
 // 가로 기본 배율: 화면폭 ÷ 흰건반 17개(약 2.5옥타브)가 한눈에 들어오도록 자동 산정
 function autoKeyZoom() {
-  if (!isLandscape) return 1; // 세로는 기존 기본값 그대로 (회귀 금지)
+  // 세로/데스크탑(2026-08-16): 기본 100%가 14px 폭 × 화면절반 높이 '바코드 건반'을 만들던 문제 —
+  // 흰건반 약 11개가 화면 폭에 들어오도록 자동 산정 (손가락 터치 폭 확보, 나머지는 좌우 스크롤)
+  if (!isLandscape) return Math.max(1, Math.min(3.0, (window.innerWidth / 11) / baseWhiteWidth()));
   return Math.max(0.8, Math.min(2.2, (window.innerWidth / 17) / baseWhiteWidth()));
 }
 function applyLayoutMode(force) {
@@ -814,6 +816,9 @@ function buildPiano() {
     const frac = Math.min(0.6, 0.48 + (keyZoom - 1) * 0.06);
     whiteHeight = Math.max(baseWhiteH, Math.round(window.innerHeight * frac));
   }
+  // 2026-08-16: 폭 대비 높이 상한 1:7 — 화면비율만 좇다가 실제 피아노(약 1:6.5)와 동떨어진
+  // 길쭉한 건반이 되던 문제. 가로모드(44×96 등)는 원래 상한 아래라 영향 없음.
+  whiteHeight = Math.min(whiteHeight, whiteKeyWidth * 7);
   const blackHeight = Math.round(whiteHeight * 0.63); // 105→66, 130→82 (기존과 동일)
 
   const whiteKeys = ALL_KEYS.filter(k => !isBlack(k.note));
