@@ -43,8 +43,10 @@ def convert_page(src_path, out_path):
         return os.path.getsize(out_path)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     im = Image.open(src_path).convert("RGB")
-    h = int(im.height * IMG_WIDTH / im.width)
-    im.resize((IMG_WIDTH, h), Image.LANCZOS).save(
+    # 원본보다 크게 늘리지 않는다 — 세로 웹툰 조판본은 1024px라 확대하면 화질만 버린다
+    target_w = min(IMG_WIDTH, im.width)
+    h = int(im.height * target_w / im.width)
+    im.resize((target_w, h), Image.LANCZOS).save(
         out_path, "JPEG", quality=IMG_QUALITY, optimize=True, progressive=True)
     return os.path.getsize(out_path)
 
