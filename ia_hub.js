@@ -479,9 +479,7 @@
       try {
         go(1);
         openSubject(it.ck);
-        setTimeout(function () {
-          try { openLesson(it.ui, it.li); } catch (e) {}   /* 맨 위로 올리는 건 openLesson 이 한다 */
-        }, 60);
+        openLesson(it.ui, it.li);   /* 동기로 — 60ms 지연 동안 단원목록이 비쳤고, 실패하면 그 목록에 발이 묶였다 */
         return;
       } catch (e) { /* 실패하면 아래 기존 경로로 내려간다 */ }
     }

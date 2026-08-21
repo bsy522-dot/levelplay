@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v86-webtoon';
+const CACHE_NAME = 'levelplay-v87-navroute';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
   './nav_unify.js',
   './home_tidy.js',
   './ia_hub.js',
+  './nav_route.js',
   './games/hangul-game.html',
   './games/eng-word-game.html',
   './games/typing-game.html',
