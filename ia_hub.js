@@ -542,7 +542,8 @@
       + '<button class="bt bs" onclick="lpGoLegacy(2,\'allVids\')">' + svg('i-video') + ' 영상만 모아보기</button>'
       + '<button class="bt bs" onclick="lpGoLegacy(2,\'allS\')">' + svg('i-science') + ' 실험</button>'
       + '<button class="bt bs" onclick="lpGoLegacy(2,\'allQ\')">' + svg('i-note') + ' 퀴즈</button>'
-      + '<button class="bt bs" onclick="lpGoLegacy(1,\'subjectGrid\')">' + svg('i-book') + ' 예전 학습 화면</button>'
+      /* ★2026-08-31 감사 #8: '예전 학습 화면'은 사용자에게 설명할 수 없는 개발 잔재라 뺐다.
+         (lpGoLegacy 자체는 다른 곳에서 계속 쓰이므로 함수는 그대로 둔다) */
       + '</div>';
     host.innerHTML = h;
   }
@@ -1070,16 +1071,17 @@
       /* ★패치가 쌓이면서 이 줄에 칩이 44개까지 늘었다(실측). 한 화면을 통째로
          잡아먹어서 '나' 탭이 5.7화면 분량이 됐다 — 오너 말로 "정신이 하나도 없다".
          자주 쓰는 세 개만 밖에 두고 나머지는 접는다. 지운 건 하나도 없다. */
+      /* ★2026-08-31 감사 #7·#8: 칩 41개가 그대로 아이 화면에 쏟아져 '미완성'으로 읽혔다.
+         ①자주 쓰는 것만 밖에 두고 ②나머지는 접고 ③'마스터리·갭분석·프리즈' 같은
+         개발자 말을 한국어로 바꾼다. ④'예전 학습 화면'(개발 잔재)은 뺐다. */
       host.innerHTML = '<div class="sec">' + svg('i-grid') + ' 빠른 이동</div>'
-        + '<div style="font-size:10px;color:var(--t3);margin:-4px 0 6px">홈 아래쪽 기능들로 바로 갑니다</div>'
-        + '<div class="lp-qjr">'
-        /* 하단 '과목' 탭이 사라진 뒤의 상시 입구 — 과목 허브(p5)·예전 학습/놀이 화면 */
+        + '<div style="font-size:10px;color:var(--t3);margin:-4px 0 6px">자주 쓰는 기능으로 바로 갑니다</div>'
+        + '<div class="lp-qjr" id="lpQuickJumpTop">'
         + '<button onclick="go(5)">' + svg('i-book') + ' 과목 전체</button>'
-        + '<button onclick="lpGoLegacy(1,\'subjectGrid\')">' + svg('i-grid') + ' 예전 학습 화면</button>'
         + '<button onclick="lpGoLegacy(2,\'allGm\')">' + svg('i-play') + ' 게임 전체</button>'
         + '</div>'
         + '<details id="lpQuickJumpMore" style="margin-top:8px">'
-        + '<summary id="lpQuickJumpSum" style="cursor:pointer;font-size:12px;font-weight:700;padding:11px 2px;min-height:44px;display:flex;align-items:center">그 밖의 기능 더 보기</summary>'
+        + '<summary id="lpQuickJumpSum" style="cursor:pointer;font-size:12px;font-weight:700;padding:11px 2px;min-height:44px;display:flex;align-items:center">기능 더 보기</summary>'
         + '<div id="lpQuickJumpRow" class="lp-qjr" style="margin-top:6px"></div>'
         + '</details>';
       var pc = document.getElementById('profileCard');
@@ -1089,9 +1091,51 @@
     var row = document.getElementById('lpQuickJumpRow');
     var btns = [].slice.call(uni.children);
     for (var i = 0; i < btns.length; i++) if (row) row.appendChild(btns[i]);   /* 노드 이동 = onclick 보존 */
+    renameChips(row);
+    promoteChips(row);
     var sum = document.getElementById('lpQuickJumpSum');
-    if (sum && row) sum.textContent = '그 밖의 기능 더 보기 (' + row.querySelectorAll('button').length + '개)';
+    if (sum && row) sum.textContent = '기능 더 보기 (' + row.querySelectorAll('button').length + '개)';
     uni.style.display = 'none';
+  }
+
+  /* 개발자 말 → 아이·부모가 아는 말. 초등생은 물론 부모도 '마스터리·갭분석·프리즈'를 모른다. */
+  var CHIP_KO = {
+    '마스터리':'숙련도','갭분석':'약한 곳 찾기','프리즈':'쉬는 날','인사이트':'학습 분석',
+    '랭크':'등급전','크로스워드':'낱말퍼즐','플래시카드':'단어 카드','포모도로':'집중 타이머',
+    '간격반복':'복습 간격','스킬트리':'실력 나무','XP이벤트':'보너스 기간','쇼케이스':'내 자랑',
+    '티어':'등급','하트':'하트','마일스톤':'이정표','적응퀴즈':'맞춤 퀴즈','경로맵':'학습 지도',
+    '타임어택':'시간 도전','리포트':'학습 리포트','올림피아드':'도전 대회','시뮬레이터':'실험실',
+    '라이벌':'대결 상대','배틀':'퀴즈 대결','퀘스트':'오늘의 임무','타워':'연속 탑',
+    '레이더':'과목 레이더','히트맵':'숙련도 지도','인증서':'수료증','챌린지':'도전 과제',
+    '퀴즈만들기':'퀴즈 만들기','루틴':'학습 루틴','단원퀴즈':'단원 퀴즈','오답분석':'틀린 문제 보기',
+    '복습':'복습하기','시험':'미니 시험','성적표':'성적표','대회':'대회'
+  };
+  function renameChips(row){
+    if (!row) return;
+    [].slice.call(row.querySelectorAll('button')).forEach(function (b) {
+      var span = b.querySelector('.lpuni-l');
+      var label = ((span ? span.textContent : b.textContent) || '').trim();
+      var ko = CHIP_KO[label];
+      if (!ko || ko === label) return;
+      if (span) { span.textContent = ko; return; }        /* 이름표가 따로 있으면 그것만 바꾼다 */
+      for (var i = 0; i < b.childNodes.length; i++) {
+        var nd = b.childNodes[i];
+        if (nd.nodeType === 3 && nd.nodeValue.trim()) { nd.nodeValue = ' ' + ko; return; }
+      }
+      b.appendChild(document.createTextNode(' ' + ko));
+    });
+  }
+  /* 아이가 실제로 쓰는 6개만 밖으로 꺼낸다 — 나머지는 접힌 채로 그대로 남는다(지운 것 없음) */
+  var CHIP_TOP = ['복습하기', '단원 퀴즈', '틀린 문제 보기', '단어 카드', '미니 시험', '숙련도'];
+  function promoteChips(row){
+    var top = document.getElementById('lpQuickJumpTop');
+    if (!row || !top) return;
+    CHIP_TOP.forEach(function (want) {
+      var hit = [].slice.call(row.querySelectorAll('button')).filter(function (b) {
+        return (b.textContent || '').trim() === want;
+      })[0];
+      if (hit) top.appendChild(hit);
+    });
   }
 
   /* ================================================================
@@ -1215,6 +1259,9 @@
     if (!it) return;
     var rel = related(it, { kinds: ['game', 'sim'], max: 4 });
     if (!rel.length) return;
+    /* ★2026-08-31 감사 #5: 같은 블록이 y=1982·y=2227 두 곳에 동시에 보였다.
+       레슨을 다시 그릴 때 앞서 붙인 것이 남아 있어 생긴 중복이다. 붙이기 전에 걷어낸다. */
+    [].slice.call(document.querySelectorAll('#lpPlayNext')).forEach(function (e) { e.remove(); });
     var box = document.createElement('div');
     box.id = 'lpPlayNext';
     box.innerHTML = '<div class="sec lp-zh">' + svg('i-play') + ' 이걸로 놀아보기</div>'
@@ -1241,6 +1288,33 @@
   };
   window.lpIa = { subjects: SUBJ, index: idx, related: related, openItem: openItem, build: function () { IDX = null; return idx(); } };
 
+  /* 부유 버튼 제어 — 위 CSS 가 쓰는 body 클래스를 세운다 */
+  (function fabGuard(){
+    var t = null;
+    function onScroll(){
+      document.body.classList.add('lp-scrolling');
+      clearTimeout(t);
+      t = setTimeout(function () { document.body.classList.remove('lp-scrolling'); }, 900);
+    }
+    ['p0','p1','p2','p3','p4','p5','p6'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('scroll', onScroll, { passive: true });
+    });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    function markComm(){
+      var p3 = document.getElementById('p3');
+      document.body.classList.toggle('lp-on-comm', !!(p3 && p3.classList.contains('on')));
+    }
+    markComm();
+    var prevGo = window.go;
+    if (typeof prevGo === 'function' && !prevGo._lpFabWrap) {
+      var wrapped = function (i) { var r = prevGo.apply(this, arguments); setTimeout(markComm, 0); return r; };
+      wrapped._lpFabWrap = 1;
+      window.go = wrapped;
+    }
+    setInterval(markComm, 1200);   /* go() 를 거치지 않는 이동까지 따라잡는다 */
+  })();
+
   /* ================================================================
      13. 스타일
      ================================================================ */
@@ -1253,6 +1327,12 @@
       '#lpUnifiedNav{display:none!important}',
       '.pg{padding-bottom:calc(var(--nv) + 18px)}',
       '.fab{bottom:calc(var(--nv) + 14px)}',
+      /* ★2026-08-31 감사 #2: 스피커·로봇·연필 세 개가 겹쳐 떠서 배지·칩·퀴즈 카드를
+         영구히 덮었고 닫을 방법이 없었다. ①글쓰기(연필)는 글 쓸 수 있는 커뮤니티에서만
+         ②나머지는 스크롤하는 동안 비켜 준다. 손을 떼면 900ms 뒤 돌아온다. */
+      'body:not(.lp-on-comm) .fab{display:none!important}',
+      'body.lp-scrolling .tutor-fab,body.lp-scrolling .v3-sound-toggle,body.lp-scrolling .v4-progress-ring,body.lp-scrolling .v3-timer,body.lp-scrolling .fab{opacity:0;transform:translateY(14px);pointer-events:none}',
+      '.tutor-fab,.v3-sound-toggle,.v4-progress-ring,.v3-timer,.fab{transition:opacity .18s ease,transform .18s ease}',
       '.tutor-fab{bottom:calc(var(--nv) + 70px)}',
       '.tutor-panel{bottom:calc(var(--nv) + 124px)}',
       '.v3-sound-toggle{bottom:calc(var(--nv,52px) + 14px)}',
