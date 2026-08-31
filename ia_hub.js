@@ -1344,6 +1344,9 @@
          영구히 덮었고 닫을 방법이 없었다. ①글쓰기(연필)는 글 쓸 수 있는 커뮤니티에서만
          ②나머지는 스크롤하는 동안 비켜 준다. 손을 떼면 900ms 뒤 돌아온다. */
       'body:not(.lp-on-comm) .fab{display:none!important}',
+      /* ★2026-08-31 3차: 친구 탭만 부유 버튼이 3개였다. 이 화면의 할 일은 글쓰기 하나라
+         도우미·소리 버튼은 접어 둔다(다른 탭에서는 그대로 쓸 수 있다). */
+      'body.lp-on-comm .tutor-fab,body.lp-on-comm .v3-sound-toggle{display:none!important}',
       'body.lp-scrolling .tutor-fab,body.lp-scrolling .v3-sound-toggle,body.lp-scrolling .v4-progress-ring,body.lp-scrolling .v3-timer,body.lp-scrolling .fab{opacity:0;transform:translateY(14px);pointer-events:none}',
       'body.lp-fab-idle .tutor-fab,body.lp-fab-idle .v3-sound-toggle,body.lp-fab-idle .v4-progress-ring,body.lp-fab-idle .v3-timer,body.lp-fab-idle .fab{opacity:0;transform:translateY(14px);pointer-events:none}',
       '.tutor-fab,.v3-sound-toggle,.v4-progress-ring,.v3-timer,.fab{transition:opacity .18s ease,transform .18s ease}',

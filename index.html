@@ -85,7 +85,9 @@ html.kid .subjc .sd{font-size:11px}
 .gcard .band{height:4px;width:100%}
 .gcard .gi{font-size:30px;margin:10px 0 5px;line-height:1}
 .gcard .gn{font-size:13px;font-weight:700;padding:0 6px;line-height:1.2}
-.gcard .gd{font-size:10px;color:var(--t2);margin-top:3px;padding:0 8px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ★2026-08-31 3차: 한 줄 말줄임이라 '실물 20키 멀티터치 운지+크로마틱 32음+동요 5곡'
+   같은 설명이 중간에서 잘렸다. 두 줄까지 편다. */
+.gcard .gd{font-size:10px;color:var(--t2);margin-top:3px;padding:0 8px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .gcard .gmeta{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:5px;font-size:9px;color:var(--t3)}
 .gcard .gmeta .gdiff b{color:var(--t2)}
 .gcard .gmeta .gxp{font-weight:800;color:var(--gd)}
@@ -1334,7 +1336,36 @@ let QUIZ=[
 {q:'교향곡의 아버지라 불리는 작곡가는?',a:['하이든','모차르트','베토벤','바흐'],c:0,cat:'음악'},
 {q:'바이올린의 줄은 몇 개일까요?',a:['4개','5개','6개','3개'],c:0,cat:'음악'},
 {q:'엘리제를 위하여를 작곡한 사람은?',a:['베토벤','모차르트','쇼팽','슈베르트'],c:0,cat:'음악'},
-{q:'관악기가 아닌 것은?',a:['첼로','트럼펫','플루트','클라리넷'],c:0,cat:'음악'}];
+{q:'관악기가 아닌 것은?',a:['첼로','트럼펫','플루트','클라리넷'],c:0,cat:'음악'},
+/* ===== 유아(5~7세) 수학 25문항 — 2026-08-31 3차 직접 제작 =====
+   재감사: 과난도(구구단·세 자리 연산)를 걷어냈더니 유아 수학이 5문항만 남았다.
+   수 세기 5 · 크기 비교 4 · 한 자리 덧셈 5 · 한 자리 뺄셈 4 · 모양 4 · 패턴 3.
+   tier:'toddler' 를 달아 초등 이상 계정에는 나오지 않게 한다(너무 쉬워서). */
+{q:'사과가 🍎🍎🍎 있어요. 모두 몇 개일까요?',a:['3개','2개','4개','5개'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'별이 ⭐⭐⭐⭐⭐ 있어요. 모두 몇 개일까요?',a:['5개','4개','6개','3개'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'병아리가 🐤🐤 있어요. 모두 몇 마리일까요?',a:['2마리','1마리','3마리','4마리'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'1, 2, 3, 4 다음에 오는 수는?',a:['5','6','4','7'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'10 바로 앞의 수는?',a:['9','11','8','10'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'3과 5 중에서 더 큰 수는?',a:['5','3','둘이 같아요','알 수 없어요'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'7과 2 중에서 더 작은 수는?',a:['2','7','둘이 같아요','알 수 없어요'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'1, 4, 9, 6 중에서 가장 큰 수는?',a:['9','6','4','1'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'8, 3, 5, 7 중에서 가장 작은 수는?',a:['3','5','7','8'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'2 + 1 은 얼마일까요?',a:['3','2','4','1'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'3 + 3 은 얼마일까요?',a:['6','5','7','9'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'4 + 5 는 얼마일까요?',a:['9','8','10','7'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'1 + 6 은 얼마일까요?',a:['7','6','8','5'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'2 + 2 는 얼마일까요?',a:['4','2','6','3'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'5 - 1 은 얼마일까요?',a:['4','5','3','6'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'6 - 3 은 얼마일까요?',a:['3','2','4','9'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'9 - 4 는 얼마일까요?',a:['5','4','6','3'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'8 - 8 은 얼마일까요?',a:['0','8','1','16'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'동그란 모양의 이름은 무엇일까요?',a:['원','세모','네모','별'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'세모(삼각형)의 변은 몇 개일까요?',a:['3개','4개','2개','5개'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'네모(사각형)의 꼭짓점은 몇 개일까요?',a:['4개','3개','5개','6개'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'공, 동전, 접시는 모두 어떤 모양일까요?',a:['동그라미','세모','네모','별'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'🔴🔵🔴🔵 다음에 올 것은?',a:['🔴','🔵','🟡','🟢'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'2, 4, 6, 8 다음에 오는 수는?',a:['10','9','12','11'],c:0,cat:'유아수학',tier:'toddler'},
+{q:'가, 나, 가, 나, 가 다음에 오는 것은?',a:['나','가','다','라'],c:0,cat:'유아수학',tier:'toddler'}];
 
 const P=[];   /* ★2026-08-31 감사 B-3: 가짜 게시글 12건을 내렸다.
    좋아요 234·'1시간전'까지 붙은 시드 글은 실이용자가 있는 것처럼 보이게 하는 조작이라
@@ -3073,6 +3104,7 @@ function completeLesson(subjNm,lessonT){
   if(!U.stats.lessonsBySubject[subjNm])U.stats.lessonsBySubject[subjNm]=0;
   U.stats.lessonsBySubject[subjNm]++;U.lessonCount=(U.lessonCount||0)+1;
   xp(20,'레슨완료: '+lessonT);toast('+20XP 레슨 완료!');sv();checkBadges();
+  lpAddSubjectXP(subjNm,20);   /* 학습 인사이트 과목 막대 (3차) */
   lpRefreshProgress();
   backToUnits();
 }
@@ -3748,11 +3780,13 @@ function lpTierTotalLessons(t){
 /* ★2026-08-31 재감사 B-2 잔여: 유아 풀 64문항 중 구구단 20 + 세 자리 연산 14 +
    곱셈 1 = 35문항(55%)이 초2~4 수준이었다. 구구단·곱셈·세 자리 연산을 뺀다.
    유아에게 남기는 셈은 '한 자리 수 더하기·빼기'뿐이다. */
-const LP_TODDLER_QCAT=['숫자','영어단어','영어','음악','건강'];
+const LP_TODDLER_QCAT=['유아수학','숫자','영어단어','영어','음악','건강'];
 const LP_TODDLER_HARDQ=/화학식|광합성|원소|분자|세포|유전|방정식|함수|벡터|확률|미적분|헌법|정치|경제|무역|주식|세계대전|전쟁|혁명|제국|물리|양자|알고리즘|프로그래밍|백분율|기압|중력|위도|경도|민주주의|산업혁명|르네상스|국회|법률|화폐|인플레|원주율|내각의 합/;
 function lpTierQuizPool(pool){
   var src=pool||(typeof QUIZ!=='undefined'?QUIZ:[]);
   var t=lpTier();
+  /* 유아 전용 문항은 초등 이상에는 내지 않는다 — 8세에게 '2+1' 은 문제가 아니다 */
+  if(t!=='toddler')src=src.filter(function(q){return !(q&&q.tier==='toddler');});
   if(t==='teen'||t==='adult')return src;
   var out;
   if(t==='toddler'){
@@ -3842,10 +3876,30 @@ function lpRecordMastery(cat,qText,ok){
     st.n++;if(ok)st.c++;
     u.v14.masteryStats[key]=st;
     u.v14.mastery[key]=Math.round(st.c/st.n*100);   /* 지어낸 값이 아니라 실제 정답률 */
+    if(ok){var vs=LP_V13_SUBJ[subj];if(vs)u['xp_'+vs]=(u['xp_'+vs]||0)+5;}   /* 인사이트 막대 (3차) */
     localStorage.setItem('lp_user',JSON.stringify(u));
   }catch(e){}
 }
 window.lpRecordMastery=lpRecordMastery;
+
+/* ===== 과목별 XP 적립 (2026-08-31 3차) =====
+   v13 '학습 인사이트'는 lp_user['xp_<과목>'] 를 읽는데 그 칸에 쓰는 코드가
+   아무 데도 없었다. 난수 폴백을 걷어내고 나니 기능이 영구 빈 상태로 죽었다.
+   실제로 배운 것만 적립한다 — 레슨 완료 20, 퀴즈 정답 5. 지어내지 않는다. */
+const LP_V13_SUBJ={'수학':'수학','과학':'과학','탐구관찰':'과학','한글국어':'국어','국어':'국어',
+  '영어':'영어','사회':'사회','사회감성':'사회','경제금융':'사회','역사':'역사','음악':'음악',
+  '미술':'미술','체육':'체육','스포츠':'체육','건강':'체육','코딩':'코딩','도덕':'도덕'};
+function lpAddSubjectXP(nm,amount){
+  try{
+    var s=LP_V13_SUBJ[String(nm||'').trim()];
+    if(!s||!amount)return;
+    var raw=localStorage.getItem('lp_user');
+    var u=raw?JSON.parse(raw):{};
+    u['xp_'+s]=(u['xp_'+s]||0)+amount;
+    localStorage.setItem('lp_user',JSON.stringify(u));
+  }catch(e){}
+}
+window.lpAddSubjectXP=lpAddSubjectXP;
 
 /* ===== 기존 설치본 정리 (2026-08-31 재감사) =====
    랭킹 화면을 한 번도 열지 않아도 저장소에서 봇이 사라지도록 부팅 때 한 번 훑는다. */

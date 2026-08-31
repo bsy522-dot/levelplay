@@ -396,7 +396,10 @@ window.v13DrawInsights=function(){
   // Summary stats on the right
   const totalXP=xpData.reduce((s,d)=>s+d.xp,0);
   const streak=u.streak||0;
-  const quizTotal=u.quizTotal||Math.floor(Math.random()*200)+50;
+  /* ★2026-08-31 3차: 여기 Math.random()*200+50 폴백이 남아 있었다. 지금은 위쪽
+     빈 상태 조기 반환에 막혀 도달하지 못하지만, 과목 XP 기록이 붙는 순간
+     "퀴즈: 137문" 같은 가짜 수치가 되살아나는 잠복 지뢰였다. 기록이 없으면 0이다. */
+  const quizTotal=u.quizTotal||0;
   ctx.fillStyle=_cTx;ctx.font='bold 11px sans-serif';
   ctx.fillText('총 XP: '+totalXP,430,80);
   ctx.fillText('스트릭: '+streak+'일',430,100);
