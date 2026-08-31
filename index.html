@@ -3498,7 +3498,9 @@ function renderComm(){
   if(_commCat!=='전체')posts=posts.filter(p=>(p.g||'자유')===_commCat);
   if(_commSort==='hot')posts.sort((a,b)=>b.l-a.l);
   else posts.sort((a,b)=>a.m-b.m);
-  document.getElementById('allP').innerHTML=posts.map(pHNew).join('')||'<div style="font-size:12px;color:var(--t3);padding:22px 12px;text-align:center;line-height:1.7">아직 올라온 글이 없어요.<br>첫 글을 남겨 보세요!</div>';
+  /* ★2026-08-31: 가짜 예시 글은 두지 않는다(감사 B-3, 병석님 결정).
+     대신 비어 있는 이유를 다정하게 말하고 글쓰기로 바로 연결한다. */
+  document.getElementById('allP').innerHTML=posts.map(pHNew).join('')||'<div style="padding:26px 14px;text-align:center"><div style="font-size:34px;line-height:1;margin-bottom:10px">✏️</div><div style="font-size:13px;font-weight:700;color:var(--t2);line-height:1.7;overflow-wrap:anywhere">아직 글이 없어요.<br>오늘 배운 걸 첫 글로 남겨볼까요?</div><button class="bt bp" style="margin-top:14px;padding:10px 20px;font-size:12px" onclick="shW()">첫 글 쓰기</button></div>';
 }
 
 // ===== 새 뱃지용 데이터 초기화 =====

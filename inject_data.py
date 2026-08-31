@@ -60,8 +60,15 @@ try:
         if n: print('K.%s+%d' % (s,n))
 except Exception as e: print('E3:'+str(e))
 
-# 4. community
+# 4. community — ★2026-08-31 중단
+# 이 블록은 data/community_posts.json 의 가짜 게시글을 index.html 의 const P=[] 에
+# 다시 밀어 넣는다. 품질감사 B-3 에서 '실이용자가 있는 것처럼 보이게 하는 조작'으로
+# 판정돼 앱에서 내렸으므로, 이 스크립트를 다시 돌려도 되살아나지 않게 막는다.
+# 원본 데이터는 _deleted_files/community_posts_가짜_20260831/ 에 보존.
+# 되살릴 일이 생기면 아래 값을 True 로 바꾸고 데이터 파일을 data/ 로 되돌릴 것.
+INJECT_FAKE_COMMUNITY = False
 try:
+    if not INJECT_FAKE_COMMUNITY: raise RuntimeError('가짜 커뮤니티 주입 중단(2026-08-31 감사 B-3)')
     with open('data/community_posts.json','r',encoding='utf-8') as f: ps=json.load(f)
     if isinstance(ps,dict): ps=ps.get('posts',ps.get('data',[]))
     cm={'AI공유':'ai','AI':'ai','개발코딩':'dev','개발':'dev','프로그램':'prog','교육강좌':'edu','교육':'edu','게임':'game','과학기술':'sci','과학':'sci','자유':'free','질문답변':'qna','질문':'qna'}
