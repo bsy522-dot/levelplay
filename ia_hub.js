@@ -1290,9 +1290,22 @@
 
   /* 부유 버튼 제어 — 위 CSS 가 쓰는 body 클래스를 세운다 */
   (function fabGuard(){
-    var t = null;
+    var t = null, idle = null;
+    /* ★2026-08-31 재감사 #2: 스크롤 중에만 비켜서는 것으로는 부족했다.
+       가만히 있는 화면에서 배지·카드 글자를 계속 덮는다는 지적이 다시 나왔다.
+       손을 안 대면 3초 뒤 완전히 비켜났다가, 화면을 건드리면 곧바로 돌아온다. */
+    function wake(){
+      document.body.classList.remove('lp-fab-idle');
+      clearTimeout(idle);
+      idle = setTimeout(function () { document.body.classList.add('lp-fab-idle'); }, 3000);
+    }
+    ['touchstart', 'pointerdown', 'mousemove', 'keydown'].forEach(function (ev) {
+      window.addEventListener(ev, wake, { passive: true });
+    });
+    wake();
     function onScroll(){
       document.body.classList.add('lp-scrolling');
+      wake();
       clearTimeout(t);
       t = setTimeout(function () { document.body.classList.remove('lp-scrolling'); }, 900);
     }
@@ -1332,6 +1345,7 @@
          ②나머지는 스크롤하는 동안 비켜 준다. 손을 떼면 900ms 뒤 돌아온다. */
       'body:not(.lp-on-comm) .fab{display:none!important}',
       'body.lp-scrolling .tutor-fab,body.lp-scrolling .v3-sound-toggle,body.lp-scrolling .v4-progress-ring,body.lp-scrolling .v3-timer,body.lp-scrolling .fab{opacity:0;transform:translateY(14px);pointer-events:none}',
+      'body.lp-fab-idle .tutor-fab,body.lp-fab-idle .v3-sound-toggle,body.lp-fab-idle .v4-progress-ring,body.lp-fab-idle .v3-timer,body.lp-fab-idle .fab{opacity:0;transform:translateY(14px);pointer-events:none}',
       '.tutor-fab,.v3-sound-toggle,.v4-progress-ring,.v3-timer,.fab{transition:opacity .18s ease,transform .18s ease}',
       '.tutor-fab{bottom:calc(var(--nv) + 70px)}',
       '.tutor-panel{bottom:calc(var(--nv) + 124px)}',
