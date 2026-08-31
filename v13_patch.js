@@ -364,10 +364,19 @@ window.v13DrawInsights=function(){
   // Bar chart - subject XP
   const barW=38,barGap=8,startX=30,startY=280;
   const maxH=180;
+  /* ★2026-08-31 재감사 후속 전수 스캔에서 발견: 실적이 없으면 과목별 XP를
+     난수(50~549)로 그려 '학습 인사이트'라는 이름의 가짜 막대그래프를 보여줬다.
+     가짜 성적표와 같은 종류다. 기록이 없으면 0 이고, 아래에서 그렇게 말한다. */
   let xpData=subjects.map((s,i)=>{
     const key='xp_'+s;
-    return{name:s,xp:u[key]||Math.floor(Math.random()*500)+50,color:colors[i]};
+    return{name:s,xp:u[key]||0,color:colors[i]};
   });
+  if(!xpData.some(d=>d.xp>0)){
+    ctx.fillStyle=_cMu;ctx.font='12px sans-serif';ctx.textAlign='center';
+    ctx.fillText('아직 기록이 없어요. 퀴즈나 레슨을 하면 여기에 쌓입니다.',300,150);
+    ctx.textAlign='left';
+    return;
+  }
   const maxXP=Math.max(...xpData.map(d=>d.xp),1);
 
   xpData.forEach((d,i)=>{
