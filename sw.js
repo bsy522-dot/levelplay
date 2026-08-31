@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v87-navroute';
+const CACHE_NAME = 'levelplay-v88-audit-fix';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -340,7 +340,11 @@ self.addEventListener('activate', event => {
 });
 
 // 가져오기: Network First (data/*.json, RPG 게임 HTML), Cache First (나머지)
-const NETWORK_FIRST_PATHS = ['/data/', 'korean-rpg-', 'index.html', '/sw.js'];
+/* ★2026-08-31: 패치 JS(_patch.js·ia_hub.js 등)가 캐시 우선이라, 앱을 설치한 사람은
+   새로 고쳐도 옛 코드를 계속 받았다. 이번 감사 수정(가짜 성적표 제거 등)이 안 닿는다는
+   뜻이라 앱 코드 파일 전부를 네트워크 우선으로 올린다. 오프라인이면 그때 캐시로 떨어진다. */
+const NETWORK_FIRST_PATHS = ['/data/', 'korean-rpg-', 'index.html', '/sw.js',
+  '_patch.js', 'ia_hub.js', 'nav_unify.js', 'nav_route.js', 'home_tidy.js'];
 const NEVER_CACHE_PATHS = ['boxing-trainer-', 'opponent_lore.json', 'manifest.boxing.json'];
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
