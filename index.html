@@ -28,14 +28,15 @@
 /* 액센트 4종은 스펙값에서 미세 조정: 스펙 표기 대비(--t3 5.0 / --gd 4.5 / --cy 4.6)가 실측과 달라
    흰 배경·--c2·저알파 틴트 위에서 AA(4.5:1)를 못 넘겼다. §6 "본문 최소 4.5:1" 을 충족하도록 어둡게. */
 :root{--bg:#F4F7FF;--c1:#FFFFFF;--c2:#E9EFFB;--p:#6641E8;--cy:#00734F;--gd:#9A5B00;--rd:#D92D45;--gn:#12874A;--tx:#1A2140;--t2:#525C7A;--t3:#5E6884;--g1:linear-gradient(135deg,#6C4AF2,#00845C);--r:16px;--nv:58px}
-:root.dark{--bg:#0a0a1a;--c1:#111127;--c2:#181838;--p:#8b5cf6;--cy:#06d6a0;--gd:#fbbf24;--rd:#ef4444;--gn:#22c55e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#c5cdd9;--g1:linear-gradient(135deg,#8b5cf6,#06d6a0)}
+:root{--nav-bg:rgba(255,255,255,.97)}
+:root.dark{--bg:#0a0a1a;--c1:#111127;--c2:#181838;--p:#8b5cf6;--cy:#06d6a0;--gd:#fbbf24;--rd:#ef4444;--gn:#22c55e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#c5cdd9;--g1:linear-gradient(135deg,#8b5cf6,#06d6a0);--nav-bg:rgba(17,17,39,.97)}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
 body{display:flex;flex-direction:column}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--p);border-radius:3px}
 #app{flex:1;overflow:hidden;position:relative}
 .pg{position:absolute;inset:0;overflow-y:auto;padding:10px 10px calc(var(--nv) + 14px);opacity:0;pointer-events:none;transition:opacity .2s}
 .pg.on{opacity:1;pointer-events:auto}
-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nv);background:rgba(255,255,255,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(139,92,246,.18);display:flex;z-index:999;padding-bottom:env(safe-area-inset-bottom)}
+nav{position:fixed;bottom:0;left:0;right:0;height:var(--nv);background:var(--nav-bg,rgba(255,255,255,.97));backdrop-filter:blur(16px);border-top:1px solid rgba(139,92,246,.18);display:flex;z-index:999;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--t3);font:10px inherit;cursor:pointer;position:relative;min-height:48px}
 nav button.on{color:var(--cy)}
 nav button.on::before{content:'';position:absolute;top:0;width:20px;height:2px;background:var(--g1);border-radius:0 0 2px 2px}
@@ -308,6 +309,11 @@ html.kid .mh-cta{font-size:16px;min-height:60px}
    =================================================================== */
 /* --- 유아 5~7: 최대 밝기 · 라운드 최대 · 터치 타깃 확대 --- */
 :root[data-age="toddler"]{--bg:#FFF9EF;--c1:#FFFFFF;--c2:#FFEEDA;--r:24px;--nv:66px}
+/* ★2026-08-31 재감사 R-1: 위 유아 팔레트가 :root.dark 보다 뒤에 있고 특정도가 같아
+   다크로 바꿔도 --bg 가 크림색(#FFF9EF), --c1 이 흰색으로 남았다.
+   글자만 거의 흰색(#e2e8f0)으로 바뀌어 카드 제목이 통째로 안 보였고, 새로고침해도
+   그대로라 아이가 스스로 빠져나올 수 없었다. 유아용 다크 팔레트를 세운다. */
+:root[data-age="toddler"].dark{--bg:#131022;--c1:#1E1836;--c2:#2A2148}
 /* --- 초등 8~12: 기본 라이트(§1 토큰 그대로) — 덮어쓸 것 없음 --- */
 /* --- 중고등: 각지게 · 정보밀도↑ · 액센트 절제(인디고/틸) --- */
 :root[data-age="teen"]{--p:#4F46E5;--cy:#0F766E;--gd:#92400E;--g1:linear-gradient(135deg,#4F46E5,#0F766E);--r:10px;--nv:54px}
@@ -501,7 +507,8 @@ html.kid .mh-cta{font-size:16px;min-height:60px}
 .hs-card{background:var(--c1);border:1px solid rgba(139,92,246,.1);border-radius:10px;padding:9px 10px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-height:48px;transition:.15s}
 .hs-card:active{transform:translateY(2px)}
 .hs-card .hs-t{font-size:8px;font-weight:800;padding:2px 6px;border-radius:6px;align-self:flex-start}
-.hs-card .hs-tx{font-size:11px;color:var(--t2);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+/* ★2026-08-31 재감사 #10: 한 줄로 잘려 '음악의 아버지라 불리는 작곡…' 이 됐다. 두 줄로 편다. */
+.hs-card .hs-tx{font-size:11px;color:var(--t2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;line-height:1.4}
 .hs-card.vid .hs-t{background:rgba(239,68,68,.15);color:#ef4444}
 .hs-card.quiz .hs-t{background:rgba(139,92,246,.15);color:var(--p)}
 /* 다크에서 --p(#8b5cf6)는 이 칩 배경 위에서 3.73:1 로 AA 미달이었다(개편 전부터).
@@ -1703,7 +1710,7 @@ function addCmt(id){const tx=document.getElementById('cmtIn').value.trim();if(!t
 function shW(){document.getElementById('moB').innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:8px">✏️ 글쓰기</div><select class="fi" id="wCat" style="margin-bottom:6px">'+COMM_CATS.filter(c=>c!=='전체').map(c=>'<option value="'+c+'">'+c+'</option>').join('')+'</select><input class="fi" id="wT" placeholder="제목" style="margin-bottom:6px"><textarea class="fi" id="wB" rows="4" placeholder="내용"></textarea><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px"><button class="bt bs" onclick="cMo()">취소</button><button class="bt bp" onclick="sbP()">등록</button></div>';document.getElementById('mo').classList.add('sh');}
 function sbP(){const t=document.getElementById('wT').value.trim(),b=document.getElementById('wB').value.trim(),cat=document.getElementById('wCat')?document.getElementById('wCat').value:'자유';if(!t)return;U.mp.unshift({id:Date.now(),g:cat,t:sanIn(t),b:sanIn(b),a:U.nk||'익명',l:0,c:[],m:0});xp(15,'글작성');cMo();rAll();toast('+15XP');}
 function cMo(){document.getElementById('mo').classList.remove('sh');document.getElementById('moB').innerHTML='';}
-function xp(a,t){U.xp+=a;U.ac.push({t,xp:a,m:0,ts:Date.now()});const today=new Date().toISOString().slice(0,10);if(!U.dailyXP)U.dailyXP={};U.dailyXP[today]=(U.dailyXP[today]||0)+a;showXPFloat(a);let didLevelUp=false;while(U.xp>=U.xm){U.xp-=U.xm;U.lv++;U.xm=Math.floor(U.xm*1.1);const k=Object.keys(U.st),r=k[Math.random()*k.length|0];U.st[r]=Math.min(100,U.st[r]+(Math.random()*2|0)+1);didLevelUp=true;}if(didLevelUp){showLevelUpCelebration();toast('Lv.'+U.lv+'!');}if(typeof trackStudyTime==='function')trackStudyTime();sv();rProf();uN();}
+function xp(a,t){U.xp+=a;U.ac.push({t,xp:a,m:0,ts:Date.now()});const today=new Date().toISOString().slice(0,10);if(!U.dailyXP)U.dailyXP={};U.dailyXP[today]=(U.dailyXP[today]||0)+a;showXPFloat(a);let didLevelUp=false;while(U.xp>=U.xm){U.xp-=U.xm;U.lv++;U.xm=Math.floor(U.xm*1.1);const k=Object.keys(U.st),r=k[Math.random()*k.length|0];U.st[r]=Math.min(100,U.st[r]+(Math.random()*2|0)+1);didLevelUp=true;}if(didLevelUp){showLevelUpCelebration();toast('Lv.'+U.lv+'!');}if(typeof trackStudyTime==='function')trackStudyTime();sv();rProf();uN();try{if(typeof window.updateXPDisplay==='function')window.updateXPDisplay();}catch(e){}}
 function showXPFloat(amount){const el=document.createElement('div');el.className='xp-float';el.textContent='+'+amount+' XP';el.style.left=(window.innerWidth/2-30)+'px';el.style.top=(window.innerHeight/2)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
 function showLevelUpCelebration(){const wrap=document.createElement('div');wrap.className='levelup-celebrate';const txt=document.createElement('div');txt.className='lup-text';txt.textContent='LEVEL UP! Lv.'+U.lv;wrap.appendChild(txt);const colors=['#8b5cf6','#06d6a0','#fbbf24','#ef4444','#3b82f6','#f97316','#ec4899','#14b8a6'];const cx=window.innerWidth/2,cy=window.innerHeight/2;for(let i=0;i<24;i++){const p=document.createElement('div');p.className='lup-particle';const angle=Math.random()*Math.PI*2;const dist=80+Math.random()*120;p.style.left=cx+'px';p.style.top=cy+'px';p.style.background=colors[i%colors.length];p.style.setProperty('--px',(Math.cos(angle)*dist)+'px');p.style.setProperty('--py',(Math.sin(angle)*dist)+'px');p.style.animationDelay=(Math.random()*0.2)+'s';wrap.appendChild(p);}for(let i=0;i<16;i++){const c=document.createElement('div');c.className='lup-confetti';const angle=Math.random()*Math.PI*2;const dist=60+Math.random()*150;c.style.left=cx+'px';c.style.top=cy+'px';c.style.background=colors[i%colors.length];c.style.setProperty('--px',(Math.cos(angle)*dist)+'px');c.style.setProperty('--py',(Math.sin(angle)*dist-40)+'px');c.style.animationDelay=(Math.random()*0.3)+'s';wrap.appendChild(c);}document.body.appendChild(wrap);setTimeout(()=>wrap.remove(),2000);}
 function dH(){const c=document.getElementById('sC');if(!c)return;const x=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,r=w*.35,st=U.st,k=Object.keys(st),n=k.length,lb=['지식','체력','창의력','소통','리더십','기술'];x.clearRect(0,0,w,h);for(let g=5;g>=1;g--){x.beginPath();for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;i?x.lineTo(cx+Math.cos(a)*r*(g/5),cy+Math.sin(a)*r*(g/5)):x.moveTo(cx+Math.cos(a)*r*(g/5),cy+Math.sin(a)*r*(g/5));}x.closePath();x.strokeStyle='rgba(139,92,246,'+(0.04+g*.03)+')';x.stroke();}x.beginPath();const v=Object.values(st);for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;i?x.lineTo(cx+Math.cos(a)*r*(v[i]/100),cy+Math.sin(a)*r*(v[i]/100)):x.moveTo(cx+Math.cos(a)*r*(v[i]/100),cy+Math.sin(a)*r*(v[i]/100));}x.closePath();const gd=x.createLinearGradient(cx-r,cy-r,cx+r,cy+r);gd.addColorStop(0,'rgba(139,92,246,.2)');gd.addColorStop(1,'rgba(6,214,160,.2)');x.fillStyle=gd;x.fill();x.strokeStyle='rgba(139,92,246,.5)';x.lineWidth=1.5;x.stroke();x.fillStyle='#94a3b8';x.font='9px Noto Sans KR';x.textAlign='center';for(let i=0;i<n;i++){const a=Math.PI*2/n*i-Math.PI/2;x.fillText(lb[i]+' '+v[i],cx+Math.cos(a)*(r+14),cy+Math.sin(a)*(r+14)+3);}}
@@ -3419,15 +3426,23 @@ function claimGoalBonus(){
 // ===== 리더보드 시스템 =====
 const _LB_NAMES=['별빛탐험가','퀴즈왕','수학천재','과학소녀','역사박사','게임마스터','독서왕','음악러버','코딩맨','우주소년','지식헌터','학습요정','도전킹','브레인','호기심왕','퀴즈챌린저','스타러너','빛나는별','꿈나무','지혜로운올빼미'];
 const _LB_AVATARS=['🦊','🐱','🐶','🐻','🐼','🐨','🦁','🐯','🐸','🐙','🦄','🐬','🦋','🐝','🦅','🐺','🦉','🐧','🦩','🐳'];
+/* ★2026-08-31 재감사 B-3: 여기서 봇 20명을 Math.random 으로 만들어
+   (레벨 3~47 / 주간 50~849XP) 리더보드에 세우고 있었다. 가입 5초 된 아이가
+   21명 중 꼴찌로 시작했다. 설치할 때마다 같은 인물의 레벨이 Lv.4↔Lv.43 으로
+   바뀌었으니 실데이터라는 해명도 불가능하다. 만들지 않는다.
+   이름·아바타 표(_LB_NAMES/_LB_AVATARS)는 파일에 남겨 둔다. */
+function lpIsBot(u){return !!(u&&typeof u.id==='string'&&u.id.indexOf('bot_')===0);}
 function initLeaderboard(){
-  if(U.leaderboard&&U.leaderboard.generated)return;
-  const users=[];
-  for(let i=0;i<20;i++){
-    const lv=Math.floor(Math.random()*45)+3;
-    const weeklyXP=Math.floor(Math.random()*800)+50;
-    users.push({id:'bot_'+i,nk:_LB_NAMES[i],av:_LB_AVATARS[i],lv:lv,weeklyXP:weeklyXP,totalXP:lv*500+Math.floor(Math.random()*500)});
+  var lb=U.leaderboard;
+  if(lb&&Array.isArray(lb.users)&&lb.users.some(lpIsBot)){
+    /* 이미 설치된 기기에 남아 있는 봇을 걷어낸다(마이그레이션) */
+    lb.users=lb.users.filter(function(u){return !lpIsBot(u);});
+    U.leaderboard={generated:true,users:lb.users,lastRefresh:new Date().toISOString().slice(0,10)};
+    sv();
+    return;
   }
-  U.leaderboard={generated:true,users:users,lastRefresh:new Date().toISOString().slice(0,10)};
+  if(lb&&lb.generated)return;
+  U.leaderboard={generated:true,users:[],lastRefresh:new Date().toISOString().slice(0,10)};
   sv();
 }
 function getLeaderboardData(type){
@@ -3450,6 +3465,13 @@ function renderLeaderboard(){
   initLeaderboard();
   const data=getLeaderboardData(_lbTab);
   let h='';
+  /* 실제로 함께하는 사람이 없으면 없다고 말한다 — 지어낸 경쟁자를 세우지 않는다 */
+  if(!data.some(function(u){return !u.isMe;})){
+    h+='<div style="padding:18px 12px;text-align:center;background:var(--c1);border-radius:var(--r);margin-bottom:8px">'
+      +'<div style="font-size:26px;line-height:1;margin-bottom:8px">🙌</div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--t2);line-height:1.7;overflow-wrap:anywhere">아직 함께하는 친구가 없어요.<br>내 기록만 보여드릴게요.</div>'
+      +'</div>';
+  }
   data.forEach((u,i)=>{
     const rank=i+1;
     const rankCls=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
@@ -3723,7 +3745,10 @@ function lpTierTotalLessons(t){
 }
 /* ===== 연령별 퀴즈 풀 (감사 B-2 파급) =====
    유아 계정 홈에 '물의 화학식은?' '광합성에 필요한 기체는?' 이 나오던 문제. */
-const LP_TODDLER_QCAT=['구구단','영어단어','영어','음악','건강'];
+/* ★2026-08-31 재감사 B-2 잔여: 유아 풀 64문항 중 구구단 20 + 세 자리 연산 14 +
+   곱셈 1 = 35문항(55%)이 초2~4 수준이었다. 구구단·곱셈·세 자리 연산을 뺀다.
+   유아에게 남기는 셈은 '한 자리 수 더하기·빼기'뿐이다. */
+const LP_TODDLER_QCAT=['숫자','영어단어','영어','음악','건강'];
 const LP_TODDLER_HARDQ=/화학식|광합성|원소|분자|세포|유전|방정식|함수|벡터|확률|미적분|헌법|정치|경제|무역|주식|세계대전|전쟁|혁명|제국|물리|양자|알고리즘|프로그래밍|백분율|기압|중력|위도|경도|민주주의|산업혁명|르네상스|국회|법률|화폐|인플레|원주율|내각의 합/;
 function lpTierQuizPool(pool){
   var src=pool||(typeof QUIZ!=='undefined'?QUIZ:[]);
@@ -3734,7 +3759,8 @@ function lpTierQuizPool(pool){
     var soft=src.filter(function(q){return !LP_TODDLER_HARDQ.test((q.q||'')+' '+(q.cat||''));});
     out=soft.filter(function(q){
       if(LP_TODDLER_QCAT.indexOf(q.cat)>=0)return true;
-      return /^\s*\d+\s*[x×*+\-]\s*\d+/.test(q.q||'');
+      /* 셈 문제는 '한 자리 + 한 자리' 더하기·빼기만 (7×8, 256+178 은 유아용이 아니다) */
+      return /^\s*\d\s*[+\-]\s*\d\s*=/.test(q.q||'');
     });
     /* 허용목록으로 3개도 못 채우는 풀(O/X·빈칸)에서는 최소한 어려운 말은 빼고 준다.
        예전에는 여기서 원본을 통째로 되돌려 '광합성'이 유아에게 그대로 나왔다. */
@@ -3766,6 +3792,7 @@ function lpRefreshProgress(){
   try{if(typeof renderSubjects==='function')renderSubjects();}catch(e){}
   try{if(typeof renderAllCategoryContent==='function')renderAllCategoryContent();}catch(e){}
   try{if(typeof rProf==='function')rProf();}catch(e){}
+  try{if(typeof window.updateXPDisplay==='function')window.updateXPDisplay();}catch(e){}
   try{
     var lu=document.getElementById('learnUnit');
     if(curSubjData&&lu&&lu.style.display!=='none'&&typeof _renderSubjectUnits==='function')_renderSubjectUnits(curSubjData);
@@ -3819,6 +3846,22 @@ function lpRecordMastery(cat,qText,ok){
   }catch(e){}
 }
 window.lpRecordMastery=lpRecordMastery;
+
+/* ===== 기존 설치본 정리 (2026-08-31 재감사) =====
+   랭킹 화면을 한 번도 열지 않아도 저장소에서 봇이 사라지도록 부팅 때 한 번 훑는다. */
+(function lpMigrateFakes(){
+  try{
+    var lb=U.leaderboard;
+    if(lb&&Array.isArray(lb.users)){
+      var before=lb.users.length;
+      lb.users=lb.users.filter(function(u){return !(u&&typeof u.id==='string'&&u.id.indexOf('bot_')===0);});
+      if(lb.users.length!==before){
+        console.info('[배움퀘스트] 가짜 랭킹 '+(before-lb.users.length)+'명 정리');
+        sv();
+      }
+    }
+  }catch(e){}
+})();
 
 /* ===== 소리 듣기 (감사 5절 ③: 영어 레슨에 발음이 없다) =====
    기기에 내장된 음성만 쓴다 — 내려받는 파일도, 바깥으로 나가는 요청도 없다. */

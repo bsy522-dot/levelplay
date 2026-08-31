@@ -125,16 +125,28 @@ function playSound(type){
 
 // ===== Daily XP Goal System =====
 function getTodayStr(){return new Date().toISOString().slice(0,10);}
+/* ★2026-08-31 재감사 R-2·R-3: XP 저장소가 둘로 갈라져 있었다.
+   레슨 완료는 lp6.dailyXP 로, 퀴즈는 lp_v3_data.earned 로 들어갔고
+   홈 게이지는 뒤엣것만 읽어서, 레슨 3개로 60XP 를 벌어도 계속 0/50 이었다.
+   이제 오늘 번 XP 의 주인은 lp6.dailyXP 하나다. 여기서는 그리로 태워 보낸다. */
+function lpTodayXP(){
+  try{
+    const u=JSON.parse(localStorage.getItem('lp6')||'{}');
+    return (u.dailyXP||{})[getTodayStr()]||0;
+  }catch(e){return 0;}
+}
 function addXP(amount){
   const d=getV3();
   const today=getTodayStr();
   if(d.dailyXP.date!==today){d.dailyXP={date:today,earned:0,goal:d.dailyXP.goal||50};}
-  const wasBelowGoal=d.dailyXP.earned<d.dailyXP.goal;
-  d.dailyXP.earned+=amount;
+  const wasBelowGoal=lpTodayXP()<d.dailyXP.goal;
   d.totalXP=(d.totalXP||0)+amount;
+  d.dailyXP.date=today;
   saveV3(d);
+  if(typeof window.xp==='function'){window.xp(amount,'보너스 XP');}
+  else{const dd=getV3();dd.dailyXP.earned+=amount;saveV3(dd);}   /* 본체가 없을 때만 예전 방식 */
   updateXPDisplay();
-  if(wasBelowGoal&&d.dailyXP.earned>=d.dailyXP.goal){
+  if(wasBelowGoal&&lpTodayXP()>=d.dailyXP.goal){
     playSound('levelup');
     showDailyComplete();
   }
@@ -145,14 +157,18 @@ function updateXPDisplay(){
   const d=getV3();
   const today=getTodayStr();
   if(d.dailyXP.date!==today){d.dailyXP.earned=0;d.dailyXP.date=today;}
-  const pct=Math.min(100,Math.round(d.dailyXP.earned/d.dailyXP.goal*100));
+  const earned=lpTodayXP();   /* 레슨·퀴즈·보너스를 모두 합친 오늘치 (재감사 R-2) */
+  const pct=Math.min(100,Math.round(earned/d.dailyXP.goal*100));
   el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-    <span style="font-size:12px;font-weight:700">🎯 일일 목표</span>
+    <span style="font-size:12px;font-weight:700">🎯 오늘 번 XP</span>
     <span style="font-size:9px;color:var(--t3);cursor:pointer" onclick="v3ChangeGoal()">목표변경</span>
   </div>
   <div class="v3-xp-bar"><div class="v3-xp-fill" style="width:${pct}%"></div></div>
-  <div class="v3-xp-text"><span>${Math.min(d.dailyXP.earned,d.dailyXP.goal)} / ${d.dailyXP.goal} XP${d.dailyXP.earned>d.dailyXP.goal?` <b style="color:var(--gn)">(+${d.dailyXP.earned-d.dailyXP.goal} 더!)</b>`:''}</span><b>${pct>=100?'✅ 달성!':pct+'%'}</b></div>`;
+  <div class="v3-xp-text"><span>${Math.min(earned,d.dailyXP.goal)} / ${d.dailyXP.goal} XP${earned>d.dailyXP.goal?` <b style="color:var(--gn)">· 오늘 총 ${earned} XP</b>`:''}</span><b>${pct>=100?'✅ 달성!':pct+'%'}</b></div>`;
 }
+/* 레슨을 끝냈을 때도 홈 게이지가 즉시 따라오게 — 본체(xp())에서 부른다.
+   저장은 되는데 화면만 옛 숫자였던 문제(2026-08-31 자체검증에서 발견). */
+window.updateXPDisplay=updateXPDisplay;
 function showDailyComplete(){
   const el=document.createElement('div');
   el.className='v3-daily-complete';
@@ -412,7 +428,10 @@ const origChkA=window.chkA;
 window.chkA=function(btn,ok){
   if(origChkA)origChkA(btn,ok);
   if(ok){
-    addXP(5);addCombo();playSound('correct');
+    /* ★원래 여기서 addXP(5)를 또 줬다. 아래 origChkA 안의 xp(5)와 겹쳐
+       저장소를 합치면 한 문제에 10XP가 된다. 기본 5XP는 본체에 맡기고
+       여기서는 연속정답 보너스만 담당한다. */
+    addCombo();playSound('correct');
   }else{
     resetCombo();playSound('wrong');
   }
@@ -561,7 +580,23 @@ function injectHomeUI(){
   setTimeout(injectV3Widgets,500);
 }
 
+/* 예전 버전에서 lp_v3_data 에만 쌓여 있던 '오늘 번 XP'를 통합 저장소로 한 번 올린다 */
+function lpMigrateXPOnce(){
+  try{
+    const d=getV3();
+    if(d._xpMerged2608)return;
+    const today=getTodayStr();
+    if(d.dailyXP&&d.dailyXP.date===today&&(d.dailyXP.earned||0)>lpTodayXP()){
+      const u=JSON.parse(localStorage.getItem('lp6')||'{}');
+      if(!u.dailyXP)u.dailyXP={};
+      u.dailyXP[today]=d.dailyXP.earned;
+      localStorage.setItem('lp6',JSON.stringify(u));
+    }
+    d._xpMerged2608=true;saveV3(d);
+  }catch(e){}
+}
 function injectV3Widgets(){
+  lpMigrateXPOnce();
   if(document.getElementById('v3XPGoal'))return;
   const catContent=document.getElementById('catContent');
   if(!catContent)return;
