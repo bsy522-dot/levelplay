@@ -588,21 +588,13 @@ function v8RenderLeaderboard(container){
     const u=U();
     const myXP=u.xp||0;
     const myName=u.name||'나';
-    const ai=[
-      {name:'학습왕 민지',xp:Math.max(myXP+120,500)},
-      {name:'퀴즈마스터',xp:Math.max(myXP+80,400)},
-      {name:'코딩천재 준호',xp:Math.max(myXP+45,350)},
-      {name:myName+' (나)',xp:myXP,isMe:true},
-      {name:'음악소녀 서연',xp:Math.max(myXP-30,150)},
-      {name:'과학탐험가',xp:Math.max(myXP-60,100)},
-      {name:'역사박사 지훈',xp:Math.max(myXP-100,80)},
-      {name:'체육왕 도윤',xp:Math.max(myXP-130,50)},
-      {name:'미술가 예은',xp:Math.max(myXP-160,30)},
-      {name:'새내기 학습자',xp:Math.max(myXP-200,10)}
-    ].sort((a,b)=>b.xp-a.xp);
+    /* ★2026-08-31 감사 B-3: '학습왕 민지 620XP' 같은 실재하지 않는 학생 9명을
+       내 점수 기준으로 만들어 리더보드에 세우고 있었다. 실이용자가 있는 것처럼 보이게
+       하는 조작이라 내렸다. 지금은 내 기록만 정직하게 보여 준다. */
+    const ai=[{name:myName+' (나)',xp:myXP,isMe:true}];
     ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,640,300);
     ctx.fillStyle='#e2e8f0';ctx.font='bold 13px sans-serif';ctx.textAlign='center';
-    ctx.fillText('이번 주 리더보드',320,22);
+    ctx.fillText('이번 주 내 기록',320,22);
     const maxXP=ai[0].xp||1;
     ai.forEach((p,i)=>{
       const y=38+i*26;

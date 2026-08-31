@@ -139,11 +139,10 @@ function getLeagueData(){
     if(prevXP>=prevNext&&newTier<LEAGUE_TIERS.length-1)newTier++;
     else if(prevXP<(LEAGUE_TIERS[prevTier]?LEAGUE_TIERS[prevTier].min:0)*0.3&&prevTier>0)newTier--;
     u.league={week:wk,weekXP:0,tier:newTier,promoted:newTier>prevTier,demoted:newTier<prevTier};
-    const seed=hashStr(wk);
-    u.league.aiPlayers=AI_PLAYERS.map((p,i)=>{
-      const variation=((seed*(i+1))%40)-20;
-      return{name:p.name,xp:Math.max(0,Math.round(p.base*3+variation+Math.random()*30))};
-    });
+    /* ★가짜 경쟁자 제거(2026-08-31 감사 B-3): '퀴즈왕 196XP' 같은 실재하지 않는
+       9명이 매주 난수로 만들어져 리그표에 올라갔다. 실제 이용자가 아니므로 세우지 않는다.
+       (AI_PLAYERS 정의는 파일에 남겨 둔다 — 되살릴 일이 있으면 여기만 되돌리면 된다) */
+    u.league.aiPlayers=[];
     S(u);
   }
   return u.league;

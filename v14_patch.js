@@ -3,6 +3,14 @@
 // + Learning Quest Map Canvas + Wrong Answer Pattern Analyzer Canvas
 // + Study Growth Simulator Canvas + Subject Olympiad Tournament Canvas
 // + 15 Quizzes + 12 Achievements + SFX 12 + KB 8
+
+/* 감사 B-3 후속: 데이터가 없을 때 정직하게 비었다고 말하는 칸 */
+(function(){try{
+  if(document.getElementById('v14EmptyStyle'))return;
+  var st=document.createElement('style');st.id='v14EmptyStyle';
+  st.textContent='.v14-empty{font-size:11px;line-height:1.7;color:var(--t3,#7a7a8c);background:rgba(139,92,246,.07);border:1px dashed rgba(139,92,246,.28);border-radius:10px;padding:10px 12px;margin:2px 0 8px;overflow-wrap:anywhere}';
+  (document.head||document.documentElement).appendChild(st);
+}catch(e){}})();
 (function(){
 'use strict';
 
@@ -108,16 +116,22 @@ function renderMasteryHeatmap(){
     {subj:'코딩',items:['변수','반복문','조건문','함수','배열','객체','알고리즘','디버깅']},
     {subj:'기타',items:['요리','경제','금융','안전','예절','진로','독서','환경']}
   ];
+  /* ★가짜 성적표 제거(2026-08-31 감사 B-3): 문제 한 개 안 풀었는데
+     '영어_단어 97 / 미술_디자인 3' 같은 난수 숙련도가 저장돼 있었다.
+     이제 0에서 시작하고, 실제로 푼 만큼만 오른다. */
   if(!u.v14.mastery){
     u.v14.mastery={};
     topics.forEach(t=>{
       t.items.forEach(it=>{
-        u.v14.mastery[t.subj+'_'+it]=Math.floor(Math.random()*100);
+        u.v14.mastery[t.subj+'_'+it]=0;
       });
     });
     S(u);
   }
+  const _mVals=Object.values(u.v14.mastery||{});
+  const _mEmpty=!_mVals.some(v=>v>0);
   let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg> 학습 마스터리 히트맵</h3>`;
+  if(_mEmpty)h+=`<div class="v14-empty">아직 데이터가 없어요. 퀴즈나 레슨을 하면 여기에 실력이 쌓입니다.</div>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14HeatmapCanvas" width="580" height="340"></canvas></div>`;
   h+=`<div class="v14-row">`;
   h+=`<button class="v14-btn" onclick="v14PracticeMastery()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-note"/></svg> 약점 연습</button>`;
@@ -183,14 +197,25 @@ function v14DrawHeatmap(){
 }
 
 window.v14PracticeMastery=function(){
-  const u=U();const m=u.v14&&u.v14.mastery?u.v14.mastery:{};
+  /* ★2026-08-31 감사 B-3 후속: 예전에는 이 버튼을 누르기만 하면 숙련도가
+     난수(+5~+19%)로 올랐다. 아무것도 안 배웠는데 실력이 오른 것처럼 보였다는 뜻이다.
+     이제 점수를 주지 않는다 — 실제 문제를 풀어야 오른다. */
+  const u=U();const ms=(u.v14&&u.v14.masteryStats)||{};
+  const m=(u.v14&&u.v14.mastery)||{};
   let weakest=null,minVal=101;
-  for(const[k,v]of Object.entries(m)){if(v<minVal){minVal=v;weakest=k;}}
-  if(weakest){
-    const parts=weakest.split('_');
-    u.v14.mastery[weakest]=Math.min(100,minVal+Math.floor(Math.random()*15)+5);
-    S(u);v14Sfx('heatmap_cell');v14DrawHeatmap();
-    alert(parts[0]+' - '+parts[1]+' 연습 완료! ('+minVal+'% -> '+u.v14.mastery[weakest]+'%)');
+  for(const[k,v]of Object.entries(m)){if(ms[k]&&ms[k].n>0&&v<minVal){minVal=v;weakest=k;}}
+  v14Sfx('heatmap_cell');
+  const subj=weakest?weakest.split('_')[0]:null;
+  if(!weakest){
+    alert('아직 푼 문제가 없어서 약한 곳을 알 수 없어요.\n퀴즈를 몇 개 풀면 여기에 표시됩니다.');
+    return;
+  }
+  const parts=weakest.split('_');
+  if(typeof window.openSummativeQuiz==='function'){
+    alert(parts[0]+' - '+parts[1]+' 이(가) 지금 가장 약해요 ('+minVal+'%).\n바로 연습 문제를 열게요.');
+    try{window.openSummativeQuiz(subj);}catch(e){}
+  }else{
+    alert(parts[0]+' - '+parts[1]+' 이(가) 지금 가장 약해요 ('+minVal+'%).\n해당 과목 퀴즈를 풀면 올라갑니다.');
   }
 };
 
@@ -359,14 +384,17 @@ window.v14ResetTower=function(){
 // ===== FEATURE 4: Subject Competitiveness Radar Canvas =====
 function renderSubjectRadar(){
   const u=U();if(!u.v14)u.v14={};
+  /* ★가짜 경쟁력 제거(감사 B-3): 6축 전부 난수였다. 실적 없으면 0. */
   if(!u.v14.competitiveness){
     u.v14.competitiveness={};
     SUBJECTS.forEach(s=>{
-      u.v14.competitiveness[s]={accuracy:Math.floor(Math.random()*40)+50,speed:Math.floor(Math.random()*40)+40,depth:Math.floor(Math.random()*40)+30,consistency:Math.floor(Math.random()*40)+45,creativity:Math.floor(Math.random()*40)+35,endurance:Math.floor(Math.random()*40)+40};
+      u.v14.competitiveness[s]={accuracy:0,speed:0,depth:0,consistency:0,creativity:0,endurance:0};
     });
     S(u);
   }
+  const _cEmpty=!Object.values(u.v14.competitiveness||{}).some(o=>Object.values(o||{}).some(v=>v>0));
   let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-radar"/></svg> 과목 경쟁력 레이더</h3>`;
+  if(_cEmpty)h+=`<div class="v14-empty">아직 측정된 기록이 없어요. 퀴즈를 풀면 과목별 강약이 그려집니다.</div>`;
   h+=`<select class="v14-select" id="v14RadarSubj" onchange="v14DrawRadar()">`;
   SUBJECTS.forEach((s,i)=>{h+=`<option value="${s}">${s}</option>`;});
   h+=`</select>`;
@@ -568,17 +596,22 @@ window.v14ClaimReward=function(){
 // ===== FEATURE 6: Wrong Answer Pattern Analyzer Canvas =====
 function renderWrongAnalyzer(){
   const u=U();if(!u.v14)u.v14={};
+  /* ★가짜 오답표 제거(감사 B-3): 아무것도 안 틀렸는데 '미술 13개 틀림 / 개념부족 29회'
+     가 저장돼 있었다. 부모가 이걸 진단으로 믿으면 거짓 정보다. 이제 0에서 시작한다. */
   if(!u.v14.wrongPatterns){
     u.v14.wrongPatterns={
-      types:{careless:Math.floor(Math.random()*20)+5,conceptMiss:Math.floor(Math.random()*25)+10,timeOut:Math.floor(Math.random()*15)+3,misread:Math.floor(Math.random()*10)+2,trickQuestion:Math.floor(Math.random()*12)+4},
+      types:{careless:0,conceptMiss:0,timeOut:0,misread:0,trickQuestion:0},
       bySubject:{},analyzeCount:0
     };
     SUBJECTS.forEach(s=>{
-      u.v14.wrongPatterns.bySubject[s]=Math.floor(Math.random()*15)+1;
+      u.v14.wrongPatterns.bySubject[s]=0;
     });
     S(u);
   }
+  const _wp=u.v14.wrongPatterns;
+  const _wEmpty=!Object.values(_wp.types||{}).some(v=>v>0)&&!Object.values(_wp.bySubject||{}).some(v=>v>0);
   let h=`<div class="v14-panel"><h3><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-search"/></svg> 오답 패턴 분석기</h3>`;
+  if(_wEmpty)h+=`<div class="v14-empty">아직 틀린 문제가 없어요. 퀴즈를 풀다 틀리면 어떤 실수였는지 여기에 모입니다.</div>`;
   h+=`<div class="v14-canvas-wrap"><canvas id="v14WrongCanvas" width="560" height="340"></canvas></div>`;
   h+=`<div class="v14-row">`;
   h+=`<button class="v14-btn" onclick="v14AnalyzeWrong()"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-science"/></svg> 분석하기</button>`;
