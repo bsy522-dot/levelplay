@@ -151,7 +151,7 @@ function updateXPDisplay(){
     <span style="font-size:9px;color:var(--t3);cursor:pointer" onclick="v3ChangeGoal()">목표변경</span>
   </div>
   <div class="v3-xp-bar"><div class="v3-xp-fill" style="width:${pct}%"></div></div>
-  <div class="v3-xp-text"><span>${d.dailyXP.earned} / ${d.dailyXP.goal} XP</span><b>${pct>=100?'✅ 달성!':pct+'%'}</b></div>`;
+  <div class="v3-xp-text"><span>${Math.min(d.dailyXP.earned,d.dailyXP.goal)} / ${d.dailyXP.goal} XP${d.dailyXP.earned>d.dailyXP.goal?` <b style="color:var(--gn)">(+${d.dailyXP.earned-d.dailyXP.goal} 더!)</b>`:''}</span><b>${pct>=100?'✅ 달성!':pct+'%'}</b></div>`;
 }
 function showDailyComplete(){
   const el=document.createElement('div');
@@ -460,7 +460,9 @@ const TF_QUIZZES=[
 ];
 
 function renderFillQuiz(container){
-  const q=FILL_QUIZZES[Math.floor(Math.random()*FILL_QUIZZES.length)];
+  /* 유아 계정에 '광합성' '화학식' 이 뜨던 문제 — 홈 퀴즈와 같은 잣대를 쓴다 */
+  const _p=(typeof window.lpTierQuizPool==='function')?window.lpTierQuizPool(FILL_QUIZZES):FILL_QUIZZES;
+  const q=_p[Math.floor(Math.random()*_p.length)];
   container.innerHTML=`<div class="qz" style="margin-bottom:8px">
     <div class="qz-q">${q.cat} | ${q.q}</div>
     <input class="v3-fill-input" id="v3FillAns" placeholder="정답을 입력하세요" onkeydown="if(event.key==='Enter')v3CheckFill()">
@@ -507,7 +509,8 @@ window.v3ShowFillHint=function(){
 };
 
 function renderTFQuiz(container){
-  const q=TF_QUIZZES[Math.floor(Math.random()*TF_QUIZZES.length)];
+  const _p=(typeof window.lpTierQuizPool==='function')?window.lpTierQuizPool(TF_QUIZZES):TF_QUIZZES;
+  const q=_p[Math.floor(Math.random()*_p.length)];
   container.innerHTML=`<div class="qz" style="margin-bottom:8px">
     <div class="qz-q">${q.cat} | ${q.q}</div>
     <div class="v3-tf-btns">

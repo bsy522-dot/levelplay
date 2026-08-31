@@ -765,9 +765,9 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 7.6 6.6 13 12 4.4 17.4 13 21 7.6v10.2H3z"/><path d="M3 20.6h18"/></symbol>
 <symbol id="i-build" viewBox="0 0 24 24"><path d="M2.6 20.6h18.8"/><path d="M4.6 20.6V12l5.4-3.2V20.6"/><path d="M10 12.4 19.4 7v13.6"/><path d="M13.4 11.4v2M16.4 9.8v2M13.4 15.4v2M16.4 15.4v2"/></symbol>
 </defs></svg>
-<div id="splash"><h1>배움퀘스트</h1><p style="color:var(--t3);font-size:11px;margin-top:4px">배우고, 올리고, 증명하라</p><div class="splash-progress"><div class="splash-progress-bar"></div></div><p class="splash-tip" id="splashTip"></p></div>
+<div id="splash"><h1>배움퀘스트</h1><p style="color:var(--t2);font-size:12px;margin-top:6px;font-weight:700;line-height:1.6;overflow-wrap:anywhere">5~12세 아이를 위한 전 과목 학습<br>만화와 게임으로 배워요</p><div class="splash-progress"><div class="splash-progress-bar"></div></div><p class="splash-tip" id="splashTip"></p></div>
 <div class="toast" id="tst"></div>
-<div class="nk" id="nkM" style="display:none"><div class="nk-c"><img src="assets/mascot/hanbeom-happy.svg" width="88" height="88" alt="배움퀘스트 마스코트 한범" style="display:block;margin:0 auto"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:6px 0">배움퀘스트</div><input class="nk-i" id="nkI" placeholder="닉네임" maxlength="12"><div class="nk-q" id="nkQ">몇 살쯤인가요?</div><div class="nk-age" id="nkAge" role="group" aria-label="연령 선택"><div class="nk-ab" role="button" tabindex="0" data-tier="toddler" onclick="lpPickNkTier('toddler')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('toddler')}">유아<small>5~7세</small></div><div class="nk-ab on" role="button" tabindex="0" data-tier="elementary" onclick="lpPickNkTier('elementary')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('elementary')}">초등<small>8~12세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="teen" onclick="lpPickNkTier('teen')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('teen')}">중고등<small>13~18세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="adult" onclick="lpPickNkTier('adult')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('adult')}">성인<small>19세~</small></div></div><button class="bt bp" style="width:100%;margin-top:12px" onclick="setNk()">시작</button></div></div>
+<div class="nk" id="nkM" style="display:none"><div class="nk-c"><img src="assets/mascot/hanbeom-happy.svg" width="88" height="88" alt="배움퀘스트 마스코트 한범" style="display:block;margin:0 auto"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:6px 0">배움퀘스트</div><div style="font-size:12px;color:var(--t2);line-height:1.6;margin:-2px 0 10px;font-weight:600;overflow-wrap:anywhere">수학·국어·영어·과학·역사까지 13과목을<br>만화와 게임으로 배우는 무료 학습앱</div><input class="nk-i" id="nkI" placeholder="별명 (안 써도 돼요)" maxlength="12"><div class="nk-q" id="nkQ">몇 살쯤인가요?</div><div class="nk-age" id="nkAge" role="group" aria-label="연령 선택"><div class="nk-ab" role="button" tabindex="0" data-tier="toddler" onclick="lpPickNkTier('toddler')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('toddler')}">유아<small>5~7세</small></div><div class="nk-ab on" role="button" tabindex="0" data-tier="elementary" onclick="lpPickNkTier('elementary')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('elementary')}">초등<small>8~12세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="teen" onclick="lpPickNkTier('teen')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('teen')}">중고등<small>13~18세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="adult" onclick="lpPickNkTier('adult')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('adult')}">성인<small>19세~</small></div></div><button class="bt bp" style="width:100%;margin-top:12px" onclick="setNk()">시작하기</button><button class="bt bs" style="width:100%;margin-top:6px;font-size:11px" onclick="skipNk()">별명 없이 바로 시작</button><div style="margin-top:12px;font-size:10px;color:var(--t3);line-height:1.7;overflow-wrap:anywhere">별명과 학습 기록은 이 기기에만 저장되고 어디로도 전송되지 않아요.<br><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--p);text-decoration:underline">개인정보처리방침 보기</a></div></div></div>
 <div class="mo" id="mo" role="dialog" aria-modal="true" aria-label="콘텐츠 모달" onclick="if(event.target===this)cMo()"><div class="mc" id="moC"><button class="x" onclick="cMo()" aria-label="닫기">&#x2715;</button><div id="moB"></div></div></div>
 <div class="go" id="gO"><div class="go-b"><span id="gT"></span><button class="bt bs" onclick="cG()" style="font-size:10px;padding:4px 10px">닫기</button></div><iframe id="gF" allow="autoplay; microphone; camera; fullscreen" sandbox="allow-scripts allow-same-origin"></iframe></div>
 
@@ -864,6 +864,8 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 </div><div style="margin-top:8px"><button class="share-btn" onclick="shareProfile()" aria-label="내 성과 공유"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-share"/></svg> <span data-i18n="share_profile">내 성과 공유</span></button></div><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-clipboard"/></svg> 학습 리포트</div><div id="learningReportArea"></div><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg> 내 학습 여정</div><div id="learningJourneyArea" style="background:var(--c1);border-radius:var(--r);padding:10px;margin-bottom:8px"></div><div class="sec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-scroll"/></svg> 활동</div><div id="tl"></div><div style="margin-top:12px;text-align:center"><button class="bt bp" id="exportBtn" onclick="exportData()" style="font-size:10px;margin-right:4px">데이터 백업</button><button class="bt bp" id="importBtn" onclick="document.getElementById('importFile').click()" style="font-size:10px">데이터 복원</button><input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"></div>
 <div style="margin-top:8px;text-align:center"><button class="bt bs" onclick="if(confirm('초기화?')){localStorage.removeItem('lp6');location.reload()}" style="font-size:9px">초기화</button></div>
 <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(139,92,246,.06);text-align:center">
+<div style="font-size:11px;line-height:1.8;margin-bottom:8px;overflow-wrap:anywhere"><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--p);font-weight:700;text-decoration:underline">개인정보처리방침</a></div>
+<div style="font-size:10px;color:var(--t3);line-height:1.7;margin-bottom:8px;overflow-wrap:anywhere">학습 기록은 이 기기 안에만 저장돼요.<br>서버로 보내거나 다른 곳과 나누지 않습니다.</div>
 <div style="font-size:10px;font-weight:600;color:var(--t2)">배움퀘스트 &copy; 2026</div>
 <div style="font-size:8px;color:var(--t3);margin-top:2px">v1.0.0 &middot; Powered by AI</div>
 </div></div>
@@ -893,7 +895,7 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 <nav role="tablist" aria-label="메인 네비게이션">
 <button class="on" role="tab" aria-selected="true" tabindex="0" onclick="go(0)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-home"/></svg></span><span class="nav-label" data-i18n="nav_home">홈</span><span id="navReviewBadge" style="display:none;position:absolute;top:2px;right:50%;transform:translateX(14px);min-width:14px;height:14px;border-radius:7px;background:var(--rd);color:#fff;font-size:8px;font-weight:700;text-align:center;line-height:14px;padding:0 3px"></span></button>
 <button role="tab" aria-selected="false" tabindex="-1" onclick="go(6)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-map"/></svg></span><span class="nav-label" data-i18n="nav_map">지도</span></button>
-<button role="tab" aria-selected="false" tabindex="-1" onclick="go(3)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chat"/></svg></span><span class="nav-label" data-i18n="nav_comm">커뮤</span></button>
+<button role="tab" aria-selected="false" tabindex="-1" onclick="go(3)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-chat"/></svg></span><span class="nav-label" data-i18n="nav_comm">친구</span></button>
 <button role="tab" aria-selected="false" tabindex="-1" onclick="go(4)"><span><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg></span><span class="nav-label" data-i18n="nav_me">나</span></button>
 </nav>
 <script>
@@ -1028,7 +1030,7 @@ if(!U.lang)U.lang='ko';if(U.highContrast===undefined)U.highContrast=false;if(!U.
 // ===== i18n 다국어 시스템 =====
 const I18N={
   ko:{
-    nav_home:'홈',nav_learn:'학습',nav_play:'놀이',nav_comm:'커뮤',nav_me:'나',
+    nav_home:'홈',nav_learn:'학습',nav_play:'놀이',nav_comm:'친구',nav_me:'나',
     nav_subject:'과목',nav_map:'지도',
     subject_select:'과목 선택',start_learn:'바로 학습하기',science_exp:'과학 실험',
     game:'게임',quiz_challenge:'퀴즈 도전',more_exp:'더 많은 실험',tools:'도구',
@@ -1214,6 +1216,18 @@ const SIMS=[
 {nm:'힘과 운동',ic:'💪',u:'https://phet.colorado.edu/sims/html/forces-and-motion-basics/latest/forces-and-motion-basics_all.html',d:'힘이 운동에 미치는 영향'},
 {nm:'밀도',ic:'⚖️',u:'https://phet.colorado.edu/sims/html/density/latest/density_all.html',d:'밀도 비교'},
 ];
+/* ★2026-08-31 감사 4절 #10: 카드 제목에 유튜브 원제와 채널명이 파이프째 들어가 있어
+   '탄소중립? 2050년까지 ZERO 만들기! | 국립어린이과…' 처럼 잘려 보였다.
+   보여 줄 때만 채널명 꼬리를 떼어 낸다 — 원본 데이터는 그대로 둔다. */
+(function(){try{
+  V.forEach(function(v){
+    if(!v||typeof v.t!=='string'||v.t.indexOf('|')<0)return;
+    var parts=v.t.split('|');
+    var tail=parts[parts.length-1].trim();
+    var head=parts.slice(0,-1).join('|').trim();
+    if(head.length>=4&&tail.length<=22){if(!v._ch)v._ch=tail;v.t=head;}
+  });
+}catch(e){}})();
 
 const GMS=[
 {nm:'한글 배우기',em:'🔤',u:'games/hangul-game.html',th:'hangul-game',si:'i-hangul',pc:'#B91C1C',d:'자음·모음·단어 학습'},
@@ -1315,20 +1329,11 @@ let QUIZ=[
 {q:'엘리제를 위하여를 작곡한 사람은?',a:['베토벤','모차르트','쇼팽','슈베르트'],c:0,cat:'음악'},
 {q:'관악기가 아닌 것은?',a:['첼로','트럼펫','플루트','클라리넷'],c:0,cat:'음악'}];
 
-const P=[
-{id:1,g:'자유',t:'여기 레벨시스템 중독성 있네ㅋㅋ',b:'퀴즈 풀고 영상 보면 XP 올라감\n능력치 올리는 재미가 있음',a:'레벨충',l:178,c:[{a:'뉴비',t:'나도 해봐야지',m:60}],m:180},
-{id:2,g:'게임',t:'스도쿠 고수 되는 법',b:'확실한 칸부터 채우면 술술 풀려요\n가능한 숫자는 연필로 메모해두기',a:'퍼즐러',l:156,c:[{a:'수학맘',t:'우리애도 푹 빠졌어요ㅋ',m:300}],m:120},
-{id:3,g:'과학',t:'PhET 회로만들기 신기함',b:'전구 연결하고 스위치 넣고\n실제 실험하는것 같음',a:'과학덕',l:234,c:[{a:'교사',t:'수업에 쓰고있어요',m:500}],m:90},
-{id:4,g:'역사',t:'역사 퀴즈 임진왜란 틀림ㅠ',b:'세종대왕은 맞췄는데 임진왜란 연도 틀림\n1592년이었네',a:'역사초보',l:89,c:[],m:45},
-{id:5,g:'자유',t:'에그박사 영상 바로 볼수있네',b:'유튜브 안가도 되서 편함\n곤충 관찰 시리즈 추천',a:'자연러',l:145,c:[{a:'엄마',t:'아이가 좋아해요',m:200}],m:60},
-{id:6,g:'수학',t:'구구단 게임 꿀팁: 9단 규칙',b:'9x1=9, 9x2=18, 9x3=27\n십의 자리는 1씩 늘고 일의 자리는 1씩 줄어듬\n합이 항상 9!',a:'수학맨',l:203,c:[{a:'초등맘',t:'아이한테 알려줘야겠다',m:120}],m:200},
-{id:7,g:'역사',t:'조선시대 왕 순서 외우는 법',b:'태정태세문단세\n예성연중인명선\n광인효현숙경영\n정순헌철고순',a:'역사덕',l:312,c:[{a:'중학생',t:'시험에 나오는거 ㅋㅋ',m:40},{a:'역사교사',t:'좋은 자료네요',m:80}],m:300},
-{id:8,g:'질문',t:'영어 단어 빨리 외우는 방법?',b:'하루에 20개씩 하려는데 자꾸 까먹어요\n좋은 방법 있나요?',a:'영어초보',l:67,c:[{a:'영어고수',t:'어원으로 외우면 오래감',m:30}],m:30},
-{id:9,g:'공략',t:'스도쿠 초보 가이드',b:'1. 가로/세로 줄에 빠진 숫자 찾기\n2. 3x3 박스에서 가능한 숫자 체크\n3. 유일한 후보 찾기',a:'퍼즐러',l:189,c:[],m:150},
-{id:10,g:'꿀팁',t:'포모도로 25분이 너무 길면',b:'처음엔 15분으로 시작해도 됨\n집중력 늘면 점점 늘리기\n5분 휴식은 꼭 지키기',a:'공부왕',l:267,c:[{a:'학부모',t:'우리 아이한테 추천!',m:60}],m:100},
-{id:11,g:'게임',t:'리듬게임 고득점 비법',b:'타이밍보다 리듬감이 중요\n소리에 집중하면 자연스럽게 Perfect 남',a:'리듬러',l:134,c:[],m:75},
-{id:12,g:'과학',t:'물의 상태변화 쉽게 이해하기',b:'얼음→물→수증기\n고체→액체→기체\n온도가 올라가면 분자 운동이 활발해짐',a:'과학소녀',l:198,c:[{a:'교사',t:'깔끔한 정리!',m:200}],m:250},
-];
+const P=[];   /* ★2026-08-31 감사 B-3: 가짜 게시글 12건을 내렸다.
+   좋아요 234·'1시간전'까지 붙은 시드 글은 실이용자가 있는 것처럼 보이게 하는 조작이라
+   스토어 심사·소비자보호 관점에서 위험하다. 원본은
+   _deleted_files/community_seed_posts_20260831.js 에 보존.
+   커뮤니티는 이제 이용자가 쓴 글(U.mp)만 보여 준다. */
 
 const UTS=[{id:'calc',ic:'🧮',nm:'계산기'},{id:'unit',ic:'📏',nm:'단위변환'},{id:'timer',ic:'⏱️',nm:'스톱워치'},{id:'pomo',ic:'🍅',nm:'포모도로'},{id:'dday',ic:'📅',nm:'D-Day'},{id:'bmi',ic:'🏋️',nm:'BMI'},{id:'rand',ic:'🎲',nm:'랜덤'}];
 
@@ -1343,7 +1348,7 @@ const pgs=['p0','p1','p2','p3','p4','p5','p6'];let cur=0;
 const NAV_SLOT=[0,0,0,2,3,0,1];   /* 패널 → 하단 탭 슬롯 */
 const NAV_PANEL=[0,6,3,4];        /* 하단 탭 슬롯 → 기본 패널 */
 function go(i){/* 뱃지 축하창이 떠 있는 채로 화면을 옮기면 새 화면 위에 얹혀 있었다 */try{document.querySelectorAll('.badge-modal-overlay').forEach(function(e){e.remove();});}catch(e){}if(typeof i!=='number'||!pgs[i])i=0;const prev=cur;pgs.forEach((p,j)=>{const el=document.getElementById(p);if(!el)return;el.classList.remove('slide-left');if(j!==i&&j<i)el.classList.add('slide-left');el.classList.toggle('on',i===j);});const slot=(NAV_SLOT[i]==null?0:NAV_SLOT[i]);document.querySelectorAll('nav button[role="tab"]').forEach((b,j)=>{b.classList.toggle('on',j===slot);b.setAttribute('aria-selected',j===slot?'true':'false');b.setAttribute('tabindex',j===slot?'0':'-1');});cur=i;const _fb=document.getElementById('fab');if(_fb)_fb.classList.toggle('sh',i===3);if(U.tabsVisited&&!U.tabsVisited.includes(i)){U.tabsVisited.push(i);sv();checkBadges();}if(typeof window.lpOnGo==='function'){try{window.lpOnGo(i);}catch(e){console.warn('[IA] lpOnGo',e);}}}
-function ckNk(){if(!U.nk)document.getElementById('nkM').style.display='flex';}
+function ckNk(){if(!U.nk&&!U.onboarded)document.getElementById('nkM').style.display='flex';}
 function sanIn(s){return String(s==null?'':s).replace(/[<>]/g,'');}
 /* 가입 게이트에서 연령을 한 번만 묻는다. 미선택 시 기본값 = 초등. */
 function lpPickNkTier(t){
@@ -1352,7 +1357,11 @@ function lpPickNkTier(t){
   document.querySelectorAll('#nkAge .nk-ab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tier')===t);});
   lpApplyAgeTier(false); /* 미리보기만 — 저장은 '시작' 에서 */
 }
-function setNk(){const n=document.getElementById('nkI').value.trim();if(!n)return;U.nk=sanIn(n);if(LP_TIERS.indexOf(U.ageTier)<0)U.ageTier='elementary';sv();document.getElementById('nkM').style.display='none';uN();lpSetAgeTier(U.ageTier,{silent:true});toast('환영!');showOnboarding();}
+/* ★2026-08-31 감사: 아이 앱이 이름부터 받아 가는 건 부담이다.
+   비워 둬도 시작되게 하고(=개인정보 최소 수집), 안내 캐러셀 4장은 없앴다.
+   온보딩 = 스플래시 + 이 화면 한 장, 두 단계로 끝난다. */
+function setNk(){const n=document.getElementById('nkI').value.trim();U.nk=n?sanIn(n):'';if(LP_TIERS.indexOf(U.ageTier)<0)U.ageTier='elementary';U.onboarded=true;sv();document.getElementById('nkM').style.display='none';uN();lpSetAgeTier(U.ageTier,{silent:true});toast(U.nk?(U.nk+'님, 환영해요!'):'환영해요! 바로 시작해요');}
+function skipNk(){const i=document.getElementById('nkI');if(i)i.value='';setNk();}
 function uN(){document.getElementById('hLv').textContent='Lv.'+U.lv+' '+(U.nk||'탐험가');const _pN=document.getElementById('pN');if(_pN)_pN.textContent=U.nk||'탐험가';const _pTi=document.getElementById('pTi');if(_pTi)_pTi.textContent='Lv.'+U.lv;const rb=document.getElementById('navReviewBadge');if(rb){const rc=getTodayReviews().length;if(rc>0){rb.textContent=rc;rb.style.display='block';}else{rb.style.display='none';}}}
 
 function isBm(type,id){return U.bookmarks.some(b=>b.type===type&&b.id===id);}
@@ -1421,7 +1430,11 @@ function getAdaptiveMessage(){
 }
 function renderQuiz(el,items,type){
   // type: 'formative' (힌트, 재시도) | 'summative' (타이머, 점수) | undefined (기본)
-  const filtered=items||getQuiz();
+  /* ★2026-08-31 감사 B-2 파급: 홈 '오늘의 퀴즈'만 걸러서는 부족했다.
+     전체 퀴즈·과목 허브·단원평가 등 6군데가 각자 QUIZ 를 직접 넘겨 쓰고 있어
+     유아 계정에 '공정 무역이란?' 같은 문제가 계속 나왔다.
+     한 군데(이 목구멍)에서 걸러야 새 호출부가 생겨도 안 샌다. */
+  const filtered=(typeof lpTierQuizPool==='function')?lpTierQuizPool(items||getQuiz()):(items||getQuiz());
   let sh;
   if(type==='summative'){
     sh=[...filtered].shuffle().slice(0,10);
@@ -1560,6 +1573,7 @@ function chkA(b,ok){
   trackMission('quiz');U.quizTotal++;
   if(!U.stats.quizByCategory[cat])U.stats.quizByCategory[cat]={total:0,correct:0};
   U.stats.quizByCategory[cat].total++;
+  lpRecordMastery(cat,qText,ok);   /* 히트맵 숙련도 = 실제 정답률 (감사 B-3 후속) */
   if(ok){
     b.classList.add('correct');
     U.quizCorrect++;U.stats.quizByCategory[cat].correct++;U.consecutiveCorrect++;
@@ -2064,7 +2078,7 @@ sports:{nm:'스포츠',ic:'⚽',units:[
 ]},
 english:{nm:'영어',ic:'🔤',units:[
 {nm:'알파벳과 파닉스',lessons:[
-{t:'ABC 알파벳',lv:1,content:'<h3>영어 알파벳 26자</h3><p>대문자: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</p><p>소문자: a b c d e f g h i j k l m n o p q r s t u v w x y z</p><h3>모음 5개</h3><p style="font-size:20px;text-align:center;color:var(--cy)">A E I O U</p><p>나머지는 자음이에요.</p><h3>파닉스란?</h3><p>알파벳의 소리를 배우는 거예요.</p><p>• A = 에이/애 (Apple의 a)</p><p>• B = 비/브 (Ball의 b)</p><p>• C = 씨/크 (Cat의 c)</p>',quiz:[{q:'영어 알파벳은 몇 글자?',a:['26','24','28','30'],c:0}]}
+{t:'ABC 알파벳',lv:1,content:'<h3>영어 알파벳 26자</h3><p><b>대문자</b>: A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</p><p><b>소문자</b>: a b c d e f g h i j k l m n o p q r s t u v w x y z</p><p>대문자와 소문자는 <b>같은 글자</b>예요. 모양만 달라요. A와 a는 둘 다 첫 번째 글자!</p><button class="bt bs" style="font-size:11px;padding:7px 12px;margin:6px 0" onclick="lpSpeak(\'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z\')">알파벳 26자 소리 듣기</button><h3>모음 5개</h3><p style="font-size:22px;text-align:center;color:var(--cy);letter-spacing:4px">A E I O U</p><p>이 다섯 글자를 <b>모음</b>이라고 해요. 입을 벌리고 소리를 쭉 낼 수 있어요.</p><p>나머지 21글자는 <b>자음</b>이에요. 혀나 입술이 어딘가에 닿아야 소리가 나요.</p><h3>파닉스 — 글자가 내는 소리</h3><p>글자 <b>이름</b>과 글자가 내는 <b>소리</b>는 달라요. C의 이름은 씨지만, 소리는 크예요. 그래서 Cat이 캣이 되는 거예요.</p><p>26글자 소리를 한 번에 다 외우지 않아도 돼요. 하루에 몇 개씩만 소리 내어 읽어 보세요.</p><p><b>A</b> = 애 &nbsp;|&nbsp; <b>A</b>pple 애플 (사과)</p><p><b>B</b> = 브 &nbsp;|&nbsp; <b>B</b>all 볼 (공)</p><p><b>C</b> = 크 &nbsp;|&nbsp; <b>C</b>at 캣 (고양이)</p><p><b>D</b> = 드 &nbsp;|&nbsp; <b>D</b>og 독 (강아지)</p><p><b>E</b> = 에 &nbsp;|&nbsp; <b>E</b>gg 에그 (달걀)</p><p><b>F</b> = 프 &nbsp;|&nbsp; <b>F</b>ish 피쉬 (물고기) — 아랫입술을 윗니에 살짝 대고 바람을 불어요</p><p><b>G</b> = 그 &nbsp;|&nbsp; <b>G</b>oat 고트 (염소)</p><p><b>H</b> = 흐 &nbsp;|&nbsp; <b>H</b>at 햇 (모자)</p><p><b>I</b> = 이 &nbsp;|&nbsp; <b>I</b>gloo 이글루 (얼음집)</p><p><b>J</b> = 즈 &nbsp;|&nbsp; <b>J</b>am 잼 (잼)</p><p><b>K</b> = 크 &nbsp;|&nbsp; <b>K</b>ite 카이트 (연) — C와 소리가 같아요</p><p><b>L</b> = 르 &nbsp;|&nbsp; <b>L</b>ion 라이언 (사자) — 혀끝을 윗니 뒤에 딱 붙여요</p><p><b>M</b> = 므 &nbsp;|&nbsp; <b>M</b>oon 문 (달) — 입을 다물고 소리 내요</p><p><b>N</b> = 느 &nbsp;|&nbsp; <b>N</b>ose 노즈 (코)</p><p><b>O</b> = 아 &nbsp;|&nbsp; <b>O</b>ctopus 옥토퍼스 (문어)</p><p><b>P</b> = 프 &nbsp;|&nbsp; <b>P</b>ig 피그 (돼지) — 입술을 붙였다가 툭 터뜨려요</p><p><b>Q</b> = 쿠 &nbsp;|&nbsp; <b>Q</b>ueen 퀸 (여왕) — Q는 늘 u와 붙어 다녀요 (qu)</p><p><b>R</b> = 르 &nbsp;|&nbsp; <b>R</b>abbit 래빗 (토끼) — 혀를 어디에도 안 닿게 해요</p><p><b>S</b> = 스 &nbsp;|&nbsp; <b>S</b>un 썬 (해) — 뱀처럼 스으</p><p><b>T</b> = 트 &nbsp;|&nbsp; <b>T</b>iger 타이거 (호랑이)</p><p><b>U</b> = 어 &nbsp;|&nbsp; <b>U</b>mbrella 엄브렐라 (우산)</p><p><b>V</b> = 브 &nbsp;|&nbsp; <b>V</b>an 밴 (승합차) — F처럼 입술을 대고, 목을 울려요</p><p><b>W</b> = 우 &nbsp;|&nbsp; <b>W</b>ater 워터 (물) — 입을 동그랗게 모아요</p><p><b>X</b> = 크스 &nbsp;|&nbsp; Bo<b>x</b> 박스 (상자) — X는 주로 낱말 끝에 와요</p><p><b>Y</b> = 이 &nbsp;|&nbsp; <b>Y</b>ellow 옐로우 (노랑)</p><p><b>Z</b> = 즈 &nbsp;|&nbsp; <b>Z</b>ebra 지브라 (얼룩말) — 벌처럼 즈으</p><button class="bt bs" style="font-size:11px;padding:7px 12px;margin:8px 0" onclick="lpSpeak(\'apple ball cat dog egg fish goat hat igloo jam kite lion moon nose octopus pig queen rabbit sun tiger umbrella van water box yellow zebra\')">예시 낱말 소리 듣기</button><h3>소리를 이어 붙이면 낱말이 돼요</h3><p>파닉스가 재미있어지는 순간이에요. 소리를 하나씩 내다가 빠르게 이어 보세요.</p><p style="font-size:17px;text-align:center;color:var(--cy);line-height:2">c + a + t &rarr; <b>cat</b> (캣)<br>d + o + g &rarr; <b>dog</b> (독)<br>s + u + n &rarr; <b>sun</b> (썬)<br>p + i + g &rarr; <b>pig</b> (피그)</p><button class="bt bs" style="font-size:11px;padding:7px 12px;margin:4px 0" onclick="lpSpeak(\'cat, dog, sun, pig\')">이어 읽기 소리 듣기</button><h3>따라 써 보기</h3><p>눈으로만 보면 금방 잊어버려요. 손으로 쓰면 오래 남아요.</p><p>• 대문자 A부터 Z까지 한 줄씩 써 보세요</p><p>• 그다음 소문자 a부터 z까지 써 보세요</p><p>• 마지막으로 cat, dog, sun, pig 네 낱말을 써 보세요</p><p style="color:var(--gd)">오늘의 목표: 소리 내어 읽기 1번 + 따라 쓰기 1번. 이것만 해도 충분해요!</p>',quiz:[{q:'영어 알파벳은 몇 글자?',a:['26','24','28','30'],c:0},{q:'모음 5개가 아닌 것은?',a:['B','A','I','U'],c:0},{q:'Cat의 c는 어떤 소리를 낼까요?',a:['크','씨','스','즈'],c:0},{q:'아랫입술을 윗니에 대고 바람을 불어 내는 소리는?',a:['F','M','K','T'],c:0},{q:'c + a + t 를 이어 읽으면?',a:['cat (캣)','cot (콧)','cut (컷)','act (액트)'],c:0}]}
 ]},
 {nm:'기초 회화',lessons:[
 {t:'인사와 자기소개',lv:1,content:'<h3>기본 인사</h3><p>• Hello! (안녕!)</p><p>• Good morning! (좋은 아침!)</p><p>• How are you? (어떻게 지내?)</p><p>• I am fine, thank you. (잘 지내요, 감사합니다.)</p><h3>자기소개</h3><p>• My name is ___. (내 이름은 ___입니다.)</p><p>• I am ___ years old. (나는 ___살입니다.)</p><p>• I like ___. (나는 ___을 좋아합니다.)</p><h3>연습!</h3><p style="color:var(--cy)">Hello! My name is 배움퀘스트. I am happy. Nice to meet you!</p>',quiz:[{q:'Thank you를 한국어로?',a:['감사합니다','안녕하세요','미안합니다','실례합니다'],c:0}]},
@@ -2153,8 +2167,9 @@ function renderSubjects(){
   const lbs=(U.stats&&U.stats.lessonsBySubject)||{};
   document.getElementById('subjectGrid').innerHTML=subjects.map(s=>{
     const bk=s.builtinKey&&CURRICULUM[s.builtinKey];
-    const total=bk?bk.units.reduce((sum,u)=>sum+u.lessons.length,0):(s.topicCount||0);
-    const units=bk?bk.units.length:(s.unitCount||0);
+    const _tc=bk?lpTierCount(s.builtinKey):null;
+    const total=_tc?_tc.lessons:(s.topicCount||0);
+    const units=_tc?_tc.units:(s.unitCount||0);
     const done=Math.min(lbs[s.nm]||0,total);
     const pct=total>0?Math.round(done/total*100):0;
     const col=subjColor(s);
@@ -2174,7 +2189,7 @@ async function openSubjectNew(subjectId){
   if(!meta){toast('과목을 찾을 수 없습니다');return;}
   if(meta.builtinKey&&CURRICULUM[meta.builtinKey]){
     curSubj=meta.builtinKey;
-    curSubjData=CURRICULUM[meta.builtinKey];
+    curSubjData=lpFilterSubjData(CURRICULUM[meta.builtinKey]);
     _renderSubjectUnits(curSubjData);
     loadCurriculumMaster().then(cm=>{
       if(!cm)return;
@@ -2182,7 +2197,7 @@ async function openSubjectNew(subjectId){
       if(jsonSubj){
         const converted=convertSubject(jsonSubj,meta.nm,meta.ic);
         const existNm=new Set(curSubjData.units.map(u=>u.nm.replace(/^[^a-zA-Z가-힣]*/,'')));
-        const newUnits=converted.units.filter(u=>!existNm.has(u.nm));
+        const newUnits=lpFilterSubjData(converted).units.filter(u=>!existNm.has(u.nm));
         if(newUnits.length>0){
           curSubjData={...curSubjData,units:[...curSubjData.units,...newUnits]};
           _renderSubjectUnits(curSubjData);
@@ -2200,7 +2215,7 @@ async function openSubjectNew(subjectId){
   if(!cm){document.getElementById('unitList').innerHTML='<div style="text-align:center;padding:20px;color:var(--t3)">데이터를 불러올 수 없습니다</div>';return;}
   const jsonSubj=cm[getAgeGroup()]&&cm[getAgeGroup()][subjectId];
   if(!jsonSubj){document.getElementById('unitList').innerHTML='<div style="text-align:center;padding:20px;color:var(--t3)">과목 데이터가 없습니다</div>';return;}
-  curSubjData=convertSubject(jsonSubj,meta.nm,meta.ic);
+  curSubjData=lpFilterSubjData(convertSubject(jsonSubj,meta.nm,meta.ic));
   // 콘텐츠 라이브러리의 dynamic 단원(예: 한국사 만화) 덧붙이기
   ((window._EXTRA_UNITS&&window._EXTRA_UNITS[subjectId])||[]).forEach(u=>{if(!curSubjData.units.some(x=>x.nm===u.nm))curSubjData.units.push(u);});
   _renderSubjectUnits(curSubjData);
@@ -2221,9 +2236,11 @@ function _renderSubjectUnits(s){
   document.getElementById('learnMain').style.display='none';
   document.getElementById('learnUnit').style.display='';
   document.getElementById('unitTitle').innerHTML=ico(s.nm,s.ic)+' '+s.nm;
+  var _sjn=s.nm;
   document.getElementById('unitList').innerHTML=s.units.map((u,ui)=>
     '<div class="sec" style="font-size:13px">'+u.nm+'</div>'+
-    u.lessons.map((l,li)=>'<div class="gc" style="text-align:left;padding:12px;margin-bottom:6px" onclick="openLesson('+ui+','+li+')"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+(_lpIsComic(l)?'📖':'📄')+'</span><div><div style="font-size:12px;font-weight:600">'+l.t+'</div><div style="font-size:9px;color:var(--t3)">'+(_lpIsComic(l)?'만화':'Lv.'+l.lv)+'</div></div></div></div>').join('')
+    u.lessons.map((l,li)=>{var _dn=(typeof lpIsLessonDone==='function')&&lpIsLessonDone(_sjn,l.t);
+      return '<div class="gc'+(_dn?' lp-done':'')+'" style="text-align:left;padding:12px;margin-bottom:6px" onclick="openLesson('+ui+','+li+')"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+(_dn?'✅':(_lpIsComic(l)?'📖':'📄'))+'</span><div><div style="font-size:12px;font-weight:600">'+l.t+'</div><div style="font-size:9px;color:var(--t3)">'+(_dn?'완료':(_lpIsComic(l)?'만화':'Lv.'+l.lv))+'</div></div></div></div>';}).join('')
   ).join('');
   /* 다른 과목을 새로 열었을 때만 맨 위로. 같은 과목을 다시 그리는 경우
      (openSubjectNew 가 데이터를 늦게 받아 한 번 더 그린다)에는 읽던 자리를 지킨다. */
@@ -2745,8 +2762,9 @@ function renderAllCategoryContent(){
   var homeSubjects=getSubjects();
   var _hs=_el('homeSubjects');if(_hs){var _lbs=(U.stats&&U.stats.lessonsBySubject)||{};_hs.innerHTML=homeSubjects.slice(0,8).map(function(s){
     var bk=s.builtinKey&&CURRICULUM[s.builtinKey];
-    var total=bk?bk.units.reduce(function(sum,u){return sum+u.lessons.length;},0):(s.topicCount||0);
-    var units=bk?bk.units.length:(s.unitCount||0);
+    var _tc=bk?lpTierCount(s.builtinKey):null;
+    var total=_tc?_tc.lessons:(s.topicCount||0);
+    var units=_tc?_tc.units:(s.unitCount||0);
     var done=Math.min(_lbs[s.nm]||0,total);
     var pct=total>0?Math.round(done/total*100):0;
     var col=subjColor(s);
@@ -2765,13 +2783,14 @@ function renderAllCategoryContent(){
   var _gR=_el('gR');if(_gR)_gR.innerHTML=GMS.map(function(g){return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>';}).join('');
   nextEng();
   renderReviewArea();renderRecommendations();
-  var _qR=_el('qR');if(_qR)renderQuiz(_qR,QUIZ.slice(0,3));
+  var _qR=_el('qR');if(_qR)renderQuiz(_qR,(typeof lpTierQuizPool==='function'?lpTierQuizPool():QUIZ).slice(0,3));
   var _hU=_el('hU');if(_hU)_hU.innerHTML=UTS.map(function(u){return '<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+ico(u.nm,u.ic)+'</div><div class="gn">'+u.nm+'</div></div>';}).join('');
   var _cR=_el('calcR');if(_cR)_cR.innerHTML=[].concat(P,U.mp).sort(function(a,b){return b.l-a.l;}).slice(0,5).map(pHNew).join('')+'<div style="text-align:right;margin-top:6px"><a href="javascript:void(0)" onclick="go(3)" style="font-size:11px;color:var(--p);text-decoration:none;font-weight:600">더보기 \u2192</a></div>';
 }
 
 function renderQuizWithGating(el,quizzes,cat){
   var userLv=U.lv;
+  if(typeof lpTierQuizPool==='function')quizzes=lpTierQuizPool(quizzes);   /* 연령 필터 (감사 B-2) */
   var basic=quizzes.slice(0,5);
   var advanced=quizzes.slice(5);
   var h='';
@@ -2841,9 +2860,13 @@ function openAILesson(lessonId){
 }
 
 function completeAILesson(id,title){
+  var map=lpCompletedMap(),key=lpLessonKey('AI학습',title);
+  if(map[key]){toast('이미 끝낸 레슨이에요');cMo();return;}
+  map[key]=new Date().toISOString().slice(0,10);
   if(!U.stats.lessonsBySubject['AI학습'])U.stats.lessonsBySubject['AI학습']=0;
-  U.stats.lessonsBySubject['AI학습']++;U.lessonCount++;
-  xp(20,'AI레슨: '+title);toast('+20XP AI 레슨 완료!');sv();checkBadges();cMo();
+  U.stats.lessonsBySubject['AI학습']++;U.lessonCount=(U.lessonCount||0)+1;
+  xp(20,'AI레슨: '+title);toast('+20XP AI 레슨 완료!');sv();checkBadges();
+  lpRefreshProgress();cMo();
 }
 
 // ===== 놀이 탭 게임 카테고리 필터 =====
@@ -3037,9 +3060,14 @@ function retryWrongNotes(){
 
 // ===== 레슨 완료 추적 =====
 function completeLesson(subjNm,lessonT){
+  var map=lpCompletedMap(),key=lpLessonKey(subjNm,lessonT);
+  if(map[key]){toast('이미 끝낸 레슨이에요');backToUnits();return;}   /* 같은 레슨 두 번 세지 않는다 */
+  map[key]=new Date().toISOString().slice(0,10);
   if(!U.stats.lessonsBySubject[subjNm])U.stats.lessonsBySubject[subjNm]=0;
-  U.stats.lessonsBySubject[subjNm]++;U.lessonCount++;
-  xp(20,'레슨완료: '+lessonT);toast('+20XP 레슨 완료!');sv();checkBadges();backToUnits();
+  U.stats.lessonsBySubject[subjNm]++;U.lessonCount=(U.lessonCount||0)+1;
+  xp(20,'레슨완료: '+lessonT);toast('+20XP 레슨 완료!');sv();checkBadges();
+  lpRefreshProgress();
+  backToUnits();
 }
 
 // ===== 총괄평가 열기 =====
@@ -3280,7 +3308,32 @@ function checkBadges(){
   });
   if(newBadge){sv();showBadgeModal(newBadge);renderBadgeArea();if(typeof addNotification==='function')addNotification(newBadge.ic,'뱃지 획득: '+newBadge.nm,'go(4)','badge');}
 }
+/* ★2026-08-31 감사 #7: 탭 몇 번 눌렀다고 전면 모달이 떠서 레슨 본문을 덮었다.
+   축하는 하되 읽던 것을 가리지 않도록 위쪽 띠로 내렸다. 3.5초 뒤 사라진다. */
 function showBadgeModal(bd){
+  try{
+    /* 가입 화면(별명·나이)이 열려 있는 동안엔 축하를 미룬다 —
+       아무것도 안 했는데 배지부터 뜨면 앱이 제멋대로인 것처럼 보인다. */
+    var _gate=document.getElementById('nkM');
+    if(_gate&&_gate.style.display!=='none')return;
+    if(!U.onboarded)return;   /* 시작도 안 했는데 축하부터 뜨지 않게 */
+    if(!document.getElementById('lpBadgeToastStyle')){
+      var st=document.createElement('style');st.id='lpBadgeToastStyle';
+      st.textContent='.lp-badge-toast{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:2000;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--c1,#fff);border:1.5px solid rgba(139,92,246,.35);box-shadow:0 6px 20px rgba(13,13,40,.18);animation:lpbt .25s ease-out;pointer-events:none}'
+        +'.lp-badge-toast .bi{font-size:26px;line-height:1;flex:0 0 auto}'
+        +'.lp-badge-toast .bx{min-width:0;overflow-wrap:anywhere}'
+        +'.lp-badge-toast .b1{font-size:12px;font-weight:800;color:var(--t1,#1c1c2e)}'
+        +'.lp-badge-toast .b2{font-size:10px;color:var(--t3,#7a7a8c);margin-top:1px}'
+        +'@keyframes lpbt{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}';
+      (document.head||document.documentElement).appendChild(st);
+    }
+    document.querySelectorAll('.lp-badge-toast').forEach(function(e){e.remove();});
+    var t=document.createElement('div');t.className='lp-badge-toast';
+    t.innerHTML='<div class="bi">'+bd.ic+'</div><div class="bx"><div class="b1">배지 획득 · '+bd.nm+'</div><div class="b2">'+bd.desc+'</div></div>';
+    document.body.appendChild(t);
+    setTimeout(function(){if(t.parentNode)t.remove();},3500);
+    return;
+  }catch(e){}
   const overlay=document.createElement('div');overlay.className='badge-modal-overlay';
   overlay.innerHTML='<div class="badge-modal"><div class="bm-icon">'+bd.ic+'</div><div style="font-size:12px;color:var(--t2);margin-bottom:4px">뱃지 획득!</div><div class="bm-title">'+bd.nm+'</div><div class="bm-desc">'+bd.desc+'</div><button class="bt bp" onclick="this.closest(\'.badge-modal-overlay\').remove()" style="font-size:12px;padding:8px 24px">확인</button></div>';
   overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
@@ -3445,7 +3498,7 @@ function renderComm(){
   if(_commCat!=='전체')posts=posts.filter(p=>(p.g||'자유')===_commCat);
   if(_commSort==='hot')posts.sort((a,b)=>b.l-a.l);
   else posts.sort((a,b)=>a.m-b.m);
-  document.getElementById('allP').innerHTML=posts.map(pHNew).join('')||'<div style="font-size:11px;color:var(--t3);padding:12px;text-align:center">게시글이 없습니다</div>';
+  document.getElementById('allP').innerHTML=posts.map(pHNew).join('')||'<div style="font-size:12px;color:var(--t3);padding:22px 12px;text-align:center;line-height:1.7">아직 올라온 글이 없어요.<br>첫 글을 남겨 보세요!</div>';
 }
 
 // ===== 새 뱃지용 데이터 초기화 =====
@@ -3624,6 +3677,159 @@ function toggleTheme(){U.themeChosen=true;applyTheme(U.theme==='dark'?'light':'d
 // ===== 연령 프로필 (DESIGN_SPEC §5 "연령별 변주") =====
 // html[data-age] 하나만 세우면 CSS 토큰·글자 배율·마스코트 톤이 전부 따라온다.
 function lpTier(){return LP_TIERS.indexOf(U.ageTier)>=0?U.ageTier:'elementary';}
+
+/* ===== 연령별 커리큘럼 필터 (감사 B-2) =====
+   문제: 유아(5~7세)로 가입해도 수학에 이차방정식·평면벡터·공간벡터가 그대로 나왔다.
+   레슨마다 붙어 있는 lv(1~18) 가 실제 난이도라 그걸 상한으로 쓴다.
+   만화·소설은 lv 가 '화 번호'(1화~16화)라 상한을 적용하지 않는다 — 만화는 전 연령용이다. */
+const LP_TIER_MAXLV={toddler:2,elementary:6,teen:14,adult:99};
+function lpTierMaxLv(t){return LP_TIER_MAXLV[t||lpTier()]||99;}
+function lpLessonFitsTier(l,t){
+  t=t||lpTier();
+  if(t==='teen'||t==='adult')return true;
+  if(!l)return false;
+  try{if(typeof _lpIsComic==='function'&&_lpIsComic(l))return true;}catch(e){}
+  if((Number(l.lv)||1)>lpTierMaxLv(t))return false;
+  /* 레벨 숫자만으로는 부족하다 — '함수의 개념'(Lv.2) '확률의 기초'(Lv.2) 가 유아에게 남았다 */
+  if(t==='toddler'&&LP_TODDLER_HARDQ.test(String(l.t||'')))return false;
+  try{if(typeof lpTierFits==='function'&&!lpTierFits(l.t,''))return false;}catch(e){}
+  return true;
+}
+/* 과목 데이터 사본을 만들어 걸러 낸다 — 원본 CURRICULUM 은 손대지 않는다.
+   (연령을 다시 바꾸면 원래대로 돌아와야 하므로) */
+function lpFilterSubjData(s,t){
+  if(!s||!s.units)return s;
+  t=t||lpTier();
+  if(t==='teen'||t==='adult')return s;
+  var units=s.units.map(function(u){
+    var o={};for(var k in u)o[k]=u[k];
+    o.lessons=(u.lessons||[]).filter(function(l){return lpLessonFitsTier(l,t);});
+    return o;
+  }).filter(function(u){return u.lessons.length>0;});
+  var out={};for(var k2 in s)out[k2]=s[k2];out.units=units;
+  return out;
+}
+/* 과목 카드에 찍히는 '몇 단원 · 몇 레슨' 도 연령 기준으로 센다 */
+function lpTierCount(bk,t){
+  var c=CURRICULUM[bk];if(!c)return{units:0,lessons:0};
+  var f=lpFilterSubjData(c,t);
+  return{units:f.units.length,lessons:f.units.reduce(function(n,u){return n+u.lessons.length;},0)};
+}
+function lpTierTotalLessons(t){
+  var n=0;for(var k in CURRICULUM){n+=lpTierCount(k,t).lessons;}
+  return n;
+}
+/* ===== 연령별 퀴즈 풀 (감사 B-2 파급) =====
+   유아 계정 홈에 '물의 화학식은?' '광합성에 필요한 기체는?' 이 나오던 문제. */
+const LP_TODDLER_QCAT=['구구단','영어단어','영어','음악','건강'];
+const LP_TODDLER_HARDQ=/화학식|광합성|원소|분자|세포|유전|방정식|함수|벡터|확률|미적분|헌법|정치|경제|무역|주식|세계대전|전쟁|혁명|제국|물리|양자|알고리즘|프로그래밍|백분율|기압|중력|위도|경도|민주주의|산업혁명|르네상스|국회|법률|화폐|인플레|원주율|내각의 합/;
+function lpTierQuizPool(pool){
+  var src=pool||(typeof QUIZ!=='undefined'?QUIZ:[]);
+  var t=lpTier();
+  if(t==='teen'||t==='adult')return src;
+  var out;
+  if(t==='toddler'){
+    var soft=src.filter(function(q){return !LP_TODDLER_HARDQ.test((q.q||'')+' '+(q.cat||''));});
+    out=soft.filter(function(q){
+      if(LP_TODDLER_QCAT.indexOf(q.cat)>=0)return true;
+      return /^\s*\d+\s*[x×*+\-]\s*\d+/.test(q.q||'');
+    });
+    /* 허용목록으로 3개도 못 채우는 풀(O/X·빈칸)에서는 최소한 어려운 말은 빼고 준다.
+       예전에는 여기서 원본을 통째로 되돌려 '광합성'이 유아에게 그대로 나왔다. */
+    if(out.length<3)out=soft;
+  }else{
+    out=src.filter(function(q){return !LP_HARD_TOPICS.test((q.q||'')+' '+(q.cat||''));});
+  }
+  return out.length>=1?out:src;
+}
+window.lpTierQuizPool=lpTierQuizPool;window.lpFilterSubjData=lpFilterSubjData;
+
+/* ===== 레슨 완료 기록 (감사 B-1) =====
+   completeLesson 은 U.stats.lessonsBySubject 만 올리고, 홈 머리글은
+   U.completedLessons 를 읽고 있었다. 아무도 쓰지 않는 칸이라 영원히 '0개 완료'.
+   완료 목록을 실제로 적고, 같은 레슨을 두 번 눌러도 두 번 세지 않는다. */
+function lpCompletedMap(){
+  if(!U.completedLessons||typeof U.completedLessons!=='object'||Array.isArray(U.completedLessons)){
+    var o={};
+    if(Array.isArray(U.completedLessons))U.completedLessons.forEach(function(k){if(k)o[String(k)]=1;});
+    U.completedLessons=o;
+  }
+  return U.completedLessons;
+}
+function lpLessonKey(subjNm,lessonT){return String(subjNm)+'::'+String(lessonT);}
+function lpIsLessonDone(subjNm,lessonT){return !!lpCompletedMap()[lpLessonKey(subjNm,lessonT)];}
+/* 완료 직후 숫자가 보이는 곳을 전부 다시 그린다 */
+function lpRefreshProgress(){
+  try{if(typeof renderGreeting==='function')renderGreeting();}catch(e){}
+  try{if(typeof renderSubjects==='function')renderSubjects();}catch(e){}
+  try{if(typeof renderAllCategoryContent==='function')renderAllCategoryContent();}catch(e){}
+  try{if(typeof rProf==='function')rProf();}catch(e){}
+  try{
+    var lu=document.getElementById('learnUnit');
+    if(curSubjData&&lu&&lu.style.display!=='none'&&typeof _renderSubjectUnits==='function')_renderSubjectUnits(curSubjData);
+  }catch(e){}
+}
+window.lpIsLessonDone=lpIsLessonDone;window.lpRefreshProgress=lpRefreshProgress;
+
+/* ===== 숙련도 히트맵을 '진짜 성적'으로 채운다 (감사 B-3 후속) =====
+   v14 히트맵은 첫 실행부터 88칸이 난수로 차 있었다. 난수를 걷어냈으니
+   이제 실제로 푼 문제의 정답률만 들어간다. 근거가 없는 칸은 0(=기록 없음)으로 남는다.
+   저장 위치가 lp_user 라 여기서 직접 읽고 쓴다 — v14 패치가 쓰는 칸과 같은 칸이다. */
+const LP_MASTERY_TOPICS={
+  '국어':['맞춤법','독해','어휘','문법','작문','문학','한자','발표'],
+  '수학':['덧셈','뺄셈','곱셈','나눗셈','분수','도형','측정','통계'],
+  '영어':['알파벳','단어','문법','독해','듣기','회화','쓰기','발음'],
+  '과학':['물리','화학','생물','지구과학','실험','관찰','환경','우주'],
+  '사회':['지리','경제','정치','문화','법률','환경','세계','시민'],
+  '역사':['고조선','삼국','고려','조선','근대','현대','세계사','인물'],
+  '음악':['음계','리듬','악기','감상','노래','화성','작곡','연주'],
+  '미술':['소묘','색채','조소','디자인','감상','판화','공예','미학'],
+  '체육':['달리기','구기','수영','체조','격투기','무용','건강','안전'],
+  '코딩':['변수','반복문','조건문','함수','배열','객체','알고리즘','디버깅'],
+  '기타':['요리','경제','금융','안전','예절','진로','독서','환경']
+};
+/* 퀴즈 분류(cat) → 히트맵 과목. 확실한 것만 적는다 — 애매하면 기록하지 않는다. */
+const LP_MASTERY_SUBJ={'구구단':'수학','수학':'수학','영어단어':'영어','영어':'영어',
+  '과학':'과학','과학상식':'과학','한국사':'역사','역사':'역사','세계사':'역사',
+  '음악':'음악','미술':'미술','사회':'사회','코딩':'코딩','국어':'국어','건강':'체육'};
+/* 분류만으로 주제가 딱 떨어지는 것들 */
+const LP_MASTERY_ALIAS={'구구단':'곱셈','영어단어':'단어','세계사':'세계사','건강':'건강'};
+function lpRecordMastery(cat,qText,ok){
+  try{
+    var subj=LP_MASTERY_SUBJ[cat];
+    if(!subj)return;
+    var topics=LP_MASTERY_TOPICS[subj];if(!topics)return;
+    var hay=String(cat||'')+' '+String(qText||'');
+    var topic=LP_MASTERY_ALIAS[cat]||null;
+    if(!topic){for(var i=0;i<topics.length;i++){if(hay.indexOf(topics[i])>=0){topic=topics[i];break;}}}
+    if(!topic)return;                      /* 근거가 없으면 아무 칸도 건드리지 않는다 */
+    var raw=localStorage.getItem('lp_user');
+    var u=raw?JSON.parse(raw):{};
+    if(!u.v14)u.v14={};
+    if(!u.v14.mastery)u.v14.mastery={};
+    if(!u.v14.masteryStats)u.v14.masteryStats={};
+    var key=subj+'_'+topic;
+    var st=u.v14.masteryStats[key]||{n:0,c:0};
+    st.n++;if(ok)st.c++;
+    u.v14.masteryStats[key]=st;
+    u.v14.mastery[key]=Math.round(st.c/st.n*100);   /* 지어낸 값이 아니라 실제 정답률 */
+    localStorage.setItem('lp_user',JSON.stringify(u));
+  }catch(e){}
+}
+window.lpRecordMastery=lpRecordMastery;
+
+/* ===== 소리 듣기 (감사 5절 ③: 영어 레슨에 발음이 없다) =====
+   기기에 내장된 음성만 쓴다 — 내려받는 파일도, 바깥으로 나가는 요청도 없다. */
+function lpSpeak(txt,lang){
+  try{
+    if(!('speechSynthesis' in window)){toast('이 기기에서는 소리를 낼 수 없어요');return;}
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(String(txt));
+    u.lang=lang||'en-US';u.rate=.75;u.pitch=1.05;
+    window.speechSynthesis.speak(u);
+  }catch(e){toast('이 기기에서는 소리를 낼 수 없어요');}
+}
+window.lpSpeak=lpSpeak;
 function lpTierMeta(){return LP_TIER_META[lpTier()];}
 function lpAdultStatsHTML(){
   var done=0;try{done=Object.keys(U.seen||{}).length;}catch(e){}
@@ -3706,11 +3912,13 @@ const _obSteps=[
 ];
 let _obStep=0;
 function showOnboarding(){
-  if(U.onboarded)return;
-  if(!U.nk)return;
-  _obStep=0;
-  document.getElementById('onboardOverlay').style.display='flex';
-  renderOnboardStep();
+  /* ★2026-08-31 감사 #9·#10: 환영 캐러셀 4장을 없앴다.
+     내용이 기능 나열인 데다("학습 탭에서 33개 과목") 그 탭 이름이 실제 하단바
+     (홈·지도·친구·나)에 없어서 첫 안내부터 화면과 어긋났다.
+     함수와 오버레이는 남겨 둔다 — 호출부가 여럿이라 지우면 깨진다. */
+  if(!U.onboarded){U.onboarded=true;try{sv();}catch(e){}}
+  var ob=document.getElementById('onboardOverlay');
+  if(ob)ob.style.display='none';
 }
 function renderOnboardStep(){
   const s=_obSteps[_obStep];
@@ -3821,8 +4029,8 @@ function renderGreeting(){
   else if(h<12)greet='좋은 아침이에요, '+(U.nk||'탐험가')+'님! 오늘도 한 걸음 성장해요';
   else if(h<18)greet=(U.nk||'탐험가')+'님, 오후 학습 화이팅!';
   else greet=(U.nk||'탐험가')+'님, 저녁 시간에도 레벨업 중이네요!';
-  const totalLessons=Object.values(CURRICULUM).reduce((s,c)=>s+c.units.reduce((ss,u)=>ss+u.lessons.length,0),0);
-  const completedCount=Object.keys(U.completedLessons||{}).length;
+  const totalLessons=(typeof lpTierTotalLessons==='function')?lpTierTotalLessons():Object.values(CURRICULUM).reduce((s,c)=>s+c.units.reduce((ss,u)=>ss+u.lessons.length,0),0);
+  const completedCount=Object.keys(lpCompletedMap()).length;
   const hi=_el('mhHi');if(hi)hi.textContent=greet;
   const sub=_el('mhSub');if(sub)sub.textContent=totalLessons+'개 레슨 중 '+completedCount+'개 완료';
   const el=_el('greetingBar');if(el){el.innerHTML='';el.style.display='none';}
@@ -3832,7 +4040,10 @@ function renderGreeting(){
 // ===== 3.5b 연령 적합성 필터 =====
 // 유아 모드에 영어 다큐·마그나카르타 퀴즈가 추천되던 결함을 막는다.
 // 판정 신호는 두 가지뿐이다: (1) 제목에 한글이 있는가 (2) 명백히 상급인 주제어인가.
-const LP_HARD_TOPICS=/성인-|미적분|calculus|magna|마그나|헌장|주식|금융|철학|미분|적분|방정식|물리학|화학식|유전자|알고리즘|프로그래밍|경제학|정치|세계대전|블랙홀|black hole|quantum|양자/i;
+/* ★2026-08-31 감사: 초등 계정 홈의 '오늘의 한 가지'로 '코드악보 보는 법 - 화성학 기초 강의'
+   같은 성인 강의가 올라왔다. 데이터에 age:"all" 로 잘못 붙어 있어 걸러지지 않았다.
+   제목에 드러나는 성인 강의 표지를 추가한다(레슨 제목과는 겹치지 않는 말만 골랐다). */
+const LP_HARD_TOPICS=/성인-|미적분|calculus|magna|마그나|헌장|주식|금융|철학|미분|적분|방정식|물리학|화학식|유전자|알고리즘|프로그래밍|경제학|정치|세계대전|블랙홀|black hole|quantum|양자|화성학|기초 강의|특강|세미나|수능|토익|토플|공무원|입시|논문|재테크|부동산|자격증/i;
 function lpTierFits(title,desc){
   var tier='elementary';
   try{ tier=(typeof lpTier==='function')?lpTier():(U&&U.ageTier)||'elementary'; }catch(e){}
@@ -3940,8 +4151,8 @@ function generateAutoNotifications(){
   // 복습 필요 알림
   const reviews=typeof getTodayReviews==='function'?getTodayReviews():[];
   if(reviews.length>0){addNotification('🔄','오늘 복습할 문제가 '+reviews.length+'개 있어요!','go(0)','review');}
-  // 일일 과제 알림
-  addNotification('📋','오늘의 일일 과제를 확인해보세요!','go(0)','mission');
+  /* ★2026-08-31 감사 #6: 앱을 켠 순간 읽지 않은 알림 '1'이 켜져 있었다.
+     내용이 자기 홍보라 가짜 참여 유도로 읽힌다. 실제로 알릴 일이 있을 때만 알린다. */
   // 스트릭 알림
   if(U.streak>=3){addNotification('🔥','연속 '+U.streak+'일째! 오늘도 이어가세요!','go(4)','streak');}
   // 뱃지 진행도 알림

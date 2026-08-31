@@ -204,8 +204,12 @@ function getRankTier(rp){
 }
 
 function renderRankedPanel(){
-  const u=U();initRankedMatch();
-  const r=u.v13.rank;
+  /* ★2026-08-31 감사 B-4: U()는 localStorage 를 매번 새로 파싱해 사본을 준다.
+     initRankedMatch() 가 채운 건 '다른 사본'이라 여기 u 에는 v13 이 없었다.
+     순서를 바꾸고(먼저 초기화 → 그 다음 읽기) 기본값까지 세워 둔다. */
+  initRankedMatch();
+  const u=U();
+  const r=(u.v13&&u.v13.rank)||{rp:0,wins:0,losses:0,draws:0,history:[]};
   const tier=getRankTier(r.rp);
   const nextTier=V13_RANKS[V13_RANKS.indexOf(tier)+1]||tier;
   const pct=nextTier.min>tier.min?Math.round((r.rp-tier.min)/(nextTier.min-tier.min)*100):100;
