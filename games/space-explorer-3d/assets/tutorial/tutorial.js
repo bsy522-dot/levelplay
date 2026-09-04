@@ -79,7 +79,7 @@
       '<h2>🚀 우주 탐험가가 된 걸 환영해요!</h2>' +
       '<div class="tut-body">' +
         '<ul>' +
-          '<li>🪐 태양·수성·금성 등 <strong>행성 11개</strong>를 탐험합니다</li>' +
+          '<li>🪐 <strong>행성 8개</strong>와 태양·달까지 <strong>10곳</strong>을 탐험합니다</li>' +
           '<li>❓ <strong>퀴즈</strong>를 맞히면 🏅 배지를 받아요</li>' +
           '<li>🔧 샘플을 모아 <strong>로켓을 강화</strong>해 더 멀리!</li>' +
         '</ul>' +
