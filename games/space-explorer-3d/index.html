@@ -72,6 +72,40 @@ canvas{display:block}
 @keyframes vfx-gold-flash{0%{opacity:0}30%{opacity:0.85}100%{opacity:0}}
 #vfx-flash{position:absolute;inset:0;pointer-events:none;z-index:50;background:radial-gradient(ellipse at center,rgba(255,215,0,0.85) 0%,rgba(255,180,0,0.4) 40%,rgba(255,140,0,0) 75%);opacity:0;display:none}
 #vfx-flash.active{display:block;animation:vfx-gold-flash 0.5s ease-out forwards}
+/* ============= 폰 화면 수선 (2026-09-24, 폭 412px·시스템 글자 1.7배) — 760px 이하에서만, PC 무변경 =============
+   ① 머리글 한 줄: 오른쪽 '?' 자리를 비우고 연료 막대는 ⛽ 옆으로
+   ② 제목·안내는 머리글 아래 줄 가운데로(겹침 없음), 오른쪽 로켓·앨범·강화 버튼 3개는 '⋯' 하나로 접기(누르면 펼침)
+   ③ 탐사 버튼 6개: 가운데 세로 기둥 → 화면 폭 3칸×2줄, 확대(+/−) 버튼은 그 위로·창이 열리면 숨김
+   ④ 창: 화면 안에서 안쪽 스크롤, ✕ 는 늘 보이게, 창이 열리면 '?' 가 ✕ 를 덮지 않게 숨김
+   ⑤ 한국어 낱말 중간 끊김 방지 (--hud-b·--nav-h 는 아래 폰 전용 스크립트가 잰다) */
+#menu-more{display:none}
+@media (max-width:760px){
+ #hud{right:56px;padding:6px 10px;gap:8px}
+ #hud>div{display:flex;align-items:center;gap:4px;white-space:nowrap;flex:0 0 auto}
+ #hud>div:nth-child(2){flex:1 1 auto;min-width:0}
+ #hud .fuel-bar{width:auto;flex:1 1 auto;min-width:32px;max-width:120px}
+ #title-overlay{top:calc(var(--hud-b,52px) + 8px);max-width:calc(100% - 128px);word-break:keep-all;overflow-wrap:anywhere}
+ #menu-more{display:flex;align-items:center;justify-content:center;position:absolute;top:calc(var(--hud-b,52px) + 8px);right:8px;min-width:44px;min-height:44px;padding:0 10px;font-size:22px;line-height:1}
+ #menu-more[aria-expanded="true"]{background:linear-gradient(135deg,#2a5a9a,#1a3a6a);color:#fff;border-color:#6af}
+ #menu-bar{display:none;top:calc(var(--hud-b,52px) + 60px)}
+ #menu-bar.open{display:flex}
+ #menu-bar .btn{min-height:44px;text-align:left;white-space:nowrap}
+ #nav-btns{left:8px;right:8px;bottom:12px;transform:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ #nav-btns .btn{min-height:44px;padding:8px 4px;white-space:nowrap}
+ #nav-btns .btn:nth-child(3),#nav-btns .btn:nth-child(4),#nav-btns .btn:nth-child(5){order:1}
+ #zoom-controls{bottom:max(60px,calc(var(--nav-h,0px) + 24px)) !important}
+ #ui:has(#planet-info.vfx-show,#quiz-panel.vfx-show,#builder.vfx-show,#album.vfx-show,#upgrade-panel.vfx-show) #zoom-controls{display:none !important}
+ .panel{word-break:keep-all;overflow-wrap:anywhere}
+ #quiz-panel,#builder,#album,#upgrade-panel{max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain}
+ .close-btn{position:sticky;top:0;float:right;margin:-12px -10px 0 8px;min-width:44px;min-height:44px;z-index:2;background:rgba(10,15,40,0.92);border-radius:50%}
+ #toast{max-width:calc(100vw - 24px);width:max-content;word-break:keep-all;overflow-wrap:anywhere;text-align:center}
+ /* 튜토리얼(assets/tutorial/tutorial.css 보다 뒤에 이기도록 한 단계 더 구체적으로) */
+ body>#tutorial-root{inset:auto;top:0;left:0;width:0;height:0}
+ body #tutorial-root .tut-card h2,body #tutorial-root .tut-card .tut-body,body #tutorial-root .tut-coach .tut-msg{word-break:keep-all;overflow-wrap:anywhere}
+ body #tutorial-root .tut-arrow{bottom:calc(40px + 6.9em)}
+ body:has(#nav-btns:not(:empty)) #tutorial-root .tut-coach:not(.tut-coach-top){bottom:calc(var(--nav-h,0px) + 20px)}
+ body:has(#quiz-panel.vfx-show,#builder.vfx-show,#album.vfx-show,#upgrade-panel.vfx-show) #tutorial-root #tut-help-btn{visibility:hidden}
+}
 </style>
 <script type="importmap">
 {
@@ -96,6 +130,7 @@ canvas{display:block}
  <button class="btn" onclick="G.showAlbum()">📖 앨범</button>
  <button class="btn" onclick="G.showUpgrades()">⬆ 강화</button>
 </div>
+<button id="menu-more" class="btn" type="button" aria-label="메뉴 더보기(로켓·앨범·강화)" aria-expanded="false" aria-controls="menu-bar">⋯</button>
 <div id="title-overlay">우주 탐험가 🚀<div class="sub">행성을 클릭하여 탐험하세요</div></div>
 <div id="nav-btns"></div>
 <div id="planet-info" class="panel"></div>
@@ -1646,5 +1681,38 @@ requestAnimationFrame(gameLoop);
 </script>
 <link rel="stylesheet" href="assets/tutorial/tutorial.css">
 <script defer src="assets/tutorial/tutorial.js"></script>
+<script>
+/* ============= 폰 화면 수선 (2026-09-24) — 폭 760px 이하에서만 동작, PC 무변경 =============
+   머리글 아래 끝(--hud-b)·탐사 버튼 줄 높이(--nav-h)를 재서 CSS 에 넘기고, '⋯' 로 로켓·앨범·강화를 펼치고 접는다. */
+(function(){
+  var mq = window.matchMedia && matchMedia('(max-width: 760px)');
+  if(!mq) return;
+  var root = document.documentElement;
+  var hud = document.getElementById('hud'), nav = document.getElementById('nav-btns');
+  var bar = document.getElementById('menu-bar'), more = document.getElementById('menu-more');
+  function measure(){
+    if(!mq.matches){ root.style.removeProperty('--hud-b'); root.style.removeProperty('--nav-h'); return; }
+    if(hud) root.style.setProperty('--hud-b', Math.round(hud.getBoundingClientRect().bottom) + 'px');
+    if(nav) root.style.setProperty('--nav-h', Math.round(nav.getBoundingClientRect().height) + 'px');
+  }
+  function setOpen(on){
+    if(!bar || !more) return;
+    bar.classList.toggle('open', !!on);
+    more.setAttribute('aria-expanded', on ? 'true' : 'false');
+  }
+  if(more && bar) more.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!bar.classList.contains('open')); });
+  if(bar) bar.addEventListener('click', function(){ setOpen(false); });
+  document.addEventListener('pointerdown', function(e){
+    if(!bar || !bar.classList.contains('open')) return;
+    if(bar.contains(e.target) || (more && more.contains(e.target))) return;
+    setOpen(false);
+  }, true);
+  measure();
+  if(window.ResizeObserver){ var ro = new ResizeObserver(measure); if(hud) ro.observe(hud); if(nav) ro.observe(nav); }
+  window.addEventListener('resize', measure);
+  if(mq.addEventListener) mq.addEventListener('change', function(){ setOpen(false); measure(); });
+  else if(mq.addListener) mq.addListener(function(){ setOpen(false); measure(); });
+})();
+</script>
 </body>
 </html>

@@ -672,6 +672,27 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 #srchBtn,#v3SoundToggle,.notif-btn{min-width:44px;min-height:44px}  /* 돋보기 31x27, 스피커 28x28, 알림 26x26 */
 .comm-cats button,.comm-sort button{min-height:40px}  /* 커뮤 분류 53x30, 정렬 62x28 */
 </style>
+<style id="lp-mobile-20260924">
+/* ★2026-09-24 폰 화면 수선(폭 412px·시스템 글자 1.7배) — 760px 이하에서만, PC 무변경. 배치·줄바꿈만 손봄(기능·꾸밈 그대로).
+   ① 첫 안내창(별명·나이): 폰에선 창을 조금 넓히고(최대 360px) 설명의 강제 줄바꿈을 풀어 고른 줄로.
+      창이 화면보다 길어지면 뒤판이 스크롤 → '시작하기'가 밀려날 일 없음
+   ② 맨 위 알림 띠(토스트): 숨을 때 자기 높이만큼 완전히 올라가게 — 글자가 커지면 아랫부분이 화면 위에 걸려 보이던 것
+   ③ 오른쪽 알림판: 닫혀 있을 땐 안 보이게 — 화면 오른쪽 끝에 회색 그림자 띠가 늘 비치던 것
+   ④ 한국어 낱말 중간 끊김 방지('먹/는', '성/장해요', '저/장되고')
+   ⑤ 영상·게임 설명 제목: 글자가 커지면 2줄에서 잘리던 것 → 폰에선 3줄까지, '오늘의 한 가지' 부제목은 줄바꿈 허용 */
+@media (max-width:760px){
+  body{word-break:keep-all;overflow-wrap:anywhere}
+  .nk{overflow-y:auto;align-items:safe center}
+  .nk-c{max-width:min(360px,100%);padding:20px 18px}
+  #nkM .nk-c>div:nth-of-type(2){text-wrap:balance}
+  #nkM .nk-c>div:nth-of-type(2) br{display:none}
+  .toast{transform:translateX(-50%) translateY(calc(-100% - 24px));max-width:calc(100vw - 24px);text-align:center}
+  .notif-panel{visibility:hidden;box-shadow:none;transition:transform .3s ease,visibility 0s linear .3s}
+  .notif-panel.open{visibility:visible;box-shadow:-4px 0 20px rgba(0,0,0,.3);transition:transform .3s ease,visibility 0s}
+  .vc .vt,.gcard .gd{-webkit-line-clamp:3}
+  .mh-cta .mh-c2{white-space:normal}
+}
+</style>
 </head>
 <body>
 <!-- ===== 아이콘 스프라이트 (전용 제작 · 이모지 전량 대체) =====
@@ -776,7 +797,7 @@ button:focus-visible,[role="tab"]:focus-visible,a:focus-visible,.gc:focus-visibl
 </defs></svg>
 <div id="splash"><h1>배움퀘스트</h1><p style="color:var(--t2);font-size:12px;margin-top:6px;font-weight:700;line-height:1.6;overflow-wrap:anywhere">5~12세 아이를 위한 전 과목 학습<br>만화와 게임으로 배워요</p><div class="splash-progress"><div class="splash-progress-bar"></div></div><p class="splash-tip" id="splashTip"></p></div>
 <div class="toast" id="tst"></div>
-<div class="nk" id="nkM" style="display:none"><div class="nk-c"><img src="assets/mascot/hanbeom-happy.svg" width="88" height="88" alt="배움퀘스트 마스코트 한범" style="display:block;margin:0 auto"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:6px 0">배움퀘스트</div><div style="font-size:12px;color:var(--t2);line-height:1.6;margin:-2px 0 10px;font-weight:600;overflow-wrap:anywhere">수학·국어·영어·과학·역사까지 13과목을<br>만화와 게임으로 배우는 무료 학습앱</div><input class="nk-i" id="nkI" placeholder="별명 (안 써도 돼요)" maxlength="12"><div class="nk-q" id="nkQ">몇 살쯤인가요?</div><div class="nk-age" id="nkAge" role="group" aria-label="연령 선택"><div class="nk-ab" role="button" tabindex="0" data-tier="toddler" onclick="lpPickNkTier('toddler')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('toddler')}">유아<small>5~7세</small></div><div class="nk-ab on" role="button" tabindex="0" data-tier="elementary" onclick="lpPickNkTier('elementary')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('elementary')}">초등<small>8~12세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="teen" onclick="lpPickNkTier('teen')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('teen')}">중고등<small>13~18세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="adult" onclick="lpPickNkTier('adult')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('adult')}">성인<small>19세~</small></div></div><button class="bt bp" style="width:100%;margin-top:12px" onclick="setNk()">시작하기</button><button class="bt bs" style="width:100%;margin-top:6px;font-size:11px" onclick="skipNk()">별명 없이 바로 시작</button><div style="margin-top:12px;font-size:10px;color:var(--t3);line-height:1.7;overflow-wrap:anywhere">별명과 학습 기록은 이 기기에만 저장되고 어디로도 전송되지 않아요.<br><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--p);text-decoration:underline">개인정보처리방침 보기</a></div></div></div>
+<div class="nk" id="nkM" style="display:none"><div class="nk-c"><img src="assets/mascot/hanbeom-happy.svg" width="88" height="88" alt="배움퀘스트 마스코트 한범" style="display:block;margin:0 auto"><div style="font-size:18px;font-weight:900;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:6px 0">배움퀘스트</div><div style="font-size:12px;color:var(--t2);line-height:1.6;margin:-2px 0 10px;font-weight:600;overflow-wrap:anywhere">수학·국어·영어·과학·역사까지 13과목을<br> 만화와 게임으로 배우는 무료 학습앱</div><input class="nk-i" id="nkI" placeholder="별명 (안 써도 돼요)" maxlength="12"><div class="nk-q" id="nkQ">몇 살쯤인가요?</div><div class="nk-age" id="nkAge" role="group" aria-label="연령 선택"><div class="nk-ab" role="button" tabindex="0" data-tier="toddler" onclick="lpPickNkTier('toddler')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('toddler')}">유아<small>5~7세</small></div><div class="nk-ab on" role="button" tabindex="0" data-tier="elementary" onclick="lpPickNkTier('elementary')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('elementary')}">초등<small>8~12세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="teen" onclick="lpPickNkTier('teen')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('teen')}">중고등<small>13~18세</small></div><div class="nk-ab" role="button" tabindex="0" data-tier="adult" onclick="lpPickNkTier('adult')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();lpPickNkTier('adult')}">성인<small>19세~</small></div></div><button class="bt bp" style="width:100%;margin-top:12px" onclick="setNk()">시작하기</button><button class="bt bs" style="width:100%;margin-top:6px;font-size:11px" onclick="skipNk()">별명 없이 바로 시작</button><div style="margin-top:12px;font-size:10px;color:var(--t3);line-height:1.7;overflow-wrap:anywhere">별명과 학습 기록은 이 기기에만 저장되고 어디로도 전송되지 않아요.<br><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--p);text-decoration:underline">개인정보처리방침 보기</a></div></div></div>
 <div class="mo" id="mo" role="dialog" aria-modal="true" aria-label="콘텐츠 모달" onclick="if(event.target===this)cMo()"><div class="mc" id="moC"><button class="x" onclick="cMo()" aria-label="닫기">&#x2715;</button><div id="moB"></div></div></div>
 <div class="go" id="gO"><div class="go-b"><span id="gT"></span><button class="bt bs" onclick="cG()" style="font-size:10px;padding:4px 10px">닫기</button></div><iframe id="gF" allow="autoplay; microphone; camera; fullscreen" sandbox="allow-scripts allow-same-origin"></iframe></div>
 

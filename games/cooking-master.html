@@ -24,6 +24,13 @@ canvas{display:block}
 .info-popup h4{color:#E65100;margin-bottom:6px}
 .stars{color:#FFD700;font-size:24px;letter-spacing:4px}
 .nutrition-bar{height:8px;border-radius:4px;margin:2px 0}
+/* 폰 화면 수선 (2026-09-24, 폭 412px·시스템 글자 1.7배) — 760px 이하에서만, PC 무변경.
+   요리 화면 위 HUD(동전·레벨·별·시간)는 캔버스 위에 얹힌 일반 글자라 글자 확대로 두꺼워지면서(35→48px)
+   캔버스가 그린 제목('재료를 골라주세요' 등)을 덮었다 → 위아래 여백만 줄여 높이를 보통 글자 때(35px)와 같게.
+   (메뉴·버튼·제목 글자는 캔버스 그림이라 폰 글자 크기 설정이 닿지 않는다 — 캔버스는 손대지 않음) */
+@media (max-width:760px){
+ #hud{padding:3px 12px;min-height:35px;line-height:1.2}
+}
 </style>
 </head>
 <body>

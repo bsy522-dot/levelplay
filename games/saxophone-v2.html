@@ -147,6 +147,35 @@ label.switch input{width:18px; height:18px; accent-color:var(--gold);}
   #content{padding:10px 10px 40px;}
   .notename{font-size:20px;}
 }
+/* ── 폰 화면 수선 (2026-09-24, 폭 412px·시스템 글자 1.7배) — 760px 이하에서만, PC 무변경 ──
+   ① 머리글 한 줄: 탭이 제목 옆에 안 들어가면 제목 글자만 접고 🎷 는 남김(아래 스크립트)
+   ② 색소폰 그림 이름표: 그림(이미지)으로 바꿔 그림과 같은 비율로 고정 → 글자 확대로 서로 겹치지 않음
+   ③ 운지표 설명 한 단락은 폰에서 접음(같은 안내가 왼쪽 아래·맨 아래 도움말에 있음) → 음 버튼이 위로
+   ④ '현재 운지' 줄 높이 고정 해제 → '전체 해제' 버튼이 글자를 덮지 않음 */
+#saxSvg image.lblimg{display:none;}
+@media (max-width:760px){
+  header{flex-wrap:nowrap; gap:8px;}
+  header h1{flex:0 1 auto; min-width:0; white-space:nowrap;}
+  nav{flex:0 1 auto; min-width:0; overflow-x:auto; scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto; min-height:40px; white-space:nowrap;}
+  #nowNote{height:auto; min-height:16px; line-height:1.35; text-align:center; margin:2px 0 6px;}
+  #clearBtn{min-height:40px;}
+  #holdTip{margin-top:6px;}
+  #saxSvg.imglbl text{display:none;}
+  #saxSvg.imglbl image.lblimg{display:inline;}
+  #saxSvg.imglbl .key image.lbl-p{display:none;}
+  #saxSvg.imglbl .key.pressed image.lbl-p{display:inline;}
+  #saxSvg.imglbl .key.pressed image.lbl-n{display:none;}
+  #chartView .viewhead p{display:none;}
+  #content{overflow-wrap:anywhere;}
+  .grouplabel .nw{white-space:nowrap;}
+  /* 곡 연주 머리줄: 곡 제목을 한 줄 위로, 버튼 둘은 그 아래(좁은 칸에서 제목이 세로로 한 글자씩 서던 것) */
+  .songbar{flex-wrap:wrap; gap:8px;}
+  .songbar .stitle2{order:-1; flex:1 0 100%;}
+  .songbar .ghostbtn{flex:1 1 auto; white-space:nowrap; min-height:40px;}
+  .btnrow{flex-wrap:wrap;}
+}
 </style>
 </head>
 <body>
@@ -601,7 +630,7 @@ function renderChart(){
   <div class="viewhead"><h2>🎼 운지표</h2>
     <p>음을 누르면 색소폰에 운지가 표시되고 소리가 나요. 실제처럼 키를 <b>꾹 잡으면</b> 바로 소리가 나요!</p></div>
   <div id="chartNow" class="card notecard"></div>
-  <div class="grouplabel">기본 음 (도 ~ 높은 도)</div>
+  <div class="grouplabel">기본 음 <span class="nw">(도 ~ 높은 도)</span></div>
   <div class="chip-grid">${BASE8.map(chipHtml).join('')}</div>
   <div class="grouplabel">반음(♯/♭)과 더 낮은 음</div>
   <div class="chip-grid">${LOWACC.map(chipHtml).join('')}</div>
@@ -859,6 +888,78 @@ document.addEventListener('click', e=>{
 });
 /* 시작 */
 renderChart();
+
+/* ───────────────── 폰 화면 수선 (2026-09-24) — 폭 760px 이하에서만 동작, PC 무변경 ───────────────── */
+(function(){
+  const mq = window.matchMedia ? matchMedia('(max-width: 760px)') : null;
+  if(!mq) return;
+  const header = document.querySelector('header'), nav = header && header.querySelector('nav'), h1 = header && header.querySelector('h1');
+  const svg = document.getElementById('saxSvg');
+  const NS = 'http://www.w3.org/2000/svg';
+  const FONT = "'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif";
+  let built = false;
+  // 그림 이름표 → 같은 자리·같은 크기의 그림(이미지). 글자 확대 설정과 무관하게 그림 비율 그대로.
+  function lblImage(txt, x, y, size, weight, fill, anchor, cls){
+    const w = Math.ceil(size * (txt.length + 2) * 1.1) + 4, h = Math.ceil(size * 1.6);
+    const base = Math.round(size * 1.15 * 100) / 100;
+    const tx = anchor === 'middle' ? w / 2 : 2;
+    const t = txt.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    const src = `<svg xmlns="${NS}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><text x="${tx}" y="${base}" font-family="${FONT}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}">${t}</text></svg>`;
+    const im = document.createElementNS(NS, 'image');
+    im.setAttribute('class', 'lblimg ' + (cls || ''));
+    im.setAttribute('x', anchor === 'middle' ? x - w / 2 : x - 2);
+    im.setAttribute('y', y - base);
+    im.setAttribute('width', w); im.setAttribute('height', h);
+    im.setAttribute('pointer-events', 'none'); im.setAttribute('aria-hidden', 'true');
+    im.setAttribute('href', 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src));
+    return im;
+  }
+  function buildLabels(){
+    if(built || !svg) return;
+    built = true;
+    svg.querySelectorAll('text').forEach(tEl=>{
+      const txt = (tEl.textContent || '').trim();
+      if(!txt) return;
+      const x = parseFloat(tEl.getAttribute('x') || '0'), y = parseFloat(tEl.getAttribute('y') || '0');
+      const c = tEl.classList;
+      if(c.contains('kn') || c.contains('kns')){
+        const size = c.contains('kn') ? 13 : 8.5;   // CSS(.kn 13px / .kns 8.5px)가 속성값보다 우선하므로 같은 값
+        tEl.after(lblImage(txt, x, y, size, 800, '#5c3d00', 'middle', 'lbl-p'));
+        tEl.after(lblImage(txt, x, y, size, 800, '#3a4664', 'middle', 'lbl-n'));
+      } else if(c.contains('kl')){
+        tEl.after(lblImage(txt, x, y, 8.5, 400, '#8ea0c6', 'middle'));
+      } else {
+        const size = parseFloat(tEl.getAttribute('font-size') || '8.5');
+        tEl.after(lblImage(txt, x, y, size, tEl.getAttribute('font-weight') || 400, tEl.getAttribute('fill') || '#8ea0c6', 'start'));
+      }
+    });
+  }
+  // 머리글: 탭이 제목 옆에 다 안 들어가면(탭 줄이 눌리면) 제목 글자만 접고 🎷 만 남긴다(글은 화면 읽기용 이름표로).
+  const h1Text = h1 && h1.firstChild && h1.firstChild.nodeType === 3 ? h1.firstChild : null;
+  const fullTitle = h1Text ? h1Text.data : '';
+  function setCompact(on){
+    header.classList.toggle('hdr-compact', on);
+    if(h1Text && h1Text.data !== (on ? '🎷' : fullTitle)) h1Text.data = on ? '🎷' : fullTitle;
+    if(on) h1.setAttribute('aria-label', fullTitle.replace('🎷', '').trim()); else h1.removeAttribute('aria-label');
+  }
+  function fitHeader(){
+    if(!header || !nav || !h1) return;
+    setCompact(false);
+    if(mq.matches && nav.scrollWidth > nav.clientWidth + 1) setCompact(true);
+  }
+  function apply(){
+    if(mq.matches) buildLabels();
+    if(svg) svg.classList.toggle('imglbl', mq.matches);
+    fitHeader();
+  }
+  apply();
+  if(mq.addEventListener) mq.addEventListener('change', apply); else if(mq.addListener) mq.addListener(apply);
+  if(window.ResizeObserver && header){
+    const ro = new ResizeObserver(()=>fitHeader());
+    ro.observe(header); if(h1) ro.observe(h1);
+    header.querySelectorAll('.tab').forEach(t=>ro.observe(t));
+  }
+})();
 </script>
 </body>
 </html>
