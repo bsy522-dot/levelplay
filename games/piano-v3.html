@@ -153,6 +153,27 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .lesson-actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
 .lesson-actions .btn { min-height:88px; font-size:19px; }
 
+/* 학습 탭 놀이 3가지 (0926 이식: 음표 읽기 · 화음 들어보기 · 소리 기억 놀이) — 좁으면 위아래, 넓으면 좌우 */
+.play-body { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:14px; }
+.play-side { display:flex; flex-direction:column; align-items:center; gap:12px; width:100%; max-width:440px; }
+.play-msg { width:100%; min-height:34px; font-size:23px; font-weight:900; color:#e2e8f0; text-align:center; }
+.play-msg.ok { color:#4ade80; }
+.play-msg.no { color:#fbbf24; }
+.play-count { font-size:21px; font-weight:900; color:var(--yellow); white-space:nowrap; }
+#note-staff { width:100%; max-width:440px; height:170px; display:block; background:#0b1220; border:1px solid #2c3656; border-radius:16px; }
+.ans-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; width:100%; }
+.ans-btn { min-height:88px; border:none; border-radius:18px; font-size:32px; font-weight:900; color:#0b1220; cursor:pointer; font-family:inherit; }
+.ans-btn:active { transform:scale(.96); }
+.ans-btn.wrong { opacity:.3; }
+.chord-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; width:100%; max-width:640px; }
+.chord-btn { min-height:120px; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--surface2); border:3px solid #2c3656; border-radius:20px; cursor:pointer; transition:transform .1s, border-color .1s; }
+.chord-btn span { width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-size:22px; font-weight:900; color:#0b1220; }
+.chord-btn.on { border-color:#fff; transform:scale(1.04); }
+.mem-pads { display:flex; justify-content:center; gap:10px; width:100%; max-width:560px; }
+.mem-pad { flex:1; max-width:110px; min-height:160px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:14px; border:none; border-radius:6px 6px 20px 20px; font-size:30px; font-weight:900; color:#0b1220; cursor:pointer; filter:saturate(.6) brightness(.75); transition:filter .1s, transform .1s, box-shadow .1s; font-family:inherit; }
+.mem-pad.lit { filter:none; transform:translateY(5px); box-shadow:0 0 26px rgba(255,255,255,.55); }
+.play-go { min-height:88px; min-width:220px; font-size:24px; }
+
 /* Record panel */
 .rec-list { padding:10px; overflow-y:auto; flex:1; }
 .rec-item { display:flex; justify-content:space-between; align-items:center; min-height:60px; padding:6px 12px; margin-bottom:6px; background:var(--surface); border-radius:10px; font-size:17px; }
@@ -253,6 +274,13 @@ body.lscape .free-info { padding:2px 8px; }
 body.lscape .learn-list { padding:6px 10px; }
 body.lscape .lesson-view { padding:6px 10px; }
 body.lscape .lesson-actions .btn { min-height:60px; }
+body.lscape #note-staff { height:124px; }
+body.lscape .ans-btn { min-height:60px; font-size:26px; }
+body.lscape .chord-btn { min-height:88px; }
+body.lscape .mem-pad { min-height:110px; }
+body.lscape .play-go { min-height:60px; }
+body.lscape .play-side { max-width:380px; gap:8px; }
+body.lscape .mem-pads { max-width:420px; }
 /* 곡 목록: 가로에선 여러 열로 폭을 쓰고 카드를 낮춰 한 화면에 더 많이 */
 body.lscape #song-browser { padding:4px 10px 10px; }
 body.lscape #song-list { grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:0 8px; }
@@ -305,6 +333,8 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
   .modal { max-width:280px; padding:12px; }
   .modal h3 { font-size:16px; }
   .modal .stars-big { font-size:26px; }
+  #play-view { padding:8px 6px; }
+  .ans-grid, .mem-pads { gap:6px; } /* 5칸이어도 한 칸 48px 이상 */
 }
 </style>
 </head>
@@ -381,6 +411,15 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
       </div>
       <div style="flex:1"></div>
     </div>
+    <!-- 놀이 화면 (음표 읽기 · 화음 들어보기 · 소리 기억 놀이) -->
+    <div class="lesson-view" id="play-view">
+      <div class="lesson-header">
+        <button class="btn btn-back" id="btn-back-play">← 목록</button>
+        <h2 id="play-title"></h2>
+        <span class="play-count" id="play-count"></span>
+      </div>
+      <div class="play-body" id="play-body"></div>
+    </div>
   </div>
 
   <!-- 따라치기 (구 Synthesia) -->
@@ -449,6 +488,15 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
       <button class="opt-btn sel" data-mode="normal">🎹 연습<small>박자 맞춰</small></button>
       <button class="opt-btn" data-mode="wait">🐢 기다리기<small>누를 때까지</small></button>
       <button class="opt-btn" data-mode="listen">🎧 듣기<small>자동 연주</small></button>
+    </div>
+    <!-- 한 손씩 연습: 두 손 곡에서만 보인다. 고른 손만 치고 다른 손은 앱이 들려준다 -->
+    <div id="hand-opt" hidden>
+      <div class="opt-h" style="margin-top:12px">손</div>
+      <div class="opt-row">
+        <button class="opt-btn sel" data-hand="both">🙌 두 손</button>
+        <button class="opt-btn" data-hand="R">🟢 오른손<small>왼손 자동</small></button>
+        <button class="opt-btn" data-hand="L">🔵 왼손<small>오른손 자동</small></button>
+      </div>
     </div>
     <div class="opt-h" style="margin-top:12px">보는 방법</div>
     <div class="opt-row">
@@ -1126,9 +1174,10 @@ function showFreeNote(midi) {
 const SONGS = {};
 function addSong(key, name, bpm, buildFn) { SONGS[key] = {name, bpm, notes: buildFn()}; }
 
+// 0926: 셋째 구절 '미'가 하나 많던 것(26음) → 가사 "높이 높이 날아라 우리 비행기"에 맞춰 25음(미레도레미미미 레레미레도)
 addSong('비행기','비행기',120,()=>{
   const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
-  return [n('E4',0),n('D4',1),n('C4',2),n('D4',3),n('E4',4),n('E4',5),n('E4',6,2),n('D4',8),n('D4',9),n('D4',10,2),n('E4',12),n('G4',13),n('G4',14,2),n('E4',16),n('D4',17),n('C4',18),n('D4',19),n('E4',20),n('E4',21),n('E4',22),n('E4',23),n('D4',24),n('D4',25),n('E4',26),n('D4',27),n('C4',28,4)];
+  return [n('E4',0),n('D4',1),n('C4',2),n('D4',3),n('E4',4),n('E4',5),n('E4',6,2),n('D4',8),n('D4',9),n('D4',10,2),n('E4',12),n('G4',13),n('G4',14,2),n('E4',16),n('D4',17),n('C4',18),n('D4',19),n('E4',20),n('E4',21),n('E4',22,2),n('D4',24),n('D4',25),n('E4',26),n('D4',27),n('C4',28,4)];
 });
 addSong('학교종','학교종',120,()=>{
   const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
@@ -1138,9 +1187,59 @@ addSong('작은별','반짝반짝 작은별',100,()=>{
   const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
   return [n('C4',0),n('C4',1),n('G4',2),n('G4',3),n('A4',4),n('A4',5),n('G4',6,2),n('F4',8),n('F4',9),n('E4',10),n('E4',11),n('D4',12),n('D4',13),n('C4',14,2),n('G4',16),n('G4',17),n('F4',18),n('F4',19),n('E4',20),n('E4',21),n('D4',22,2),n('G4',24),n('G4',25),n('F4',26),n('F4',27),n('E4',28),n('E4',29),n('D4',30,2),n('C4',32),n('C4',33),n('G4',34),n('G4',35),n('A4',36),n('A4',37),n('G4',38,2),n('F4',40),n('F4',41),n('E4',42),n('E4',43),n('D4',44),n('D4',45),n('C4',46,2)];
 });
+// 0926: 원곡 선율로 다시 입력(4/4, 12마디 49음). 도도도도도 미솔솔미도 | 솔솔미 솔솔미 도도도 | 솔솔미도 솔솔솔 ×2 | 솔솔미도 솔솔솔라솔 | 도솔도솔(높은 도) 미레도
 addSong('곰세마리','곰 세 마리',120,()=>{
   const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
-  return [n('C4',0),n('C4',1),n('C4',2),n('C4',3),n('E4',4),n('E4',5),n('E4',6,.5),n('E4',6.5,.5),n('C4',7),n('E4',8),n('G4',9),n('G4',10,2),n('G4',12),n('G4',13),n('E4',14),n('E4',15),n('C4',16),n('E4',17),n('D4',18,2),n('G4',20),n('G4',21),n('E4',22),n('E4',23),n('C4',24),n('E4',25),n('D4',26,2),n('C4',28),n('D4',29),n('E4',30),n('C4',31),n('D4',32),n('E4',33),n('F4',34),n('E4',35),n('C4',36),n('C4',37),n('C4',38,2)];
+  return [n('C4',0),n('C4',1,.5),n('C4',1.5,.5),n('C4',2),n('C4',3),
+    n('E4',4),n('G4',5,.5),n('G4',5.5,.5),n('E4',6),n('C4',7),
+    n('G4',8,.5),n('G4',8.5,.5),n('E4',9),n('G4',10,.5),n('G4',10.5,.5),n('E4',11),
+    n('C4',12),n('C4',13),n('C4',14,2),
+    n('G4',16),n('G4',17),n('E4',18),n('C4',19),n('G4',20),n('G4',21),n('G4',22,2),
+    n('G4',24),n('G4',25),n('E4',26),n('C4',27),n('G4',28),n('G4',29),n('G4',30,2),
+    n('G4',32),n('G4',33),n('E4',34),n('C4',35),n('G4',36,.5),n('G4',36.5,.5),n('G4',37,.5),n('A4',37.5,.5),n('G4',38,2),
+    n('C5',40),n('G4',41),n('C5',42),n('G4',43),n('E4',44),n('D4',45),n('C4',46,2)];
+});
+// ── 0926 이식 동요 4곡 (단독 앱에서 곡 이름만 가져오고 음은 원곡 악보와 한 음씩 대조해 박 단위로 새로 입력) ──
+// 생일 축하: 3/4, 다장조로 옮김(흰 건반만). 원곡 리듬(점8분+16분) 그대로
+addSong('생일축하','생일 축하',90,()=>{
+  const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
+  return [n('G3',0,.75),n('G3',.75,.25),n('A3',1),n('G3',2),n('C4',3),n('B3',4,2),
+    n('G3',6,.75),n('G3',6.75,.25),n('A3',7),n('G3',8),n('D4',9),n('C4',10,2),
+    n('G3',12,.75),n('G3',12.75,.25),n('G4',13),n('E4',14),n('C4',15),n('B3',16),n('A3',17),
+    n('F4',18,.75),n('F4',18.75,.25),n('E4',19),n('C4',20),n('D4',21),n('C4',22,3)];
+});
+// 런던 브릿지: 2/4, 다장조로 옮김
+addSong('런던브릿지','런던 브릿지',100,()=>{
+  const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
+  return [n('G4',0,.75),n('A4',.75,.25),n('G4',1,.5),n('F4',1.5,.5),n('E4',2,.5),n('F4',2.5,.5),n('G4',3),
+    n('D4',4,.5),n('E4',4.5,.5),n('F4',5),n('E4',6,.5),n('F4',6.5,.5),n('G4',7),
+    n('G4',8,.75),n('A4',8.75,.25),n('G4',9,.5),n('F4',9.5,.5),n('E4',10,.5),n('F4',10.5,.5),n('G4',11),
+    n('D4',12),n('G4',13),n('E4',14,.5),n('C4',14.5,1.5)];
+});
+// 맥도널드 할아버지: 4/4 16마디(꽥꽥 여기 저기 부분까지 한 절), 다장조로 옮김
+addSong('맥도널드','맥도널드 할아버지',120,()=>{
+  const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
+  const line=t=>[n('C4',t),n('C4',t+1),n('C4',t+2),n('G3',t+3),n('A3',t+4),n('A3',t+5),n('G3',t+6,2),n('E4',t+8),n('E4',t+9),n('D4',t+10),n('D4',t+11)];
+  return [...line(0),n('C4',12,3),n('G3',15),
+    ...line(16),n('C4',28,3),n('G3',31,.5),n('G3',31.5,.5),
+    n('C4',32),n('C4',33),n('C4',34),n('G3',35,.5),n('G3',35.5,.5),n('C4',36),n('C4',37),n('C4',38,2),
+    n('C4',40,.5),n('C4',40.5,.5),n('C4',41),n('C4',42,.5),n('C4',42.5,.5),n('C4',43),
+    n('C4',44,.5),n('C4',44.5,.5),n('C4',45,.5),n('C4',45.5,.5),n('C4',46),n('C4',47),
+    ...line(48),n('C4',60,4)];
+});
+// 젓가락 행진곡: 원곡(1877 'The Celebrated Chop Waltz') 1~16마디, 3/4, 한 옥타브 낮춤.
+// 두 검지로 치는 곡이라 아래 음=왼손·위 음=오른손 → '손' 고르기로 한 손씩 연습 가능
+addSong('젓가락','젓가락 행진곡',100,()=>{
+  const out=[]; let t=0;
+  const two=(lo,hi)=>{ out.push({note:lo,time:t,duration:1,hand:'L'},{note:hi,time:t,duration:1,hand:'R'}); t++; };
+  const run=(lo,hi,k)=>{ for(let i=0;i<k;i++) two(lo,hi); };
+  const one=note=>{ out.push({note,time:t,duration:1,hand:'R'}); t++; };
+  run('F4','G4',6); run('E4','G4',6); run('D4','B4',6); run('C4','C5',3); // 1~7마디
+  two('C4','C5'); two('D4','B4'); two('E4','A4');                          // 8마디
+  run('F4','G4',6); run('E4','G4',6); run('D4','B4',6);                    // 9~14마디
+  two('C4','C5'); one('G4'); one('E4');                                    // 15마디
+  one('C4');                                                               // 16마디
+  return out;
 });
 addSong('엘리제','엘리제를 위하여',140,()=>{
   const n=(note,t,d=.5,h='R')=>({note,time:t,duration:d,hand:h});
@@ -1814,7 +1913,13 @@ function renderLearnList() {
   const el = document.getElementById('learn-list');
   el.style.display = '';
   document.getElementById('lesson-view').classList.remove('active');
+  document.getElementById('play-view').classList.remove('active');
   let html = '';
+
+  // 놀이 3가지 (0926 이식) — 바이엘 앞
+  html += '<div class="learn-section"><h3>🎈 놀이</h3>';
+  PLAY_ITEMS.forEach(p => { html += `<div class="lesson-item" data-play="${p.id}"><span class="l-name">${p.name}</span></div>`; });
+  html += '</div>';
 
   // Beyer section
   html += '<div class="learn-section"><h3>🎵 바이엘 기초 (No.1~10)</h3>';
@@ -1845,8 +1950,11 @@ function renderLearnList() {
     html += '</div>';
   });
   el.innerHTML = html;
-  el.querySelectorAll('.lesson-item').forEach(item => {
+  el.querySelectorAll('.lesson-item[data-lesson]').forEach(item => {
     item.addEventListener('click', () => openLesson(item.dataset.lesson));
+  });
+  el.querySelectorAll('.lesson-item[data-play]').forEach(item => {
+    item.addEventListener('click', () => openPlay(item.dataset.play));
   });
 }
 
@@ -1942,6 +2050,8 @@ let synthWaitMode = false; // wait for correct key before advancing time
 let synthNotes = [], synthBPM = 120, synthSpeed = 1, synthAutoPlay = false;
 let synthStartTime = 0, synthTestId = null;
 let pendingSongKey = null, synthSongKey = null; // 곡 목록에서 시작한 곡 (완성도 기록용)
+// 한 손씩 연습(0926 이식): 'both' | 'R' | 'L'. 고른 손 음만 채점하고 다른 손 음(n.auto)은 앱이 제때 들려준다
+let pendingHand = 'both', synthHand = 'both';
 // 가이드 방식: 'staff'(오선지) | 'waterfall'(음길이 낙하바, 기본) | 'circle'(음이름 원형)
 // 판정·타이밍 로직은 셋 다 동일 — synthLoop의 "그리기"만 분기한다.
 let guideMode = (() => {
@@ -1996,7 +2106,8 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
 
   if (typeof hideSongBrowser === 'function') hideSongBrowser(); // 낙하 화면이 보이도록 곡 목록 닫기
 
-  synthNotes = notes.map((n,i) => ({...n, idx:i, played:false, result:null}));
+  synthHand = autoPlay ? 'both' : pendingHand; pendingHand = 'both';
+  synthNotes = notes.map((n,i) => ({...n, idx:i, played:false, result:null, auto: synthHand !== 'both' && (n.hand || 'R') !== synthHand}));
   synthBPM = bpm;
   synthSpeed = parseInt(document.getElementById('speed').value) / 100;
   synthAutoPlay = autoPlay;
@@ -2036,7 +2147,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
         const unplayed = synthNotes.filter(n => !n.played);
         if (!unplayed.length) return;
         const minTime = Math.min(...unplayed.map(n => n.time));
-        const target = unplayed.find(n => n.time === minTime && n.note === name);
+        const target = unplayed.find(n => n.time === minTime && n.note === name && !n.auto);
         if (!target) return; // 틀린 키는 무시 (시간은 고정 상태)
         target.played = true;
         target.result = 'perfect';
@@ -2051,7 +2162,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
       // === 일반 모드: 정밀 매칭 (윈도우 0.4s) ===
       let best = null, bestDiff = Infinity;
       synthNotes.forEach(n => {
-        if (n.played || n.note !== name) return;
+        if (n.played || n.auto || n.note !== name) return;
         const diff = Math.abs(now - n.time * beatToSec);
         if (diff < bestDiff && diff < 0.4) { bestDiff = diff; best = n; }
       });
@@ -2191,7 +2302,7 @@ function drawNoteCircle(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, 
   else if (n.result === 'miss') ring = '#ef4444';
 
   if (!n.played && Math.abs(noteBottom - H) < 60*dpr) { ctx.shadowColor = ring; ctx.shadowBlur = 14*dpr; }
-  ctx.globalAlpha = n.result === 'miss' ? 0.45 : 1;
+  ctx.globalAlpha = n.result === 'miss' ? 0.45 : n.auto ? 0.3 : 1;
   ctx.fillStyle = base;
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
   ctx.shadowBlur = 0;
@@ -2294,7 +2405,7 @@ function drawStaff(ctx, W, H, dpr, now, beatToSec) {
     if (n.result === 'perfect') col = '#4ade80';
     else if (n.result === 'good') col = '#facc15';
     else if (n.result === 'miss') col = '#f87171';
-    const alpha = n.played && !n.result ? 0.4 : (dt < -0.2 ? 0.45 : 1);
+    const alpha = n.auto ? 0.3 : n.played && !n.result ? 0.4 : (dt < -0.2 ? 0.45 : 1);
     items.push({n, x, y, d, isNow, col, alpha});
   });
 
@@ -2480,6 +2591,7 @@ function synthLoop() {
 
     // 판정선 통과 후 유예시간(판정 윈도우 0.4s보다 김)이 지나면 미스 — 화면 크기와 무관하게 균일
     if (now - noteTimeSec > 0.45) {
+      if (n.auto && !n.played) n.played = true; // 앱이 들려줄 손: 화면이 멈췄다 넘어가도 '놓침'으로 세지 않는다
       if (!n.played && !synthAutoPlay) {
         n.played = true; n.result = 'miss'; synthScore.miss++; synthScore.combo=0;
         document.getElementById('sc-miss').textContent = synthScore.miss;
@@ -2500,6 +2612,7 @@ function synthLoop() {
     if (n.result==='perfect') { color='rgba(34,197,94,0.6)'; glow='#22c55e'; }
     else if (n.result==='good') { color='rgba(234,179,8,0.6)'; glow='#eab308'; }
     else if (n.result==='miss') { color='rgba(239,68,68,0.4)'; glow='#ef4444'; }
+    else if (n.auto) { color='rgba(148,163,184,0.35)'; glow='rgba(0,0,0,0)'; } // 앱이 들려줄 손 = 흐린 회색
     else if (n.hand==='L') { color='rgba(59,130,246,0.85)'; glow='#3b82f6'; }
     else { color='rgba(34,197,94,0.85)'; glow='#22c55e'; }
 
@@ -2508,12 +2621,14 @@ function synthLoop() {
     if (guideMode === 'circle') drawNoteCircle(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, glow);
     else drawNoteBar(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, glow);
 
-    // Auto-play
-    if (synthAutoPlay && !n.played && noteBottom >= H - 5*dpr) {
+    // Auto-play (한 손 연습이면 다른 손 음도 여기서 앱이 친다 — 판정 콜백은 잠시 떼어 아이 점수에 안 섞이게)
+    if ((synthAutoPlay || n.auto) && !n.played && noteBottom >= H - 5*dpr) {
       n.played = true;
       const midi = nameToMidi(n.note);
       if (midi>0) {
-        playNote(midi, 0.7);
+        const cb = onNoteCallback; if (n.auto) onNoteCallback = null;
+        playNote(midi, n.auto ? 0.5 : 0.7);
+        onNoteCallback = cb;
         setTimeout(()=>stopNote(midi), noteDurSec*1000);
         const el = document.querySelector(`[data-midi="${midi}"]`);
         if (el) { el.classList.add('guide'); setTimeout(()=>el.classList.remove('guide'), noteDurSec*1000); }
@@ -2521,7 +2636,7 @@ function synthLoop() {
     }
 
     // Guide highlight for play-along (좁은 윈도우)
-    if (!synthAutoPlay && !synthWaitMode && !n.played && noteBottom > H-80*dpr && noteBottom < H+20*dpr) {
+    if (!synthAutoPlay && !synthWaitMode && !n.played && !n.auto && noteBottom > H-80*dpr && noteBottom < H+20*dpr) {
       const el = document.querySelector(`[data-midi="${nameToMidi(n.note)}"]`);
       if (el && !el.classList.contains('pressed')) { el.classList.add('guide'); setTimeout(()=>el.classList.remove('guide'),150); }
     }
@@ -2539,6 +2654,7 @@ function synthLoop() {
       const minTime = Math.min(...unplayed.map(n => n.time));
       // wait 모드는 동시 노트 모두 강조, 일반 모드는 hit line 근처만
       const targets = unplayed.filter(n => {
+        if (n.auto) return false;
         if (synthWaitMode) return n.time === minTime;
         const tSec = n.time * beatToSec;
         return Math.abs(tSec - now) < 0.3;
@@ -2564,13 +2680,13 @@ function synthLoop() {
     const unplayed = synthNotes.filter(n => !n.played);
     if (unplayed.length > 0) {
       const minTime = Math.min(...unplayed.map(n => n.time));
-      const targets = unplayed.filter(n => n.time === minTime);
+      const targets = unplayed.filter(n => n.time === minTime && !n.auto);
       const showKR = document.getElementById('show-korean')?.checked;
       const noteList = targets.map(n => showKR ? toKoreanNote(n.note) : n.note).join(' + ');
       ctx.fillStyle = 'rgba(6,182,212,0.95)';
       ctx.font = `bold ${18*dpr}px sans-serif`;
       ctx.textAlign = 'center';
-      ctx.fillText(`⏸ ${noteList} 키를 누르세요`, W/2, infoTop + 22*dpr);
+      if (targets.length) ctx.fillText(`⏸ ${noteList} 키를 누르세요`, W/2, infoTop + 22*dpr);
     }
   }
 
@@ -2619,8 +2735,9 @@ function synthLoop() {
   if ((allDone && now > 2) || (!hasUnplayed && synthNotes.every(n=>n.played))) {
     synthRunning = false;
     onNoteCallback = null;
+    const mine = synthNotes.filter(n => !n.auto).length || 1; // 아이가 친 음 수 (한 손 연습이면 그 손 음만)
     if (synthTestId) {
-      const total = synthNotes.length;
+      const total = mine;
       const pct = (synthScore.perfect + synthScore.good * 0.5) / total;
       let stars = 0;
       if (pct >= 0.9) stars = 3;
@@ -2645,11 +2762,14 @@ function synthLoop() {
       // 곡 목록에서 시작한 곡 → 완성도(정확도) 최고 기록 저장 + 결과 표시
       const key = synthSongKey;
       const song = SONGS[key];
-      const total = synthNotes.length || 1;
+      const total = mine;
+      const hand = synthHand;
       const pct = Math.max(0, Math.min(100, Math.round((synthScore.perfect + synthScore.good) / total * 100)));
-      if (pct > (progress['song:' + key] || 0)) { progress['song:' + key] = pct; saveProgress(); }
+      // 곡 완성도 기록은 두 손으로 친 판만 — 한 손 연습은 결과만 보여 준다
+      if (hand === 'both' && pct > (progress['song:' + key] || 0)) { progress['song:' + key] = pct; saveProgress(); }
       const stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 40 ? 1 : 0;
-      document.getElementById('result-title').textContent = (song ? song.name : '연주') + ' 완주!';
+      const handName = hand === 'R' ? ' 오른손' : hand === 'L' ? ' 왼손' : '';
+      document.getElementById('result-title').textContent = (song ? song.name : '연주') + handName + ' 완주!';
       document.getElementById('result-stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
       document.getElementById('result-body').innerHTML =
         `<div class="score-detail" style="font-size:20px;font-weight:800;color:#22d3ee">완성도 ${pct}%${pct >= 90 ? ' ⭐' : ''}</div>` +
@@ -2660,6 +2780,7 @@ function synthLoop() {
       document.getElementById('btn-result-retry').onclick = () => {
         document.getElementById('result-modal').classList.remove('show');
         pendingSongKey = key;
+        pendingHand = hand;
         startSynthesia(_notes, _bpm, _auto, null);
       };
       showSongBrowser(); // 목록에 완성도 즉시 반영 (모달 뒤로)
@@ -2699,20 +2820,25 @@ function scrollToMidi(midi) {
 document.getElementById('synth-canvas').addEventListener('click', () => { if (synthPaused) resumeSynthesia(); });
 
 // ▶재생 → 곡 옵션 다이얼로그(난이도·플레이 모드) → 시작 (상용 앱식 흐름)
-let optSpd = 100, optMode = 'normal';
+let optSpd = 100, optMode = 'normal', optHand = 'both';
 const songOptModal = document.getElementById('song-opt-modal');
 songOptModal.querySelectorAll('.opt-btn').forEach(b => {
   b.addEventListener('click', () => {
     const groupSel = b.dataset.spd !== undefined ? '[data-spd]'
                    : b.dataset.mode !== undefined ? '[data-mode]'
+                   : b.dataset.hand !== undefined ? '[data-hand]'
                    : '[data-guide]';
     songOptModal.querySelectorAll('.opt-btn' + groupSel).forEach(x => x.classList.remove('sel'));
     b.classList.add('sel');
     if (b.dataset.spd !== undefined) optSpd = parseInt(b.dataset.spd);
     else if (b.dataset.mode !== undefined) optMode = b.dataset.mode;
+    else if (b.dataset.hand !== undefined) optHand = b.dataset.hand;
     else { guideMode = b.dataset.guide; localStorage.setItem('piano-v3-guide', guideMode); }
   });
 });
+// 두 손 곡(왼손 음과 오른손 음이 다 있는 곡)에서만 '손' 줄을 보인다
+function songHasTwoHands(song) { return song.notes.some(n => n.hand === 'L') && song.notes.some(n => n.hand !== 'L'); }
+function syncHandRow(song) { document.getElementById('hand-opt').hidden = !songHasTwoHands(song); }
 // 저장된 가이드 방식을 모달에 복원 (기본 = 폭포)
 (function syncGuideSel() {
   songOptModal.querySelectorAll('.opt-btn[data-guide]').forEach(x => {
@@ -2725,6 +2851,7 @@ document.getElementById('btn-play-synth').addEventListener('click', () => {
   if (!song) return;
   document.getElementById('song-opt-title').textContent = '🎵 ' + song.name;
   setSongOptInfo(song);
+  syncHandRow(song);
   songOptModal.classList.add('show');
 });
 document.getElementById('song-opt-cancel').addEventListener('click', () => songOptModal.classList.remove('show'));
@@ -2741,6 +2868,7 @@ document.getElementById('song-opt-start').addEventListener('click', () => {
   synthPracticeMode = false;
   synthWaitMode = (optMode === 'wait');
   pendingSongKey = songKey; // 완성도 기록 대상
+  pendingHand = songHasTwoHands(song) ? optHand : 'both';
   hideSongBrowser();
   startSynthesia(song.notes, song.bpm, optMode === 'listen', null);
 });
@@ -2761,7 +2889,7 @@ document.getElementById('auto-play').addEventListener('change', e => {
 (function(){
   const sel = document.getElementById('song-select');
   const groups = [
-    {label:'동요/찬송가', keys:['비행기','학교종','작은별','곰세마리','AmazingGrace','clementine']},
+    {label:'동요/찬송가', keys:['비행기','학교종','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','AmazingGrace','clementine']},
     {label:'클래식 초중급', keys:['ode_to_joy','minuet_g','humoresque']},
     {label:'클래식 중급', keys:['엘리제','캐논','air_on_g','traumerei','swan_lake']},
     {label:'클래식 상급', keys:['turkish_march','moonlight','nocturne','spring','liebestraum','hungarian5']},
@@ -2786,6 +2914,10 @@ const SONG_META = {
   '학교종':        {emoji:'🔔', sub:'동요 · 김메리'},
   '작은별':        {emoji:'✨', sub:'동요 · 프랑스 민요'},
   '곰세마리':      {emoji:'🐻', sub:'동요 · 한국 창작동요'},
+  '생일축하':      {emoji:'🎂', sub:'동요 · 생일 노래'},
+  '런던브릿지':    {emoji:'🌉', sub:'동요 · 영국 전래'},
+  '맥도널드':      {emoji:'🐮', sub:'동요 · 미국 전래'},
+  '젓가락':        {emoji:'🥢', sub:'피아노 놀이곡 · 두 손가락'},
   'AmazingGrace':  {emoji:'⛪', sub:'찬송가 · J. Newton'},
   'clementine':    {emoji:'🤠', sub:'미국 민요 · 클레멘타인'},
   'ode_to_joy':    {emoji:'🎼', sub:'클래식 · 베토벤'},
@@ -2805,7 +2937,7 @@ const SONG_META = {
   'river_flows':   {emoji:'🌊', sub:'뉴에이지 · 이루마'},
   'la_campanella': {emoji:'🛎️', sub:'클래식 · 리스트(초절기교)'},
 };
-const SONG_ORDER = ['비행기','학교종','작은별','곰세마리','AmazingGrace','clementine',
+const SONG_ORDER = ['비행기','학교종','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','AmazingGrace','clementine',
   'ode_to_joy','minuet_g','humoresque','엘리제','캐논','air_on_g','traumerei','swan_lake',
   'turkish_march','moonlight','nocturne','spring','liebestraum','hungarian5','river_flows','la_campanella'];
 const DIFF_NAME = {1:'초급', 2:'중급', 3:'고급'};
@@ -2883,6 +3015,7 @@ function openSongOptions(key) {
   if (sel) sel.value = key;
   document.getElementById('song-opt-title').textContent = '🎵 ' + song.name;
   setSongOptInfo(song);
+  syncHandRow(song);
   songOptModal.classList.add('show');
 }
 // 곡 옵션 창 정보 줄: 난이도 · 빠르기(BPM) · 음 수 (곡 카드에서 옮겨 옴)
@@ -2901,6 +3034,203 @@ function hideSongBrowser() {
   const b = document.getElementById('song-browser');
   if (b) b.classList.add('hidden');
   document.getElementById('panel-synth').classList.remove('browsing');
+}
+
+// ================ 학습 탭 놀이 3가지 (0926 이식) ================
+// 단독 피아노 앱의 음표 읽기(v14)·화음(v8)과 노래방의 멜로디 기억(v22)을 아이용으로 다시 만든 것.
+// 시간 제한 없음 · 도레미 이름 · 크게 · ⭐ 숫자는 실제로 맞힌 것만 센다(저장 안 함).
+const PLAY_ITEMS = [
+  {id:'notes',  name:'🎼 음표 읽기'},
+  {id:'chord',  name:'🎹 화음 들어보기'},
+  {id:'memory', name:'🧠 소리 기억 놀이'},
+];
+const PLAY_COLOR = {C:'#f87171', D:'#fb923c', E:'#facc15', F:'#4ade80', G:'#22d3ee', A:'#60a5fa', B:'#c084fc'}; // 음마다 색 하나
+let playKind = null, playTimers = [];
+function playLater(fn, ms) { playTimers.push(setTimeout(fn, ms)); }
+// 소리와 건반 불빛을 같이 켜고 ms 뒤에 같이 끈다
+function playLit(name, ms = 500, vel = 0.7) {
+  const m = nameToMidi(name); if (m < 0) return;
+  playNote(m, vel);
+  setTimeout(() => stopNote(m), ms);
+  const el = document.querySelector(`#piano [data-midi="${m}"]`);
+  if (el) { el.classList.add('guide'); setTimeout(() => el.classList.remove('guide'), ms); }
+}
+// 첫 소리가 씹히지 않게(아이폰): 오디오가 실제로 켜진 뒤에 소리를 낸다
+function whenAudioReady(fn) {
+  const ctx = ensureAudio();
+  if (ctx.state === 'running') fn(); else ctx.resume().then(fn, fn);
+}
+function setPlayCount(n) { document.getElementById('play-count').textContent = n > 0 ? '⭐ ' + n : ''; }
+function setPlayMsg(id, text, cls) { const el = document.getElementById(id); if (el) { el.textContent = text; el.className = 'play-msg' + (cls ? ' ' + cls : ''); } }
+function openPlay(kind) {
+  stopPlayGames();
+  playKind = kind;
+  document.getElementById('learn-list').style.display = 'none';
+  document.getElementById('play-view').classList.add('active');
+  document.getElementById('play-title').textContent = PLAY_ITEMS.find(p => p.id === kind).name;
+  setPlayCount(0);
+  const body = document.getElementById('play-body');
+  if (kind === 'notes') nrBuild(body);
+  else if (kind === 'chord') chordBuild(body);
+  else memBuild(body);
+}
+// 목록으로·탭 이동 때: 순서 재생을 멈추고 기억 놀이는 처음 상태로
+function stopPlayGames() {
+  playTimers.forEach(clearTimeout); playTimers = [];
+  if (onNoteCallback === memInput) onNoteCallback = null;
+  if (mem.phase !== 'idle') {
+    Object.assign(mem, {phase:'idle', seq:[], step:0, fails:0, pads:3});
+    memPads();
+    setPlayMsg('mem-msg', '잘 듣고 따라 눌러요');
+    const go = document.getElementById('mem-go'); if (go) go.textContent = '▶ 시작';
+  }
+  if (nr.lock) { nrButtons(); nrNext(); } // 맞힌 뒤 다음 문제로 넘어가던 중이었으면 바로 넘긴다
+}
+document.getElementById('btn-back-play').addEventListener('click', () => { stopPlayGames(); playKind = null; renderLearnList(); });
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  stopPlayGames();
+  if (t.dataset.tab === 'learn' && playKind === 'notes') requestAnimationFrame(nrDraw);
+}));
+window.addEventListener('resize', () => { if (playKind === 'notes') nrDraw(); });
+
+// ── 음표 읽기: 오선의 음표를 보고 도레미 고르기. 5개 맞히면 음이 늘어난다(도레미 → 도~솔 → 도~시 → 높은 도) ──
+const NR_LEVELS = [['C4','D4','E4'], ['C4','D4','E4','F4','G4'], ['C4','D4','E4','F4','G4','A4','B4'], ['C4','D4','E4','F4','G4','A4','B4','C5']];
+const nr = {lv:0, cur:null, got:0, lvGot:0, lock:false, shown:false};
+function nrBuild(body) {
+  body.innerHTML = '<canvas id="note-staff"></canvas><div class="play-side"><div class="play-msg" id="nr-msg"></div><div class="ans-grid" id="nr-ans"></div></div>';
+  setPlayCount(nr.got);
+  nrButtons();
+  nrNext();
+}
+function nrButtons() {
+  const box = document.getElementById('nr-ans'); if (!box) return;
+  const letters = [...new Set(NR_LEVELS[nr.lv].map(n => n[0]))];
+  box.style.gridTemplateColumns = `repeat(${letters.length <= 5 ? letters.length : 4}, 1fr)`; // 3개·5개는 한 줄, 7개는 두 줄
+  box.innerHTML = letters.map(l => `<button class="ans-btn" data-l="${l}" style="background:${PLAY_COLOR[l]}">${KOREAN_NOTE_MAP[l]}</button>`).join('');
+  box.querySelectorAll('.ans-btn').forEach(b => b.addEventListener('click', () => nrAnswer(b)));
+}
+function nrNext() {
+  const pool = NR_LEVELS[nr.lv].filter(n => n !== nr.cur);
+  nr.cur = pool[Math.floor(Math.random() * pool.length)]; // 무작위는 문제 고르기에만 쓴다
+  nr.lock = false; nr.shown = false;
+  setPlayMsg('nr-msg', '이 음은 뭘까요?');
+  nrDraw();
+}
+function nrAnswer(btn) {
+  if (nr.lock) return;
+  if (btn.dataset.l !== nr.cur[0]) { btn.classList.add('wrong'); setPlayMsg('nr-msg', '다시 해 봐요', 'no'); return; }
+  nr.lock = true; nr.shown = true; nr.got++; nr.lvGot++;
+  setPlayCount(nr.got);
+  let msg = '맞았어요! 🎉';
+  if (nr.lvGot >= 5 && nr.lv < NR_LEVELS.length - 1) { nr.lv++; nr.lvGot = 0; msg = '새 음이 나와요! 🎉'; }
+  setPlayMsg('nr-msg', msg, 'ok');
+  scrollToMidi(nameToMidi(nr.cur));
+  whenAudioReady(() => playLit(nr.cur, 800));
+  nrDraw();
+  playLater(() => { nrButtons(); nrNext(); }, 1300);
+}
+function nrDraw() {
+  const cv = document.getElementById('note-staff');
+  if (!cv || !cv.clientWidth) return; // 숨어 있으면 다시 보일 때 그린다
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(cv.clientHeight * dpr);
+  const ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  const SP = H / 10, bottomY = H * 0.66;          // 줄 간격 · 맨 아래 줄(미)
+  const yOf = dn => bottomY - (dn - DN_E4) * SP / 2;
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = Math.max(1, 1.2 * dpr);
+  for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(8*dpr, bottomY - i*SP); ctx.lineTo(W - 8*dpr, bottomY - i*SP); ctx.stroke(); }
+  drawTrebleClef(ctx, SP * 1.6 + 8*dpr, bottomY, SP, dpr);
+  if (!nr.cur) return;
+  const d = diatonicOf(nr.cur), x = W * 0.56, y = yOf(d.dn);
+  const col = nr.shown ? PLAY_COLOR[nr.cur[0]] : '#f8fafc';
+  for (let L = DN_E4 - 2; L >= d.dn; L -= 2) { ctx.beginPath(); ctx.moveTo(x - SP*1.1, yOf(L)); ctx.lineTo(x + SP*1.1, yOf(L)); ctx.stroke(); } // 덧줄(가운데 도)
+  ctx.fillStyle = col;
+  ctx.beginPath(); ctx.ellipse(x, y, SP * 0.66, SP * 0.48, -0.35, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = col; ctx.lineWidth = Math.max(2, SP * 0.13);
+  ctx.beginPath();
+  if (d.dn < DN_E4 + 4) { ctx.moveTo(x + SP*0.6, y); ctx.lineTo(x + SP*0.6, y - SP*3.3); }
+  else { ctx.moveTo(x - SP*0.6, y); ctx.lineTo(x - SP*0.6, y + SP*3.3); }
+  ctx.stroke();
+  if (nr.shown) { ctx.font = `900 ${SP * 2.2}px sans-serif`; ctx.textAlign = 'left'; ctx.fillText(KOREAN_NOTE_MAP[nr.cur[0]], x + SP * 1.6, y + SP * 0.8); }
+}
+
+// ── 화음 들어보기: 누르면 세 음이 함께 울리고 건반 세 개가 같이 빛난다 ──
+const CHORDS = [['C4','E4','G4'], ['F4','A4','C5'], ['G4','B4','D5']];
+function chordBuild(body) {
+  body.innerHTML = '<div class="play-msg">눌러서 들어 봐요</div><div class="chord-grid">'
+    + CHORDS.map((c, i) => `<button class="chord-btn" data-i="${i}" aria-label="${c.map(n => KOREAN_NOTE_MAP[n[0]]).join(' ')}">`
+      + c.map(n => `<span style="background:${PLAY_COLOR[n[0]]}">${KOREAN_NOTE_MAP[n[0]]}</span>`).join('') + '</button>').join('')
+    + '</div>';
+  scrollToMidi(nameToMidi('G4')); // 도~높은 레가 한 화면에
+  body.querySelectorAll('.chord-btn').forEach(b => b.addEventListener('click', () => {
+    whenAudioReady(() => CHORDS[b.dataset.i].forEach(n => playLit(n, 1400, 0.5)));
+    b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 350);
+  }));
+}
+
+// ── 소리 기억 놀이: 앱이 불빛과 소리로 들려준 순서대로 누르기. 2음·건반 3개에서 시작해 맞힐수록 늘어난다 ──
+// 화면 건반(색 칸)이나 아래 피아노 건반 어느 쪽으로 눌러도 된다(옥타브는 안 따짐 — 도는 어디서 눌러도 도).
+const MEM_NOTES = ['C4','D4','E4','F4','G4'];
+const mem = {pads:3, seq:[], step:0, best:0, fails:0, phase:'idle'}; // phase: idle · show(듣는 중) · input(누를 차례) · wait
+function memBuild(body) {
+  body.innerHTML = '<div class="play-side"><div class="play-msg" id="mem-msg">잘 듣고 따라 눌러요</div><button class="btn btn-primary play-go" id="mem-go">▶ 시작</button></div><div class="mem-pads" id="mem-pads"></div>';
+  setPlayCount(mem.best);
+  memPads();
+  scrollToMidi(nameToMidi('E4'));
+  document.getElementById('mem-go').addEventListener('click', () => {
+    if (mem.phase === 'show' || mem.phase === 'wait') return; // 이미 들려주는 중이거나 곧 들려줄 참
+    if (!mem.seq.length) { mem.pads = 3; memPads(); mem.seq = [memPick()]; mem.seq.push(memPick()); }
+    whenAudioReady(memShow);
+  });
+}
+// 다음 음 고르기(무작위) — 바로 앞 음과는 다르게 해서 "도도도도" 같은 밋밋한 줄이 안 나오게
+function memPick() {
+  const last = mem.seq[mem.seq.length - 1];
+  const pool = MEM_NOTES.slice(0, mem.pads).filter(n => n !== last);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function memPads() {
+  const box = document.getElementById('mem-pads'); if (!box) return;
+  box.innerHTML = MEM_NOTES.slice(0, mem.pads).map(n => `<button class="mem-pad" data-n="${n}" style="background:${PLAY_COLOR[n[0]]}">${KOREAN_NOTE_MAP[n[0]]}</button>`).join('');
+  box.querySelectorAll('.mem-pad').forEach(p => p.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (mem.phase === 'show') return;
+    ensureAudio();
+    playLit(p.dataset.n, 350); // playNote → 누를 차례면 memInput 으로 들어간다
+  }));
+}
+function memLight(n, ms) {
+  const p = document.querySelector(`#mem-pads .mem-pad[data-n="${n}"]`);
+  if (p) { p.classList.add('lit'); setTimeout(() => p.classList.remove('lit'), ms); }
+}
+function memShow() {
+  mem.phase = 'show'; mem.step = 0;
+  if (onNoteCallback === memInput) onNoteCallback = null;
+  setPlayMsg('mem-msg', '잘 들어 봐요 👂');
+  const go = document.getElementById('mem-go'); if (go) go.textContent = '🔁 다시 듣기';
+  mem.seq.forEach((n, i) => playLater(() => { memLight(n, 450); playLit(n, 450); }, 350 + i * 700));
+  playLater(() => { mem.phase = 'input'; onNoteCallback = memInput; setPlayMsg('mem-msg', '이제 눌러요! 👆'); }, 350 + mem.seq.length * 700);
+}
+function memInput(midi) {
+  if (mem.phase !== 'input') return;
+  const k = midiToKeyMap.get(midi); if (!k) return;
+  memLight(k.note + '4', 300);
+  if (k.note === mem.seq[mem.step].slice(0, -1)) {
+    if (++mem.step < mem.seq.length) return;
+    mem.phase = 'wait'; onNoteCallback = null; mem.fails = 0;
+    mem.best = Math.max(mem.best, mem.seq.length); setPlayCount(mem.best);
+    setPlayMsg('mem-msg', '맞았어요! 🎉', 'ok');
+    const pads = Math.min(MEM_NOTES.length, 3 + Math.floor((mem.seq.length - 1) / 2)); // 다음 줄이 4음이면 건반 4개, 6음이면 5개
+    if (pads !== mem.pads) { mem.pads = pads; memPads(); }
+    mem.seq.push(memPick());
+    playLater(memShow, 1300);
+  } else {
+    mem.phase = 'wait'; onNoteCallback = null;
+    if (++mem.fails >= 2 && mem.seq.length > 2) { mem.seq.pop(); mem.fails = 0; } // 두 번 연달아 틀리면 한 음 줄여서
+    setPlayMsg('mem-msg', '다시 들어 봐요', 'no');
+    playLater(memShow, 1300);
+  }
 }
 
 // ================ RECORDING ================
