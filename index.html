@@ -1275,22 +1275,22 @@ const GMS=[
 {nm:'문장 만들기',em:'📝',u:'games/sentence-builder.html',th:'sentence-builder',si:'i-book',pc:'#9F1239',d:'영어 단어 순서 배치'},
 {nm:'주기율표',em:'⚗️',u:'games/periodic-table.html',th:'periodic-table',si:'i-chem',pc:'#0E7490',d:'원소 기호·이름 퀴즈'},
 {nm:'피아노 마스터',em:'🎹',u:'games/piano-v3.html',th:'piano-v3',si:'i-music',pc:'#6D28D9',d:'따라치기 26곡 · 혼자 연주 · 배우기'},
-{nm:'바이올린 리듬',em:'🎻',u:'games/ViolinReal-v3.html',th:'ViolinReal-v3',si:'i-note',pc:'#7C3AED',d:'따라 켜기 16곡 · 혼자 연주 · 배우기'},
+{nm:'바이올린 리듬',em:'🎻',u:'games/ViolinReal-v3.html',th:'ViolinReal-v3',si:'i-note',pc:'#7C3AED',d:'따라 켜기 16곡 · 혼자 연주 · 배우기 · 악기 도구'},
 {nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',th:'noraebang-v4',si:'i-sound',pc:'#C2410C',d:'동요·민요 12곡 따라 부르기'},
 {nm:'색소폰 마스터',em:'🎷',u:'games/saxophone-v2.html',th:'saxophone-v2',si:'i-wave',pc:'#B45309',d:'실물 20키 멀티터치 운지+크로마틱 32음+동요 5곡'},
 {nm:'복싱 트레이너',em:'🥊',u:'games/boxing-trainer-v5.html',th:'boxing-trainer-v5',si:'i-dumbbell',pc:'#15803D',d:'3D 복싱+커리어+10대전'},
-{nm:'골프 트래커',em:'⛳',u:'games/golf-tracker-v3.html',th:'golf-tracker-v3',si:'i-target',pc:'#166534',d:'스윙분석+통계+라운드'},
-{nm:'한국사 영웅전 v8',em:'⚔️',u:'games/korean-rpg-v8b/index.html',th:'korean-rpg-v8b',si:'i-sword',pc:'#C2410C',d:'영걸전식 3D 전략 RPG — 환웅의 시련, 고조선의 서막'},
-{nm:'심시티 빌더',em:'🏙️',u:'games/simcity-v3.html',th:'simcity-v3',si:'i-tower',pc:'#1D4ED8',d:'도시건설+경제+재난'},
-{nm:'집짓기',em:'🏠',u:'games/house-builder-v4.html',th:'house-builder-v4',si:'i-home',pc:'#B45309',d:'진짜 3D+그림자+시간/날씨+워크스루'},
+{nm:'골프 트래커',em:'⛳',u:'games/golf-tracker-v3.html',th:'golf-tracker-v3',si:'i-target',pc:'#166534',d:'공추적+스윙+라운드+통계'},
+{nm:'한국사 영웅전 v8',em:'⚔️',u:'games/korean-rpg-v8b/index.html',th:'korean-rpg-v8b',si:'i-sword',pc:'#C2410C',d:'영걸전식 전략 RPG — EP.1 환웅의 시험 · EP.2 단군의 건국'},
+{nm:'심시티 빌더',em:'🏙️',u:'games/simcity-v3.html',th:'simcity-v3',si:'i-tower',pc:'#1D4ED8',d:'도시건설+경제+재난+옛날 이야기'},
+{nm:'집짓기',em:'🏠',u:'games/house-builder-v4.html',th:'house-builder-v4',si:'i-home',pc:'#B45309',d:'내 집 꾸미기 + 한옥·초가집 짓기'},
 {nm:'문명 진화 ✨',em:'🏛️',u:'games/civilization-evolution/index.html',th:'civilization-evolution',si:'i-society',pc:'#A16207',d:'AI 픽셀아트 24장+동적BGM+AI내레이터 · 석기→현대 7시대'},
 {nm:'우주 탐험 3D ✨',em:'🌌',u:'games/space-explorer-3d/index.html',th:'space-explorer-3d',si:'i-orbit',pc:'#3730A3',d:'Three.js 3D · 행성 8개+태양·달 10곳 자전공전 · 셰이더+파티클 · BGM/SFX'},
 {nm:'우주 탐험',em:'🚀',u:'games/space-explorer.html',th:'space-explorer',si:'i-telescope',pc:'#4338CA',d:'태양계 8행성 과학탐사'},
 {nm:'요리왕',em:'🍳',u:'games/cooking-master.html',th:'cooking-master',si:'i-cook',pc:'#BE185D',d:'한식15종 요리+영양학습'},
-{nm:'동물농장 타이쿤',em:'🚜',u:'games/animal-farm.html',th:'animal-farm',si:'i-leaf',pc:'#15803D',d:'12동물·10작물·AI컨설턴트·P2P멀티·4계절BGM'},
+{nm:'동물농장 타이쿤',em:'🚜',u:'games/animal-farm.html',th:'animal-farm',si:'i-leaf',pc:'#15803D',d:'12동물·10작물·농장 도우미·친구 농장·사계절 음악'},
 ];
 /* 화면에 보이는 게임 이름 — nm 은 분류·메타·배지·놀아 본 기록·ia_hub 의 열쇠라 그대로 두고, 그릴 때만 이 표로 바꾼다 */
-const GAME_VN={'피아노 마스터':'피아노','바이올린 리듬':'바이올린','노래방 v4 ✨':'노래방'};function gameVN(g){var n=(g&&typeof g==='object')?g.nm:g;return GAME_VN[n]||n;}
+const GAME_VN={'한국사 영웅전 v8':'한국사 영웅전','피아노 마스터':'피아노','바이올린 리듬':'바이올린','노래방 v4 ✨':'노래방'};function gameVN(g){var n=(g&&typeof g==='object')?g.nm:g;return GAME_VN[n]||n;}
 
 let QUIZ=[
 {q:'태양계 여덟 행성 중 가장 큰 행성은?',a:['목성','토성','해왕성','천왕성'],c:0,cat:'과학'},

@@ -183,7 +183,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 </head>
 <body>
 <canvas id="c3d"></canvas>
-<div class="build-tag" id="buildTag">v5.6 · loading…</div>
+<div class="build-tag" id="buildTag" hidden>v5.6 · loading…</div>
 
 <!-- HOW-TO OVERLAY (게임 열면 가장 먼저 보이는 조작법 안내) -->
 <div id="lpHowto">
@@ -315,7 +315,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <div class="controls-hint hidden" id="controlsHint">1/J=잽 2/K=크로스 3/L=훅 4/;=어퍼 | Q=슬립좌 E=슬립우 S=덕 | A=하이가드 D=로우가드</div>
 <div class="touch-hint hidden" id="touchHint">&#x1F44A; 아래 버튼으로 펀치!<br>&#x1F6E1;&#xFE0F; 슬립·덕·가드로 방어!</div>
 <button id="camModeBtn" onclick="resetFightCam()" title="카메라를 자동 연출로 되돌립니다" style="display:none;position:fixed;right:12px;top:118px;z-index:60;background:rgba(15,20,35,.88);color:#e8ecf4;border:1.5px solid #3b82f6;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.4)">📷 카메라 자동복귀</button>
-<div class="rest-screen hidden" id="restScreen"><h2>휴식</h2><div class="timer" id="restTimer">60</div><div style="font-size:13px;color:var(--dim);margin-top:10px">체력이 회복됩니다...</div></div>
+<div class="rest-screen hidden" id="restScreen"><h2>휴식</h2><div class="timer" id="restTimer">60</div><div style="font-size:13px;color:var(--dim);margin-top:10px">체력이 회복됩니다...</div><div id="restTip" style="margin-top:18px;padding:12px 18px;background:rgba(255,255,255,.06);border-radius:12px;max-width:320px;font-size:17px;color:var(--text);line-height:1.5;border-left:4px solid var(--yellow);word-break:keep-all"></div></div>
 <div class="fight-result hidden" id="fightResult"></div>
 <div class="level-up hidden" id="levelUp"></div>
 <div class="train-result hidden" id="trainResult"></div>
@@ -510,13 +510,21 @@ function initThree() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.8;
+  renderer.toneMappingExposure = 1.05;
 
   clock = new THREE.Clock();
 
-  // Ambient light
-  const amb = new THREE.AmbientLight(0x1a1a2e, 0.4);
+  // Ambient + hemisphere fill (sky/ground bounce) — 단독판에서 옮김
+  const amb = new THREE.AmbientLight(0x202030, 0.35);
   scene.add(amb);
+  const hemi = new THREE.HemisphereLight(0xffe8c4, 0x331515, 0.55);
+  hemi.position.set(0, 12, 0);
+  scene.add(hemi);
+
+  // Rim back-light to separate fighters from background
+  const rim = new THREE.DirectionalLight(0xfff5e0, 0.8);
+  rim.position.set(0, 6, -8);
+  scene.add(rim);
 
   // Overhead ring lights (warm white)
   const ringLight1 = new THREE.SpotLight(0xfff5e0, 1.5, 30, Math.PI / 4, 0.5, 1);
@@ -791,16 +799,18 @@ function buildCrowd() {
 // ==================== BUILD 3D BOXER (Hierarchical Joint System) ====================
 function buildBoxer(gloveColor, isPlayer) {
   const group = new THREE.Group();
-  const skinMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.7, metalness: 0.05 });
-  const darkSkinMat = new THREE.MeshStandardMaterial({ color: darkSkin, roughness: 0.7 });
-  const shortsMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0x111111 : 0x1a1a2e, roughness: 0.8 });
-  const gloveMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0xe63946 : 0x3b82f6, roughness: 0.4, metalness: 0.1 });
-  const shoeMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.9 });
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
-  const stripeMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0xe63946 : 0x3b82f6, roughness: 0.6 });
+  const teamCol = isPlayer ? 0xe63946 : 0x3b82f6;
+  const skinMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.55, metalness: 0.0 });
+  const darkSkinMat = new THREE.MeshStandardMaterial({ color: darkSkin, roughness: 0.55 });
+  const shortsMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0x141414 : 0x191928, roughness: 0.55, metalness: 0.15 });
+  const gloveMat = new THREE.MeshPhysicalMaterial({ color: teamCol, roughness: 0.32, metalness: 0.05, clearcoat: 0.85, clearcoatRoughness: 0.18 });
+  const shoeMat = new THREE.MeshStandardMaterial({ color: 0x141420, roughness: 0.7, metalness: 0.1 });
+  const hairMat = new THREE.MeshStandardMaterial({ color: 0x101010, roughness: 0.85 });
+  const stripeMat = new THREE.MeshStandardMaterial({ color: teamCol, roughness: 0.5, metalness: 0.1 });
   const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-  const mouthguardMat = new THREE.MeshStandardMaterial({ color: isPlayer ? 0xe63946 : 0x3b82f6 });
-  const wrapMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.8 });
+  const mouthguardMat = new THREE.MeshStandardMaterial({ color: teamCol, emissive: teamCol, emissiveIntensity: 0.15 });
+  const wrapMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.85 });
+  const headgearMat = new THREE.MeshStandardMaterial({ color: teamCol, roughness: 0.45, metalness: 0.18 });
 
   // ROOT — overall movement container
   const root = new THREE.Group();
@@ -827,12 +837,36 @@ function buildBoxer(gloveColor, isPlayer) {
 
   // Abdomen mesh
   const abdomen = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.16, 0.18, 0.2, 8),
+    new THREE.CylinderGeometry(0.16, 0.18, 0.2, 12),
     skinMat
   );
   abdomen.position.y = 0.1;
   abdomen.castShadow = true;
   spine.add(abdomen);
+
+  // Six-pack abs (3 rows × 2)
+  const absGeo = new THREE.BoxGeometry(0.06, 0.045, 0.025);
+  const absRows = [0.18, 0.12, 0.06];
+  for (const yy of absRows) {
+    const lAb = new THREE.Mesh(absGeo, skinMat);
+    lAb.position.set(-0.038, yy, 0.155);
+    spine.add(lAb);
+    const rAb = new THREE.Mesh(absGeo, skinMat);
+    rAb.position.set(0.038, yy, 0.155);
+    spine.add(rAb);
+  }
+  // Linea alba (centre divider) — slight darker line
+  const linea = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.18, 0.035), darkSkinMat);
+  linea.position.set(0, 0.12, 0.156);
+  spine.add(linea);
+  // Obliques (side abs)
+  const oblGeo = new THREE.SphereGeometry(0.05, 6, 5);
+  const lObl = new THREE.Mesh(oblGeo, skinMat);
+  lObl.position.set(-0.155, 0.10, 0.06); lObl.scale.set(0.7, 1.4, 0.8);
+  spine.add(lObl);
+  const rObl = new THREE.Mesh(oblGeo, skinMat);
+  rObl.position.set(0.155, 0.10, 0.06); rObl.scale.set(0.7, 1.4, 0.8);
+  spine.add(rObl);
 
   // CHEST
   const chest = new THREE.Group();
@@ -841,21 +875,56 @@ function buildBoxer(gloveColor, isPlayer) {
 
   // Chest mesh
   const chestMesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.2, 0.17, 0.25, 8),
+    new THREE.CylinderGeometry(0.2, 0.17, 0.25, 12),
     skinMat
   );
   chestMesh.position.y = 0.1;
   chestMesh.castShadow = true;
   chest.add(chestMesh);
 
-  // Shoulder bulk meshes
-  const shoulderBulkGeo = new THREE.SphereGeometry(0.1, 6, 6);
+  // Pectoralis (chest muscle) — left & right
+  const pecGeo = new THREE.SphereGeometry(0.085, 8, 6);
+  const lPec = new THREE.Mesh(pecGeo, skinMat);
+  lPec.position.set(-0.085, 0.16, 0.10); lPec.scale.set(1.05, 0.55, 0.7);
+  lPec.castShadow = true;
+  chest.add(lPec);
+  const rPec = new THREE.Mesh(pecGeo, skinMat);
+  rPec.position.set(0.085, 0.16, 0.10); rPec.scale.set(1.05, 0.55, 0.7);
+  rPec.castShadow = true;
+  chest.add(rPec);
+  // Sternum cleft
+  const sternum = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.13, 0.04), darkSkinMat);
+  sternum.position.set(0, 0.16, 0.165);
+  chest.add(sternum);
+
+  // Shoulder bulk meshes (deltoid)
+  const shoulderBulkGeo = new THREE.SphereGeometry(0.105, 8, 6);
   const lShoulderBulk = new THREE.Mesh(shoulderBulkGeo, skinMat);
-  lShoulderBulk.position.set(-0.22, 0.18, 0);
+  lShoulderBulk.position.set(-0.225, 0.18, 0); lShoulderBulk.scale.set(1.1, 1.0, 1.0);
+  lShoulderBulk.castShadow = true;
   chest.add(lShoulderBulk);
   const rShoulderBulk = new THREE.Mesh(shoulderBulkGeo, skinMat);
-  rShoulderBulk.position.set(0.22, 0.18, 0);
+  rShoulderBulk.position.set(0.225, 0.18, 0); rShoulderBulk.scale.set(1.1, 1.0, 1.0);
+  rShoulderBulk.castShadow = true;
   chest.add(rShoulderBulk);
+
+  // Latissimus (back muscle) — visible from side
+  const latGeo = new THREE.SphereGeometry(0.075, 6, 5);
+  const lLat = new THREE.Mesh(latGeo, skinMat);
+  lLat.position.set(-0.18, 0.05, -0.03); lLat.scale.set(0.6, 1.4, 0.7);
+  chest.add(lLat);
+  const rLat = new THREE.Mesh(latGeo, skinMat);
+  rLat.position.set(0.18, 0.05, -0.03); rLat.scale.set(0.6, 1.4, 0.7);
+  chest.add(rLat);
+
+  // Trapezius (neck-shoulder muscle)
+  const trapGeo = new THREE.SphereGeometry(0.06, 6, 5);
+  const lTrap = new THREE.Mesh(trapGeo, skinMat);
+  lTrap.position.set(-0.10, 0.24, -0.02); lTrap.scale.set(1.2, 0.6, 0.8);
+  chest.add(lTrap);
+  const rTrap = new THREE.Mesh(trapGeo, skinMat);
+  rTrap.position.set(0.10, 0.24, -0.02); rTrap.scale.set(1.2, 0.6, 0.8);
+  chest.add(rTrap);
 
   // Neck mesh
   const neck = new THREE.Mesh(
@@ -881,24 +950,111 @@ function buildBoxer(gloveColor, isPlayer) {
   chin.position.set(0, -0.02, 0.07);
   headGrp.add(chin);
 
-  // Eyes
-  const eyeGeo = new THREE.SphereGeometry(0.02, 6, 6);
-  const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-  leftEye.position.set(-0.04, 0.08, 0.08);
-  headGrp.add(leftEye);
-  const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-  rightEye.position.set(0.04, 0.08, 0.08);
-  headGrp.add(rightEye);
+  // Eyes (sclera white + pupil)
+  const scleraGeo = new THREE.SphereGeometry(0.022, 8, 6);
+  const scleraMat = new THREE.MeshStandardMaterial({ color: 0xeeeae0, roughness: 0.3 });
+  const leftSclera = new THREE.Mesh(scleraGeo, scleraMat);
+  leftSclera.position.set(-0.04, 0.08, 0.08);
+  headGrp.add(leftSclera);
+  const rightSclera = new THREE.Mesh(scleraGeo, scleraMat);
+  rightSclera.position.set(0.04, 0.08, 0.08);
+  headGrp.add(rightSclera);
+  const pupilGeo = new THREE.SphereGeometry(0.012, 6, 5);
+  const leftPupil = new THREE.Mesh(pupilGeo, eyeMat);
+  leftPupil.position.set(-0.04, 0.08, 0.094);
+  headGrp.add(leftPupil);
+  const rightPupil = new THREE.Mesh(pupilGeo, eyeMat);
+  rightPupil.position.set(0.04, 0.08, 0.094);
+  headGrp.add(rightPupil);
 
-  // Nose
-  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.03, 0.03), skinMat);
-  nose.position.set(0, 0.05, 0.1);
-  headGrp.add(nose);
+  // Eyebrows (angled boxes)
+  const browMat = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.85 });
+  const lBrow = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.012, 0.018), browMat);
+  lBrow.position.set(-0.04, 0.105, 0.092); lBrow.rotation.z = -0.18;
+  headGrp.add(lBrow);
+  const rBrow = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.012, 0.018), browMat);
+  rBrow.position.set(0.04, 0.105, 0.092); rBrow.rotation.z = 0.18;
+  headGrp.add(rBrow);
 
-  // Mouthguard
-  const mg = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.015, 0.03), mouthguardMat);
-  mg.position.set(0, 0.0, 0.09);
+  // Cheekbones
+  const cheekboneGeo = new THREE.SphereGeometry(0.028, 6, 5);
+  const lCheekbone = new THREE.Mesh(cheekboneGeo, skinMat);
+  lCheekbone.position.set(-0.062, 0.045, 0.076); lCheekbone.scale.set(1.0, 0.7, 0.7);
+  headGrp.add(lCheekbone);
+  const rCheekbone = new THREE.Mesh(cheekboneGeo, skinMat);
+  rCheekbone.position.set(0.062, 0.045, 0.076); rCheekbone.scale.set(1.0, 0.7, 0.7);
+  headGrp.add(rCheekbone);
+
+  // Ears
+  const earGeo = new THREE.SphereGeometry(0.03, 6, 5);
+  const lEar = new THREE.Mesh(earGeo, skinMat);
+  lEar.position.set(-0.105, 0.05, 0); lEar.scale.set(0.4, 1.0, 0.7);
+  headGrp.add(lEar);
+  const rEar = new THREE.Mesh(earGeo, skinMat);
+  rEar.position.set(0.105, 0.05, 0); rEar.scale.set(0.4, 1.0, 0.7);
+  headGrp.add(rEar);
+
+  // Nose (more anatomical)
+  const noseBridge = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.05, 0.025), skinMat);
+  noseBridge.position.set(0, 0.06, 0.1);
+  headGrp.add(noseBridge);
+  const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.018, 6, 5), skinMat);
+  noseTip.position.set(0, 0.04, 0.115); noseTip.scale.set(1.1, 0.8, 1.0);
+  headGrp.add(noseTip);
+
+  // Mouth — upper lip + lower lip
+  const lipMat = new THREE.MeshStandardMaterial({ color: 0x9c5050, roughness: 0.6 });
+  const upperLip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.008, 0.015), lipMat);
+  upperLip.position.set(0, 0.005, 0.098);
+  headGrp.add(upperLip);
+  const lowerLip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.011, 0.018), lipMat);
+  lowerLip.position.set(0, -0.008, 0.098);
+  headGrp.add(lowerLip);
+
+  // Mouthguard (visible behind lips when open)
+  const mg = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.012, 0.025), mouthguardMat);
+  mg.position.set(0, -0.002, 0.094);
   headGrp.add(mg);
+
+  // Hair cap (under the headgear)
+  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.10, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), hairMat);
+  hairCap.position.set(0, 0.075, 0);
+  hairCap.scale.set(1.02, 1.0, 1.05);
+  headGrp.add(hairCap);
+  // Sideburns
+  const sideburnGeo = new THREE.BoxGeometry(0.012, 0.03, 0.015);
+  const lSideburn = new THREE.Mesh(sideburnGeo, hairMat);
+  lSideburn.position.set(-0.085, 0.04, 0.05);
+  headGrp.add(lSideburn);
+  const rSideburn = new THREE.Mesh(sideburnGeo, hairMat);
+  rSideburn.position.set(0.085, 0.04, 0.05);
+  headGrp.add(rSideburn);
+
+  // Jawline accent
+  const jawGeo = new THREE.BoxGeometry(0.105, 0.015, 0.03);
+  const jaw = new THREE.Mesh(jawGeo, darkSkinMat);
+  jaw.position.set(0, -0.025, 0.06);
+  headGrp.add(jaw);
+
+  // Headgear ring (open-face boxing headgear)
+  const headgearRing = new THREE.Mesh(new THREE.TorusGeometry(0.115, 0.025, 8, 18), headgearMat);
+  headgearRing.position.set(0, 0.085, 0);
+  headgearRing.rotation.x = Math.PI / 2;
+  headgearRing.castShadow = true;
+  headGrp.add(headgearRing);
+  // Top crown strap
+  const headgearCrown = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.022, 6, 14, Math.PI), headgearMat);
+  headgearCrown.position.set(0, 0.08, 0);
+  headgearCrown.rotation.set(0, Math.PI / 2, 0);
+  headGrp.add(headgearCrown);
+  // Cheek pads (left/right)
+  const cheekGeo = new THREE.SphereGeometry(0.045, 6, 5);
+  const lCheek = new THREE.Mesh(cheekGeo, headgearMat);
+  lCheek.position.set(-0.10, 0.05, 0.04); lCheek.scale.set(0.7, 1.2, 1.0);
+  headGrp.add(lCheek);
+  const rCheek = new THREE.Mesh(cheekGeo, headgearMat);
+  rCheek.position.set(0.10, 0.05, 0.04); rCheek.scale.set(0.7, 1.2, 1.0);
+  headGrp.add(rCheek);
 
   // LEFT SHOULDER joint group
   const lSh = new THREE.Group();
@@ -907,12 +1063,20 @@ function buildBoxer(gloveColor, isPlayer) {
 
   // Upper arm mesh
   const lUpperArm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.045, 0.22, 6),
+    new THREE.CylinderGeometry(0.052, 0.047, 0.22, 8),
     skinMat
   );
   lUpperArm.position.y = -0.12;
   lUpperArm.castShadow = true;
   lSh.add(lUpperArm);
+  // Biceps bulge (front)
+  const lBicep = new THREE.Mesh(new THREE.SphereGeometry(0.045, 7, 6), skinMat);
+  lBicep.position.set(0, -0.10, 0.035); lBicep.scale.set(1.0, 1.5, 0.9);
+  lSh.add(lBicep);
+  // Triceps bulge (back)
+  const lTricep = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 5), skinMat);
+  lTricep.position.set(0, -0.13, -0.035); lTricep.scale.set(1.0, 1.4, 0.8);
+  lSh.add(lTricep);
 
   // LEFT ELBOW joint group
   const lEl = new THREE.Group();
@@ -921,11 +1085,15 @@ function buildBoxer(gloveColor, isPlayer) {
 
   // Forearm mesh
   const lForearm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.04, 0.035, 0.2, 6),
+    new THREE.CylinderGeometry(0.042, 0.036, 0.2, 8),
     skinMat
   );
   lForearm.position.y = -0.1;
   lEl.add(lForearm);
+  // Forearm bulge (brachioradialis)
+  const lForeBulge = new THREE.Mesh(new THREE.SphereGeometry(0.038, 6, 5), skinMat);
+  lForeBulge.position.set(0, -0.06, 0.025); lForeBulge.scale.set(1.0, 1.4, 0.85);
+  lEl.add(lForeBulge);
 
   // Wrist wrap
   const lWristWrap = new THREE.Mesh(
@@ -953,12 +1121,18 @@ function buildBoxer(gloveColor, isPlayer) {
   chest.add(rSh);
 
   const rUpperArm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.045, 0.22, 6),
+    new THREE.CylinderGeometry(0.052, 0.047, 0.22, 8),
     skinMat
   );
   rUpperArm.position.y = -0.12;
   rUpperArm.castShadow = true;
   rSh.add(rUpperArm);
+  const rBicep = new THREE.Mesh(new THREE.SphereGeometry(0.045, 7, 6), skinMat);
+  rBicep.position.set(0, -0.10, 0.035); rBicep.scale.set(1.0, 1.5, 0.9);
+  rSh.add(rBicep);
+  const rTricep = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 5), skinMat);
+  rTricep.position.set(0, -0.13, -0.035); rTricep.scale.set(1.0, 1.4, 0.8);
+  rSh.add(rTricep);
 
   // RIGHT ELBOW joint group
   const rEl = new THREE.Group();
@@ -966,11 +1140,14 @@ function buildBoxer(gloveColor, isPlayer) {
   rSh.add(rEl);
 
   const rForearm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.04, 0.035, 0.2, 6),
+    new THREE.CylinderGeometry(0.042, 0.036, 0.2, 8),
     skinMat
   );
   rForearm.position.y = -0.1;
   rEl.add(rForearm);
+  const rForeBulge = new THREE.Mesh(new THREE.SphereGeometry(0.038, 6, 5), skinMat);
+  rForeBulge.position.set(0, -0.06, 0.025); rForeBulge.scale.set(1.0, 1.4, 0.85);
+  rEl.add(rForeBulge);
 
   const rWristWrap = new THREE.Mesh(
     new THREE.CylinderGeometry(0.04, 0.04, 0.04, 6),
@@ -1011,11 +1188,16 @@ function buildBoxer(gloveColor, isPlayer) {
 
   // Thigh mesh
   const lLeg = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.06, 0.055, 0.32, 6),
+    new THREE.CylinderGeometry(0.065, 0.055, 0.32, 8),
     skinMat
   );
   lLeg.position.y = -0.16;
+  lLeg.castShadow = true;
   lHip.add(lLeg);
+  // Quadriceps bulge (front of thigh)
+  const lQuad = new THREE.Mesh(new THREE.SphereGeometry(0.055, 6, 5), skinMat);
+  lQuad.position.set(0, -0.16, 0.04); lQuad.scale.set(1.05, 2.2, 0.8);
+  lHip.add(lQuad);
 
   // LEFT KNEE joint group
   const lKn = new THREE.Group();
@@ -1028,11 +1210,16 @@ function buildBoxer(gloveColor, isPlayer) {
 
   // Shin mesh
   const lLowerLeg = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.045, 0.32, 6),
+    new THREE.CylinderGeometry(0.05, 0.045, 0.32, 8),
     skinMat
   );
   lLowerLeg.position.y = -0.18;
+  lLowerLeg.castShadow = true;
   lKn.add(lLowerLeg);
+  // Calf bulge (gastrocnemius)
+  const lCalf = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 5), skinMat);
+  lCalf.position.set(0, -0.14, -0.035); lCalf.scale.set(1.0, 1.6, 0.85);
+  lKn.add(lCalf);
 
   // LEFT ANKLE joint group
   const lAnk = new THREE.Group();
@@ -1058,11 +1245,15 @@ function buildBoxer(gloveColor, isPlayer) {
   pelvis.add(rHip);
 
   const rLeg = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.06, 0.055, 0.32, 6),
+    new THREE.CylinderGeometry(0.065, 0.055, 0.32, 8),
     skinMat
   );
   rLeg.position.y = -0.16;
+  rLeg.castShadow = true;
   rHip.add(rLeg);
+  const rQuad = new THREE.Mesh(new THREE.SphereGeometry(0.055, 6, 5), skinMat);
+  rQuad.position.set(0, -0.16, 0.04); rQuad.scale.set(1.05, 2.2, 0.8);
+  rHip.add(rQuad);
 
   const rKn = new THREE.Group();
   rKn.position.y = -0.34;
@@ -1072,11 +1263,15 @@ function buildBoxer(gloveColor, isPlayer) {
   rKn.add(rKnee);
 
   const rLowerLeg = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.045, 0.32, 6),
+    new THREE.CylinderGeometry(0.05, 0.045, 0.32, 8),
     skinMat
   );
   rLowerLeg.position.y = -0.18;
+  rLowerLeg.castShadow = true;
   rKn.add(rLowerLeg);
+  const rCalf = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 5), skinMat);
+  rCalf.position.set(0, -0.14, -0.035); rCalf.scale.set(1.0, 1.6, 0.85);
+  rKn.add(rCalf);
 
   const rAnk = new THREE.Group();
   rAnk.position.y = -0.36;
@@ -1155,11 +1350,17 @@ const PUNCH_KF = {
   ],
   hook: [
     {t:0, p:null},
-    {t:0.2, p:{pelvisRY:-0.55, lShX:-0.9, lShY:0.3, lShZ:0.9, lElX:-1.55, lElY:0.2, lKnX:0.25}},
-    {t:0.5, p:{pelvisRY:-0.1, spineRY:0.3, chestRY:0.25,
-      lShX:-0.7, lShY:0.7, lShZ:0.2, lElX:-1.55, lElY:0.4,
-      lHipY:0.1, rShX:-1.5, rElX:-1.8, headRY:-0.05}},
-    {t:0.75, p:{lShX:-1.0, lShY:0.4, lShZ:0.5, lElX:-1.6}},
+    {t:0.18, p:{pelvisRY:-0.7, spineRY:-0.28, chestRY:-0.22,
+      lShX:-1.05, lShY:0.55, lShZ:0.95, lElX:-1.55, lElY:0.35,
+      lKnX:0.32, rKnX:0.18, headRY:0.08, lAnkX:0.05}},
+    {t:0.42, p:{pelvisRY:0.05, spineRY:0.55, chestRY:0.5,
+      lShX:-0.85, lShY:1.05, lShZ:0.18, lElX:-1.55, lElY:0.45,
+      lHipY:0.18, rShX:-1.45, rElX:-1.85,
+      lKnX:0.18, rKnX:0.30, lAnkX:-0.18,
+      headRY:-0.12, headRX:-0.05}},
+    {t:0.65, p:{pelvisRY:-0.05, spineRY:0.42, chestRY:0.32,
+      lShX:-0.95, lShY:0.95, lShZ:0.32, lElX:-1.55, lElY:0.4,
+      rShX:-1.5, rElX:-1.8}},
     {t:1, p:null}
   ],
   uppercut: [
@@ -2593,6 +2794,23 @@ function updateOpponentAI(dt) {
 }
 
 // ==================== FIGHT UPDATE ====================
+// 라운드 사이 휴식 화면의 한 줄 요령 (단독판에서 옮김 — 이 게임 규칙에 맞는 것만, 아이 말로)
+const REST_TIPS = [
+  '\u{1F4A8} 슬립·덕으로 피하면 안 맞아요',
+  '\u26A1 피한 다음 바로 치면 두 배로 세요',
+  '\u{1F94A} 잽-크로스-훅을 이어 치면 더 세요',
+  '\u{1F3AF} 훅·어퍼컷은 세지만 힘이 많이 들어요',
+  '\u{1F3C3} 스태미나가 적을 땐 피하기부터 해요',
+  '\u{1F6E1}\uFE0F 얼굴은 하이가드, 몸은 로우가드로 막아요'
+];
+function showRestTip(f) {
+  const el = $('restTip');
+  if (!el || !f) return;
+  el.textContent = (f.totalOppHits > f.totalPlayerHits)
+    ? '\u26A0\uFE0F 많이 맞았어요. 가드와 피하기를 더 써 봐요'
+    : REST_TIPS[(f.round - 1) % REST_TIPS.length];
+}
+
 function updateFight(dt) {
   const f = currentFight;
   if (!f || !f.active) return;
@@ -2614,6 +2832,7 @@ function updateFight(dt) {
       f.phase = 'rest';
       f.restTimer = 10;
       $('restScreen').classList.remove('hidden');
+      showRestTip(f);
       playBell();
       callRoundEnd(f.round);
       return;
@@ -2873,15 +3092,15 @@ function applyDodgePoseTrain(model, type, p) {
 // ==================== COMBINATION TRAINING (실전 콤보 반복 연습) ====================
 const _comboActName = { jab: '잽(1)', cross: '크로스(2)', hook: '훅(3)', uppercut: '어퍼(4)', slipL: '슬립←(Q)', slipR: '슬립→(E)', duck: '덕(S)' };
 const COMBO_LIB = [
-  { name: '원투 (1-2)', lv: '기초', seq: ['jab', 'cross'] },
-  { name: '더블 잽 (1-1)', lv: '기초', seq: ['jab', 'jab'] },
-  { name: '잽 잽 크로스 (1-1-2)', lv: '기초', seq: ['jab', 'jab', 'cross'] },
-  { name: '원투 훅 (1-2-3)', lv: '중급', seq: ['jab', 'cross', 'hook'] },
-  { name: '투 쓰리 투 (2-3-2)', lv: '중급', seq: ['cross', 'hook', 'cross'] },
-  { name: '원투 훅 어퍼 (1-2-3-4)', lv: '중급', seq: ['jab', 'cross', 'hook', 'uppercut'] },
-  { name: '원투 - 슬립 - 크로스', lv: '고급', seq: ['jab', 'cross', 'slipL', 'cross'] },
-  { name: '원투 - 덕 - 훅', lv: '고급', seq: ['jab', 'cross', 'duck', 'hook'] },
-  { name: '잽 - 슬립 - 훅 크로스', lv: '고급', seq: ['jab', 'slipR', 'hook', 'cross'] },
+  { name: '원투 (1-2)', lv: '기초', seq: ['jab', 'cross'], tip: '치고 나면 바로 손을 얼굴 앞으로!' },
+  { name: '더블 잽 (1-1)', lv: '기초', seq: ['jab', 'jab'], tip: '두 번째 잽은 한 발 앞으로 나가며' },
+  { name: '잽 잽 크로스 (1-1-2)', lv: '기초', seq: ['jab', 'jab', 'cross'], tip: '잽은 짧게, 크로스는 힘껏!' },
+  { name: '원투 훅 (1-2-3)', lv: '중급', seq: ['jab', 'cross', 'hook'], tip: '훅은 팔꿈치를 ㄱ자로 굽혀서' },
+  { name: '투 쓰리 투 (2-3-2)', lv: '중급', seq: ['cross', 'hook', 'cross'], tip: '상대에게 가까이 붙어서 시작해요' },
+  { name: '원투 훅 어퍼 (1-2-3-4)', lv: '중급', seq: ['jab', 'cross', 'hook', 'uppercut'], tip: '어퍼컷은 무릎을 굽혔다 펴며' },
+  { name: '원투 - 슬립 - 크로스', lv: '고급', seq: ['jab', 'cross', 'slipL', 'cross'], tip: '슬립은 고개만 옆으로 살짝' },
+  { name: '원투 - 덕 - 훅', lv: '고급', seq: ['jab', 'cross', 'duck', 'hook'], tip: '덕은 무릎을 굽혀 낮게' },
+  { name: '잽 - 슬립 - 훅 크로스', lv: '고급', seq: ['jab', 'slipR', 'hook', 'cross'], tip: '피한 뒤 바로 훅!' },
 ];
 let _comboSel = null;
 
@@ -2907,6 +3126,43 @@ function startComboTraining(i) {
 function stopComboToMenu() {
   if (currentTraining) currentTraining.active = false;
   showComboMenu();
+}
+
+// 콤보 시연: 캐릭터가 먼저 두 번 보여 준 뒤 "이제 해 봐요!" (단독판 '시연' 단계에서 옮김, 이 판의 훈련 동작을 그대로 씀)
+const COMBO_DEMO_STEP = 0.7, COMBO_DEMO_TIMES = 2;
+function updateComboDemo(t, dt) {
+  const d = t.demo, n = t.hbTarget.length;
+  d.t += dt;
+  const cycle = n * COMBO_DEMO_STEP + 0.8;
+  const k = Math.floor(d.t / cycle);
+  if (k >= COMBO_DEMO_TIMES) { endComboDemo(t, true); return; }
+  const idx = Math.min(n, Math.floor((d.t - k * cycle) / COMBO_DEMO_STEP));
+  const key = k * 100 + idx;
+  if (key === d.key) return;
+  d.key = key;
+  t.hbIdx = idx;
+  if (idx < n) {
+    const a = t.hbTarget[idx];
+    if (a === 'slipL' || a === 'slipR' || a === 'duck') {
+      _trainPunch = null; _trainDodge = { type: a, t: 0.4 };
+      if (typeof playStep === 'function') playStep();
+    } else {
+      if (_trainDodge) { _trainDodge = null; playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; }
+      _trainPunch = { type: a, t: 0.35 };
+      playPunch(a === 'hook' || a === 'uppercut' ? 'heavy' : 'light');
+      if (heavybagProp) heavybagProp.userData.swing = Math.min(0.22, heavybagProp.userData.swing + 0.08);
+    }
+  }
+  updateTrainOverlay();
+}
+function endComboDemo(t, say) {
+  t.demo = null; t.hbIdx = 0;
+  if (_trainDodge) { _trainDodge = null; playerModel.group.rotation.z = 0; playerModel.group.position.y = 0; }
+  if (say) {
+    showComboText('이제 해 봐요!');
+    if (typeof speak === 'function') speak('이제 해 봐요', { priority: 'high' });
+  }
+  updateTrainOverlay();
 }
 
 // ==================== TRAINING MINI-GAMES ====================
@@ -2957,7 +3213,8 @@ function startTraining(type) {
   }
   if (type === 'combo') {
     currentTraining.hbTarget = _comboSel.seq.slice();
-    if (typeof speak === 'function') speak(_comboSel.name + ' 연습 시작', { priority: 'high' });
+    currentTraining.demo = { t: 0, key: -1 }; // 먼저 두 번 보여 주기(시연) — 아무 입력이나 하면 바로 연습 시작
+    if (typeof speak === 'function') speak(_comboSel.name + ', 잘 보세요', { priority: 'high' });
   }
 
   updateTrainOverlay();
@@ -2986,7 +3243,9 @@ function updateTrainOverlay() {
     <div class="train-combo-seq">${t.hbTarget.map((p, i) =>
       `<div class="train-combo-item ${i < t.hbIdx ? 'done' : i === t.hbIdx ? 'current' : ''}">${_comboActName[p]}</div>`
     ).join('')}</div>
-    <div style="font-size:14px;margin-top:8px">세트 <b style="color:var(--green)">${t.sets}</b> · 정확도 <b>${acc}%</b></div>
+    ${t.demo ? '<div style="font-size:18px;font-weight:800;color:var(--gold);margin-top:8px">&#x1F440; 잘 보세요</div>'
+      : `<div style="font-size:14px;margin-top:8px">세트 <b style="color:var(--green)">${t.sets}</b> · 정확도 <b>${acc}%</b></div>`}
+    ${_comboSel.tip ? `<div style="font-size:15px;margin-top:6px;word-break:keep-all">&#x1F4A1; ${_comboSel.tip}</div>` : ''}
     <div style="font-size:11px;color:var(--dim);margin-top:6px">키보드 1·2·3·4 / Q=슬립← E=슬립→ S=덕</div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
       <button class="confirm-btn" style="padding:8px 14px;font-size:13px" onclick="stopComboToMenu()">콤보 변경</button>
@@ -3021,6 +3280,7 @@ function updateTrainOverlay() {
 function updateTraining(dt) {
   const t = currentTraining;
   if (!t || !t.active) return;
+  if (t.type === 'combo' && t.demo) updateComboDemo(t, dt);
 
   if (t.type !== 'combo') { // 콤비네이션은 시간제한 없는 자유 연습
     t.timer -= dt;
@@ -3076,6 +3336,7 @@ function trainingInput(action) {
       }
     } else { t.misses++; t.hbIdx = 0; }
   } else if (t.type === 'combo') {
+    if (t.demo) endComboDemo(t, false); // 시연 중에 누르면 바로 연습 시작(이 입력도 그대로 판정)
     const expected = t.hbTarget[t.hbIdx];
     if (action === expected) {
       t.hits++; t.hbIdx++;

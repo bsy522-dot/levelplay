@@ -62,6 +62,7 @@ body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;fo
 .save-slot:hover{background:#e3f2fd;border-color:#90caf9}
 .save-slot .sn{font-weight:700;color:#e67e22}
 .save-slot .sd{color:#7a8a9a;font-size:10px}
+.save-slot{min-height:48px}
 #saveBox button{background:#e3f2fd;border:1px solid #90caf9;color:#1976d2;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;margin:2px}
 #saveBox button:hover{background:#bbdefb}
 
@@ -79,6 +80,9 @@ body{background:linear-gradient(180deg,#cfeaf7 0%,#fafdff 100%);color:#2c3e50;fo
 .INFO_stats span{font-size:11px;background:#f0f6fc;border:1px solid #dbe8f4;border-radius:6px;padding:2px 7px;color:#2c3e50}
 .INFO_bull{width:100%;background:#ffeceb;border:1px solid #ffb3ac;color:#c0392b;padding:7px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer}
 .INFO_bull:active{background:#ffd6d2}
+/* 옛날 이야기 칸 (단독 '한국사 도시건설'의 건물 역사 이야기를 옮김) */
+.INFO_old{font-size:13px;line-height:1.55;color:#5d4037;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:7px 9px;margin-bottom:8px;word-break:keep-all}
+.INFO_old b{color:#8d6e00}
 
 /* === R3: 첫 진입 튜토리얼 === */
 #TUT_ov{position:fixed;inset:0;background:rgba(20,40,70,.55);backdrop-filter:blur(5px);z-index:60;display:flex;align-items:center;justify-content:center;animation:sd .3s}
@@ -508,6 +512,7 @@ function simulate(){
   const st={pop,money,hap,saf,bcount};
   ACHS.forEach(a=>{if(!achievements.has(a.id)&&a.check(st)){achievements.add(a.id);popup(`🏆 업적 달성: ${a.n}`,true);}});
   MIS_check(st); // missions: check current objective after achievements
+  if(day%10===0)SAV_auto(); // 자동 저장 (10일마다)
 
   updUI();
 }
@@ -697,11 +702,12 @@ function showSaveModal(mode){
   const m=document.getElementById('saveModal');m.style.display='flex';
   const box=document.getElementById('saveBox');
   let h=`<h3>${mode==='save'?'💾 저장':'📂 불러오기'}</h3>`;
+  if(mode==='load'){const a=SAV_info(localStorage.getItem(SAV_KEY));if(a)h+=`<div class="save-slot" onclick="doLoad('auto')"><span class="sn">⏱️ 자동 저장</span><br><span class="sd">${a}</span></div>`;}
   for(let i=1;i<=5;i++){
     const key='simcity_v3_slot'+i;
     const raw=localStorage.getItem(key);
     let info='빈 슬롯';
-    if(raw){try{const d=JSON.parse(raw);info=`${d.cityName||'도시'} | 인구 ${(d.pop||0).toLocaleString()} | Day ${d.day||0}`;}catch(e){}}
+    if(raw)info=SAV_info(raw)||info;
     if(mode==='save'){
       h+=`<div class="save-slot" onclick="doSave(${i})"><span class="sn">슬롯 ${i}</span><br><span class="sd">${info}</span></div>`;
     }else{
@@ -713,14 +719,14 @@ function showSaveModal(mode){
 }
 
 window.doSave=(slot)=>{
-  const data={grid,money,pop,hap,saf,day,season,loans,achievements:[...achievements],popHistory,incHistory,MIS_idx,MIS_won,cityName:document.getElementById('cityName').textContent};
+  const data=SAV_data();
   localStorage.setItem('simcity_v3_slot'+slot,JSON.stringify(data));
   document.getElementById('saveModal').style.display='none';
   popup('💾 저장 완료!',true);
 };
 window.doLoad=(slot)=>{
   try{
-    const data=JSON.parse(localStorage.getItem('simcity_v3_slot'+slot));
+    const data=JSON.parse(localStorage.getItem(slot==='auto'?SAV_KEY:'simcity_v3_slot'+slot));
     if(!data){popup('저장 데이터 없음',false);return;}
     grid=data.grid;money=data.money;pop=data.pop;hap=data.hap;saf=data.saf;day=data.day;season=data.season||0;loans=data.loans||0;
     achievements=new Set(data.achievements||[]);popHistory=data.popHistory||[];incHistory=data.incHistory||[];
@@ -1238,6 +1244,43 @@ function SEASON_snow(){
   ctx.restore();
 }
 
+// === HIS: 옛날 이야기 — 단독 앱 '한국사 도시건설'(bsy522-dot/city-builder)의 건물 역사 이야기를 옮김 ===
+// 지은 건물을 누르면 정보 카드 안에 같은 쓰임의 옛날 건물 이야기가 나온다. 연도는 확인한 것만 적었다.
+const HIS_OLD={
+house:{e:'고조선',t:'땅을 파고 풀로 지붕을 얹은 “움집”에서 살았어요. 바닥이 땅보다 낮아서 겨울에도 따뜻했어요.'},
+apt:{e:'고려·조선',t:'방바닥을 데우는 “온돌”은 아주 오래된 우리 난방이에요. 고려와 조선 때 널리 퍼졌어요.'},
+mansion:{e:'조선',t:'“한옥”은 나무·흙·돌·종이로 지은 집이에요. 여름엔 대청마루에서 시원하게, 겨울엔 온돌방에서 따뜻하게 지냈어요.'},
+shop:{e:'삼국 시대',t:'신라의 서울 경주에도 물건을 사고파는 시장이 있었어요. 곡식과 옷감, 그릇을 사고팔았어요.'},
+mall:{e:'조선',t:'한양 종로에는 “시전”이라는 가게 거리가 길게 있었어요. 비단·종이·생선처럼 파는 물건마다 가게가 나뉘었어요.'},
+office:{e:'조선',t:'옛날 관리들은 “관아”에서 일했어요. 세금을 걷고 마을 일을 정하던, 지금의 시청 같은 곳이에요.'},
+factory:{e:'근대',t:'나라의 문을 연 뒤 기계로 천을 짜는 공장이 생겼어요. 물건을 빨리, 많이 만들게 되었어요.'},
+warehouse:{e:'옛날',t:'가을에 거둔 곡식을 창고에 모아 두고 겨울에 꺼내 먹었어요. 쥐가 못 들어오게 높은 기둥 위에 짓기도 했어요.'},
+techpark:{e:'조선',t:'세종 때 과학자 장영실은 스스로 종을 쳐 시각을 알리는 물시계 “자격루”를 만들었어요.'},
+hospital:{e:'근대',t:'1885년에 문을 연 “광혜원”이 우리나라 첫 서양식 병원이에요. 곧 “제중원”으로 이름을 바꿨어요.'},
+school:{e:'근대',t:'1883년에 세운 “원산학사”가 우리나라 첫 근대 학교예요. 그 전에는 서당에서 글을 배웠어요.'},
+police:{e:'삼국 시대',t:'옛날에는 마을을 지키려고 나무 울타리와 성벽을 쌓았어요. 고구려 안시성은 당나라 대군을 막아 냈어요.'},
+fire:{e:'조선',t:'세종 때(1426년) 불을 막고 끄는 관청 “금화도감”이 생겼어요. 지금의 소방서 같은 곳이에요.'},
+park:{e:'근대',t:'고종 때(1897년) 만든 서울 “탑골공원”이 우리나라 첫 근대식 공원이에요.'},
+stadium:{e:'삼국 시대',t:'신라의 젊은이 “화랑”은 활쏘기와 말타기를 익히고 노래와 춤도 함께 배웠어요.'},
+power:{e:'근대',t:'1887년 경복궁에 우리나라 첫 전등이 켜졌어요. 밤에도 환한 불빛에 모두 깜짝 놀랐대요.'},
+water:{e:'옛날',t:'땅을 깊이 파서 “우물”을 만들고 물을 길었어요. 우물가에 사람들이 모여 이야기도 나눴어요.'}
+};
+function HIS_html(t){const o=HIS_OLD[t];return o?'<div class="INFO_old">📜 <b>옛날에는</b> · '+o.e+'<br>'+o.t+'</div>':'';}
+
+// === SAV: 자동 저장 — 단독 앱 autoSave 방식을 옮김 ===
+// 게임을 닫거나(배움퀘스트 게임 창 닫기 포함) 다른 화면으로 가도 도시가 남는다. 10일마다·화면을 떠날 때 저장.
+// 건물이 하나도 없으면 저장하지 않는다(빈 땅으로 지난 도시를 덮지 않게). 이어 하기는 📂 불러오기 맨 위 '자동 저장'.
+const SAV_KEY='simcity_v3_auto';
+function SAV_data(){return{grid,money,pop,hap,saf,day,season,loans,achievements:[...achievements],popHistory,incHistory,MIS_idx,MIS_won,cityName:document.getElementById('cityName').textContent};}
+function SAV_info(raw){if(!raw)return'';try{const d=JSON.parse(raw);return`${d.cityName||'도시'} | 인구 ${(d.pop||0).toLocaleString()} | ${d.day||0}일째`;}catch(e){return'';}}
+function SAV_auto(){
+  let bc=0;for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(grid[y][x].t!=='empty')bc++;
+  if(!bc)return;
+  try{localStorage.setItem(SAV_KEY,JSON.stringify(SAV_data()));}catch(e){}
+}
+window.addEventListener('pagehide',SAV_auto);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')SAV_auto();});
+
 // === R3: 건물 정보 팝오버 + 첫 진입 튜토리얼 ===
 window.INFO_show=function(gx,gy){
   const cell=grid[gy][gx];if(!cell||cell.t==='empty')return;
@@ -1262,7 +1305,7 @@ window.INFO_show=function(gx,gy){
   else if(cell._dc)status='<div class="INFO_warn">⚠ 도로 미연결 — 생산 50%</div>';
   card.innerHTML='<div class="INFO_hd"><span style="font-size:22px">'+(b.ic||'🏢')+'</span> <b>'+b.n+'</b>'
     +'<span style="margin-left:auto;cursor:pointer;font-size:18px" onclick="this.parentNode.parentNode.remove()">✕</span></div>'
-    +'<div class="INFO_desc">'+(b.d||'')+'</div>'+status
+    +'<div class="INFO_desc">'+(b.d||'')+'</div>'+status+HIS_html(cell.t)
     +'<div class="INFO_stats">'+stats.map(s=>'<span>'+s+'</span>').join('')+'</div>'
     +'<button class="INFO_bull" onclick="INFO_demolish('+gx+','+gy+')">🗑️ 철거 (환불 '+Math.floor((b.cost||0)*0.3).toLocaleString()+')</button>';
   document.body.appendChild(card);
@@ -1287,7 +1330,7 @@ function TUT_maybe(){
   if(seen)return;
   const ov=document.createElement('div');ov.id='TUT_ov';
   ov.innerHTML='<div class="TUT_box"><h2>🏙️ 심시티에 오신 걸 환영합니다!</h2><ul>'
-    +'<li>👆 <b>탭</b>으로 건물 짓기 · 지어진 건물 <b>탭</b>하면 정보 보기</li>'
+    +'<li>👆 <b>탭</b>으로 건물 짓기 · 지어진 건물 <b>탭</b>하면 정보와 <b>옛날 이야기</b></li>'
     +'<li>🛣️ 건물은 <b>도로에 붙여야</b> 100% 작동 (⚠ = 미연결)</li>'
     +'<li>🌳 주거지 옆 <b>공원</b>은 행복↑ · <b>공장</b>은 행복↓</li>'
     +'<li>🏪 상점·쇼핑몰은 <b>주거지 옆</b>에서 수입 +10%</li>'
@@ -1311,6 +1354,7 @@ MIS_render()
 AUD_initBtn()
 SEASON_applySky()
 TUT_maybe()
+try{if(localStorage.getItem(SAV_KEY))popup('📂 지난 도시는 불러오기에 있어요',true);}catch(e){}
 window.addEventListener('pointerdown',AUD_resume,{once:true})
 window.addEventListener('touchstart',AUD_resume,{once:true})
 updUI();draw();startSim();

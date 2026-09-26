@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Golf Tracker v3</title>
-<style> *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;color:#e0e0e0;font-family:'Pretendard',-apple-system,'Segoe UI',sans-serif;user-select:none;}body{display:flex;flex-direction:column;}:root{--accent:#10b981;--accent2:#059669;--bg:#0a0e1a;--card:#111827;--card2:#1f2937;--border:#374151;--text:#e5e7eb;--dim:#6b7280;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--orange:#f97316;}#tab-nav{display:flex;background:#111827;border-bottom:1px solid #1f2937;flex-shrink:0;z-index:50;position:relative;}.tab-btn{flex:1;padding:10px 2px 8px;text-align:center;font-size:10px;font-weight:600;color:var(--dim);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}.tab-btn:active{opacity:.7;}.tab-content{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}.tab-content.active{display:flex;flex-direction:column;}#tab-ball{position:relative;overflow:hidden;}#camera-container{flex:1;position:relative;background:#000;min-height:0;}#video{width:100%;height:100%;object-fit:cover;display:block;}#processingCanvas{display:none;}#overlayCanvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}#cam-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;z-index:10;}#cam-stats{background:rgba(0,0,0,.6);border-radius:8px;padding:8px 12px;backdrop-filter:blur(8px);font-size:11px;display:none;}#cam-stats.visible{display:block;}#cam-stats .sv{font-size:18px;font-weight:700;color:var(--accent);}#cam-stats .sl{font-size:9px;color:var(--dim);}.cam-btn-row{display:flex;gap:6px;}.cam-btn{width:36px;height:36px;border-radius:18px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.5);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}.cam-btn:active{transform:scale(.9);}#cam-controls{padding:10px 16px 14px;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;gap:16px;flex-shrink:0;}#track-btn{width:64px;height:64px;border-radius:32px;border:none;cursor:pointer;font-weight:800;font-size:10px;letter-spacing:1px;color:#000;background:linear-gradient(135deg,var(--accent),#4ecdc4);box-shadow:0 0 20px rgba(16,185,129,.3);}#track-btn.stop{background:linear-gradient(135deg,var(--red),#ff6b35);color:#fff;}#track-btn:active{transform:scale(.93);}.ctrl-btn{width:44px;height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;}.ctrl-btn .cl{font-size:8px;color:var(--dim);margin-top:1px;}.ctrl-btn:active{transform:scale(.9);}#center-guide{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:5;}#center-guide.hidden{display:none;}.guide-icon{font-size:48px;margin-bottom:12px;}.guide-text{font-size:14px;color:rgba(255,255,255,.6);line-height:1.7;}.guide-hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:10px;line-height:1.5;}#settings-overlay{display:none;position:absolute;top:50px;right:8px;z-index:20;background:rgba(17,24,39,.95);border:1px solid var(--border);border-radius:12px;padding:14px;width:240px;backdrop-filter:blur(12px);}#settings-overlay.visible{display:block;}.sett-title{font-size:12px;font-weight:700;margin-bottom:10px;color:var(--accent);}.sett-group{margin-bottom:10px;}.sett-label{font-size:10px;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:3px;}input[type=range]{width:100%;accent-color:var(--accent);height:4px;}.sett-hint{font-size:9px;color:var(--dim);margin-top:2px;}#dist-display{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border:1px solid var(--accent);border-radius:10px;padding:6px 18px;text-align:center;z-index:10;display:none;}#dist-display.visible{display:block;}#dist-display .dv{font-size:28px;font-weight:800;color:var(--accent);}#dist-display .dl{font-size:10px;color:var(--dim);}#landing-zone{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);border:1px solid var(--accent);border-radius:8px;padding:4px 12px;text-align:center;z-index:10;display:none;font-size:10px;}#landing-zone.visible{display:block;}#landing-zone .lz-title{color:var(--accent);font-weight:700;font-size:9px;letter-spacing:1px;}#landing-zone .lz-val{font-size:14px;font-weight:800;color:var(--text);}#landing-zone .lz-conf{font-size:9px;color:var(--dim);}#club-suggest{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);border:1px solid var(--accent);border-radius:10px;padding:8px 16px;text-align:center;z-index:10;display:none;backdrop-filter:blur(6px);}#club-suggest.visible{display:block;}#club-suggest .cs-club{font-size:16px;font-weight:800;color:var(--accent);}#club-suggest .cs-dist{font-size:10px;color:var(--dim);}#scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,rgba(16,185,129,.3),transparent);pointer-events:none;display:none;z-index:6;animation:scanAnim 2s linear infinite;}#scan-line.active{display:block;}@keyframes scanAnim{0%{top:0}100%{top:100%}}#tab-swing{padding:0;}#swing-camera{flex:1;position:relative;background:#000;min-height:200px;}#swing-video{width:100%;height:100%;object-fit:cover;display:block;}#swing-overlay-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}#swing-controls{padding:12px 16px;background:var(--card);flex-shrink:0;border-top:1px solid var(--border);display:flex;gap:8px;}#swing-record-btn{flex:1;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;}#swing-record-btn.recording{background:linear-gradient(135deg,#666,#444);animation:recPulse 1s infinite;}#swing-record-btn:active{transform:scale(.97);}#swing-manual-btn{padding:14px 20px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;}@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.6}}#swing-results{padding:14px 16px;overflow-y:auto;flex:1;min-height:0;}.swing-phase-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;margin:10px 0;}.swing-phase-bar div{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;}.swing-metric{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}.swing-metric .sm-label{font-size:12px;color:var(--dim);}.swing-metric .sm-value{font-size:16px;font-weight:700;color:var(--accent);}#swing-placeholder{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;line-height:1.8;}.swing-path-viz{width:100%;height:120px;margin:10px 0;}.swing-tip{background:var(--card);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 12px;margin:6px 0;font-size:11px;color:var(--dim);line-height:1.6;}.swing-history-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:6px 0;font-size:11px;}.swing-history-item .sh-date{color:var(--dim);font-size:9px;}.swing-history-item .sh-stats{display:flex;gap:12px;margin-top:4px;}.swing-history-item .sh-stat{color:var(--accent);font-weight:700;}#manual-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;}#manual-modal.visible{display:flex;}.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;max-width:340px;}.modal-box h3{font-size:14px;color:var(--accent);margin-bottom:14px;}.modal-field{margin-bottom:12px;}.modal-field label{font-size:11px;color:var(--dim);display:block;margin-bottom:4px;}.modal-field input,.modal-field select{width:100%;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;}.modal-field input:focus,.modal-field select:focus{border-color:var(--accent);outline:none;}.modal-btns{display:flex;gap:8px;margin-top:14px;}.modal-btns button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;}.modal-btns .btn-ok{background:var(--accent);color:#000;}.modal-btns .btn-cancel{background:var(--card2);color:var(--text);border:1px solid var(--border);}#tab-round{padding:0;}.round-header{padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}.round-header h3{font-size:14px;font-weight:700;}.round-header select,.round-header button{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;}.round-header button{background:var(--accent);color:#000;font-weight:700;border:none;}.round-header button:active{opacity:.8;}#course-selector{max-width:160px;font-size:11px;}#scorecard{flex:1;overflow-y:auto;padding:0 0 12px;}.sc-table{width:100%;border-collapse:collapse;font-size:11px;}.sc-table th{position:sticky;top:0;background:var(--card);padding:8px 4px;font-weight:600;color:var(--dim);font-size:10px;border-bottom:1px solid var(--border);z-index:2;}.sc-table td{padding:6px 3px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);}.sc-table tr:nth-child(even){background:rgba(255,255,255,.02);}.sc-input{width:36px;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:4px;padding:4px;font-size:12px;text-align:center;}.sc-input:focus{border-color:var(--accent);outline:none;}.sc-toggle{width:28px;height:28px;border-radius:14px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-size:10px;cursor:pointer;font-weight:700;}.sc-toggle.on{background:var(--accent);color:#000;border-color:var(--accent);}.sc-toggle:active{transform:scale(.9);}.hole-num{font-weight:700;color:var(--accent);font-size:12px;}.sc-par{color:var(--dim);}.score-eagle{color:#f59e0b;}.score-birdie{color:#3b82f6;}.score-par-color{color:var(--accent);}.score-bogey{color:#f97316;}.score-double{color:var(--red);}.score-worse{color:#dc2626;font-weight:800;}#running-score{flex-shrink:0;background:linear-gradient(to right,rgba(17,24,39,.95),rgba(17,24,39,.8));padding:6px 16px;display:none;font-size:11px;border-top:1px solid var(--border);}#running-score.visible{display:flex;justify-content:space-around;align-items:center;}.run-item{text-align:center;}.run-item .rv{font-size:16px;font-weight:800;color:var(--accent);}.run-item .rl{font-size:8px;color:var(--dim);}#round-summary{flex-shrink:0;background:var(--card);border-top:1px solid var(--border);padding:10px 16px;display:none;}#round-summary.visible{display:flex;justify-content:space-around;}.rs-item{text-align:center;}.rs-item .rsv{font-size:18px;font-weight:800;color:var(--accent);}.rs-item .rsl{font-size:9px;color:var(--dim);}#round-actions{padding:12px 16px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}#round-actions button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;}#save-round-btn{background:var(--accent);color:#000;}#history-toggle-btn{background:var(--card2);color:var(--text);border:1px solid var(--border);}#round-history{display:none;flex:1;overflow-y:auto;padding:8px 16px;}#round-history.visible{display:block;}.history-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;}.history-card .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}.history-card .hc-course{font-size:13px;font-weight:700;}.history-card .hc-date{font-size:10px;color:var(--dim);}.history-card .hc-stats{display:flex;gap:12px;font-size:11px;flex-wrap:wrap;}.history-card .hc-stats span{color:var(--dim);}.history-card .hc-stats b{color:var(--accent);}.history-card .hc-del{background:none;border:none;color:var(--red);font-size:10px;cursor:pointer;padding:4px;}.handicap-badge{background:var(--accent);color:#000;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;}#tab-stats{padding:16px;gap:14px;}.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;}.stat-card h4{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:.5px;}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}.sg-item{text-align:center;}.sg-item .sgv{font-size:22px;font-weight:800;color:var(--text);}.sg-item .sgl{font-size:9px;color:var(--dim);margin-top:2px;}.bar-chart{display:flex;align-items:flex-end;gap:3px;height:100px;padding-top:8px;}.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}.bar-fill{width:100%;border-radius:3px 3px 0 0;background:var(--accent);min-width:8px;transition:height .3s;}.bar-label{font-size:8px;color:var(--dim);white-space:nowrap;}.bar-value{font-size:8px;color:var(--accent);font-weight:700;}.canvas-chart{width:100%;height:160px;}.canvas-chart canvas{width:100%;height:100%;}.club-table{width:100%;font-size:11px;}.club-table td{padding:6px 8px;}.club-table tr:nth-child(even){background:rgba(255,255,255,.02);}.club-table .ct-club{font-weight:700;color:var(--text);}.club-table .ct-dist{color:var(--accent);font-weight:700;font-size:13px;}.club-table .ct-avg{color:var(--dim);}.club-input{width:50px;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:4px;padding:3px;font-size:11px;text-align:center;}.club-input:focus{border-color:var(--accent);outline:none;}.sg-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11px;}.sg-bar-label{width:70px;color:var(--dim);text-align:right;font-size:10px;}.sg-bar-track{flex:1;height:18px;background:var(--card2);border-radius:4px;position:relative;overflow:hidden;}.sg-bar-fill{height:100%;border-radius:4px;position:absolute;top:0;}.sg-bar-val{font-size:11px;font-weight:700;width:50px;text-align:right;}.record-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);}.record-item .ri-label{color:var(--dim);font-size:12px;}.record-item .ri-value{font-weight:700;color:var(--text);font-size:13px;}.smartgolf-link{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;text-decoration:none;color:var(--text);margin-top:8px;}.smartgolf-link:active{opacity:.8;}.smartgolf-link .sg-icon{font-size:24px;}.smartgolf-link .sg-text{font-size:12px;line-height:1.5;}.smartgolf-link .sg-text b{color:var(--accent);}#tab-practice{padding:16px;gap:14px;}.practice-canvas-wrap{width:100%;aspect-ratio:4/3;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;touch-action:none;}.practice-canvas-wrap canvas{width:100%;height:100%;display:block;}.practice-controls{display:flex;gap:8px;flex-wrap:wrap;}.practice-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;}.practice-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}.practice-btn:active{transform:scale(.95);}.practice-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}.ps-item{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 4px;}.ps-item .psv{font-size:18px;font-weight:800;color:var(--accent);}.ps-item .psl{font-size:9px;color:var(--dim);margin-top:2px;}.dispersion-info{font-size:10px;color:var(--dim);text-align:center;margin-top:6px;line-height:1.5;}.empty-state{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;line-height:1.8;}#perm-screen{position:fixed;inset:0;z-index:99990;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;overflow-y:auto;}#perm-screen.hidden{display:none;}.perm-icon{font-size:56px;margin-bottom:12px;}.perm-title{font-size:26px;font-weight:900;color:#FFD700;margin-bottom:10px;}.perm-goal{font-size:16px;font-weight:700;color:#e5e7eb;line-height:1.6;margin-bottom:16px;}.perm-howto{font-size:16px;line-height:1.7;color:#cbd5e1;text-align:left;margin-bottom:24px;max-width:340px;}.perm-howto b{color:var(--accent);}.perm-desc{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:24px;}#perm-btn{padding:16px 48px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),#4ecdc4);color:#000;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 0 24px rgba(16,185,129,.35);}#perm-btn:active{transform:scale(.96);}.perm-version{font-size:10px;color:var(--dim);margin-top:12px;}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}.line-chart-container{width:100%;height:140px;position:relative;}.line-chart-container svg{width:100%;height:100%;}</style>
+<style> *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}html,body{width:100%;height:100%;overflow:hidden;background:#0a0e1a;color:#e0e0e0;font-family:'Pretendard',-apple-system,'Segoe UI',sans-serif;user-select:none;}body{display:flex;flex-direction:column;}:root{--accent:#10b981;--accent2:#059669;--bg:#0a0e1a;--card:#111827;--card2:#1f2937;--border:#374151;--text:#e5e7eb;--dim:#6b7280;--red:#ef4444;--yellow:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6;--orange:#f97316;}#tab-nav{display:flex;background:#111827;border-bottom:1px solid #1f2937;flex-shrink:0;z-index:50;position:relative;}.tab-btn{flex:1;padding:10px 2px 8px;text-align:center;font-size:10px;font-weight:600;color:var(--dim);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.3px;}.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}.tab-btn:active{opacity:.7;}.tab-content{display:none;flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}.tab-content.active{display:flex;flex-direction:column;}#tab-ball{position:relative;overflow:hidden;}#camera-container{flex:1;position:relative;background:#000;min-height:0;}#video{width:100%;height:100%;object-fit:cover;display:block;}#processingCanvas{display:none;}#overlayCanvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}#cam-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;z-index:10;}#cam-stats{background:rgba(0,0,0,.6);border-radius:8px;padding:8px 12px;backdrop-filter:blur(8px);font-size:11px;display:none;}#cam-stats.visible{display:block;}#cam-stats .sv{font-size:18px;font-weight:700;color:var(--accent);}#cam-stats .sl{font-size:9px;color:var(--dim);}.cam-btn-row{display:flex;gap:6px;}.cam-btn{width:36px;height:36px;border-radius:18px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.5);color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}.cam-btn:active{transform:scale(.9);}#cam-controls{padding:10px 16px 14px;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;gap:16px;flex-shrink:0;}#track-btn{width:64px;height:64px;border-radius:32px;border:none;cursor:pointer;font-weight:800;font-size:10px;letter-spacing:1px;color:#000;background:linear-gradient(135deg,var(--accent),#4ecdc4);box-shadow:0 0 20px rgba(16,185,129,.3);}#track-btn.stop{background:linear-gradient(135deg,var(--red),#ff6b35);color:#fff;}#track-btn:active{transform:scale(.93);}.ctrl-btn{width:44px;height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:16px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;}.ctrl-btn .cl{font-size:8px;color:var(--dim);margin-top:1px;}.ctrl-btn:active{transform:scale(.9);}#center-guide{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:5;}#center-guide.hidden{display:none;}.guide-icon{font-size:48px;margin-bottom:12px;}.guide-text{font-size:14px;color:rgba(255,255,255,.6);line-height:1.7;}.guide-hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:10px;line-height:1.5;}#settings-overlay{display:none;position:absolute;top:50px;right:8px;z-index:20;background:rgba(17,24,39,.95);border:1px solid var(--border);border-radius:12px;padding:14px;width:240px;backdrop-filter:blur(12px);}#settings-overlay.visible{display:block;}.sett-title{font-size:12px;font-weight:700;margin-bottom:10px;color:var(--accent);}.sett-group{margin-bottom:10px;}.sett-label{font-size:10px;color:var(--dim);display:flex;justify-content:space-between;margin-bottom:3px;}input[type=range]{width:100%;accent-color:var(--accent);height:4px;}.sett-hint{font-size:9px;color:var(--dim);margin-top:2px;}#dist-display{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);border:1px solid var(--accent);border-radius:10px;padding:6px 18px;text-align:center;z-index:10;display:none;}#dist-display.visible{display:block;}#shot-toast{position:absolute;top:64px;left:50%;transform:translateX(-50%);max-width:calc(100% - 24px);background:rgba(0,0,0,.8);border:1px solid var(--accent);border-radius:12px;padding:10px 16px;color:#fff;font-size:15px;font-weight:700;text-align:center;word-break:keep-all;z-index:12;pointer-events:none;opacity:0;transition:opacity .25s;}#shot-toast.show{opacity:1;}.bs-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}.bs-row canvas{flex:0 0 96px;width:96px;height:60px;background:var(--card2);border-radius:8px;}.bs-info{flex:1;min-width:0;font-size:13px;line-height:1.6;color:var(--text);word-break:keep-all;}.bs-info .bs-when{font-size:12px;color:var(--dim);}#dist-display .dv{font-size:28px;font-weight:800;color:var(--accent);}#dist-display .dl{font-size:10px;color:var(--dim);}#landing-zone{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);border:1px solid var(--accent);border-radius:8px;padding:4px 12px;text-align:center;z-index:10;display:none;font-size:10px;}#landing-zone.visible{display:block;}#landing-zone .lz-title{color:var(--accent);font-weight:700;font-size:9px;letter-spacing:1px;}#landing-zone .lz-val{font-size:14px;font-weight:800;color:var(--text);}#landing-zone .lz-conf{font-size:9px;color:var(--dim);}#club-suggest{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);border:1px solid var(--accent);border-radius:10px;padding:8px 16px;text-align:center;z-index:10;display:none;backdrop-filter:blur(6px);}#club-suggest.visible{display:block;}#club-suggest .cs-club{font-size:16px;font-weight:800;color:var(--accent);}#club-suggest .cs-dist{font-size:10px;color:var(--dim);}#scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,rgba(16,185,129,.3),transparent);pointer-events:none;display:none;z-index:6;animation:scanAnim 2s linear infinite;}#scan-line.active{display:block;}@keyframes scanAnim{0%{top:0}100%{top:100%}}#tab-swing{padding:0;}#swing-camera{flex:1;position:relative;background:#000;min-height:200px;}#swing-video{width:100%;height:100%;object-fit:cover;display:block;}#swing-overlay-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}#swing-controls{padding:12px 16px;background:var(--card);flex-shrink:0;border-top:1px solid var(--border);display:flex;gap:8px;}#swing-record-btn{flex:1;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--red),#dc2626);color:#fff;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;}#swing-record-btn.recording{background:linear-gradient(135deg,#666,#444);animation:recPulse 1s infinite;}#swing-record-btn:active{transform:scale(.97);}#swing-manual-btn{padding:14px 20px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;}@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.6}}#swing-results{padding:14px 16px;overflow-y:auto;flex:1;min-height:0;}.swing-phase-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;margin:10px 0;}.swing-phase-bar div{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;}.swing-metric{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}.swing-metric .sm-label{font-size:12px;color:var(--dim);}.swing-metric .sm-value{font-size:16px;font-weight:700;color:var(--accent);}#swing-placeholder{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;line-height:1.8;}.swing-path-viz{width:100%;height:120px;margin:10px 0;}.swing-tip{background:var(--card);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 12px;margin:6px 0;font-size:11px;color:var(--dim);line-height:1.6;}.swing-history-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:6px 0;font-size:11px;}.swing-history-item .sh-date{color:var(--dim);font-size:9px;}.swing-history-item .sh-stats{display:flex;gap:12px;margin-top:4px;}.swing-history-item .sh-stat{color:var(--accent);font-weight:700;}#manual-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;}#manual-modal.visible{display:flex;}.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;max-width:340px;}.modal-box h3{font-size:14px;color:var(--accent);margin-bottom:14px;}.modal-field{margin-bottom:12px;}.modal-field label{font-size:11px;color:var(--dim);display:block;margin-bottom:4px;}.modal-field input,.modal-field select{width:100%;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;}.modal-field input:focus,.modal-field select:focus{border-color:var(--accent);outline:none;}.modal-btns{display:flex;gap:8px;margin-top:14px;}.modal-btns button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;}.modal-btns .btn-ok{background:var(--accent);color:#000;}.modal-btns .btn-cancel{background:var(--card2);color:var(--text);border:1px solid var(--border);}#tab-round{padding:0;}.round-header{padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px;}.round-header h3{font-size:14px;font-weight:700;}.round-header select,.round-header button{background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;}.round-header button{background:var(--accent);color:#000;font-weight:700;border:none;}.round-header button:active{opacity:.8;}#course-selector{max-width:160px;font-size:11px;}#scorecard{flex:1;overflow-y:auto;padding:0 0 12px;}.sc-table{width:100%;border-collapse:collapse;font-size:11px;}.sc-table th{position:sticky;top:0;background:var(--card);padding:8px 4px;font-weight:600;color:var(--dim);font-size:10px;border-bottom:1px solid var(--border);z-index:2;}.sc-table td{padding:6px 3px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);}.sc-table tr:nth-child(even){background:rgba(255,255,255,.02);}.sc-input{width:36px;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:4px;padding:4px;font-size:12px;text-align:center;}.sc-input:focus{border-color:var(--accent);outline:none;}.sc-toggle{width:28px;height:28px;border-radius:14px;border:1px solid var(--border);background:var(--card2);color:var(--dim);font-size:10px;cursor:pointer;font-weight:700;}.sc-toggle.on{background:var(--accent);color:#000;border-color:var(--accent);}.sc-toggle:active{transform:scale(.9);}.hole-num{font-weight:700;color:var(--accent);font-size:12px;}.sc-par{color:var(--dim);}.score-eagle{color:#f59e0b;}.score-birdie{color:#3b82f6;}.score-par-color{color:var(--accent);}.score-bogey{color:#f97316;}.score-double{color:var(--red);}.score-worse{color:#dc2626;font-weight:800;}#running-score{flex-shrink:0;background:linear-gradient(to right,rgba(17,24,39,.95),rgba(17,24,39,.8));padding:6px 16px;display:none;font-size:11px;border-top:1px solid var(--border);}#running-score.visible{display:flex;justify-content:space-around;align-items:center;}.run-item{text-align:center;}.run-item .rv{font-size:16px;font-weight:800;color:var(--accent);}.run-item .rl{font-size:8px;color:var(--dim);}#round-summary{flex-shrink:0;background:var(--card);border-top:1px solid var(--border);padding:10px 16px;display:none;}#round-summary.visible{display:flex;justify-content:space-around;}.rs-item{text-align:center;}.rs-item .rsv{font-size:18px;font-weight:800;color:var(--accent);}.rs-item .rsl{font-size:9px;color:var(--dim);}#round-actions{padding:12px 16px;background:var(--card);border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}#round-actions button{flex:1;padding:10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;}#save-round-btn{background:var(--accent);color:#000;}#history-toggle-btn{background:var(--card2);color:var(--text);border:1px solid var(--border);}#round-history{display:none;flex:1;overflow-y:auto;padding:8px 16px;}#round-history.visible{display:block;}.history-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;}.history-card .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}.history-card .hc-course{font-size:13px;font-weight:700;}.history-card .hc-date{font-size:10px;color:var(--dim);}.history-card .hc-stats{display:flex;gap:12px;font-size:11px;flex-wrap:wrap;}.history-card .hc-stats span{color:var(--dim);}.history-card .hc-stats b{color:var(--accent);}.history-card .hc-del{background:none;border:none;color:var(--red);font-size:10px;cursor:pointer;padding:4px;}.handicap-badge{background:var(--accent);color:#000;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;}#tab-stats{padding:16px;gap:14px;}.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;}.stat-card h4{font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px;letter-spacing:.5px;}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}.sg-item{text-align:center;}.sg-item .sgv{font-size:22px;font-weight:800;color:var(--text);}.sg-item .sgl{font-size:9px;color:var(--dim);margin-top:2px;}.bar-chart{display:flex;align-items:flex-end;gap:3px;height:100px;padding-top:8px;}.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}.bar-fill{width:100%;border-radius:3px 3px 0 0;background:var(--accent);min-width:8px;transition:height .3s;}.bar-label{font-size:8px;color:var(--dim);white-space:nowrap;}.bar-value{font-size:8px;color:var(--accent);font-weight:700;}.canvas-chart{width:100%;height:160px;}.canvas-chart canvas{width:100%;height:100%;}.club-table{width:100%;font-size:11px;}.club-table td{padding:6px 8px;}.club-table tr:nth-child(even){background:rgba(255,255,255,.02);}.club-table .ct-club{font-weight:700;color:var(--text);}.club-table .ct-dist{color:var(--accent);font-weight:700;font-size:13px;}.club-table .ct-avg{color:var(--dim);}.club-input{width:50px;background:var(--card2);border:1px solid var(--border);color:#fff;border-radius:4px;padding:3px;font-size:11px;text-align:center;}.club-input:focus{border-color:var(--accent);outline:none;}.sg-bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:11px;}.sg-bar-label{width:70px;color:var(--dim);text-align:right;font-size:10px;}.sg-bar-track{flex:1;height:18px;background:var(--card2);border-radius:4px;position:relative;overflow:hidden;}.sg-bar-fill{height:100%;border-radius:4px;position:absolute;top:0;}.sg-bar-val{font-size:11px;font-weight:700;width:50px;text-align:right;}.record-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);}.record-item .ri-label{color:var(--dim);font-size:12px;}.record-item .ri-value{font-weight:700;color:var(--text);font-size:13px;}.smartgolf-link{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;text-decoration:none;color:var(--text);margin-top:8px;}.smartgolf-link:active{opacity:.8;}.smartgolf-link .sg-icon{font-size:24px;}.smartgolf-link .sg-text{font-size:12px;line-height:1.5;}.smartgolf-link .sg-text b{color:var(--accent);}#tab-practice{padding:16px;gap:14px;}.practice-canvas-wrap{width:100%;aspect-ratio:4/3;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;touch-action:none;}.practice-canvas-wrap canvas{width:100%;height:100%;display:block;}.practice-controls{display:flex;gap:8px;flex-wrap:wrap;}.practice-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;}.practice-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}.practice-btn:active{transform:scale(.95);}.practice-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}.ps-item{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 4px;}.ps-item .psv{font-size:18px;font-weight:800;color:var(--accent);}.ps-item .psl{font-size:9px;color:var(--dim);margin-top:2px;}.dispersion-info{font-size:10px;color:var(--dim);text-align:center;margin-top:6px;line-height:1.5;}.empty-state{text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;line-height:1.8;}#perm-screen{position:fixed;inset:0;z-index:99990;background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;overflow-y:auto;}#perm-screen.hidden{display:none;}.perm-icon{font-size:56px;margin-bottom:12px;}.perm-title{font-size:26px;font-weight:900;color:#FFD700;margin-bottom:10px;}.perm-goal{font-size:16px;font-weight:700;color:#e5e7eb;line-height:1.6;margin-bottom:16px;}.perm-howto{font-size:16px;line-height:1.7;color:#cbd5e1;text-align:left;margin-bottom:24px;max-width:340px;}.perm-howto b{color:var(--accent);}.perm-desc{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:24px;}#perm-btn{padding:16px 48px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),#4ecdc4);color:#000;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 0 24px rgba(16,185,129,.35);}#perm-btn:active{transform:scale(.96);}.perm-version{font-size:10px;color:var(--dim);margin-top:12px;}::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}.line-chart-container{width:100%;height:140px;position:relative;}.line-chart-container svg{width:100%;height:100%;}</style>
 </head>
 <body>
 <!-- Permission Screen -->
@@ -96,6 +96,7 @@
   <div class="cs-club" id="cs-club-name">-</div>
   <div class="cs-dist" id="cs-club-info">-</div>
   </div>
+  <div id="shot-toast" aria-live="polite"></div>
   </div>
   <div id="cam-controls">
   <button class="ctrl-btn" onclick="clearTrail()"><span>&#128465;</span><span class="cl">초기화</span></button>
@@ -224,6 +225,11 @@ let stream=null, facingMode='environment', isTracking=false, trail=[], prevPos=n
 let sensitivity=85, minBallSize=4, maxBallSize=45, calibDist=150, windSpeed=0;
 let swingStream=null, swingRecording=false, swingFrames=[], swingStartTime=0, swingTimerId=null;
 let practiceTarget=150, practiceShots=[], practiceCanvasReady=false;
+// ★2026-09-26 단독 앱(golf-tracker)에서 옮김: 움직임 감지·샷 자동 저장
+// prevFrameSum=직전 화면(2칸 간격 밝기 합) · lastAddAt=궤적에 마지막으로 점을 넣은 시각(ms)
+// shotDetected=공이 빠르게 출발함 · shotSaved=이번 궤적을 이미 저장함(다음 움직임부터 새 궤적)
+let prevFrameSum=null, shotDetected=false, shotSaved=false, lastAddAt=0, framesNoAdd=0;
+const MOTION_THRESHOLD=25, SHOT_KEY='gt_shots', SHOT_MAX=50; // gt_shots = 단독 앱과 같은 저장 이름(옛 기록 이어받기)
 // Physics constants
 const GRAVITY = 9.81;
 const COURSES=[
@@ -314,66 +320,70 @@ function detectBall(ctx, w, h) {
   const data = imageData.data;
   const thresh = sensitivity * 2.55;
   const step = 2;
+  // ★2026-09-26 단독 앱의 '움직임 감지(직전 화면과 비교)'를 합침.
+  // 전에는 밝기만 봐서, 화면에 가만히 있는 흰 물체(표지판·흰 선)가 있으면 거기에 붙어 공을 놓쳤다.
+  const gw=Math.ceil(w/step), gh=Math.ceil(h/step);
+  const sums=new Uint16Array(gw*gh);
+  const prev=(prevFrameSum && prevFrameSum.length===sums.length) ? prevFrameSum : null;
   const candidates = [];
-  for (let y=0; y<h; y+=step) {
-  for (let x=0; x<w; x+=step) {
+  for (let y=0, gy=0; y<h; y+=step, gy++) {
+  for (let x=0, gx=0; x<w; x+=step, gx++) {
   const i = (y*w+x)*4;
   const r=data[i], g=data[i+1], b=data[i+2];
-  const brightness = (r+g+b)/3;
+  const s=r+g+b, gi=gy*gw+gx;
+  sums[gi]=s;
+  const moving = prev ? (Math.abs(s-prev[gi])/3 > MOTION_THRESHOLD ? 1 : 0) : 0;
+  const brightness = s/3;
   const mx=Math.max(r,g,b), mn=Math.min(r,g,b);
   const sat = mx>0 ? (mx-mn)/mx : 0;
-  // White ball: high brightness, low saturation
-  // Also check for circular uniformity
-  if (brightness > thresh && sat < 0.3) {
-  candidates.push({x,y,brightness});
+  // White ball: high brightness, low saturation (움직이는 곳은 기준을 조금 낮춤)
+  if (brightness > (moving ? thresh*0.75 : thresh) && sat < 0.3) {
+  candidates.push({x,y,brightness,moving});
   }
   }
   }
+  prevFrameSum = sums;
   if (!candidates.length) return null;
   // Grid clustering with adaptive grid size
   const gs=12, grid={};
   for (const p of candidates) {
   const key = (Math.floor(p.x/gs))+','+(Math.floor(p.y/gs));
-  if (!grid[key]) grid[key]={sx:0,sy:0,cnt:0,br:0};
-  grid[key].sx+=p.x; grid[key].sy+=p.y; grid[key].cnt++; grid[key].br+=p.brightness;
+  if (!grid[key]) grid[key]={sx:0,sy:0,cnt:0,br:0,mv:0};
+  grid[key].sx+=p.x; grid[key].sy+=p.y; grid[key].cnt++; grid[key].br+=p.brightness; grid[key].mv+=p.moving;
   }
   const clusters=[];
   for (const k in grid) {
   const g=grid[k];
-  clusters.push({x:g.sx/g.cnt, y:g.sy/g.cnt, size:g.cnt, brightness:g.br/g.cnt});
+  clusters.push({x:g.sx/g.cnt, y:g.sy/g.cnt, size:g.cnt, brightness:g.br/g.cnt, motion:g.mv/g.cnt});
   }
   // Merge nearby clusters
   const merged=[], used=new Set();
   for (let i=0;i<clusters.length;i++) {
   if (used.has(i)) continue;
-  let cx=clusters[i].x*clusters[i].size, cy=clusters[i].y*clusters[i].size, ts=clusters[i].size, tb=clusters[i].brightness*clusters[i].size;
+  let cx=clusters[i].x*clusters[i].size, cy=clusters[i].y*clusters[i].size, ts=clusters[i].size, tb=clusters[i].brightness*clusters[i].size, tm=clusters[i].motion*clusters[i].size;
   used.add(i);
   for (let j=i+1;j<clusters.length;j++) {
   if (used.has(j)) continue;
   const dx=clusters[i].x-clusters[j].x, dy=clusters[i].y-clusters[j].y;
   if (Math.sqrt(dx*dx+dy*dy)<gs*3) {
   cx+=clusters[j].x*clusters[j].size; cy+=clusters[j].y*clusters[j].size;
-  ts+=clusters[j].size; tb+=clusters[j].brightness*clusters[j].size; used.add(j);
+  ts+=clusters[j].size; tb+=clusters[j].brightness*clusters[j].size; tm+=clusters[j].motion*clusters[j].size; used.add(j);
   }
   }
-  merged.push({x:cx/ts, y:cy/ts, size:ts, brightness:tb/ts, radius:Math.sqrt(ts*step*step/Math.PI)});
+  merged.push({x:cx/ts, y:cy/ts, size:ts, brightness:tb/ts, motion:tm/ts, radius:Math.sqrt(ts*step*step/Math.PI)});
   }
-  // Circularity check: compute aspect ratio of cluster bounding box
-  const valid = merged.filter(c=>{
-  if(c.radius<minBallSize || c.radius>maxBallSize) return false;
-  return true;
-  });
+  const valid = merged.filter(c=>c.radius>=minBallSize && c.radius<=maxBallSize);
   if (!valid.length) return null;
-  // Temporal consistency: prefer ball near previous position
-  if (prevPos) {
-  let bestDist=Infinity, best=null;
+  // 점수 = 밝기 40% + 움직임 40% + 직전 위치와 가까움 20% (단독 앱 방식)
+  const maxDist=Math.max(w,h)*0.35;
   for (const c of valid) {
+  c.score = c.brightness/255*0.4 + c.motion*0.4;
+  if (prevPos) {
   const d=Math.sqrt((c.x-prevPos.rawX)**2+(c.y-prevPos.rawY)**2);
-  if (d<bestDist){bestDist=d;best=c;}
+  if (d<maxDist) c.score += (1-d/maxDist)*0.2;
   }
-  if (best && bestDist<Math.max(w,h)*0.35) return best;
   }
-  valid.sort((a,b)=>b.brightness-a.brightness);
+  valid.sort((a,b)=>b.score-a.score);
   return valid[0];
 }
 function predictTrajectory(trail, vw, vh) {
@@ -445,20 +455,31 @@ function processFrame() {
   const octx=overlay.getContext('2d');
   octx.setTransform(dpr,0,0,dpr,0,0);
   octx.clearRect(0,0,dw,dh);
-  const scaleX=dw/vw, scaleY=dh/vh;
+  // ★2026-09-26 화면의 영상은 꽉 채우기(object-fit:cover, 넘치는 쪽은 잘림)라 같은 배율+가운데 맞춤으로 옮겨야
+  // 궤적 선이 영상 속 공 위에 그려진다(전에는 가로·세로를 따로 늘려 세로 화면에서 선이 공과 어긋났다)
+  const cover=Math.max(dw/vw, dh/vh), offX=(dw-vw*cover)/2, offY=(dh-vh*cover)/2;
+  const scaleX=cover, scaleY=cover;
   let ballFound=false;
   if (isTracking) {
   const ball = detectBall(pctx,vw,vh);
+  let added=false;
   if (ball) {
   ballFound=true; lostFrames=0;
-  const sx=ball.x*scaleX, sy=ball.y*scaleY, now=Date.now();
+  const sx=ball.x*scaleX+offX, sy=ball.y*scaleY+offY, now=Date.now();
+  // ★2026-09-26 단독 앱 방식: 움직이는 공만, 1.5px 넘게 옮겨졌을 때만 궤적에 넣음(가만히 있는 흰 물체·떨림 제외)
+  const last=trail[trail.length-1];
+  if (ball.motion>0 && (!last || Math.abs(sx-last.x)>1.5 || Math.abs(sy-last.y)>1.5)) {
+  // 저장한 샷 뒤 새로 움직이면 새 궤적 · 출발 전 흔들림은 0.5초 넘게 멈췄다 움직이면 버리고 새로 시작
+  if (shotSaved || (!shotDetected && trail.length && now-lastAddAt>500)) clearTrail();
   let speed=0;
   if (prevPos) {
   const dx=ball.x-prevPos.rawX, dy=ball.y-prevPos.rawY, dt=(now-prevPos.t)/1000;
   if (dt>0) speed=Math.round(Math.sqrt(dx*dx+dy*dy)/dt);
   }
-  const pt={x:sx,y:sy,t:now,rawX:ball.x,rawY:ball.y};
-  prevPos=pt; trail.push(pt);
+  // 멈춰 있다 갑자기 빨라지면 = 공이 출발함
+  if (!shotDetected && speed>200 && trail.length<5) { shotDetected=true; if (navigator.vibrate) navigator.vibrate(50); }
+  const pt={x:sx,y:sy,t:now,rawX:ball.x,rawY:ball.y,speed};
+  prevPos=pt; trail.push(pt); added=true;
   // Calculate estimated distance
   let totalPx=0;
   for (let i=1;i<trail.length;i++) {
@@ -472,10 +493,13 @@ function processFrame() {
   document.getElementById('stat-dist').textContent=estDist;
   document.getElementById('dist-value').textContent=estDist;
   document.getElementById('dist-display').classList.add('visible');
+  }
   // Trajectory prediction
   const pred = predictTrajectory(trail, vw, vh);
   if (pred) {
-  document.getElementById('stat-angle').textContent = pred.angle+'°';
+  // ★2026-09-26 '발사각'은 처음 떠오를 때의 각도(단독 앱과 같은 계산). 전에는 지금 날아가는 방향이라 내려올 때 음수로 바뀌었다.
+  const la = launchAngleOf(trail);
+  document.getElementById('stat-angle').textContent = la===null ? '-' : la+'°';
   document.getElementById('lz-dist').textContent = pred.range+'m';
   document.getElementById('lz-conf').textContent = '신뢰도: '+pred.confidence+'%';
   document.getElementById('landing-zone').classList.add('visible');
@@ -534,6 +558,13 @@ function processFrame() {
   } else {
   lostFrames++;
   }
+  if (added) { lastAddAt=Date.now(); framesNoAdd=0; } else framesNoAdd++;
+  // ★2026-09-26 단독 앱에서 옮김: 공이 출발한 뒤 0.8초 동안 새 점이 없으면(멈춤·화면 밖) 그 샷을 자동 저장
+  // (점이 6개보다 적거나 처음부터 내려가기만 한 궤적은 샷이 아니라 버림). 궤적은 화면에 남기고, 다음 움직임에 새 궤적을 시작한다.
+  // 출발 없이 흔들림만 쌓인 점은 2초 뒤 버림. (시간으로 재되, 화면이 잠깐 멈췄다 풀린 경우에 잘리지 않게 12장 이상 확인)
+  const idle=(trail.length && framesNoAdd>=12) ? Date.now()-lastAddAt : 0;
+  if (shotDetected && !shotSaved && idle>=800) { if (!saveBallShot()) clearTrail(); }
+  else if (!shotDetected && !shotSaved && trail.length && idle>=2000) clearTrail();
   // Draw trail with gradient
   if (trail.length>1) {
   octx.beginPath(); octx.moveTo(trail[0].x,trail[0].y);
@@ -556,6 +587,18 @@ function processFrame() {
   octx.beginPath(); octx.arc(trail[0].x,trail[0].y,5,0,Math.PI*2);
   octx.fillStyle='rgba(16,185,129,0.4)'; octx.fill();
   octx.strokeStyle='#10b981'; octx.lineWidth=1.5; octx.stroke();
+  // ★2026-09-26 단독 앱에서 옮김: 공이 가장 높이 올라간 곳 표시
+  if (trail.length>10) {
+  let ai=0;
+  for (let i=1;i<trail.length;i++) if (trail[i].y<trail[ai].y) ai=i;
+  if (ai>0 && ai<trail.length-1) {
+  const ap=trail[ai];
+  octx.beginPath(); octx.arc(ap.x,ap.y,6,0,Math.PI*2);
+  octx.strokeStyle='rgba(245,158,11,0.9)'; octx.lineWidth=2; octx.stroke();
+  octx.font='bold 13px sans-serif'; octx.fillStyle='rgba(245,158,11,0.95)'; octx.textAlign='center';
+  octx.fillText('최고점',ap.x,ap.y-12);
+  }
+  }
   }
   document.getElementById('scan-line').classList.toggle('active',!ballFound);
   }
@@ -565,6 +608,7 @@ function processFrame() {
 function toggleTracking() {
   const btn=document.getElementById('track-btn');
   if (isTracking) {
+  if (!shotSaved && trail.length>=6) saveBallShot(); // 멈출 때 아직 저장 안 된 궤적이 있으면 저장
   isTracking=false;
   document.getElementById('cam-stats').classList.remove('visible');
   document.getElementById('scan-line').classList.remove('active');
@@ -573,7 +617,7 @@ function toggleTracking() {
   btn.classList.remove('stop'); btn.textContent='START';
   playSound('land');
   } else {
-  clearTrail(); isTracking=true;
+  clearTrail(); prevFrameSum=null; isTracking=true; // 멈춘 동안의 옛 화면과 비교하지 않게
   document.getElementById('cam-stats').classList.add('visible');
   document.getElementById('center-guide').classList.add('hidden');
   btn.classList.add('stop'); btn.textContent='STOP';
@@ -582,6 +626,7 @@ function toggleTracking() {
 }
 function clearTrail() {
   trail=[]; prevPos=null; lostFrames=0;
+  shotDetected=false; shotSaved=false;
   document.getElementById('stat-points').textContent='0';
   document.getElementById('stat-speed').textContent='0';
   document.getElementById('stat-dist').textContent='0';
@@ -590,13 +635,56 @@ function clearTrail() {
   document.getElementById('landing-zone').classList.remove('visible');
   document.getElementById('club-suggest').classList.remove('visible');
 }
+// ★2026-09-26 단독 앱(golf-tracker)에서 옮김: 추적한 샷을 기록으로 남김.
+// 저장 이름 gt_shots·모양은 단독 앱과 같다 → 같은 주소(bsy522-dot.github.io)에서 쓰던 옛 기록이 그대로 보인다.
+// 화면에 보인 방향 그대로 저장(앞 카메라는 좌우가 거울이라 뒤집어 저장).
+function launchAngleOf(pts) {
+  if (!pts || pts.length<3) return null;
+  const n=Math.min(5,pts.length);
+  return Math.round(Math.atan2(-(pts[n-1].y-pts[0].y), Math.abs(pts[n-1].x-pts[0].x))*180/Math.PI);
+}
+function readBallShots() {
+  try { const a=JSON.parse(localStorage.getItem(SHOT_KEY)||'[]'); return Array.isArray(a)?a:[]; } catch(e) { return []; }
+}
+function saveBallShot() { // 저장하면 true
+  if (shotSaved || trail.length<6) return false;
+  const cw=document.getElementById('camera-container').clientWidth;
+  const mirror=facingMode==='user';
+  const pts=trail.map(p=>({x:mirror?cw-p.x:p.x, y:p.y}));
+  // 발사각: 처음 5점의 기울기 · 휨: 가운데 점이 처음-끝 직선에서 15px 넘게 벗어난 쪽
+  const angle=launchAngleOf(pts);
+  // 처음부터 내려가기만 하는 궤적(높이 뜬 공이 화면 밖에서 다시 떨어져 들어온 조각 등)은 샷이 아님
+  if (angle===null || angle<=0) return false;
+  let ai=0; for (let i=1;i<pts.length;i++) if (pts[i].y<pts[ai].y) ai=i;
+  let curve='Straight';
+  if (pts.length>10) {
+  const dev=pts[Math.floor(pts.length/2)].x-(pts[0].x+pts[pts.length-1].x)/2;
+  if (dev>15) curve='Fade'; else if (dev<-15) curve='Draw';
+  }
+  let dist=0; for (let i=1;i<pts.length;i++) dist+=Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y);
+  const k=Math.max(1,Math.ceil(pts.length/60)); // 저장 공간 아끼기: 궤적은 60점 안쪽으로
+  const small=pts.filter((p,i)=>i%k===0||i===pts.length-1).map(p=>({x:Math.round(p.x*10)/10, y:Math.round(p.y*10)/10}));
+  const shot={id:Date.now(), club:'', time:new Date().toLocaleString('ko-KR'), points:trail.length,
+  maxSpeed:Math.max(...trail.map(p=>p.speed||0)), angle, apex:Math.round(pts[0].y-pts[ai].y), curve, distance:Math.round(dist), trail:small};
+  const shots=readBallShots();
+  shots.unshift(shot);
+  try { localStorage.setItem(SHOT_KEY, JSON.stringify(shots.slice(0,SHOT_MAX))); } catch(e) { /* 저장 공간 부족 */ }
+  shotSaved=true; shotDetected=false;
+  playSound('success');
+  const t=document.getElementById('shot-toast');
+  if (t) { t.textContent='샷 저장! 통계 탭에 있어요'; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); }
+  return true;
+}
 function captureScreenshot() {
   const c=document.getElementById('camera-container');
   const cw=c.clientWidth, ch=c.clientHeight;
   const cap=document.createElement('canvas');
   cap.width=cw*2; cap.height=ch*2;
   const ctx=cap.getContext('2d'); ctx.scale(2,2);
-  ctx.drawImage(video,0,0,cw,ch);
+  // 화면과 똑같이 꽉 채우기(가운데 기준으로 넘치는 쪽 잘라 냄) — 궤적 선과 맞게
+  const vw=video.videoWidth, vh=video.videoHeight;
+  if (vw && vh) { const s=Math.max(cw/vw, ch/vh); ctx.drawImage(video,(vw-cw/s)/2,(vh-ch/s)/2,cw/s,ch/s,0,0,cw,ch); }
+  else ctx.drawImage(video,0,0,cw,ch);
   ctx.drawImage(overlay,0,0,cw,ch);
   ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(0,ch-28,cw,28);
   ctx.font='bold 11px sans-serif'; ctx.fillStyle='#fff'; ctx.textAlign='left';
@@ -1137,11 +1225,12 @@ function saveRound() {
   _lastRoundSaveKey = saveKey;
   _roundSaveLock = true;
   const _sb = document.getElementById('save-round-btn');
-  if (_sb) _sb.disabled = true;
-  setTimeout(()=>{ _roundSaveLock = false; const b=document.getElementById('save-round-btn'); if(b) b.disabled=false; }, 2000);
+  // ★2026-09-26 배움퀘스트 틀(iframe sandbox, allow-modals 없음) 안에서는 alert 가 무시돼 저장됐다는 표시가 없었다
+  // → 알림창 대신 저장 단추 글자로 2초 알려 줌(단추는 원래 2초 잠김)
+  if (_sb) { _sb.disabled = true; _sb.textContent = '저장했어요 ✓'; }
+  setTimeout(()=>{ _roundSaveLock = false; const b=document.getElementById('save-round-btn'); if(b) { b.disabled=false; b.textContent='라운드 저장'; } }, 2000);
   playSound('success');
   renderRunningScore(); // Update handicap
-  alert('라운드가 저장되었습니다!');
 }
 function toggleHistory() {
   const el=document.getElementById('round-history');
@@ -1170,7 +1259,7 @@ function renderHistory() {
   return `<div class="history-card">
   <div class="hc-top">
   <span class="hc-course">${r.course}</span>
-  <span><span class="hc-date">${r.date}</span> <button class="hc-del" onclick="deleteRound(${ri})">삭제</button></span>
+  <span><span class="hc-date">${r.date}</span> <button class="hc-del" onclick="deleteRound(${ri},this)">삭제</button></span>
   </div>
   <div class="hc-stats">
   <span>스코어 <b>${totalScore} (${diffStr})</b></span>
@@ -1181,8 +1270,16 @@ function renderHistory() {
   </div>`;
   }).join('');
 }
-function deleteRound(idx) {
-  if (!confirm('이 라운드를 삭제하시겠습니까?')) return;
+function deleteRound(idx, btn) {
+  // ★2026-09-26 배움퀘스트 틀 안에서는 confirm 창이 막혀(늘 '취소') 삭제가 아예 안 됐다
+  // → 확인 창 대신 '두 번 누르기'(첫 번째 누르면 글자가 바뀌고 3초 안에 한 번 더 누르면 삭제)
+  if (btn) {
+  if (btn.dataset.armed !== '1') {
+  btn.dataset.armed = '1'; btn.textContent = '한 번 더 누르면 삭제';
+  setTimeout(()=>{ if (btn.isConnected) { btn.dataset.armed = ''; btn.textContent = '삭제'; } }, 3000);
+  return;
+  }
+  } else if (!confirm('이 라운드를 삭제하시겠습니까?')) return;
   const rounds=JSON.parse(localStorage.getItem('golfRounds')||'[]');
   rounds.splice(idx,1);
   localStorage.setItem('golfRounds',JSON.stringify(rounds));
@@ -1406,9 +1503,11 @@ function renderStats() {
   라운드 기록이 없습니다.<br>라운드를 기록하면 통계가 표시됩니다.
   </div>
   </div>
+  ${renderBallShotCard()}
   ${renderClubDistCard(clubDists)}
   ${renderSmartGolfCard()}
   `;
+  setTimeout(drawBallShotCanvases, 0);
   return;
   }
   const scores=rounds.map(r=>r.holes.reduce((s,h)=>s+h.score,0));
@@ -1514,6 +1613,7 @@ function renderStats() {
   <div class="record-item"><span class="ri-label">총 보기</span><span class="ri-value">${totalBogeys}개</span></div>
   <div class="record-item"><span class="ri-label">총 라운드</span><span class="ri-value">${rounds.length}회</span></div>
   </div>
+  ${renderBallShotCard()}
   <!-- Club Distances -->
   ${renderClubDistCard(clubDists)}
   <!-- SmartGolf -->
@@ -1524,7 +1624,48 @@ function renderStats() {
   renderScoringCanvas(totalEagles, totalBirdies, totalPars, totalBogeys, totalDoubles, totalWorse);
   renderTrendCanvas(trendScores);
   renderAccuracyCanvas(rounds);
+  drawBallShotCanvases();
   }, 50);
+}
+// ★2026-09-26 단독 앱(golf-tracker)의 '샷 기록'을 통계 탭 카드로 옮김: 최근 10샷의 궤적 그림·발사각·휨 방향.
+// 거리(px)·속도(px/s) 같은 기술 숫자는 보여 주지 않는다.
+function renderBallShotCard() {
+  const shots=readBallShots();
+  if (!shots.length) return `<div class="stat-card"><h4>공 추적 기록</h4><div style="font-size:13px;color:var(--dim);line-height:1.7;">볼추적 탭에서 공을 치면 여기에 쌓여요.</div></div>`;
+  const CURVE={Straight:'곧게', Fade:'오른쪽으로 휨', Draw:'왼쪽으로 휨'};
+  const CLUB_KO={Driver:'드라이버', Putter:'퍼터', Hybrid:'하이브리드'}; // 옛 단독 앱 기록의 영어 클럽 이름
+  const safe=s=>String(s).replace(/[&<>"']/g,'');
+  const rows=shots.slice(0,10).map((s,i)=>{
+  const d=new Date(+s.id);
+  const when=(s.id && !isNaN(d)) ? (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0') : '';
+  const bits=[];
+  if (s.club) bits.push(safe(CLUB_KO[s.club]||String(s.club).toUpperCase()));
+  if (typeof s.angle==='number') bits.push('발사각 '+s.angle+'°');
+  if (CURVE[s.curve]) bits.push(CURVE[s.curve]);
+  return `<div class="bs-row"><canvas id="bs-canvas-${i}"></canvas><div class="bs-info"><div>${bits.join(' · ')||'샷'}</div><div class="bs-when">${when}</div></div></div>`;
+  }).join('');
+  return `<div class="stat-card"><h4>공 추적 기록 (${shots.length}샷)</h4>${rows}${shots.length>10?'<div style="font-size:12px;color:var(--dim);margin-top:6px;">최근 10샷만 보여요</div>':''}</div>`;
+}
+function drawBallShotCanvases() {
+  const dpr=Math.min(devicePixelRatio||1,2);
+  readBallShots().slice(0,10).forEach((s,i)=>{
+  const c=document.getElementById('bs-canvas-'+i);
+  const tr=Array.isArray(s.trail) ? s.trail.filter(p=>p && isFinite(p.x) && isFinite(p.y)) : [];
+  if (!c || tr.length<2) return;
+  s={trail:tr};
+  const cw=c.clientWidth||96, ch=c.clientHeight||60;
+  c.width=cw*dpr; c.height=ch*dpr;
+  const ctx=c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  s.trail.forEach(p=>{minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);});
+  const pad=8, sc=Math.min((cw-pad*2)/((maxX-minX)||1),(ch-pad*2)/((maxY-minY)||1));
+  const ox=(cw-(maxX-minX)*sc)/2, oy=(ch-(maxY-minY)*sc)/2;
+  ctx.beginPath();
+  s.trail.forEach((p,j)=>{const x=ox+(p.x-minX)*sc, y=oy+(p.y-minY)*sc; if(j) ctx.lineTo(x,y); else ctx.moveTo(x,y);});
+  ctx.strokeStyle='#10b981'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.stroke();
+  const f=s.trail[0];
+  ctx.beginPath(); ctx.arc(ox+(f.x-minX)*sc, oy+(f.y-minY)*sc, 3.5, 0, Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  });
 }
 // Canvas-based scoring breakdown chart (donut)
 function renderScoringCanvas(eagles, birdies, pars, bogeys, doubles, worse) {

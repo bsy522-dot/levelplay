@@ -1,11 +1,17 @@
 /* dialogue_loader.js
  * 동물농장 NPC 대사 로더
- *  - dialogues.json (Ollama 생성본) 우선
- *  - 실패 시 dialogue_fallback.json 으로 폴백
+ *  - 배포본에 실제로 들어 있는 dialogue_fallback.json 을 기본으로 쓴다.
+ *  - dialogues.json(Ollama 생성본)은 저장소에 없는 선택 파일이므로 무조건 요청하지 않는다.
+ *    → 예전엔 매 로드마다 404 + 콘솔 에러가 났다. 쓰려면 게임 로드 전에
+ *      window.__NPC_DIALOGUES_URL = "_assets/dialogues.json" 을 지정하면 된다.
  *  - window.NPC.say(animalKey, ctx) 로 랜덤 대사 1줄 반환
  */
 (function () {
-  const PATHS = ["_assets/dialogues.json", "_assets/dialogue_fallback.json"];
+  const PATHS = [];
+  if (typeof window !== "undefined" && window.__NPC_DIALOGUES_URL) {
+    PATHS.push(String(window.__NPC_DIALOGUES_URL));
+  }
+  PATHS.push("_assets/dialogue_fallback.json");
   const NPC = {
     data: null,
     source: null,

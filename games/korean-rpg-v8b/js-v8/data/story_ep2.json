@@ -59,6 +59,7 @@
           { "speakerId": "dangun", "speaker": "단군", "text": "회의를 소집하라." }
         ]
       },
+      "objective": "회의장에서 회의 소집",
       "exitTrigger": "council",
       "nextSceneOnExit": "council"
     },
@@ -80,7 +81,7 @@
       "mapId": "ep2_battle_1",
       "camera": "tactical",
       "allies": ["dangun", "ungnyeo", "sinha_general"],
-      "enemies": ["hojok_chief", "hojok_warrior", "hojok_archer", "hojok_rider", "hojok_shaman", "hojok_warrior"],
+      "enemies": ["hojok_chief", "hojok_warrior", "hojok_archer", "hojok_shaman"],
       "allySource": "ep2_allies",
       "enemySource": "ep2_enemies",
       "victoryCondition": "defeat_boss",

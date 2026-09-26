@@ -22,8 +22,33 @@
 import portraitsData from '../data/portraits_data.js';
 import { getPortraitSVG as _getPortraitSVG } from './portrait_art.js';
 
+// 날씨 아이콘 — OS 이모지는 기종마다 모양이 달라져 게임 아트로 부적합(감사 싸구려 #2).
+// 인라인 SVG로 통일한다.
 const WEATHER_ICON = {
-  clear: '☀️', rain: '🌧️', snow: '❄️', fog: '🌫️'
+  clear: '<svg viewBox="0 0 24 24" class="v8-wx"><circle cx="12" cy="12" r="5" fill="#ffd24a"/>'
+       + '<g stroke="#ffd24a" stroke-width="2" stroke-linecap="round">'
+       + '<path d="M12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M19.8 4.2l-2.1 2.1M6.3 17.7l-2.1 2.1"/></g></svg>',
+  rain:  '<svg viewBox="0 0 24 24" class="v8-wx"><path d="M7 15a4 4 0 0 1 .6-8 5.5 5.5 0 0 1 10.4 1.6A3.4 3.4 0 0 1 17.5 15z" fill="#c8d8e8"/>'
+       + '<g stroke="#7ab8ff" stroke-width="2" stroke-linecap="round"><path d="M8 17.5l-1 3M12.5 17.5l-1 3M17 17.5l-1 3"/></g></svg>',
+  snow:  '<svg viewBox="0 0 24 24" class="v8-wx"><g stroke="#dff0ff" stroke-width="2" stroke-linecap="round">'
+       + '<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></g></svg>',
+  fog:   '<svg viewBox="0 0 24 24" class="v8-wx"><g stroke="#c8c8c0" stroke-width="2.4" stroke-linecap="round">'
+       + '<path d="M4 8h16M3 12h14M6 16h15M4 20h12"/></g></svg>',
+};
+
+// 미니맵 타일 색 — maps.json tileLegend의 이름 기준
+const MINIMAP_COLOR = {
+  plain:          '#5c7a44',
+  grass:          '#44632f',
+  forest:         '#27431f',
+  mountain:       '#6b6055',
+  wall:           '#6b6055',
+  water:          '#33608f',
+  road:           '#b09a72',
+  sindansu:       '#d8b840',
+  sacred:         '#d8b840',
+  building_floor: '#8b6b3a',
+  village:        '#8b6b3a',
 };
 
 const CAMERA_LABEL = {
@@ -165,6 +190,12 @@ export function initHUD(container) {
   // 노이즈 요소 초기 표시 상태 반영 (실패해도 HUD 자체는 정상 동작)
   _applyHudConfig();
 
+  // ★ 2026-08-31 재감사 R7: 글자확대 150%에서 상단 바 내용이 44px 밖으로 흘러나왔다.
+  //   바 높이를 고정하지 않고 실제 높이를 CSS 변수(--v8-topbar-h)로 내보내
+  //   행동순서 띠·미니맵이 그 아래로 자동으로 밀리게 한다.
+  _watchTopbarHeight();
+  _watchPanelHeight();
+
   return root;
 }
 
@@ -187,6 +218,50 @@ function _applyHudConfig() {
   } catch (e) {
     console.warn('[hud] applyHudConfig failed', e);
   }
+}
+
+// 하단 유닛 패널 실제 높이 → --v8-panel-h
+// ★ 2026-09-01 3차: A/B 버튼을 bottom 고정값으로 올려 두었더니, 액션 버튼이 있는
+//   패널(154px)에서는 28px이 겹쳤다(재감사2 실측 ab_x_panel=3696px²).
+//   패널 높이는 단계마다 달라지므로(버튼 없음 117px / 있음 154px) 실측해서 내보낸다.
+function _syncPanelHeight() {
+  if (!_root) return;
+  const p = _root.querySelector('#v8-unit-panel');
+  if (!p) return;
+  const open = p.classList.contains('v8-visible');
+  const h = open ? Math.ceil(p.getBoundingClientRect().height) || 0 : 0;
+  document.documentElement.style.setProperty('--v8-panel-h', h + 'px');
+}
+
+// 상단 바 실제 높이 → --v8-topbar-h
+function _syncTopbarHeight() {
+  if (!_root) return;
+  const t = _root.querySelector('#v8-hud-top');
+  if (!t) return;
+  const h = Math.max(36, Math.ceil(t.getBoundingClientRect().height) || 44);
+  document.documentElement.style.setProperty('--v8-topbar-h', h + 'px');
+}
+
+function _watchPanelHeight() {
+  _syncPanelHeight();
+  try {
+    const p = _root.querySelector('#v8-unit-panel');
+    if (p && typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(() => _syncPanelHeight()).observe(p);
+    }
+  } catch (e) { /* 미지원 브라우저는 show/hide 시점 갱신으로 충분 */ }
+  window.addEventListener('resize', _syncPanelHeight);
+}
+
+function _watchTopbarHeight() {
+  _syncTopbarHeight();
+  try {
+    const t = _root.querySelector('#v8-hud-top');
+    if (t && typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(() => _syncTopbarHeight()).observe(t);
+    }
+  } catch (e) { /* 미지원 브라우저는 resize 이벤트로 폴백 */ }
+  window.addEventListener('resize', _syncTopbarHeight);
 }
 
 function _ensureStyles() {
@@ -214,7 +289,9 @@ export function updateHUD(state) {
     sideEl.textContent = state.side === 'ally' ? '아군 턴' : '적군 턴';
     sideEl.classList.toggle('v8-side-enemy', state.side !== 'ally');
   }
-  if (state.weather !== undefined) _root.querySelector('#v8-weather').textContent = WEATHER_ICON[state.weather] || '☀️';
+  if (state.weather !== undefined) {
+    _root.querySelector('#v8-weather').innerHTML = WEATHER_ICON[state.weather] || WEATHER_ICON.clear;
+  }
   // 아군/적 생존 수
   if (state.allyAlive !== undefined || state.enemyAlive !== undefined) {
     const a = _root.querySelector('#v8-ally-count .v8-cnt-ally');
@@ -250,6 +327,7 @@ export function updateHUD(state) {
     }
   }
   _drawMinimap();
+  _syncTopbarHeight();
 }
 
 // ─────────────────────────────────────────────
@@ -259,6 +337,9 @@ export function showUnitPanel(unit, opts = {}) {
   _currentUnit = unit;
   const panel = _root.querySelector('#v8-unit-panel');
   panel.classList.add('v8-visible');
+  // 하단 조작 버튼이 패널을 피해 올라가도록 (styles.css .v8-panel-open)
+  document.body.classList.add('v8-panel-open');
+  requestAnimationFrame(_syncPanelHeight);
 
   const portrait = portraitsData[unit.portraitId || unit.id] || { emoji: '🧍', color: '#888' };
   const pEl = _root.querySelector('#v8-up-portrait');
@@ -298,18 +379,26 @@ export function showUnitPanel(unit, opts = {}) {
   _root.querySelector('#v8-up-xp-val').textContent = `${xp}/${xpMax}`;
 
   // 액션 버튼 활성/비활성
+  //   opts.actions  : 보여줄 액션 목록
+  //   opts.disabled : 보이되 누를 수 없는 액션 (예: 사거리 안에 적이 없으면 '공격')
+  //   ★ 2026-08-31 재감사 후속: 눌러도 아무 일이 없는 버튼이 살아 있으면
+  //     초보가 같은 버튼만 반복해 누르다 턴이 멈춘 것처럼 느낀다.
   const actions = opts.actions || ['attack', 'skill', 'item', 'wait'];
+  const off = opts.disabled || [];
   _root.querySelectorAll('.v8-action-btn').forEach(btn => {
     const act = btn.dataset.act;
     const active = actions.includes(act);
-    btn.disabled = !active || (unit.acted === true);
+    btn.disabled = !active || off.includes(act) || (unit.acted === true);
     btn.style.display = active ? '' : 'none';
   });
+  requestAnimationFrame(_syncPanelHeight);
 }
 
 export function hideUnitPanel() {
   if (!_root) return;
   _root.querySelector('#v8-unit-panel').classList.remove('v8-visible');
+  document.body.classList.remove('v8-panel-open');
+  _syncPanelHeight();
   _currentUnit = null;
   _selectedAction = null;
 }
@@ -328,6 +417,7 @@ function _drawMinimap() {
   const ctx = _minimapCanvas.getContext('2d');
   const W = _minimapCanvas.width, H = _minimapCanvas.height;
   ctx.clearRect(0, 0, W, H);
+  ctx.imageSmoothingEnabled = false;
 
   const map = _minimapMapFn ? _minimapMapFn() : null;
   const units = _minimapUnitsFn ? _minimapUnitsFn() : [];
@@ -336,17 +426,13 @@ function _drawMinimap() {
   const mh = (map && map.h) || 10;
   const tw = W / mw, th = H / mh;
 
-  // 지형
+  // 지형 — ★ 2026-08-31: plain/grass가 전부 기본 남색으로 떨어져 "검은 사각형에
+  //   갈색 십자"로만 보이던 문제(감사 싸구려 #7). 타일 종류별 색을 모두 채운다.
   if (map && map.tiles) {
     for (let y = 0; y < mh; y++) {
       for (let x = 0; x < mw; x++) {
         const t = map.tiles[y] && map.tiles[y][x];
-        let color = '#2a2a3a';
-        if (t === 'mountain' || t === 'wall') color = '#4a3a2a';
-        else if (t === 'water') color = '#2a3a6a';
-        else if (t === 'forest') color = '#2a4a2a';
-        else if (t === 'road') color = '#5a5040';
-        else if (t === 'sacred') color = '#8a7a2a';
+        const color = MINIMAP_COLOR[t] || MINIMAP_COLOR.plain;
         ctx.fillStyle = color;
         ctx.fillRect(x * tw, y * th, Math.ceil(tw), Math.ceil(th));
       }

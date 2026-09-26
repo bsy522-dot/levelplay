@@ -208,15 +208,20 @@ export function openSettings(opts = {}) {
   window.addEventListener('keydown', onKey);
   overlay._onKeyHandler = onKey;
 
+  // 폰 뒤로가기(◁) → [취소]와 같은 길로 닫는다
+  try { if (window.HubBack) window.HubBack.push('kh-settings', () => { _cancel(); }); } catch (e) {}
+
   return overlay;
 }
 
 export function closeSettings() {
+  const _hadOverlay = !!_overlay;
   if (_overlay && _overlay.parentElement) {
     if (_overlay._onKeyHandler) window.removeEventListener('keydown', _overlay._onKeyHandler);
     _overlay.parentElement.removeChild(_overlay);
   }
   _overlay = null;
+  if (_hadOverlay) { try { if (window.HubBack) window.HubBack.pop('kh-settings'); } catch (e) {} }
 }
 
 // 초기화 시 저장된 볼륨을 audio 모듈에 반영

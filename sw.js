@@ -47,6 +47,7 @@ const STATIC_ASSETS = [
   './games/golf-tracker-v3.html',
   // 한국사 영웅전 v8b — 폴더형 (ES Module + JSON 데이터)
   './games/korean-rpg-v8b/index.html',
+  './games/korean-rpg-v8b/hub-back.js',
   './games/korean-rpg-v8b/assets/portraits/hwanoong.png',
   './games/korean-rpg-v8b/assets/models/manifest.json',
   './games/korean-rpg-v8b/js-v8/core/engine.js',
