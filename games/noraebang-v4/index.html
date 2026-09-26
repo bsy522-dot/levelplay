@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<title>StarVoice v4 - 노래방</title>
+<title>노래방</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#555;border-radius:3px}
@@ -17,26 +17,50 @@ body{background:#0a0818;color:#eee;font-family:-apple-system,'Malgun Gothic','�
 #app{height:100vh;display:flex;flex-direction:column}
 button{font-family:inherit;cursor:pointer}
 
-/* Header */
-#header{background:linear-gradient(135deg,#1a1040,#2a1060);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #6a3aaa;flex-shrink:0;z-index:10}
-#header h1{font-size:20px;color:#ff6ab0;text-shadow:0 0 20px rgba(255,106,176,.5)}
-.hdr-btns{display:flex;gap:6px}
-.hdr-btns button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 12px;border-radius:18px;font-size:12px;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
-.hdr-btns button:hover,.hdr-btns button.active{background:rgba(255,106,176,.3);border-color:#ff6ab0}
+/* Header — 이름 하나 + 오른쪽 위 ⚙ 하나 (노래 중에만 멈춤·그만 버튼이 옆에 나옴) */
+#header{background:linear-gradient(135deg,#1a1040,#2a1060);height:64px;padding:0 10px 0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #6a3aaa;flex-shrink:0;z-index:10}
+#header h1{font-size:24px;color:#ff6ab0;text-shadow:0 0 20px rgba(255,106,176,.5)}
+.hdr-btns{display:flex;gap:8px;align-items:center}
+.hdr-btns button{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;width:52px;height:52px;border-radius:50%;font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.hdr-btns button:hover,#btnSet[aria-expanded=true]{background:rgba(255,106,176,.3);border-color:#ff6ab0}
+#singControls{display:none;gap:8px}
+body.singing #singControls{display:flex}
 
-/* Song Select */
-#songSelect{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;align-content:start}
-.cat-header{grid-column:1/-1;font-size:14px;font-weight:700;color:#a855f7;margin:8px 0 2px;padding-left:4px;border-left:3px solid #a855f7}
-.song-card{background:linear-gradient(135deg,rgba(40,20,80,.8),rgba(60,30,100,.6));border:2px solid rgba(255,106,176,.15);border-radius:14px;padding:14px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;min-height:0}
-.song-card:hover{border-color:#ff6ab0;transform:translateY(-2px);box-shadow:0 6px 24px rgba(255,106,176,.2)}
-.song-card .sc-icon{font-size:32px;float:left;margin-right:10px;flex-shrink:0}
-.song-card .sc-title{font-size:15px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.song-card .sc-info{font-size:11px;color:#aaa;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.song-card .sc-stars{color:#ffd700;font-size:13px;margin-top:4px}
-.song-card .sc-high{font-size:10px;color:#8f8;margin-top:2px}
-.song-card .sc-grade{position:absolute;top:8px;right:10px;font-size:20px;font-weight:900;opacity:.3}
-.diff-badge{position:absolute;bottom:8px;right:10px;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
-.diff-easy{background:#4caf50;color:#fff}.diff-medium{background:#ff9800;color:#fff}.diff-hard{background:#f44336;color:#fff}
+/* ⚙ 설정 칸 — 마이크·따라 부를 멜로디·키·음이름·내 기록 */
+#setPanel{position:fixed;top:72px;right:10px;width:min(380px,calc(100vw - 20px));max-height:calc(100vh - 84px);overflow-y:auto;background:linear-gradient(135deg,#1a1040,#2a1060);border:2px solid #6a3aaa;border-radius:16px;padding:4px 16px 16px;z-index:60;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+#setPanel[hidden]{display:none}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:66px;border-bottom:1px solid rgba(255,255,255,.08);font-size:18px;color:#eee}
+.set-row button{min-width:88px;min-height:48px;border-radius:24px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;font-size:18px;font-weight:700;padding:0 14px}
+.set-row button.active,.seg button.on{background:linear-gradient(135deg,#d6337f,#8b3fd9);border-color:transparent}
+.set-key{display:flex;align-items:center;gap:8px}
+.set-key button{min-width:48px;width:48px;padding:0}
+.set-key b{min-width:40px;text-align:center;font-size:20px}
+.seg{display:flex;gap:6px}
+.seg button{min-width:76px;padding:0 10px}
+.set-wide{display:block;width:100%;margin-top:14px;min-height:52px;border-radius:26px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.1);color:#fff;font-size:18px;font-weight:700}
+
+/* Song Select — 큰 그림 카드 4개 + '노래 더 보기' 한 곳 */
+#songSelect{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.feat{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:16px;height:calc(100vh - 176px);min-height:300px;flex-shrink:0}
+.song-card{background:linear-gradient(135deg,rgba(40,20,80,.85),rgba(60,30,100,.65));border:2px solid rgba(255,106,176,.18);border-radius:20px;cursor:pointer;transition:transform .2s,border-color .2s;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px;text-align:center;touch-action:manipulation}
+.song-card:hover{border-color:#ff6ab0;transform:translateY(-2px)}
+.song-card:active{transform:scale(.97)}
+.feat .song-card{container-type:size}
+.feat .sc-icon{font-size:clamp(56px,13vmin,140px);font-size:min(40cqh,58cqw,180px);line-height:1.15}
+.feat .sc-title{font-size:clamp(20px,3.4vmin,34px);font-size:clamp(20px,7cqw,36px);font-weight:800;color:#fff;line-height:1.25}
+.sc-stars{color:#ffd700;font-size:clamp(18px,2.4vmin,26px);letter-spacing:2px;min-height:1.2em}
+.sc-stars .off{color:rgba(255,215,0,.32)}
+.diff-dot{position:absolute;top:12px;right:12px;width:18px;height:18px;border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.25)}
+.diff-easy{background:#4caf50}.diff-medium{background:#ff9800}.diff-hard{background:#f44336}
+.more-btn{flex-shrink:0;min-height:64px;border-radius:32px;border:2px solid rgba(168,85,247,.55);background:rgba(168,85,247,.16);color:#fff;font-size:20px;font-weight:700}
+.more-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;flex-shrink:0}
+.more-grid[hidden]{display:none}
+.more-grid .song-card{flex-direction:row;justify-content:flex-start;min-height:96px;padding:12px 16px;text-align:left;gap:14px}
+.more-grid .sc-icon{font-size:48px;flex-shrink:0;line-height:1}
+.more-grid .sc-txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.more-grid .sc-title{font-size:20px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.more-grid .sc-stars{font-size:18px}
+@media (orientation:landscape) and (max-height:520px){.feat{grid-template-columns:repeat(4,1fr);grid-template-rows:1fr}}
 
 /* Sing Screen */
 #singScreen{flex:1;display:none;flex-direction:column;position:relative}
@@ -45,98 +69,90 @@ button{font-family:inherit;cursor:pointer}
 #pitchCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
 #particleCanvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2}
 
-/* Lyrics */
-#lyricsArea{height:120px;background:linear-gradient(180deg,rgba(30,15,60,.95),rgba(20,10,40,.98));border-top:2px solid #6a3aaa;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 16px;flex-shrink:0}
-#lyricsArea .cur-lyric{font-size:26px;font-weight:900;color:#fff;text-align:center;text-shadow:0 0 20px rgba(255,106,176,.6);min-height:34px;display:flex;align-items:center;gap:2px;flex-wrap:wrap;justify-content:center}
+/* Lyrics — 태블릿에선 멀리서도 보이게 크게 */
+#lyricsArea{height:clamp(120px,20vh,210px);background:linear-gradient(180deg,rgba(30,15,60,.95),rgba(20,10,40,.98));border-top:2px solid #6a3aaa;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 16px;flex-shrink:0}
+#lyricsArea .cur-lyric{font-size:clamp(26px,5.2vmin,52px);font-weight:900;color:#fff;text-align:center;text-shadow:0 0 20px rgba(255,106,176,.6);min-height:1.3em;display:flex;align-items:center;gap:2px;flex-wrap:wrap;justify-content:center}
 #lyricsArea .cur-lyric .syl{transition:color .15s,transform .15s;display:inline-block}
 #lyricsArea .cur-lyric .syl.sung{color:#ffd700;transform:scale(1.15)}
 #lyricsArea .cur-lyric .syl.active{color:#ff6ab0;transform:scale(1.2)}
-#lyricsArea .nxt-lyric{font-size:14px;color:rgba(255,255,255,.3);text-align:center;margin-top:6px;min-height:20px}
-.lyric-prog{width:80%;max-width:500px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden}
+#lyricsArea .nxt-lyric{font-size:clamp(18px,2.8vmin,28px);color:rgba(255,255,255,.62);text-align:center;margin-top:6px;min-height:1.3em}
+.lyric-prog{width:80%;max-width:600px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:8px;overflow:hidden}
 .lyric-prog-bar{height:100%;background:linear-gradient(90deg,#ff6ab0,#a855f7);border-radius:2px;transition:width .1s linear}
 
 /* Score HUD */
 #scoreHUD{position:absolute;top:8px;right:12px;text-align:right;z-index:5}
-#scoreHUD .sv{font-size:32px;font-weight:900;color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.5)}
-#scoreHUD .cv{font-size:13px;color:#8f8}
-#scoreHUD .pn{font-size:12px;color:#aaa;margin-top:2px}
-#scoreHUD .line-fb{font-size:11px;margin-top:4px;font-weight:700;min-height:16px}
+#scoreHUD .sv{font-size:clamp(32px,5vmin,52px);font-weight:900;color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,.5)}
+#scoreHUD .cv{font-size:18px;font-weight:700;color:#8f8}
+#scoreHUD .pn{font-size:24px;color:#e6e0ff;margin-top:2px;min-height:28px}
+#scoreHUD .pn small{font-size:16px;opacity:.8;margin-left:1px}
+#scoreHUD .line-fb{font-size:22px;margin-top:4px;font-weight:800;min-height:28px}
 
 /* Pitch Meter */
-#pitchMeter{position:absolute;left:10px;top:8px;bottom:8px;width:36px;background:rgba(255,255,255,.04);border-radius:6px;z-index:5;overflow:hidden}
+#pitchMeter{position:absolute;left:10px;top:8px;bottom:calc(clamp(120px,20vh,210px) + 8px);width:36px;background:rgba(255,255,255,.04);border-radius:6px;z-index:5;overflow:hidden}
 #pitchMeter .mt{position:absolute;left:0;width:100%;height:20px;background:rgba(76,175,80,.25);border:2px solid #4caf50;border-radius:3px;transition:top .12s}
 #pitchMeter .mu{position:absolute;left:0;width:100%;height:6px;background:#ff6ab0;border-radius:3px;transition:top .06s;box-shadow:0 0 8px rgba(255,106,176,.6)}
-#pitchMeter .ml{position:absolute;bottom:3px;width:100%;text-align:center;font-size:8px;color:#888}
 
 /* Timer */
 #timerBar{position:absolute;top:0;left:0;right:0;height:3px;z-index:5}
 #timerFill{height:100%;background:linear-gradient(90deg,#ff6ab0,#a855f7);transition:width .3s linear}
 
-/* Controls overlay */
-#singControls{position:absolute;bottom:128px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:6;opacity:.7;transition:opacity .2s}
-#singControls:hover{opacity:1}
-#singControls button{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;font-size:14px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
-#singControls button.active{background:rgba(255,106,176,.4);border-color:#ff6ab0}
-
 /* Result */
-#resultScreen{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;overflow-y:auto}
-.res-title{font-size:24px;font-weight:900;color:#ff6ab0;margin-bottom:8px}
-.res-grade{font-size:80px;font-weight:900;margin:8px 0}
+#resultScreen{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;overflow-y:auto}
+.res-title{font-size:26px;font-weight:900;color:#ff6ab0;margin-bottom:4px}
+.res-grade{font-size:clamp(72px,14vmin,120px);font-weight:900;margin:4px 0;line-height:1.1}
 .grade-S{color:#ffd700;text-shadow:0 0 40px rgba(255,215,0,.6)}.grade-A{color:#4caf50;text-shadow:0 0 30px rgba(76,175,80,.5)}
 .grade-B{color:#2196f3}.grade-C{color:#ff9800}.grade-D{color:#f44336}
 .res-score{font-size:48px;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,.4)}
-.res-stars{font-size:36px;margin:10px 0}
-.res-detail{font-size:13px;color:#aaa;margin-bottom:6px;line-height:1.8}
-.res-bars{width:280px;margin:10px auto}
-.res-bar-row{display:flex;align-items:center;margin:4px 0;font-size:12px}
-.res-bar-row .lbl{width:60px;text-align:right;margin-right:8px;color:#ccc}
-.res-bar-row .bar{flex:1;height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden}
-.res-bar-row .bar-fill{height:100%;border-radius:5px;transition:width 1s}
-.res-bar-row .val{width:36px;text-align:right;margin-left:6px;color:#fff;font-weight:700}
-.res-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center}
-.res-btns button{padding:10px 24px;border:none;border-radius:20px;font-size:14px;font-weight:700;transition:all .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.btn-retry{background:linear-gradient(135deg,#ff6ab0,#a855f7);color:#fff}
-.btn-back{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)!important}
-.btn-play{background:rgba(76,175,80,.3);color:#8f8;border:1px solid rgba(76,175,80,.4)!important}
-.btn-share{background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff}
+.res-stars{font-size:36px;margin:8px 0;color:#ffd700}
+.res-more{margin:4px auto 0;width:min(320px,90%);color:#ddd}
+.res-more summary{cursor:pointer;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#d8d0f0;list-style:none}
+.res-more summary::-webkit-details-marker{display:none}
+.res-detail{font-size:16px;color:#d0cce0;margin-bottom:6px;line-height:1.8}
+.res-bars{width:100%;margin:6px auto}
+.res-bar-row{display:flex;align-items:center;margin:6px 0;font-size:16px}
+.res-bar-row .lbl{width:48px;text-align:right;margin-right:8px;color:#ddd}
+.res-bar-row .bar{flex:1;height:12px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden}
+.res-bar-row .bar-fill{height:100%;border-radius:6px;transition:width 1s}
+.res-bar-row .val{width:52px;text-align:right;margin-left:6px;color:#fff;font-weight:700}
+.res-btns{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;justify-content:center;align-items:center;max-width:560px}
+.res-btns button{min-height:56px;padding:0 24px;border:none;border-radius:28px;font-size:18px;font-weight:700;transition:all .2s;white-space:nowrap}
+.res-btns .btn-retry{flex-basis:100%;max-width:340px;min-height:88px;font-size:26px;border-radius:44px}
+.btn-retry{background:linear-gradient(135deg,#d6337f,#8b3fd9);color:#fff}
+.btn-back{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25)!important}
+.btn-play{background:rgba(76,175,80,.3);color:#b6ffb6;border:1px solid rgba(76,175,80,.5)!important}
+.btn-share{background:linear-gradient(135deg,#8b3fd9,#4f46e5);color:#fff}
 
-/* Practice Modal */
+/* Practice Modal (카드 길게 누르기) */
 #practiceModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:50;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 #practiceModal.show{display:flex}
-.pm-box{background:linear-gradient(135deg,#1a1040,#2a1060);border:2px solid #6a3aaa;border-radius:16px;padding:24px;max-width:360px;width:100%}
-.pm-box h3{color:#ff6ab0;margin-bottom:16px;font-size:18px}
-.pm-row{display:flex;align-items:center;justify-content:space-between;margin:10px 0;font-size:14px}
-.pm-row label{color:#ccc}
-.pm-row input[type=range]{width:120px;accent-color:#ff6ab0}
-.pm-row select{background:#1a1040;color:#fff;border:1px solid #6a3aaa;border-radius:6px;padding:4px 8px;font-size:13px}
-.pm-row .val{color:#ff6ab0;font-weight:700;width:40px;text-align:right}
-.pm-btns{display:flex;gap:8px;margin-top:16px;justify-content:center}
-.pm-btns button{padding:8px 20px;border:none;border-radius:16px;font-size:13px;font-weight:700}
+.pm-box{background:linear-gradient(135deg,#1a1040,#2a1060);border:2px solid #6a3aaa;border-radius:16px;padding:24px;max-width:420px;width:100%}
+.pm-box h3{color:#ff6ab0;margin-bottom:12px;font-size:22px}
+.pm-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;font-size:18px}
+.pm-row label{color:#e6e0ff}
+.pm-row input[type=range]{width:150px;height:32px;accent-color:#ff6ab0}
+.pm-row select{background:#1a1040;color:#fff;border:1px solid #6a3aaa;border-radius:8px;padding:4px 10px;font-size:18px;min-height:48px}
+.pm-row .val{color:#ff8ac4;font-weight:700;width:56px;text-align:right}
+.pm-btns{display:flex;gap:10px;margin-top:18px;justify-content:center}
+.pm-btns button{min-height:56px;padding:0 26px;border:none;border-radius:28px;font-size:18px;font-weight:700}
 
-/* Mic Prompt */
-#micPrompt{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:100;flex-direction:column;align-items:center;justify-content:center}
+/* Mic Prompt — 큰 '마이크 켜기' 하나 */
+#micPrompt{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 #micPrompt.show{display:flex}
-#micPrompt .mi{font-size:56px;margin-bottom:14px}
-#micPrompt p{font-size:16px;color:#ccc;margin-bottom:16px;text-align:center;line-height:1.6;padding:0 20px}
-#micPrompt button{padding:12px 32px;background:linear-gradient(135deg,#ff6ab0,#a855f7);border:none;color:#fff;border-radius:24px;font-size:15px;font-weight:700}
-#micPrompt .skip-btn{background:transparent;color:#888;font-size:13px;margin-top:10px;border:none;text-decoration:underline}
+#micPrompt p{font-size:20px;color:#eee;margin-bottom:22px;text-align:center;line-height:1.5}
+#micPrompt #btnAllowMic{min-height:104px;min-width:280px;padding:0 40px;display:flex;align-items:center;justify-content:center;gap:12px;background:linear-gradient(135deg,#d6337f,#8b3fd9);border:none;color:#fff;border-radius:52px;font-size:28px;font-weight:800;box-shadow:0 8px 30px rgba(255,106,176,.4)}
+#micPrompt .mi{font-size:44px;line-height:1}
+#micPrompt .skip-btn{background:transparent;color:#d4cdef;font-size:18px;margin-top:16px;border:none;text-decoration:underline;min-height:52px;padding:0 20px}
 
 /* High Score Modal */
-#hsModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:50;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#hsModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:70;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 #hsModal.show{display:flex}
-.hs-box{background:linear-gradient(135deg,#1a1040,#2a1060);border:2px solid #6a3aaa;border-radius:16px;padding:24px;max-width:400px;width:100%;max-height:70vh;overflow-y:auto}
-.hs-box h3{color:#ff6ab0;margin-bottom:12px}
-.hs-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.hs-box{background:linear-gradient(135deg,#1a1040,#2a1060);border:2px solid #6a3aaa;border-radius:16px;padding:24px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto}
+.hs-box h3{color:#ff6ab0;margin-bottom:12px;font-size:22px}
+.hs-row{display:flex;justify-content:space-between;align-items:center;min-height:52px;border-bottom:1px solid rgba(255,255,255,.06);font-size:18px}
 .hs-row .hs-name{color:#fff}.hs-row .hs-sc{color:#ffd700;font-weight:700}
 .hs-row .hs-gr{font-weight:900;margin-left:6px}
-
-@media(max-width:600px){
-  #songSelect{grid-template-columns:1fr;padding:10px;gap:8px}
-  .song-card{padding:12px}
-  #lyricsArea .cur-lyric{font-size:20px}
-  #scoreHUD .sv{font-size:24px}
-  #singControls button{width:32px;height:32px;font-size:12px}
-}
+.hs-row .hs-none{color:#aaa3c8}
+.hs-box .btn-back{min-height:56px;padding:0 32px;border-radius:28px;font-size:18px;font-weight:700}
 </style>
 <style>
 /* =====================================================================
@@ -371,11 +387,21 @@ button{font-family:inherit;cursor:pointer}
 <body>
 <div id="app">
   <div id="header">
-    <h1>StarVoice v4.1</h1>
+    <h1>노래방</h1>
     <div class="hdr-btns">
-      <button id="btnMic">마이크 OFF</button>
-      <button id="btnHS">기록</button>
+      <div id="singControls">
+        <button id="btnPause" title="잠깐 멈춤" aria-label="잠깐 멈춤">⏸</button>
+        <button id="btnStop" title="그만 부르기" aria-label="그만 부르기">⏹</button>
+      </div>
+      <button id="btnSet" title="설정" aria-label="설정" aria-expanded="false" aria-controls="setPanel">⚙</button>
     </div>
+  </div>
+  <div id="setPanel" hidden>
+    <div class="set-row"><span>마이크</span><button id="btnMic" aria-pressed="false">꺼짐</button></div>
+    <div class="set-row"><span>따라 부를 멜로디</span><button id="btnGuide" class="active" aria-pressed="true">켜짐</button></div>
+    <div class="set-row"><span>키 (높낮이)</span><div class="set-key"><button id="btnKeyDn" title="키 내리기" aria-label="키 내리기">▼</button><b id="keyVal">0</b><button id="btnKeyUp" title="키 올리기" aria-label="키 올리기">▲</button></div></div>
+    <div class="set-row"><span>음이름</span><div class="seg" id="noteLangSeg"><button data-nl="ko">도레미</button><button data-nl="en">C D E</button></div></div>
+    <button id="btnHS" class="set-wide">내 기록 보기</button>
   </div>
   <div id="songSelect"></div>
   <div id="singScreen">
@@ -385,19 +411,12 @@ button{font-family:inherit;cursor:pointer}
       <canvas id="pitchCanvas"></canvas>
       <canvas id="particleCanvas"></canvas>
     </div>
-    <div id="pitchMeter"><div class="mt"></div><div class="mu"></div><div class="ml">음정</div></div>
+    <div id="pitchMeter" aria-label="음정"><div class="mt"></div><div class="mu"></div></div>
     <div id="scoreHUD">
       <div class="sv" id="sDisp">0</div>
       <div class="cv" id="cDisp"></div>
       <div class="pn" id="pNote"></div>
       <div class="line-fb" id="lineFb"></div>
-    </div>
-    <div id="singControls">
-      <button id="btnGuide" title="가이드 멜로디">♪</button>
-      <button id="btnPause" title="일시정지">⏸</button>
-      <button id="btnStop" title="중지">⏹</button>
-      <button id="btnKeyUp" title="키 올리기">▲</button>
-      <button id="btnKeyDn" title="키 내리기">▼</button>
     </div>
     <div id="lyricsArea">
       <div class="cur-lyric" id="curLyric"></div>
@@ -416,10 +435,9 @@ button{font-family:inherit;cursor:pointer}
   <div id="resultScreen"></div>
 </div>
 <div id="micPrompt">
-  <div class="mi">🎤</div>
-  <p>마이크 사용 권한이 필요합니다.<br>음정 측정을 위해 허용해 주세요.</p>
-  <button id="btnAllowMic">마이크 허용</button>
-  <button class="skip-btn" id="btnSkipMic">마이크 없이 진행</button>
+  <p>마이크를 켜면 별을 받아요</p>
+  <button id="btnAllowMic"><span class="mi">🎤</span>마이크 켜기</button>
+  <button class="skip-btn" id="btnSkipMic">마이크 없이 듣기</button>
 </div>
 <div id="practiceModal"><div class="pm-box" id="pmBox"></div></div>
 <div id="hsModal"><div class="hs-box" id="hsBox"></div></div>
@@ -1248,7 +1266,7 @@ button{font-family:inherit;cursor:pointer}
     wrap.appendChild(icon);
 
     const txt = createEl('div', 'fx-judge-text', wrap);
-    txt.textContent = G;
+    txt.textContent = ({PERFECT:'최고!',GREAT:'잘했어!',GOOD:'좋아!',MISS:'아쉬워'})[G] || G;
     txt.style.color = color;
 
     setTimeout(() => wrap.remove(), 850);
@@ -1409,6 +1427,12 @@ const C4=261.63,D4=293.66,E4=329.63,F4=349.23,G4=392,A4=440,B4=493.88;
 const C5=523.25,D5=587.33,E5=659.26,F5=698.46,G5=784;
 const NOTE_NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 function freqToNote(f){if(!f||f<=0)return"";const n=12*Math.log2(f/440)+69;const nn=Math.round(n);return NOTE_NAMES[nn%12]+(Math.floor(nn/12)-1);}
+// 화면용 음이름: 기본 한글 도레미(옥타브는 작은 숫자), ⚙에서 C D E 선택 가능
+const NOTE_KO=["도","도#","레","레#","미","파","파#","솔","솔#","라","라#","시"];
+let noteLang='ko';try{if(localStorage.getItem('sv4_note_lang')==='en')noteLang='en';}catch(e){}
+function noteParts(f){if(!f||f<=0)return null;const nn=Math.round(12*Math.log2(f/440)+69);return{n:(noteLang==='en'?NOTE_NAMES:NOTE_KO)[((nn%12)+12)%12],o:Math.floor(nn/12)-1};}
+function noteHTML(f){const p=noteParts(f);return p?p.n+'<small>'+p.o+'</small>':'';}
+function drawNoteName(ctx,f,x,y,px,color){const p=noteParts(f);if(!p)return;ctx.fillStyle=color;ctx.font=px+'px sans-serif';ctx.fillText(p.n,x,y);const w=ctx.measureText(p.n).width;ctx.font=Math.round(px*.62)+'px sans-serif';ctx.fillText(String(p.o),x+w+1,y);}
 function transpose(f,semi){return f*Math.pow(2,semi/12);}
 
 // ===================== 12 SONGS =====================
@@ -1623,12 +1647,11 @@ async function startMic(){
     analyser=audioCtx.createAnalyser();analyser.fftSize=BUF;
     src.connect(analyser);micOn=true;
     if(window.KaraokeAudio)KaraokeAudio.init(audioCtx,analyser,BUF);
-    document.getElementById('btnMic').textContent='마이크 ON';
-    document.getElementById('btnMic').classList.add('active');
+    syncSettings();
     return true;
   }catch(e){console.error('Mic:',e);return false;}
 }
-function stopMic(){if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}micOn=false;document.getElementById('btnMic').textContent='마이크 OFF';document.getElementById('btnMic').classList.remove('active');}
+function stopMic(){if(micStream){micStream.getTracks().forEach(t=>t.stop());micStream=null;}micOn=false;syncSettings();}
 
 function detectPitch(){
   if(!analyser||!micOn)return null;
@@ -1665,7 +1688,7 @@ function startRecording(){
     if(gState==='result'&&recordedBlob.size>0&&!document.getElementById('rPlay')){
       const btns=document.querySelector('#resultScreen .res-btns');
       if(btns){
-        const bp=document.createElement('button');bp.className='btn-play';bp.id='rPlay';bp.textContent='녹음 재생';
+        const bp=document.createElement('button');bp.className='btn-play';bp.id='rPlay';bp.textContent='내 노래 듣기';
         bp.onclick=()=>playRecording();
         btns.insertBefore(bp,document.getElementById('rBack'));
       }
@@ -1728,29 +1751,43 @@ function getGrade(s){if(s>=95)return'S';if(s>=85)return'A';if(s>=70)return'B';if
 function getStars(s){if(s>=95)return 5;if(s>=80)return 4;if(s>=60)return 3;if(s>=40)return 2;if(s>=20)return 1;return 0;}
 
 // ===================== RENDER SONG LIST =====================
+// 첫 화면 = 큰 그림 카드 4곡, 나머지 곡은 '노래 더 보기' 한 곳에 (곡·기능은 그대로 12곡)
+const FEAT_IDS=[1,2,3,4];
+const DIFF_ORDER={'diff-easy':0,'diff-medium':1,'diff-hard':2};
+let showMoreSongs=false;
 function renderList(){
   const c=document.getElementById('songSelect');c.innerHTML='';
-  const hs=getHS();const cats=[...new Set(SONGS.map(s=>s.cat))];
-  cats.forEach(cat=>{
-    const h=document.createElement('div');h.className='cat-header';h.textContent=cat;c.appendChild(h);
-    SONGS.filter(s=>s.cat===cat).forEach(song=>{
-      const d=document.createElement('div');d.className='song-card';
-      const rec=hs[song.id];const stars=rec?getStars(rec.s):0;
-      d.innerHTML=`<div class="diff-badge ${song.dc}">${song.diff}</div>
-        <div class="sc-icon">${song.icon}</div>
-        <div class="sc-title">${song.title}</div>
-        <div class="sc-info">BPM ${song.bpm} · ${song.dur}초</div>
-        <div class="sc-stars">${stars>0?'★'.repeat(stars)+'☆'.repeat(5-stars):'☆☆☆☆☆'}</div>
-        ${rec?`<div class="sc-high">최고 ${rec.s}점</div>`:''}
-        ${rec?`<div class="sc-grade grade-${rec.g}">${rec.g}</div>`:''}`;
-      // long press for practice — 발동 시 이어지는 click(pickSong)을 삼켜 모달 뒤 재생 시작 방지
-      let lt,lpFired=false;
-      d.onclick=()=>{if(lpFired){lpFired=false;return;}pickSong(song,false);};
-      d.onpointerdown=()=>{lpFired=false;lt=setTimeout(()=>{lpFired=true;openPractice(song);},600);};
-      d.onpointerup=()=>clearTimeout(lt);d.onpointerleave=()=>clearTimeout(lt);
-      c.appendChild(d);
-    });
-  });
+  const hs=getHS();
+  const feat=document.createElement('div');feat.className='feat';
+  const more=document.createElement('div');more.className='more-grid';more.id='moreSongs';more.hidden=!showMoreSongs;
+  const makeCard=song=>{
+    const d=document.createElement('div');d.className='song-card';
+    d.setAttribute('role','button');d.setAttribute('aria-label',song.title+' ('+song.diff+')');
+    const rec=hs[song.id];const stars=rec?getStars(rec.s):0;
+    const st=rec?'★'.repeat(stars)+'<span class="off">'+'★'.repeat(5-stars)+'</span>':'';
+    d.innerHTML=`<span class="diff-dot ${song.dc}" title="${song.diff}"></span>
+      <div class="sc-icon">${song.icon}</div>
+      <div class="sc-txt"><div class="sc-title">${song.title}</div><div class="sc-stars">${st}</div></div>`;
+    // long press for practice — 발동 시 이어지는 click(pickSong)을 삼켜 모달 뒤 재생 시작 방지
+    let lt,lpFired=false;
+    d.onclick=()=>{if(lpFired){lpFired=false;return;}pickSong(song,false);};
+    d.onpointerdown=()=>{lpFired=false;lt=setTimeout(()=>{lpFired=true;openPractice(song);},600);};
+    d.onpointerup=()=>clearTimeout(lt);d.onpointerleave=()=>clearTimeout(lt);
+    return d;
+  };
+  FEAT_IDS.forEach(id=>{const s=SONGS.find(x=>x.id===id);if(s)feat.appendChild(makeCard(s));});
+  SONGS.filter(s=>FEAT_IDS.indexOf(s.id)<0).map((s,i)=>({s,i}))
+    .sort((a,b)=>(DIFF_ORDER[a.s.dc]-DIFF_ORDER[b.s.dc])||(a.i-b.i))
+    .forEach(o=>more.appendChild(makeCard(o.s)));
+  const mb=document.createElement('button');mb.className='more-btn';mb.id='btnMore';
+  mb.setAttribute('aria-expanded',String(showMoreSongs));mb.setAttribute('aria-controls','moreSongs');
+  mb.textContent=showMoreSongs?'접기 ▲':'노래 더 보기 ▼';
+  mb.onclick=()=>{
+    showMoreSongs=!showMoreSongs;more.hidden=!showMoreSongs;
+    mb.textContent=showMoreSongs?'접기 ▲':'노래 더 보기 ▼';mb.setAttribute('aria-expanded',String(showMoreSongs));
+    if(showMoreSongs)mb.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  c.appendChild(feat);c.appendChild(mb);c.appendChild(more);
 }
 
 // ===================== PRACTICE MODAL =====================
@@ -1796,8 +1833,8 @@ async function pickSong(song,isPractice){
       const ok=await startMic();document.getElementById('micPrompt').classList.remove('show');beginSing();
       if(!ok){
         const div=document.createElement('div');
-        div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(244,67,54,.92);color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:30;text-align:center;max-width:90%;';
-        div.textContent='마이크를 사용할 수 없어 점수 측정 없이 진행합니다';
+        div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(198,40,40,.95);color:#fff;padding:12px 20px;border-radius:24px;font-size:17px;z-index:30;text-align:center;max-width:90%;';
+        div.textContent='마이크가 안 켜져서 점수 없이 불러요';
         document.getElementById('singScreen').appendChild(div);
         setTimeout(()=>{div.style.transition='opacity .4s';div.style.opacity='0';setTimeout(()=>div.remove(),400);},3500);
       }
@@ -1805,8 +1842,8 @@ async function pickSong(song,isPractice){
     document.getElementById('btnSkipMic').onclick=()=>{
       document.getElementById('micPrompt').classList.remove('show');beginSing();
       const div=document.createElement('div');
-      div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(33,150,243,.92);color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:30;text-align:center;max-width:90%;';
-      div.textContent='마이크 없이 감상 모드로 진행합니다 (점수 측정 없음)';
+      div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:rgba(21,101,192,.95);color:#fff;padding:12px 20px;border-radius:24px;font-size:17px;z-index:30;text-align:center;max-width:90%;';
+      div.textContent='마이크 없이 들어요 (점수 없음)';
       document.getElementById('singScreen').appendChild(div);
       setTimeout(()=>{div.style.transition='opacity .4s';div.style.opacity='0';setTimeout(()=>div.remove(),400);},3500);
     };
@@ -1817,6 +1854,7 @@ async function pickSong(song,isPractice){
 
 function beginSing(){
   gState='singing';
+  document.body.classList.add('singing');closeSettings();
   document.getElementById('songSelect').style.display='none';
   document.getElementById('singScreen').style.display='flex';
   document.getElementById('resultScreen').style.display='none';
@@ -1837,6 +1875,7 @@ function beginSing(){
   startT=performance.now();
   if(micOn)startRecording();
   document.getElementById('btnGuide').classList.toggle('active',guideOn);
+  syncSettings();
   // v4: auto key-shift suggestion 5s after song start (one-shot)
   // 마이크 프롬프트 경로(pickSong의 !micOn 조기 return)에서도 발동하도록 beginSing으로 재배치
   window.__keyShiftSuggested=false;
@@ -1846,11 +1885,11 @@ function beginSing(){
       const r=KaraokeAudio.estimateUserRange?KaraokeAudio.estimateUserRange():null;
       if(r&&Math.abs(r.suggestedKeyShift)>=2){
         const div=document.createElement('div');
-        div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(168,85,247,.95),rgba(255,106,176,.95));color:#fff;padding:10px 16px;border-radius:20px;font-size:13px;z-index:30;box-shadow:0 4px 20px rgba(255,106,176,.4);cursor:pointer;animation:fade-in .3s';
+        div.style.cssText='position:absolute;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(139,63,217,.97),rgba(214,51,127,.97));color:#fff;padding:12px 20px;min-height:48px;border-radius:24px;font-size:17px;z-index:30;box-shadow:0 4px 20px rgba(255,106,176,.4);cursor:pointer;animation:fade-in .3s;white-space:nowrap';
         const dir=r.suggestedKeyShift>0?'+':'';
-        div.textContent='\u{1F3B5} 음역 추천: 키 '+dir+r.suggestedKeyShift+' (탭하여 적용)';
+        div.textContent='\u{1F3B5} 키 '+dir+r.suggestedKeyShift+' 추천 · 누르면 바꿔요';
         div.onclick=()=>{
-          keyShift=r.suggestedKeyShift;
+          keyShift=r.suggestedKeyShift;syncSettings();
           div.remove();
           window.__keyShiftSuggested=true;
         };
@@ -1957,7 +1996,7 @@ function gameLoop(){
   const fs=totalN>0?Math.min(100,Math.round(score/Math.max(1,totalN))):0;
   document.getElementById('sDisp').textContent=fs;
   document.getElementById('cDisp').textContent=combo>1?combo+' 콤보!':'';
-  document.getElementById('pNote').textContent=userFreq?freqToNote(dispFreq):'---';
+  const pnH=userFreq?noteHTML(dispFreq):'';const pnEl=document.getElementById('pNote');if(pnEl.__h!==pnH){pnEl.__h=pnH;pnEl.innerHTML=pnH;}
 
   // Per-line scoring feedback
   let curLI=-1;
@@ -1999,10 +2038,10 @@ function gameLoop(){
       lineSnapScore=score;lineSnapN=totalN;
       lineScores[curLI-1]=true;
       let fbText='',fbColor='';
-      if(lsc>=90){fbText='Perfect!';fbColor='#ffd700';spawnFireworks(document.getElementById('particleCanvas'));}
-      else if(lsc>=70){fbText='Great!';fbColor='#4caf50';}
-      else if(lsc>=50){fbText='Good';fbColor='#2196f3';}
-      else{fbText='Miss';fbColor='#f44336';}
+      if(lsc>=90){fbText='최고!';fbColor='#ffd700';spawnFireworks(document.getElementById('particleCanvas'));}
+      else if(lsc>=70){fbText='잘했어!';fbColor='#5fd068';}
+      else if(lsc>=50){fbText='좋아!';fbColor='#64b5f6';}
+      else{fbText='아쉬워';fbColor='#ff7a70';}
       const fb=document.getElementById('lineFb');fb.textContent=fbText;fb.style.color=fbColor;
       lastLineFbTime=now;lastLineFbText=fbText;
     }
@@ -2054,13 +2093,13 @@ function drawPitch(elapsed,userFreq,targetFreq){
 
   // Grid
   const noteFreqs=[C3,D3,E3,F3,G3,A3,B3,C4,D4,E4,F4,G4,A4,B4,C5,D5,E5];
-  const noteNames2=["C3","D3","E3","F3","G3","A3","B3","C4","D4","E4","F4","G4","A4","B4","C5","D5","E5"];
-  ctx.lineWidth=1;ctx.font='9px sans-serif';
+  ctx.lineWidth=1;
   noteFreqs.forEach((f,i)=>{
     const y=freqToY(f);if(y<0||y>H)return;
     ctx.strokeStyle=f===C4||f===C5?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)';
     ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillText(noteNames2[i],3,y-2);
+    // 줄 이름은 연습 모드 '음이름 표시'를 켰을 때만 (기본 화면은 줄만)
+    if(showNoteNames)drawNoteName(ctx,f,50,y-3,14,'rgba(255,255,255,.45)');
   });
 
   // Time window
@@ -2084,13 +2123,12 @@ function drawPitch(elapsed,userFreq,targetFreq){
     ctx.beginPath();ctx.roundRect(x,y-bH/2,Math.max(3,x2-x),bH,3);ctx.fill();ctx.stroke();
     // Note name
     if(showNoteNames&&!past){
-      ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='9px sans-serif';
-      ctx.fillText(freqToNote(tf),x+2,y-bH/2-2);
+      drawNoteName(ctx,tf,x+2,y-bH/2-3,16,'rgba(255,255,255,.8)');
     }
     // Syllable on bar
     if(n.s&&!past){
-      ctx.fillStyle=cur?'#fff':'rgba(255,255,255,.5)';ctx.font=cur?'bold 11px sans-serif':'10px sans-serif';
-      ctx.fillText(n.s,x+2,y+bH/2+10);
+      ctx.fillStyle=cur?'#fff':'rgba(255,255,255,.72)';ctx.font=cur?'bold 18px sans-serif':'16px sans-serif';
+      ctx.fillText(n.s,x+2,y+bH/2+17);
     }
   });
 
@@ -2126,6 +2164,7 @@ function drawParticles(){
 // ===================== END SONG =====================
 function endSong(){
   gState='result';killSynth();stopRecording();
+  document.body.classList.remove('singing');
   if(animId)cancelAnimationFrame(animId);
 
   // v4.1: close any open per-note scoring — 마지막 노트도 점수에 포함
@@ -2146,19 +2185,20 @@ function endSong(){
   const r=document.getElementById('resultScreen');r.style.display='flex';
   r.innerHTML=`
     <div class="res-title">${practiceMode?'연습 완료!':'노래 완료!'}</div>
-    ${noScore?`<div class="res-score" style="margin:18px 0;font-size:18px;color:rgba(255,255,255,.65)">마이크 미사용 · 점수 측정 없음</div>`:`<div class="res-grade grade-${grade}">${grade}</div>
+    ${noScore?`<div class="res-score" style="margin:18px 0;font-size:20px;color:rgba(255,255,255,.8)">마이크 없이 불렀어요 · 점수 없음</div>`:`<div class="res-grade grade-${grade}">${grade}</div>
     <div class="res-score">${fs}점</div>
     <div class="res-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+    <details class="res-more"><summary>자세히 보기 ▾</summary>
     <div class="res-bars">
       <div class="res-bar-row"><div class="lbl">음정</div><div class="bar"><div class="bar-fill" style="width:${pitchAcc}%;background:linear-gradient(90deg,#ff6ab0,#a855f7)"></div></div><div class="val">${pitchAcc}%</div></div>
       <div class="res-bar-row"><div class="lbl">리듬</div><div class="bar"><div class="bar-fill" style="width:${rhythmAcc}%;background:linear-gradient(90deg,#4caf50,#2196f3)"></div></div><div class="val">${rhythmAcc}%</div></div>
     </div>
-    <div class="res-detail">최대 콤보: ${maxCombo} · 히트율: ${totalN>0?Math.round(hitN/totalN*100):0}%</div>`}
+    <div class="res-detail">최대 콤보: ${maxCombo} · 히트율: ${totalN>0?Math.round(hitN/totalN*100):0}%</div></details>`}
     <div class="res-btns">
       <button class="btn-retry" id="rRetry">다시 부르기</button>
-      ${recordedBlob?'<button class="btn-play" id="rPlay">녹음 재생</button>':''}
-      ${noScore?'':'<button class="btn-share" id="rShare">📷 공유 카드</button>'}
-      <button class="btn-back" id="rBack">곡 선택</button>
+      ${recordedBlob?'<button class="btn-play" id="rPlay">내 노래 듣기</button>':''}
+      ${noScore?'':'<button class="btn-share" id="rShare">📷 사진 저장</button>'}
+      <button class="btn-back" id="rBack">노래 고르기</button>
     </div>`;
   const rShareBtn=document.getElementById('rShare');
   if(rShareBtn)rShareBtn.onclick=()=>downloadShareCard();
@@ -2168,7 +2208,7 @@ function endSong(){
     if(window.KaraokeFX)KaraokeFX.cleanup();
     if(shaderOn&&window.KaraokeShader){KaraokeShader.destroy();shaderOn=false;}
     r.style.display='none';document.getElementById('singScreen').style.display='none';
-    document.getElementById('songSelect').style.display='grid';renderList();
+    document.getElementById('songSelect').style.display='';renderList();
   };
   if(recordedBlob){
     document.getElementById('rPlay').onclick=()=>playRecording();
@@ -2197,7 +2237,7 @@ function downloadShareCard(){
 
   // Title
   x.fillStyle='#ff6ab0'; x.textAlign='center';
-  x.font='bold 64px sans-serif'; x.fillText('🎤 StarVoice v4', W/2, 200);
+  x.font='bold 64px sans-serif'; x.fillText('🎤 노래방', W/2, 200);
   x.fillStyle='rgba(255,255,255,.6)'; x.font='32px sans-serif';
   x.fillText('나의 노래방 점수', W/2, 260);
 
@@ -2235,21 +2275,35 @@ function downloadShareCard(){
   // Footer
   x.fillStyle='rgba(255,255,255,.4)'; x.font='32px sans-serif';
   const date = new Date().toLocaleDateString('ko-KR');
-  x.fillText(date+' · StarVoice v4', W/2, H-100);
+  x.fillText(date+' · 노래방', W/2, H-100);
 
   // Download
   c.toBlob(blob=>{
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `StarVoice_${songTitle}_${grade}_${fs}점.png`;
+    a.download = `노래방_${songTitle}_${grade}_${fs}점.png`;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }, 'image/png', 0.95);
 }
 
 // ===================== CONTROLS =====================
-document.getElementById('btnGuide').onclick=()=>{guideOn=!guideOn;document.getElementById('btnGuide').classList.toggle('active',guideOn);if(!guideOn)muteSynth();};
+// ⚙ 설정 칸: 켜짐/꺼짐 글자·키 숫자·음이름 선택을 지금 상태로 맞춤
+function syncSettings(){
+  const bm=document.getElementById('btnMic');if(bm){bm.textContent=micOn?'켜짐':'꺼짐';bm.classList.toggle('active',micOn);bm.setAttribute('aria-pressed',String(micOn));}
+  const bg=document.getElementById('btnGuide');if(bg){bg.textContent=guideOn?'켜짐':'꺼짐';bg.classList.toggle('active',guideOn);bg.setAttribute('aria-pressed',String(guideOn));}
+  const kv=document.getElementById('keyVal');if(kv)kv.textContent=(keyShift>0?'+':'')+keyShift;
+  document.querySelectorAll('#noteLangSeg button').forEach(b=>{const on=b.dataset.nl===noteLang;b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));});
+}
+function closeSettings(){const p=document.getElementById('setPanel');if(p)p.hidden=true;const b=document.getElementById('btnSet');if(b)b.setAttribute('aria-expanded','false');}
+document.getElementById('btnSet').onclick=e=>{
+  e.stopPropagation();const p=document.getElementById('setPanel');
+  if(p.hidden){syncSettings();p.hidden=false;document.getElementById('btnSet').setAttribute('aria-expanded','true');}else closeSettings();
+};
+document.addEventListener('click',e=>{const p=document.getElementById('setPanel');if(p&&!p.hidden&&!p.contains(e.target))closeSettings();});
+document.querySelectorAll('#noteLangSeg button').forEach(b=>{b.onclick=()=>{noteLang=b.dataset.nl==='en'?'en':'ko';try{localStorage.setItem('sv4_note_lang',noteLang);}catch(e){}syncSettings();};});
+document.getElementById('btnGuide').onclick=()=>{guideOn=!guideOn;document.getElementById('btnGuide').classList.toggle('active',guideOn);if(!guideOn)muteSynth();syncSettings();};
 document.getElementById('btnPause').onclick=()=>{
   if(gState!=='singing')return;
   paused=!paused;
@@ -2258,11 +2312,12 @@ document.getElementById('btnPause').onclick=()=>{
   else{pauseAccum+=performance.now()-pauseT;}
 };
 document.getElementById('btnStop').onclick=()=>{if(gState==='singing')endSong();};
-function showKeyFb(){const fb=document.getElementById('lineFb');if(!fb)return;fb.textContent='키 '+(keyShift>0?'+':'')+keyShift;fb.style.color='#c084fc';lastLineFbTime=performance.now();}
+function showKeyFb(){syncSettings();const fb=document.getElementById('lineFb');if(!fb)return;fb.textContent='키 '+(keyShift>0?'+':'')+keyShift;fb.style.color='#c084fc';lastLineFbTime=performance.now();}
 document.getElementById('btnKeyUp').onclick=()=>{keyShift=Math.min(keyShift+1,6);showKeyFb();};
 document.getElementById('btnKeyDn').onclick=()=>{keyShift=Math.max(keyShift-1,-6);showKeyFb();};
 document.getElementById('btnMic').onclick=async()=>{if(micOn)stopMic();else await startMic();};
 document.getElementById('btnHS').onclick=()=>{
+  closeSettings();
   const m=document.getElementById('hsModal');m.classList.add('show');
   const hs=getHS();
   let html='<h3>최고 기록</h3>';
@@ -2270,7 +2325,7 @@ document.getElementById('btnHS').onclick=()=>{
     const rec=hs[s.id];
     html+=`<div class="hs-row"><span class="hs-name">${s.icon} ${s.title}</span>`;
     if(rec)html+=`<span><span class="hs-sc">${rec.s}점</span><span class="hs-gr grade-${rec.g}">${rec.g}</span></span>`;
-    else html+=`<span style="color:#555">기록 없음</span>`;
+    else html+=`<span class="hs-none">기록 없음</span>`;
     html+=`</div>`;
   });
   html+=`<div style="text-align:center;margin-top:14px"><button class="btn-back" onclick="document.getElementById('hsModal').classList.remove('show')">닫기</button></div>`;
@@ -2289,7 +2344,7 @@ function resizeCanvases(){
 window.addEventListener('resize',resizeCanvases);
 
 // ===================== INIT =====================
-renderList();
+renderList();syncSettings();
 
 // v4: triple-tap on title toggles debug panel (hidden by default)
 (function(){

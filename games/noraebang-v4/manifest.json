@@ -1,6 +1,6 @@
 {
-  "name": "StarVoice v4 — 노래방",
-  "short_name": "StarVoice",
+  "name": "노래방",
+  "short_name": "노래방",
   "description": "AI 음정 분석 K-노래방",
   "start_url": "./index.html",
   "scope": "./",

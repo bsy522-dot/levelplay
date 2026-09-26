@@ -996,7 +996,7 @@ function gameThumb(g,extraCls){
   if(!g)return '';
   var sym=g.si||'i-play', col=g.pc||'#4338CA';
   return '<div class="gth gthp'+(extraCls?' '+extraCls:'')+'" style="--pc:'+col+'"'
-    +' role="img" aria-label="'+_thEsc(g.nm)+'">'
+    +' role="img" aria-label="'+_thEsc(gameVN(g))+'">'
     +'<svg class="ico gthp-i" aria-hidden="true" focusable="false"><use href="#'+sym+'"/></svg>'
     +'</div>';
 }
@@ -1247,15 +1247,15 @@ const GMS=[
 {nm:'시간여행',em:'⏳',u:'games/timeline-game.html',th:'timeline-game',si:'i-timer',pc:'#A16207',d:'역사 사건 시간순 배치'},
 {nm:'수학 퍼즐',em:'🧩',u:'games/math-puzzle.html',th:'math-puzzle',si:'i-puzzle',pc:'#1D4ED8',d:'빈칸 수식 완성하기'},
 {nm:'과학 실험실',em:'🔬',u:'games/science-lab.html',th:'science-lab',si:'i-science',pc:'#0E7490',d:'물리 시뮬레이션 실험'},
-{nm:'리듬 게임',em:'🎵',u:'games/rhythm-game.html',th:'rhythm-game',si:'i-bolt',pc:'#7C3AED',d:'노트 타이밍 맞추기'},
+{nm:'리듬 게임',em:'🎵',u:'games/rhythm-game.html',th:'rhythm-game',si:'i-bolt',pc:'#7C3AED',d:'노래에 맞춰 톡톡'},
 {nm:'단어 연결',em:'🔗',u:'games/word-connect.html',th:'word-connect',si:'i-speak',pc:'#B91C1C',d:'자모 조합 단어 만들기'},
 {nm:'기억력 카드',em:'🃏',u:'games/memory-game.html',th:'memory-game',si:'i-cards',pc:'#6D28D9',d:'카드 뒤집기 매칭'},
 {nm:'스도쿠',em:'🔢',u:'games/sudoku.html',th:'sudoku',si:'i-grid',pc:'#1D4ED8',d:'숫자 퍼즐'},
 {nm:'문장 만들기',em:'📝',u:'games/sentence-builder.html',th:'sentence-builder',si:'i-book',pc:'#9F1239',d:'영어 단어 순서 배치'},
 {nm:'주기율표',em:'⚗️',u:'games/periodic-table.html',th:'periodic-table',si:'i-chem',pc:'#0E7490',d:'원소 기호·이름 퀴즈'},
-{nm:'피아노 마스터',em:'🎹',u:'games/piano-v3.html',th:'piano-v3',si:'i-music',pc:'#6D28D9',d:'22곡 클래식+Synthesia+바이엘+연습모드'},
-{nm:'바이올린 리듬',em:'🎻',u:'games/ViolinReal-v3.html',th:'ViolinReal-v3',si:'i-note',pc:'#7C3AED',d:'리듬게임 14곡+곡연주+학습30단계'},
-{nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',th:'noraebang-v4',si:'i-sound',pc:'#C2410C',d:'StarVoice v4.1 — 옥타브무관 채점+지연보정+MPM음정엔진+WebGL셰이더+12곡+S~D채점+공유카드'},
+{nm:'피아노 마스터',em:'🎹',u:'games/piano-v3.html',th:'piano-v3',si:'i-music',pc:'#6D28D9',d:'따라치기 22곡 · 혼자 연주 · 배우기'},
+{nm:'바이올린 리듬',em:'🎻',u:'games/ViolinReal-v3.html',th:'ViolinReal-v3',si:'i-note',pc:'#7C3AED',d:'따라 켜기 14곡 · 혼자 연주 · 배우기'},
+{nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',th:'noraebang-v4',si:'i-sound',pc:'#C2410C',d:'동요·민요 12곡 따라 부르기'},
 {nm:'색소폰 마스터',em:'🎷',u:'games/saxophone-v2.html',th:'saxophone-v2',si:'i-wave',pc:'#B45309',d:'실물 20키 멀티터치 운지+크로마틱 32음+동요 5곡'},
 {nm:'복싱 트레이너',em:'🥊',u:'games/boxing-trainer-v5.html',th:'boxing-trainer-v5',si:'i-dumbbell',pc:'#15803D',d:'3D 복싱+커리어+10대전'},
 {nm:'골프 트래커',em:'⛳',u:'games/golf-tracker-v3.html',th:'golf-tracker-v3',si:'i-target',pc:'#166534',d:'스윙분석+통계+라운드'},
@@ -1268,6 +1268,8 @@ const GMS=[
 {nm:'요리왕',em:'🍳',u:'games/cooking-master.html',th:'cooking-master',si:'i-cook',pc:'#BE185D',d:'한식15종 요리+영양학습'},
 {nm:'동물농장 타이쿤',em:'🚜',u:'games/animal-farm.html',th:'animal-farm',si:'i-leaf',pc:'#15803D',d:'12동물·10작물·AI컨설턴트·P2P멀티·4계절BGM'},
 ];
+/* 화면에 보이는 게임 이름 — nm 은 분류·메타·배지·놀아 본 기록·ia_hub 의 열쇠라 그대로 두고, 그릴 때만 이 표로 바꾼다 */
+const GAME_VN={'피아노 마스터':'피아노','바이올린 리듬':'바이올린','노래방 v4 ✨':'노래방'};function gameVN(g){var n=(g&&typeof g==='object')?g.nm:g;return GAME_VN[n]||n;}
 
 let QUIZ=[
 {q:'태양계 여덟 행성 중 가장 큰 행성은?',a:['목성','토성','해왕성','천왕성'],c:0,cat:'과학'},
@@ -1409,7 +1411,7 @@ function playVid(id,t){document.getElementById('moB').innerHTML='<div id="vidSpn
 function sc(s){return'<div class="gc" style="position:relative" onclick="playSim(\''+s.u+'\',\''+s.nm+'\')"><button onclick="tgBm(event,\'sim\',\''+s.nm.replace(/'/g,"\\'")+'\',\''+s.nm.replace(/'/g,"\\'")+'\')" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--gd);line-height:0">'+(isBm('sim',s.nm)?'<svg class="ico" aria-hidden="true" focusable="false" style="fill:currentColor;font-size:15px"><use href="#i-star"/></svg>':'<svg class="ico" aria-hidden="true" focusable="false" style="font-size:15px"><use href="#i-star"/></svg>')+'</button><div class="gi">'+ico(s.nm,s.ic)+'</div><div class="gn">'+s.nm+'</div><div class="gd">'+s.d+'</div></div>';}
 function playSim(u,n){document.getElementById('moB').innerHTML='<div id="simSpn" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:450px;background:var(--bg);border-radius:8px;gap:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:11px;color:var(--t3)">실험 로딩 중...</div></div><div style="font-size:12px;font-weight:600;margin-top:6px">'+n+'</div>';const ifr=document.createElement('iframe');ifr.src=u;ifr.style.cssText='width:100%;height:450px;border:none;border-radius:8px;display:none';ifr.onload=function(){const sp=document.getElementById('simSpn');if(sp)sp.remove();ifr.style.display='';};document.getElementById('moB').prepend(ifr);document.getElementById('mo').classList.add('sh');xp(10,'실험');}
 const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8b/index.html']);
-function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();var _u=u+(u.indexOf('?')>=0?'&':'?')+'_cb='+Date.now();if(_3D_GAMES.has(u)){window.open(_u,'_blank');return;}document.getElementById('gT').textContent=n;document.getElementById('gF').src=_u;document.getElementById('gO').classList.add('sh');}
+function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();var _u=u+(u.indexOf('?')>=0?'&':'?')+'_cb='+Date.now();if(_3D_GAMES.has(u)){window.open(_u,'_blank');return;}document.getElementById('gT').textContent=gameVN(n);document.getElementById('gF').src=_u;document.getElementById('gO').classList.add('sh');}
 function cG(){document.getElementById('gO').classList.remove('sh');document.getElementById('gF').src='';}
 /* 게임 XP 수신 브릿지: 게임 오버레이 iframe에서 온 {type:'xp',amount,source} 메시지만 인정(위조 source 차단) */
 window.addEventListener('message',function(e){
@@ -2604,7 +2606,7 @@ function checkGG(){const ans=parseInt(document.getElementById('ggA').value);if(i
 
 function filterVids(cat){document.querySelectorAll('[data-vcat]').forEach(el=>{el.style.display=(!cat||el.dataset.vcat===cat)?'':'none';});}
 
-function doSearch(q){const box=document.getElementById('srchRes');if(!q||q.trim().length<1){box.style.display='none';return;}const s=q.trim().toLowerCase();let h='';const vr=getV().filter(v=>v.t.toLowerCase().includes(s)||v.c.toLowerCase().includes(s));if(vr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin-bottom:4px">영상 ('+vr.length+')</div><div class="row">'+vr.slice(0,10).map(vc).join('')+'</div>';const qr=QUIZ.filter(x=>x.q.toLowerCase().includes(s)||x.cat.toLowerCase().includes(s));if(qr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">퀴즈 ('+qr.length+')</div>'+qr.slice(0,5).map(q2=>{const qIdx=QUIZ.indexOf(q2);const opts=[...q2.a].map((a,i)=>({t:a,ok:i===q2.c})).shuffle();return'<div class="qz" data-quiz-idx="'+qIdx+'"><div class="qz-q">'+q2.cat+' | '+q2.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';}).join('');const sr=SIMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(sr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">실험 ('+sr.length+')</div><div class="g2">'+sr.map(sc).join('')+'</div>';const gr=GMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(gr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">게임 ('+gr.length+')</div><div class="g2">'+gr.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+g.nm+'</div></div>').join('')+'</div>';const cr=[];Object.entries(CURRICULUM).forEach(([k,v])=>{v.units.forEach((u,ui)=>{u.lessons.forEach((l,li)=>{if(l.t.toLowerCase().includes(s)||v.nm.toLowerCase().includes(s)||u.nm.toLowerCase().includes(s))cr.push({subj:k,subjNm:v.nm,ic:v.ic,unitNm:u.nm,ui,li,t:l.t,lv:l.lv});});});});const subjMatches=getSubjects().filter(sb=>sb.nm.toLowerCase().includes(s)&&!cr.find(c=>c.subjNm===sb.nm));if(subjMatches.length)subjMatches.forEach(sb=>{cr.push({subj:sb.id,subjNm:sb.nm,ic:sb.ic,unitNm:'전체',ui:-1,li:-1,t:sb.nm+' ('+sb.unitCount+'단원 '+sb.topicCount+'토픽)',lv:0,isDyn:true});});if(cr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">커리큘럼 ('+cr.length+')</div>'+cr.slice(0,8).map(c=>{if(c.isDyn)return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>openSubjectNew(\''+c.subj+'\'),50)"><div style="font-size:12px;font-weight:600">'+ico(c.subjNm,c.ic)+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">과목 열기</div></div>';return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>{openSubject(\''+c.subj+'\');setTimeout(()=>openLesson('+c.ui+','+c.li+'),50)},50)"><div style="font-size:12px;font-weight:600">'+ico(c.subjNm,c.ic)+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">'+c.subjNm+' > '+c.unitNm+' > Lv.'+c.lv+'</div></div>';}).join('');if(!h)h='<div style="font-size:11px;color:var(--t3);text-align:center;padding:12px">검색 결과가 없습니다</div>';box.innerHTML=h;box.style.display='block';}
+function doSearch(q){const box=document.getElementById('srchRes');if(!q||q.trim().length<1){box.style.display='none';return;}const s=q.trim().toLowerCase();let h='';const vr=getV().filter(v=>v.t.toLowerCase().includes(s)||v.c.toLowerCase().includes(s));if(vr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin-bottom:4px">영상 ('+vr.length+')</div><div class="row">'+vr.slice(0,10).map(vc).join('')+'</div>';const qr=QUIZ.filter(x=>x.q.toLowerCase().includes(s)||x.cat.toLowerCase().includes(s));if(qr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">퀴즈 ('+qr.length+')</div>'+qr.slice(0,5).map(q2=>{const qIdx=QUIZ.indexOf(q2);const opts=[...q2.a].map((a,i)=>({t:a,ok:i===q2.c})).shuffle();return'<div class="qz" data-quiz-idx="'+qIdx+'"><div class="qz-q">'+q2.cat+' | '+q2.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div></div>';}).join('');const sr=SIMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(sr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">실험 ('+sr.length+')</div><div class="g2">'+sr.map(sc).join('')+'</div>';const gr=GMS.filter(x=>x.nm.toLowerCase().includes(s)||x.d.toLowerCase().includes(s));if(gr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">게임 ('+gr.length+')</div><div class="g2">'+gr.map(g=>'<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+gameVN(g)+'</div></div>').join('')+'</div>';const cr=[];Object.entries(CURRICULUM).forEach(([k,v])=>{v.units.forEach((u,ui)=>{u.lessons.forEach((l,li)=>{if(l.t.toLowerCase().includes(s)||v.nm.toLowerCase().includes(s)||u.nm.toLowerCase().includes(s))cr.push({subj:k,subjNm:v.nm,ic:v.ic,unitNm:u.nm,ui,li,t:l.t,lv:l.lv});});});});const subjMatches=getSubjects().filter(sb=>sb.nm.toLowerCase().includes(s)&&!cr.find(c=>c.subjNm===sb.nm));if(subjMatches.length)subjMatches.forEach(sb=>{cr.push({subj:sb.id,subjNm:sb.nm,ic:sb.ic,unitNm:'전체',ui:-1,li:-1,t:sb.nm+' ('+sb.unitCount+'단원 '+sb.topicCount+'토픽)',lv:0,isDyn:true});});if(cr.length)h+='<div style="font-size:11px;font-weight:700;color:var(--cy);margin:6px 0 4px">커리큘럼 ('+cr.length+')</div>'+cr.slice(0,8).map(c=>{if(c.isDyn)return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>openSubjectNew(\''+c.subj+'\'),50)"><div style="font-size:12px;font-weight:600">'+ico(c.subjNm,c.ic)+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">과목 열기</div></div>';return '<div class="gc" style="text-align:left;padding:10px;margin-bottom:4px" onclick="go(1);setTimeout(()=>{openSubject(\''+c.subj+'\');setTimeout(()=>openLesson('+c.ui+','+c.li+'),50)},50)"><div style="font-size:12px;font-weight:600">'+ico(c.subjNm,c.ic)+' '+c.t+'</div><div style="font-size:9px;color:var(--t3)">'+c.subjNm+' > '+c.unitNm+' > Lv.'+c.lv+'</div></div>';}).join('');if(!h)h='<div style="font-size:11px;color:var(--t3);text-align:center;padding:12px">검색 결과가 없습니다</div>';box.innerHTML=h;box.style.display='block';}
 
 
 // ===== CATEGORY SYSTEM =====
@@ -2750,7 +2752,7 @@ function renderCategoryContent(){
   if(catGames.length){
     h+='<div class="cat-subsec"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-play"/></svg> 게임</div>';
     h+='<div class="g4">'+catGames.map(function(g){
-      return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>';
+      return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+gameVN(g)+'</div><div class="gd">'+g.d+'</div></div>';
     }).join('')+'</div>';
   }
 
@@ -2819,7 +2821,7 @@ function renderAllCategoryContent(){
   var _hl=_el('homeLesson');if(_hl)_hl.innerHTML='<div class="gc" style="text-align:left;padding:12px" onclick="go(1);setTimeout(function(){openSubject(\''+firstSubjKey+'\');setTimeout(function(){openLesson(0,0)},50)},50)"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:24px">'+ico(CURRICULUM[firstSubjKey].nm,CURRICULUM[firstSubjKey].ic)+'</span><div><div style="font-size:13px;font-weight:600">'+firstLesson.t+'</div><div style="font-size:10px;color:var(--t3)">'+CURRICULUM[firstSubjKey].nm+' > '+CURRICULUM[firstSubjKey].units[0].nm+' > Lv.'+firstLesson.lv+'</div></div><span style="margin-left:auto;color:var(--cy)">시작 \u203A</span></div></div>';
   var _sR=_el('sR');if(_sR)_sR.innerHTML=SIMS.slice(0,4).map(sc).join('');
   var _sR2=_el('sR2');if(_sR2)_sR2.innerHTML=SIMS.slice(4,8).map(sc).join('');
-  var _gR=_el('gR');if(_gR)_gR.innerHTML=GMS.map(function(g){return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+g.nm+'</div><div class="gd">'+g.d+'</div></div>';}).join('');
+  var _gR=_el('gR');if(_gR)_gR.innerHTML=GMS.map(function(g){return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+gameVN(g)+'</div><div class="gd">'+g.d+'</div></div>';}).join('');
   nextEng();
   renderReviewArea();renderRecommendations();
   var _qR=_el('qR');if(_qR)renderQuiz(_qR,(typeof lpTierQuizPool==='function'?lpTierQuizPool():QUIZ).slice(0,3));
@@ -2973,7 +2975,7 @@ function filterGames(cat){
     var tm=m.min>0?(m.min+'분'):'∞';
     var xp=kid?('<svg class="ico" aria-hidden="true" focusable="false" style="fill:currentColor;font-size:11px;vertical-align:-.1em"><use href="#i-star"/></svg>'+m.xp):('+'+m.xp+'XP');
     return '<div class="gcard" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="band" style="background:'+col+'"></div>'
-      +'<div class="gn">'+g.nm+'</div><div class="gd">'+m.hook+'</div>'
+      +'<div class="gn">'+gameVN(g)+'</div><div class="gd">'+m.hook+'</div>'
       +'<div class="gmeta">'+diff+'<span class="gtime">'+tm+'</span><span class="gxp">'+xp+'</span></div>'
       +'<div class="play">▶ '+(kid?'놀기!':'플레이')+'</div></div>';
   }).join('');
@@ -4200,7 +4202,7 @@ function lpTodayPick(){
   const pool=GMS.filter(g=>lpTierFits(g.nm,g.d));
   const src=pool.length?pool:GMS;
   const g=src[Math.floor(rnd*src.length)]||src[0];
-  return{title:g.nm,action:"oG('"+g.u+"','"+String(g.nm).replace(/'/g,"\\'")+"')"};
+  return{title:gameVN(g),action:"oG('"+g.u+"','"+String(g.nm).replace(/'/g,"\\'")+"')"};
 }
 function renderTodayOne(){
   const el=_el('mhCtaSub');if(!el)return;

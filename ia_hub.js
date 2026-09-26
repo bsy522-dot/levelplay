@@ -587,6 +587,8 @@
     return h;
   }
   window.lpHubMore = function (key) { HUB_MORE[key] = 1; renderHub(curHub, curHubOpt); };
+  /* 게임의 화면 이름 — it.t(=nm)는 중복 제거·게임 찾기 열쇠라 그대로 두고 그릴 때만 index.html 의 gameVN 표를 쓴다 */
+  function vt(it) { return (it && it.kind === 'game' && it.g && typeof gameVN === 'function') ? gameVN(it.g) : it.t; }
 
   function gameCard(it) {
     var g = it.g, s = SB[it.s];
@@ -601,7 +603,7 @@
     return '<div class="gcard" onclick="lpOpenItem(' + it.i + ')">'
       + (typeof gameThumb === 'function' ? gameThumb(g) : '')
       + '<div class="band" style="background:' + s.ac + '"></div>'
-      + '<div class="gn">' + esc(g.nm) + '</div><div class="gd">' + esc(m.hook || g.d) + '</div>'
+      + '<div class="gn">' + esc(vt(it)) + '</div><div class="gd">' + esc(m.hook || g.d) + '</div>'
       + '<div class="gmeta"><span class="gtime">' + (m.min > 0 ? m.min + '분' : '∞') + '</span><span class="gxp">+' + m.xp + 'XP</span></div>'
       + '<div class="play">▶ 플레이</div>'
       + '<button class="lp-linkb" title="이어서 볼 것" onclick="event.stopPropagation();lpShowNext(' + it.i + ')">' + svg('i-repeat') + ' 이어서</button>'
@@ -619,7 +621,7 @@
         : fb);
     return '<div class="lp-row" onclick="lpOpenItem(' + it.i + ')" role="button" tabindex="0">'
       + thumb
-      + '<div class="lp-rx"><div class="lp-rt">' + esc(it.t) + '</div>'
+      + '<div class="lp-rx"><div class="lp-rt">' + esc(vt(it)) + '</div>'
       + '<div class="lp-rd"><span class="lp-kd" style="background:' + s.ti + ';color:' + shade(s.ac, .14) + '">' + KIND_LABEL[it.kind] + '</span>' + esc(deco(it.d)) + '</div></div>'
       + (it.done ? '<span class="lp-done">완료</span>' : '<span class="lp-arr">›</span>')
       + '</div>';
@@ -649,7 +651,7 @@
       + '<span class="lp-pai">' + svg(KIND_SYM[pick.kind]) + '</span>'
       + '<span class="lp-pax">'
       + '<span class="lp-pak">' + esc(s.nm) + (doneN ? ' 이어서 하기' : ' 시작하기') + '</span>'
-      + '<span class="lp-pat">' + esc(pick.t) + '</span>'
+      + '<span class="lp-pat">' + esc(vt(pick)) + '</span>'
       + '<span class="lp-pad">' + esc(sub) + '</span>'
       + '</span>'
       + '<span class="lp-paa">' + svg('i-play') + '</span></button>'
@@ -860,7 +862,7 @@
   window.lpShowNext = function (i) {
     var it = idx().items[i]; if (!it) return;
     var rel = related(it, { kinds: ['comic', 'story', 'video', 'lesson', 'quiz'], max: 6 });
-    if (!nextSheet('이어서', esc(it.t) + ' 와(과) 이어지는 내용', rel)) try { toast('이어질 내용이 아직 없어요'); } catch (e) {}
+    if (!nextSheet('이어서', esc(vt(it)) + ' 와(과) 이어지는 내용', rel)) try { toast('이어질 내용이 아직 없어요'); } catch (e) {}
   };
   function itemByGameName(nm) {
     var a = idx().items;
@@ -914,7 +916,7 @@
       tot: bucket.length, done: bucket.filter(function (o) { return o.done; }).length, center: 1 }];
     pick.forEach(function (it, i) {
       var a = -Math.PI / 2 + i * 2 * Math.PI / pick.length;
-      nodes.push({ type: 'item', it: it, nm: it.t, ac: (SB[it.s] || s).ac, r: 13,
+      nodes.push({ type: 'item', it: it, nm: vt(it), ac: (SB[it.s] || s).ac, r: 13,
         x: cx + R * Math.cos(a), y: cy + R * Math.sin(a), done: it.done });
     });
     return nodes;
@@ -1221,7 +1223,7 @@
         lastGame = null;
         if (!it) return;
         var rel = related(it, { kinds: ['comic', 'story', 'video', 'lesson', 'quiz'], max: 6 });
-        if (rel.length) setTimeout(function () { nextSheet('이어서', it.t + ' 다음엔 이런 것', rel); }, 320);
+        if (rel.length) setTimeout(function () { nextSheet('이어서', vt(it) + ' 다음엔 이런 것', rel); }, 320);
       };
       wc._lpWrap = 1; window.cG = wc;
     }
@@ -1232,7 +1234,7 @@
       var it = lastGame ? itemByGameName(lastGame) : null; lastGame = null;
       if (!it) return;
       var rel = related(it, { kinds: ['comic', 'story', 'video', 'lesson', 'quiz'], max: 6 });
-      if (rel.length) setTimeout(function () { nextSheet('이어서', it.t + ' 다음엔 이런 것', rel); }, 600);
+      if (rel.length) setTimeout(function () { nextSheet('이어서', vt(it) + ' 다음엔 이런 것', rel); }, 600);
     });
   }
 
