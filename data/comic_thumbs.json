@@ -1,0 +1,104 @@
+{
+ "assets/comics/k_history/gojoseon_e01": {
+  "thumb": "assets/comics/k_history/gojoseon_e01/p1.jpg",
+  "cuts": 1,
+  "src": "assets/comics/k_history/gojoseon_e01/p1.jpg",
+  "split": false
+ },
+ "assets/comics/k_history/gojoseon_e02": {
+  "thumb": "assets/comics/k_history/gojoseon_e02/p1.jpg",
+  "cuts": 1,
+  "src": "assets/comics/k_history/gojoseon_e02/p1.jpg",
+  "split": false
+ },
+ "assets/comics/k_history/sp_bugeunri": {
+  "thumb": "assets/comics/k_history/sp_bugeunri/p1.jpg",
+  "cuts": 1,
+  "src": "assets/comics/k_history/sp_bugeunri/p1.jpg",
+  "split": false
+ },
+ "assets/comics/k_history/sp_chamseongdan": {
+  "thumb": "assets/comics/k_history/sp_chamseongdan/p1.jpg",
+  "cuts": 1,
+  "src": "assets/comics/k_history/sp_chamseongdan/p1.jpg",
+  "split": false
+ },
+ "assets/comics/k_history/sp_ganghwa_church": {
+  "thumb": "assets/comics/k_history/sp_ganghwa_church/p1.jpg",
+  "cuts": 1,
+  "src": "assets/comics/k_history/sp_ganghwa_church/p1.jpg",
+  "split": false
+ },
+ "assets/comics/k_history/sp_jeondeungsa": {
+  "thumb": "assets/comics/k_history/sp_jeondeungsa/p1.jpg",
+  "cuts": 1,
+  "src": "assets/comics/k_history/sp_jeondeungsa/p1.jpg",
+  "split": false
+ },
+ "assets/comics/k_history/sp_osangri": {
+  "thumb": "assets/comics/k_history/sp_osangri/p1.jpg",
+  "cuts": 1,
+  "src": "assets/comics/k_history/sp_osangri/p1.jpg",
+  "split": false
+ },
+ "assets/comics/math_history/s1e01": {
+  "thumb": "assets/comics_pages/math_history/s1e01/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s1e01/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s1e02": {
+  "thumb": "assets/comics_pages/math_history/s1e02/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s1e02/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s1e03": {
+  "thumb": "assets/comics_pages/math_history/s1e03/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s1e03/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s1e04": {
+  "thumb": "assets/comics_pages/math_history/s1e04/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s1e04/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s1e05": {
+  "thumb": "assets/comics_pages/math_history/s1e05/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s1e05/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s2e01": {
+  "thumb": "assets/comics_pages/math_history/s2e01/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s2e01/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s2e02": {
+  "thumb": "assets/comics_pages/math_history/s2e02/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s2e02/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s2e03": {
+  "thumb": "assets/comics_pages/math_history/s2e03/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s2e03/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s2e04": {
+  "thumb": "assets/comics_pages/math_history/s2e04/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s2e04/p1.jpg",
+  "split": true
+ },
+ "assets/comics/math_history/s2e05": {
+  "thumb": "assets/comics_pages/math_history/s2e05/p1_c1.jpg",
+  "cuts": 9,
+  "src": "assets/comics/math_history/s2e05/p1.jpg",
+  "split": true
+ }
+}

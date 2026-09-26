@@ -1499,17 +1499,14 @@ showToast(`⚠ ${bres?bres.name:'자원'} 채집에는 더 좋은 도구가 필�
 return;
 }
 if(closest){
-closest.hp--;
+// 이미 같은 자원을 채집 중이면 그 작업 유지(진행이 끊기지 않게)
+if(G.task&&G.task.type==='gather'&&G.task.target===closest)return;
+const tp=getToolPower(closest.type);
+// 클릭 경로(onCanvasClick)와 동일한 태스크 파이프라인을 사용한다.
 const res=RESOURCES[closest.type];
-if(closest.hp<=0){
-addItem(closest.type,1);
-showToast(`${res.icon} ${res.name} 획득!`);
-G.worldResources=G.worldResources.filter(r=>r!==closest);
-// Discover recipes
-discoverRecipesFor(closest.type);
-}else{
-showToast(`${res.icon} 채집 중... (${3-closest.hp}/3)`);
-}
+G.task={type:'gather',target:closest,progress:0,toolPower:tp};
+G.targetX=null;G.targetY=null;G.walking=false;
+showToast(`${res.icon} ${res.name} 채집 시작...`);
 }else{
 showToast('근처에 수집할 자원이 없습니다. (이동: 방향키/WASD, 수집: 스페이스/클릭)');
 }

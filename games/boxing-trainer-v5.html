@@ -900,11 +900,11 @@ function buildBoxer(gloveColor, isPlayer) {
   // Shoulder bulk meshes (deltoid)
   const shoulderBulkGeo = new THREE.SphereGeometry(0.105, 8, 6);
   const lShoulderBulk = new THREE.Mesh(shoulderBulkGeo, skinMat);
-  lShoulderBulk.position.set(-0.225, 0.18, 0); lShoulderBulk.scale.set(1.1, 1.0, 1.0);
+  lShoulderBulk.position.set(-0.235, 0.30, 0); lShoulderBulk.scale.set(1.0, 0.92, 1.0);
   lShoulderBulk.castShadow = true;
   chest.add(lShoulderBulk);
   const rShoulderBulk = new THREE.Mesh(shoulderBulkGeo, skinMat);
-  rShoulderBulk.position.set(0.225, 0.18, 0); rShoulderBulk.scale.set(1.1, 1.0, 1.0);
+  rShoulderBulk.position.set(0.235, 0.30, 0); rShoulderBulk.scale.set(1.0, 0.92, 1.0);
   rShoulderBulk.castShadow = true;
   chest.add(rShoulderBulk);
 
@@ -1058,41 +1058,41 @@ function buildBoxer(gloveColor, isPlayer) {
 
   // LEFT SHOULDER joint group
   const lSh = new THREE.Group();
-  lSh.position.set(-0.22, 0.08, 0);
+  lSh.position.set(-0.255, 0.06, 0);
   chest.add(lSh);
 
   // Upper arm mesh
   const lUpperArm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.052, 0.047, 0.22, 8),
+    new THREE.CylinderGeometry(0.06, 0.052, 0.30, 12),
     skinMat
   );
-  lUpperArm.position.y = -0.12;
+  lUpperArm.position.y = -0.13;  // 어깨 관절(y=0.06)에 밀착
   lUpperArm.castShadow = true;
   lSh.add(lUpperArm);
   // Biceps bulge (front)
   const lBicep = new THREE.Mesh(new THREE.SphereGeometry(0.045, 7, 6), skinMat);
-  lBicep.position.set(0, -0.10, 0.035); lBicep.scale.set(1.0, 1.5, 0.9);
+  lBicep.position.set(0, -0.14, 0.042); lBicep.scale.set(1.0, 1.6, 0.95);
   lSh.add(lBicep);
   // Triceps bulge (back)
   const lTricep = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 5), skinMat);
-  lTricep.position.set(0, -0.13, -0.035); lTricep.scale.set(1.0, 1.4, 0.8);
+  lTricep.position.set(0, -0.19, -0.042); lTricep.scale.set(1.0, 1.5, 0.85);
   lSh.add(lTricep);
 
   // LEFT ELBOW joint group
   const lEl = new THREE.Group();
-  lEl.position.y = -0.24;
+  lEl.position.y = -0.32;
   lSh.add(lEl);
 
   // Forearm mesh
   const lForearm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.042, 0.036, 0.2, 8),
+    new THREE.CylinderGeometry(0.05, 0.042, 0.29, 12),
     skinMat
   );
-  lForearm.position.y = -0.1;
+  lForearm.position.y = -0.145;
   lEl.add(lForearm);
   // Forearm bulge (brachioradialis)
   const lForeBulge = new THREE.Mesh(new THREE.SphereGeometry(0.038, 6, 5), skinMat);
-  lForeBulge.position.set(0, -0.06, 0.025); lForeBulge.scale.set(1.0, 1.4, 0.85);
+  lForeBulge.position.set(0, -0.11, 0.03); lForeBulge.scale.set(1.0, 1.6, 0.85);
   lEl.add(lForeBulge);
 
   // Wrist wrap
@@ -1100,70 +1100,70 @@ function buildBoxer(gloveColor, isPlayer) {
     new THREE.CylinderGeometry(0.04, 0.04, 0.04, 6),
     wrapMat
   );
-  lWristWrap.position.y = -0.2;
+  lWristWrap.position.y = -0.29;
   lEl.add(lWristWrap);
 
   // Glove mesh
   const lGlove = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), gloveMat);
   lGlove.scale.set(1, 1.1, 0.9);
-  lGlove.position.y = -0.26;
+  lGlove.position.y = -0.35;
   lGlove.castShadow = true;
   lEl.add(lGlove);
 
   // Knuckle line
   const lKnuckle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.015, 0.03), gloveMat);
-  lKnuckle.position.set(0, -0.26, 0.05);
+  lKnuckle.position.set(0, -0.35, 0.05);
   lEl.add(lKnuckle);
 
   // RIGHT SHOULDER joint group (mirror)
   const rSh = new THREE.Group();
-  rSh.position.set(0.22, 0.08, 0);
+  rSh.position.set(0.255, 0.06, 0);
   chest.add(rSh);
 
   const rUpperArm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.052, 0.047, 0.22, 8),
+    new THREE.CylinderGeometry(0.06, 0.052, 0.30, 12),
     skinMat
   );
-  rUpperArm.position.y = -0.12;
+  rUpperArm.position.y = -0.13;  // 어깨 관절(y=0.06)에 밀착
   rUpperArm.castShadow = true;
   rSh.add(rUpperArm);
   const rBicep = new THREE.Mesh(new THREE.SphereGeometry(0.045, 7, 6), skinMat);
-  rBicep.position.set(0, -0.10, 0.035); rBicep.scale.set(1.0, 1.5, 0.9);
+  rBicep.position.set(0, -0.14, 0.042); rBicep.scale.set(1.0, 1.6, 0.95);
   rSh.add(rBicep);
   const rTricep = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 5), skinMat);
-  rTricep.position.set(0, -0.13, -0.035); rTricep.scale.set(1.0, 1.4, 0.8);
+  rTricep.position.set(0, -0.19, -0.042); rTricep.scale.set(1.0, 1.5, 0.85);
   rSh.add(rTricep);
 
   // RIGHT ELBOW joint group
   const rEl = new THREE.Group();
-  rEl.position.y = -0.24;
+  rEl.position.y = -0.32;
   rSh.add(rEl);
 
   const rForearm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.042, 0.036, 0.2, 8),
+    new THREE.CylinderGeometry(0.05, 0.042, 0.29, 12),
     skinMat
   );
-  rForearm.position.y = -0.1;
+  rForearm.position.y = -0.145;
   rEl.add(rForearm);
   const rForeBulge = new THREE.Mesh(new THREE.SphereGeometry(0.038, 6, 5), skinMat);
-  rForeBulge.position.set(0, -0.06, 0.025); rForeBulge.scale.set(1.0, 1.4, 0.85);
+  rForeBulge.position.set(0, -0.11, 0.03); rForeBulge.scale.set(1.0, 1.6, 0.85);
   rEl.add(rForeBulge);
 
   const rWristWrap = new THREE.Mesh(
     new THREE.CylinderGeometry(0.04, 0.04, 0.04, 6),
     wrapMat
   );
-  rWristWrap.position.y = -0.2;
+  rWristWrap.position.y = -0.29;
   rEl.add(rWristWrap);
 
   const rGlove = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), gloveMat);
   rGlove.scale.set(1, 1.1, 0.9);
-  rGlove.position.y = -0.26;
+  rGlove.position.y = -0.35;
   rGlove.castShadow = true;
   rEl.add(rGlove);
 
   const rKnuckle = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.015, 0.03), gloveMat);
-  rKnuckle.position.set(0, -0.26, 0.05);
+  rKnuckle.position.set(0, -0.35, 0.05);
   rEl.add(rKnuckle);
 
   // SHORTS + stripe (attached to pelvis)
@@ -1317,10 +1317,12 @@ const GUARD = {
   spineRX: 0.08, spineRY: 0, spineRZ: 0,
   chestRX: -0.05, chestRY: -0.15, chestRZ: 0,
   headRX: -0.12, headRY: 0.2, headRZ: 0,
-  lShX: -1.3, lShY: 0.1, lShZ: 0.6,
-  lElX: -1.6, lElY: 0.15, lElZ: 0,
-  rShX: -1.5, rShY: -0.05, rShZ: -0.35,
-  rElX: -1.8, rElY: -0.1, rElZ: 0,
+  // 가드 자세: 팔꿈치를 몸 앞으로 모으고 살짝 굽혀 올린다.
+  // X축이 너무 크면 팔이 축 처져 처지듯 보이며, 너무 작으면 장갑이 얼굴에 안 닿는다.
+  lShX: -1.40, lShY: 0.1, lShZ: 0.35,
+  lElX: -1.60, lElY: 0.15, lElZ: 0,
+  rShX: -1.38, rShY: -0.05, rShZ: -0.26,
+  rElX: -1.58, rElY: -0.1, rElZ: 0,
   lHipX: -0.08, lHipY: 0, lHipZ: 0.08,
   lKnX: 0.2, lKnY: 0, lKnZ: 0, lAnkX: 0,
   rHipX: 0.06, rHipY: 0, rHipZ: -0.06,
@@ -1331,48 +1333,48 @@ const GUARD = {
 const PUNCH_KF = {
   jab: [
     {t:0, p:null},
-    {t:0.25, p:{pelvisRY:-0.35, lShX:-1.5, lShZ:0.4, lElX:-1.7}},
+    {t:0.25, p:{pelvisRY:-0.35, lShX:-0.2, lShZ:0.95, lElX:-0.35}},
     {t:0.5, p:{pelvisRY:-0.2, chestRY:0.05, spineRY:0.15,
-      lShX:-0.3, lShY:0.2, lShZ:0.8, lElX:-0.2, lElY:0.1,
-      rShX:-1.5, rShY:-0.05, rShZ:-0.35, rElX:-1.8, headRY:0.1}},
-    {t:0.75, p:{lShX:-0.8, lShZ:0.6, lElX:-1.0}},
+      lShX:-0.12, lShY:0.2, lShZ:1.02, lElX:-0.15, lElY:0.1,
+      rShX:-0.85, rShY:-0.05, rShZ:-0.18, rElX:-1.45, headRY:0.1}},
+    {t:0.75, p:{lShX:-0.3, lShZ:0.82, lElX:-0.5}},
     {t:1, p:null}
   ],
   cross: [
     {t:0, p:null},
-    {t:0.2, p:{pelvisRY:-0.55, rShX:-1.6, rShZ:-0.5, rElX:-1.6, rKnX:0.3}},
+    {t:0.2, p:{pelvisRY:-0.55, rShX:-1.25, rShZ:-0.22, rElX:-1.45, rKnX:0.3}},
     {t:0.5, p:{pelvisRY:0.1, spineRY:0.3, chestRY:0.2,
-      rShX:-0.2, rShY:-0.25, rShZ:-0.7, rElX:-0.15, rElY:-0.05,
+      rShX:-0.12, rShY:-0.22, rShZ:-0.18, rElX:-0.12, rElY:-0.05,
       rHipY:0.15, rKnX:0.15, rAnkX:-0.25,
-      lShX:-1.4, lElX:-1.7, headRY:-0.1}},
-    {t:0.75, p:{pelvisRY:-0.25, rShX:-1.0, rElX:-1.2}},
+      lShX:-0.85, lElX:-1.5, headRY:-0.1}},
+    {t:0.75, p:{pelvisRY:-0.25, rShX:-0.72, rElX:-0.82}},
     {t:1, p:null}
   ],
   hook: [
     {t:0, p:null},
     {t:0.18, p:{pelvisRY:-0.7, spineRY:-0.28, chestRY:-0.22,
-      lShX:-1.05, lShY:0.55, lShZ:0.95, lElX:-1.55, lElY:0.35,
+      lShX:-0.35, lShY:0.55, lShZ:0.72, lElX:-0.8, lElY:0.35,
       lKnX:0.32, rKnX:0.18, headRY:0.08, lAnkX:0.05}},
     {t:0.42, p:{pelvisRY:0.05, spineRY:0.55, chestRY:0.5,
-      lShX:-0.85, lShY:1.05, lShZ:0.18, lElX:-1.55, lElY:0.45,
-      lHipY:0.18, rShX:-1.45, rElX:-1.85,
+      lShX:-0.22, lShY:1.05, lShZ:0.34, lElX:-0.42, lElY:0.45,
+      lHipY:0.18, rShX:-0.8, rElX:-1.5,
       lKnX:0.18, rKnX:0.30, lAnkX:-0.18,
       headRY:-0.12, headRX:-0.05}},
     {t:0.65, p:{pelvisRY:-0.05, spineRY:0.42, chestRY:0.32,
-      lShX:-0.95, lShY:0.95, lShZ:0.32, lElX:-1.55, lElY:0.4,
-      rShX:-1.5, rElX:-1.8}},
+      lShX:-0.3, lShY:0.95, lShZ:0.55, lElX:-0.62, lElY:0.4,
+      rShX:-0.85, rElX:-1.45}},
     {t:1, p:null}
   ],
   uppercut: [
     {t:0, p:null},
     {t:0.25, p:{pelvisY:0.76, pelvisRY:-0.55,
-      rShX:-0.5, rShY:-0.15, rShZ:-0.3, rElX:-1.55,
+      rShX:-0.95, rShY:-0.15, rShZ:0.18, rElX:-1.30,
       lKnX:0.4, rKnX:0.5, spineRX:0.12}},
     {t:0.55, p:{pelvisY:0.93, pelvisRY:-0.15, spineRY:-0.15, chestRY:-0.1,
-      rShX:-2.1, rShY:-0.2, rShZ:-0.4, rElX:-1.4,
+      rShX:-1.05, rShY:-0.2, rShZ:0.42, rElX:-0.30,
       rHipY:0.1, rAnkX:-0.25,
       lKnX:0.12, rKnX:0.12,
-      lShX:-1.3, lElX:-1.6}},
+      lShX:-0.55, lElX:-0.8}},
     {t:1, p:null}
   ]
 };
@@ -1445,10 +1447,10 @@ function applyPose(model, pose) {
   model.headGrp.rotation.x = pose.headRX || -0.12;
   model.headGrp.rotation.y = pose.headRY || 0.2;
   model.headGrp.rotation.z = pose.headRZ || 0;
-  model.lSh.rotation.set(pose.lShX || -1.3, pose.lShY || 0, pose.lShZ || 0);
-  model.lEl.rotation.set(pose.lElX || -1.6, pose.lElY || 0, pose.lElZ || 0);
-  model.rSh.rotation.set(pose.rShX || -1.5, pose.rShY || 0, pose.rShZ || 0);
-  model.rEl.rotation.set(pose.rElX || -1.8, pose.rElY || 0, pose.rElZ || 0);
+  model.lSh.rotation.set(pose.lShX ?? -1.40, pose.lShY || 0, pose.lShZ || 0);
+  model.lEl.rotation.set(pose.lElX ?? -1.60, pose.lElY || 0, pose.lElZ || 0);
+  model.rSh.rotation.set(pose.rShX ?? -1.38, pose.rShY || 0, pose.rShZ || 0);
+  model.rEl.rotation.set(pose.rElX ?? -1.58, pose.rElY || 0, pose.rElZ || 0);
   model.lHip.rotation.set(pose.lHipX || 0, pose.lHipY || 0, pose.lHipZ || 0);
   model.lKn.rotation.x = pose.lKnX || 0.2;
   model.lAnk.rotation.x = pose.lAnkX || 0;
@@ -1466,8 +1468,8 @@ function animateBoxerIdle(model, time) {
   const pose = { ...GUARD };
   pose.pelvisY = (GUARD.pelvisY || 0.88) + bob;
   pose.spineRZ = sway;
-  pose.lShZ = (GUARD.lShZ || 0.6) + Math.sin(time * 3 + p) * 0.02;
-  pose.rShZ = (GUARD.rShZ || -0.35) + Math.sin(time * 3 + p + 1) * 0.02;
+  pose.lShZ = (GUARD.lShZ || 0.35) + Math.sin(time * 3 + p) * 0.02;
+  pose.rShZ = (GUARD.rShZ || -0.26) + Math.sin(time * 3 + p + 1) * 0.02;
   applyPose(model, pose);
 }
 
@@ -1503,7 +1505,49 @@ function animateDodge(model, dodgeType, progress) {
 
 function resetBoxerPose(model) {
   applyPose(model, GUARD);
-  model.group.position.x = model.group.userData.baseX || 0;
+  // 이동 오프셋(baseX + 스텝)을 지우지 않는다 — 매 프레임 위치가 0으로 리셋되어
+  // 선수가 움직이지 못하는 문제가 있었다.
+}
+
+// 전투 중 이동(스텝) — 좁은 링 안에서 앞뒤/좌우로 이동하며 거리를 조절한다.
+const FIGHT_MOVE = { x: 0, z: 0, speed: 1.8, minZ: 0.9, maxZ: 5.2, maxX: 2.2 };
+
+function updateFightMovement(dt) {
+  const f = currentFight;
+  if (!f || currentScreen !== 'fight' || !playerModel) return;
+  const g = playerModel.group;
+  let ix = 0, iz = 0;
+  // 키보드
+  if (keys['ArrowLeft'] || keys['a']) ix -= 1;
+  if (keys['ArrowRight'] || keys['d']) ix += 1;
+  if (keys['ArrowUp'] || keys['w']) iz -= 1;
+  if (keys['ArrowDown'] || keys['s']) iz += 1;
+  // 모바일 조이스틱/버튼
+  if (typeof joyState !== 'undefined' && joyState && joyState.active) {
+    if (Math.abs(joyState.dx) > 0.15) ix += joyState.dx;
+    if (Math.abs(joyState.dy) > 0.15) iz += joyState.dy;
+  }
+  const mag = Math.hypot(ix, iz);
+  if (mag > 0.05) {
+    ix /= mag; iz /= mag;
+    const sp = FIGHT_MOVE.speed * dt;
+    g.position.x = Math.max(-FIGHT_MOVE.maxX, Math.min(FIGHT_MOVE.maxX, g.position.x + ix * sp));
+    g.position.z = Math.max(FIGHT_MOVE.minZ, Math.min(FIGHT_MOVE.maxZ, g.position.z + iz * sp));
+    g.userData.baseX = g.position.x; // 리셋 시 현재 위치 유지
+    g.userData.baseZ = g.position.z;
+    g.rotation.y = Math.atan2(ix, 0) * 0.12; // 미세한 방향 전환
+  }
+  // 상대 AI 도 이동 가능
+  if (oppModel && !f.oppKO && !f.playerKO) {
+    const o = oppModel.group;
+    const dz = g.position.z - o.position.z;
+    const want = 1.9;
+    const diff = want - dz;
+    if (Math.abs(diff) > 0.35) {
+      o.position.z = Math.max(FIGHT_MOVE.minZ - 0.3, Math.min(FIGHT_MOVE.maxZ + 0.6, o.position.z + Math.sign(diff) * 0.8 * dt));
+      o.userData.baseZ = o.position.z;
+    }
+  }
 }
 
 // ==================== PUNCH TRAIL SYSTEM ====================
@@ -3504,6 +3548,9 @@ function update3DScene(time, dt) {
     // Reset poses
     resetBoxerPose(playerModel);
     resetBoxerPose(oppModel);
+
+    // 이동(스텝) — 이전엔 위치가 매 프레임 리셋되어 선수가 움직이지 않았다
+    updateFightMovement(dt);
 
     // Idle animation
     animateBoxerIdle(playerModel, time);

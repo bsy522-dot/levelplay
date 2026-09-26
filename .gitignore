@@ -36,3 +36,7 @@ _diag/
 
 # ── 개인 커리큘럼 원본 (이미 git 추적 중 → git rm --cached 필요) ──
 카카오톡_전체정리.txt
+
+# 0926: 만화 컷 분할 작업 산출물 (원본만 커밋, 컷은 빌드 시 생성 가능)
+assets/comics_pages/_split_report.json
+tools/__pycache__/

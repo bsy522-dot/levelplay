@@ -224,6 +224,16 @@ html.kid .mh-cta{font-size:16px;min-height:60px}
 .goal-progress-bar{height:100%;background:var(--g1);border-radius:4px;transition:width .4s}
 .goal-value{font-size:10px;color:var(--t3);min-width:50px;text-align:right}
 /* 형성평가 */
+.qz-dlv{position:absolute;right:10px;top:9px;font-size:9px;font-weight:800;letter-spacing:-.2px;
+  padding:1.5px 7px;border-radius:999px;pointer-events:none}
+.qz{position:relative}
+.qz-dlv1{background:rgba(6,214,160,.16);color:#0B8A5E}
+.qz-dlv2{background:rgba(139,92,246,.14);color:#6D28D9}
+.qz-dlv3{background:rgba(234,88,12,.15);color:#C2410C}
+@media(prefers-color-scheme:dark){
+  .qz-dlv1{background:rgba(6,214,160,.2);color:#34D399}
+  .qz-dlv3{background:rgba(234,88,12,.22);color:#FB923C}
+}
 .qz-formative{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(139,92,246,.03));border:1.5px solid rgba(139,92,246,.18)}
 .qz-formative .qz-type-label{font-size:9px;color:var(--p);font-weight:700;margin-bottom:4px}
 .qz-formative .qz-hint-btn{font-size:9px;color:var(--p);cursor:pointer;border:none;background:none;text-decoration:underline;margin-top:4px;padding:0}
@@ -1466,22 +1476,66 @@ function getAdaptiveDifficulty(cat){
   return 'normal';
 }
 function getAdaptiveQuizzes(pool){
-  // 적응형: 정답률 높은 카테고리는 어려운 문제, 낮은 카테고리는 쉬운 문제 추천
+  // 적응형: 카테고리별 정답률로 난이도 매칭
+  /* ★2026-09-26 수리. 병석님 지적("퀴즈는 상대방 난이도랑 상관없이 이게 나온다고?")의 실체.
+     (1) 홈 '오늘의 퀴즈'가 적응형 경로를 아예 쓰지 않았다 —
+         renderQuiz(_qR, lpTierQuizPool()) 처럼 items 를 넘기면 else 분기(shuffle.slice(0,5))로
+         빠져 같은 3문항이 매번 같게 나온다.
+     (2) 적응형이 살아 있어도 난이도 판정이 '문항 글자 수'였음.
+         q.q.length>20 은 난이도가 아니라 문장 길이이고, 보기 개수도 무관했다.
+     이제 진짜 난이도(1~3)를 매겨 그 값으로 고른다. */
+  const DIFF = quizDifficulty(pool);
+  const seen = lpSeenQuiz();               /* 아래 반복문 안에서 매번 다시 만들지 않는다 */
   const scored=pool.map(q=>{
-    const diff=getAdaptiveDifficulty(q.cat);
-    let weight=1;
-    if(diff==='hard'){
-      // 어려운 문제 우선: 길이 긴 문제, 덜 푼 카테고리
-      weight=q.q.length>20?2:1.5;
-    }else if(diff==='easy'){
-      // 기초 문제 우선: 짧고 쉬운 문제
-      weight=q.q.length<=20?2:1.2;
-    }
-    return{q,weight:weight+Math.random()};
+    const myD = DIFF[qKey(q)]||2;          /* 키는 문자열 — DIFF[q] 로 찾으면 늘상 undefined 였다 */
+    const catD = getAdaptiveDifficulty(q.cat);       /* 이 카테고리의 실력 */
+    /* 잘 풀면 한 단계 어렵게, 못 풀면 한 단계 쉽게 */
+    let want = 2;
+    if(catD==='hard') want = 3;
+    else if(catD==='easy') want = 1;
+    /* 이미 아는 난이도는 낮게, 목표 난이도는 높게 */
+    let weight = (myD===want?2:1) + (3-Math.abs(myD-want))*0.4;
+    /* 이미 아는 문제(최근에 본 것)는 뒤로 — 연속으로 같은 게 나오면 지루하다 */
+    if(seen[qKey(q)]) weight -= 1.2;
+    /* 난이도 차이가 클수록 덜 지루하되, 너무 튀면 무너진다 */
+    return {q, weight: weight + Math.random()*0.5};
   });
   scored.sort((a,b)=>b.weight-a.weight);
   return scored.slice(0,5).map(s=>s.q);
 }
+/* 문항 키 — 어디에나 있는 고유 문자열 */
+function qKey(q){
+  return (q&&q.q)?String(q.q).replace(/\s+/g,'').slice(0,40):'';
+}
+/* 이미 본 문제 기록 (최근 40개) */
+function lpSeenQuiz(){
+  try{
+    if(!U.seenQuiz)U.seenQuiz=[];
+    if(!Array.isArray(U.seenQuiz))U.seenQuiz=[];
+  }catch(e){ return {}; }
+  const o={};
+  U.seenQuiz.slice(-40).forEach(k=>{o[k]=1;});
+  return o;
+}
+window.lpSeenQuiz=lpSeenQuiz;
+/* ★문항 난이도 1~3 — 길이가 아니라 구조로 잰다.
+   3(어려움) = 타오면 회피 규칙이 필요(부정·제외·예외)
+   2(보통)   = 정의·성질
+   1(쉬움)   = 이름·개수·색깔 같은 직접 회상            */
+const Q_DIFF_HARD=/아니|아닌|제외|예외|아래|다음은|가 아닌|틀린|옳지|실패하면|만약.{0,12}하면/;
+const Q_DIFF_EASY=/몇|몇 개|무엇|이름|색|위치|나이|몇 년/;
+function quizDifficulty(pool){
+  const map={};
+  (pool||[]).forEach(q=>{ if(q&&q.q) map[qKey(q)] = qDiffOf(q); });
+  return map;
+}
+function qDiffOf(q){
+  const s=String(q.q||'');
+  if(Q_DIFF_HARD.test(s))return 3;
+  if(Q_DIFF_EASY.test(s))return 1;
+  return 2;
+}
+window.qDiffOf=qDiffOf;window.quizDifficulty=quizDifficulty;
 function getAdaptiveMessage(){
   const cats=Object.entries(U.stats.quizByCategory);
   if(cats.length===0)return null;
@@ -1499,11 +1553,15 @@ function renderQuiz(el,items,type){
      전체 퀴즈·과목 허브·단원평가 등 6군데가 각자 QUIZ 를 직접 넘겨 쓰고 있어
      유아 계정에 '공정 무역이란?' 같은 문제가 계속 나왔다.
      한 군데(이 목구멍)에서 걸러야 새 호출부가 생겨도 안 샌다. */
-  const filtered=(typeof lpTierQuizPool==='function')?lpTierQuizPool(items||getQuiz()):(items||getQuiz());
+  /* ★2026-09-26: 홈 '오늘의 퀴즈'가 연령 필터만 통과시키려고 items 를 넘겼다.
+     그러면 아래 else 분기(셔플 5개)로 빠져 적응형이 죽었다.
+     그래서 items 대신 LP_QUIZ_POOL(전역)를 쓴다 — 필터는 유지, 적응형 경로는 복구. */
+  const srcPool = (items && items.length) ? items : (LP_QUIZ_POOL || null);
+  const filtered=(typeof lpTierQuizPool==='function')?lpTierQuizPool(srcPool):(srcPool||getQuiz());
   let sh;
   if(type==='summative'){
     sh=[...filtered].shuffle().slice(0,10);
-  }else if(!items){
+  }else if(!srcPool){
     sh=getAdaptiveQuizzes(filtered);
   }else{
     sh=[...filtered].shuffle().slice(0,5);
@@ -1524,7 +1582,13 @@ function renderQuiz(el,items,type){
   html+=sh.map((q,qi)=>{
     const qIdx=QUIZ.indexOf(q);
     const opts=[...q.a].map((a,i)=>({t:a,ok:i===q.c})).shuffle();
-    let qHtml='<div class="qz '+typeClass+'" data-quiz-idx="'+qIdx+'" data-quiz-type="'+qType+'">'+typeLabel+'<div class="qz-q">'+(q.cat||'')+' | '+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div>';
+    /* ★2026-09-26: 난이도가 있는데 화면에 아무 표시가 없어서 "상관없이 이게 나온다"는
+       인상을 주었다. 구조로 판정한 1~3 을 눈으로 보이게 한다(추정은 아니고 계산값). */
+    const dLv=typeof qDiffOf==='function'?qDiffOf(q):2;
+    const dLb=['','쉬움','보통','도전'][dLv]||'보통';
+    let qHtml='<div class="qz '+typeClass+'" data-quiz-idx="'+qIdx+'" data-quiz-type="'+qType+'" data-dlv="'+dLv+'">'
+      +'<span class="qz-dlv qz-dlv'+dLv+'">'+dLb+'</span>'
+      +typeLabel+'<div class="qz-q">'+(q.cat||'')+' | '+q.q+'</div><div class="qz-a">'+opts.map(o=>'<button data-correct="'+o.ok+'" onclick="chkA(this,'+o.ok+')">'+o.t+'</button>').join('')+'</div>';
     if(type==='formative'){
       const hint=q.explanation||'정답은 보기 중 하나에요. 천천히 생각해보세요!';
       qHtml+='<button class="qz-hint-btn" onclick="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">힌트 보기</button>';
@@ -1609,6 +1673,14 @@ function getEducationalFeedback(ok,cat,qIdx,correctAns,userAns){
 function chkA(b,ok){
   const qEl=b.closest('.qz');
   const qType=qEl?qEl.getAttribute('data-quiz-type')||'default':'default';
+  /* ★2026-09-26: 지금 본 문제를 기억해 다음 '오늘의 퀴즈'에서 물러나게 한다.
+     같은 3문항이 반복되면 "난이도랑 상관없이 이게 나온다"는 인상이 생긴다. */
+  try{
+    const qtxt=qEl?(qEl.querySelector('.qz-q')?.textContent||''):'';
+    const k=qtxt.replace(/\s+/g,'').slice(0,40);
+    if(k){ if(!U.seenQuiz)U.seenQuiz=[]; if(U.seenQuiz[U.seenQuiz.length-1]!==k) U.seenQuiz.push(k);
+          if(U.seenQuiz.length>40)U.seenQuiz=U.seenQuiz.slice(-40); }
+  }catch(e){}
   // 형성평가: 재시도 허용 (오답 시 다시 시도 가능)
   if(qType==='formative'){
     if(b.classList.contains('correct'))return;
@@ -2472,7 +2544,37 @@ function openLesson(ui,li){
   }
   /* 만화면 다 보고 난 자리에 "이 만화가 다루는 내용" 을 놓는다 */
   if(_isComic)html+=_lpRelStrip(curSubj,l.t);
-  document.getElementById('lessonContent').innerHTML=html;
+  /* ★2026-09-26 만화 컷 열기.
+     수학 만화 50장이 1024x9842(세로 9.6배)라 폰에서 첫 컷을 보려면 5스크롤씩 해야 했다.
+     tools/split_comic_panels.py 로 정사각 컷 446장으로 잘라 comics_pages/ 에 뒀다
+     (원본 그대로 보존). 여기서 <img> 를 컷으로 바꾸고 가로 넘김 뷰어를 붙인다. */
+  const _lessonEl=document.getElementById('lessonContent');
+  const _mountComic=function(expanded){
+    _lessonEl.innerHTML=expanded;
+    _lpTop();
+    if(typeof window.lpMountComicViewer==='function'){
+      try{ window.lpMountComicViewer(_lessonEl); }catch(e){}
+    }
+  };
+  if(_isComic && typeof window.lpExpandComic==='function'){
+    try{
+      window.lpExpandComic(html, function(expanded){
+        if(!expanded || expanded.indexOf('lp-cmpwrap')<0){
+          _mountComic(html); return;                 /* 못 갈았다면 원문 그대로 */
+        }
+        /* 첫 컷이 곧 보이게 '만화로 보기 (5쪽)' 같은 안내 블록을 걷어낸다.
+           ★2026-09-26 여기서 div 를 만들어 통째로 갈아엎었다가 wrap 이 사라졌다 —
+           outerHTML 은 빈 <div></div> 만 남기고 안의 노드를 떼어내기 때문이다.
+           문자열에서 해당 안내 <div> 만 정규식으로 지운 뒤 그대로 넣는다. */
+        const cleaned = expanded
+          .replace(/<div[^>]*>\s*(?:📖|📜)?\s*만화로 보기[^<]*<\/div>/g, '')
+          .replace(/(?:<div[^>]*>\s*)?(?:📖|📜)?\s*만화로 보기(?:[^<]*)<\/div>/g, '');
+        _mountComic(cleaned);
+      });
+      return;                    /* 비동기 경로에서 아래는 실행되지 않는다 */
+    }catch(e){}
+  }
+  _lessonEl.innerHTML=html;
   _lpTop();                    /* 새로 연 내용은 언제나 맨 위부터 */
 }
 function backToSubjects(){document.getElementById('learnMain').style.display='';document.getElementById('learnUnit').style.display='none';_lpShownSubj=null;_lpSetScroll(_lpSubjPos);}
@@ -2842,7 +2944,15 @@ function renderAllCategoryContent(){
   var _gR=_el('gR');if(_gR)_gR.innerHTML=GMS.map(function(g){return '<div class="gc" onclick="oG(\''+g.u+'\',\''+g.nm+'\')">'+gameThumb(g)+'<div class="gn">'+gameVN(g)+'</div><div class="gd">'+g.d+'</div></div>';}).join('');
   nextEng();
   renderReviewArea();renderRecommendations();
-  var _qR=_el('qR');if(_qR)renderQuiz(_qR,(typeof lpTierQuizPool==='function'?lpTierQuizPool():QUIZ).slice(0,3));
+  const _qR=_el('qR');
+  if(_qR){
+    /* ★items 를 넘기면 renderQuiz 의 else 분기(셔플 고정 5개)로 빠져 적응형이 죽는다.
+       홈 '오늘의 퀴즈'는 items 없이 넘겨 getAdaptiveQuizzes() 를 타게 한다.
+       단, 유아/초등 필터는 lpTierQuizPool 로 끝내야 하므로 풀을 기억했다가 비워 넘긴다. */
+    LP_QUIZ_POOL = (typeof lpTierQuizPool==='function')?lpTierQuizPool():null;
+    renderQuiz(_qR, null);
+    LP_QUIZ_POOL = null;
+  }
   var _hU=_el('hU');if(_hU)_hU.innerHTML=UTS.map(function(u){return '<div class="gc" onclick="openU(\''+u.id+'\')"><div class="gi">'+ico(u.nm,u.ic)+'</div><div class="gn">'+u.nm+'</div></div>';}).join('');
   var _cR=_el('calcR');if(_cR)_cR.innerHTML=[].concat(P,U.mp).sort(function(a,b){return b.l-a.l;}).slice(0,5).map(pHNew).join('')+'<div style="text-align:right;margin-top:6px"><a href="javascript:void(0)" onclick="go(3)" style="font-size:11px;color:var(--p);text-decoration:none;font-weight:600">더보기 \u2192</a></div>';
 }
@@ -3828,6 +3938,9 @@ function lpTierQuizPool(pool){
   return out.length>=1?out:src;
 }
 window.lpTierQuizPool=lpTierQuizPool;window.lpFilterSubjData=lpFilterSubjData;
+/* 홈 '오늘의 퀴즈'가 연령 필터만 통과시킨 채 items 로 넘기던 것을 대체한다(2026-09-26).
+   renderQuiz(el, null) 로 불렀을 때 이 풀을 쓴다. */
+let LP_QUIZ_POOL=null;
 
 /* ===== 레슨 완료 기록 (감사 B-1) =====
    completeLesson 은 U.stats.lessonsBySubject 만 올리고, 홈 머리글은

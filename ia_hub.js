@@ -411,6 +411,128 @@
     return { items: items, by: by };
   }
 
+  /* 홈 3개 문(배운다/놀린다/확인한다)의 "N개" 숫자 — 종류별로 몇 개씩 있는가.
+     화면에 숫자를 써놓고 근거가 없어지면 안 되니 실제 색인에서 센다. */
+  function kindCount() {
+    var items = idx().items, c = { learn: 0, play: 0, quiz: 0, total: items.length };
+    items.forEach(function (it) {
+      if (it.kind === 'quiz') c.quiz++;
+      else if (it.kind === 'game' || it.kind === 'sim') c.play++;
+      else c.learn++;
+    });
+    return c;
+  }
+  window.lpKindCount = kindCount;
+
+  /* ================================================================
+     만화 컷 열기 (2026-09-26)
+
+     병석님 지적: "만화를 누르면 만화 들어가지는것도 아니고 뭔가 캐릭터나 그림
+     이런게 많이 없는느낌도 있고 열면 보고싶어져"
+
+     실측 원인 두 가지가 겹쳐 있었다.
+     (1) math_history 의 만화 50장이 전부 세로 1:9.6(1024 x 9842)이었다.
+         폭 1024 를 폰 412px 에 넣으면 표시 높이가 9,960px — 첫 컷을 보려면
+         화면을 다섯 번 넘게 스크롤해야 한다. 한국사 만화(1240x1754)는 정상이었고,
+         수학 만화만 이상형이었다.
+     (2) 그 위에 "열면 보고싶어진다"를 더 만든 것이, 만화 카드가 과목→단원→회차
+         3단계를 거쳐야 처음 그림이 나온다는 점이었다.
+
+     해결: tools/split_comic_panels.py 로 1024x9842 를 정사각 컷 9장으로 잘라
+     assets/comics_pages/ 에 뒀다(원본은 그대로 보존). 여기서는 data/comic_panels.json
+     맵을 읽어 <img> 를 컷으로 바꿔 그린다. 맵에 없는 그림은 원본 경로 그대로 쓴다.
+     ================================================================ */
+  var PANEL_MAP = null;
+  function panelMap(cb) {
+    if (PANEL_MAP) return cb(PANEL_MAP);
+    fetch('data/comic_panels.json').then(function (r) { return r.json(); })
+      .then(function (j) { PANEL_MAP = j || {}; cb(PANEL_MAP); })
+      .catch(function () { PANEL_MAP = {}; cb(PANEL_MAP); });
+  }
+  window.lpPanelMap = function (cb) { panelMap(cb); };
+
+  /* html 문자열 속 <img src="assets/comics/..."> 를 컷 열로 바꾼다.
+     컷 9장은 가로 스크롤 한 줄로 두지 않고, 세로로 쌓되 첫 컷이 바로 보이게 한다. */
+  function expandComicHtml(html, done) {
+    if (!html) { done(html); return; }
+    panelMap(function (map) {
+      var keys = Object.keys(map);
+      if (!keys.length) { done(html); return; }
+      var re = new RegExp('<img[^>]*src="(assets/comics/[^"]+)"[^>]*>', 'g');
+      var need = 0, got = 0;
+      var out = html.replace(re, function (full, src) {
+        var cuts = map[src];
+        if (!cuts) return full;
+        need++;
+        var inner = cuts.map(function (c, i) {
+          return '<figure class="lp-cmp"><img loading="' + (i < 2 ? 'eager' : 'lazy')
+            + '" src="' + c + '" alt="컷 ' + (i + 1) + '"'
+            + ' style="width:100%;border-radius:10px;display:block;background:rgba(255,255,255,.04)">'
+            + '<figcaption>' + (i + 1) + ' / ' + cuts.length + '</figcaption></figure>';
+        }).join('');
+        return '<div class="lp-cmpwrap" data-cuts="' + cuts.length + '">' + inner + '</div>';
+      });
+      /* 컷을 하나도 못 갈았다면 원문 그대로 — 없는 그림을 지우지 않는다 */
+      done(need ? out : html);
+    });
+  }
+  window.lpExpandComic = expandComicHtml;
+
+  /* ================================================================
+     만화 컷 뷰어 — 벤치마크 결론을 그대로 쓴다.
+     조사 요약("한국형 학습만화는 세로 스크롤이 기본값"):
+       · 첫 화면에 설명문·회차목록·로그인을 먼저 두지 말고 첫 컷을 즉시 보여준다.
+       · 얇은 고정 바에 '1화 / 전체 N화' 와 회차 목록.
+       · 첫 화면의 큰 CTA 는 '다음 회차'가 아니라 '계속 읽기'.
+       · 다음 회차 유도는 회차 끝에 놓는다.
+     그래서 아래 구현은: 고정 바(현재 컷/전체, 회차 목록) + 좌우 넘김 + 끝의 다음화.
+     ================================================================ */
+  function mountComicViewer(root) {
+    if (!root) return;
+    var wraps = [].slice.call(root.querySelectorAll('.lp-cmpwrap'));
+    if (!wraps.length) return;
+    wraps.forEach(function (wrap, wi) {
+      var figs = [].slice.call(wrap.querySelectorAll('.lp-cmp'));
+      var n = figs.length;
+      if (!n) return;
+      wrap.classList.add('lp-cmp-on');
+      /* 가로 스크롤 + 스냅 */
+      wrap.style.display = 'flex';
+      wrap.style.overflowX = 'auto';
+      wrap.style.scrollSnapType = 'x mandatory';
+      wrap.style.gap = '8px';
+      figs.forEach(function (f) {
+        f.style.flex = '0 0 84%';
+        f.style.scrollSnapAlign = 'center';
+        f.style.margin = '0';
+      });
+      /* 얇은 진행 바 */
+      var bar = document.createElement('div');
+      bar.className = 'lp-cmpbar';
+      bar.innerHTML = '<span class="lp-cmpnow">1</span> / ' + n
+        + '<span class="lp-cmpbtns">'
+        + '<button type="button" class="lp-cmpb" aria-label="이전 컷">‹</button>'
+        + '<button type="button" class="lp-cmpb" aria-label="다음 컷">›</button></span>';
+      wrap.parentNode.insertBefore(bar, wrap);
+      function goTo(i) {
+        i = Math.max(0, Math.min(n - 1, i));
+        wrap.scrollTo({ left: figs[i].offsetLeft - (wrap.clientWidth - figs[i].offsetWidth) / 2,
+                         behavior: 'smooth' });
+        bar.querySelector('.lp-cmpnow').textContent = i + 1;
+      }
+      var bs = bar.querySelectorAll('.lp-cmpb');
+      bs[0].addEventListener('click', function () { goTo(cur - 1); });
+      bs[1].addEventListener('click', function () { goTo(cur + 1); });
+      var cur = 0;
+      wrap.addEventListener('scroll', function () {
+        var i = Math.round(wrap.scrollLeft / Math.max(1, figs[0].offsetWidth + 8));
+        cur = Math.max(0, Math.min(n - 1, i));
+        bar.querySelector('.lp-cmpnow').textContent = cur + 1;
+      });
+    });
+  }
+  window.lpMountComicViewer = mountComicViewer;
+
   function stamp() { return (isKid() ? 'k' : 'a') + '|' + (tier() || '-') + '|' + (window._lpCM ? 1 : 0) + '|' +
       ((typeof V !== 'undefined' ? V.length : 0)) + '|' + ((typeof QUIZ !== 'undefined' ? QUIZ.length : 0)) + '|' +
       ((typeof CURRICULUM !== 'undefined') ? Object.keys(CURRICULUM).reduce(function (n, k) { return n + CURRICULUM[k].units.length; }, 0) : 0); }
@@ -751,6 +873,105 @@
     var p = document.getElementById((curHubOpt && curHubOpt.home) ? 'p0' : 'p5');
     if (p) { p.scrollTop = 0; try { requestAnimationFrame(function () { p.scrollTop = 0; }); } catch (e) {} }
   };
+
+  /* ================================================================
+     홈 3개 문(배운다/놀린다/확인한다) — 과목 탭을 고르지 않고 '무엇을 할지'로 바로 간다.
+     오너 지적: "필요없는건 다 밖에 나와서. 보이고 필요한건 찾기도 어렵고"
+     실측: 홈 3155px 중 게임·실험·퀴즈가 1900~2700px(2스크롤 아래)에 있었다.
+     여기서 '놀린다'를 누르면 과목 상관없이 게임·실험만 한 화면에 모인다.
+     ================================================================ */
+  var DOOR_MODE = null;                 /* null = 과목 기본 보기 / 'play' / 'quiz' / 'learn' */
+  window.lpDoorKind = function (kinds, mode) {
+    DOOR_MODE = modes_filter(mode);
+    renderHomeTabs();
+    if (homeTab === REC_KEY) {
+      /* 추천 탭이면 과목 전체를 모아 문 모드로 보여준다. */
+      var body = document.getElementById('lpHomeSubj');
+      if (body) { body.style.display = DOOR_MODE ? '' : 'none'; body.innerHTML = ''; }
+      if (DOOR_MODE) renderDoorAll();
+    } else {
+      renderHub(homeTab, { host: 'lpHomeSubj', home: true });   /* lpHomeTab 가 분기 */
+      window.lpHomeTab(homeTab);
+    }
+    var p0 = document.getElementById('p0'); if (p0) p0.scrollTop = 0;
+  };
+  function modes_filter(mode) {
+    if (mode === 'play')  return 'play';
+    if (mode === 'quiz')  return 'quiz';
+    if (mode === 'learn') return 'learn';
+    return null;
+  }
+  /* 문 모드용 구역 — 과목의 '배우기/해보기/확인' 대신 '놀리기/확인/배우기' 3구역만. */
+  function renderDoorAll() {
+    var hostId = 'lpHomeSubj', host = document.getElementById(hostId);
+    if (!host) return;
+    var all = idx().items;
+    function of(ks) { return all.filter(function (it) { return ks.indexOf(it.kind) >= 0; }); }
+    var learn = of(['video', 'comic', 'story', 'lesson']);
+    var play  = of(['game', 'sim']);
+    var quiz  = of(['quiz']);
+    host.innerHTML = doorChips(hostId, learn, play, quiz, '전체 과목')
+      + '<div id="' + hostId + '-body">'
+      + doorZones(hostId, learn, play, quiz, 'all')
+      + '</div>';
+    mountDoorQuiz(hostId, quiz);
+  }
+
+  function renderDoorBody(k) {
+    var hostId = 'lpHomeSubj', host = document.getElementById(hostId);
+    if (!host || !SB[k]) return;
+    var s = SB[k], bucket = idx().by[k] || [];
+    function of(ks) { return bucket.filter(function (it) { return ks.indexOf(it.kind) >= 0; }); }
+    var learn = of(['video', 'comic', 'story', 'lesson']);
+    var play  = of(['game', 'sim']);
+    var quiz  = of(['quiz']);
+    host.innerHTML = doorChips(hostId, learn, play, quiz, esc(s.nm) + ' · ' + bucket.length + '개')
+      + '<div id="' + hostId + '-body">' + doorZones(hostId, learn, play, quiz, k) + '</div>';
+    mountDoorQuiz(hostId, quiz);
+  }
+
+  /* 칩 줄 — 숫자는 실제 색인에서 센 값 */
+  function doorChips(hostId, learn, play, quiz, head) {
+    return '<div class="lp-chips" id="' + hostId + '-chips">'
+      + '<button class="bt ' + (DOOR_MODE ? 'bs' : 'bp') + '" onclick="lpDoorKind(null,null)">'
+        + svg('i-grid') + '<span>' + esc(head) + '</span></button>'
+      + '<button class="bt ' + (DOOR_MODE === 'learn' ? 'bp' : 'bs') + '" onclick="lpDoorKind(null,\'learn\')">'
+        + svg('i-book') + '<span>배우기 ' + learn.length + '</span></button>'
+      + '<button class="bt ' + (DOOR_MODE === 'play' ? 'bp' : 'bs') + '" onclick="lpDoorKind(null,\'play\')">'
+        + svg('i-play') + '<span>놀리기 ' + play.length + '</span></button>'
+      + '<button class="bt ' + (DOOR_MODE === 'quiz' ? 'bp' : 'bs') + '" onclick="lpDoorKind(null,\'quiz\')">'
+        + svg('i-note') + '<span>확인 ' + quiz.length + '</span></button>'
+      + '</div>';
+  }
+
+  /* 구역 — DOOR_MODE 가 켜면 그 하나만, 꺼져 있으면 배우기/놀리기/확인 전부 */
+  function doorZones(hostId, learn, play, quiz, k) {
+    var h = '';
+    if (!DOOR_MODE || DOOR_MODE === 'play') {
+      if (play.length) h += zone('놀리기 · 게임과 실험', 'i-play', play, k, { poster: true, lim: 12 });
+    }
+    if (!DOOR_MODE || DOOR_MODE === 'learn') {
+      if (learn.length) h += zone('배우기 · 만화와 영상', 'i-book', learn, k, { mix: true, lim: 9 });
+    }
+    if (!DOOR_MODE || DOOR_MODE === 'quiz') {
+      if (quiz.length) {
+        h += '<div class="sec lp-zh">' + svg('i-note') + ' 확인 · 퀴즈<span class="lp-zn">' + quiz.length + '</span></div>'
+          + '<div id="' + hostId + '-qz"></div>'
+          + (k && k !== 'all' ? '<button class="bt bp lp-more" onclick="lpFullQuiz(\'' + k + '\')">이 과목 퀴즈 '
+              + quiz.length + '문항 전체 도전</button>' : '');
+      }
+    }
+    return h;
+  }
+  function mountDoorQuiz(hostId, quiz) {
+    var qz = document.getElementById(hostId + '-qz');
+    if (qz && quiz.length && (!DOOR_MODE || DOOR_MODE === 'quiz') && typeof renderQuiz === 'function') {
+      /* 과목이 섞인 상태라 renderQuiz 의 적응형 경로를 태운다(중복 방지 로직 재사용). */
+      try { renderQuiz(qz, null); } catch (e) {}
+    }
+  }
+  /* 문 모드가 켜져 있으면 lpHomeTab 이 이쪽을 그린다. */
+  var _lpRenderHubOrig = renderHub;
   window.lpBackToSubjects = function () {
     var hub = document.getElementById('subjHub'), home = document.getElementById('subjHome');
     if (hub) hub.style.display = 'none';
@@ -832,13 +1053,22 @@
     homeTab = k;
     if (k === REC_KEY) {
       if (p0) p0.classList.remove('lp-subjmode');
-      if (body) { body.style.display = 'none'; body.innerHTML = ''; }
       curHub = null; curHubOpt = null;
+      /* ★2026-09-26: '추천' 탭에서도 문(배운다/놀린다/확인한다)이 먹혀야 한다.
+         예전엔 REC_KEY 면 lpHomeSubj 를 통째로 숨겼는데, 그러면 첫 화면의 3개 문이
+         눌려도 아무 반응이 없었다(사용자 체감 = "고쳐도 그대로"). */
+      if (body) {
+        body.style.display = DOOR_MODE ? '' : 'none';
+        body.innerHTML = '';
+        if (DOOR_MODE) renderDoorAll();
+      }
     } else {
       if (p0) p0.classList.add('lp-subjmode');
       if (body) body.style.display = '';
       curChip = 'all'; HUB_MORE = {};
-      renderHub(k, { host: 'lpHomeSubj', home: true });
+      /* 문 모드(배운다/놀린다/확인한다)가 켜져 있으면 과목 기본 화면 대신 문 화면을 그린다. */
+      if (DOOR_MODE) renderDoorBody(k);
+      else renderHub(k, { host: 'lpHomeSubj', home: true });
       ensureCM();
     }
     syncHomeTabs(true);
