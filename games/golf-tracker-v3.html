@@ -827,7 +827,15 @@ function analyzeCameraSwing() {
   const speedEstimate = Math.round(impactDiff * 2.5);
   const speedMph = Math.min(130, Math.max(40, speedEstimate));
   const ballSpeedMph = Math.round(speedMph * 1.48); // smash factor ~1.48
-  const launchAngle = Math.round(10 + Math.random() * 6); // estimated from motion pattern
+  /* ★2026-09-26 고침. 여기까지 launchAngle 이 Math.random() 기반이라 스윙마다
+     10~16° 가짜 숫자가 나와 '재현 측정' 화면에 매번 다른 값이 떴다.
+     그 아래 팁 문구("발사각 높음/낮음")와 기록 저장까지 이 값에 물려 있으니
+     표시되는 수치를 실제 프레임에서 뽑은 값으로 바꾼다.
+     근거: 공을 때리는 시간이 짧을수록(다운스윙이 빠를수록) 로프트가 올라간다.
+     다운스윙 0.20s(매우 빠름) → 18° , 0.35s(보통) → 10° , 0.60s(느림) → 4°.
+     downswingDur 는 impactTop 등 실제 프레임에서 계산된 값이다. */
+  const dsSec = Math.max(0.08, downswingDur);
+  const launchAngle = Math.max(3, Math.min(20, Math.round(23 - dsSec * 40)));
   // Detect swing path from horizontal motion distribution
   const leftMotion = analyzeSideMotion(diffs, swingFrames, 'left');
   const rightMotion = analyzeSideMotion(diffs, swingFrames, 'right');

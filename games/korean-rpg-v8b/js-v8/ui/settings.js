@@ -113,7 +113,7 @@ export function openSettings(opts = {}) {
     <h3>전투 표시 모드</h3>
     <div class="v8-settings-row">
       <input type="radio" name="v8-battle-display" id="v8-bd-squad" value="squad" ${s.battleDisplay === 'squad' ? 'checked' : ''}>
-      <label for="v8-bd-squad">분대 (리더 1 + 병사 9) — fullloop-3d 진군감</label>
+      <label for="v8-bd-squad">분대 (리더 1 + 병사 9) — 진군감</label>
     </div>
     <div class="v8-settings-row">
       <input type="radio" name="v8-battle-display" id="v8-bd-single" value="single" ${s.battleDisplay === 'single' ? 'checked' : ''}>

@@ -198,8 +198,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 
 <!-- MAIN MENU -->
 <div class="overlay" id="mainMenu">
-<div style="position:relative;text-align:center"><img src="img/boxer_silhouette.png" style="height:140px;width:auto;opacity:.55;filter:drop-shadow(0 0 30px rgba(230,57,70,.6));margin-bottom:-10px" alt=""><div class="menu-title" style="margin-top:-20px">BOXING</div></div>
-<div class="menu-sub">TRAINER V5 — 3D CAREER MODE</div>
+<div style="position:relative;text-align:center"><img src="img/boxer_silhouette.png" style="height:140px;width:auto;opacity:.55;filter:drop-shadow(0 0 30px rgba(230,57,70,.6));margin-bottom:-10px" alt=""><div class="menu-title" style="margin-top:-20px">복싱</div></div>
+<div class="menu-sub">트레이너 — 3D 커리어 모드</div>
 <div id="playerInfo" style="margin-bottom:15px"></div>
 <button class="menu-btn" onclick="showCareer()"><span class="icon">&#x1F94A;</span> 커리어 모드<span class="sub">랭킹을 올려 챔피언에 도전하세요</span></button>
 <button class="menu-btn" onclick="showTraining()"><span class="icon">&#x1F3CB;&#xFE0F;</span> 트레이닝<span class="sub">스피드백, 헤비백, 줄넘기, 스파링</span></button>
@@ -210,7 +210,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-ser
 <button class="menu-btn" onclick="showMultiplayer()"><span class="icon">&#x1F310;</span> 1:1 스파링<span class="sub">친구와 P2P 실시간 대전 (코드 입력)</span></button>
 <button class="menu-btn" id="ttsToggleBtn" onclick="ttsToggle()"><span class="icon">&#x1F50A;</span> <span id="ttsLabel">음성 ON</span><span class="sub">라운드콜·콤보콜·KO 외침</span></button>
 <button class="menu-btn" id="motionToggleBtn" onclick="toggleMotion()"><span class="icon">&#x1F4F1;</span> <span id="motionLabel">모션펀치 OFF</span><span class="sub">폰 흔들어 잽/크로스/훅/어퍼 입력 (모바일)</span></button>
-<button class="menu-btn" onclick="showAICoach()"><span class="icon">&#x1F916;</span> AI 코치 (BETA)<span class="sub">카메라로 자세 분석 · 로컬 Ollama 필요</span></button>
+<button class="menu-btn" onclick="showAICoach()"><span class="icon">&#x1F916;</span> AI 코치<span class="sub">카메라로 자세 분석 · 로컬 AI 필요</span></button>
 <button class="menu-btn" onclick="resetAll()" style="border-color:rgba(230,57,70,.3)"><span class="icon">&#x1F504;</span> 데이터 초기화<span class="sub">모든 진행 상황을 리셋합니다</span></button>
 </div>
 
@@ -2322,11 +2322,11 @@ function updatePlayerInfo() {
   $('playerInfo').innerHTML = `
     <div style="font-size:13px;color:var(--dim)">Lv.${s.level} ${beltText ? '| &#x1F3C6; ' + beltText : ''} | 전적: ${s.record.wins}승 ${s.record.losses}패 (KO ${s.record.kos})</div>
     <div class="stats-bar">
-      <span class="stat-pill">SPD<b>${s.stats.speed}</b></span>
-      <span class="stat-pill">PWR<b>${s.stats.power}</b></span>
-      <span class="stat-pill">STA<b>${s.stats.stamina}</b></span>
-      <span class="stat-pill">DEF<b>${s.stats.defense}</b></span>
-      <span class="stat-pill">CHN<b>${s.stats.chin}</b></span>
+      <span class="stat-pill">속도<b>${s.stats.speed}</b></span>
+      <span class="stat-pill">위력<b>${s.stats.power}</b></span>
+      <span class="stat-pill">체력<b>${s.stats.stamina}</b></span>
+      <span class="stat-pill">방어<b>${s.stats.defense}</b></span>
+      <span class="stat-pill">턱<b>${s.stats.chin}</b></span>
     </div>`;
 }
 

@@ -11,7 +11,24 @@ body{background:#0a0a14;color:#eee;font-family:-apple-system,'Segoe UI',sans-ser
 
 #topBar{position:fixed;top:0;left:0;right:0;height:44px;background:linear-gradient(135deg,#1a1040,#251555);border-bottom:2px solid #5a3a9a;display:flex;align-items:center;padding:0 10px;gap:8px;z-index:100}
 #topBar h1{font-size:15px;font-weight:700;color:#d0b0ff;flex-shrink:0}
-.tb{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+.tb{display:flex;gap:4px;margin-left:auto;flex-shrink:0;min-width:0}
+/* ★ 412px 회귀 수선(2026-09-26). 병합 때 글자 크기 1.7배가 들어와 상단바가
+   clientWidth 412 / scrollWidth 534 로 늘어나 스크린샷·샘플·도움말 3개가
+   화면 밖으로 밀려 hit-test 결과 el=none 이었다(누를 수 없음 = 기능 손실).
+   원인은 h1·상태 span·버튼이 전부 flex-shrink:0 인데 .tb 만 auto 마진으로
+   밀리고, 버튼 라벨(🏚지붕 등)이 줄바꿈 없이 밀려난 것.
+   고침: ① 상태 표시는 720px 미만에서 숨겨 h1+버튼만 남김
+        ② 버튼은 아이콘 위주로 좁히고 ③ 넘칠 때만 .tb 가 가로 스크롤 */
+@media(max-width:720px){
+  #topBar{gap:5px;padding:0 6px}
+  #topBar h1{font-size:12px;max-width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #topBar>#floorDisp,#topBar>#budgetDisp,#topBar>#weatherIcon,#topBar>#timeIcon,#topBar>#fpsDisp{display:none}
+  #topBar .tb{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:3px}
+  #topBar .tb::-webkit-scrollbar{display:none}
+  #topBar .tb button{padding:0 6px;min-width:34px;font-size:13px}
+  #topBar #btnRoof{font-size:0;padding:0 7px}
+  #topBar #btnRoof::before{content:"🏚";font-size:13px}
+}
 .tb button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#d0b0ff;padding:4px 10px;border-radius:10px;font-size:11px;cursor:pointer}
 .tb button:hover,.tb button.act{background:rgba(140,80,255,.3)}
 #budgetDisp{font-size:12px;color:#ffd700;font-weight:700;flex-shrink:0}
