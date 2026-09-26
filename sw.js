@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v94-instrument-fx';
+const CACHE_NAME = 'levelplay-v95-piano-real-size';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
