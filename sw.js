@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v92-space-count';
+const CACHE_NAME = 'levelplay-v93-always-fresh';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -339,13 +339,19 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 가져오기: Network First (data/*.json, RPG 게임 HTML), Cache First (나머지)
+// 가져오기: 코드·문서는 네트워크 우선(no-cache), 그림·소리·영상은 캐시 먼저+뒤에서 새로 받기
 /* ★2026-08-31: 패치 JS(_patch.js·ia_hub.js 등)가 캐시 우선이라, 앱을 설치한 사람은
    새로 고쳐도 옛 코드를 계속 받았다. 이번 감사 수정(가짜 성적표 제거 등)이 안 닿는다는
    뜻이라 앱 코드 파일 전부를 네트워크 우선으로 올린다. 오프라인이면 그때 캐시로 떨어진다. */
 const NETWORK_FIRST_PATHS = ['/data/', 'korean-rpg-', 'index.html', '/sw.js',
   '_patch.js', 'ia_hub.js', 'nav_unify.js', 'nav_route.js', 'home_tidy.js'];
 const NEVER_CACHE_PATHS = ['boxing-trainer-', 'opponent_lore.json', 'manifest.boxing.json'];
+/* ★2026-09-26: "LevelPlay 가 바뀌면 원허브든 APK 든 전부 반영". 네트워크 요청은 브라우저의
+   10분 임시저장을 건너뛰고 서버에 새 판이 있는지 묻는다(no-cache: 안 바뀌었으면 304 로 가볍게).
+   코드(js·css·json·manifest)는 네트워크 우선, 그림·소리·영상·글꼴은 캐시로 바로 보여 주고
+   뒤에서 새 판을 받아 둔다(다음에 열 때 반영). CACHE_NAME 을 더 올리지 않아도 된다. */
+const FRESH = { cache: 'no-cache' };
+const CODE_EXT = /\.(?:js|mjs|css|json|webmanifest|txt|html?)$/i;
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
@@ -358,7 +364,7 @@ self.addEventListener('fetch', event => {
   // 메인 앱 Navigation (게임 페이지 제외): v2_patch.js 자동 주입
   if (event.request.mode === 'navigate' && !url.pathname.includes('/games/')) {
     event.respondWith(
-      fetch(event.request).then(response => {
+      fetch(event.request, FRESH).then(response => {
         if (response.ok) {
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
         }
@@ -373,10 +379,10 @@ self.addEventListener('fetch', event => {
   }
 
   // 게임 HTML 문서는 항상 네트워크 우선 → 새 배포가 즉시 반영(캐시우선이면 옛 게임코드가 계속 나옴).
-  // 오프라인일 때만 캐시로 폴백. (게임 내부 자산 json/이미지/모델은 아래 캐시우선 유지)
+  // 오프라인일 때만 캐시로 폴백. (게임 폴더의 js·css·json 은 아래 코드 규칙, 그림·소리는 캐시+뒤에서 새로 받기)
   if (url.pathname.includes('/games/') && url.pathname.endsWith('.html')) {
     event.respondWith(
-      fetch(event.request).then(response => {
+      fetch(event.request, FRESH).then(response => {
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
@@ -392,7 +398,7 @@ self.addEventListener('fetch', event => {
   // Network First 대상 - 항상 네트워크 우선, fallback to cache
   if (isNetworkFirst) {
     event.respondWith(
-      fetch(event.request).then(response => {
+      fetch(event.request, FRESH).then(response => {
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
@@ -408,17 +414,37 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 나머지 - Cache First, fallback to network
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response.ok && event.request.method === 'GET') {
+  if (event.request.method !== 'GET') return;
+
+  // 나머지 코드 파일(게임 폴더 js·css·json, manifest 등) - 네트워크 우선, 오프라인이면 캐시
+  if (CODE_EXT.test(url.pathname)) {
+    event.respondWith(
+      fetch(event.request, FRESH).then(response => {
+        if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // 나머지(그림·소리·영상·글꼴·모델) - 캐시로 바로, 뒤에서 새 판 받아 두기
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      const refresh = fetch(event.request, FRESH).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone)).catch(() => {});
+        }
+        return response;
       });
+      if (cached) {
+        event.waitUntil(refresh.catch(() => {}));
+        return cached;
+      }
+      return refresh;
     }).catch(() => {
       // 오프라인 fallback: HTML 요청이면 index.html 반환
       if (event.request.headers.get('accept')?.includes('text/html')) {
