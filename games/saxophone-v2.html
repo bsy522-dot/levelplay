@@ -212,16 +212,43 @@ label.switch input{width:18px; height:18px; accent-color:var(--gold);}
           <stop offset="100%" stop-color="#b6c2d9"/>
         </radialGradient>
       </defs>
-      <!-- 마우스피스 / 넥 -->
-      <rect x="50" y="16" width="32" height="15" rx="7" fill="#1f2937" transform="rotate(-18 66 24)"/>
-      <path d="M105 68 Q106 36 76 27" stroke="url(#brass)" stroke-width="15" fill="none" stroke-linecap="round"/>
-      <!-- 본체 -->
-      <rect x="87" y="62" width="36" height="392" rx="17" fill="url(#brass)" stroke="#a16207" stroke-width="2"/>
-      <line x1="120" y1="95" x2="120" y2="430" stroke="#b45309" stroke-width="2" opacity=".55"/>
-      <!-- 벨 -->
-      <path d="M92 446 Q90 522 145 527 Q197 531 195 447" stroke="url(#brass)" stroke-width="34" fill="none" stroke-linecap="round"/>
-      <ellipse cx="195" cy="440" rx="26" ry="12" fill="url(#brass)" stroke="#a16207" stroke-width="2"/>
-      <ellipse cx="195" cy="440" rx="17" ry="7" fill="#7c4a03" opacity=".85"/>
+      <!-- 0926(병석님 "이거는 섹소폰을 연주하는 운지 느낌이 하나도 안들고"):
+           아래 본체/벨/마우스피스를 실제로 손댔다. 근거는 실제 알토 색소폰의 실루엣 —
+             ① 벨이 '아랫도착'이 아니라 위로 일곱(upturned bell) — 기존은 아래로 180도 꺾여
+                클라리넷/바soon 처럼 보였다. 이게 제일 큰 어색함의 원인이었다.
+             ② 마우스피스·크라운이 본체 왼쪽위로 꺾여 있었음 → 실제론 위에서 곧게 얹힌다.
+             ③ 벨 아래 29px 는 죽은 여백 → 벨을 위로 올려 전체 실루엣을 채운다.
+           키 좌표(cx/cy)는 손대지 않았다 — 이미 위에서 실측으로 겹침을 검증했다. -->
+      <!-- 마우스피스(블랙 고무) → 크라운 → 넥: 위에서 곧게 -->
+      <rect x="94" y="8" width="26" height="13" rx="6" fill="#1f2937" transform="rotate(-8 107 15)"/>
+      <path d="M107 21 Q108 40 106 62" stroke="#b8860b" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <path d="M107 21 Q108 40 106 62" stroke="url(#brass)" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <!-- 본체(원추형 관 — 실제 알토 색소폰은 위가 가늘고 아래로 갈수록 넓어진다) -->
+      <path d="M99 60 L114 60 L123 452 L93 452 Z" fill="url(#brass)" stroke="#a16207" stroke-width="2"/>
+      <line x1="121" y1="92" x2="122" y2="436" stroke="#b45309" stroke-width="2" opacity=".5"/>
+      <!-- 활대(바깥살) — 알토 색소폰 특유의 앞쪽 경사진 날 -->
+      <path d="M99 60 L88 66 L84 452 L93 452 Z" fill="#c98f16" stroke="#8a5a05" stroke-width="1.5" opacity=".95"/>
+      <!-- 넥(목) — S자 곡선: 0926 비전 점검 '목이 곧게 꽂힌 스텁' 지적 반영.
+           실제 알토는 크라운에서 몸통으로 갈 때 완만한 S를 그린다. -->
+      <path d="M107 60 Q118 46 110 32 Q103 22 100 18" stroke="url(#brass)" stroke-width="11"
+            fill="none" stroke-linecap="round"/>
+      <path d="M107 60 Q118 46 110 32 Q103 22 100 18" stroke="#8a5a05" stroke-width="1.6"
+            fill="none" stroke-linecap="round" opacity=".5"/>
+      <!-- 볼트(자 Centres) — 키축 위 작은 볼 Head -->
+      <g fill="#8a5a05" opacity=".8">
+        <circle cx="105" cy="118" r="2.6"/><circle cx="105" cy="170" r="2.6"/>
+        <circle cx="105" cy="222" r="2.6"/><circle cx="105" cy="300" r="2.6"/>
+        <circle cx="105" cy="350" r="2.6"/><circle cx="105" cy="400" r="2.6"/>
+        <circle cx="57" cy="277" r="2.2"/><circle cx="57" cy="311" r="2.2"/>
+        <circle cx="57" cy="177" r="2.2"/><circle cx="160" cy="415" r="2.2"/>
+      </g>
+      <!-- 벨: 위로 일곱(upturned) — 실제 알토 색소폰의 특징.
+           0926: 본체를 원추형으로 넓혔으므로 벨 시작점도 아래 넓은 폭(93~123)에 맞춘다. -->
+      <path d="M93 448 L123 448 Q131 470 145 486 Q179 522 179 500 Q179 482 155 470 Q131 460 121 452"
+            stroke="url(#brass)" stroke-width="30" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <ellipse cx="179" cy="500" rx="21" ry="10" fill="url(#brass)" stroke="#a16207" stroke-width="2"
+               transform="rotate(28 179 500)"/>
+      <ellipse cx="179" cy="500" rx="13" ry="5.5" fill="#7c4a03" opacity=".85" transform="rotate(28 179 500)"/>
       <!-- 연결 로드 -->
       <line x1="88" y1="112" x2="62" y2="108" stroke="#a16207" stroke-width="3"/>
       <line x1="88" y1="192" x2="60" y2="192" stroke="#a16207" stroke-width="2.5"/>
