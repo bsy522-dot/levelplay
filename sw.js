@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v93-always-fresh';
+const CACHE_NAME = 'levelplay-v94-instrument-fx';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {

@@ -72,11 +72,15 @@ html,body{width:100%;height:100%;overflow:hidden;touch-action:none;background:#0
 .oc{font-size:.7em;font-weight:700;margin-left:1px;}
 .o3{color:#a6f5a6;}.o4{color:#ffe08a;}.o5{color:#94deff;}.o6{color:#ffb3de;}
 .ob .oc{color:inherit;}
-/* 반음(♯) 버튼: 기본은 흐리게(글자 없음) — ⚙ 에서 또렷하게. 안내(반짝임)·누름 중에는 보임 */
-.nb.sharp:not(.on):not(.sel):not(.highlight){background:rgba(255,250,235,.045);border-color:rgba(200,190,160,.12);}
-body.showSharp .nb.sharp:not(.on):not(.sel):not(.highlight){background:rgba(255,250,235,.13);border-color:rgba(200,190,160,.28);}
-.nb.sharp .nl{visibility:hidden;}
-body.showSharp .nb.sharp .nl,.nb.sharp.on .nl,.nb.sharp.sel .nl,.nb.sharp.highlight .nl{visibility:visible;}
+/* 반음(♯) 버튼: 0926(병석님) "샵은 굳이 빈 네모칸으로 표현 필요없다"
+   → 글자를 숨겨 빈 칸처럼 보이게 하던 것을 없앤다. 반음 자리는 처음부터 ♯ 가 보이게 하고
+     자연음보다 약간만 조용히 처리해 '빈 칸'도 '굵은 글자'도 되지 않게 한다(가독성 우선). */
+.nb.sharp:not(.on):not(.sel):not(.highlight){background:rgba(255,250,235,.07);border-color:rgba(200,190,160,.18);}
+body.showSharp .nb.sharp:not(.on):not(.sel):not(.highlight){background:rgba(255,250,235,.14);border-color:rgba(200,190,160,.3);}
+/* ♯ 기호만 조금 옅게 — 글자 전체가 사라지지 않는다 */
+.nb.sharp .nl{visibility:visible;opacity:.62;}
+body.showSharp .nb.sharp .nl{opacity:1;}
+.nb.sharp.on .nl,.nb.sharp.sel .nl,.nb.sharp.highlight .nl{opacity:1;visibility:visible;}
 .nb:active,.nb.on{transform:scale(.94);
   background:rgba(255,215,0,.3);border-color:rgba(255,215,0,.45);
   color:#fff;box-shadow:0 0 10px rgba(255,215,0,.25);}
@@ -293,7 +297,8 @@ body:not(.showInfo) .info{display:none;}
     <div class="sbtn" data-set="names" data-v="doremi" role="button">도레미</div>
     <div class="sbtn" data-set="names" data-v="abc" role="button">C D E (영어)</div></div></div>
   <div class="sRow"><div class="sLbl">반음(♯) 버튼</div><div class="sSeg">
-    <div class="sbtn" data-set="sharps" data-v="0" role="button">흐리게</div>
+    <!-- 0926: 글자를 감추던 동작을 없애고 '조용히/또렷하게'만 바꾸도록 문구 수정 -->
+    <div class="sbtn" data-set="sharps" data-v="0" role="button">조용히</div>
     <div class="sbtn" data-set="sharps" data-v="1" role="button">또렷하게</div></div></div>
   <div class="sRow"><div class="sLbl">리듬 게임 빠르기</div><div class="sSeg">
     <div class="sbtn" data-set="spd" data-v="1" role="button">⚡ 보통</div>

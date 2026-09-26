@@ -40,11 +40,23 @@ main{flex:1 1 auto; display:flex; min-height:0;}
 }
 #saxSvg{width:100%; height:auto; max-height:calc(100% - 76px); flex:1 1 auto; min-height:0; touch-action:none;}
 .key{cursor:pointer;}
-.key .cap{fill:url(#pearl); stroke:#5a6a92; stroke-width:2; transition:fill .06s;}
-.key.pressed .cap{fill:var(--gold); stroke:#b45309;}
+/* 0926(병석님 "운지 느낌이 하나도 안 든다"):
+   누른 키를 '금색(#f6c453)'으로 칠하고 있었는데 본체 brass gradient 도 금색이라
+   누르는 순간 키가 본체에 묻혀 사라졌다 → '눌렀다'는 신호가 안 보였다.
+   → 누름을 '밝은 청록 링 + 살짝 커짐'으로 바꿔 본체·키와 확실히 분리한다.
+   주의: .key 는 SVG transform="translate(x,y)" 를 이미 갖고 있어서 CSS transform 을
+   주면 위치가 0으로 리셋된다(0926 실측 — L1·L2·L3 이 한 점에 겹쳤다).
+   커짐은 cap 에만 주고(그 안에 transform 이 없음), 그룹 transform 은 절대 건드리지 않는다. */
+.key .cap{fill:url(#pearl); stroke:#5a6a92; stroke-width:2; transition:fill .1s,stroke .1s,transform .1s;
+  transform-box:fill-box; transform-origin:center;}
+.key .hit{fill:transparent;}
+.key.pressed .cap{fill:#d8f6ff; stroke:#22d3ee; stroke-width:4; transform:scale(1.14);}
 .key .kn{fill:#3a4664; font-weight:800; text-anchor:middle; pointer-events:none; font-size:13px;}
 .key .kns{fill:#3a4664; font-weight:800; text-anchor:middle; pointer-events:none; font-size:8.5px;}
-.key.pressed .kn,.key.pressed .kns{fill:#5c3d00;}
+.key.pressed .kn,.key.pressed .kns{fill:#075985;}
+/* 눌린 순간 본체 위에서 확실히 튀도록 후광 */
+.key.pressed .halo{opacity:1;}
+.key .halo{fill:none; stroke:#22d3ee; stroke-width:5; opacity:0; transition:opacity .12s; pointer-events:none;}
 .key .kl{fill:#8ea0c6; font-size:8.5px; text-anchor:middle; pointer-events:none;}
 .key.hint .cap{stroke:#22d3ee; stroke-width:4; animation:hintPulse 1s ease-in-out infinite;}
 @keyframes hintPulse{50%{stroke-opacity:.15;}}
@@ -217,6 +229,21 @@ label.switch input{width:18px; height:18px; accent-color:var(--gold);}
       <line x1="122" y1="324" x2="150" y2="324" stroke="#a16207" stroke-width="2.5"/>
       <line x1="122" y1="400" x2="152" y2="400" stroke="#a16207" stroke-width="2.5"/>
       <line x1="122" y1="428" x2="152" y2="430" stroke="#a16207" stroke-width="3"/>
+      <!-- 0926(병석님): 키가 '알던 깃털'처럼 흩어져 있어 운지抓手로 안 읽혔다.
+           실제 색소폰은 키 하나하나가 축(rod) 위 힌지(hinge)에 붙어 있고,
+           축이 키 중심을 세로로 관통한다 → 축·힌지·키 3층을 먼저 그린다. -->
+      <g id="keyStack" fill="none" stroke="#b8860b" stroke-width="2" opacity=".9">
+        <!-- 왼손 메인 축(1·2·3) -->
+        <line x1="105" y1="118" x2="105" y2="262"/>
+        <!-- 왼손 새끼 테이블 축 -->
+        <line x1="57" y1="268" x2="57" y2="332" stroke="#a16207"/>
+        <!-- 오른손 메인 축(4·5·6) -->
+        <line x1="105" y1="300" x2="105" y2="444"/>
+        <!-- 왼손 팜키 축 -->
+        <line x1="57" y1="146" x2="57" y2="208" stroke="#a16207"/>
+        <!-- 오른손 새끼 축 -->
+        <line x1="160" y1="388" x2="160" y2="442" stroke="#a16207"/>
+      </g>
       <!-- 손 라벨 -->
       <text x="150" y="152" fill="#7789ad" font-size="10.5" font-weight="700">왼손</text>
       <text x="34" y="392" fill="#7789ad" font-size="10.5" font-weight="700">오른손</text>
@@ -924,7 +951,7 @@ renderChart();
       const c = tEl.classList;
       if(c.contains('kn') || c.contains('kns')){
         const size = c.contains('kn') ? 13 : 8.5;   // CSS(.kn 13px / .kns 8.5px)가 속성값보다 우선하므로 같은 값
-        tEl.after(lblImage(txt, x, y, size, 800, '#5c3d00', 'middle', 'lbl-p'));
+        tEl.after(lblImage(txt, x, y, size, 800, '#075985', 'middle', 'lbl-p'));  // 0926: 누름 글자색을 새 청록계로
         tEl.after(lblImage(txt, x, y, size, 800, '#3a4664', 'middle', 'lbl-n'));
       } else if(c.contains('kl')){
         tEl.after(lblImage(txt, x, y, 8.5, 400, '#8ea0c6', 'middle'));

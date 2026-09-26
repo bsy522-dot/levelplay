@@ -74,6 +74,15 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 #kb-strip-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#94a3b8; pointer-events:none; }
 #piano-wrap::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 #piano { display:flex; position:relative; height:130px; margin:0; }
+/* 0926: 건반 위 ＋/− 볼트 — ⚙ 설정 안에서만 키울 수 있던 것을 항상 보이게 */
+#kb-zoom{position:absolute;right:6px;top:4px;z-index:6;display:flex;align-items:center;gap:3px;
+  background:rgba(13,17,23,.82);border:1px solid rgba(255,255,255,.18);border-radius:999px;
+  padding:2px 5px;backdrop-filter:blur(4px);}
+#kb-zoom button{width:32px;height:32px;border:none;border-radius:999px;background:rgba(255,255,255,.14);
+  color:#fff;font-size:20px;font-weight:900;line-height:1;cursor:pointer;touch-action:manipulation;}
+#kb-zoom button:active{background:var(--accent);}
+#kzb-label{min-width:38px;text-align:center;color:#e2e8f0;font-size:12px;font-weight:800;}
+body.lscape #kb-zoom{top:2px;right:4px;}
 .key-white { width:20px; height:130px; background:linear-gradient(180deg,#f5f5f5 0%,#e8e8e8 70%,#d8d8d8 100%); border:1px solid #888; border-top:none; border-radius:0 0 4px 4px; cursor:pointer; position:relative; z-index:1; flex-shrink:0; transition:background .06s; }
 .key-white:active, .key-white.pressed { background:linear-gradient(180deg,#ccc,#bbb); box-shadow:inset 0 2px 6px rgba(0,0,0,.3); }
 .key-white.hit-perfect { background:linear-gradient(180deg,#22c55e,#16a34a) !important; }
@@ -468,9 +477,17 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
     <button id="lscape-hint-x" aria-label="힌트 닫기">✕</button>
   </div>
 
-  <!-- Piano keyboard (건반 크기 버튼은 ⚙ 칸으로 옮김) -->
+  <!-- Piano keyboard -->
+  <!-- 0926(병석님): 건반 ＋/− 가 ⚙ 설정 안에 숨어 있어서 '어떻게 키우지'를 못 찾았다.
+       건반 위에 항상 보이는 작은 볼트 + ＋/− 를 둔다(설정 안의 것은 그대로 유지). -->
   <div id="kb-strip"><div id="kb-strip-win"></div><div id="kb-strip-hint">◀ 좌우로 끌어 이동 ▶</div></div>
-  <div id="piano-wrap"><div id="piano"></div></div>
+  <div id="piano-wrap"><div id="piano"></div>
+    <div id="kb-zoom" role="group" aria-label="건반 크기">
+      <button id="kzb-out" aria-label="건반 작게">−</button>
+      <span id="kzb-label">100%</span>
+      <button id="kzb-in" aria-label="건반 크게">＋</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="song-opt-modal">
@@ -740,6 +757,9 @@ function applyLayoutMode(force) {
   keyZoom = zoomOverride[k] != null ? zoomOverride[k] : autoKeyZoom();
   const zl = document.getElementById('zoom-label');
   if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
+  // 0926: 건반 위 볼트 라벨도 자동배율을 반영해야 한다(초기값 100% 그대로면 거짓말 표시)
+  const bl = document.getElementById('kzb-label');
+  if (bl) bl.textContent = Math.round(keyZoom * 100) + '%';
   return true;
 }
 
@@ -801,9 +821,14 @@ function setKeyZoom(z) {
   wrap.scrollLeft = centerRatio * wrap.scrollWidth - wrap.clientWidth / 2;
   const zl = document.getElementById('zoom-label');
   if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
+  const bl = document.getElementById('kzb-label');   // 0926: 건반 위 볼트 라벨도 같이 갱신
+  if (bl) bl.textContent = Math.round(keyZoom * 100) + '%';
   if (typeof renderStrip === 'function') renderStrip();
 }
 document.getElementById('zoom-in').addEventListener('click', () => setKeyZoom(keyZoom + 0.2));
+// 0926: 건반 위 ＋/− (⚙ 안의 것과 같은 함수 호출 → 같은 배율·같은 스크롤 유지)
+document.getElementById('kzb-in').addEventListener('click', e => { e.stopPropagation(); setKeyZoom(keyZoom + 0.2); });
+document.getElementById('kzb-out').addEventListener('click', e => { e.stopPropagation(); setKeyZoom(keyZoom - 0.2); });
 document.getElementById('zoom-out').addEventListener('click', () => setKeyZoom(keyZoom - 0.2));
 // 두 손가락 핀치 = 건반 확대/축소 (건반 영역에서만)
 (function(){
@@ -905,12 +930,20 @@ function buildPiano() {
     whiteHeight = Math.min(Math.round(baseWhiteH * keyZoom), Math.round(window.innerHeight * 0.5));
   } else {
     // 화면의 48%~60%(확대할수록 조금 더 크게) — 얇은 띠+빈 공간 문제(0718) 해소
-    const frac = Math.min(0.6, 0.48 + (keyZoom - 1) * 0.06);
-    whiteHeight = Math.max(baseWhiteH, Math.round(window.innerHeight * frac));
+    // 2026-09-26: 확대할 때 '키만 커지고 높이는 그대로'라 얇아 보이었다.
+    // → 확대 배율의 절반 정도를 높이에 더 반영해 두 축이 같이 커지게 한다.
+    const frac = Math.min(0.72, 0.48 + (keyZoom - 1) * 0.12);
+    const zoomed = Math.round(baseWhiteH * (1 + (keyZoom - 1) * 0.5));
+    whiteHeight = Math.max(baseWhiteH, Math.round(window.innerHeight * frac), zoomed);
   }
   // 2026-08-16: 폭 대비 높이 상한 1:7 — 화면비율만 좇다가 실제 피아노(약 1:6.5)와 동떨어진
   // 길쭉한 건반이 되던 문제. 가로모드(44×96 등)는 원래 상한 아래라 영향 없음.
-  whiteHeight = Math.min(whiteHeight, whiteKeyWidth * 7);
+  // 2026-09-26(병석님): 이 상한이 '건반 크기 ＋'로 키를 넓힐 때 높이가 안 따라와서
+  // 옆으로 늘어나기만 하는 납작한 띠가 됐다. 1:7은 '기본 폭' 기준이지 확대폭 기준이 아니다.
+  // → 확대 시엔 상한을 키울수록(1:7 → 최대 1:3.4) 폭과 높이가 같이 자라게 한다.
+  //   아래로 곱하면 좁을수록 두꺼워지는 비현실감이 생겨 '높이만 챙김'으로 안 한다.
+  const ratioCap = 7 - (keyZoom - 1) * 1.4;      // 1.0배→1:7, 1.5배→1:5.5, 2.2배→1:3.9
+  whiteHeight = Math.min(whiteHeight, whiteKeyWidth * ratioCap);
   const blackHeight = Math.round(whiteHeight * 0.63); // 105→66, 130→82 (기존과 동일)
 
   const whiteKeys = ALL_KEYS.filter(k => !isBlack(k.note));
@@ -931,7 +964,10 @@ function buildPiano() {
     lbl.className = 'key-label';
     lbl.innerHTML = keyLabelHTML(k);
     lbl.style.background = OCT_CHIP[k.octave] || '#e5e7eb';
-    lbl.style.fontSize = Math.max(9, Math.min(20, Math.round(whiteKeyWidth * 0.42))) + 'px';
+    // 2026-09-26: 폭×0.42였고 CSS 하한 9px가 거의 항상 적용돼 사실상 고정 9px였다.
+    // 건반이 좁을 때 글자가 접히던 것이 병석님이 '좁다'고 느낀 한 축이다.
+    // → 폭에 비례하게 키우되 최소 11px/최대 22px로 넓힌다(확대하면 같이 커진다).
+    lbl.style.fontSize = Math.max(11, Math.min(22, Math.round(whiteKeyWidth * 0.52))) + 'px';
     el.appendChild(lbl);
     piano.appendChild(el);
   });
