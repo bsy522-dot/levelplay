@@ -130,6 +130,22 @@ async function run(theme) {
   chk('연속 이중클릭 = HP 1만 감소', rapid === 4, '실제 ' + rapid);
   await page.waitForTimeout(1200);
 
+  /* ── 채점 문구 잔존 회귀: 다음 문제 화면에 지난 답이 남으면 안 된다 ── */
+  const fbRes = await page.evaluate(async () => {
+    const g = window.MB.game, b = g.battle;
+    const q1 = b.cur();
+    b.busy = false; g.answer(b, q1.c);                 // 1번 문제 채점 → 피드백 채움
+    await new Promise(r => setTimeout(r, 1200));
+    const q2 = b.cur();
+    return {
+      q2: q2 ? q2.q : null,
+      fb: document.getElementById('b-fb').textContent,
+      fbCls: document.getElementById('b-fb').className,
+    };
+  });
+  chk('다음 문제에 지난 채점 문구가 남지 않음', fbRes.fb.trim() === '' && fbRes.fbCls.indexOf('ok') < 0 && fbRes.fbCls.indexOf('no') < 0,
+      JSON.stringify(fbRes));
+
   /* ── 정답만 계속: 무리 전체를 순회해 승리 ── */
   const res = await page.evaluate(async () => {
     const g = window.MB.game;

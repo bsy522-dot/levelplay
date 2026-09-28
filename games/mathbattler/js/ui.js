@@ -85,6 +85,12 @@
 
   UI.prototype.renderQuestion = function (b, q) {
     $('#b-q').textContent = q.q;
+    /* ★다음 문제로 넘어가면 지난 문제의 채점 문구를 지운다.
+     *   안 지우면 '가장 큰 숫자는?' 화면에 '72 - 38 = 34' 같은 옛 답이 남아 어색하다. */
+    $('#b-fb').textContent = '';
+    $('#b-fb').className = 'b-fb';
+    $('#hint-box').classList.add('hidden');
+    $('#hint-btn').disabled = false;
     const box = $('#b-opts');
     box.innerHTML = '';
     (q.a || []).forEach((a, i) => {
