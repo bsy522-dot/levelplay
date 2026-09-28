@@ -121,7 +121,7 @@ export function panel(title, build, opts = {}) {
     const api = { close, body, onKey: (fn) => { keyFn = fn; }, setTitle: (t) => { p.querySelector('header span').textContent = t; } };
     const pop = Input.push((k) => {
       if (keyFn && keyFn(k) === true) return;
-      if (k === 'b' || k === 'menu') { sfx('cancel'); close(null); }
+      if (k === 'b' || k === 'menu' || (k === 'a' && !keyFn)) { sfx('cancel'); close(null); }
     });
     build(body, api);
   });

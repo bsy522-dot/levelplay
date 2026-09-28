@@ -72,7 +72,8 @@ function explainCard(it, pick, title, skill) {
   const body = el('div', { class: 'body2' });
   body.append(el('div', { class: 'lbl' }, title));
   if (pick != null && it.wrong[pick]) {
-    const last = String(it.a[pick]).replace(/[^가-힣0-9A-Za-z]+$/, '').slice(-1);
+    const txt = String(it.a[pick]); const frac = txt.match(/(\d+)\/\d+[^\d]*$/);
+    const last = frac ? frac[1].slice(-1) : txt.replace(/[^가-힣0-9A-Za-z²³]+$/, '').slice(-1);
     body.append(el('div', {}, `"${it.a[pick]}"${hasBatchim(last) ? '을' : '를'} 골랐구나. `, it.wrong[pick]));
   }
   body.append(el('div', { style: { marginTop: '.3em' } }, el('b', {}, '정답은 '), el('b', { style: { color: '#2fae5b' } }, it.a[it.c]), ' — ', it.why));
@@ -98,7 +99,7 @@ export async function moveQuiz({ monName, moveName, moveType, story }) {
     r.result.textContent = '정답! ' + (q.item.why || '');
     const need = q.item.need || (q.subj === 'math' && skillNote(q.skill).need);
     if (need) r.box.append(el('div', { class: 'need' }, el('b', {}, '💡 어디에 쓰일까? '), need));
-    if (rec.mastered) { toast(rec.leap ? `🦘 8연속 이상! 도약 — 두 단계 위로!` : rec.fast ? `🚀 5연속 이상! '${q.title}' 통과 — 바로 다음 단계로!` : `⭐ '${q.title}' 익힘! 다음 단계로!`, 2400); sfx('levelup'); }
+    if (rec.mastered) { toast(rec.leap ? `🦘 도약! '${q.title}' 통과, '${rec.leap}'도 건너뛰기 — 나중에 확인 문제가 나와!` : rec.fast ? `🚀 5연속 이상! '${q.title}' 통과 — 바로 다음 단계로!` : `⭐ '${q.title}' 익힘! 다음 단계로!`, 2400); sfx('levelup'); }
     await sleep(350);
     await button('공격! ▶', r.box);
     close(r.box);

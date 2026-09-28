@@ -10,8 +10,9 @@ const THINGS = [['몬스터볼', '개'], ['상처약', '개'], ['나무열매', 
 const PAIRS = [['이라서', '라서', '이라서'], ['라서', '라서', '이라서'], ['이야', '야', '이야'], ['이라고', '라고', '이라고'], ['으로', '로', '으로'], ['와', '와', '과'], ['과', '와', '과'],
   ['를', '를', '을'], ['을', '를', '을'], ['는', '는', '은'], ['은', '는', '은'], ['가', '가', '이'], ['이', '가', '이'], ['야', '야', '이야'], ['라고', '라고', '이라고'], ['로', '로', '으로']];
 const RE_J = new RegExp(`(\\d)(${PAIRS.map((p) => p[0]).join('|')})(?![가-힣(])`, 'g');
-const RE_W = /([가-힣A-Za-z0-9]+)(이\(가\)|을\(를\)|은\(는\)|와\(과\)|\(으\)로)/g;
+const RE_W = /([가-힣A-Za-z0-9²³]+)(이\(가\)|을\(를\)|은\(는\)|와\(과\)|\(으\)로)/g;
 export function hasBatchim(ch) {
+  if (ch === '²' || ch === '³') return true; // 제곱·세제곱
   if (/\d/.test(ch)) return '013678'.includes(ch);
   const c = ch.charCodeAt(0);
   return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
@@ -50,11 +51,14 @@ function mcRaw(correct, wrongs, why, extra = {}) {
   const fmt = extra.fmt || String;
   const seen = new Set([fmt(correct)]);
   const list = [];
+  const fv = (x) => { const m2 = String(x).match(/^(\d+)\/(\d+)$/); return m2 ? Number(m2[1]) / Number(m2[2]) : null; };
+  const cv = fv(fmt(correct));
+  const same = (s2) => cv != null && fv(s2) != null && Math.abs(fv(s2) - cv) < 1e-9; // 1/6 과 2/12 처럼 같은 값
   for (const w of wrongs) {
     if (w == null || w.v == null) continue;
     if (typeof w.v === 'number' && (w.v < 0 || !Number.isFinite(w.v))) continue;
     const s = fmt(w.v);
-    if (seen.has(s)) continue;
+    if (seen.has(s) || same(s)) continue;
     seen.add(s); list.push({ s, why: w.why });
     if (list.length === 3) break;
   }
@@ -62,7 +66,7 @@ function mcRaw(correct, wrongs, why, extra = {}) {
   for (let tries = 0; list.length < 3 && extra.fill && tries < 40; tries++) {
     const w = extra.fill();
     const s = fmt(w.v);
-    if (!seen.has(s)) { seen.add(s); list.push({ s, why: w.why }); }
+    if (!seen.has(s) && !same(s)) { seen.add(s); list.push({ s, why: w.why }); }
   }
   // 모자라면 가까운 값으로 채운다 (단순 계산 실수)
   let d = 1;

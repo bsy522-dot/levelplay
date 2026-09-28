@@ -387,7 +387,7 @@ export const MATH_ADV = [
           steps: [`${a}를 ${m}번 곱하고, 또 ${n}번 곱해`, `지수끼리 더해: ${m} + ${n} = ${m + n}`, `답: ${pw(a, m + n)}`] });
       }
       if (kind === 'pow') {
-        const m = rand(2, 4), n = rand(2, 4);
+        let m, n; do { m = rand(2, 4); n = rand(2, 4); } while ((a * n) ** m === a ** (m * n));
         return Q(pw(a, m * n), [
           { v: pw(a, m + n), why: `지수끼리 더했어. (${pw(a, m)})${sup(n)}은 ${pw(a, m)}을 ${n}번 곱하는 거라 ${m}이(가) ${n}번 → ${m} × ${n}이야.` },
           { v: pw(a * n, m), why: `밑에 ${n}을(를) 곱했어. 바깥 지수 ${n}은 '${pw(a, m)}을 ${n}번 곱하라'는 뜻이야.` },

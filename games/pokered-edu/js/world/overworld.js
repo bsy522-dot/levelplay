@@ -239,6 +239,7 @@ export class WorldScene extends Phaser.Scene {
       const isExitMat = !m.outdoor && c === 'D' && y === m.h - 1;
       if (!isExitMat || d === 'down') { await this.useWarp(x, y); return; }
     }
+    W.updateGoal?.();
     if (await EV.stepTrigger(m.id, x, y, d)) return;
     if (await this.checkTrainers()) return;
     if ((c === '"' || (m.tileset === 'Cavern' && c === '_')) && m.wild && Math.random() < EV.encounterChance(m.wild.encounterRate)) {
@@ -416,6 +417,42 @@ export class WorldScene extends Phaser.Scene {
     this.tweens.add({ targets: f.img, scaleY: f.img.scaleX * 0.9, duration: ms / 2, yoyo: true });
   }
 
+  /** 길 안내: targets=[[x,y,이름],...] 중 걸어서 닿는 첫 목표까지의 첫 방향과 걸음 수 */
+  navTo(targets) {
+    if (!this.map || !targets || !targets.length) return null;
+    const W2 = this.map.w, H2 = this.map.h, sx = G.s.x, sy = G.s.y;
+    const key = (x, y) => y * W2 + x;
+    const prev = new Map([[key(sx, sy), -1]]);
+    const q = [[sx, sy]];
+    const want = new Map(targets.map((t, i) => [key(t[0], t[1]), i]));
+    let found = null;
+    for (let qi = 0; qi < q.length && !found; qi++) {
+      const [cx, cy] = q[qi];
+      if (want.has(key(cx, cy))) { found = [cx, cy]; break; }
+      for (const [d, [dx, dy]] of Object.entries(DIRV)) {
+        const nx = cx + dx, ny = cy + dy;
+        if (nx < 0 || ny < 0 || nx >= W2 || ny >= H2 || prev.has(key(nx, ny))) continue;
+        const c = this.cell(nx, ny);
+        // 턱은 그 방향으로만 뛰어내린다 (한 칸 건너 착지)
+        if ((c === 'v' && d === 'down') || (c === '<' && d === 'left') || (c === '>' && d === 'right')) {
+          const lx = nx + dx, ly = ny + dy;
+          if (lx < 0 || ly < 0 || lx >= W2 || ly >= H2 || prev.has(key(lx, ly))) continue;
+          if (!isWalkable(this.cell(lx, ly)) || this.npcAt(lx, ly)) continue;
+          prev.set(key(lx, ly), key(cx, cy)); q.push([lx, ly]);
+          continue;
+        }
+        if (!want.has(key(nx, ny)) && (!isWalkable(c) || this.npcAt(nx, ny))) continue;
+        prev.set(key(nx, ny), key(cx, cy)); q.push([nx, ny]);
+      }
+    }
+    if (!found) return null;
+    let k = key(found[0], found[1]), dist = 0, first = k;
+    while (prev.get(k) !== -1) { first = k; k = prev.get(k); dist++; }
+    const fx = first % W2, fy = Math.floor(first / W2);
+    const dir = fx > sx ? '→' : fx < sx ? '←' : fy > sy ? '↓' : fy < sy ? '↑' : '';
+    return { dir, dist, label: targets[want.get(key(found[0], found[1]))][2] || '' };
+  }
+
   /* ── 트레이너 시선 ── */
   async checkTrainers() {
     for (const o of this.npcs) {
@@ -428,10 +465,13 @@ export class WorldScene extends Phaser.Scene {
           W.busy = true;
           try {
             await this.exclaim(o);
+            const face0 = o.facing, mapNow = this.map;
             if (i > 1) await this.walkNpc(o, o.facing, i - 1);
-            const back = { up: 'down', down: 'up', left: 'right', right: 'left' }[o.facing];
+            const back = { up: 'down', down: 'up', left: 'right', right: 'left' }[face0];
             this.facePlayer(back);
             await EV.trainerEncounter(this.map.id, o);
+            // 배틀이 끝나면 원래 자리로 돌아간다 (길을 막아 갇히지 않게)
+            if (this.map === mapNow && !o.gone && i > 1) { await this.walkNpc(o, back, i - 1, 160); o.facing = face0; o.sp.setFrame(DIRI[face0] * 3); }
           } finally { W.busy = false; }
           return true;
         }

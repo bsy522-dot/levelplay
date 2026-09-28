@@ -77,7 +77,7 @@ export function nextQuestion(opts = {}) {
   let subj = opts.subject;
   if (!subj) {
     const typeTopics = (TYPE_SCI[opts.moveType] || []);
-    const pSci = typeTopics.length ? 0.55 : 0.3;
+    const pSci = typeTopics.length ? 0.4 : 0.25; // 수학 위주 (병석님: 수학 논술)
     subj = Math.random() < pSci ? 'sci' : 'math';
   }
   const lad = LADDER[subj];
@@ -90,7 +90,7 @@ export function nextQuestion(opts = {}) {
   for (let i = Math.max(0, l[subj].floor - 3); i < f; i++) {
     const s = sk(lad[i].id);
     if (s.wrongRecent > 0) cands.push({ i, w: 3 });
-    else if (s.mastered && !s.placed && !hot) cands.push({ i, w: 0.4 });
+    else if (s.mastered && !s.placed && (!hot || s.leapt)) cands.push({ i, w: s.leapt ? 1 : 0.4 }); // 건너뛴 주제는 가끔 확인
   }
   if (subj === 'sci' && opts.moveType) {
     const pref = TYPE_SCI[opts.moveType] || [];
@@ -139,7 +139,7 @@ export function record(q, correct, firstTry = true) {
     if (!s.mastered && fast) {
       s.mastered = true; res.mastered = true; res.fast = true;
       // 8연속 이상 = 도약: 다음 단계 하나는 건너뛴다 (나중에 틀리면 다시 내려올 수 있음)
-      if (l.streak >= 8) { const lad = LADDER[q.subj], f2 = frontier(q.subj); if (f2 < lad.length - 1) { const nx = sk(lad[f2].id); nx.mastered = true; nx.placed = true; res.leap = true; } }
+      if (l.streak >= 8) { const lad = LADDER[q.subj], f2 = frontier(q.subj); if (f2 < lad.length - 1) { const nx = sk(lad[f2].id); nx.mastered = true; nx.leapt = true; res.leap = lad[f2].t; } }
     }
     const last5 = s.hist.slice(-5);
     const last4 = s.hist.slice(-4);

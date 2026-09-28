@@ -392,7 +392,7 @@ const SIGNS = {
 export async function readSign(map, s) {
   const key = `${map}:${s.textId}`;
   // 포켓몬센터 PC, 학교 칠판은 특별한 화면
-  if ((map === 'ViridianPokecenter' || map === 'PewterPokecenter') && s.textId === 1) return W.openBox?.();
+  if (/Pokecenter$/.test(map) && s.textId === 1) return W.openBox?.();
   if (map === 'ViridianSchoolHouse' && s.textId === 2) return W.openReport?.();
   let L = SIGNS[key];
   if (typeof L === 'function') L = await L();
@@ -472,7 +472,7 @@ const ROUTE_TO = {
   PewterCity: { PalletTown: 'north', Route1: 'north', ViridianCity: 'north', Route2: 'north', ViridianForest: 'north', ViridianForestSouthGate: 'north', ViridianForestNorthGate: 'north',
     ViridianPokecenter: 'south', ViridianMart: 'south', ViridianSchoolHouse: 'south', OaksLab: 'south', RedsHouse1F: 'south', RedsHouse2F: 'south', BluesHouse: 'south' },
 };
-export function objective() {
+function objectiveBase() {
   const f = flag, map = G.s.map;
   const go = (target, text, detail) => ({ text, detail, dir: map === target ? '' : DIR[ROUTE_TO[target]?.[map]] || '' });
   if (!f('oakEscort')) return { text: '집을 나가 마을 북쪽 풀숲 쪽으로 가 보자', detail: ['계단(오른쪽 위)으로 1층에 내려가서, 아래쪽 문으로 나가자.', '마을 위쪽 풀숲으로 가면 오박사님을 만날 수 있어!'], dir: map === 'PalletTown' ? DIR.north : '' };
@@ -480,27 +480,29 @@ export function objective() {
   if (!f('rivalBattled')) return { text: '연구소 출구 쪽으로 걸어가 보자 (라이벌이 기다려!)', detail: ['아래쪽 출구로 걸어가면 라이벌이 승부를 걸어 와.'], dir: '↓' };
   if (!f('pokedex')) return go('ViridianCity', '상록시티 파란 지붕 가게에서 도감 받기', ['태초마을 북쪽 → 1번도로 → 상록시티.', '파란 지붕 “프렌들리숍”에 들어가 점원에게 말을 걸자!']);
   if (!f('badge1')) {
-    if (/^Pewter/.test(map)) return { text: '회색시티 체육관(보라 지붕)에서 관장 웅을 이기자', detail: ['체육관 가이드에게 먼저 말을 걸면 선물을 줘!', '포켓몬이 지치면 포켓몬센터(빨간 지붕)에서 쉬자.'], dir: '' };
+    if (/^Pewter/.test(map)) return { text: '회색시티 체육관(보라 지붕)에서 관장 웅을 이기자', detail: ['체육관 가이드에게 먼저 말을 걸면 선물을 줘!', '포켓몬이 지치면 포켓몬센터(빨간 지붕)에서 쉬자.'], dir: '', targets: map === 'PewterGym' ? [[4, 2, '웅 앞']] : map === 'PewterCity' ? [[16, 18, '체육관 문']] : null };
     return go('PewterCity', '상록숲을 지나 회색시티로!', ['상록시티 북쪽 → 2번도로 → 건물(숲 입구)로 들어가 상록숲을 통과하자.', '숲에서는 표지판을 읽으며 북쪽 출구를 찾자!']);
   }
   if (!f('badge2')) {
     if (map === 'PewterCity' || map === 'PewterPokecenter' || map === 'PewterMart' || map === 'PewterGym') return { text: '회색시티 동쪽 3번도로로 가자', detail: ['회색시티 오른쪽(동쪽) 길로 나가면 3번도로야.'], dir: '→ 동쪽' };
     if (map === 'Route3') return { text: '3번도로 끝에서 위로 올라가 달맞이산으로', detail: ['트레이너들을 이기며 동쪽 끝까지 가서 위(북쪽)로!', '달맞이산 앞 포켓몬센터에서 꼭 회복하자.'], dir: '→ 동쪽 끝에서 ↑' };
     if (map === 'MtMoonPokecenter') return { text: '달맞이산 동굴 입구로 들어가자', detail: ['센터를 나와 오른쪽 바위산의 동굴 입구로!', '(잉어킹 파는 아저씨도 있어!)'], dir: '' };
-    if (/^MtMoon[1B]/.test(map)) return { text: '달맞이산을 통과하자 — 사다리를 찾아라!', detail: ['사다리를 타고 지하로 내려가 로켓단과 화석을 찾자.', '지하 2층에서 화석을 받고, 사다리로 올라가면 4번도로 동쪽 출구야.'], dir: '' };
-    if (map === 'Route4') return G.s.x < 26 ? { text: '달맞이산 동굴 입구로 들어가자', detail: ['바위산의 검은 입구로 들어가자.'], dir: '' } : { text: '동쪽으로 가면 블루시티!', detail: ['턱을 뛰어내리며 오른쪽으로 쭉!'], dir: '→ 동쪽' };
-    if (/^Cerulean/.test(map)) return { text: '블루시티 체육관에서 관장 이슬을 이기자', detail: ['체육관은 오른쪽 아래쪽 건물이야.', '물 포켓몬에게는 피카츄의 전기 기술이 효과 굉장!'], dir: '' };
+    if (/^MtMoon[1B]/.test(map)) return mtMoonGoal(map);
+    if (map === 'Route4') return !f('fossil') && G.s.x < 22 ? { text: '달맞이산 동굴 입구로 들어가자', detail: ['바위산의 검은 입구로 들어가자.'], dir: '' } : { text: '동쪽으로 가면 블루시티!', detail: ['턱을 뛰어내리며 오른쪽으로 쭉!'], dir: '→ 동쪽' };
+    if (map === 'CeruleanGym') return { text: '체육관 맨 위의 관장 이슬에게 말을 걸자', detail: ['수영장 사이 길을 따라 위로!', '물 포켓몬에게는 피카츄의 전기 기술이 효과 굉장!'], dir: '', targets: [[4, 3, '이슬 앞']] };
+    if (/^Cerulean/.test(map)) return { text: '블루시티 체육관에서 관장 이슬을 이기자', detail: map === 'CeruleanCity' ? ['체육관은 오른쪽 가운데쯤, 보라 지붕 건물이야.', '물 포켓몬에게는 피카츄의 전기 기술이 효과 굉장!'] : ['밖으로 나가 보라 지붕 체육관으로 가자.'], dir: '', targets: map === 'CeruleanCity' ? [[30, 20, '체육관 문']] : null };
     return { text: '회색시티를 지나 동쪽 3번도로로!', detail: ['회색시티 오른쪽 길 → 3번도로 → 달맞이산 → 블루시티.'], dir: '' };
   }
   if (!f('billSaved')) {
     if (map === 'CeruleanCity' || /^Cerulean/.test(map)) return { text: '블루시티 북쪽 너겟 브릿지를 건너자', detail: ['블루시티 위쪽(북쪽) 다리로!', '다리 위 트레이너 5명을 이기면 선물이 있대.'], dir: map === 'CeruleanCity' ? '↑ 북쪽' : '' };
-    if (map === 'Route24') return { text: '다리를 건너 동쪽 25번도로로', detail: ['다리 끝까지 간 뒤 오른쪽(동쪽)으로!'], dir: '↑ 그다음 →' };
-    if (map === 'Route25') return { text: '길 끝의 이수재 박사님 집으로!', detail: ['동쪽 끝 오두막이 이수재 박사님 집이야.'], dir: '→ 동쪽' };
-    if (map === 'BillsHouse') return f('billAsk') ? { text: '왼쪽 PC에서 “분리”를 실행하자', detail: ['방 왼쪽 컴퓨터 앞에서 A 버튼!'], dir: '' } : { text: '삐삐에게 말을 걸어 보자', detail: ['방 안의 삐삐… 뭔가 이상한데?'], dir: '' };
+    if (map === 'Route24') return { text: '다리를 건너 동쪽 25번도로로', detail: ['다리 끝까지 간 뒤 오른쪽(동쪽)으로!'], dir: '↑ 그다음 →', targets: [[19, 4, '25번도로 쪽'], [19, 5, ''], [19, 6, '']] };
+    if (map === 'Route25') return { text: '길 끝의 이수재 박사님 집으로!', detail: ['동쪽 끝 오두막이 이수재 박사님 집이야.'], dir: '→ 동쪽', targets: [[45, 4, '오두막 문 앞']] };
+    if (map === 'BillsHouse') return f('billAsk') ? { text: '왼쪽 PC에서 “분리”를 실행하자', detail: ['방 왼쪽 컴퓨터 앞에서 A 버튼!'], dir: '', targets: [[1, 5, 'PC 앞']] } : { text: '삐삐에게 말을 걸어 보자', detail: ['방 안의 삐삐… 뭔가 이상한데?'], dir: '', targets: [[6, 6, '삐삐 앞']] };
     return { text: '블루시티 북쪽으로 가서 이수재 박사님을 만나자', detail: ['블루시티 → 북쪽 다리(24번도로) → 25번도로 끝 오두막.'], dir: '' };
   }
   if (!f('badge3')) {
-    if (/^Vermilion/.test(map)) return { text: '갈색시티 체육관에서 관장 마티스를 이기자', detail: ['체육관에 들어가면 가이드가 디그다를 빌려줘!', '땅 타입에는 전기 기술이 안 통해.'], dir: '' };
+    if (/^Vermilion/.test(map)) return { text: '갈색시티 체육관에서 관장 마티스를 이기자', detail: ['체육관에 들어가면 가이드가 디그다를 빌려줘!', '땅 타입에는 전기 기술이 안 통해.'], dir: '', targets: map === 'VermilionGym' ? [[5, 2, '마티스 앞']] : map === 'VermilionCity' ? [[12, 20, '체육관 문']] : null };
+    if (map === 'BillsHouse' && !f('billGift')) return { text: '사람으로 돌아온 이수재 박사님께 말을 걸자', detail: ['방 가운데의 이수재 박사님 앞에서 A 버튼!'], dir: '', targets: [[4, 5, '이수재 앞']] };
     if (map === 'BillsHouse' || map === 'Route25' || map === 'Route24') return { text: '블루시티로 돌아가서 남쪽 5번도로로', detail: ['왔던 길로 블루시티에 간 뒤, 아래쪽(남쪽) 출구로!'], dir: map === 'Route24' ? '↓ 남쪽' : '← 서쪽' };
     if (/^Cerulean/.test(map)) return { text: '블루시티 남쪽 5번도로로 가자', detail: ['블루시티 아래쪽(남쪽) 길로 나가면 5번도로야.'], dir: map === 'CeruleanCity' ? '↓ 남쪽' : '' };
     if (map === 'Route5') return { text: '오른쪽 작은 건물(지하통로 입구)로 들어가자', detail: ['5번도로 아래쪽 오른편의 건물이 지하통로 입구야.', '(가운데 큰 건물은 지금은 못 지나가.)'], dir: '↓' };
@@ -538,6 +540,7 @@ async function rivalCerulean() {
     await sayAs('rival', [`어이, ${P()}! 달맞이산을 벌써 지나왔어?`, '실력이 얼마나 늘었는지 보자!']);
     const res = await W.trainerBattle({ party: [[17, 15], [133, 16]], name: R(), face: 'rival', intro: `라이벌 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, lose: '쳇… 제법인데?', win: '헤헤, 아직 멀었어!', money: 600 });
     setFlag('rival2');
+    if (res !== 'win') return; // 전멸했으면 이미 포켓몬센터로 돌아감
     await sayAs('rival', res === 'win' ? ['흥, 이번엔 봐준 거야!', '블루시티 체육관 관장 이슬은 물 포켓몬을 써. 피카츄라면 해볼 만하겠지. 그럼 난 간다!'] : ['내가 더 강하지롱! 이슬 관장한테도 이길 수 있겠어?']);
     for (let i = 0; i < 4; i++) await S.walkNpc(o, 'right', 1, 150);
     S.removeNpc(o); save();
@@ -597,8 +600,8 @@ Object.assign(LINES, {
   'MtMoonPokecenter:5': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
   'Route4:0': () => say(['달맞이산에서 로켓단을 봤어! 화석을 노린대.', '나쁜 사람들이니까 조심해!']),
   'MtMoonB2F:0': () => fossilNerd(),
-  'MtMoonB2F:5': () => say(['돔처럼 둥근 화석이다.']),
-  'MtMoonB2F:6': () => say(['소용돌이 모양의 조개 화석이다.']),
+  'MtMoonB2F:5': () => say(['돔처럼 둥근 화석이다.', '💡 옆에 있는 과학자에게 말을 걸어 보자!']),
+  'MtMoonB2F:6': () => say(['소용돌이 모양의 조개 화석이다.', '💡 옆에 있는 과학자에게 말을 걸어 보자!']),
   'CeruleanCity:2': () => say(['자전거가 있으면 엄청 빨리 달릴 수 있대.', '하지만 가게 자전거는 너무 비싸…']),
   'CeruleanCity:3': () => say(['블루시티는 물이 맑기로 유명해.', '물은 햇볕에 데워지면 수증기가 되어 하늘로 올라가 구름이 된단다.']),
   'CeruleanCity:4': () => say(['체육관 관장 이슬은 수영도 엄청 잘해!']),
@@ -786,3 +789,57 @@ Object.assign(EXTRA_WILD, {
   Route5: [['Meowth', 14], ['Jigglypuff', 14], ['Psyduck', 14], ['Bellsprout', 14], ['Growlithe', 14]],
   Route6: [['Meowth', 14], ['Psyduck', 14], ['Poliwag', 14], ['Bellsprout', 14], ['Vulpix', 14], ['Drowzee', 14]],
 });
+
+
+/* 달맞이산 층별 길 안내: 걸어서 닿는 첫 목표로 방향·걸음 수를 보여 준다 (navTo) */
+function mtMoonGoal(map) {
+  const f = flag('fossil');
+  if (map === 'MtMoon1F') return f
+    ? { text: '출구는 지하 1층 오른쪽 위야 — 가운데 사다리로!', detail: ['가운데 사다리 → 지하 1층 → 다시 지하 2층 왼쪽 위 사다리 → 지하 1층 출구.'], dir: '', targets: [[17, 11, '가운데 사다리']] }
+    : { text: '가운데 사다리로 내려가자', detail: ['오른쪽 아래 사다리는 막다른 길이야!', '가운데 사다리 → 지하 1층 → 바로 옆 사다리 → 지하 2층.'], dir: '', targets: [[17, 11, '가운데 사다리']] };
+  if (map === 'MtMoonB1F') return f
+    ? { text: '출구로! (오른쪽 위 계단)', detail: ['오른쪽 위 계단으로 나가면 4번도로 동쪽이야.', '출구가 없는 곳이면 가까운 사다리로 지하 2층에 갔다가 왼쪽 위 사다리로 올라오자.'], dir: '', targets: [[27, 3, '출구'], [17, 11, '지하 2층 사다리'], [21, 17, '지하 2층 사다리']] }
+    : { text: '사다리를 타고 지하 2층으로!', detail: ['지하 2층에 로켓단과 화석을 지키는 과학자가 있어.'], dir: '', targets: [[17, 11, '지하 2층 사다리'], [21, 17, '지하 2층 사다리'], [25, 15, '막다른 길 — 1층으로 돌아가자']] };
+  return f
+    ? { text: '왼쪽 위 사다리로 올라가면 출구야', detail: ['지하 2층 왼쪽 위 사다리 → 지하 1층 → 바로 오른쪽 계단이 출구!'], dir: '', targets: [[5, 7, '왼쪽 위 사다리'], [15, 27, '막다른 길 — 올라가자']] }
+    : { text: '과학자를 찾아 화석을 받자', detail: ['로켓단을 이기며 서쪽(왼쪽)으로 빙 돌아가면 과학자가 있어.'], dir: '', targets: [[13, 8, '과학자 옆'], [15, 27, '막다른 길 — 올라가자']] };
+}
+
+
+/* ── 길 안내 목적지: 목표 문구에 목적지가 없으면 지도별 다음 출구·문으로 안내 ── */
+export function navTargets(map, f) {
+  const s = G.s;
+  switch (map) {
+    case 'PalletTown': return !f.oakEscort ? [[10, 2, '풀숲 입구']] : !f.pokedex ? [[10, 0, '1번도로'], [11, 0, '']] : null;
+    case 'Route1': return !f.pokedex ? [[10, 0, '상록시티'], [11, 0, '']] : null;
+    case 'ViridianCity': return !f.pokedex ? [[29, 20, '파란 지붕 가게 문 앞']] : !f.badge1 ? [[17, 0, '2번도로'], [18, 0, ''], [19, 0, '']] : null;
+    case 'Route2': return !f.badge1 ? [[3, 44, '숲 입구 건물'], [8, 0, '회색시티'], [9, 0, '']] : null;
+    case 'ViridianForestSouthGate': return [[4, 0, '숲으로'], [5, 0, '']];
+    case 'ViridianForest': return [[1, 0, '숲 출구'], [2, 0, '']];
+    case 'ViridianForestNorthGate': return [[4, 0, '2번도로로'], [5, 0, '']];
+    case 'PewterCity': return f.badge1 && !f.badge2 ? [[39, 16, '3번도로'], [39, 17, ''], [39, 18, ''], [39, 19, '']] : null;
+    case 'Route3': return f.badge1 && !f.badge2 ? [58, 59, 60, 61, 62, 63].map((x, i) => [x, 0, i ? '' : '4번도로(달맞이산)']) : null;
+    case 'Route4': return !f.badge2 ? (!f.fossil && s.x < 22 ? [[18, 6, '동굴 입구 앞']] : [[89, 4, '블루시티'], [89, 10, ''], [89, 11, '']]) : null;
+    case 'CeruleanCity': return f.badge2 && !f.billSaved ? [[20, 0, '24번도로'], [21, 0, '']] : f.billSaved && !f.badge3 ? [[12, 35, '5번도로'], [13, 35, '']] : null;
+    case 'Route24': return f.billSaved && !f.badge3 ? [[10, 35, '블루시티'], [11, 35, '']] : null;
+    case 'Route25': return f.billSaved && !f.badge3 ? [[0, 8, '24번도로'], [0, 9, '']] : null;
+    case 'Route5': return f.billSaved && !f.badge3 ? [[17, 28, '지하통로 입구 앞']] : null;
+    case 'UndergroundPathRoute5': return [[4, 4, '계단']];
+    case 'UndergroundPathNorthSouth': return [[2, 41, '남쪽 계단']];
+    case 'UndergroundPathRoute6': return [[3, 7, '출구'], [4, 7, '']];
+    case 'Route6': return f.billSaved && !f.badge3 ? [[8, 35, '갈색시티'], [9, 35, '']] : null;
+    default: return null;
+  }
+}
+export function objective() {
+  const o = objectiveBase();
+  if (!o.targets) o.targets = navTargets(G.s.map, G.s.flags);
+  // 건물 안인데 여기서 할 일이 없으면 → 출구(맨 아래 매트)로 안내
+  const m = DB.maps[G.s.map];
+  if (!o.targets && m && !m.outdoor && m.tileset !== 'Cavern') {
+    const exits = [];
+    m.grid[m.h - 1].split('').forEach((c, x) => { if (c === 'D') exits.push([x, m.h - 1, exits.length ? '' : '출구']); });
+    if (exits.length) o.targets = exits;
+  }
+  return o;
+}

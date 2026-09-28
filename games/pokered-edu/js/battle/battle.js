@@ -231,6 +231,7 @@ class Hud {
   }
   drawMe(b) {
     const m = b.m, s = sp(m.sp), mx = maxHp(m), r = m.hp / mx;
+    this.meEl.style.bottom = (this.box.offsetHeight + 22) + 'px';
     this.meEl.innerHTML = '';
     this.meEl.append(
       el('div', { class: 'nm' }, el('span', {}, s.name, m.status ? el('span', { class: 'st', style: { background: M.STATUS_COLOR[m.status] } }, M.STATUS_KO[m.status]) : null), el('span', {}, 'Lv' + m.lv)),

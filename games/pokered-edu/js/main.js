@@ -48,7 +48,7 @@ async function boot() {
     wildBattle, trainerBattle, openMenu: MENU.openMenu, openShop: MENU.openShop, openBox: MENU.openBox,
     openReport: MENU.reportScreen, practice: MENU.practice, chapterEnd: MENU.chapterEnd,
     mapMusicNow: () => (W.scene.map ? mapMusic(W.scene.map) : 'town'),
-    updateGoal, showGoalDetail,
+    updateGoal, showGoalDetail, objective,
   });
   document.getElementById('boot').remove();
   await title();
@@ -131,7 +131,9 @@ function updateGoal() {
     root().append(goalEl);
   }
   goalEl.innerHTML = '';
-  goalEl.append(el('span', {}, '🎯 ' + o.text), o.dir ? el('b', {}, ' ' + o.dir) : '', el('small', {}, '  💡'));
+  const nav = o.targets && W.scene?.navTo(o.targets);
+  const navTxt = nav ? (nav.dist === 0 ? ' 📍 도착!' : ` ${nav.dir} ${nav.dist}걸음${nav.label ? ' (' + nav.label + ')' : ''}`) : (o.dir ? ' ' + o.dir : '');
+  goalEl.append(el('span', {}, '🎯 ' + o.text), navTxt ? el('b', {}, navTxt) : '', el('small', {}, '  💡'));
 }
 async function showGoalDetail() {
   if (W.busy || !G.s) return;

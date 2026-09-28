@@ -60,7 +60,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .banner.show { transform: none; }
 
 /* 토스트 */
-.toast { position: absolute; left: 50%; top: 18%; transform: translate(-50%, -10px); opacity: 0; transition: .25s; padding: .5em 1.1em; font-family: 'Jua'; z-index: 40; pointer-events: none; white-space: nowrap; }
+.toast { position: absolute; left: 50%; top: 18%; transform: translate(-50%, -10px); opacity: 0; transition: .25s; padding: .5em 1.1em; font-family: 'Jua'; z-index: 40; pointer-events: none; max-width: calc(100% - 24px); width: max-content; text-align: center; word-break: keep-all; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* 페이드 */
@@ -208,7 +208,7 @@ body.in-panel .pad .dpad, body.in-quiz .pad, body.in-battle .pad { display: none
 .goal b { color: #e3350d; }
 .goal small { opacity: .6; }
 body.in-battle .goal, body.in-panel .goal, body.in-quiz .goal { display: none; }
-@media (orientation: portrait) { .goal { top: calc(62px + env(safe-area-inset-top)); white-space: normal; text-align: center; } }
+@media (orientation: portrait) { .goal { top: calc(62px + env(safe-area-inset-top)); white-space: normal; text-align: center; word-break: keep-all; } }
 
 .explain .steps { margin-top: .4em; }
 .explain ol { margin: .2em 0 0 1.2em; padding: 0; }
