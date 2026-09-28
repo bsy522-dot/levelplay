@@ -176,7 +176,7 @@ for (let tries = 0; tries < 12; tries++) {
 }
 await drive(async () => !(await st()).busy, 100);
 s = await st();
-ok('야생 구구 포획', s.party.some((m) => m[0] === 16) || (await page.evaluate(() => window.__pe.G.s.box.length)) > 0, JSON.stringify(s.party));
+ok('야생 포켓몬 포획', s.party.length >= 2 || (await page.evaluate(() => window.__pe.G.s.box.length)) > 0, JSON.stringify(s.party));
 
 console.log('▶ 지도 화면들');
 for (const [m, x, y] of [['Route2', 4, 60], ['ViridianForest', 17, 45], ['PewterCity', 18, 30], ['ViridianPokecenter', 4, 6], ['PewterGym', 4, 12]]) {

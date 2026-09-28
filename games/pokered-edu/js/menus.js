@@ -162,6 +162,16 @@ export async function bagScreen() {
       const list = el('div', { class: 'list' }); body.append(list);
       api.onKey(listNav(list, ids.map((id) => ({ value: id, node: el('div', { class: 'row' }, el('div', { class: 'grow' }, el('div', { class: 'jua' }, `${ITEMS[id].name} ×${G.s.bag[id]}`), el('div', { class: 'sub' }, ITEMS[id].desc))) })), async (id) => {
         const it = ITEMS[id];
+        if (it.kind === 'candy') {
+          const m = await pickPartyPanel(fixJosa(`${it.name}을(를) 누구에게 먹일까?`));
+          if (!m) return;
+          addItem(id, -1); sfx('levelup');
+          M.applyExp(m, Math.max(1, M.expAt(sp(m.sp).growth, m.lv + 1) - m.exp));
+          const learned = sp(m.sp).learn.filter(([l]) => l === m.lv).map(([, mv]) => mv).filter((mv) => DB.moves[mv] && !m.moves.some((x) => x.id === mv));
+          for (const mv of learned) if (m.moves.length < 4) m.moves.push({ id: mv, pp: DB.moves[mv].pp });
+          await say([fixJosa(`${sp(m.sp).name}의 레벨이 ${m.lv}(으)로 올랐다!`)]);
+          draw(); return;
+        }
         if (it.kind !== 'heal' && it.kind !== 'cure') { await say([it.desc]); return; }
         const m = await pickPartyPanel(fixJosa(`${it.name}을(를) 누구에게 쓸까?`));
         if (!m) return;
@@ -293,10 +303,12 @@ export async function practice(n) {
 }
 
 /* ── 1차 완료 ── */
-export async function chapterEnd() {
+export async function chapterEnd(n = 1) {
   const r = report();
-  await say(['축하해! 🎉', '1차 모험(태초마을 ~ 회색시티 체육관)을 모두 마쳤어!', '다음 도시와 체육관은 곧 열린단다. 그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!'], { who: '오박사', face: 'oak' });
-  await panel('🏅 1차 모험 완료!', (body) => {
+  const msg = n === 1 ? ['축하해! 🎉 회색배지를 땄구나!', '다음 모험은 회색시티 동쪽 3번도로에서 시작이야. 달맞이산을 지나 블루시티로 가 보자!']
+    : ['축하해! 🎉 블루배지까지 땄구나!', `${n}판 모험을 모두 마쳤어! 다음 판은 곧 열린단다.`, '그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!'];
+  await say(msg, { who: '오박사', face: 'oak' });
+  await panel(`🏅 ${n}판 모험 완료!`, (body) => {
     body.append(el('div', { class: 'report' },
       el('div', { class: 'kpi' },
         el('div', {}, el('b', {}, r.total), '푼 문제'), el('div', {}, el('b', {}, r.acc + '%'), '처음에 맞힌 비율'),

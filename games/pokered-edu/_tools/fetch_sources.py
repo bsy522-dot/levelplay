@@ -13,9 +13,10 @@
 import os, sys, json, urllib.request, concurrent.futures as cf
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'pokered_src'
-MAPS = (sys.argv[2].split(',') if len(sys.argv) > 2 else
-        'PalletTown,Route1,ViridianCity,Route2,ViridianForest,ViridianForestSouthGate,ViridianForestNorthGate,PewterCity,PewterGym,'
-        'RedsHouse1F,RedsHouse2F,BluesHouse,OaksLab,ViridianPokecenter,ViridianMart,PewterPokecenter,PewterMart,Route2Gate,ViridianSchoolHouse').split(',')
+DEFAULT_MAPS = ('PalletTown,Route1,ViridianCity,Route2,ViridianForest,ViridianForestSouthGate,ViridianForestNorthGate,PewterCity,PewterGym,'
+                'RedsHouse1F,RedsHouse2F,BluesHouse,OaksLab,ViridianPokecenter,ViridianMart,PewterPokecenter,PewterMart,Route2Gate,ViridianSchoolHouse,'
+                'Route3,MtMoon1F,MtMoonB1F,MtMoonB2F,Route4,CeruleanCity,CeruleanPokecenter,CeruleanMart,CeruleanGym,MtMoonPokecenter')
+MAPS = (sys.argv[2] if len(sys.argv) > 2 else DEFAULT_MAPS).split(',')
 GH = 'https://raw.githubusercontent.com/'
 
 def get(url, dst):
@@ -38,7 +39,7 @@ def main():
         if top in ('pokemon', 'moves', 'trainers') or (top == 'maps' and rel.split('/')[1] in MAPS):
             jobs.append((GH + 'liuyanghejerry/open-pokered/HEAD/' + p, os.path.join(OUT, 'opr', rel)))
     # 2) pret/pokered
-    for name in ['overworld', 'forest', 'reds_house', 'house', 'pokecenter', 'gym', 'gate']:
+    for name in ['overworld', 'forest', 'reds_house', 'house', 'pokecenter', 'gym', 'gate', 'cavern']:
         for f in (f'gfx/blocksets/{name}.bst', f'gfx/tilesets/{name}.png'):
             jobs.append((GH + 'pret/pokered/master/' + f, os.path.join(OUT, 'pret', f)))
     # 3) PokeAPI CSV

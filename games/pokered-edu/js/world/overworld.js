@@ -232,7 +232,7 @@ export class WorldScene extends Phaser.Scene {
     }
     if (await EV.stepTrigger(m.id, x, y, d)) return;
     if (await this.checkTrainers()) return;
-    if (c === '"' && m.wild && Math.random() < EV.encounterChance(m.wild.encounterRate)) {
+    if ((c === '"' || (m.tileset === 'Cavern' && c === '_')) && m.wild && Math.random() < EV.encounterChance(m.wild.encounterRate)) {
       await W.wildBattle(m.wild);
     }
   }
@@ -250,6 +250,7 @@ export class WorldScene extends Phaser.Scene {
     save();
     await fade(false, 140);
     W.busy = false;
+    await EV.enterMap(ex.to);
   }
 
   async useWarp(x, y) {

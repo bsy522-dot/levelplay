@@ -12,7 +12,7 @@ import { initLearn, GRADES } from './learn/tutor.js';
 import * as MENU from './menus.js';
 import { charSheet, KINDS, CW, CH } from './art/chars.js';
 
-const AI_FACES = ['oak', 'rival', 'brock', 'mom', 'nurse', 'clerk', 'bugcatcher', 'youngster', 'oldman', 'camper', 'player'];
+const AI_FACES = ['oak', 'rival', 'brock', 'mom', 'nurse', 'clerk', 'bugcatcher', 'youngster', 'oldman', 'camper', 'player', 'misty', 'rocket', 'hiker'];
 
 function spriteFace(kind) {
   const sheet = charSheet(kind);

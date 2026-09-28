@@ -12,7 +12,7 @@ import { fixJosa } from '../learn/math.js';
 import { W } from '../world/overworld.js';
 import { wildPick } from '../world/events.js';
 
-const BG = { ViridianForest: 'bg_forest', PewterGym: 'bg_gym_rock', OaksLab: 'bg_lab' };
+const BG = { ViridianForest: 'bg_forest', PewterGym: 'bg_gym_rock', OaksLab: 'bg_lab', MtMoon1F: 'bg_cave', MtMoonB1F: 'bg_cave', MtMoonB2F: 'bg_cave', CeruleanGym: 'bg_gym_water' };
 
 export class BattleScene extends Phaser.Scene {
   constructor() { super({ key: 'battle', active: true }); }

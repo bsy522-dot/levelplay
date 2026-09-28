@@ -21,12 +21,13 @@ TS = {  # 원작 타일셋 -> (블록셋 파일, 걸을 수 있는 타일)
     'House': ('house', {0x01,0x12,0x14,0x28,0x32,0x37,0x44,0x54,0x5c}),
     'ForestGate': ('gate', {0x01,0x12,0x14,0x1a,0x1c,0x37,0x38,0x3b,0x3c,0x5e}),
     'Gate': ('gate', {0x01,0x12,0x14,0x1a,0x1c,0x37,0x38,0x3b,0x3c,0x5e}),
+    'Cavern': ('cavern', {0x05,0x15,0x18,0x1a,0x20,0x21,0x22,0x2a,0x2d,0x30}),
 }
 
 # 실내 막힌 칸의 가구 종류 (2x2 타일 서명 -> 기호). 눈으로 확인해 붙인 이름.
 # W 벽  K 책장·진열장  P 화분  O 바위  Q 석상  t 탁자  C 카운터  M 기계·컴퓨터  V TV  b 침대  N 칠판·포스터
 INDOOR = {
-    'gym': {'02381213': 'Q', '05051010': 'W', '07081718': 'O', '0d0e1d1e': 'K', '22233233': 'M', '292a0d0e': 'K',
+    'gym': {'14141414': 'w', '04041414': 'w', '090a191a': 'W', '02381213': 'Q', '05051010': 'W', '07081718': 'O', '0d0e1d1e': 'K', '22233233': 'M', '292a0d0e': 'K',
             '293b4e39': 't', '34435253': 'N', '3b2a394f': 't', '3b3b3939': 't', '5b5c3637': 'M', '5d5e555f': 'M'},
     'pokecenter': {'03281328': 'W', '04051415': 'W', '08081819': 'C', '080a1819': 'C', '0e0f1e1f': 'M', '10291029': 'W',
                    '10291918': 'W', '20213031': 'P', '22233233': 'M', '24253435': 'N', '26272a2b': 'M', '28022812': 'C',
@@ -51,7 +52,7 @@ LEDGE_DOWN, LEDGE_LEFT, LEDGE_RIGHT = {0x36, 0x37}, {0x27}, {0x0d, 0x1d}
 
 KIND = {  # 문이 이어지는 곳 -> 건물 종류
     'Pokecenter': 'center', 'Mart': 'mart', 'Gym': 'gym', 'OaksLab': 'lab', 'Museum': 'museum',
-    'Gate': 'gate', 'SchoolHouse': 'school', 'Cave': 'cave',
+    'Gate': 'gate', 'SchoolHouse': 'school', 'Cave': 'cave', 'MtMoon': 'cave',
 }
 
 def kind_of(dest):
@@ -73,6 +74,9 @@ def load(name):
 def hexs(s):
     return ''.join('%02x' % t for t in s)
 
+ROCK = set()  # 1차 변환에서 배운 '바위산' 칸 모양
+BLDG_KNOWN = set()  # 1차 변환에서 배운 '진짜 건물' 칸 모양
+
 def classify(name):
     m, asset, walk, sig = load(name)
     H, W = len(sig), len(sig[0])
@@ -93,6 +97,7 @@ def classify(name):
                     elif 0x14 in s or bl == 0x32: c = '~'
                     elif OW_TREE & set(s): c = 'T'
                     elif {0x0e, 0x55} & set(s): c = '#'
+                    elif hexs(s) in ROCK: c = 'R'
                     else: c = 'B'
                 elif (x, y) in warps: c = 'D'
                 elif 0x52 in s: c = '"'
@@ -110,7 +115,7 @@ def classify(name):
                     c = 'D' if (x, y) in warps and y == H - 1 else INDOOR_WALK.get(hx, '_')
                     if (x, y) in warps and y < H - 1 and c == '_': c = 'U'
                 else:
-                    c = INDOOR.get(asset, {}).get(hx, 'f')
+                    c = INDOOR.get(asset, {}).get(hx, 'R' if asset == 'cavern' else 'f')
             g[y][x] = c
     # 실내 출입구 칸은 원작에서 밟고 지나가는 곳이니 막히지 않게
     if not outdoor:
@@ -120,32 +125,60 @@ def classify(name):
     # 바깥: 건물 칸을 묶어 한 채씩 (문 칸 포함)
     buildings = []
     if asset == 'overworld':
-        seen = set()
-        for y in range(H):
-            for x in range(W):
-                if g[y][x] != 'B' or (x, y) in seen: continue
-                stack, comp = [(x, y)], []
-                seen.add((x, y))
-                while stack:
-                    cx, cy = stack.pop(); comp.append((cx, cy))
-                    for nx, ny in ((cx+1, cy), (cx-1, cy), (cx, cy+1), (cx, cy-1)):
-                        if 0 <= nx < W and 0 <= ny < H and (nx, ny) not in seen and g[ny][nx] in 'BD':
-                            seen.add((nx, ny)); stack.append((nx, ny))
-                xs = [c[0] for c in comp]; ys = [c[1] for c in comp]
-                b = {'x': min(xs), 'y': min(ys), 'w': max(xs) - min(xs) + 1, 'h': max(ys) - min(ys) + 1, 'doors': []}
-                for i, wp in enumerate(m['warps']):
-                    if (wp['x'], wp['y']) in comp:
-                        b['doors'].append({'x': wp['x'], 'y': wp['y'], 'to': wp.get('destMap')})
-                if not b['doors']:  # 문 없는 덩어리 = 바위 절벽(산)
-                    for cx, cy in comp: g[cy][cx] = 'R'
-                    continue
-                b['kind'] = kind_of(b['doors'][0]['to'])
-                buildings.append(b)
+        def group():
+            seen, comps = set(), []
+            for y in range(H):
+                for x in range(W):
+                    if g[y][x] != 'B' or (x, y) in seen: continue
+                    stack, comp = [(x, y)], []
+                    seen.add((x, y))
+                    while stack:
+                        cx, cy = stack.pop(); comp.append((cx, cy))
+                        for nx, ny in ((cx+1, cy), (cx-1, cy), (cx, cy+1), (cx, cy-1)):
+                            if 0 <= nx < W and 0 <= ny < H and (nx, ny) not in seen and g[ny][nx] in 'BD':
+                                seen.add((nx, ny)); stack.append((nx, ny))
+                    comps.append(comp)
+            return comps
+        def box(comp):
+            xs = [c[0] for c in comp]; ys = [c[1] for c in comp]
+            return {'x': min(xs), 'y': min(ys), 'w': max(xs) - min(xs) + 1, 'h': max(ys) - min(ys) + 1, 'doors': []}
+        # 산 전체가 건물과 한 덩어리로 묶였으면: 아는 건물 모양만 남기고 나머지는 바위산
+        for comp in group():
+            b = box(comp)
+            if b['w'] > 16 or b['h'] > 10:
+                cs = set(comp)
+                for cx, cy in comp:
+                    if g[cy][cx] == 'B': g[cy][cx] = 'R'
+                # 원작 포켓몬센터·가게·집은 문 기준 가로 4 × 세로 4칸 (문은 왼쪽에서 두 번째 칸)
+                for wp in m['warps']:
+                    dx, dy = wp['x'], wp['y']
+                    if (dx, dy) in cs and kind_of(wp.get('destMap')) in ('center', 'mart', 'house', 'gym', 'school', 'museum', 'gate'):
+                        for yy in range(dy - 3, dy + 1):
+                            for xx in range(dx - 1, dx + 3):
+                                if 0 <= xx < W and 0 <= yy < H and g[yy][xx] == 'R': g[yy][xx] = 'B'
+        for comp in group():
+            b = box(comp)
+            for wp in m['warps']:
+                if (wp['x'], wp['y']) in comp:
+                    b['doors'].append({'x': wp['x'], 'y': wp['y'], 'to': wp.get('destMap')})
+            if not b['doors']:  # 문 없는 덩어리 = 바위 절벽(산)
+                for cx, cy in comp: g[cy][cx] = 'R'; LEARN_ROCK.add(hexs(sig[cy][cx]))
+                continue
+            if b['w'] <= 16 and b['h'] <= 10:  # 진짜 건물 크기만 배운다
+                for cx, cy in comp: LEARN_BLDG.add(hexs(sig[cy][cx]))
+            b['kind'] = kind_of(b['doors'][0]['to'])
+            buildings.append(b)
     return m, [''.join(r) for r in g], buildings, outdoor
+
+LEARN_ROCK, LEARN_BLDG = set(), set()
 
 def main():
     os.makedirs(OUT, exist_ok=True)
     names = sorted(os.listdir(os.path.join(SRC, 'opr/maps')))
+    # 1차: 문 없는 덩어리에서 바위산 칸 모양을 배운다 (건물에도 쓰이는 모양은 뺀다)
+    for name in names: classify(name)
+    ROCK.update(LEARN_ROCK - LEARN_BLDG)
+    BLDG_KNOWN.update(LEARN_BLDG)
     for name in names:
         m, grid, buildings, outdoor = classify(name)
         out = {

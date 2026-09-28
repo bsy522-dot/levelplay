@@ -3,7 +3,8 @@ export const DB = { species: [], byKey: {}, moves: {}, trainers: {}, maps: {}, s
 
 export const MAP_IDS = ['PalletTown', 'RedsHouse1F', 'RedsHouse2F', 'BluesHouse', 'OaksLab', 'Route1', 'ViridianCity',
   'ViridianPokecenter', 'ViridianMart', 'ViridianSchoolHouse', 'Route2', 'ViridianForestSouthGate', 'ViridianForest',
-  'ViridianForestNorthGate', 'PewterCity', 'PewterPokecenter', 'PewterMart', 'PewterGym'];
+  'ViridianForestNorthGate', 'PewterCity', 'PewterPokecenter', 'PewterMart', 'PewterGym',
+  'Route3', 'MtMoonPokecenter', 'Route4', 'MtMoon1F', 'MtMoonB1F', 'MtMoonB2F', 'CeruleanCity', 'CeruleanPokecenter', 'CeruleanMart', 'CeruleanGym'];
 
 export const MAP_NAME = {
   PalletTown: '태초마을', RedsHouse1F: '우리 집 1층', RedsHouse2F: '우리 집 2층', BluesHouse: '라이벌의 집', OaksLab: '오박사 연구소',
@@ -11,6 +12,8 @@ export const MAP_NAME = {
   ViridianSchoolHouse: '상록시티 트레이너 학교', Route2: '2번도로', ViridianForestSouthGate: '상록숲 입구', ViridianForest: '상록숲',
   ViridianForestNorthGate: '상록숲 출구', PewterCity: '회색시티', PewterPokecenter: '회색시티 포켓몬센터', PewterMart: '회색시티 프렌들리숍',
   PewterGym: '회색시티 체육관',
+  Route3: '3번도로', MtMoonPokecenter: '달맞이산 포켓몬센터', Route4: '4번도로', MtMoon1F: '달맞이산 1층', MtMoonB1F: '달맞이산 지하 1층',
+  MtMoonB2F: '달맞이산 지하 2층', CeruleanCity: '블루시티', CeruleanPokecenter: '블루시티 포켓몬센터', CeruleanMart: '블루시티 프렌들리숍', CeruleanGym: '블루시티 체육관',
 };
 
 export const ITEMS = {
@@ -23,6 +26,8 @@ export const ITEMS = {
   10: { name: '달의돌', kind: 'key', price: 0, desc: '신비한 돌. 어떤 포켓몬을 진화시킨다고 한다.' },
   35: { name: '맥스업', kind: 'key', price: 0, desc: '포켓몬의 최대 HP가 조금 오르는 약.' },
   900: { name: '오박사의 소포', kind: 'key', price: 0, desc: '오박사님께 전해 드려야 하는 소포.' },
+  40: { name: '이상한사탕', kind: 'candy', price: 0, desc: '먹으면 포켓몬의 레벨이 1 오른다.' },
+  901: { name: '회색배지', kind: 'key', price: 0, desc: '회색시티 체육관 관장 웅을 이긴 증거.' },
 };
 
 async function j(path) {

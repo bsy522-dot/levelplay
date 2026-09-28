@@ -98,6 +98,14 @@ export function paintMap(map) {
   }
   // 5) 건물
   for (const b of map.buildings || []) building(g, o, b, M);
+  // 5-1) 건물에 속하지 않은 문 = 바위산의 동굴 입구
+  const inB = (x, y) => (map.buildings || []).some((b) => x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.h);
+  for (let y = 0; y < map.h; y++) for (let x = 0; x < map.w; x++) {
+    if (map.grid[y][x] !== 'D' || inB(x, y)) continue;
+    const px = (x + M) * T, py = (y + M) * T;
+    rr(g, px - 2, py - 6, T + 4, T + 6, 10, PAL.rock2);
+    g.fillStyle = '#1a1410'; g.beginPath(); g.ellipse(px + T / 2, py + T * 0.62, T * 0.46, T * 0.5, 0, Math.PI, 0); g.fill(); g.fillRect(px + 2, py + T * 0.6, T - 4, T * 0.4);
+  }
   // 6) 나무 (위에서 아래 순서로 그려 아래 나무가 앞에 오도록)
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (at(x, y) === 'T') tree(g, o, x * T, y * T, rnd, forest);
   return { ground: cv, over: ov, M, W, H };
@@ -229,9 +237,9 @@ function building(g, o, b, M) {
 const FLOOR = {
   RedsHouse1: ['#e2c28f', '#d4b07a', 'wood'], RedsHouse2: ['#e2c28f', '#d4b07a', 'wood'], House: ['#e2c28f', '#d4b07a', 'wood'],
   Dojo: ['#eef1f6', '#dfe4ee', 'tile'], Pokecenter: ['#fdf1f4', '#f3dde4', 'tile'], Mart: ['#eef6ff', '#dde9f7', 'tile'],
-  Gym: ['#cfc4b0', '#bcb09a', 'stone'], ForestGate: ['#e8eadf', '#d6d9ca', 'tile'], Gate: ['#e8eadf', '#d6d9ca', 'tile'],
+  Gym: ['#cfc4b0', '#bcb09a', 'stone'], Cavern: ['#8a7358', '#7c6750', 'cave'], ForestGate: ['#e8eadf', '#d6d9ca', 'tile'], Gate: ['#e8eadf', '#d6d9ca', 'tile'],
 };
-const WALLC = { RedsHouse1: '#f6e7c8', RedsHouse2: '#dfeefe', House: '#f6e7c8', Dojo: '#e3ecf7', Pokecenter: '#ffe3ea', Mart: '#e0efff', Gym: '#9e9582', ForestGate: '#e2ead7', Gate: '#e2ead7' };
+const WALLC = { Cavern: '#5a4a3a', RedsHouse1: '#f6e7c8', RedsHouse2: '#dfeefe', House: '#f6e7c8', Dojo: '#e3ecf7', Pokecenter: '#ffe3ea', Mart: '#e0efff', Gym: '#9e9582', ForestGate: '#e2ead7', Gate: '#e2ead7' };
 
 function comps(map, ch) {
   const seen = new Set(), out = [];
@@ -253,6 +261,7 @@ function paintIndoor(g, map, rnd) {
     const px = x * T, py = y * T;
     if (kind === 'wood') { g.fillStyle = y % 2 ? f1 : f2; g.fillRect(px, py, T, T); g.fillStyle = 'rgba(0,0,0,.06)'; g.fillRect(px + ((y * 17) % T), py, 2, T); g.fillRect(px, py + T - 2, T, 2); }
     else if (kind === 'tile') { g.fillStyle = (x + y) % 2 ? f1 : f2; g.fillRect(px, py, T, T); }
+    else if (kind === 'cave') { g.fillStyle = f1; g.fillRect(px, py, T, T); for (let i = 0; i < 3; i++) { g.fillStyle = rnd() < 0.5 ? f2 : '#9b8466'; g.beginPath(); g.ellipse(px + 6 + rnd() * 36, py + 6 + rnd() * 36, 2 + rnd() * 3, 1.5 + rnd() * 2, 0, 0, Math.PI * 2); g.fill(); } }
     else { g.fillStyle = f1; g.fillRect(px, py, T, T); g.strokeStyle = f2; g.lineWidth = 2; g.strokeRect(px + 2, py + 2, T - 4, T - 4); }
   }
   // 벽: 'W' 칸 (보통 윗줄)
@@ -277,6 +286,21 @@ function paintIndoor(g, map, rnd) {
     f: (b) => { rr(g, b.x * T + 3, b.y * T + 4, b.w * T - 6, b.h * T - 8, 6, '#a1887f', '#6d4c41', 2); },
     S: (b) => { for (let xx = 0; xx < b.w; xx++) { const px = (b.x + xx) * T, py = b.y * T; rr(g, px + 8, py + 6, 32, 28, 5, '#cfd8dc', '#607d8b', 2); rr(g, px + 12, py + 10, 24, 18, 3, '#81d4fa'); } },
   };
+  // 동굴 바위벽: 칸마다 울퉁불퉁한 바위, 아래쪽 가장자리는 어둡게
+  for (let y = 0; y < map.h; y++) for (let x = 0; x < map.w; x++) {
+    const c = map.grid[y][x], px = x * T, py = y * T;
+    if (c === 'R') {
+      const dn = y + 1 < map.h && map.grid[y + 1][x] !== 'R';
+      g.fillStyle = '#5a4a3a'; g.fillRect(px, py, T, T);
+      g.fillStyle = '#6e5a46'; g.beginPath(); g.ellipse(px + 16 + rnd() * 6, py + 18 + rnd() * 6, 14, 11, 0, 0, Math.PI * 2); g.ellipse(px + 32, py + 30, 12, 10, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.ellipse(px + 14, py + 14, 6, 4, 0, 0, Math.PI * 2); g.fill();
+      if (dn) { g.fillStyle = '#3e3228'; g.fillRect(px, py + T - 10, T, 10); }
+    } else if (c === 'w') {
+      g.fillStyle = '#4fa9e8'; g.fillRect(px, py, T, T);
+      g.strokeStyle = '#8fd0f7'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 6, py + 18); g.quadraticCurveTo(px + 24, py + 12, px + 42, py + 18); g.moveTo(px + 6, py + 34); g.quadraticCurveTo(px + 24, py + 28, px + 42, py + 34); g.stroke();
+      if (y > 0 && map.grid[y - 1][x] !== 'w') { g.fillStyle = '#e9f6ff'; g.fillRect(px, py, T, 5); }
+    }
+  }
   for (const ch of Object.keys(draw)) for (const b of comps(map, ch)) draw[ch](b);
   // 계단, 매트, 출구
   for (let y = 0; y < map.h; y++) for (let x = 0; x < map.w; x++) {

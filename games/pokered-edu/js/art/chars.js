@@ -20,12 +20,17 @@ export const KINDS = {
   camper: { hair: '#333', hairStyle: 'short', hat: 'cap', hatCol: '#2e7d32', hatCol2: '#2e7d32', top: '#66bb6a', bottom: '#8d6e63', shoe: '#5d4037', shorts: true },
   coolf: { hair: '#c62828', hairStyle: 'long', top: '#fdd835', bottom: '#1565c0', shoe: '#333', skirt: true },
   nerd: { hair: '#5d4037', hairStyle: 'short', top: '#90caf9', bottom: '#455a64', shoe: '#222', glasses: true },
+  rocket: { hair: '#2b2b2b', hairStyle: 'short', hat: 'cap', hatCol: '#222', hatCol2: '#222', top: '#222', top2: '#e3350d', bottom: '#222', shoe: '#555' },
+  hiker: { hair: '#5d4037', hairStyle: 'short', hat: 'bucket', hatCol: '#8d6e63', top: '#a1887f', bottom: '#6d4c41', shoe: '#3e2723', beard: true },
+  misty: { hair: '#f57c00', hairStyle: 'pony', top: '#fdd835', bottom: '#e53935', shoe: '#e53935', shorts: true },
+  swimmer: { hair: '#222', hairStyle: 'short', top: '#4fc3f7', bottom: '#1565c0', shoe: '#f8d5b5', shorts: true },
   guide: { hair: '#333', hairStyle: 'short', top: '#ef5350', bottom: '#37474f', shoe: '#222', glasses: true, shades: true },
 };
 export const SPRITE_KIND = {
   Oak: 'oak', Blue: 'rival', Girl: 'girl', Fisher: 'fisher', Youngster: 'youngster', Gambler: 'gambler', GamblerAsleep: 'oldman',
   CooltrainerF: 'coolf', CooltrainerM: 'camper', SuperNerd: 'nerd', GymGuide: 'guide', Scientist: 'scientist', Mom: 'mom',
   Nurse: 'nurse', Clerk: 'clerk', BugCatcher: 'bugcatcher', Brock: 'brock', OldMan: 'oldman',
+  Rocket: 'rocket', Hiker: 'hiker', Swimmer: 'swimmer', MiddleAgedMan: 'gambler', Guard: 'clerk',
 };
 
 function rr(g, x, y, w, h, r, fill) { g.beginPath(); g.roundRect ? g.roundRect(x, y, w, h, r) : g.rect(x, y, w, h); g.fillStyle = fill; g.fill(); }
@@ -68,6 +73,7 @@ function drawFrame(g, k, dir, step) {
   if (k.top2 && !k.coat) rr(g, cx - 4, bodyY + 1, 8, 14, 3, k.top2);
   if (k.coat) { rr(g, cx - 11, bodyY, 22, 20, 7, '#fbfbfb'); if (dir === 0) rr(g, cx - 3, bodyY + 1, 6, 13, 2, k.top2); }
   if (k.apron && dir !== 1) rr(g, cx - 7, bodyY + 5, 14, 14, 4, k.apron);
+  if (k === KINDS.rocket && dir === 0) { g.fillStyle = '#e3350d'; g.font = 'bold 12px sans-serif'; g.textAlign = 'center'; g.fillText('R', cx, bodyY + 13); }
   if (!k.skirt && !k.coat) rr(g, cx - 10, bodyY + 13, 20, 5, 2, k.shorts ? k.bottom : shade(k.bottom, 0.9));
   // 팔
   const armSwing = step === 1 ? 3 : step === 2 ? -3 : 0;
