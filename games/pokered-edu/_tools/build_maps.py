@@ -22,6 +22,8 @@ TS = {  # 원작 타일셋 -> (블록셋 파일, 걸을 수 있는 타일)
     'ForestGate': ('gate', {0x01,0x12,0x14,0x1a,0x1c,0x37,0x38,0x3b,0x3c,0x5e}),
     'Gate': ('gate', {0x01,0x12,0x14,0x1a,0x1c,0x37,0x38,0x3b,0x3c,0x5e}),
     'Cavern': ('cavern', {0x05,0x15,0x18,0x1a,0x20,0x21,0x22,0x2a,0x2d,0x30}),
+    'Interior': ('interior', {0x04,0x0f,0x15,0x1f,0x3b,0x45,0x47,0x55,0x56}),
+    'Underground': ('underground', {0x0b,0x0c,0x13,0x15,0x18}),
 }
 
 # 실내 막힌 칸의 가구 종류 (2x2 타일 서명 -> 기호). 눈으로 확인해 붙인 이름.
@@ -41,6 +43,8 @@ INDOOR = {
     'house': {'00000000': 'W', '0a0b0809': 'P', '0e0f1e1f': 'K', '1a1b1819': 'P', '24243434': 'K', '2627362f': 't',
               '26274647': 't', '26290e0f': 'K', '26293031': 't', '27292f39': 't', '2d2e3d3e': 'N', '2f393a3b': 't',
               '30311e1f': 'K', '362f3c3a': 't', '48495859': 'N', '494b5a5b': 'N', '56573c3a': 't'},
+    'interior': {'10100809': 'W', '10100a10': 'W', '10101007': 'W', '10101010': 'W', '26263636': 'W', '18192829': 'M', '1a252a35': 'M',
+                 '20173027': 'M', '38390102': 'M', '0b0c1b1c': 'M', '0d0e1d1e': 'M'},
     'gate': {'05061516': 'P', '07081718': 'W', '17183233': 'W', '25263536': 'P', '48484a4a': 'W'},
 }
 # 실내 걸을 수 있는 칸 중 특수: 계단(U), 발판(m)
@@ -67,6 +71,7 @@ def load(name):
     bst = open(os.path.join(SRC, 'pret/gfx/blocksets', asset + '.bst'), 'rb').read()
     w, h = m['header']['width'], m['header']['height']
     blk = open(os.path.join(SRC, 'opr/maps', name, 'map.blk'), 'rb').read()
+    if len(blk) < w * h: blk += bytes([blk[-1]]) * (w * h - len(blk))  # 원작 파일이 짧은 지도(지하통로): 마지막 벽 블록으로 채움
     sig = [[tuple(bst[blk[(cy // 2) * w + cx // 2] * 16 + ((cy % 2) * 2 + j) * 4 + (cx % 2) * 2 + i]
                   for j in range(2) for i in range(2)) for cx in range(w * 2)] for cy in range(h * 2)]
     return m, asset, walk, sig
@@ -115,7 +120,7 @@ def classify(name):
                     c = 'D' if (x, y) in warps and y == H - 1 else INDOOR_WALK.get(hx, '_')
                     if (x, y) in warps and y < H - 1 and c == '_': c = 'U'
                 else:
-                    c = INDOOR.get(asset, {}).get(hx, 'R' if asset == 'cavern' else 'f')
+                    c = INDOOR.get(asset, {}).get(hx, 'R' if asset == 'cavern' else 'W' if asset == 'underground' else 'f')
             g[y][x] = c
     # 실내 출입구 칸은 원작에서 밟고 지나가는 곳이니 막히지 않게
     if not outdoor:
@@ -172,6 +177,16 @@ def classify(name):
 
 LEARN_ROCK, LEARN_BLDG = set(), set()
 
+# 아이가 막히지 않게 고친 칸 (지도, x, y, 새 칸). 원작에서 지나가기 어려운 곳만 최소로.
+OVERRIDES = {
+    # 블루시티 남쪽: 원작은 도둑맞은 집을 통과해야 5번도로로 갈 수 있음 → 나무줄 틈 아래 울타리 기둥 하나를 치움
+    'CeruleanCity': [(16, 29, ',')],
+    # 갈색시티 체육관 앞: 원작은 풀베기(HM01)로 베는 작은 나무 → 치움
+    'VermilionCity': [(14, 19, ',')],
+}
+# '마지막 바깥 지도로' 나가는 출구 중, 지하통로처럼 반대편으로 나가야 하는 곳은 목적지를 못박는다
+WARP_FIX = {'UndergroundPathRoute5': 'Route5', 'UndergroundPathRoute6': 'Route6'}
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     names = sorted(os.listdir(os.path.join(SRC, 'opr/maps')))
@@ -181,11 +196,13 @@ def main():
     BLDG_KNOWN.update(LEARN_BLDG)
     for name in names:
         m, grid, buildings, outdoor = classify(name)
+        for (ox, oy, oc) in OVERRIDES.get(name, []):
+            row = list(grid[oy]); row[ox] = oc; grid[oy] = ''.join(row)
         out = {
             'id': name, 'outdoor': outdoor, 'tileset': m['header']['tileset'],
             'w': len(grid[0]), 'h': len(grid), 'grid': grid, 'buildings': buildings,
             'connections': {k: {'to': v['targetMap'], 'offset': v['offset'] * 2} for k, v in (m.get('connections') or {}).items()},
-            'warps': [{'x': wp['x'], 'y': wp['y'], 'to': wp.get('destMap'), 'toWarp': wp['destWarpId']} for wp in m['warps']],
+            'warps': [{'x': wp['x'], 'y': wp['y'], 'to': wp.get('destMap') or WARP_FIX.get(name), 'toWarp': wp['destWarpId']} for wp in m['warps']],
             'npcs': [{k: n[k] for k in ('spriteName', 'x', 'y', 'movement', 'facing', 'range', 'textId', 'isTrainer',
                                         'trainerClass', 'trainerSet', 'itemId') if k in n} for n in m['npcs']],
             'signs': m['signs'],

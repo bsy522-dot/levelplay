@@ -98,7 +98,7 @@ export async function moveQuiz({ monName, moveName, moveType, story }) {
     r.result.textContent = '정답! ' + (q.item.why || '');
     const need = q.item.need || (q.subj === 'math' && skillNote(q.skill).need);
     if (need) r.box.append(el('div', { class: 'need' }, el('b', {}, '💡 어디에 쓰일까? '), need));
-    if (rec.mastered) { toast(rec.fast ? `🚀 5연속 이상! '${q.title}' 통과 — 바로 다음 단계로!` : `⭐ '${q.title}' 익힘! 다음 단계로!`, 2400); sfx('levelup'); }
+    if (rec.mastered) { toast(rec.leap ? `🦘 8연속 이상! 도약 — 두 단계 위로!` : rec.fast ? `🚀 5연속 이상! '${q.title}' 통과 — 바로 다음 단계로!` : `⭐ '${q.title}' 익힘! 다음 단계로!`, 2400); sfx('levelup'); }
     await sleep(350);
     await button('공격! ▶', r.box);
     close(r.box);

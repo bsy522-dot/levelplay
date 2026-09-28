@@ -22,6 +22,8 @@ export const KINDS = {
   nerd: { hair: '#5d4037', hairStyle: 'short', top: '#90caf9', bottom: '#455a64', shoe: '#222', glasses: true },
   rocket: { hair: '#2b2b2b', hairStyle: 'short', hat: 'cap', hatCol: '#222', hatCol2: '#222', top: '#222', top2: '#e3350d', bottom: '#222', shoe: '#555' },
   hiker: { hair: '#5d4037', hairStyle: 'short', hat: 'bucket', hatCol: '#8d6e63', top: '#a1887f', bottom: '#6d4c41', shoe: '#3e2723', beard: true },
+  surge: { skin: '#f2c9a0', hair: '#f2d14b', hairStyle: 'spiky', top: '#6b8e23', bottom: '#556b2f', shoe: '#3e2723', shades: true },
+  sailor: { hair: '#333', hairStyle: 'short', hat: 'bucket', hatCol: '#ffffff', top: '#ffffff', top2: '#1565c0', bottom: '#1565c0', shoe: '#222' },
   misty: { hair: '#f57c00', hairStyle: 'pony', top: '#fdd835', bottom: '#e53935', shoe: '#e53935', shorts: true },
   swimmer: { hair: '#222', hairStyle: 'short', top: '#4fc3f7', bottom: '#1565c0', shoe: '#f8d5b5', shorts: true },
   guide: { hair: '#333', hairStyle: 'short', top: '#ef5350', bottom: '#37474f', shoe: '#222', glasses: true, shades: true },

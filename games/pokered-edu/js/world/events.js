@@ -45,6 +45,7 @@ export function npcVisible(map, n, idx) {
   if (map === 'MtMoonPokecenter' && idx === 4) return false;
   if (map === 'CeruleanCity' && (idx === 0 || idx === 1 || idx === 7)) return false;
   if (map === 'MtMoonB2F' && (idx === 5 || idx === 6)) return !flag('fossil');
+  if (map === 'BillsHouse') return idx === 0 ? !flag('billSaved') : idx === 1 ? flag('billSaved') : false;
   if (n.spriteName === 'PokeBall' && n.itemId && f(`item:${map}:${idx}`)) return false;
   return true;
 }
@@ -56,6 +57,12 @@ export function npcKind(map, n, idx) {
   if (map === 'PewterGym' && idx === 1) return 'camper';
   if (map === 'ViridianSchoolHouse' && idx === 1) return 'coolf';
   if (map === 'CeruleanGym' && idx === 0) return 'misty';
+  if (map === 'VermilionGym' && idx === 0) return 'surge';
+  if (map === 'BillsHouse' && idx === 0) return 'mon:35';
+  if (map === 'VermilionCity' && idx === 4) return 'mon:66';
+  if (map === 'BillsHouse' && idx === 1) return 'nerd';
+  if (n.spriteName === 'Sailor') return 'sailor';
+  if (n.trainerClass === 'Hiker') return 'hiker';
   if (n.spriteName === 'Fossil') return 'item';
   if (n.trainerClass === 'BugCatcher') return 'bugcatcher';
   if (n.trainerClass === 'Lass' || n.trainerClass === 'JrTrainerF') return 'coolf';
@@ -71,6 +78,10 @@ export async function lockedDoor(dest) {
   if (/CeruleanCave/.test(dest || '')) return say(['아주 강한 포켓몬이 산다는 동굴이다…', '지금은 들어갈 수 없어.']);
   if (/Cave/.test(dest || '')) return say(['어두운 동굴이다… 지금은 들어가지 않는 게 좋겠어.']);
   if (/BikeShop/.test(dest || '')) return say(['자전거 가게다. 자전거 한 대에 100만 원!', '…지금은 너무 비싸다.']);
+  if (/Route[56]Gate/.test(dest || '')) return say(['“목이 말라서 아무도 못 지나가게 할 거야!”', '(노랑시티로 가는 길은 다음 모험에서 열린다.)']);
+  if (/VermilionDock/.test(dest || '')) return say(['상트앙느호는 이미 먼 바다로 떠났다…']);
+  if (/Daycare/.test(dest || '')) return say(['포켓몬 키우미집: “지금은 문을 닫았어요.”']);
+  if (/FanClub/.test(dest || '')) return say(['포켓몬 팬클럽: “회원 모집은 다음 모험에서!”']);
   if (/Trashed/.test(dest || '')) return say(['“로켓단이 이 집에 도둑질을 했어요! 지금은 경찰이 조사 중이에요.”']);
   return say(['문이 잠겨 있다.']);
 }
@@ -109,6 +120,12 @@ export async function bumpTrigger(map, x, y, d) {
 }
 export async function enterMap(id) {
   if (id === 'CeruleanCity' && flag('badge1') && !flag('rival2')) { await rivalCerulean(); return; }
+  if (id === 'VermilionGym' && !flag('gym3Intro')) {
+    setFlag('gym3Intro'); W.busy = true;
+    await say(['갈색시티 체육관에 들어왔다! 찌릿찌릿 전기 냄새가 난다.']);
+    if (!flag('diglettGift')) await LINES['VermilionGym:4']();
+    W.busy = false;
+  }
   if (id === 'CeruleanGym' && !flag('gym2Intro')) {
     setFlag('gym2Intro'); W.busy = true;
     await say(['블루시티 체육관에 들어왔다! 가운데에 커다란 수영장이 있다.', '관장 이슬은 물 포켓몬을 쓴다. 피카츄의 전기 기술이 효과가 굉장할 거야!']);
@@ -475,7 +492,23 @@ export function objective() {
     if (/^Cerulean/.test(map)) return { text: '블루시티 체육관에서 관장 이슬을 이기자', detail: ['체육관은 오른쪽 아래쪽 건물이야.', '물 포켓몬에게는 피카츄의 전기 기술이 효과 굉장!'], dir: '' };
     return { text: '회색시티를 지나 동쪽 3번도로로!', detail: ['회색시티 오른쪽 길 → 3번도로 → 달맞이산 → 블루시티.'], dir: '' };
   }
-  return { text: '2판 완료! 도감을 채우며 다음 판을 기다리자', detail: ['동굴과 풀숲에서 여러 포켓몬을 잡아 보자!'], dir: '' };
+  if (!f('billSaved')) {
+    if (map === 'CeruleanCity' || /^Cerulean/.test(map)) return { text: '블루시티 북쪽 너겟 브릿지를 건너자', detail: ['블루시티 위쪽(북쪽) 다리로!', '다리 위 트레이너 5명을 이기면 선물이 있대.'], dir: map === 'CeruleanCity' ? '↑ 북쪽' : '' };
+    if (map === 'Route24') return { text: '다리를 건너 동쪽 25번도로로', detail: ['다리 끝까지 간 뒤 오른쪽(동쪽)으로!'], dir: '↑ 그다음 →' };
+    if (map === 'Route25') return { text: '길 끝의 이수재 박사님 집으로!', detail: ['동쪽 끝 오두막이 이수재 박사님 집이야.'], dir: '→ 동쪽' };
+    if (map === 'BillsHouse') return f('billAsk') ? { text: '왼쪽 PC에서 “분리”를 실행하자', detail: ['방 왼쪽 컴퓨터 앞에서 A 버튼!'], dir: '' } : { text: '삐삐에게 말을 걸어 보자', detail: ['방 안의 삐삐… 뭔가 이상한데?'], dir: '' };
+    return { text: '블루시티 북쪽으로 가서 이수재 박사님을 만나자', detail: ['블루시티 → 북쪽 다리(24번도로) → 25번도로 끝 오두막.'], dir: '' };
+  }
+  if (!f('badge3')) {
+    if (/^Vermilion/.test(map)) return { text: '갈색시티 체육관에서 관장 마티스를 이기자', detail: ['체육관에 들어가면 가이드가 디그다를 빌려줘!', '땅 타입에는 전기 기술이 안 통해.'], dir: '' };
+    if (map === 'BillsHouse' || map === 'Route25' || map === 'Route24') return { text: '블루시티로 돌아가서 남쪽 5번도로로', detail: ['왔던 길로 블루시티에 간 뒤, 아래쪽(남쪽) 출구로!'], dir: map === 'Route24' ? '↓ 남쪽' : '← 서쪽' };
+    if (/^Cerulean/.test(map)) return { text: '블루시티 남쪽 5번도로로 가자', detail: ['블루시티 아래쪽(남쪽) 길로 나가면 5번도로야.'], dir: map === 'CeruleanCity' ? '↓ 남쪽' : '' };
+    if (map === 'Route5') return { text: '오른쪽 작은 건물(지하통로 입구)로 들어가자', detail: ['5번도로 아래쪽 오른편의 건물이 지하통로 입구야.', '(가운데 큰 건물은 지금은 못 지나가.)'], dir: '↓' };
+    if (/^UndergroundPath/.test(map)) return { text: '지하통로를 따라 남쪽으로!', detail: ['계단을 내려가 긴 통로를 쭉 따라가면 6번도로야.'], dir: '↓ 남쪽' };
+    if (map === 'Route6') return { text: '남쪽으로 가면 갈색시티!', detail: ['트레이너들을 이기며 아래쪽으로 쭉!'], dir: '↓ 남쪽' };
+    return { text: '갈색시티를 향해!', detail: ['블루시티 남쪽 → 5번도로 → 지하통로 → 6번도로 → 갈색시티.'], dir: '' };
+  }
+  return { text: '3판 완료! 도감을 채우며 다음 판을 기다리자', detail: ['여러 곳의 풀숲에서 새로운 포켓몬을 찾아보자!'], dir: '' };
 }
 
 /* ── 야생 포켓몬: 원작 출현표 + 여러 친구 섞기 ── */
@@ -625,4 +658,131 @@ Object.assign(EXTRA_WILD, {
   MtMoonB1F: [['Onix', 10], ['Sandshrew', 10], ['Clefairy', 10]],
   MtMoonB2F: [['Onix', 11], ['Clefairy', 11], ['Sandshrew', 11]],
   Route4: [['Mankey', 10], ['Sandshrew', 10], ['Meowth', 10], ['Psyduck', 10], ['Poliwag', 10]],
+});
+
+
+/* ════════════════ 3판: 너겟 브릿지 · 이수재 · 지하통로 · 갈색시티 ════════════════ */
+async function nuggetRocket() {
+  if (flag('nuggetRocket')) return say(['크윽… 로켓단의 비밀이 들통나다니!'], { who: '로켓단', face: 'rocket' });
+  await say(['축하해! 너겟 브릿지 5연승을 해냈구나!', '상으로 이 금덩이를 주지. (팔면 5000원!)'], { who: '아저씨', face: 'camper' });
+  G.s.money += 5000; sfx('item');
+  await say([`${josa(P(), '은/는')} 금덩이를 받아서 5000원이 되었다!`]);
+  await say(['…그런데 말이야. 너처럼 강한 아이라면 우리 “로켓단”에 들어오지 않을래?', '싫다고? 그럼 힘으로 데려가 주마!'], { who: '로켓단', face: 'rocket' });
+  const res = await W.trainerBattle({ cls: 'Rocket', set: 5, name: '로켓단 조무래기', face: 'rocket', intro: '로켓단 조무래기가 승부를 걸어 왔다!', lose: '으윽… 이 꼬마 뭐야!', money: 500 });
+  if (res === 'win') { setFlag('nuggetRocket'); save(); await say(['로켓단은 포기하지 않는다! 두고 보자!'], { who: '로켓단', face: 'rocket' }); }
+}
+
+async function billPokemon() {
+  if (flag('billSaved')) return;
+  await say(['어이! 거기 너! 나 좀 도와줘!', '나는 포켓몬 박사 이수재야. 포켓몬을 전송하는 실험을 하다가…', '실수로 포켓몬이랑 합쳐져 버렸어! 😱', '저쪽 PC(전송 기계 옆 컴퓨터)에서 “분리” 버튼을 눌러 줘! 그동안 나는 기계에 들어가 있을게!'], { who: '삐삐(이수재)', face: 'mon' });
+  setFlag('billAsk'); save();
+}
+async function billPC() {
+  if (flag('billSaved')) return say(['포켓몬 전송 기계의 PC다. 보관함 정리가 잘 되어 있다.']);
+  if (!flag('billAsk')) return say(['복잡한 프로그램이 켜져 있다… 함부로 만지면 안 될 것 같다.']);
+  const yes = await ask('“분리 프로그램”을 실행할까?');
+  if (!yes) return;
+  sfx('evolve');
+  await fade(true, 250); await fade(false, 120); await fade(true, 120); await fade(false, 250);
+  setFlag('billSaved'); save();
+  await W.scene.loadMap('BillsHouse', G.s.x, G.s.y, G.s.facing, { quiet: true });
+  await say(['위이이잉… 번쩍!', '기계 속에서 사람이 걸어 나왔다!']);
+}
+async function billThanks() {
+  if (flag('billGift')) return say(['포켓몬 전송은 포켓몬을 “정보”로 바꿔 전기 신호로 보내는 거야.', '그래서 PC에서 PC로 옮길 수 있지! 과학 멋지지?'], { who: '이수재', face: 'bill' });
+  await say(['휴, 살았다! 고마워, 정말 고마워!', '나는 포켓몬 박사 이수재. 네 덕분에 원래대로 돌아왔어.', '고마움의 표시로 이걸 줄게!'], { who: '이수재', face: 'bill' });
+  addItem(40, 3); setFlag('billGift'); sfx('item');
+  await say([`${josa(P(), '은/는')} 이상한사탕을 3개 받았다!`, '(가방에서 포켓몬에게 먹이면 레벨이 1 오른다!)']);
+  await say(['다음 모험은 블루시티 남쪽이야. 5번도로에서 지하통로를 지나면 항구 도시 갈색시티가 나와!', '갈색시티 체육관 관장 마티스는 전기 포켓몬의 달인이란다.'], { who: '이수재', face: 'bill' });
+  W.updateGoal?.(); save();
+}
+
+async function surgeBattle() {
+  if (flag('badge3')) return say(['헤이! 오렌지배지는 네가 번개처럼 똑똑하다는 증거야!'], { who: '마티스', face: 'surge' });
+  await say(['헤이, 꼬마 트레이너! 나는 갈색시티 체육관 관장 마티스!', '전쟁터에서 내 목숨을 구해 준 건 전기 포켓몬이었지!', '전기의 힘을 제대로 이해한 트레이너만 나를 이길 수 있다! 문제를 잘 읽어!'], { who: '마티스', face: 'surge' });
+  const res = await W.trainerBattle({ cls: 'LtSurge', set: 0, name: '마티스', face: 'surge', intro: '관장 마티스가 승부를 걸어 왔다!', story: true, gym: true, lose: '와우! 너 정말 대단하구나!', money: 2376, music: 'gym' });
+  if (res !== 'win') return;
+  await say(['이 오렌지배지를 받아라!'], { who: '마티스', face: 'surge' });
+  setFlag('badge3'); G.s.badges.push('thunder'); onBadge(); sfx('badge');
+  await say([`${josa(P(), '은/는')} 오렌지배지를 받았다!`, '(문제가 한 단계 더 어려워진다! 이제 진짜 실력파 트레이너야.)']);
+  save();
+  await W.chapterEnd?.(3);
+}
+
+Object.assign(LINES, {
+  'Route24:0': () => nuggetRocket(),
+  'BillsHouse:0': () => billPokemon(),
+  'BillsHouse:1': () => billThanks(),
+  'BillsHouse:2': () => billThanks(),
+  'UndergroundPathRoute5:0': () => say(['이 지하통로는 5번도로와 6번도로를 이어 줘.', '땅 밑으로 곧장 가면 금방이야!']),
+  'UndergroundPathRoute6:0': () => say(['지하통로를 지나왔구나! 남쪽으로 조금만 가면 갈색시티야.']),
+  'VermilionCity:0': () => say(['갈색시티는 바다를 끼고 있는 항구 도시야!', '밀물과 썰물은 달이 바닷물을 끌어당겨서 생긴대.']),
+  'VermilionCity:1': () => say(['체육관 관장 마티스는 번개 같은 사나이지!']),
+  'VermilionCity:2': () => say(['상트앙느호는 벌써 출항했어.', '큰 배가 무거운데도 물에 뜨는 건 배가 밀어낸 물의 무게만큼 물이 위로 밀어 주기 때문이야!'], { who: '선원', face: 'sailor' }),
+  'VermilionCity:3': () => say(['땅 타입 포켓몬에게는 전기 기술이 전혀 안 통해.', '전기가 땅속으로 흘러가 버리거든!']),
+  'VermilionCity:4': () => say(['알통몬이 땅을 쿵쿵 다지고 있다!', '“이렇게 땅을 다져 놓아야 건물을 지을 수 있대!”']),
+  'VermilionCity:5': () => say(['바닷물은 짜서 그냥 마시면 안 돼!'], { who: '선원', face: 'sailor' }),
+  'VermilionPokecenter:0': nurse,
+  'VermilionPokecenter:1': () => say(['낚시는 참을성이 필요하지. 공부도 그렇단다, 허허.']),
+  'VermilionPokecenter:2': () => say(['마티스 관장의 라이츄는 엄청 빨라!'], { who: '선원', face: 'sailor' }),
+  'VermilionPokecenter:3': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'VermilionMart:0': clerk,
+  'VermilionMart:1': () => say(['마비치료제를 챙겨 가! 전기 기술에 맞으면 몸이 저리거든.']),
+  'VermilionMart:2': () => say(['갈색시티 항구에는 먼 나라 물건도 많이 들어와!']),
+  'VermilionGym:0': () => surgeBattle(),
+  'VermilionGym:4': async () => {
+    if (!flag('diglettGift')) {
+      await say(['어이, 챔피언 지망생! 마티스 관장은 전기 포켓몬을 써.', '피카츄의 전기 기술은 전기 포켓몬에게 잘 안 통해…', '그래서 도전자에게 빌려주는 친구가 있지. 땅 속을 다니는 디그다야!'], { who: '가이드', face: 'guide' });
+      const where = receive(makeMon(50, 22)); setFlag('diglettGift'); sfx('item');
+      await say([`${josa(P(), '은/는')} 디그다를 받았다!${where === 'box' ? ' (보관함으로 보냈다)' : ''}`, '💡 땅 타입은 전기 기술을 전혀 안 받아! 배틀 중 “포켓몬”을 눌러 디그다로 바꿔 보자.']);
+      save(); return;
+    }
+    return say(['땅 타입 포켓몬이면 전기 기술이 전혀 안 통해!', '마티스 관장은 상황 문제를 내니 끝까지 읽어!'], { who: '가이드', face: 'guide' });
+  },
+});
+Object.assign(SIGNS, {
+  'Route25:1': ['바닷가 오두막', '이수재의 집'],
+  'BillsHouse:2': () => (billPC(), null),
+  'Route5:1': ['지하통로 입구', '← 블루시티 · 갈색시티 →'],
+  'Route6:1': ['지하통로 입구', '← 블루시티 · 갈색시티 →'],
+  'VermilionCity:1': ['갈색시티', '황혼빛 항구 도시'], 'VermilionCity:2': ['트레이너 팁', '땅 타입에는 전기 기술이 통하지 않아요!'],
+  'VermilionCity:3': ['프렌들리숍'], 'VermilionCity:4': ['포켓몬센터'], 'VermilionCity:5': ['포켓몬 팬클럽'],
+  'VermilionCity:6': ['갈색시티 체육관', '관장: 마티스 — 번개 아메리칸!'], 'VermilionCity:7': ['갈색시티 항구', '상트앙느호 선착장'],
+  'VermilionPokecenter:2': ['포켓몬센터', '포켓몬의 건강을 책임집니다!'],
+  'VermilionGym:16': () => [flag('badge3') ? `갈색시티 체육관 — 우승 트레이너: ${P()}` : '갈색시티 체육관 — 우승 트레이너: …'],
+  'VermilionGym:17': () => [flag('badge3') ? `갈색시티 체육관 — 우승 트레이너: ${P()}` : '갈색시티 체육관 — 우승 트레이너: …'],
+  'VermilionGym:18': ['쓰레기통이다… 잘 보니 전선이 연결되어 있다.', '(원래 게임에서는 스위치 퍼즐이 있었지만, 여기선 문이 열려 있다!)'],
+});
+for (let i = 1; i <= 15; i++) SIGNS['VermilionGym:' + i] = ['쓰레기통이다… 아무것도 없다.', i % 5 === 0 ? '💡 전기는 전선처럼 이어진 길(회로)로만 흐른단다.' : ''].filter(Boolean);
+Object.assign(TRAINER, {
+  'Route24:1': T2('주니어트레이너', '너겟 브릿지 첫 번째 관문이다!', ['졌다! 다음 관문도 힘내!'], 350),
+  'Route24:2': T2('주니어트레이너', '두 번째 관문! 쉽지 않을걸?', ['으악, 졌다!'], 350),
+  'Route24:3': T2('미니스커트', '세 번째 관문은 나야!', ['졌어… 넌 정말 강하구나!'], 300),
+  'Route24:4': T2('반바지꼬마', '네 번째 관문! 여기까지 오다니!', ['졌다! 마지막 관문만 남았어!'], 250),
+  'Route24:5': T2('미니스커트', '다섯 번째, 마지막 관문이야!', ['너겟 브릿지 5연승이야! 저 끝의 아저씨에게 가 봐!'], 300),
+  'Route24:6': T2('곤충채집소년', '다리 옆에서 곤충을 찾는 중이었어!', ['졌다!', '잠자리 눈은 수천 개의 작은 눈이 모인 겹눈이래!'], 200),
+  'Route25:0': T2('반바지꼬마', '바닷가 길은 내 구역이야!', ['졌다!'], 250),
+  'Route25:1': T2('반바지꼬마', '나랑 겨뤄 보자!', ['으으, 졌다!'], 250),
+  'Route25:2': T2('주니어트레이너', '이수재 박사님 집에 가려면 나를 이겨!', ['졌다! 박사님은 조금 이상한 분이야.'], 350),
+  'Route25:3': T2('미니스커트', '바다 바람이 시원하지? 승부!', ['졌어!', '바닷바람은 낮에는 바다에서 육지로 불어!'], 300),
+  'Route25:4': T2('반바지꼬마', '눈 마주쳤다! 승부!', ['졌다!'], 250),
+  'Route25:5': T2('미니스커트', '마지막 한 판!', ['대단해! 이수재 박사님 집은 바로 저 앞이야.'], 300),
+  'Route25:6': T2('등산가', '산에서 내려온 김에 승부다!', ['허허, 졌구먼!'], 400),
+  'Route25:7': T2('등산가', '내 바위 포켓몬은 단단하다고!', ['졌다!', '바위는 물·바람에 깎여 모래와 흙이 된단다.'], 400),
+  'Route25:8': T2('등산가', '허허, 젊은이! 한판 붙세!', ['졌네! 대단한 청년일세.'], 400),
+  'Route6:0': T2('주니어트레이너', '우리 둘은 한 팀이야!', ['졌다!'], 350),
+  'Route6:1': T2('주니어트레이너', '나도 있다고!', ['졌어!'], 350),
+  'Route6:2': T2('곤충채집소년', '6번도로의 벌레왕이 나야!', ['졌다!'], 200),
+  'Route6:3': T2('주니어트레이너', '갈색시티 가기 전 마지막 시험!', ['졌다! 갈색시티는 바로 저기야.'], 350),
+  'Route6:4': T2('주니어트레이너', '나랑도 겨뤄야지!', ['졌다…!'], 350),
+  'Route6:5': T2('곤충채집소년', '곤충은 다리가 몇 개인지 알아?', ['졌다!', '정답은 6개! 머리·가슴·배로 나뉘어 있어.'], 200),
+  'VermilionGym:1': T2('신사', '마티스 관장님께 가려면 나를 먼저!', ['허허, 졌네. 제법이구먼!'], 700),
+  'VermilionGym:2': T2('로커', '짜릿한 전기 록을 들려주지!', ['졌다!', '번개는 구름 속 전기가 한꺼번에 흐르는 거야!'], 500),
+  'VermilionGym:3': T2('선원', '바다 사나이의 힘을 보여 주마!', ['졌다! 항해하듯 앞으로 나아가라!'], 400),
+});
+Object.assign(EXTRA_WILD, {
+  Route24: [['Bellsprout', 12], ['Venonat', 12], ['Psyduck', 12], ['Mankey', 12]],
+  Route25: [['Bellsprout', 12], ['Venonat', 12], ['Psyduck', 12], ['Mankey', 12], ['Eevee', 12]],
+  Route5: [['Meowth', 14], ['Jigglypuff', 14], ['Psyduck', 14], ['Bellsprout', 14], ['Growlithe', 14]],
+  Route6: [['Meowth', 14], ['Psyduck', 14], ['Poliwag', 14], ['Bellsprout', 14], ['Vulpix', 14], ['Drowzee', 14]],
 });

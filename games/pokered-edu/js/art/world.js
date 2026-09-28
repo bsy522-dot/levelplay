@@ -237,9 +237,9 @@ function building(g, o, b, M) {
 const FLOOR = {
   RedsHouse1: ['#e2c28f', '#d4b07a', 'wood'], RedsHouse2: ['#e2c28f', '#d4b07a', 'wood'], House: ['#e2c28f', '#d4b07a', 'wood'],
   Dojo: ['#eef1f6', '#dfe4ee', 'tile'], Pokecenter: ['#fdf1f4', '#f3dde4', 'tile'], Mart: ['#eef6ff', '#dde9f7', 'tile'],
-  Gym: ['#cfc4b0', '#bcb09a', 'stone'], Cavern: ['#8a7358', '#7c6750', 'cave'], ForestGate: ['#e8eadf', '#d6d9ca', 'tile'], Gate: ['#e8eadf', '#d6d9ca', 'tile'],
+  Gym: ['#cfc4b0', '#bcb09a', 'stone'], Cavern: ['#8a7358', '#7c6750', 'cave'], Interior: ['#eef1f6', '#dfe4ee', 'tile'], Underground: ['#d9dde3', '#c9ced6', 'tile'], ForestGate: ['#e8eadf', '#d6d9ca', 'tile'], Gate: ['#e8eadf', '#d6d9ca', 'tile'],
 };
-const WALLC = { Cavern: '#5a4a3a', RedsHouse1: '#f6e7c8', RedsHouse2: '#dfeefe', House: '#f6e7c8', Dojo: '#e3ecf7', Pokecenter: '#ffe3ea', Mart: '#e0efff', Gym: '#9e9582', ForestGate: '#e2ead7', Gate: '#e2ead7' };
+const WALLC = { Cavern: '#5a4a3a', Interior: '#e3ecf7', Underground: '#4a5160', RedsHouse1: '#f6e7c8', RedsHouse2: '#dfeefe', House: '#f6e7c8', Dojo: '#e3ecf7', Pokecenter: '#ffe3ea', Mart: '#e0efff', Gym: '#9e9582', ForestGate: '#e2ead7', Gate: '#e2ead7' };
 
 function comps(map, ch) {
   const seen = new Set(), out = [];

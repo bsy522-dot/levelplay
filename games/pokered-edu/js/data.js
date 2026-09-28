@@ -4,7 +4,9 @@ export const DB = { species: [], byKey: {}, moves: {}, trainers: {}, maps: {}, s
 export const MAP_IDS = ['PalletTown', 'RedsHouse1F', 'RedsHouse2F', 'BluesHouse', 'OaksLab', 'Route1', 'ViridianCity',
   'ViridianPokecenter', 'ViridianMart', 'ViridianSchoolHouse', 'Route2', 'ViridianForestSouthGate', 'ViridianForest',
   'ViridianForestNorthGate', 'PewterCity', 'PewterPokecenter', 'PewterMart', 'PewterGym',
-  'Route3', 'MtMoonPokecenter', 'Route4', 'MtMoon1F', 'MtMoonB1F', 'MtMoonB2F', 'CeruleanCity', 'CeruleanPokecenter', 'CeruleanMart', 'CeruleanGym'];
+  'Route3', 'MtMoonPokecenter', 'Route4', 'MtMoon1F', 'MtMoonB1F', 'MtMoonB2F', 'CeruleanCity', 'CeruleanPokecenter', 'CeruleanMart', 'CeruleanGym',
+  'Route24', 'Route25', 'BillsHouse', 'Route5', 'UndergroundPathRoute5', 'UndergroundPathNorthSouth', 'UndergroundPathRoute6', 'Route6',
+  'VermilionCity', 'VermilionPokecenter', 'VermilionMart', 'VermilionGym'];
 
 export const MAP_NAME = {
   PalletTown: '태초마을', RedsHouse1F: '우리 집 1층', RedsHouse2F: '우리 집 2층', BluesHouse: '라이벌의 집', OaksLab: '오박사 연구소',
@@ -14,6 +16,9 @@ export const MAP_NAME = {
   PewterGym: '회색시티 체육관',
   Route3: '3번도로', MtMoonPokecenter: '달맞이산 포켓몬센터', Route4: '4번도로', MtMoon1F: '달맞이산 1층', MtMoonB1F: '달맞이산 지하 1층',
   MtMoonB2F: '달맞이산 지하 2층', CeruleanCity: '블루시티', CeruleanPokecenter: '블루시티 포켓몬센터', CeruleanMart: '블루시티 프렌들리숍', CeruleanGym: '블루시티 체육관',
+  Route24: '24번도로 (너겟 브릿지)', Route25: '25번도로', BillsHouse: '이수재의 집', Route5: '5번도로', UndergroundPathRoute5: '지하통로 입구 (5번도로)',
+  UndergroundPathNorthSouth: '지하통로', UndergroundPathRoute6: '지하통로 입구 (6번도로)', Route6: '6번도로', VermilionCity: '갈색시티',
+  VermilionPokecenter: '갈색시티 포켓몬센터', VermilionMart: '갈색시티 프렌들리숍', VermilionGym: '갈색시티 체육관',
 };
 
 export const ITEMS = {

@@ -81,11 +81,18 @@ for mid, x, y, lo in seen:
 GOALS = [('OaksLab', 5, 3, '오박사 앞'), ('ViridianMart', 2, 5, '상록 상점 점원 앞(계산대 너머)'), ('ViridianForest', 1, 1, '상록숲 북쪽 출구'),
          ('PewterGym', 4, 2, '웅 앞'), ('Route3', 59, 10, '3번도로 끝'), ('MtMoonPokecenter', 3, 3, '달맞이산 센터 간호순 앞(카운터 너머)'),
          ('MtMoonB2F', 13, 8, '화석 과학자 옆'), ('Route4', 60, 10, '4번도로 동쪽'), ('CeruleanCity', 20, 20, '블루시티'),
-         ('CeruleanGym', 4, 3, '이슬 앞'), ('CeruleanPokecenter', 3, 3, '블루시티 간호순 앞(카운터 너머)')]
+         ('CeruleanGym', 4, 3, '이슬 앞'), ('CeruleanPokecenter', 3, 3, '블루시티 간호순 앞(카운터 너머)'),
+         ('Route24', 10, 15, '너겟 브릿지 끝 아저씨 옆'), ('BillsHouse', 6, 6, '삐삐(이수재) 앞'), ('BillsHouse', 1, 5, '분리 PC 앞'),
+         ('UndergroundPathNorthSouth', 2, 40, '지하통로 남쪽 끝'), ('VermilionGym', 5, 2, '마티스 앞'), ('VermilionPokecenter', 3, 3, '갈색시티 간호순 앞')]
 bad = 0
 for mid, x, y, label in GOALS:
     okk = (x, y) in reached[mid]
     bad += not okk
     print(('✓' if okk else '✗'), label, f'{mid}({x},{y})', '' if okk else f'— 이 지도에서 닿은 칸 {len(reached[mid])}개')
 print('닿은 지도', len(reached), '/', len(M), ' 못 간 지도:', [i for i in M if i not in reached])
+import sys
+if len(sys.argv) > 1:  # python _tools/reach.py 지도이름 → 닿은 칸을 @ 로 표시
+    mm = M[sys.argv[1]]; RR = reached[sys.argv[1]]
+    for yy, row in enumerate(mm['grid']):
+        print(f'{yy:2} ' + ''.join('@' if (xx, yy) in RR else ch for xx, ch in enumerate(row)))
 raise SystemExit(1 if bad else 0)

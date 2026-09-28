@@ -83,13 +83,14 @@ export function nextQuestion(opts = {}) {
   const lad = LADDER[subj];
   const f = frontier(subj);
   const cands = [];
-  cands.push({ i: f, w: 6 });
+  const hot = l.streak >= 5; // 잘하고 있으면 새 단계 위주로
+  cands.push({ i: f, w: hot ? 9 : 6 });
   // 한 단계 위 맛보기는 지금 주제를 잘 풀고 있을 때만
-  if (f + 1 < lad.length && sk(lad[f].id).streak >= 1) cands.push({ i: f + 1, w: 1.2 });
+  if (f + 1 < lad.length && (hot || sk(lad[f].id).streak >= 1)) cands.push({ i: f + 1, w: hot ? 3 : 1.2 });
   for (let i = Math.max(0, l[subj].floor - 3); i < f; i++) {
     const s = sk(lad[i].id);
     if (s.wrongRecent > 0) cands.push({ i, w: 3 });
-    else if (s.mastered && !s.placed) cands.push({ i, w: 0.4 });
+    else if (s.mastered && !s.placed && !hot) cands.push({ i, w: 0.4 });
   }
   if (subj === 'sci' && opts.moveType) {
     const pref = TYPE_SCI[opts.moveType] || [];
@@ -135,7 +136,11 @@ export function record(q, correct, firstTry = true) {
     if (s.wrongRecent > 0) s.wrongRecent--;
     // 익힘: 최근 5문제 중 4개 이상 + 이번에도 정답 (요행 3연속 방지)
     const fast = l.streak >= 5 && q.skill === LADDER[q.subj][frontier(q.subj)].id; // 5연속 이상 = 빠른 길
-    if (!s.mastered && fast) { s.mastered = true; res.mastered = true; res.fast = true; }
+    if (!s.mastered && fast) {
+      s.mastered = true; res.mastered = true; res.fast = true;
+      // 8연속 이상 = 도약: 다음 단계 하나는 건너뛴다 (나중에 틀리면 다시 내려올 수 있음)
+      if (l.streak >= 8) { const lad = LADDER[q.subj], f2 = frontier(q.subj); if (f2 < lad.length - 1) { const nx = sk(lad[f2].id); nx.mastered = true; nx.placed = true; res.leap = true; } }
+    }
     const last5 = s.hist.slice(-5);
     const last4 = s.hist.slice(-4);
     if (!s.mastered && last4.length >= 3 && last4.reduce((a, b) => a + b, 0) >= 3 && s.streak >= 2) { s.mastered = true; res.mastered = true; }

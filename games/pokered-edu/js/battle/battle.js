@@ -3,7 +3,7 @@ import { DB, ITEMS, sp, monArt } from '../data.js';
 import { G, save, addItem, itemCount, seen, receive, alive, healParty, maxHp } from '../state.js';
 import { el, sleep, josa, pick, chance, rand, typeTag, TYPE_COLOR, weighted } from '../util.js';
 import { Input } from '../input.js';
-import { root, portraitUrl, choose, fade, say } from '../ui.js';
+import { root, portraitUrl, choose, fade, say, toast } from '../ui.js';
 import { sfx, music } from '../audio.js';
 import * as M from './mech.js';
 import { moveQuiz } from '../learn/quiz.js';
@@ -12,7 +12,7 @@ import { fixJosa } from '../learn/math.js';
 import { W } from '../world/overworld.js';
 import { wildPick } from '../world/events.js';
 
-const BG = { ViridianForest: 'bg_forest', PewterGym: 'bg_gym_rock', OaksLab: 'bg_lab', MtMoon1F: 'bg_cave', MtMoonB1F: 'bg_cave', MtMoonB2F: 'bg_cave', CeruleanGym: 'bg_gym_water' };
+const BG = { ViridianForest: 'bg_forest', PewterGym: 'bg_gym_rock', OaksLab: 'bg_lab', MtMoon1F: 'bg_cave', MtMoonB1F: 'bg_cave', MtMoonB2F: 'bg_cave', CeruleanGym: 'bg_gym_water', VermilionGym: 'bg_gym_electric', VermilionCity: 'bg_harbor' };
 
 export class BattleScene extends Phaser.Scene {
   constructor() { super({ key: 'battle', active: true }); }
@@ -275,7 +275,7 @@ class Hud {
       wrap.innerHTML = '';
       wrap.classList.remove('hidden');
       if (moves) { this.msgEl.classList.add('hidden'); this.box.prepend(wrap); }
-      let sel = 0;
+      let sel = Math.max(0, items.findIndex((it) => !it.disabled)); // 처음부터 쓸 수 있는 것에 커서
       const btns = items.map((it, i) => {
         const b = el('button', { disabled: it.disabled, onclick: () => { if (!it.disabled) done(it.value); } }, it.label, it.sub || null);
         return b;
@@ -295,7 +295,7 @@ class Hud {
         else if (k === 'right') sel = sel % cols < cols - 1 && sel + 1 < n ? sel + 1 : sel;
         else if (k === 'up') sel = sel - cols >= 0 ? sel - cols : sel;
         else if (k === 'down') sel = sel + cols < n ? sel + cols : sel;
-        else if (k === 'a') { if (!items[sel].disabled) done(items[sel].value); return; }
+        else if (k === 'a') { if (!items[sel].disabled) done(items[sel].value); else { sfx('bump'); toast(moves ? 'PP가 없어서 쓸 수 없어요! 다른 기술을 골라요.' : '지금은 고를 수 없어요.'); } return; }
         else if (k === 'b') { if (cancel !== false) done(cancel); return; }
         else return;
         sfx('select'); paint();

@@ -58,17 +58,26 @@ export class WorldScene extends Phaser.Scene {
     this.placeSprite(this.player, x, y);
     // NPC
     this.npcs = [];
-    map.npcs.forEach((n, idx) => {
+    for (let idx = 0; idx < map.npcs.length; idx++) {
+      const n = map.npcs[idx];
       const vis = EV.npcVisible(map.id, n, idx);
-      if (!vis) return;
+      if (!vis) continue;
       const pos = EV.npcPos(map.id, n, idx) || { x: n.x, y: n.y };
       const kind = EV.npcKind(map.id, n, idx) || (n.spriteName === 'PokeBall' ? 'item' : n.spriteName === 'GamblerAsleep' ? 'sleeper' : SPRITE_KIND[n.spriteName] || 'youngster');
-      if (n.spriteName === 'Pokedex') return; // 도감은 탁자 위 물건 (말 걸기만)
-      const sp = this.add.sprite(0, 0, 'ch_' + kind, kind === 'item' || kind === 'sleeper' ? 0 : DIRI[(n.facing || 'Down').toLowerCase()] * 3).setOrigin(0.5, 1);
+      if (n.spriteName === 'Pokedex') continue; // 도감은 탁자 위 물건 (말 걸기만)
+      let sp;
+      if (kind.startsWith('mon:')) { // 사람이 아닌 포켓몬 NPC (예: 삐삐가 된 이수재)
+        const key = 'fol_' + kind.slice(4);
+        if (!this.textures.exists(key)) await new Promise((res) => { this.load.image(key, `art/mon/${kind.slice(4)}.webp`); this.load.once('complete', res); this.load.start(); });
+        if (this.map !== map) return; // 불러오는 사이 지도가 바뀜
+        sp = this.add.image(0, 0, key).setOrigin(0.5, 1);
+        sp.setScale(54 / Math.max(sp.width, sp.height));
+        sp.setFrame = () => sp;
+      } else sp = this.add.sprite(0, 0, 'ch_' + kind, kind === 'item' || kind === 'sleeper' ? 0 : DIRI[(n.facing || 'Down').toLowerCase()] * 3).setOrigin(0.5, 1);
       const o = { n, idx, sp, x: pos.x, y: pos.y, home: { ...pos }, kind, facing: (n.facing || 'Down').toLowerCase(), moving: false, wait: 1000 + Math.random() * 2500 };
       this.placeSprite(sp, o.x, o.y);
       this.npcs.push(o); this.mapObjs.push(sp);
-    });
+    }
     this.fol = null;
     this.refreshFollower();
     W.updateGoal?.();
@@ -305,7 +314,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   faceNpcToPlayer(o) {
-    if (o.kind === 'item' || o.kind === 'sleeper') return;
+    if (o.kind === 'item' || o.kind === 'sleeper' || o.kind.startsWith('mon:')) return;
     const dx = G.s.x - o.x, dy = G.s.y - o.y;
     o.facing = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
     o.sp.setFrame(DIRI[o.facing] * 3);
