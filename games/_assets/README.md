@@ -4,9 +4,9 @@
 
 ## 모델
 
-`z_image_turbo_bf16.safetensors` (`D:/AI/06_도구/ComfyUI/ComfyUI/models/diffusion_models/`) — SD-Turbo 계열, 8 step / cfg 1.0 으로 빠르게 뽑고, 워크플로우 안에서 `nearest-exact 0.125x` 다운스케일 → 픽셀 룩 확보.
+`z-image-turbo-Q8_0.gguf` (2026-09-28 원본 bf16 → 양자화 Q8) (`D:/AI/06_도구/ComfyUI/ComfyUI/models/diffusion_models/`) — SD-Turbo 계열, 8 step / cfg 1.0 으로 빠르게 뽑고, 워크플로우 안에서 `nearest-exact 0.125x` 다운스케일 → 픽셀 룩 확보.
 
-> `models/checkpoints` 가 비어 있으므로, 처음 실행 시 ComfyUI Manager에서 **CheckpointLoaderSimple → ckpt_name** 드롭다운에 `z_image_turbo_bf16.safetensors` 가 보이는지 확인. 안 보이면 `diffusion_models` 의 파일을 `checkpoints` 로 심볼릭/복사.
+> `models/checkpoints` 가 비어 있으므로, 처음 실행 시 ComfyUI Manager에서 **UnetLoaderGGUF → unet_name** 드롭다운에 `z-image-turbo-Q8_0.gguf` (2026-09-28 원본 bf16 → 양자화 Q8) 가 보이는지 확인. 안 보이면 `diffusion_models` 의 파일을 `checkpoints` 로 심볼릭/복사.
 
 ## 실행 순서
 

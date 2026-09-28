@@ -1,0 +1,15 @@
+{
+ "active": "pokemon",
+ "available": [
+  {
+   "id": "pokemon",
+   "name": "포켓몬 원작",
+   "note": "1세대 151마리 · 지우"
+  },
+  {
+   "id": "monster",
+   "name": "수학·과학 배틀러",
+   "note": "기존 비주얼 몬스터"
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 // LevelPlay Service Worker - 오프라인 캐시 지원
-const CACHE_NAME = 'levelplay-v97-comic-cuts';
+const CACHE_NAME = 'levelplay-v98-mathbattler-roster';
 
 // 즉시 새 SW로 전환 메시지
 self.addEventListener('message', e => {
@@ -45,6 +45,21 @@ const STATIC_ASSETS = [
   './games/boxing-trainer-v5.html', // NEVER_CACHE_PATHS에도 존재 → 런타임은 항상 네트워크; 오프라인 HTML 셸만 프리캐시
   './games/three.r128.min.js',
   './games/golf-tracker-v3.html',
+  // 매스배틀러 — 테마 교체형 (pokemon 151캐스터 / monster) — 폴더형
+  './games/mathbattler/index.html',
+  './games/mathbattler/data/curriculum.json',
+  './games/mathbattler/themes/active.json',
+  './games/mathbattler/themes/index.json',
+  './games/mathbattler/skins/pokemon/theme.json',
+  './games/mathbattler/skins/monster/theme.json',
+  './games/mathbattler/js/skin-loader.js',
+  './games/mathbattler/js/core.js',
+  './games/mathbattler/js/map.js',
+  './games/mathbattler/js/battle.js',
+  './games/mathbattler/js/ui.js',
+  './games/mathbattler/js/main.js',
+  './games/mathbattler/skins/pokemon/art/_placeholder.png',
+  './games/mathbattler/skins/monster/art/_placeholder.png',
   // 한국사 영웅전 v8b — 폴더형 (ES Module + JSON 데이터)
   './games/korean-rpg-v8b/index.html',
   './games/korean-rpg-v8b/hub-back.js',

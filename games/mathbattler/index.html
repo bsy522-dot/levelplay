@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#bfe6ff">
+<title>수학·과학 배틀러</title>
+<style>
+:root{
+  --sky:#bfe6ff; --panel:rgba(18,22,34,.94); --text:#f4f7ff; --accent:#f2c94c;
+  --hp-mine:#4ade80; --hp-enemy:#f87171; --correct:#4ade80; --wrong:#f87171;
+  --grass:#7ec96b; --grass2:#6fbd5d; --path:#e0cf9f; --water:#5fb7e8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--sky);color:var(--text)}
+#game{position:fixed;inset:0;display:block;touch-action:none;width:100%;height:100%}
+.hidden{display:none !important}
+
+/* 상단 HUD */
+#hud{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;gap:6px;align-items:center;
+  padding:6px 8px;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0));font-size:13px;pointer-events:none;flex-wrap:wrap}
+#hud .pill{background:rgba(20,26,40,.8);padding:5px 9px;border-radius:14px;white-space:nowrap}
+#hud b{color:var(--accent)}
+#gate-acc,#gate-seen{color:#cdd8ee;font-weight:400}
+#gate-lock{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gate-lock.open{color:var(--correct)} .gate-lock.shut{color:var(--wrong)}
+
+/* 화면 공통 */
+.screen{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column}
+#screen-map{background:transparent;pointer-events:none}
+#screen-battle,#screen-lib,#screen-study,#screen-result{background:rgba(8,12,22,.93);backdrop-filter:blur(3px);overflow-y:auto;padding:12px;padding-bottom:80px}
+
+/* 맵 하단 버튼 */
+#map-bar{position:fixed;left:0;right:0;bottom:0;z-index:25;display:flex;gap:10px;justify-content:center;padding:12px;pointer-events:auto;
+  background:linear-gradient(0deg,rgba(0,0,0,.5),rgba(0,0,0,0))}
+#map-bar button{font-size:15px;padding:14px 22px;border-radius:14px;border:0;background:var(--accent);color:#222;font-weight:700}
+#map-bar button.ghost{background:rgba(255,255,255,.85)}
+#dpad-hint{position:fixed;left:8px;bottom:70px;z-index:24;font-size:11px;color:#fff;background:rgba(0,0,0,.4);padding:6px 8px;border-radius:8px;pointer-events:none}
+
+/* 배틀 상단 */
+.b-top{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.b-mimg{width:112px;height:112px;object-fit:contain;background:rgba(255,255,255,.08);border-radius:14px;flex:0 0 auto}
+.b-info{flex:1;min-width:0}
+.b-info h2{margin:0 0 3px;font-size:18px}
+.b-meta{font-size:11px;color:#a8b6d0;margin-bottom:6px}
+#b-mline{font-size:12px;color:#c8d4ea;margin-bottom:6px;line-height:1.45}
+#b-tier{display:inline-block;background:rgba(0,0,0,.4);padding:1px 7px;border-radius:8px;margin-right:6px}
+.hpbar{height:10px;border-radius:6px;background:rgba(0,0,0,.45);overflow:hidden;margin-top:5px}
+.hpbar>div{height:100%;transition:width .25s}
+#hero-hp-bar{background:var(--hp-mine)} #b-hp-bar{background:var(--hp-enemy)}
+.hp-lab{display:flex;justify-content:space-between;font-size:11px;margin-top:2px;color:#cdd8ee}
+
+#b-q{font-size:19px;line-height:1.45;margin:16px 0 14px;font-weight:700}
+#b-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{padding:16px 12px;font-size:16px;border-radius:14px;border:2px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.1);color:var(--text);min-height:58px;cursor:pointer}
+.opt:active{transform:scale(.98)}
+.opt.right{background:rgba(74,222,128,.28);border-color:var(--correct)}
+.opt.wrong{background:rgba(248,113,113,.28);border-color:var(--wrong)}
+.b-fb{margin-top:14px;padding:11px;border-radius:12px;font-size:13px;line-height:1.5;min-height:20px}
+.b-fb.ok{background:rgba(74,222,128,.16);color:#d1f5dd}
+.b-fb.no{background:rgba(248,113,113,.16);color:#ffdede}
+#b-ctl{display:flex;gap:10px;align-items:center;margin-top:14px;position:sticky;bottom:0}
+#hint-btn{padding:12px 18px;border-radius:12px;border:0;background:#6366f1;color:#fff;font-size:14px;font-weight:600}
+#hint-btn:disabled{opacity:.5}
+#b-prog{margin-left:auto;font-size:13px;color:#a8b6d0}
+#hint-box{margin-top:12px;padding:12px;background:rgba(99,102,241,.15);border-radius:12px;font-size:13px;line-height:1.6}
+.hint-title{font-weight:700;margin-bottom:6px}
+.hint-body{color:#dfe7ff;margin-bottom:6px}
+.hint-link{display:block;color:#a5b4fc;margin-top:4px}
+
+/* 도서관 */
+.lib-h{position:sticky;top:0;background:rgba(8,12,22,.95);padding:8px 0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;z-index:2}
+.lib-h button{margin-left:auto;padding:8px 14px;border-radius:10px;border:0;background:var(--accent);font-weight:700}
+.lib-sub{margin:14px 0 4px;font-size:15px;font-weight:700;color:var(--accent)}
+.lib-unit{margin:10px 0 4px;font-size:13px;color:#a8b6d0}
+.lib-row{display:flex;align-items:center;gap:8px;padding:11px 12px;background:rgba(255,255,255,.07);border-radius:10px;margin-bottom:6px;font-size:14px}
+.lr-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr-m{font-size:11px;background:rgba(0,0,0,.4);padding:2px 7px;border-radius:7px;white-space:nowrap}
+.lr-s{font-size:11px;color:#a8b6d0;white-space:nowrap}
+.lr-b{padding:8px 12px;border-radius:9px;border:0;background:#22c55e;color:#052;font-weight:700;font-size:13px;white-space:nowrap}
+
+/* 학습 */
+#st-title{font-size:18px;font-weight:700;margin-bottom:4px}
+#st-tier{font-size:12px;color:#a8b6d0;margin-bottom:12px}
+#st-content{background:rgba(255,255,255,.07);padding:14px;border-radius:12px;font-size:14px;line-height:1.7}
+#st-content h3{margin:10px 0 6px;font-size:15px;color:var(--accent)}
+#st-questions{margin-top:14px}
+.st-q{background:rgba(255,255,255,.06);padding:11px;border-radius:10px;margin-bottom:8px;font-size:14px}
+.st-a{color:var(--correct);margin-top:4px}
+.st-e{color:#a8b6d0;font-size:12px;margin-top:4px;line-height:1.5}
+
+/* 게이트 박스 */
+.gate-box{background:rgba(0,0,0,.35);padding:12px;border-radius:12px;margin-top:12px}
+.gate-box.open{background:rgba(74,222,128,.14)}
+.gate-h{font-size:13px;margin-bottom:8px}
+.gate-h b{color:var(--accent)}
+.grow{display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;margin-bottom:5px;background:rgba(255,255,255,.06);font-size:13px}
+.grow.ok{background:rgba(74,222,128,.16);color:#c9f7d8}
+.grow.no{background:rgba(248,113,113,.14);color:#ffd4d4}
+.gv{font-weight:700}
+
+/* 결과 */
+#rs-title{font-size:24px;font-weight:800;text-align:center;margin:24px 0 10px}
+#rs-body{font-size:15px;line-height:1.7}
+#rs-back{display:block;margin:20px auto 0;padding:14px 30px;border-radius:12px;border:0;background:var(--accent);font-size:15px;font-weight:700}
+
+/* 토스트 */
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:120px;z-index:99;background:rgba(0,0,0,.85);
+  color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:88%;text-align:center}
+#toast.show{opacity:1}
+
+#loading{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#1e293b,#0b1220);color:#cbd5f5;font-size:16px;flex-direction:column;gap:10px}
+#loading small{color:#7f8db0;font-size:12px}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div class="pill">GP <b id="gp-val">0</b></div>
+  <div class="pill">♥ <b id="hero-hp-val">5/5</b></div>
+  <div class="pill">연속 <b id="streak-val">0</b></div>
+  <div class="pill">최고 <b id="best-val">0</b></div>
+  <div class="pill" id="gate-acc">0%</div>
+  <div class="pill" id="gate-seen">0/3</div>
+  <div class="pill" id="gate-lock"></div>
+</div>
+
+<!-- 타이틀(맵 우상단) -->
+<div id="skin-plate" style="position:fixed;right:8px;top:74px;z-index:22;text-align:right;pointer-events:none">
+  <div id="skin-title" style="font-size:14px;font-weight:800;color:#123;opacity:.8"></div>
+  <div id="skin-sub" style="font-size:10px;color:#123;opacity:.6"></div>
+</div>
+
+<!-- 맵 -->
+<div id="screen-map" class="screen">
+  <div id="map-bar">
+    <button id="btn-fight" data-act="fight">⚔ 전투</button>
+    <button id="btn-lib" class="ghost" data-act="library">📚 학습</button>
+  </div>
+  <div id="dpad-hint">방향키 / WASD 이동 · ⚔ 표시를 찾아가세요</div>
+</div>
+
+<!-- 배틀 -->
+<div id="screen-battle" class="screen hidden">
+  <div class="b-top">
+    <img id="b-mimg" class="b-mimg" alt="" src="">
+    <div class="b-info">
+      <h2 id="b-mname">—</h2>
+      <div class="b-meta"><span id="b-slot"></span><span id="b-tier"></span><span id="b-topic"></span></div>
+      <div id="b-mline"></div>
+      <div class="hpbar"><div id="b-hp-bar" style="width:100%"></div></div>
+      <div class="hp-lab"><span id="b-hp-text"></span></div>
+      <div class="hpbar"><div id="hero-hp-bar" style="width:100%"></div></div>
+      <div class="hp-lab"><span>내 HP</span><span id="hero-hp-lab">♥</span></div>
+    </div>
+  </div>
+  <div id="b-q"></div>
+  <div id="b-opts"></div>
+  <div class="b-fb" id="b-fb"></div>
+  <div id="b-ctl">
+    <button id="hint-btn" data-act="hint">힌트</button>
+    <span id="b-prog"></span>
+  </div>
+  <div id="hint-box" class="hidden"></div>
+</div>
+
+<!-- 도서관 -->
+<div id="screen-lib" class="screen hidden">
+  <div class="lib-h">📚 학습 — 단원 선택
+    <button id="btn-map" data-act="map">맵으로</button>
+  </div>
+  <div id="lib-list"></div>
+</div>
+
+<!-- 학습 -->
+<div id="screen-study" class="screen hidden">
+  <div class="lib-h" id="st-title">단원</div>
+  <div id="st-tier"></div>
+  <div id="st-content"></div>
+  <div id="st-questions"></div>
+  <div id="st-gate"></div>
+  <button id="st-back" class="lr-b" data-act="library" style="margin-top:14px">← 목록으로</button>
+</div>
+
+<!-- 결과 -->
+<div id="screen-result" class="screen hidden">
+  <h1 id="rs-title"></h1>
+  <div id="rs-body"></div>
+  <button id="rs-back" data-act="map">맵으로 돌아가기</button>
+  <button id="rs-again" class="ghost" data-act="again" style="display:block;margin:10px auto 0;padding:12px 26px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:transparent;color:var(--text);font-size:14px">다시 도전</button>
+</div>
+
+<div id="toast"></div>
+<div id="loading">불러오는 중…<small id="load-note">캐릭터 테마를 읽는 중</small></div>
+
+<script src="js/skin-loader.js"></script>
+<script src="js/core.js"></script>
+<script src="js/map.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function () {
+  /* ★mb:ready 는 document 에서 일어난다(지금까지 window 에서 기다려서
+   *   로딩 화면이 영영 안 꺼졌었다). document 에서 듣고, 올라온다 fallback 으로 남긴다. */
+  function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
+  document.addEventListener('mb:ready', hideLoading);
+  window.addEventListener('mb:ready', hideLoading);
+  /* 확실한 안전장치: 게임이 뜬 뒤 1.5초 지나도 로딩이 남아 있으면 무조건 내린다 */
+  setTimeout(function () {
+    if (window.MB && window.MB.game) hideLoading();
+  }, 1500);
+  window.addEventListener('error', e => {
+    const n = document.getElementById('load-note');
+    if (n) n.textContent = '오류: ' + (e.message || '알 수 없음');
+  });
+  setTimeout(hideLoading, 4000);
+})();
+</script>
+</body>
+</html>

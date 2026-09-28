@@ -49,11 +49,10 @@ WORKFLOW = {
         "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0,
         "model": ["11", 0], "positive": ["6", 0],
         "negative": ["7", 0], "latent_image": ["5", 0]}},
-    "11": {"class_type": "UNETLoader", "inputs": {
-        "unet_name": "z_image_turbo_bf16.safetensors",
-        "weight_dtype": "default"}},
+    "11": {"class_type": "UnetLoaderGGUF", "inputs": {
+        "unet_name": "z-image-turbo-Q8_0.gguf"}},
     "12": {"class_type": "CLIPLoader", "inputs": {
-        "clip_name": "qwen_3_4b.safetensors",
+        "clip_name": "qwen3-4b-heretic.safetensors",
         "type": "qwen_image"}},
     "13": {"class_type": "VAELoader", "inputs": {
         "vae_name": "flux2_vae.safetensors"}},

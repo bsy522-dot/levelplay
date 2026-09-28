@@ -5,16 +5,15 @@
     "designed_for": "ComfyUI API (POST /prompt). Placeholders {POSITIVE}, {NEGATIVE}, {SEED}, {FILENAME_PREFIX} replaced per item by generate_sprites.py."
   },
   "28": {
-    "class_type": "UNETLoader",
+    "class_type": "UnetLoaderGGUF",
     "inputs": {
-      "unet_name": "z_image_turbo_bf16.safetensors",
-      "weight_dtype": "default"
+      "unet_name": "z-image-turbo-Q8_0.gguf"
     }
   },
   "30": {
     "class_type": "CLIPLoader",
     "inputs": {
-      "clip_name": "qwen_3_4b.safetensors",
+      "clip_name": "qwen3-4b-heretic.safetensors",
       "type": "lumina2",
       "device": "default"
     }

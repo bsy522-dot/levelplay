@@ -1,0 +1,72 @@
+{
+  "_doc": "테마 정본. 나중에 이 파일 하나만 바꾸면 게임 전체가 갈아뀐다. 이미지 파일명과 팔레트·이름만 여기 둔다. 코드는 이 값을 참조만 한다.",
+  "id": "mathbattler",
+  "title": "수학·과학 배틀러",
+  "subtitle": "배우고 · 싸우고 · 올라간다",
+
+  "hero": {
+    "name": "견습 배틀러",
+    "art": "art/hero/hero.png",
+    "palette": ["#3b82f6", "#1e40af", "#fbbf24"]
+  },
+
+  "monsterArtDir": "art/monsters/",
+  "monsterArtExt": "png",
+  "monsterPlaceholder": "art/monsters/_placeholder.png",
+
+  "_naming": "몬스터 이미지는 <몬스터id>.png 규칙으로 art/monsters/ 에 둔다. id 는 data/monsters.json 의 monster.id 와 동일해야 한다.",
+
+  "palette": {
+    "bg_sky": "#cfe8ff",
+    "bg_grass": "#8ed36a",
+    "bg_grass2": "#7ac95c",
+    "bg_path": "#d8c39a",
+    "bg_water": "#6fc3ef",
+    "ui_panel": "rgba(20,26,40,0.92)",
+    "ui_text": "#f2f6ff",
+    "ui_accent": "#fbbf24",
+    "hp_mine": "#4ade80",
+    "hp_enemy": "#f87171",
+    "correct": "#4ade80",
+    "wrong": "#f87171"
+  },
+
+  "text": {
+    "menu_start": "모험 시작",
+    "menu_library": "도서관",
+    "menu_codex": "도감",
+    "label_gp": "GP",
+    "label_gate": "다음 몬스터 게이트",
+    "label_streak": "연속 정답",
+    "label_recent": "최근 10문제 정확도",
+    "label_seen": "단원 노출",
+    "label_monster_hp": "몬스터 체력",
+    "label_my_hp": "내 체력",
+    "label_hint": "학습 힌트",
+    "label_study": "학습하기",
+    "msg_gate_locked": "이 문턱은 아직 잠겨 있습니다. 도서관에서 공부하거나, 전투 중 힌트를 쓰세요.",
+    "msg_gate_open": "게이트가 열렸습니다! 다음 난이도 몬스터가 나타납니다.",
+    "msg_win": "이겨했습니다!",
+    "msg_lose": "패배했습니다. 학습 후 다시 도전하세요.",
+    "msg_hint_used": "힌트를 썼습니다. 이번 보상은 줄어듭니다."
+  },
+
+  "gate": {
+    "streak_required": 5,
+    "recent_window": 10,
+    "recent_acc": 0.7,
+    "min_topic_exposure": 3
+  },
+
+  "battle": {
+    "hero_hp": 5,
+    "wrong_damage": 1,
+    "hint_reward_factor": 0.5
+  },
+
+  "map": {
+    "w": 40,
+    "h": 30,
+    "tile": 32
+  }
+}

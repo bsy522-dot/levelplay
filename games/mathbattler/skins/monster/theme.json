@@ -1,0 +1,552 @@
+{
+ "id": "monster",
+ "name": "수학·과학 배틀러",
+ "title": "수학·과학 배틀러",
+ "subtitle": "배우고 · 싸우고 · 올라간다",
+ "hero": {
+  "name": "견습 배틀러",
+  "kind": "blob",
+  "render": "vector",
+  "palette": [
+   "#3b82f6",
+   "#1e40af",
+   "#fbbf24"
+  ]
+ },
+ "art": {
+  "placeholder": "art/monsters/_placeholder.png"
+ },
+ "map": {
+  "w": 44,
+  "h": 32,
+  "tile": 32,
+  "palette": {
+   "bg_sky": "#cfe8ff",
+   "bg_grass": "#8ed36a",
+   "bg_grass2": "#7ac95c",
+   "bg_path": "#d8c39a",
+   "bg_water": "#6fc3ef"
+  },
+  "encounter": {
+   "tile": "tall",
+   "color": "#4a9a3a",
+   "glow": "#f59e0b",
+   "icon": "⚔"
+  },
+  "poi": {
+   "tile": "house",
+   "color": "#8b5cf6",
+   "icon": "📚"
+  },
+  "decor": "tree"
+ },
+ "palette": {
+  "bg_sky": "#cfe8ff",
+  "bg_grass": "#8ed36a",
+  "bg_grass2": "#7ac95c",
+  "bg_path": "#d8c39a",
+  "bg_water": "#6fc3ef",
+  "ui_panel": "rgba(20,26,40,0.92)",
+  "ui_text": "#f2f6ff",
+  "ui_accent": "#fbbf24",
+  "hp_mine": "#4ade80",
+  "hp_enemy": "#f87171",
+  "correct": "#4ade80",
+  "wrong": "#f87171"
+ },
+ "text": {
+  "menu_start": "모험 시작",
+  "menu_library": "도서관",
+  "menu_codex": "도감",
+  "label_gp": "GP",
+  "label_gate": "다음 몬스터 게이트",
+  "label_streak": "연속 정답",
+  "label_recent": "최근 10문제 정확도",
+  "label_seen": "단원 노출",
+  "label_monster_hp": "몸통",
+  "label_my_hp": "내 체력",
+  "label_roster": "등장",
+  "label_hint": "학습 힌트",
+  "label_study": "학습하기",
+  "msg_gate_locked": "이 문턱은 아직 잠겨 있습니다. 도서관에서 공부하거나, 전투 중 힌트를 쓰세요.",
+  "msg_gate_open": "게이트가 열렸습니다! 다음 난이도 몬스터가 나타납니다.",
+  "msg_win": "이겨했습니다!",
+  "msg_lose": "패배했습니다. 학습 후 다시 도전하세요.",
+  "msg_hint_used": "힌트를 썼습니다. 이번 보상은 줄어듭니다."
+ },
+ "gate": {
+  "streak_required": 5,
+  "recent_window": 10,
+  "recent_acc": 0.7,
+  "min_topic_exposure": 3
+ },
+ "battle": {
+  "hero_hp": 5,
+  "wrong_damage": 1,
+  "hint_reward_factor": 0.5
+ },
+ "cast": {
+  "entries": [
+   {
+    "key": "수학|수와 연산|1~10 세기",
+    "id": "m_ma_00_00",
+    "name": "씨앗",
+    "art": "art/monsters/m_ma_00_00.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "수학 · 수와 연산 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "수학|수와 연산|11~100 세기",
+    "id": "m_ma_00_01",
+    "name": "잎새",
+    "art": "art/monsters/m_ma_00_01.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "수학 · 수와 연산 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "수학|수와 연산|덧셈과 뺄셈 (한 자리)",
+    "id": "m_ma_00_02",
+    "name": "물방울",
+    "art": "art/monsters/m_ma_00_02.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "수학 · 수와 연산 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "수학|수와 연산|덧셈과 뺄셈 (두 자리)",
+    "id": "m_ma_00_03",
+    "name": "자갈빛",
+    "art": "art/monsters/m_ma_00_03.png",
+    "hp": 4,
+    "hpUnit": "문제",
+    "line": "수학 · 수와 연산 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "수학|수와 연산|곱셈 구구단",
+    "id": "m_ma_00_04",
+    "name": "안개빛",
+    "art": "art/monsters/m_ma_00_04.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "수학 · 수와 연산 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "수학|수와 연산|나눗셈 기초",
+    "id": "m_ma_00_05",
+    "name": "불씨",
+    "art": "art/monsters/m_ma_00_05.png",
+    "hp": 4,
+    "hpUnit": "문제",
+    "line": "수학 · 수와 연산 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "수학|분수와 소수|분수란 무엇일까",
+    "id": "m_ma_01_00",
+    "name": "불씨",
+    "art": "art/monsters/m_ma_01_00.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "수학 · 분수와 소수 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "수학|분수와 소수|분수의 덧셈과 뺄셈",
+    "id": "m_ma_01_01",
+    "name": "잎문",
+    "art": "art/monsters/m_ma_01_01.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "수학 · 분수와 소수 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "수학|분수와 소수|소수 이해하기",
+    "id": "m_ma_01_02",
+    "name": "천둥구름",
+    "art": "art/monsters/m_ma_01_02.png",
+    "hp": 4,
+    "hpUnit": "문제",
+    "line": "수학 · 분수와 소수 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "수학|분수와 소수|분수와 소수 변환",
+    "id": "m_ma_01_03",
+    "name": "현무암",
+    "art": "art/monsters/m_ma_01_03.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 분수와 소수 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "수학|도형과 측정|기본 도형 (삼각형, 사각형, 원)",
+    "id": "m_ma_02_00",
+    "name": "씨앗",
+    "art": "art/monsters/m_ma_02_00.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 도형과 측정 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "수학|도형과 측정|길이와 무게 재기",
+    "id": "m_ma_02_01",
+    "name": "잎새",
+    "art": "art/monsters/m_ma_02_01.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 도형과 측정 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "수학|도형과 측정|넓이와 둘레",
+    "id": "m_ma_02_02",
+    "name": "구름껍질",
+    "art": "art/monsters/m_ma_02_02.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 도형과 측정 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "수학|도형과 측정|부피와 들이",
+    "id": "m_ma_02_03",
+    "name": "현무암",
+    "art": "art/monsters/m_ma_02_03.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 도형과 측정 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "수학|도형과 측정|대칭과 이동",
+    "id": "m_ma_02_04",
+    "name": "번개",
+    "art": "art/monsters/m_ma_02_04.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 도형과 측정 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "수학|비율과 비례|비율이란",
+    "id": "m_ma_03_00",
+    "name": "불티",
+    "art": "art/monsters/m_ma_03_00.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 비율과 비례 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "수학|비율과 비례|백분율(%) 이해",
+    "id": "m_ma_03_01",
+    "name": "잎문",
+    "art": "art/monsters/m_ma_03_01.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 비율과 비례 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "수학|비율과 비례|비례식과 비례배분",
+    "id": "m_ma_03_02",
+    "name": "심연구름",
+    "art": "art/monsters/m_ma_03_02.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 비율과 비례 (TIER 4)",
+    "tier": 4
+   },
+   {
+    "key": "수학|규칙과 문제해결|수 배열의 규칙 찾기",
+    "id": "m_ma_04_00",
+    "name": "불씨",
+    "art": "art/monsters/m_ma_04_00.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 규칙과 문제해결 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "수학|규칙과 문제해결|문장제 문제 풀기",
+    "id": "m_ma_04_01",
+    "name": "이끼",
+    "art": "art/monsters/m_ma_04_01.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 규칙과 문제해결 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "수학|규칙과 문제해결|표와 그래프 읽기",
+    "id": "m_ma_04_02",
+    "name": "천둥구름",
+    "art": "art/monsters/m_ma_04_02.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "수학 · 규칙과 문제해결 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "과학|동물의 세계|우리 주변의 동물",
+    "id": "m_sc_00_00",
+    "name": "씨앗",
+    "art": "art/monsters/m_sc_00_00.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "과학 · 동물의 세계 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|동물의 세계|동물의 분류 (포유류, 조류, 파충류)",
+    "id": "m_sc_00_01",
+    "name": "잎새",
+    "art": "art/monsters/m_sc_00_01.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "과학 · 동물의 세계 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|동물의 세계|동물의 한살이",
+    "id": "m_sc_00_02",
+    "name": "구름껍질",
+    "art": "art/monsters/m_sc_00_02.png",
+    "hp": 4,
+    "hpUnit": "문제",
+    "line": "과학 · 동물의 세계 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|동물의 세계|멸종위기 동물",
+    "id": "m_sc_00_03",
+    "name": "자갈빛",
+    "art": "art/monsters/m_sc_00_03.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 동물의 세계 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|식물의 세계|씨앗에서 꽃까지",
+    "id": "m_sc_01_00",
+    "name": "씨앗",
+    "art": "art/monsters/m_sc_01_00.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 식물의 세계 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|식물의 세계|나무와 풀의 차이",
+    "id": "m_sc_01_01",
+    "name": "잎새",
+    "art": "art/monsters/m_sc_01_01.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 식물의 세계 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|식물의 세계|광합성이란",
+    "id": "m_sc_01_02",
+    "name": "구름껍질",
+    "art": "art/monsters/m_sc_01_02.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 식물의 세계 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|식물의 세계|식물의 구조 (뿌리, 줄기, 잎)",
+    "id": "m_sc_01_03",
+    "name": "자갈빛",
+    "art": "art/monsters/m_sc_01_03.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 식물의 세계 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|우리 몸|뼈와 근육",
+    "id": "m_sc_02_00",
+    "name": "씨앗",
+    "art": "art/monsters/m_sc_02_00.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우리 몸 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|우리 몸|소화와 영양",
+    "id": "m_sc_02_01",
+    "name": "이끼",
+    "art": "art/monsters/m_sc_02_01.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우리 몸 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|우리 몸|호흡과 혈액순환",
+    "id": "m_sc_02_02",
+    "name": "구름껍질",
+    "art": "art/monsters/m_sc_02_02.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우리 몸 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|우리 몸|감각기관 (눈, 코, 귀, 혀, 피부)",
+    "id": "m_sc_02_03",
+    "name": "돌멩이",
+    "art": "art/monsters/m_sc_02_03.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우리 몸 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|지구와 날씨|지구의 모양과 구조",
+    "id": "m_sc_03_00",
+    "name": "불씨",
+    "art": "art/monsters/m_sc_03_00.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "과학 · 지구와 날씨 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|지구와 날씨|날씨의 변화",
+    "id": "m_sc_03_01",
+    "name": "잎새",
+    "art": "art/monsters/m_sc_03_01.png",
+    "hp": 5,
+    "hpUnit": "문제",
+    "line": "과학 · 지구와 날씨 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|지구와 날씨|계절이 바뀌는 이유",
+    "id": "m_sc_03_02",
+    "name": "구름껍질",
+    "art": "art/monsters/m_sc_03_02.png",
+    "hp": 5,
+    "hpUnit": "문제",
+    "line": "과학 · 지구와 날씨 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|지구와 날씨|물의 순환",
+    "id": "m_sc_03_03",
+    "name": "자갈빛",
+    "art": "art/monsters/m_sc_03_03.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 지구와 날씨 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|우주 탐험|태양과 달",
+    "id": "m_sc_04_00",
+    "name": "씨앗",
+    "art": "art/monsters/m_sc_04_00.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우주 탐험 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|우주 탐험|태양계 행성",
+    "id": "m_sc_04_01",
+    "name": "이끼",
+    "art": "art/monsters/m_sc_04_01.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우주 탐험 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|우주 탐험|별자리 이야기",
+    "id": "m_sc_04_02",
+    "name": "물방울",
+    "art": "art/monsters/m_sc_04_02.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우주 탐험 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|우주 탐험|우주 탐사의 역사",
+    "id": "m_sc_04_03",
+    "name": "현무암",
+    "art": "art/monsters/m_sc_04_03.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 우주 탐험 (TIER 3)",
+    "tier": 3
+   },
+   {
+    "key": "과학|물질과 에너지|고체, 액체, 기체",
+    "id": "m_sc_05_00",
+    "name": "씨앗",
+    "art": "art/monsters/m_sc_05_00.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "과학 · 물질과 에너지 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|물질과 에너지|열과 온도",
+    "id": "m_sc_05_01",
+    "name": "이끼",
+    "art": "art/monsters/m_sc_05_01.png",
+    "hp": 6,
+    "hpUnit": "문제",
+    "line": "과학 · 물질과 에너지 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|물질과 에너지|빛과 그림자",
+    "id": "m_sc_05_02",
+    "name": "물방울",
+    "art": "art/monsters/m_sc_05_02.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 물질과 에너지 (TIER 1)",
+    "tier": 1
+   },
+   {
+    "key": "과학|물질과 에너지|소리의 세계",
+    "id": "m_sc_05_03",
+    "name": "자갈빛",
+    "art": "art/monsters/m_sc_05_03.png",
+    "hp": 4,
+    "hpUnit": "문제",
+    "line": "과학 · 물질과 에너지 (TIER 2)",
+    "tier": 2
+   },
+   {
+    "key": "과학|물질과 에너지|자석과 전기",
+    "id": "m_sc_05_04",
+    "name": "안개빛",
+    "art": "art/monsters/m_sc_05_04.png",
+    "hp": 2,
+    "hpUnit": "문제",
+    "line": "과학 · 물질과 에너지 (TIER 2)",
+    "tier": 2
+   }
+  ]
+ }
+}

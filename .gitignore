@@ -40,3 +40,11 @@ _diag/
 # 0926: 만화 컷 분할 작업 산출물 (원본만 커밋, 컷은 빌드 시 생성 가능)
 assets/comics_pages/_split_report.json
 tools/__pycache__/
+
+# 0928: 매스배틀러 — PokeAPI 원본 캐시/CSV (regen 가능, 저장소 제외)
+# ★주의: skins/<테마>/art/ 의 스프라이트는 '배포 필수 자산'이라 커밋해야 한다.
+#   제외하는 것은 루트 art/ 와 _tools/ 뿐이다.
+games/mathbattler/_tools/sprite_cache/
+games/mathbattler/_tools/*.csv
+games/mathbattler/_tools/diag*.mjs
+games/mathbattler/data/monsters.json
