@@ -64,7 +64,7 @@ export class BattleScene extends Phaser.Scene {
       gr.fillGradientStyle(0x9fd8ff, 0x9fd8ff, 0xd8f5c0, 0xd8f5c0, 1); gr.fillRect(0, 0, w * 2, h * 2);
       this.bg = null;
     }
-    this.foe = null; this.me = null;
+    this.foe = null; this.me = null; this.pback = null; this.trainer = null;
     this.layout();
   }
   async showMon(side, id, { from = 'slide' } = {}) {
@@ -95,6 +95,21 @@ export class BattleScene extends Phaser.Scene {
     await this.tw({ targets: img, x, duration: 450, ease: 'Cubic.out' });
     this.trainer = img;
     return img;
+  }
+  /** 주인공 뒷모습 (원작처럼 배틀 시작 때 왼쪽에 서 있다가 포켓몬을 내보내며 들어감) */
+  async showPlayerBack() {
+    const key = await this.tex('tr_player_back', 'art/ai/player_back.png');
+    if (!key) return;
+    const [x, y] = this.L.me;
+    const img = this.add.image(-200, y + 10, key).setOrigin(0.5, 1).setDepth(7);
+    this.fit(img, this.L.ms * 1.15);
+    await this.tw({ targets: img, x, duration: 420, ease: 'Cubic.out' });
+    this.pback = img;
+  }
+  async hidePlayerBack() {
+    if (!this.pback) return;
+    await this.tw({ targets: this.pback, x: -220, duration: 300 });
+    this.pback.destroy(); this.pback = null;
   }
   async hideTrainer() {
     if (!this.trainer) return;
@@ -185,7 +200,7 @@ export class BattleScene extends Phaser.Scene {
     if (!t) return;
     await this.tw({ targets: t, alpha: 0.4, duration: 120, yoyo: true, repeat: 2 });
   }
-  clear() { this.children.removeAll(true); this.foe = this.me = this.trainer = this.bg = null; }
+  clear() { this.children.removeAll(true); this.foe = this.me = this.trainer = this.bg = this.pback = null; }
 }
 
 /* ────────────────── 전투 진행 ────────────────── */
@@ -317,6 +332,7 @@ export async function runBattle(opts) {
   const nameOf = (b) => (b.side === 'foe' ? (trainer ? '상대 ' : '야생 ') : '') + sp(b.m.sp).name;
 
   try {
+    const backP = S.showPlayerBack();
     if (trainer) {
       await S.showTrainer(opts.face);
       await hud.msg(opts.intro || `${opts.name}이(가) 승부를 걸어 왔다!`, true);
@@ -329,9 +345,11 @@ export async function runBattle(opts) {
       hud.drawFoe(foe);
       await hud.msg(`앗! 야생 ${josa(sp(foe.m.sp).name, '이/가')} 튀어나왔다!`, true);
     }
+    await backP;
+    await hud.msg(`가라! ${sp(me.m.sp).name}!`);
+    await S.hidePlayerBack();
     await S.showMon('me', me.m.sp, { from: 'ball' });
     hud.drawMe(me);
-    await hud.msg(`가라! ${sp(me.m.sp).name}!`);
 
     // ── 턴 반복 ──
     while (!result) {
