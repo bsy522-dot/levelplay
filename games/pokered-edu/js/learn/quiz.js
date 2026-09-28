@@ -4,7 +4,7 @@ import { Input } from '../input.js';
 import { root, portraitUrl, toast } from '../ui.js';
 import { sfx } from '../audio.js';
 import { drawViz } from './viz.js';
-import { nextQuestion, record, expMult, skillTitle } from './tutor.js';
+import { nextQuestion, record, expMult, skillTitle, skillNote, isNewSkill, MATH_ALL_BY } from './tutor.js';
 import { G } from '../state.js';
 
 const SUBJ = { math: ['수학', '#3b6cd4'], sci: ['과학', '#3fb950'] };
@@ -67,7 +67,7 @@ function button(label, box) {
   });
 }
 
-function explainCard(it, pick, title) {
+function explainCard(it, pick, title, skill) {
   const face = portraitUrl('oak');
   const body = el('div', { class: 'body2' });
   body.append(el('div', { class: 'lbl' }, title));
@@ -76,14 +76,18 @@ function explainCard(it, pick, title) {
     body.append(el('div', {}, `"${it.a[pick]}"${hasBatchim(last) ? '을' : '를'} 골랐구나. `, it.wrong[pick]));
   }
   body.append(el('div', { style: { marginTop: '.3em' } }, el('b', {}, '정답은 '), el('b', { style: { color: '#2fae5b' } }, it.a[it.c]), ' — ', it.why));
+  if (it.steps && it.steps.length) body.append(el('div', { class: 'steps' }, el('div', { class: 'lbl' }, '📝 풀이 순서'), el('ol', {}, ...it.steps.map((t) => el('li', {}, t)))));
   const v = it.viz ? drawViz(it.viz) : null;
   if (v) body.append(v);
+  const need = it.need || (skill && skillNote(skill).need);
+  if (need) body.append(el('div', { class: 'need' }, el('b', {}, '💡 이게 왜 필요할까? '), need));
   return el('div', { class: 'explain' }, face ? el('div', { class: 'face', style: { backgroundImage: `url(${face})` } }) : null, body);
 }
 
 /** 전투에서 기술을 쓸 때: 문제 → 결과. 반환 {hit, mastered, stepDown} */
 export async function moveQuiz({ monName, moveName, moveType, story }) {
   const q = nextQuestion({ moveType, story });
+  if (q.subj === 'math' && isNewSkill(q.skill)) await lessonCard(q, false);
   const mult = expMult();
   const head = G.s.learn.streak > 0 ? `🔥 ${G.s.learn.streak}연속 · 경험치 ×${mult.toFixed(2).replace(/\.?0+$/, '')}` : '';
   const lead = `${monName}의 ${moveName}! 맞히면 명중!`;
@@ -92,7 +96,9 @@ export async function moveQuiz({ monName, moveName, moveType, story }) {
   if (r.ok) {
     r.result.className = 'result ok';
     r.result.textContent = '정답! ' + (q.item.why || '');
-    if (rec.mastered) { toast(`⭐ '${q.title}' 익힘! 다음 단계로!`, 2200); sfx('levelup'); }
+    const need = q.item.need || (q.subj === 'math' && skillNote(q.skill).need);
+    if (need) r.box.append(el('div', { class: 'need' }, el('b', {}, '💡 어디에 쓰일까? '), need));
+    if (rec.mastered) { toast(rec.fast ? `🚀 5연속 이상! '${q.title}' 통과 — 바로 다음 단계로!` : `⭐ '${q.title}' 익힘! 다음 단계로!`, 2400); sfx('levelup'); }
     await sleep(350);
     await button('공격! ▶', r.box);
     close(r.box);
@@ -100,7 +106,7 @@ export async function moveQuiz({ monName, moveName, moveType, story }) {
   }
   r.result.className = 'result no';
   r.result.textContent = '앗, 빗나갔어!';
-  r.box.append(explainCard(q.item, r.pick, '오박사의 설명'));
+  r.box.append(explainCard(q.item, r.pick, '오박사의 설명', q.skill));
   await button('비슷한 문제로 다시 해 볼래! ▶', r.box);
   close(r.box);
   // 재도전: 같은 주제, 새 문제
@@ -115,11 +121,34 @@ export async function moveQuiz({ monName, moveName, moveType, story }) {
   } else {
     r2.result.className = 'result no';
     r2.result.textContent = '괜찮아, 다음에 또 나올 거야.';
-    r2.box.append(explainCard(again, r2.pick, '다시 한 번 볼까?'));
+    r2.box.append(explainCard(again, r2.pick, '다시 한 번 볼까?', q.skill));
   }
   await button('계속 ▶', r2.box);
   close(r2.box);
+  if (!r2.ok && q.subj === 'math') await lessonCard(q, true);
   return { hit: false, stepDown: rec.stepDown };
+}
+
+/** 오박사의 1분 강의: 핵심 한 줄 + 왜 필요한지 + 예시 풀이(그림) */
+async function lessonCard(q, again) {
+  const n = skillNote(q.skill);
+  const ex = (MATH_BY[q.skill] || {}).gen?.(false);
+  const box = el('div', { class: 'win quiz lesson' });
+  const face = portraitUrl('oak');
+  box.append(
+    el('div', { class: 'top' }, el('span', { class: 'tag', style: { background: '#f0a500' } }, again ? '다시 차근차근' : '새 주제!'), el('span', { class: 'skill' }, '오박사의 1분 강의')),
+    el('div', { class: 'q' }, n.t),
+    el('div', { class: 'explain' }, face ? el('div', { class: 'face', style: { backgroundImage: `url(${face})` } }) : null,
+      el('div', { class: 'body2' },
+        n.idea ? el('div', {}, el('b', {}, '🔑 핵심: '), n.idea) : null,
+        n.need ? el('div', { class: 'need' }, el('b', {}, '💡 왜 필요할까? '), n.need) : null,
+        ex ? el('div', { style: { marginTop: '.5em' } }, el('b', {}, '📌 예시: '), ex.q, el('br'), el('b', { style: { color: '#2fae5b' } }, '→ ' + ex.a[ex.c]), ' — ', ex.why) : null,
+        ex && ex.steps ? el('ol', {}, ...ex.steps.map((t) => el('li', {}, t))) : null,
+        ex && ex.viz ? drawViz(ex.viz) : null)));
+  root().append(box);
+  document.body.classList.add('in-quiz');
+  await button(again ? '알겠어요! 다음엔 맞힐게요 ▶' : '알겠어요! 문제 풀기 ▶', box);
+  close(box);
 }
 
 function nextSameSkill(q) {
@@ -130,7 +159,8 @@ function nextSameSkill(q) {
   // 같은 주제를 직접 만든다
   return nextQuestionFor(q);
 }
-import { MATH_BY, hasBatchim } from './math.js';
+import { hasBatchim } from './math.js';
+const MATH_BY = MATH_ALL_BY;
 import { DB } from '../data.js';
 import { pick, shuffle } from '../util.js';
 function nextQuestionFor(q) {

@@ -6,7 +6,14 @@
  * - 연속 정답이면 경험치가 최대 2배 -> 빨리 배우면 게임도 빨리 끝난다. */
 import { G } from '../state.js';
 import { DB } from '../data.js';
-import { MATH, MATH_BY } from './math.js';
+import { MATH as MATH_BASE } from './math.js';
+import { MATH_ADV, NOTES } from './math_adv.js';
+// 수학 사다리: 미취학 ~ 미적분 (기초 36 + 심화 20)
+export const MATH_ALL = [...MATH_BASE, ...MATH_ADV];
+export const MATH_ALL_BY = Object.fromEntries(MATH_ALL.map((s) => [s.id, s]));
+const MATH = MATH_ALL, MATH_BY = MATH_ALL_BY;
+/** 주제 설명 카드용: {t, idea, need} */
+export function skillNote(id) { const s = MATH_BY[id] || SCI_BY[id] || {}; const n = NOTES[id] || {}; return { t: s.t || id, idea: s.idea || n.idea || '', need: s.need || n.need || '' }; }
 import { weighted, pick, shuffle } from '../util.js';
 
 export const SCI = [
@@ -127,8 +134,11 @@ export function record(q, correct, firstTry = true) {
     l.streak++; l.best = Math.max(l.best, l.streak);
     if (s.wrongRecent > 0) s.wrongRecent--;
     // 익힘: 최근 5문제 중 4개 이상 + 이번에도 정답 (요행 3연속 방지)
+    const fast = l.streak >= 5 && q.skill === LADDER[q.subj][frontier(q.subj)].id; // 5연속 이상 = 빠른 길
+    if (!s.mastered && fast) { s.mastered = true; res.mastered = true; res.fast = true; }
     const last5 = s.hist.slice(-5);
-    if (!s.mastered && last5.length >= MASTER_STREAK && last5.reduce((a, b) => a + b, 0) >= Math.min(4, last5.length) && s.streak >= MASTER_STREAK) { s.mastered = true; res.mastered = true; }
+    const last4 = s.hist.slice(-4);
+    if (!s.mastered && last4.length >= 3 && last4.reduce((a, b) => a + b, 0) >= 3 && s.streak >= 2) { s.mastered = true; res.mastered = true; }
   } else {
     s.streak = 0; s.miss++; s.wrongRecent = 2; l.streak = 0;
     // 지금 배우는 주제가 너무 어려우면 한 단계 쉽게:
@@ -194,4 +204,5 @@ export function report() {
     math: rows('math'), sci: rows('sci'), fMath: frontier('math'), fSci: frontier('sci'),
   };
 }
+export const isNewSkill = (id) => !(L().sk[id] && (L().sk[id].n > 0 || L().sk[id].placed));
 export const skillTitle = (id) => (MATH_BY[id] || SCI_BY[id] || {}).t || id;

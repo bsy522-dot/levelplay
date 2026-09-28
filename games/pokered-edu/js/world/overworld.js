@@ -69,6 +69,9 @@ export class WorldScene extends Phaser.Scene {
       this.placeSprite(sp, o.x, o.y);
       this.npcs.push(o); this.mapObjs.push(sp);
     });
+    this.fol = null;
+    this.refreshFollower();
+    W.updateGoal?.();
     this.fitCamera();
     this.cameras.main.startFollow(this.player, true, 0.2, 0.2, 0, 24);
     this.cameras.main.centerOn(this.player.x, this.player.y - 24);
@@ -175,6 +178,7 @@ export class WorldScene extends Phaser.Scene {
       this.stepParity = !this.stepParity;
       this.player.setFrame(base + (this.stepParity ? 1 : 2));
       const tx = (nx + this.M) * T + T / 2, ty = (ny + this.M) * T + T - 2;
+      this.followTo(G.s.x, G.s.y, ms);
       this.tweens.add({
         targets: this.player, x: tx, y: ty, duration: ms,
         onUpdate: () => this.player.setDepth(10 + this.player.y),
@@ -207,6 +211,7 @@ export class WorldScene extends Phaser.Scene {
         onComplete: async () => {
           shadow.destroy();
           G.s.x = lx; G.s.y = ly;
+          this.followTo(lx - DIRV[G.s.facing][0], ly - DIRV[G.s.facing][1], 120);
           await this.afterStep(G.s.facing);
           this.moving = false; resolve();
         },
@@ -286,6 +291,7 @@ export class WorldScene extends Phaser.Scene {
     if (!npc && ['C', 'M'].includes(this.cell(tx, ty))) { npc = this.npcAt(tx + dx, ty + dy); if (npc) { tx += dx; ty += dy; } }
     W.busy = true;
     try {
+      if (!npc && this.fol && this.fol.x === tx && this.fol.y === ty) { await EV.talkFollower(); return; }
       if (npc) {
         this.faceNpcToPlayer(npc);
         await EV.talk(this.map.id, npc);
@@ -294,7 +300,7 @@ export class WorldScene extends Phaser.Scene {
         if (sg) await EV.readSign(this.map.id, sg);
         else await EV.inspect(this.map.id, tx, ty, this.cell(tx, ty));
       }
-    } finally { W.busy = false; }
+    } finally { W.busy = false; W.updateGoal?.(); }
   }
 
   faceNpcToPlayer(o) {
@@ -350,6 +356,7 @@ export class WorldScene extends Phaser.Scene {
       await new Promise((resolve) => {
         const base = DIRI[d] * 3; this.stepParity = !this.stepParity;
         this.player.setFrame(base + (this.stepParity ? 1 : 2));
+        this.followTo(G.s.x, G.s.y, WALK_MS);
         G.s.x += dx; G.s.y += dy;
         this.tweens.add({ targets: this.player, x: (G.s.x + this.M) * T + T / 2, y: (G.s.y + this.M) * T + T - 2, duration: WALK_MS,
           onUpdate: () => this.player.setDepth(10 + this.player.y), onComplete: () => { this.player.setFrame(base); resolve(); } });
@@ -365,6 +372,38 @@ export class WorldScene extends Phaser.Scene {
       const t = this.add.text(o.sp.x, o.sp.y - CH - 4, '!', { fontFamily: 'Jua', fontSize: '30px', color: '#e3350d', stroke: '#fff', strokeThickness: 6 }).setOrigin(0.5, 1).setDepth(200000);
       this.tweens.add({ targets: t, y: t.y - 8, yoyo: true, duration: 160, repeat: 1, onComplete: () => { setTimeout(() => { t.destroy(); resolve(); }, 250); } });
     });
+  }
+
+  /* ── 따라오는 포켓몬 (파티 맨 앞) ── */
+  async refreshFollower() {
+    const lead = G.s.party[0];
+    if (this.fol) { this.fol.img.destroy(); this.fol = null; }
+    if (!lead) return;
+    const key = 'fol_' + lead.sp;
+    if (!this.textures.exists(key)) {
+      await new Promise((res) => { this.load.image(key, `art/mon/${lead.sp}.webp`); this.load.once('complete', res); this.load.start(); });
+    }
+    if (!this.player || !this.player.active) return;
+    const [dx, dy] = DIRV[G.s.facing] || [0, 1];
+    let fx = G.s.x - dx, fy = G.s.y - dy;
+    const c = this.cell(fx, fy);
+    if (c == null || !isWalkable(c) || this.npcAt(fx, fy)) { fx = G.s.x; fy = G.s.y; }
+    const img = this.add.image(0, 0, key).setOrigin(0.5, 1);
+    img.setScale(44 / Math.max(img.width, img.height));
+    this.fol = { img, x: fx, y: fy };
+    this.placeFollower();
+    this.mapObjs.push(img);
+  }
+  placeFollower() {
+    const f = this.fol; if (!f) return;
+    f.img.x = (f.x + this.M) * T + T / 2; f.img.y = (f.y + this.M) * T + T - 6;
+    f.img.setDepth(9 + f.img.y);
+  }
+  followTo(x, y, ms) {
+    const f = this.fol; if (!f) return;
+    f.x = x; f.y = y;
+    this.tweens.add({ targets: f.img, x: (x + this.M) * T + T / 2, y: (y + this.M) * T + T - 6, duration: ms, onUpdate: () => f.img.setDepth(9 + f.img.y) });
+    this.tweens.add({ targets: f.img, scaleY: f.img.scaleX * 0.9, duration: ms / 2, yoyo: true });
   }
 
   /* ── 트레이너 시선 ── */

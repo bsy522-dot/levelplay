@@ -7,7 +7,7 @@ import { Input } from './input.js';
 import { sfx, music } from './audio.js';
 import { WorldScene, W } from './world/overworld.js';
 import { BattleScene, B, wildBattle, trainerBattle } from './battle/battle.js';
-import { mapMusic } from './world/events.js';
+import { mapMusic, objective } from './world/events.js';
 import { initLearn, GRADES } from './learn/tutor.js';
 import * as MENU from './menus.js';
 import { charSheet, KINDS, CW, CH } from './art/chars.js';
@@ -48,6 +48,7 @@ async function boot() {
     wildBattle, trainerBattle, openMenu: MENU.openMenu, openShop: MENU.openShop, openBox: MENU.openBox,
     openReport: MENU.reportScreen, practice: MENU.practice, chapterEnd: MENU.chapterEnd,
     mapMusicNow: () => (W.scene.map ? mapMusic(W.scene.map) : 'town'),
+    updateGoal, showGoalDetail,
   });
   document.getElementById('boot').remove();
   await title();
@@ -118,6 +119,25 @@ async function newGame() {
   save();
   await fade(false, 400);
   W.busy = false;
+}
+
+/* 화면 위 '다음 목표' 안내판 */
+let goalEl = null;
+function updateGoal() {
+  if (!G.s) return;
+  const o = objective();
+  if (!goalEl) {
+    goalEl = el('div', { class: 'win goal', onclick: () => showGoalDetail() });
+    root().append(goalEl);
+  }
+  goalEl.innerHTML = '';
+  goalEl.append(el('span', {}, '🎯 ' + o.text), o.dir ? el('b', {}, ' ' + o.dir) : '', el('small', {}, '  💡'));
+}
+async function showGoalDetail() {
+  if (W.busy || !G.s) return;
+  const o = objective();
+  W.busy = true;
+  try { await say(['🎯 ' + o.text + (o.dir ? `  (${o.dir})` : ''), ...o.detail], { who: '힌트', face: 'oak' }); } finally { W.busy = false; }
 }
 
 // 디버그/검증용 (자동 점검 스크립트가 쓴다)

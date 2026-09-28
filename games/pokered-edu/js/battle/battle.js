@@ -10,6 +10,7 @@ import { moveQuiz } from '../learn/quiz.js';
 import { expMult } from '../learn/tutor.js';
 import { fixJosa } from '../learn/math.js';
 import { W } from '../world/overworld.js';
+import { wildPick } from '../world/events.js';
 
 const BG = { ViridianForest: 'bg_forest', PewterGym: 'bg_gym_rock', OaksLab: 'bg_lab' };
 
@@ -295,7 +296,7 @@ class Hud {
         else if (k === 'up') sel = sel - cols >= 0 ? sel - cols : sel;
         else if (k === 'down') sel = sel + cols < n ? sel + cols : sel;
         else if (k === 'a') { if (!items[sel].disabled) done(items[sel].value); return; }
-        else if (k === 'b') { if (cancel !== undefined && cancel !== false) done(cancel); return; }
+        else if (k === 'b') { if (cancel !== false) done(cancel); return; }
         else return;
         sfx('select'); paint();
       });
@@ -358,7 +359,7 @@ export async function runBattle(opts) {
       const cmd = await hud.pick([
         { label: '⚔ 싸운다', value: 'fight' }, { label: '🎒 가방', value: 'bag' },
         { label: '🔴 포켓몬', value: 'mon' }, { label: '🏃 도망', value: 'run' },
-      ], { cancel: undefined });
+      ], { cancel: false });
       let myAct = null;
       if (cmd === 'fight') {
         const usable = me.m.moves.filter((mv) => mv.pp > 0);
@@ -494,6 +495,7 @@ export async function runBattle(opts) {
     await fade(false, 250);
   }
   W.busy = false;
+  world.refreshFollower?.(); W.updateGoal?.();
   return result;
 }
 
@@ -756,12 +758,12 @@ async function maybeEvolve(m) {
 /* ── 공개 도우미 ── */
 export async function wildBattle(wild) {
   const W8 = [51, 51, 39, 25, 25, 25, 13, 13, 11, 3];
-  const e = weighted(wild.mons.map((m, i) => ({ m, w: W8[i] ?? 1 })), (x) => x.w).m;
+  const e = wildPick(G.s.map) || weighted(wild.mons.map((m, i) => ({ m, w: W8[i] ?? 1 })), (x) => x.w).m;
   const m = M.makeMon(e.species ? DB.byKey[e.species].id : e[0], e.level || e[1]);
   return runBattle({ kind: 'wild', foes: [m] });
 }
 export async function trainerBattle(o) {
-  const party = (DB.trainers[o.cls] || [])[o.set] || (DB.trainers[o.cls] || [])[0] || [];
+  const party = o.party || (DB.trainers[o.cls] || [])[o.set] || (DB.trainers[o.cls] || [])[0] || [];
   let foes = party.map(([id, lv]) => M.makeMon(id, lv, { iv: { atk: 9, def: 8, spe: 8, spc: 8 } }));
   if (o.cls === 'Brock') { // 원작처럼 롱스톤은 참기(Bide)를 쓴다
     const onix = foes.find((m) => m.sp === 95); if (onix) onix.moves = ['Tackle', 'Screech', 'Bide', 'RockThrow'].map((id) => ({ id, pp: DB.moves[id].pp }));

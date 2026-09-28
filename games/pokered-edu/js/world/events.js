@@ -1,10 +1,10 @@
 /* 이야기·대사 (1차: 태초마을 ~ 회색시티 체육관). 원작 흐름을 따르되 대사는 아이 눈높이로 새로 썼다. */
-import { G, flag, setFlag, addItem, itemCount, receive, healParty, save, alive, seen } from '../state.js';
+import { G, flag, setFlag, addItem, itemCount, receive, healParty, save, alive, seen, maxHp } from '../state.js';
 import { DB, ITEMS, sp, monArt } from '../data.js';
 import { say, ask, choose, toast, fade, PORTRAIT } from '../ui.js';
 import { sfx, music } from '../audio.js';
 import { makeMon } from '../battle/mech.js';
-import { josa } from '../util.js';
+import { josa, pick } from '../util.js';
 import { W } from './overworld.js';
 import { placementPlan, placementQuestion, placementAnswer, placementDone, onBadge, GRADES } from '../learn/tutor.js';
 import { placementQuiz } from '../learn/quiz.js';
@@ -72,7 +72,8 @@ export async function stepTrigger(map, x, y, d) {
   if (map === 'OaksLab' && flag('gotStarter') && !flag('rivalBattled') && y >= 6) { await rivalBattle(); return true; }
   if (map === 'ViridianCity' && !flag('pokedex') && y <= 9 && y >= 8 && x >= 17 && x <= 19) {
     W.busy = true;
-    await say(['“여긴 못 지나가! 우리 집 앞마당이라고!”', '(할아버지가 길 한가운데 누워서 비켜 주지 않는다…)'], { who: '할아버지', face: 'oldman' });
+    await say(['“여긴 못 지나가! 포켓몬 도감도 없는 꼬마는 안 돼!”', '(할아버지가 길 한가운데 누워서 비켜 주지 않는다…)'], { who: '할아버지', face: 'oldman' });
+    await say(['💡 힌트: 할아버지를 비키게 하려면', '① 오른쪽 아래 파란 지붕 가게(프렌들리숍)에 들어가서', '② 카운터의 점원에게 말을 걸어 포켓몬 도감을 받으면 돼!']);
     await S.walkPlayer('down', 1);
     W.busy = false;
     return true;
@@ -100,6 +101,7 @@ export async function enterMap(id) {
     setFlag('gymIntro');
     W.busy = true;
     await say(['회색시티 체육관에 들어왔다!', '관장 웅은 “상황 문제”를 낸다고 한다. 문제를 끝까지 잘 읽자!']);
+    if (!flag('squirtleGift')) await LINES['PewterGym:2']();
     W.busy = false;
   }
 }
@@ -139,43 +141,38 @@ async function labIntro() {
   setFlag('placement');
   await sayAs('oak', ['좋아, 수고했다!', `수학은 “${r.math}”부터, 과학은 “${r.sci}”부터 모험하면서 배워 보자.`,
     '포켓몬이 기술을 쓸 때마다 문제가 나온단다. 맞히면 기술이 명중하고, 틀리면 빗나가지.', '틀려도 괜찮아. 왜 틀렸는지 내가 옆에서 알려 주마!',
-    '자, 저 탁자 위 몬스터볼 3개 중 하나를 골라 보렴. 너의 첫 포켓몬이란다!']);
+    '자, 이제 너의 첫 포켓몬을 줄 차례구나!']);
+  save();
+  await givePikachu();
+}
+
+/* 만화 1화처럼: 파이리·꼬부기·이상해씨는 이미 없고, 남은 한 마리 = 피카츄 */
+async function givePikachu() {
+  const S = W.scene;
+  await sayAs('oak', ['원래 저 탁자 위에 파이리, 꼬부기, 이상해씨가 있었는데…', '아침 일찍 온 친구들이 모두 데려가 버렸단다. 허허, 이런!', '하지만 딱 한 마리가 남아 있지. 조금 고집이 세지만… 아주 특별한 아이란다.']);
+  PORTRAIT['mon'] = monArt(25);
+  seen(25);
+  sfx('item');
+  await say(['피카피카~! ⚡'], { who: '피카츄', face: 'mon' });
+  const m = makeMon(25, 5);
+  receive(m);
+  setFlag('gotStarter', 25);
+  await say([`${josa(P(), '은/는')} 오박사에게서 피카츄를 받았다!`]);
+  await sayAs('oak', ['이 피카츄는 몬스터볼 안에 들어가는 걸 싫어한단다.', '대신 너를 졸졸 따라다닐 거야. 사이좋게 지내렴!', '피카츄에게 말을 걸면 기분도 알 수 있단다.']);
+  W.scene.refreshFollower?.();
+  // 라이벌은 이브이
+  await sayAs('rival', ['할아버지! 나도! 나도 포켓몬 줘요!']);
+  await sayAs('oak', ['허허, 그래. 너에게는 이 이브이를 주마.']);
+  seen(133);
+  setFlag('rivalStarter', 133);
+  sfx('item');
+  await sayAs('rival', [`${josa(R(), '은/는')} 오박사에게서 이브이를 받았다!`, '헤헤, 이브이는 나중에 여러 모습으로 진화할 수 있다고! 부럽지?']);
   save();
 }
 
-const STARTERS = { 1: 4, 2: 7, 3: 1 }; // 공 번호 -> 파이리, 꼬부기, 이상해씨
-const STARTER_DESC = { 4: '불꽃 포켓몬 파이리', 7: '물 포켓몬 꼬부기', 1: '풀 포켓몬 이상해씨' };
-const COUNTER = { 4: 7, 7: 1, 1: 4 };
-const RIVAL_SET = { 7: 0, 1: 1, 4: 2 };
-
 async function pickStarter(idx) {
-  const S = W.scene;
-  if (!flag('placement')) { await sayAs('oak', ['잠깐, 먼저 자격 시험부터 보자꾸나!']); return; }
-  if (flag('gotStarter')) { await say(['몬스터볼 안에 포켓몬이 들어 있다. 오박사님의 소중한 포켓몬이야.']); return; }
-  const id = STARTERS[idx];
-  PORTRAIT['mon'] = monArt(id);
-  seen(id);
-  const yes = await ask(`${josa(STARTER_DESC[id], '을/를')} 고를래?`, { face: 'mon', who: sp(id).name });
-  if (!yes) return;
-  const m = makeMon(id, 5);
-  receive(m);
-  setFlag('gotStarter', id); setFlag('ball' + idx);
-  const o = S.npcBy((x) => x.idx === idx); if (o) S.removeNpc(o);
-  sfx('item');
-  await say([`${josa(P(), '은/는')} 오박사에게서 ${josa(sp(id).name, '을/를')} 받았다!`]);
-  // 라이벌이 상성 좋은 포켓몬을 가져간다
-  const rid = COUNTER[id];
-  setFlag('rivalStarter', rid);
-  const ridx = Object.keys(STARTERS).find((k) => STARTERS[k] === rid);
-  const rv = S.npcBy((x) => x.idx === 0);
-  await sayAs('rival', ['그럼 난 이걸로 할래!']);
-  const ball = S.npcBy((x) => x.idx === Number(ridx));
-  if (rv) { rv.facing = 'right'; rv.sp.setFrame(9); }
-  if (ball) S.removeNpc(ball);
-  setFlag('ball' + ridx);
-  sfx('item');
-  await sayAs('rival', [`${josa(R(), '은/는')} 오박사에게서 ${josa(sp(rid).name, '을/를')} 받았다!`, `헤헤, ${josa(sp(rid).name, '이/가')} 네 ${sp(id).name}보다 유리하지롱!`]);
-  save();
+  if (!flag('gotStarter')) return sayAs('oak', ['그 몬스터볼은 비어 있단다. 나에게 말을 걸어 보렴!']);
+  return say(['빈 몬스터볼이다. 다른 트레이너가 포켓몬을 데려갔나 봐.']);
 }
 
 async function rivalBattle() {
@@ -185,8 +182,7 @@ async function rivalBattle() {
   S.facePlayer('up');
   await sayAs('rival', [`잠깐, ${P()}!`, '할아버지한테 받은 포켓몬으로 한번 겨뤄 보자!']);
   await sayAs('oak', ['첫 배틀이구나! 잘 들어라.', '“싸운다”를 누르고 기술을 고르면 문제가 나온단다.', '문제를 맞히면 기술이 명중! 틀리면 빗나가지만, 내가 이유를 설명해 주마.', '연속으로 맞히면 경험치도 더 많이 받는단다. 자, 시작!']);
-  const set = RIVAL_SET[flag('rivalStarter')] ?? 0;
-  const res = await W.trainerBattle({ cls: 'Rival1', set, name: R(), face: 'rival', intro: `라이벌 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, lose: '뭐야! 내 포켓몬이 더 유리했는데!', win: '헤헤, 역시 내가 최고야!', noBlackout: true, money: 175 });
+  const res = await W.trainerBattle({ party: [[133, 5]], name: R(), face: 'rival', intro: `라이벌 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, lose: '뭐야! 내 포켓몬이 더 유리했는데!', win: '헤헤, 역시 내가 최고야!', noBlackout: true, money: 175 });
   setFlag('rivalBattled');
   healParty();
   if (res === 'win') await sayAs('rival', ['쳇, 이번엔 운이 좋았어!', '더 강한 포켓몬을 잔뜩 잡아서 다시 올 테다! 할아버지, 안녕!']);
@@ -228,9 +224,13 @@ const nurse = async () => {
 };
 const clerk = async () => {
   if (!flag('parcel') && !flag('pokedex') && G.s.map === 'ViridianMart') {
-    await say(['어서 오세요! 어, 혹시 태초마을에서 왔니?', '마침 잘 됐다! 오박사님께 주문하신 물건이 왔는데, 이 소포 좀 전해 줄래?'], { who: '점원', face: 'clerk' });
-    addItem(900, 1); setFlag('parcel'); sfx('item');
-    return say([`${josa(P(), '은/는')} 오박사의 소포를 받았다!`]);
+    await say(['어서 오세요! 어, 네가 피카츄를 데리고 다닌다는 그 트레이너구나?', '오박사님이 전화로 부탁하셨어. 이걸 꼭 너에게 전해 달라고!'], { who: '점원', face: 'clerk' });
+    setFlag('parcel'); setFlag('pokedex'); sfx('item');
+    await say([`${josa(P(), '은/는')} 포켓몬 도감을 받았다!`, '만난 포켓몬과 잡은 포켓몬이 자동으로 기록된다!']);
+    addItem(4, 5); sfx('item');
+    await say([`${josa(P(), '은/는')} 몬스터볼을 5개 받았다!`]);
+    await say(['아, 그리고 북쪽 길에 누워 계시던 할아버지 말이야…', '도감을 받은 트레이너에게는 길을 비켜 주신대! 이제 2번도로로 갈 수 있을 거야.'], { who: '점원', face: 'clerk' });
+    W.updateGoal?.(); save(); return;
   }
   return W.openShop?.();
 };
@@ -259,8 +259,8 @@ const LINES = {
     const y = await ask('애벌레 포켓몬 두 종류에 대해 알고 싶니?');
     return say(y ? ['캐터피는 독이 없지만, 뿔충이는 머리에 독침이 있어!', '뿔충이의 독침을 조심해!'] : ['그래, 알았어!']);
   },
-  'ViridianCity:3': () => say(flag('pokedex') ? ['회색시티에 가려면 상록숲을 지나가야 해.', '숲은 미로 같으니까 표지판을 잘 읽어 봐!'] : ['할아버지! 너무해요!', '미안해… 할아버지가 아직 커피를 못 드셔서 그래.']),
-  'ViridianCity:4': () => say(['“여긴 우리 집 앞마당이야! 못 지나가!”', '(할아버지가 길을 막고 누워 있다…)'], { who: '할아버지', face: 'oldman' }),
+  'ViridianCity:3': () => say(flag('pokedex') ? ['회색시티에 가려면 상록숲을 지나가야 해.', '숲은 미로 같으니까 표지판을 잘 읽어 봐!'] : ['할아버지! 너무해요!', '미안해… 할아버지는 포켓몬 도감을 가진 트레이너만 지나가게 해 주셔.', '파란 지붕 가게(프렌들리숍) 점원 아저씨가 오박사님 선물을 갖고 있대. 가 봐!']),
+  'ViridianCity:4': () => say(['“포켓몬 도감이 없으면 못 지나가!”', '💡 파란 지붕 가게(프렌들리숍) 점원에게 말을 걸어 도감을 받아 오자!'], { who: '할아버지', face: 'oldman' }),
   'ViridianCity:5': () => say(['하암~ 햇볕 아래서 깜빡 졸았네.', '꿈속에서 곱셈구구를 외우고 있었지 뭐야!']),
   'ViridianCity:6': async () => {
     await say(['아, 커피를 마시니 기분이 좋구나!', '포켓몬 도감을 들고 있네? 포켓몬을 잡으면 도감이 자동으로 채워진단다.']);
@@ -297,7 +297,15 @@ const LINES = {
   'PewterCity:2': () => say(['바위 포켓몬에게는 물이나 풀 기술이 잘 들어!', '불꽃이나 노말 기술은 잘 안 통해.']),
   'PewterCity:3': () => say(['강한 트레이너는 문제를 풀 때도 차분하게 끝까지 읽는대!']),
   'PewterCity:4': () => say(flag('badge1') ? ['회색배지를 땄구나! 대단해!', '다음 길은 곧 열릴 거야. 조금만 기다려!'] : ['웅을 이기기 전엔 이 길로 못 가!']),
-  'PewterGym:2': () => say(['어이, 챔피언 지망생!', '웅의 포켓몬은 바위 타입이야. 물·풀 기술이 효과가 굉장하지!', '그리고 웅은 “상황 문제”를 내. 포켓몬 세계 이야기 속 문제니까 끝까지 읽어!', '체력이 걱정되면 포켓몬센터에서 회복하고 오렴!'], { who: '가이드', face: 'guide' }),
+  'PewterGym:2': async () => {
+    if (!flag('squirtleGift')) {
+      await say(['어이, 챔피언 지망생! 피카츄를 데리고 왔구나.', '그런데 웅의 바위 포켓몬에게는 전기 기술이 전혀 안 통해!', '그래서 도전자에게 빌려주는 친구가 있지. 이 꼬부기를 데려가!'], { who: '가이드', face: 'guide' });
+      const m = makeMon(7, 8); const where = receive(m); setFlag('squirtleGift'); sfx('item');
+      await say([`${josa(P(), '은/는')} 꼬부기를 받았다!${where === 'box' ? ' (보관함으로 보냈다)' : ''}`, '💡 배틀 중 “포켓몬”을 눌러 꼬부기로 바꾸면 물 기술로 바위 포켓몬을 쉽게 이길 수 있어!']);
+      save(); return;
+    }
+    return say(['어이, 챔피언 지망생!', '웅의 포켓몬은 바위 타입이야. 물·풀 기술이 효과가 굉장하지!', '그리고 웅은 “상황 문제”를 내. 포켓몬 세계 이야기 속 문제니까 끝까지 읽어!', '체력이 걱정되면 포켓몬센터에서 회복하고 오렴!'], { who: '가이드', face: 'guide' });
+  },
   'PewterGym:0': async (o) => {
     if (flag('badge1')) return say(['회색배지는 네가 힘들게 배운 증거야.', '다음 체육관에서도 멋지게 해 봐!'], { who: '웅', face: 'brock' });
     await say(['나는 회색시티 체육관 관장, 웅!', '내 바위 포켓몬은 단단하고, 내 문제는 진짜 세상 이야기로 되어 있지.', '문제를 잘 읽고, 왜 그런지 생각하는 트레이너만 나를 이길 수 있다!', '자, 덤벼라!'], { who: '웅', face: 'brock' });
@@ -370,7 +378,7 @@ export async function inspect(map, x, y, c) {
 /* 오박사 대화 (연구소) */
 LINES['OaksLab:4'] = async () => {
   if (!flag('placement')) return labIntro();
-  if (!flag('gotStarter')) return sayAs('oak', ['탁자 위 몬스터볼 3개 중 하나를 고르렴!']);
+  if (!flag('gotStarter')) return givePikachu();
   if (itemCount(900) && !flag('pokedex')) {
     await sayAs('oak', ['오! 그건 내가 주문한 소포로구나. 고맙다!', '답례로 이걸 주마. 포켓몬 도감이란다!', '만난 포켓몬과 잡은 포켓몬이 자동으로 기록되지.', '151마리를 모두 채우는 게 나의 꿈이란다. 네가 도와주겠니?']);
     addItem(900, -1); setFlag('pokedex'); sfx('item');
@@ -380,7 +388,7 @@ LINES['OaksLab:4'] = async () => {
     await sayAs('oak', ['야생 포켓몬을 약하게 만든 뒤 몬스터볼을 던지면 잡을 수 있단다.', '북쪽 상록시티를 지나면 상록숲, 그 너머 회색시티에 체육관이 있지. 힘내라!']);
     save(); return;
   }
-  if (!flag('pokedex')) return sayAs('oak', ['상록시티 프렌들리숍에 내가 주문한 물건이 있을 거란다.', '가는 길에 받아다 주겠니?']);
+  if (!flag('pokedex')) return sayAs('oak', ['북쪽 1번도로를 쭉 올라가면 상록시티가 나온단다.', '상록시티의 파란 지붕 가게(프렌들리숍)에 너에게 줄 선물을 맡겨 두었지!', '점원에게 말을 걸어 보렴.']);
   const c = Object.keys(G.s.dex.caught).length;
   return sayAs('oak', [`도감은 잘 채우고 있니? 지금 ${c}마리를 잡았구나!`, c < 10 ? '풀숲마다 사는 포켓몬이 달라. 여기저기 찾아보렴!' : '훌륭해! 이대로 151마리를 향해!']);
 };
@@ -407,3 +415,51 @@ export async function trainerEncounter(map, o) {
   if (res === 'win') { setFlag(`tr:${map}:${o.idx}`); save(); await say(t.post.slice(1).length ? t.post.slice(1) : ['…'], { who: t.name, face: o.kind }); }
 }
 export { GRADES };
+
+/* ── 따라오는 포켓몬에게 말 걸기 ── */
+export async function talkFollower() {
+  const m = G.s.party[0]; if (!m) return;
+  const nm = sp(m.sp).name;
+  PORTRAIT['mon'] = monArt(m.sp);
+  const mx = maxHp(m);
+  const lines = m.hp <= 0 ? [`${josa(nm, '은/는')} 지쳐서 쓰러져 있다… 포켓몬센터에 데려가자!`]
+    : m.hp < mx / 3 ? [`${josa(nm, '은/는')} 조금 힘들어 보인다. 쉬고 싶은 것 같아.`]
+    : [pick([`${josa(nm, '은/는')} 신나서 폴짝 뛰었다!`, `${josa(nm, '은/는')} ${P()}의 얼굴을 빤히 보고 있다.`, `${josa(nm, '은/는')} 문제를 맞힐 때마다 기분이 좋아지는 것 같다!`, `${josa(nm, '은/는')} 콧노래를 부르고 있다.`]), m.sp === 25 ? '피카피카~! ⚡' : `${nm}! ♪`];
+  sfx('talk');
+  return say(lines, { who: nm, face: 'mon' });
+}
+
+/* ── 다음 목표 (화면 위 안내판) ── */
+const DIR = { north: '↑ 북쪽', south: '↓ 남쪽', east: '→ 동쪽', west: '← 서쪽' };
+// 목표 지도로 가는 길: 지금 지도 -> 가야 할 방향
+const ROUTE_TO = {
+  ViridianCity: { PalletTown: 'north', Route1: 'north', RedsHouse1F: 'south', RedsHouse2F: 'south', OaksLab: 'south', BluesHouse: 'south' },
+  PewterCity: { PalletTown: 'north', Route1: 'north', ViridianCity: 'north', Route2: 'north', ViridianForest: 'north', ViridianForestSouthGate: 'north', ViridianForestNorthGate: 'north',
+    ViridianPokecenter: 'south', ViridianMart: 'south', ViridianSchoolHouse: 'south', OaksLab: 'south', RedsHouse1F: 'south', RedsHouse2F: 'south', BluesHouse: 'south' },
+};
+export function objective() {
+  const f = flag, map = G.s.map;
+  const go = (target, text, detail) => ({ text, detail, dir: map === target ? '' : DIR[ROUTE_TO[target]?.[map]] || '' });
+  if (!f('oakEscort')) return { text: '집을 나가 마을 북쪽 풀숲 쪽으로 가 보자', detail: ['계단(오른쪽 위)으로 1층에 내려가서, 아래쪽 문으로 나가자.', '마을 위쪽 풀숲으로 가면 오박사님을 만날 수 있어!'], dir: map === 'PalletTown' ? DIR.north : '' };
+  if (!f('placement') || !f('gotStarter')) return { text: '연구소에서 오박사님께 말을 걸자', detail: ['오박사님 앞에서 A(스페이스) 버튼을 누르면 돼.'], dir: '' };
+  if (!f('rivalBattled')) return { text: '연구소 출구 쪽으로 걸어가 보자 (라이벌이 기다려!)', detail: ['아래쪽 출구로 걸어가면 라이벌이 승부를 걸어 와.'], dir: '↓' };
+  if (!f('pokedex')) return go('ViridianCity', '상록시티 파란 지붕 가게에서 도감 받기', ['태초마을 북쪽 → 1번도로 → 상록시티.', '파란 지붕 “프렌들리숍”에 들어가 점원에게 말을 걸자!']);
+  if (!f('badge1')) {
+    if (/^Pewter/.test(map)) return { text: '회색시티 체육관(보라 지붕)에서 관장 웅을 이기자', detail: ['체육관 가이드에게 먼저 말을 걸면 선물을 줘!', '포켓몬이 지치면 포켓몬센터(빨간 지붕)에서 쉬자.'], dir: '' };
+    return go('PewterCity', '상록숲을 지나 회색시티로!', ['상록시티 북쪽 → 2번도로 → 건물(숲 입구)로 들어가 상록숲을 통과하자.', '숲에서는 표지판을 읽으며 북쪽 출구를 찾자!']);
+  }
+  return { text: '1차 모험 완료! 도감을 채우며 다음 판을 기다리자', detail: ['풀숲에서 여러 포켓몬을 잡아 보자!'], dir: '' };
+}
+
+/* ── 야생 포켓몬: 원작 출현표 + 여러 친구 섞기 ── */
+const EXTRA_WILD = {
+  Route1: [['Spearow', 3], ['NidoranF', 3], ['NidoranM', 3], ['Jigglypuff', 3], ['Mankey', 3], ['Meowth', 3]],
+  Route2: [['Caterpie', 4], ['NidoranF', 4], ['NidoranM', 4], ['Oddish', 4], ['Bellsprout', 4], ['Mankey', 4], ['Sandshrew', 4]],
+  ViridianForest: [['Oddish', 5], ['Bellsprout', 5], ['Paras', 5], ['Venonat', 5], ['Butterfree', 7], ['Beedrill', 7]],
+};
+/** 35% 확률로 여러 친구 중 하나, 아니면 null(원작 출현표 사용) */
+export function wildPick(mapId) {
+  const extra = EXTRA_WILD[mapId];
+  if (extra && Math.random() < 0.35) { const [key, lv] = extra[Math.floor(Math.random() * extra.length)]; return { species: key, level: lv + Math.floor(Math.random() * 2) }; }
+  return null;
+}

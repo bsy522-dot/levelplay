@@ -23,6 +23,7 @@ export async function openMenu() {
         G.s.party.length ? { label: '🔴 포켓몬', value: 'party' } : null,
         G.s.flags.pokedex ? { label: '📕 도감', value: 'dex' } : null,
         { label: '🎒 가방', value: 'bag' },
+        { label: '💡 힌트 (다음에 할 일)', value: 'hint' },
         { label: '📒 공부 기록', value: 'report' },
         { label: `👤 ${G.s.name}`, value: 'card' },
         { label: '💾 저장', value: 'save' },
@@ -37,11 +38,12 @@ export async function openMenu() {
       else if (v === 'dex') await dexScreen();
       else if (v === 'bag') await bagScreen();
       else if (v === 'report') await reportScreen();
+      else if (v === 'hint') { W.busy = false; await W.showGoalDetail?.(); W.busy = true; }
       else if (v === 'card') await cardScreen();
       else if (v === 'save') { save(); sfx('item'); toast('저장했어요! 💾'); }
       else if (v === 'sound') { setMuted(!isMuted()); }
     }
-  } finally { W.busy = false; }
+  } finally { W.busy = false; W.scene?.refreshFollower?.(); W.updateGoal?.(); }
 }
 
 function menuPick(box, items, start) {

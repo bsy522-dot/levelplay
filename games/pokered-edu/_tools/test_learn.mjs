@@ -4,7 +4,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 const here = path.dirname(fileURLToPath(import.meta.url));
-const { MATH } = await import(pathToFileURL(path.join(here, '../js/learn/math.js')).href);
+const { MATH: BASE } = await import(pathToFileURL(path.join(here, '../js/learn/math.js')).href);
+const { MATH_ADV } = await import(pathToFileURL(path.join(here, '../js/learn/math_adv.js')).href);
+const MATH = [...BASE, ...MATH_ADV];
 
 let bad = 0;
 const samples = {};

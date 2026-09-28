@@ -38,9 +38,11 @@ export function fixJosa(s) {
 }
 
 /** 정답 + 오개념 보기들로 4지선다를 만든다. fmt 는 값을 글자로 */
-function mc(correct, wrongs, why, extra = {}) {
+export function mc(correct, wrongs, why, extra = {}) {
   const r = mcRaw(correct, wrongs, why, extra);
   r.q = fixJosa(r.q); r.why = fixJosa(r.why);
+  if (extra.steps) r.steps = extra.steps.map(fixJosa);
+  if (extra.need) r.need = fixJosa(extra.need);
   for (const k of Object.keys(r.wrong)) r.wrong[k] = fixJosa(r.wrong[k]);
   return r;
 }
@@ -79,6 +81,7 @@ function mcRaw(correct, wrongs, why, extra = {}) {
   return out;
 }
 
+export { POKE };
 const tens = (n) => Math.floor(n / 10) % 10, ones = (n) => n % 10, hund = (n) => Math.floor(n / 100) % 10;
 
 /* ── 기술(주제) 목록: 쉬운 것 -> 어려운 것 ── */

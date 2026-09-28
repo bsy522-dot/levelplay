@@ -90,13 +90,16 @@ await drive(async () => { const s = await st(); return s.flags.placement && !s.b
 s = await st();
 ok('자격 시험 완료', !!s.flags.placement, JSON.stringify(s.learn));
 
-console.log('▶ 첫 포켓몬 (파이리)');
+console.log('▶ 첫 포켓몬 (피카츄 — 만화처럼)');
 await walk('ArrowDown', 1); await walk('ArrowRight', 1); await walk('ArrowUp', 1);
 await key('Space'); await page.waitForTimeout(300);
 await shot('starter_ask');
 await drive(async () => (await st()).flags.gotStarter && !(await vis('.dialog')), 60);
 s = await st();
-ok('파이리를 받음', s.party.length === 1 && s.party[0][0] === 4, JSON.stringify(s.party));
+ok('피카츄를 받음', s.party.length === 1 && s.party[0][0] === 25, JSON.stringify(s.party));
+ok('피카츄가 뒤를 따라다님', await page.evaluate(() => !!(window.__pe.W.scene.fol && window.__pe.W.scene.fol.img.active)));
+ok('다음 목표 안내판 표시', await vis('.goal'));
+await shot('goal_follower');
 
 console.log('▶ 라이벌 배틀');
 await walk('ArrowLeft', 1); await walk('ArrowDown', 3);
@@ -121,14 +124,14 @@ await walk('ArrowUp', 1); await walk('ArrowLeft', 1); await walk('ArrowLeft', 1)
 await key('Space');
 await drive(async () => (await st()).flags.parcel && !(await vis('.dialog')), 40);
 s = await st();
-ok('상점에서 소포 받음', !!s.flags.parcel, JSON.stringify(s.flags));
+ok('상점에서 도감 바로 받음 (왕복 없음)', !!s.flags.pokedex, JSON.stringify(s.flags));
 
 console.log('▶ 도감 받기');
 await teleport('OaksLab', 5, 3, 'up');
 await key('Space');
 await drive(async () => (await st()).flags.pokedex && !(await vis('.dialog')), 80);
 s = await st();
-ok('도감과 몬스터볼 받음', !!s.flags.pokedex, JSON.stringify(s.flags));
+ok('오박사와 대화 정상', !(await st()).busy, JSON.stringify(s.flags));
 
 console.log('▶ 지도 끝 넘어가기 · 숲 관문 연결');
 await teleport('Route1', 10, 1, 'up');
@@ -193,6 +196,11 @@ await drive(async () => { const s = await st(); return !s.busy && !(await vis('.
 console.log('▶ 웅 체육관');
 await page.evaluate(() => { const p = window.__pe.G.s.party; p.forEach((m) => { m.lv = 30; m.hp = 999; }); });
 await drive(async () => !(await st()).busy && !(await vis('.dialog')), 60);
+await teleport('PewterGym', 7, 11, 'up');
+await key('Space');
+await drive(async () => (await st()).flags.squirtleGift && !(await vis('.dialog')), 60);
+ok('체육관 가이드가 꼬부기를 빌려줌', !!(await st()).flags.squirtleGift);
+await page.evaluate(() => { const p = window.__pe.G.s.party; const i = p.findIndex((m) => m.sp === 7); if (i > 0) p.unshift(...p.splice(i, 1)); p.forEach((m) => { m.lv = 30; m.hp = 999; }); });
 await teleport('PewterGym', 4, 2, 'up');
 await key('Space');
 let gymQuiz = null;
@@ -211,7 +219,7 @@ await shot('menu');
 ok('시작 메뉴 열림', await vis('.menu'));
 await key('Space'); await page.waitForTimeout(400); await shot('party'); await key('KeyX'); await page.waitForTimeout(200);
 await key('ArrowDown'); await key('Space'); await page.waitForTimeout(500); await shot('pokedex'); ok('도감 열림', await vis('.dexgrid')); await key('KeyX');
-await key('ArrowDown', 2); await key('Space'); await page.waitForTimeout(400); await shot('report'); ok('공부 기록 열림', await vis('.report')); await key('KeyX');
+await key('ArrowDown', 3); await key('Space'); await page.waitForTimeout(400); await shot('report'); ok('공부 기록 열림', await vis('.report')); await key('KeyX');
 await key('KeyX');
 
 console.log('▶ 저장/이어하기');

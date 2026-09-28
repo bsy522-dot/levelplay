@@ -202,3 +202,16 @@ body.in-panel .pad .dpad, body.in-quiz .pad, body.in-battle .pad { display: none
   .bhud { max-width: 62vw; }
   .quiz .ans { grid-template-columns: 1fr; }
 }
+
+/* 다음 목표 안내판 */
+.goal { position: absolute; left: 50%; top: calc(10px + env(safe-area-inset-top)); transform: translateX(-50%); max-width: min(720px, calc(100% - 24px)); padding: .35em .9em; font-family: 'Jua'; font-size: .85em; z-index: 9; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(255, 253, 246, .94); }
+.goal b { color: #e3350d; }
+.goal small { opacity: .6; }
+body.in-battle .goal, body.in-panel .goal, body.in-quiz .goal { display: none; }
+@media (orientation: portrait) { .goal { top: calc(62px + env(safe-area-inset-top)); white-space: normal; text-align: center; } }
+
+.explain .steps { margin-top: .4em; }
+.explain ol { margin: .2em 0 0 1.2em; padding: 0; }
+.explain ol li { margin: .1em 0; }
+.need { margin-top: .45em; padding: .35em .6em; background: #e9f7ee; border-radius: 10px; font-size: .92em; line-height: 1.5; }
+.quiz .need { margin-top: .5em; }
