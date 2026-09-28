@@ -56,7 +56,7 @@ export function initLearn(grade) {
   };
 }
 
-const sk = (id) => (L().sk[id] ||= { n: 0, ok: 0, streak: 0, miss: 0, mastered: false, placed: false, wrongRecent: 0 });
+const sk = (id) => (L().sk[id] ||= { n: 0, ok: 0, streak: 0, miss: 0, mastered: false, placed: false, wrongRecent: 0, hist: [] });
 
 export function frontier(subj) {
   const lad = LADDER[subj], st = L()[subj];
@@ -77,7 +77,8 @@ export function nextQuestion(opts = {}) {
   const f = frontier(subj);
   const cands = [];
   cands.push({ i: f, w: 6 });
-  if (f + 1 < lad.length) cands.push({ i: f + 1, w: 1.2 });
+  // 한 단계 위 맛보기는 지금 주제를 잘 풀고 있을 때만
+  if (f + 1 < lad.length && sk(lad[f].id).streak >= 1) cands.push({ i: f + 1, w: 1.2 });
   for (let i = Math.max(0, l[subj].floor - 3); i < f; i++) {
     const s = sk(lad[i].id);
     if (s.wrongRecent > 0) cands.push({ i, w: 3 });
@@ -120,21 +121,25 @@ export function record(q, correct, firstTry = true) {
     return res;
   }
   l.total++; s.n++;
+  s.hist = [...(s.hist || []), correct ? 1 : 0].slice(-6);
   if (correct) {
     l.correct++; s.ok++; s.streak++; s.miss = 0;
     l.streak++; l.best = Math.max(l.best, l.streak);
     if (s.wrongRecent > 0) s.wrongRecent--;
-    if (!s.mastered && s.streak >= MASTER_STREAK) { s.mastered = true; res.mastered = true; }
+    // 익힘: 최근 5문제 중 4개 이상 + 이번에도 정답 (요행 3연속 방지)
+    const last5 = s.hist.slice(-5);
+    if (!s.mastered && last5.length >= MASTER_STREAK && last5.reduce((a, b) => a + b, 0) >= Math.min(4, last5.length) && s.streak >= MASTER_STREAK) { s.mastered = true; res.mastered = true; }
   } else {
     s.streak = 0; s.miss++; s.wrongRecent = 2; l.streak = 0;
-    // 첫 주제에서 3번 연속 틀리면 한 단계 쉽게 (배치 시험으로 건너뛴 주제만 되돌림)
+    // 지금 배우는 주제가 너무 어려우면 한 단계 쉽게:
+    // 3번 연속 틀리거나, 최근 5~6문제 정답률이 40% 미만이면 (아래 주제가 어떻게 익힘 처리됐든) 되돌린다
     const st = l[q.subj], lad = LADDER[q.subj];
     const f = frontier(q.subj);
-    if (lad[f].id === q.skill && s.miss >= 3 && f > 0) {
+    const acc = s.hist.length >= 5 ? s.hist.reduce((a, b) => a + b, 0) / s.hist.length : 1;
+    if (lad[f].id === q.skill && f > 0 && (s.miss >= 3 || acc < 0.4)) {
       const prev = sk(lad[f - 1].id);
-      if (prev.placed || f - 1 < st.floor) {
-        prev.mastered = false; prev.placed = false; st.floor = Math.min(st.floor, f - 1); res.stepDown = true; s.miss = 0;
-      }
+      prev.mastered = false; prev.placed = false; prev.streak = 0; prev.hist = [];
+      st.floor = Math.min(st.floor, f - 1); res.stepDown = true; s.miss = 0; s.hist = [];
     }
   }
   res.streak = l.streak;
@@ -156,7 +161,7 @@ export function placementQuestion(subj) {
 export function placementAnswer(q, correct) {
   const l = L(), lad = LADDER[q.subj], st = l[q.subj];
   l.total++; if (correct) l.correct++;
-  st.pos = correct ? Math.min(lad.length - 1, st.pos + (q.subj === 'math' ? 2 : 1)) : Math.max(0, st.pos - 1);
+  st.pos = correct ? Math.min(lad.length - 1, st.pos + (q.subj === 'math' ? 2 : 1)) : Math.max(0, st.pos - 2);
 }
 export function placementDone() {
   const l = L();

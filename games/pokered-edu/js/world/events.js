@@ -210,6 +210,7 @@ export async function talk(map, o) {
     return say([`${josa(P(), '은/는')} ${josa(it.name, '을/를')} 주웠다!`]);
   }
   if (o.n.isTrainer && !trainerBeaten(map, o)) return trainerEncounter(map, o);
+  if (o.n.isTrainer && TRAINER[k]) return say(TRAINER[k].post.slice(1).length ? TRAINER[k].post.slice(1) : TRAINER[k].post, { who: TRAINER[k].name, face: o.kind });
   const L = LINES[k];
   if (typeof L === 'function') return L(o);
   if (L) return say(Array.isArray(L) ? L : [L], { who: o.kind === 'nurse' ? '간호순' : undefined, face: o.kind });

@@ -87,6 +87,14 @@ async function title() {
     W.busy = false;
     return;
   }
+  if (hasSave()) {
+    await fade(false, 200);
+    const box = await say(['이미 저장된 모험이 있어요. 새로 시작하면 지금까지의 기록이 모두 지워져요!'], { keep: true });
+    const yes = await choose([{ label: '그래도 새로 시작', value: true }, { label: '아니요, 돌아갈래요', value: false }], { cancel: false });
+    box.remove();
+    if (!yes) { location.reload(); return; }
+    wipe();
+  }
   await newGame();
 }
 function go() {}

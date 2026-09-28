@@ -2,7 +2,7 @@
  *  ground = 땅·건물·나무 전부,  over = 캐릭터보다 위에 와야 하는 것(나무 윗부분, 풀숲 앞쪽 잎)
  * 원작 그림은 쓰지 않는다. 칸 종류만 보고 새로 그린다. */
 export const T = 48;
-export const MARGIN = 7; // 바깥 지도 둘레에 채우는 여백(칸)
+export const MARGIN = 5; // 바깥 지도 둘레에 채우는 여백(칸)
 
 // 칸 기호
 const WALK = new Set(['.', ',', '"', '*', 'D', '_', 'm', 'U']);

@@ -50,6 +50,7 @@ class InputHub {
     if (DIRS.includes(k)) {
       this.held.add(k);
       this.order = this.order.filter((d) => d !== k); this.order.push(k);
+      if (!repeat && !this.stack.length && !this.locked) this.pending = k; // 가만히 있을 때 톡 친 것도 한 칸은 걷게
     }
     if (this.locked) return;
     const top = this.stack[this.stack.length - 1];
@@ -63,7 +64,8 @@ class InputHub {
   /** 지금 누르고 있는 방향 (UI가 떠 있으면 없음) */
   dir() {
     if (this.stack.length || this.locked) return null;
-    for (let i = this.order.length - 1; i >= 0; i--) if (this.held.has(this.order[i])) return this.order[i];
+    for (let i = this.order.length - 1; i >= 0; i--) if (this.held.has(this.order[i])) { this.pending = null; return this.order[i]; }
+    if (this.pending) { const p = this.pending; this.pending = null; return p; }
     return null;
   }
   push(fn) { this.stack.push(fn); return () => { const i = this.stack.lastIndexOf(fn); if (i >= 0) this.stack.splice(i, 1); }; }

@@ -20,7 +20,7 @@
 
 ## 1. 지금 상태 (2026-09-28, 실측)
 
-- 자동 플레이 테스트 `node _tools/playtest.mjs` — **27/27 통과** (PC 1280×760, 폰 412×860 둘 다)
+- 자동 플레이 테스트 `node _tools/playtest.mjs` — **27/27 통과** (PC 1280×760, 폰 412×860 둘 다) + 터치 전용 `touchtest.mjs` 13/13
   - 새 게임 → 자격 시험 → 파이리 → 라이벌 배틀(문제·오답 설명) → 소포 → 도감 → 지도 넘어가기·숲 관문 → 야생 포획 → 숲 트레이너 → 웅 → 회색배지 → 메뉴 → 이어하기
 - 문제 점검 `node _tools/test_learn.mjs` — 수학 36주제 × 600문제 + 과학 258문제 **오류 0**
 - 지도 18개(바깥 6 + 실내 12), 포켓몬 151마리(도감·그림), 기술 165개, 트레이너 47종 데이터
@@ -87,8 +87,12 @@ games/pokered-edu/
 python -m http.server 8793 --bind 127.0.0.1      # levelplay 폴더에서
 node _tools/playtest.mjs                          # PC
 VIEW=phone node _tools/playtest.mjs               # 폰
+node _tools/touchtest.mjs                         # 폰 터치만으로 (키보드 없이)
 node _tools/test_learn.mjs                        # 문제
+node _tools/test_josa.mjs                         # 숫자·이름 뒤 조사
 ```
+
+> 2026-09-28 독립 검증에서 잡은 것: 투명 전환막이 터치를 막던 문제(키보드 테스트만으론 안 보임 → touchtest 추가), 시간·길이 설명 오류, 너무 어려운 단계에 갇히던 난이도(최근 정답률 40% 미만이면 한 단계 내려감), 새로 시작 시 저장 덮어쓰기 확인.
 스크린샷은 `SHOT_DIR` (기본 job tmp) 에 저장된다. **실측 없이 "완료"라고 말하지 말 것.**
 
 ## 6. 다음 할 일 (2차)

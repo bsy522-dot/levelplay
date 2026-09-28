@@ -1,7 +1,7 @@
 /* 전투: 그림은 Phaser(BattleScene), 글자·메뉴는 화면 위 창. 기술을 쓸 때마다 문제가 나온다. */
 import { DB, ITEMS, sp, monArt } from '../data.js';
 import { G, save, addItem, itemCount, seen, receive, alive, healParty, maxHp } from '../state.js';
-import { el, sleep, josa, pick, chance, rand, typeTag, TYPE_COLOR } from '../util.js';
+import { el, sleep, josa, pick, chance, rand, typeTag, TYPE_COLOR, weighted } from '../util.js';
 import { Input } from '../input.js';
 import { root, portraitUrl, choose, fade, say } from '../ui.js';
 import { sfx, music } from '../audio.js';
@@ -268,7 +268,7 @@ class Hud {
     });
   }
   /** 명령 고르기 (그리드). items: [{label, value, disabled, sub}] */
-  pick(items, { cols = 2, cancel = null, moves = false } = {}) {
+  pick(items, { cols = 2, cancel = null, moves = false, title = null } = {}) {
     return new Promise((resolve) => {
       const wrap = moves ? el('div', { class: 'win moves' }) : this.side;
       wrap.innerHTML = '';
@@ -279,6 +279,7 @@ class Hud {
         const b = el('button', { disabled: it.disabled, onclick: () => { if (!it.disabled) done(it.value); } }, it.label, it.sub || null);
         return b;
       });
+      if (title) wrap.append(el('div', { class: 'jua', style: { gridColumn: '1 / -1', padding: '.1em .3em' } }, fixJosa(title)));
       wrap.append(...btns);
       const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel));
       paint();
@@ -637,7 +638,7 @@ async function learnMove(hud, m, mvId) {
   if (m.moves.length < 4) { m.moves.push({ id: mvId, pp: d.pp }); sfx('item'); await hud.msg(`${josa(nm, '은/는')} 새로 ${josa(d.name, '을/를')} 배웠다!`, true); return; }
   await hud.msg(`${josa(nm, '은/는')} ${josa(d.name, '을/를')} 배우고 싶어 한다!`, true);
   await hud.msg('하지만 기술은 4개까지만 기억할 수 있어. 하나를 잊게 할까?', true);
-  const idx = await hud.pick([...m.moves.map((x, i) => ({ label: DB.moves[x.id].name, value: i, sub: el('small', {}, typeTag(DB.moves[x.id].type)) })), { label: `${d.name} 안 배우기`, value: -1 }], { moves: true, cancel: -1 });
+  const idx = await hud.pick([...m.moves.map((x, i) => ({ label: DB.moves[x.id].name, value: i, sub: el('small', {}, typeTag(DB.moves[x.id].type)) })), { label: `${d.name} 안 배우기`, value: -1 }], { moves: true, cancel: -1, title: `${d.name}을(를) 배우려면 잊을 기술을 고르세요` });
   if (idx === -1) { await hud.msg(`${josa(nm, '은/는')} ${josa(d.name, '을/를')} 배우지 않았다.`, true); return; }
   const old = DB.moves[m.moves[idx].id].name;
   m.moves[idx] = { id: mvId, pp: d.pp };
@@ -741,8 +742,12 @@ async function maybeEvolve(m) {
   m.sp = to;
   m.hp += M.stats(m).hp - before;
   G.s.dex.seen[to] = 1; G.s.dex.caught[to] = 1;
+  const newMoves = [...sp(to).start, ...sp(to).learn.filter(([l]) => l <= m.lv).map(([, mv]) => mv)].filter((mv) => DB.moves[mv] && !m.moves.some((x) => x.id === mv));
+  const taught = [];
+  for (const mv of newMoves) if (m.moves.length < 4) { m.moves.push({ id: mv, pp: DB.moves[mv].pp }); taught.push(DB.moves[mv].name); }
   sfx('levelup');
   txt.textContent = fixJosa(`축하해! ${josa(sp(from).name, '은/는')} ${sp(to).name}(으)로 진화했다!`);
+  if (taught.length) txt.textContent += fixJosa(` 새로 ${taught.join(', ')}을(를) 배웠다!`);
   await new Promise((res) => { const pop = Input.push((k) => { if (k === 'a' || k === 'b') { pop(); res(); } }); box.onclick = () => { pop(); res(); }; });
   box.remove();
   save();
@@ -750,7 +755,8 @@ async function maybeEvolve(m) {
 
 /* ── 공개 도우미 ── */
 export async function wildBattle(wild) {
-  const e = pick(wild.mons);
+  const W8 = [51, 51, 39, 25, 25, 25, 13, 13, 11, 3];
+  const e = weighted(wild.mons.map((m, i) => ({ m, w: W8[i] ?? 1 })), (x) => x.w).m;
   const m = M.makeMon(e.species ? DB.byKey[e.species].id : e[0], e.level || e[1]);
   return runBattle({ kind: 'wild', foes: [m] });
 }

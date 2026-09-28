@@ -135,7 +135,7 @@ export class WorldScene extends Phaser.Scene {
     if (!this.map || !this.player) return;
     G.s.playMs = (G.s.playMs || 0) + dt;
     this.updateNpcs(dt);
-    if (this.moving || W.busy || Input.busy()) { this.animPlayer(); return; }
+    if (this.moving || W.busy || Input.busy()) { Input.pending = null; this.animPlayer(); return; }
     const d = Input.dir();
     if (d) this.tryStep(d);
     else this.player.setFrame(DIRI[G.s.facing] * 3);

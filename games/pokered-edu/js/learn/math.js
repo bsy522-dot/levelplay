@@ -7,9 +7,9 @@ const POKE = ['피카츄', '꼬렛', '구구', '캐터피', '뿔충이', '파이
 const THINGS = [['몬스터볼', '개'], ['상처약', '개'], ['나무열매', '개'], ['배지', '개']];
 
 /* 숫자 뒤 조사 바로잡기: '7와' -> '7과', '10야' -> '10이야', '3를' -> '3을' */
-const PAIRS = [['이야', '야', '이야'], ['이라고', '라고', '이라고'], ['으로', '로', '으로'], ['와', '와', '과'], ['과', '와', '과'],
+const PAIRS = [['이라서', '라서', '이라서'], ['라서', '라서', '이라서'], ['이야', '야', '이야'], ['이라고', '라고', '이라고'], ['으로', '로', '으로'], ['와', '와', '과'], ['과', '와', '과'],
   ['를', '를', '을'], ['을', '를', '을'], ['는', '는', '은'], ['은', '는', '은'], ['가', '가', '이'], ['이', '가', '이'], ['야', '야', '이야'], ['라고', '라고', '이라고'], ['로', '로', '으로']];
-const RE_J = new RegExp(`(\\d)(${PAIRS.map((p) => p[0]).join('|')})(?![가-힣])`, 'g');
+const RE_J = new RegExp(`(\\d)(${PAIRS.map((p) => p[0]).join('|')})(?![가-힣(])`, 'g');
 const RE_W = /([가-힣A-Za-z0-9]+)(이\(가\)|을\(를\)|은\(는\)|와\(과\)|\(으\)로)/g;
 export function hasBatchim(ch) {
   if (/\d/.test(ch)) return '013678'.includes(ch);
@@ -18,10 +18,12 @@ export function hasBatchim(ch) {
 }
 export function fixJosa(s) {
   if (!s) return s;
-  s = s.replace(RE_J, (m, d, p) => {
+  s = s.replace(RE_J, (m, d, p, off, str) => {
     const [, noB, withB] = PAIRS.find((x) => x[0] === p);
-    if (p === '으로' || p === '로') return d + ('178'.includes(d) || !'0369'.includes(d) && !'013678'.includes(d) ? '로' : '으로');
-    return d + ('013678'.includes(d) ? withB : noB);
+    const pre = str.slice(0, off + 1).match(/(\d+)\/\d+$/);
+    const last = pre ? pre[1].slice(-1) : d; // 분수는 분자를 마지막에 읽는다
+    if (p === '으로' || p === '로') return d + ('036'.includes(last) ? '으로' : '로');
+    return d + ('013678'.includes(last) ? withB : noB);
   });
   return s.replace(RE_W, (m, w, p) => {
     const last = w.slice(-1);
@@ -89,7 +91,7 @@ export const MATH = [
       { v: n + 1, why: `하나를 두 번 셌을 수 있어. 센 것은 마음속으로 표시해 두면 두 번 세지 않아.` },
       { v: n + 2, why: `조금 많이 셌어. 줄을 맞춰 왼쪽부터 차례로 세어 보자.` },
     ], `하나씩 짚으면서 세면 ${n}${unit}야. 마지막에 센 수가 전체 개수란다.`, {
-      q: st ? `${pick(POKE)}가 ${thing}을(를) 모았어. 모두 몇 ${unit}일까?` : `${thing}이(가) 모두 몇 ${unit}일까?`,
+      q: st ? `${pick(POKE)}이(가) ${thing}을(를) 모았어. 모두 몇 ${unit}일까?` : `${thing}이(가) 모두 몇 ${unit}일까?`,
       pic: { type: 'count', n }, viz: { type: 'count', n, label: true } });
   } },
   { id: 'm_compare10', g: 0, t: '수의 크기 비교', gen: () => {
@@ -109,7 +111,7 @@ export const MATH = [
       { v: Math.abs(a - b) || null, why: `빼기를 했구나! '더하기(+)'는 합치는 거야. 합치면 원래보다 많아져.` },
       { v: s + 1, why: `하나를 더 셌어. ${a}에서 ${b}칸 앞으로 가면 ${s}에 도착해.` },
     ], `${a}개와 ${b}개를 합치면 ${s}개야. ${a}에서 ${b}칸 이어 세면 ${s}!`, {
-      q: st ? `${pick(POKE)}가 나무열매 ${a}개를 먹고, 또 ${b}개를 먹었어. 모두 몇 개 먹었을까?` : `${a} + ${b} = ?`,
+      q: st ? `${pick(POKE)}이(가) 나무열매 ${a}개를 먹고, 또 ${b}개를 먹었어. 모두 몇 개 먹었을까?` : `${a} + ${b} = ?`,
       viz: { type: 'dots', a, b, op: '+' } });
   } },
   { id: 'm_sub10', g: 0, t: '10까지 빼기', gen: (st) => {
@@ -235,9 +237,9 @@ export const MATH = [
     const m = rand(1, 5), cm = rand(5, 95), t = m * 100 + cm;
     return mc(t, [
       { v: m * 10 + cm, why: `1m는 10cm가 아니라 100cm야. ${m}m는 ${m * 100}cm!` },
-      { v: Number(`${m}${cm}`) === t ? m + cm : Number(`${m}${cm}`), why: `숫자를 그냥 붙이면 안 돼. ${m}m = ${m * 100}cm에 ${cm}cm를 더해야 해.` },
+      cm < 10 ? { v: Number(`${m}${cm}`), why: `${m}과 ${cm}을 그냥 붙였구나. ${cm}cm는 한 자리라서 십의 자리에 0을 채워 ${m}0${cm}cm가 돼.` } : { v: m * 1000 + cm, why: `1m는 1000cm가 아니라 100cm야.` },
       { v: m + cm, why: `m와 cm는 단위가 달라서 그냥 더하면 안 돼. 먼저 cm로 바꾸자.` },
-    ], `1m = 100cm. ${m}m = ${m * 100}cm, 여기에 ${cm}cm를 더하면 ${t}cm!`, {
+    ], `1m = 100cm이니까 ${m}m는 ${m * 100}cm. 여기에 ${cm}cm를 더하면 ${t}cm!`, {
       q: st ? `롱스톤의 몸길이가 ${m}m ${cm}cm라면 몇 cm일까?` : `${m}m ${cm}cm는 몇 cm일까?`, unit: 'cm', viz: { type: 'ruler', m, cm } });
   } },
   { id: 'm_clock_min', g: 2, t: '시계 보기 (몇 시 몇 분)', gen: () => {
@@ -268,7 +270,7 @@ export const MATH = [
     return mc(d, [
       { v: d + 10, why: `십의 자리에서 10을 빌려 왔으면 그 자리를 1 줄여야 해.` },
       { v: Number(`${Math.abs(hund(a) - hund(b))}${Math.abs(tens(a) - tens(b))}${Math.abs(ones(a) - ones(b))}`), why: `자리마다 큰 수에서 작은 수를 뺐구나. 위의 수가 작으면 윗자리에서 빌려 와야 해.` },
-      { v: a + b > 999 ? d - 10 : a + b, why: `계산 방향을 다시 보자. 빼기는 처음 수보다 작아져.` },
+      { v: a + b, why: `더하기를 했어. 빼기는 처음 수 ${a}보다 작아져야 해.` },
     ], `일의 자리 ${ones(a)} − ${ones(b)}가 안 되니 십의 자리에서 10을 빌려 와. 차례로 계산하면 ${d}!`, {
       q: st ? `돈이 ${a}원 있었는데 몬스터볼 값으로 ${b}원을 냈어. 얼마 남았을까?` : `${a} − ${b} = ?`, viz: { type: 'col', a, b, op: '-' } });
   } },
@@ -308,7 +310,7 @@ export const MATH = [
       { v: `${d - n}/${d}`, why: `색칠 안 된 부분을 셌구나. 문제는 색칠된 부분이야.` },
       { v: `${n}/${d - n}`, why: `분모에는 '전체 조각 수'를 써야 해. 색칠 안 된 조각 수가 아니야.` },
     ], `전체를 똑같이 ${d}조각 → 분모 ${d}. 그중 ${n}조각 색칠 → 분자 ${n}. 그래서 ${n}/${d}!`, {
-      fmt, fill: () => ({ v: `${rand(1, 8)}/${rand(2, 9)}`, why: '분모는 전체 조각 수, 분자는 색칠한 조각 수야. 하나씩 세어 보자.' }), q: '색칠한 부분을 분수로 나타내면?', pic: { type: 'frac', n, d }, viz: { type: 'frac', n, d } });
+      fmt, fill: () => { let a2, b2; do { a2 = rand(1, 8); b2 = rand(2, 9); } while (a2 >= b2 || a2 * d === n * b2); return { v: `${a2}/${b2}`, why: '분모는 전체 조각 수, 분자는 색칠한 조각 수야. 하나씩 세어 보자.' }; }, q: '색칠한 부분을 분수로 나타내면?', pic: { type: 'frac', n, d }, viz: { type: 'frac', n, d } });
   } },
   { id: 'm_frac_compare', g: 3, t: '단위분수 크기 비교', gen: (st) => {
     let a = rand(2, 9), b = rand(2, 9); while (b === a) b = rand(2, 9);
@@ -333,7 +335,7 @@ export const MATH = [
       fmt, q: `1이 ${o}개, 0.1이 ${k}개인 수는?`, viz: { type: 'decimal', o, k } });
   } },
   { id: 'm_time_calc', g: 3, t: '시간 계산', gen: (st) => {
-    const h = rand(1, 10), m = pick([20, 30, 40, 45, 50]), add = pick([20, 25, 30, 40]);
+    const h = rand(1, 10), m = pick([30, 40, 45, 50]), add = pick([20, 25, 30, 40].filter((x) => m + x > 60));
     const tot = m + add, H = h + Math.floor(tot / 60), M = tot % 60;
     const f = (a, b) => `${a}시 ${b}분`;
     return mc(f(H, M), [
@@ -415,7 +417,7 @@ export const MATH = [
       { v: 2 * (w + h), why: `둘레를 구했구나. 넓이는 안쪽을 채우는 1cm² 칸의 개수야.` },
       { v: w + h, why: `가로와 세로를 더했어. 넓이는 가로 × 세로!` },
       { v: w * h * 2, why: `두 배를 할 필요는 없어. 칸을 세면 가로 × 세로 개야.` },
-    ], `한 줄에 ${w}칸씩 ${h}줄 → ${w} × ${h} = ${w * h}cm².`, {
+    ], `한 줄에 ${w}칸씩 ${h}줄 → ${w} × ${h} = ${w * h}${st ? 'm²' : 'cm²'}.`, {
       q: st ? `포켓몬 목장이 가로 ${w}m, 세로 ${h}m인 직사각형이야. 넓이는 몇 m²?` : `가로 ${w}cm, 세로 ${h}cm인 직사각형의 넓이는?`, unit: st ? 'm²' : 'cm²', viz: { type: 'array', r: h, c: w } });
   } },
   { id: 'm_average', g: 5, t: '평균', gen: (st) => {

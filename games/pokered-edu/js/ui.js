@@ -155,7 +155,7 @@ export function askName(title, def) {
       el('div', { class: 'row2' }, el('button', { onclick: ok }, '좋아요!')));
     inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); ok(); } });
     root().append(box);
-    const pop = Input.push(() => {});
+    const pop = Input.push((k) => { if (k === 'a') ok(); });
     setTimeout(() => inp.focus(), 50);
   });
 }
