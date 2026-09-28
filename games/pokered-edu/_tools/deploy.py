@@ -18,7 +18,7 @@ def main():
         (shutil.copytree if os.path.isdir(src) else shutil.copy2)(src, os.path.join(dist, k))
     cmd = f'npx -y wrangler@4.121.0 pages deploy "{dist}" --project-name={PROJECT} --branch=main --commit-dirty=true'
     print('>', cmd)
-    r = subprocess.run(cmd, shell=True)
+    r = subprocess.run(cmd, shell=True, cwd=tempfile.gettempdir())  # 캐시(.wrangler)가 게임 폴더에 생기지 않게
     sys.exit(r.returncode)
 
 if __name__ == '__main__':
