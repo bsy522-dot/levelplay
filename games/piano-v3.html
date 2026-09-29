@@ -14,7 +14,7 @@
 }
 /* touch-action: manipulation은 핀치 '페이지 줌'을 허용한다 → pan-y로 좁혀 페이지 줌 원천 차단.
    확대는 오직 건반 폭(keyZoom)만. 건반 영역은 pan-x로 좌우 스크롤 허용. */
-html, body { height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; overflow:hidden; touch-action:pan-y; user-select:none; }
+html, body { height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; overflow:hidden; touch-action:pan-y; user-select:none; overscroll-behavior:none; }
 #app { display:flex; flex-direction:column; height:100%; }
 
 .midi-connected { color:var(--green) !important; }
@@ -355,6 +355,82 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
   #play-view { padding:8px 6px; }
   .ans-grid, .mem-pads { gap:6px; } /* 5칸이어도 한 칸 48px 이상 */
 }
+/* ===== 🌈 건반 7개 (0929) — 아이용 큰 무지개 건반. 칠 건반에 불이 들어오고, 맞게 누르면 그 곡의 진짜 높이로 소리가 난다 ===== */
+#btn-k7 { flex-shrink:0; min-width:76px; min-height:60px; border:none; border-left:1px solid var(--border); background:transparent; color:#fde68a; font-size:15px; font-weight:900; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; padding:0 6px; }
+#btn-k7 .k7i { font-size:22px; }
+body.lscape #btn-k7 { min-height:48px; flex-direction:row; gap:4px; }
+#k7 { position:fixed; inset:0; z-index:55; background:var(--bg); display:none; flex-direction:column; touch-action:none; overscroll-behavior:none; }
+body.k7on #k7 { display:flex; }
+#k7-top { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+#k7-top .btn { min-height:56px; font-size:18px; padding:0 14px; white-space:nowrap; }
+#k7-title { flex:1; min-width:0; text-align:center; font-size:22px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#k7-mid { position:relative; flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:10px 12px; overflow:hidden; }
+#k7-big { width:min(30vw,26vh,180px); height:min(30vw,26vh,180px); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:min(13vw,12vh,84px); font-weight:900; color:#111827; background:var(--c,#1f2a44); box-shadow:0 0 0 6px rgba(255,255,255,.07); transition:background .15s, transform .12s; flex-shrink:0; }
+#k7-big.pop { transform:scale(1.12); }
+#k7-prog { width:min(560px,90%); height:14px; background:var(--border); border-radius:7px; overflow:hidden; flex-shrink:0; }
+#k7-prog i { display:block; height:100%; width:0; background:linear-gradient(90deg,#f87171,#facc15,#4ade80,#60a5fa,#c084fc); transition:width .2s; }
+#k7-msg { font-size:20px; font-weight:800; color:#cbd5e1; text-align:center; }
+#k7-acts { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+#k7-acts .btn { min-height:60px; font-size:19px; }
+#k7-acts[hidden] { display:none; }
+/* 폰 가로: 가운데 칸이 낮으니 동그라미는 왼쪽, 글·단추는 오른쪽 */
+body.lscape #k7-top { padding:4px 8px; }
+body.lscape #k7-top .btn { min-height:44px; font-size:16px; }
+body.lscape #k7-title { font-size:18px; }
+body.lscape #k7-mid { display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:14px; row-gap:6px; align-content:center; justify-items:start; padding:4px 12px; }
+body.lscape #k7-big { grid-row:1 / span 3; width:min(18vw,24vh,100px); height:min(18vw,24vh,100px); font-size:min(8vw,12vh,50px); }
+body.lscape #k7-prog { width:100%; }
+body.lscape #k7-msg { font-size:17px; text-align:left; }
+body.lscape #k7-acts .btn { min-height:44px; font-size:16px; }
+body.lscape .k7k.target::before { top:22%; font-size:clamp(22px,4vw,36px); }
+@media (max-width:380px) { #btn-k7 { min-width:54px; font-size:12px; padding:0 3px; } #btn-k7 .k7i { font-size:18px; } .tab, .tab-more { font-size:15px; gap:3px; padding:4px 2px; } }
+@media (max-width:340px) { .tabs .tab-icon, .tab-more .tab-icon { display:none; } #btn-settings { width:52px; } }
+/* 폰 가로에서 노래 목록이 열려 있는 동안은 건반을 낮춰 곡 카드가 보이게 */
+body.lscape.k7list #k7-keys { height:26vh; }
+#k7-list { position:absolute; inset:0; overflow-y:auto; touch-action:pan-y; background:var(--bg); padding:10px 12px 16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; align-content:start; }
+#k7-list[hidden] { display:none; }
+.k7-sec { grid-column:1/-1; font-size:17px; font-weight:900; color:#8fb0ff; margin-top:6px; }
+.k7-card { min-height:80px; border:2px solid #2c3656; border-radius:16px; background:var(--surface2); color:var(--text); display:flex; align-items:center; gap:10px; padding:8px 12px; font-size:19px; font-weight:800; cursor:pointer; text-align:left; }
+.k7-card .k7-ce { font-size:34px; line-height:1; flex-shrink:0; }
+.k7-card .k7-cn { flex:1; min-width:0; overflow-wrap:anywhere; }
+.k7-card.done { border-color:#facc15; }
+.k7-card.free { border-color:#4a7dff; }
+#k7-keys { flex-shrink:0; height:min(46vh,520px); display:flex; gap:6px; padding:6px 6px calc(8px + env(safe-area-inset-bottom, 0px)); background:#0d1117; border-top:1px solid var(--border); touch-action:none; }
+body.lscape #k7-keys { height:52vh; }
+.k7k { flex:1; min-width:0; position:relative; border-radius:10px 10px 22px 22px; background:linear-gradient(180deg, var(--c) 0 22%, #f8fafc 22% 100%); box-shadow:inset 0 -8px 0 rgba(0,0,0,.12), 0 4px 0 #475569; display:flex; align-items:flex-end; justify-content:center; padding-bottom:14px; cursor:pointer; transition:transform .06s, filter .06s; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+.k7k .k7n { width:1.8em; height:1.8em; border-radius:50%; background:var(--c); color:#111827; display:flex; align-items:center; justify-content:center; font-size:clamp(20px,5.2vw,42px); font-weight:900; pointer-events:none; }
+.k7k.down { transform:translateY(5px); filter:brightness(.9); box-shadow:inset 0 -3px 0 rgba(0,0,0,.12), 0 1px 0 #475569; }
+.k7k.lit { background:var(--c); }
+.k7k.target { animation:k7pulse 1s ease-in-out infinite; }
+.k7k.target::before { content:'⬇'; position:absolute; top:26%; left:50%; transform:translateX(-50%); font-size:clamp(28px,7vw,54px); color:var(--c); filter:drop-shadow(0 2px 2px rgba(0,0,0,.5)); animation:k7bob 1s ease-in-out infinite; pointer-events:none; }
+.k7k.nudge { animation:k7nudge .35s; }
+.k7k.hit::after { content:'⭐'; position:absolute; top:4%; left:50%; font-size:36px; animation:k7star .6s forwards; pointer-events:none; }
+@keyframes k7pulse { 0%,100% { box-shadow:0 0 0 0 var(--c), 0 4px 0 #475569; } 50% { box-shadow:0 0 0 8px var(--c), 0 4px 0 #475569; } }
+@keyframes k7bob { 0%,100% { transform:translate(-50%,0); } 50% { transform:translate(-50%,10px); } }
+@keyframes k7nudge { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
+@keyframes k7star { from { opacity:1; transform:translate(-50%,0) scale(.6); } to { opacity:0; transform:translate(-50%,-60px) scale(1.4); } }
+.sb-sec.fam { color:#f9a8d4; }
+.fam-btns { justify-content:flex-end; gap:8px; }
+.fam-btns .btn { min-height:48px; font-size:16px; }
+.fam-btns { flex-wrap:wrap; padding:6px 0; }
+/* ✏️ 계이름으로 노래 만들기 (0929) */
+.modal.solf { max-width:520px; max-height:92vh; overflow-y:auto; touch-action:pan-y; text-align:left; display:flex; flex-direction:column; gap:10px; }
+.modal.solf > * { flex-shrink:0; }
+.modal.solf h3 { text-align:center; margin:0; }
+.solf input, .solf textarea { width:100%; font-size:18px; padding:10px 12px; background:var(--bg); color:var(--text); border:1px solid #2c3656; border-radius:10px; font-family:inherit; user-select:text; -webkit-user-select:text; }
+.solf textarea { min-height:120px; resize:vertical; line-height:1.6; }
+.solf-emo { display:flex; gap:6px; flex-wrap:wrap; }
+.solf-emo button { width:48px; height:48px; font-size:26px; border-radius:12px; border:2px solid #374151; background:#1f2430; cursor:pointer; }
+.solf-emo button.sel { border-color:#f9a8d4; background:#3b1d33; }
+.solf-help { font-size:14px; color:#94a3b8; line-height:1.6; }
+.solf-read { font-size:15px; color:#cbd5e1; min-height:22px; overflow-wrap:anywhere; }
+.solf-acts { display:flex; gap:8px; }
+.solf-acts .btn { flex:1; min-height:56px; }
+.solf-mine { display:flex; flex-wrap:wrap; gap:6px; }
+.solf-mine .item { display:flex; border:1px solid #2c3656; border-radius:10px; overflow:hidden; }
+.solf-mine button { min-height:44px; padding:0 10px; background:var(--surface2); color:var(--text); border:none; font-size:15px; cursor:pointer; }
+.solf-mine button.del { color:#fca5a5; border-left:1px solid #2c3656; }
+.k7-card.make { border-style:dashed; border-color:#f9a8d4; }
 </style>
 </head>
 <body>
@@ -375,6 +451,7 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
       <div class="tab" data-tab="record" data-label="녹음"><span class="tab-icon">⏺</span>녹음</div>
     </div>
     <span id="midi-badge" hidden>MIDI</span>
+    <button id="btn-k7" aria-label="건반 7개로 바꾸기"><span class="k7i">🌈</span>7건반</button>
     <button id="btn-settings" aria-label="설정" aria-expanded="false">⚙</button>
   </div>
 
@@ -401,7 +478,11 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
         <div><kbd>←</kbd><kbd>→</kbd> 건반 이동</div>
       </div>
     </div>
-    <div class="set-ver">판 0926</div>
+    <div class="set-h">💖 우리집 노래</div>
+    <div class="set-row">이 기기에만 넣은 곡 <span class="set-val" id="fam-count">0곡</span></div>
+    <div class="set-row fam-btns"><button class="btn btn-primary" id="solf-open" style="background:#be185d">✏️ 계이름으로 만들기</button><button class="btn btn-primary" id="fam-add">＋ 곡 파일 넣기</button><button class="btn btn-secondary" id="fam-clear" hidden>모두 빼기</button></div>
+    <input type="file" id="fam-file" accept=".json,application/json,text/plain" hidden>
+    <div class="set-ver">판 0929</div>
   </div>
 
   <!-- Free Play -->
@@ -504,6 +585,46 @@ body.lscape #song-opt-start { min-height:56px; font-size:18px; }
        실제로 그랬다. 그래서 #kb-strip 옆, 스크롤에 안 물리는 자리에 둔다. -->
   <div id="kb-land-wrap">
     <button id="kzb-land" aria-label="가로로 보기" title="가로로 보기">↻</button>
+  </div>
+</div>
+
+<!-- 🌈 건반 7개 (0929) -->
+<div id="k7" aria-label="건반 7개">
+  <div id="k7-top">
+    <button class="btn btn-secondary" id="k7-exit">🎹 건반 전체</button>
+    <div id="k7-title">노래 고르기</div>
+    <button class="btn btn-primary" id="k7-songs" style="background:#7c3aed">🎵 노래</button>
+  </div>
+  <div id="k7-mid">
+    <div id="k7-big">🌈</div>
+    <div id="k7-prog" hidden><i></i></div>
+    <div id="k7-msg">무지개 건반을 눌러 보세요</div>
+    <div id="k7-acts" hidden>
+      <button class="btn btn-secondary" id="k7-listen">👂 들어보기</button>
+      <button class="btn btn-primary" id="k7-again" style="background:#15803d">↺ 처음부터</button>
+    </div>
+    <div id="k7-list"></div>
+  </div>
+  <div id="k7-keys"></div>
+</div>
+
+<!-- ✏️ 계이름으로 노래 만들기 (0929) -->
+<div class="modal-overlay" id="solf-modal">
+  <div class="modal solf">
+    <h3>✏️ 계이름으로 노래 만들기</h3>
+    <input id="solf-name" maxlength="30" placeholder="노래 이름 (예: 우리 노래)">
+    <div class="solf-emo" id="solf-emo"></div>
+    <textarea id="solf-text" placeholder="예) 도도솔솔 라라솔- / 파파미미 레레도-"></textarea>
+    <div class="solf-help">도 레 미 파 솔 라 시 (C D E 도 돼요) · <b>높은도</b> · <b>낮은솔</b> · 파# · 솔-(길게) · /(잠깐 쉼)<br>표시 없이 적으면 높이를 알아서 골라요. 높이가 틀리면, 가운데 도~시보다 높은 음엔 모두 '높은', 낮은 음엔 모두 '낮은'을 붙여요. 계이름만 적어 주세요. 이 기기에만 저장돼요.</div>
+    <div class="opt-h">음 높이</div>
+    <div class="opt-row" id="solf-auto"><button class="opt-btn sel" data-auto="1">🎯 알아서<small>표시 없을 때 앞 음과 가깝게</small></button><button class="opt-btn" data-auto="0">🎹 가운데 도~시<small>높은·낮은만 바뀜</small></button></div>
+    <div class="opt-h">빠르기</div>
+    <div class="opt-row" id="solf-bpm"><button class="opt-btn" data-bpm="70">🐢 느리게</button><button class="opt-btn sel" data-bpm="100">⭐ 보통</button><button class="opt-btn" data-bpm="130">🐇 빠르게</button></div>
+    <div class="solf-read" id="solf-read"></div>
+    <div class="solf-acts"><button class="btn btn-secondary" id="solf-play">👂 들어보기</button><button class="btn btn-primary" id="solf-save" style="background:#be185d">💾 저장</button></div>
+    <div class="opt-h" id="solf-mine-h">넣은 노래 (누르면 고치기)</div>
+    <div class="solf-mine" id="solf-mine"></div>
+    <button class="btn btn-secondary" id="solf-close">닫기</button>
   </div>
 </div>
 
@@ -734,6 +855,7 @@ function releaseNote(midi) {
   data.noteGain.gain.setValueAtTime(data.noteGain.gain.value, now);
   data.noteGain.gain.exponentialRampToValueAtTime(0.001, now + rel);
   data.oscs.forEach(o => o.osc.stop(now + rel + 0.05));
+  noteCleanup(data);
   activeNotes.delete(midi);
   const el = document.querySelector(`[data-midi="${midi}"]`);
   if (el) el.classList.remove('pressed');
@@ -744,11 +866,17 @@ function stopNoteImmediate(midi) {
   const data = activeNotes.get(midi);
   if (!data) return;
   data.oscs.forEach(o => { try{o.osc.stop();}catch(e){} });
+  noteCleanup(data);
   activeNotes.delete(midi);
   const el = document.querySelector(`[data-midi="${midi}"]`);
   if (el) el.classList.remove('pressed');
 }
 
+// 0929: 멈춘 음의 부품(발진기·음량)을 끝난 뒤 떼어 낸다 — 오래 치면 연결이 쌓여 앱이 무거워지던 것 예방
+function noteCleanup(data) {
+  const o = data.oscs[0] && data.oscs[0].osc; if (!o) return;
+  o.onended = () => { try { data.oscs.forEach(x => { x.osc.disconnect(); x.gain.disconnect(); }); data.noteGain.disconnect(); } catch (e) {} };
+}
 function releaseSustain() { sustainedNotes.forEach(m => releaseNote(m)); sustainedNotes.clear(); }
 
 // ================ 가로(랜드스케이프) 컴팩트 레이아웃 ================
@@ -791,7 +919,7 @@ function pianoToast(msg) {
   if (!t) {
     t = document.createElement('div');
     t.id = 'piano-toast';
-    t.style.cssText = 'position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:9999;max-width:86%;padding:12px 16px;border-radius:12px;background:rgba(17,24,39,.96);color:#e5e7eb;font-size:13px;font-weight:600;line-height:1.5;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5);border:1px solid #374151;';
+    t.style.cssText = 'position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:9999;pointer-events:none;max-width:86%;padding:12px 16px;border-radius:12px;background:rgba(17,24,39,.96);color:#e5e7eb;font-size:13px;font-weight:600;line-height:1.5;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.5);border:1px solid #374151;';
     document.body.appendChild(t);
   }
   t.textContent = msg;
@@ -1132,7 +1260,7 @@ function buildKeyMap() {
 
 const heldKeys = new Set();
 document.addEventListener('keydown', e => {
-  if (e.repeat || e.target.tagName==='INPUT' || e.target.tagName==='SELECT') return;
+  if (e.repeat || e.target.tagName==='INPUT' || e.target.tagName==='SELECT' || e.target.tagName==='TEXTAREA') return;
   if (e.code === 'Space') { e.preventDefault(); sustainOn=true; return; }
   if (e.code === 'ArrowLeft') { e.preventDefault(); document.getElementById('piano-wrap').scrollLeft -= 80; return; }
   if (e.code === 'ArrowRight') { e.preventDefault(); document.getElementById('piano-wrap').scrollLeft += 80; return; }
@@ -3032,9 +3160,9 @@ const DIFF_NAME = {1:'초급', 2:'중급', 3:'고급'};
 const DIFF_LABEL = {1:'🌱 초급', 2:'⭐ 중급', 3:'🔥 고급'};
 
 // 난이도 자동 산정: 노트 수·양손 여부·BPM(체감 난이도 = 초당 노트 수 + 화음 + 음역)
-const _diffCache = {};
+const _diffCache = new WeakMap(); // 0929: 이름이 아니라 곡 자체로 — 우리집 노래가 기존 곡 이름과 같아도 안 꼬이게
 function songDifficulty(song) {
-  if (_diffCache[song.name] !== undefined) return _diffCache[song.name];
+  if (_diffCache.has(song)) return _diffCache.get(song);
   const N = song.notes;
   if (!N.length) return 1;
   let end = 0, hasL = false, hasR = false, minM = 999, maxM = -1;
@@ -3059,7 +3187,7 @@ function songDifficulty(song) {
   if (N.length > 100) s += 1;                            // 긴 곡
   if (song.bpm >= 120 && density < 4.5) s += 1;          // 빠른 템포 (밀도에 이미 반영된 곡은 중복 가산 제외)
   const d = s <= 2 ? 1 : (s <= 5 ? 2 : 3);
-  _diffCache[song.name] = d;
+  _diffCache.set(song, d);
   return d;
 }
 function songPct(key) { return Math.round(progress['song:' + key] || 0); }
@@ -3068,9 +3196,21 @@ function renderSongList() {
   const host = document.getElementById('song-list');
   if (!host) return;
   const secs = {1:[], 2:[], 3:[]};
-  const keys = SONG_ORDER.filter(k => SONGS[k]).concat(Object.keys(SONGS).filter(k => !SONG_ORDER.includes(k)));
+  const keys = SONG_ORDER.filter(k => SONGS[k]).concat(Object.keys(SONGS).filter(k => !SONG_ORDER.includes(k) && !isFam(k)));
   keys.forEach(k => secs[songDifficulty(SONGS[k])].push(k));
   let html = '';
+  const fam = Object.keys(SONGS).filter(isFam);
+  if (fam.length) {
+    html += `<div class="sb-sec fam">💖 우리집 노래</div>`;
+    fam.forEach(k => {
+      const s = SONGS[k], m = SONG_META[k] || {emoji:'💖', sub:'우리집 노래'}, pct = songPct(k);
+      html += `<button class="song-card${pct >= 90 ? ' done' : ''}" data-key="${esc(k)}">`
+        + `<span class="sc-thumb">${esc(m.emoji)}</span>`
+        + `<span class="sc-body"><span class="sc-title">${esc(s.name)}</span><span class="sc-sub">${esc(m.sub)}</span>`
+        + `<span class="sc-bar"><i style="width:${pct}%"></i></span></span>`
+        + `<span class="sc-pct${pct ? '' : ' zero'}">${pct}%${pct >= 90 ? '<small>⭐</small>' : ''}</span></button>`;
+    });
+  }
   [1,2,3].forEach(d => {
     if (!secs[d].length) return;
     html += `<div class="sb-sec d${d}">${DIFF_LABEL[d]}</div>`;
@@ -3470,31 +3610,444 @@ function init() {
   }, 100);
 }
 
+// ================ 💖 우리집 노래 (0929) ================
+// 공개 앱에는 곡이 없다. 부모가 가진 곡 파일(.json)을 ⚙ → '곡 파일 넣기'로 이 기기에만 넣는다(이 기기 저장소에만 남고 서버로 안 간다).
+const FAM_KEY = 'piano-v3-family';
+const FLAT2SHARP = {Db:'C#', Eb:'D#', Gb:'F#', Ab:'G#', Bb:'A#'};
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function isFam(k) { return typeof k === 'string' && k.startsWith('fam_'); }
+function famHash(s) { let h = 5381; for (const ch of String(s)) h = ((h * 33) ^ ch.codePointAt(0)) >>> 0; return 'h' + h.toString(36); }
+function famNote(s) {
+  const m = /^([A-G])(#|b)?(\d)$/.exec(String(s || '').trim());
+  if (!m) return null;
+  let n = m[1] + (m[2] || ''), o = +m[3];
+  if (m[2] === 'b') { if (n === 'Cb') { n = 'B'; o--; } else if (n === 'Fb') n = 'E'; else n = FLAT2SHARP[n]; }
+  if (n === 'E#') n = 'F';
+  if (n === 'B#') { n = 'C'; o++; }
+  const r = n + o;
+  return nameToMidi(r) > 0 ? r : null;
+}
+function famParse(obj) {
+  const arr = Array.isArray(obj) ? obj : (obj && Array.isArray(obj.songs) ? obj.songs : []);
+  const out = [];
+  arr.slice(0, 60).forEach((s, i) => {
+    if (!s || typeof s.name !== 'string' || !Array.isArray(s.notes)) return;
+    const notes = [];
+    s.notes.slice(0, 3000).forEach(n => {
+      const note = n && famNote(n.note), tm = n ? +n.time : NaN, d = n ? +n.duration : NaN;
+      if (!note || !isFinite(tm) || tm < 0 || tm > 100000 || !isFinite(d) || d <= 0 || d > 64) return;
+      notes.push({note, time:tm, duration:d, hand: n.hand === 'L' ? 'L' : 'R'});
+    });
+    if (notes.length < 2) return;
+    const id = String(s.key || s.name).replace(/^fam_/, '').replace(/[^\w가-힣]/g, '').slice(0, 40) || famHash(s.key || s.name);
+    out.push({key:'fam_' + id, name:s.name.trim().slice(0, 40) || '우리집 노래', sub:String(s.artist || s.sub || '우리집 노래').slice(0, 40),
+      emoji: typeof s.emoji === 'string' && s.emoji ? [...s.emoji].slice(0, 2).join('') : '💖',
+      bpm: Math.min(240, Math.max(30, +s.bpm || 100)), notes,
+      text: typeof s.text === 'string' ? s.text.slice(0, 4000) : undefined, auto: s.auto !== false});
+  });
+  return out;
+}
+function famLoad() { try { const a = JSON.parse(localStorage.getItem(FAM_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function famApply() {
+  Object.keys(SONGS).filter(isFam).forEach(k => { delete SONGS[k]; delete SONG_META[k]; });
+  const list = famParse(famLoad());
+  list.forEach(s => { SONGS[s.key] = {name:s.name, bpm:s.bpm, notes:s.notes}; SONG_META[s.key] = {emoji:s.emoji, sub:s.sub}; });
+  const sel = document.getElementById('song-select');
+  const old = document.getElementById('fam-og'); if (old) old.remove();
+  if (list.length && sel) {
+    const og = document.createElement('optgroup'); og.id = 'fam-og'; og.label = '우리집 노래';
+    list.forEach(s => { const o = document.createElement('option'); o.value = s.key; o.textContent = s.name; og.appendChild(o); });
+    sel.appendChild(og);
+  }
+  const c = document.getElementById('fam-count'); if (c) c.textContent = list.length + '곡';
+  const clr = document.getElementById('fam-clear'); if (clr) clr.hidden = !list.length;
+  return list.length;
+}
+function famRefresh() { famApply(); renderSongList(); k7RenderList(); if (k7.key && !SONGS[k7.key]) k7ShowList(); }
+famApply();
+document.getElementById('fam-add').addEventListener('click', () => document.getElementById('fam-file').click());
+document.getElementById('fam-file').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  if (f.size > 2e6) { pianoToast('파일이 너무 커요'); return; }
+  const r = new FileReader();
+  r.onload = () => {
+    let obj; try { obj = JSON.parse(r.result); } catch (err) { pianoToast('곡 파일이 아니에요'); return; }
+    const add = famParse(obj);
+    if (!add.length) { pianoToast('넣을 수 있는 곡이 없어요'); return; }
+    const all = famParse(famLoad()).filter(s => !add.some(a => a.key === s.key)).concat(add).slice(-60);
+    try { localStorage.setItem(FAM_KEY, JSON.stringify(all)); } catch (err) { pianoToast('저장 공간이 모자라요'); return; }
+    famRefresh();
+    pianoToast('💖 우리집 노래 ' + add.length + '곡을 넣었어요');
+  };
+  r.readAsText(f);
+});
+(function () {
+  const clr = document.getElementById('fam-clear'); let arm = 0, tm = null;
+  clr.addEventListener('click', () => {
+    if (Date.now() - arm > 3000) { arm = Date.now(); clr.textContent = '한 번 더 누르면 빼요'; clearTimeout(tm); tm = setTimeout(() => { clr.textContent = '모두 빼기'; }, 3000); return; }
+    arm = 0; clearTimeout(tm); clr.textContent = '모두 빼기';
+    try { localStorage.removeItem(FAM_KEY); } catch (e) {}
+    famRefresh(); pianoToast('우리집 노래를 뺐어요');
+  });
+})();
+
+// ================ ✏️ 계이름으로 노래 만들기 (0929) ================
+// 부모가 계이름(도레미)을 적으면 우리집 노래가 된다. 이 기기에만 저장(서버로 안 감) — 공개 앱에는 곡이 없다.
+// 높은도/낮은솔·↑↓ = 가운데(도~시)보다 한 옥타브 위·아래, 파#·시b, 솔-(한 박 더), /(쉼).
+// 표시가 하나도 없으면 '알아서'(앞 음과 가깝되 가운데 음역에 머물게 — 작은별 도→솔은 위로), 표시가 있으면 모든 음을 가운데 기준으로.
+const solfEl = id => document.getElementById(id);
+const SOLF = {'도':'C','레':'D','미':'E','파':'F','솔':'G','쏠':'G','라':'A','시':'B'};
+const SOLF_PC = {C:0, D:2, E:4, F:5, G:7, A:9, B:11};
+function solfParse(text, auto) {
+  const s = String(text || '').slice(0, 4000);
+  const marked = /높은|낮은|[↑↓^]|[A-G][#♯b♭]?[1-7]/.test(s);
+  if (marked) auto = false;   // 표시를 쓴 글은 표시 기준(가운데 도~시)으로만 읽는다
+  const notes = []; let tm = 0, prev = null, up = 0, bad = 0, i = 0;
+  while (i < s.length) {
+    if (s.startsWith('높은', i)) { up++; i += 2; continue; }
+    if (s.startsWith('낮은', i)) { up--; i += 2; continue; }
+    const c = s[i];
+    if (c === '↑' || c === '^') { up++; i++; continue; }
+    if (c === '↓') { up--; i++; continue; }
+    const L = SOLF[c] || (/[A-G]/.test(c) ? c : null);
+    if (!L) {
+      if ((c === '-' || c === '~' || c === 'ー' || c === '—') && notes.length) { notes[notes.length - 1].duration += 1; tm += 1; }
+      else if (c === '/' || c === '|' || c === '\n') { if (notes.length) tm += 1; }
+      else if (!/[\s()\[\]{}.,·'"’]/.test(c)) bad++;
+      i++; continue;
+    }
+    let j = i + 1, acc = 0, oct = null;
+    if (s[j] === '#' || s[j] === '♯') { acc = 1; j++; } else if (s[j] === 'b' || s[j] === '♭') { acc = -1; j++; }
+    if (/[A-G]/.test(c) && /[1-7]/.test(s[j] || '')) { oct = +s[j]; j++; }
+    const base = SOLF_PC[L] + acc;
+    let m;
+    if (oct !== null) m = (oct + 1) * 12 + base;
+    else if (up !== 0 || !auto || prev === null) m = 60 + base + 12 * up;
+    else { m = null; let best = 1e9; for (let o = 2; o <= 6; o++) { const x = (o + 1) * 12 + base, sc = Math.abs(x - prev) + 0.5 * Math.abs(x - 66); if (sc < best) { best = sc; m = x; } } } // 앞 음과 가깝되 가운데(파♯4)에서 너무 멀어지지 않게
+    m = Math.min(96, Math.max(36, m));
+    notes.push({note: NOTE_NAMES[m % 12] + (Math.floor(m / 12) - 1), time: tm, duration: 1, hand: 'R'});
+    tm += 1; prev = m; up = 0; i = j;
+  }
+  return {notes, bad, marked};
+}
+const SOLF_EMO = ['💖','🌟','🦄','🎤','👑','🐰','🌈','🎀'];
+const solf = {auto: true, bpm: 100, emoji: '💖', timers: [], delArm: null, editKey: null, draft: false};
+function solfShow(n) {
+  const L = n.note.replace(/\d$/, ''), o = +n.note.slice(-1);
+  return (KOREAN_NOTE_MAP[L] || L) + (o >= 5 ? '↑'.repeat(o - 4) : o <= 3 ? '↓'.repeat(4 - o) : '');
+}
+function solfRead() {
+  const r = solfParse(solfEl('solf-text').value, solf.auto), el = solfEl('solf-read');
+  el.textContent = r.notes.length
+    ? `읽은 음 ${r.notes.length}개 — ` + r.notes.slice(0, 16).map(solfShow).join(' ') + (r.notes.length > 16 ? ' …' : '') + (r.bad ? ` (모르는 글자 ${r.bad}개는 뺐어요)` : '')
+    : '계이름을 적으면 여기에 읽은 음이 나와요';
+  if (r.marked && r.notes.length) el.textContent += ' · 높은·낮은 표시가 있어 가운데 도~시 기준으로 읽었어요';
+  return r;
+}
+function solfSel(boxId, attr, val) { solfEl(boxId).querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset[attr] === String(val))); }
+function solfStopPlay() {
+  solf.timers.forEach(clearTimeout); solf.timers = [];
+  for (const m of [...activeNotes.keys()]) { try { stopNoteImmediate(m); } catch (e) {} }
+}
+function solfPlay() {
+  solfStopPlay(); ensureAudio();
+  const r = solfRead(); if (!r.notes.length) return;
+  const spb = 60 / solf.bpm;
+  r.notes.forEach(n => {
+    const m = nameToMidi(n.note);
+    solf.timers.push(setTimeout(() => { playNote(m, 0.8); solf.timers.push(setTimeout(() => stopNote(m), n.duration * spb * 900)); }, n.time * spb * 1000));
+  });
+}
+function solfMine() {
+  const list = famParse(famLoad()), box = solfEl('solf-mine');
+  solfEl('solf-mine-h').hidden = !list.length;
+  box.innerHTML = list.map(s => `<span class="item"><button data-edit="${esc(s.key)}">${esc(s.emoji)} ${esc(s.name)}</button><button class="del" data-del="${esc(s.key)}" aria-label="빼기">✕</button></span>`).join('');
+  box.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => {
+    const s = famParse(famLoad()).find(x => x.key === b.dataset.edit); if (!s) return;
+    if (!s.text) { pianoToast('파일로 넣은 곡은 여기서 못 고쳐요'); return; }
+    solfFill(s);
+  }));
+  box.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+    const key = b.dataset.del;
+    if (solf.delArm !== key) { solf.delArm = key; b.textContent = '빼기?'; setTimeout(() => { if (solf.delArm === key) { solf.delArm = null; b.textContent = '✕'; } }, 3000); return; }
+    solf.delArm = null;
+    try { localStorage.setItem(FAM_KEY, JSON.stringify(famParse(famLoad()).filter(x => x.key !== key))); } catch (e) {}
+    if (solf.editKey === key) solf.editKey = null;
+    famRefresh(); solfMine(); pianoToast('뺐어요');
+  }));
+}
+function solfFill(s) {
+  solfEl('solf-name').value = s ? s.name : '';
+  solfEl('solf-text').value = s ? (s.text || '') : '';
+  solf.emoji = s ? s.emoji : '💖'; solf.bpm = s ? s.bpm : 100; solf.auto = s ? s.auto !== false : true;
+  solfSel('solf-emo', 'emo', solf.emoji); solfSel('solf-bpm', 'bpm', solf.bpm); solfSel('solf-auto', 'auto', solf.auto ? 1 : 0);
+  solf.editKey = s ? s.key : null; solf.draft = false;
+  solfRead();
+}
+function solfOpen() {
+  const sp = solfEl('settings-panel'); if (sp) sp.hidden = true;
+  try { if (k7.on) k7Stop(); } catch (e) {}
+  if (synthRunning) { stopSynthesia(); showSongBrowser(); }
+  try { stopPlayGames(); } catch (e) {}
+  if (isRecording) { const rs = solfEl('btn-rec-stop'); if (rs) rs.click(); }
+  if (!solf.draft) solfFill(null);
+  solfMine();
+  solfEl('solf-modal').classList.add('show');
+}
+function solfClose() { solfStopPlay(); solfEl('solf-modal').classList.remove('show'); }
+function solfSave() {
+  const name = solfEl('solf-name').value.trim().slice(0, 30) || '우리 노래';
+  const r = solfParse(solfEl('solf-text').value, solf.auto);
+  if (r.notes.length < 2) { pianoToast('계이름을 두 개 넘게 적어 주세요'); return; }
+  const add = famParse([{key: name, name, artist: '직접 만든 노래', emoji: solf.emoji, bpm: solf.bpm, notes: r.notes, text: solfEl('solf-text').value, auto: solf.auto}]);
+  if (!add.length) return;
+  // 고치던 곡만 덮어쓴다(이름을 바꿔도 사본이 안 남게). 새 곡 이름이 이미 있으면 '이름 2'로 따로 저장
+  const cur = famParse(famLoad());
+  const taken = k => cur.some(s => s.key === k && s.key !== solf.editKey);
+  if (taken(add[0].key)) {
+    let n = 2; while (taken(add[0].key + '_' + n)) n++;
+    add[0].key += '_' + n; add[0].name = (name + ' ' + n).slice(0, 40);
+  }
+  const all = cur.filter(s => s.key !== add[0].key && s.key !== solf.editKey).concat(add).slice(-60);
+  try { localStorage.setItem(FAM_KEY, JSON.stringify(all)); } catch (e) { pianoToast('저장 공간이 모자라요'); return; }
+  solf.editKey = add[0].key; solf.draft = false;
+  if (add[0].name !== name) solfEl('solf-name').value = add[0].name;
+  famRefresh(); solfMine();
+  pianoToast('💖 "' + add[0].name + '" 저장했어요 — 🌈 7건반·따라치기에서 골라요');
+}
+(function () {
+  solfEl('solf-emo').innerHTML = SOLF_EMO.map(e => `<button data-emo="${e}">${e}</button>`).join('');
+  solfEl('solf-emo').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; solf.emoji = b.dataset.emo; solfSel('solf-emo', 'emo', solf.emoji); });
+  solfEl('solf-auto').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; solf.auto = b.dataset.auto === '1'; solfSel('solf-auto', 'auto', b.dataset.auto); solfRead(); });
+  solfEl('solf-bpm').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; solf.bpm = +b.dataset.bpm; solfSel('solf-bpm', 'bpm', solf.bpm); });
+  solfEl('solf-text').addEventListener('input', () => { solf.draft = true; solfRead(); });
+  solfEl('solf-name').addEventListener('input', () => { solf.draft = true; });
+  solfEl('solf-play').addEventListener('click', solfPlay);
+  solfEl('solf-save').addEventListener('click', solfSave);
+  solfEl('solf-close').addEventListener('click', solfClose);
+  solfEl('solf-open').addEventListener('click', solfOpen);
+})();
+
+// ================ 🌈 건반 7개 (0929) ================
+// 큰 건반 7개(도~시). 곡을 고르면 칠 건반에 불이 들어오고, 맞게 누르면 그 곡의 진짜 높이(옥타브)로 소리가 난다.
+// ♯ 음은 같은 글자 건반(파♯ → 파)으로 친다. 기존 따라치기 엔진과 따로 돈다(서로 안 건드림).
+const K7_LETTERS = ['C','D','E','F','G','A','B'];
+const K7_BASE = {C:60, D:62, E:64, F:65, G:67, A:69, B:71};
+const K7_SONGS = ['비행기','학교종','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','ode_to_joy'];
+const k7 = {on:false, key:null, seq:[], i:0, mode:null, timers:[], held:new Map()};
+const k7El = id => document.getElementById(id);
+function k7Name(L) { return useKoreanNames() ? KOREAN_NOTE_MAP[L] : L; }
+function k7Bpm() { const s = SONGS[k7.key]; const sp = (parseInt(k7El('speed').value) || 100) / 100; return Math.max(30, (s ? s.bpm : 100) * sp); }
+function k7Melody(song) {
+  let N = song.notes.filter(n => (n.hand || 'R') !== 'L');
+  if (!N.length) N = song.notes.slice();
+  N = N.slice().sort((a, b) => a.time - b.time || nameToMidi(b.note) - nameToMidi(a.note));
+  const out = []; let lastT = null;
+  N.forEach(n => {
+    const m = nameToMidi(n.note); if (m < 0) return;
+    if (lastT !== null && Math.abs(n.time - lastT) < 1e-6) return; // 같은 박의 화음은 가장 높은 음 하나만
+    lastT = n.time;
+    out.push({midi:m, L:n.note[0], time:n.time, dur:n.duration});
+  });
+  return out;
+}
+const k7Off = {};
+function k7Sound(midi, sec, vel = 0.8) { playNote(midi, vel); clearTimeout(k7Off[midi]); k7Off[midi] = setTimeout(() => { delete k7Off[midi]; stopNote(midi); }, Math.round(sec * 1000)); }
+function k7Later(fn, ms) { k7.timers.push(setTimeout(fn, ms)); }
+function k7Key(L) { return document.querySelector(`#k7-keys .k7k[data-l="${L}"]`); }
+function k7Big(L, text) {
+  const b = k7El('k7-big');
+  b.style.setProperty('--c', L ? PLAY_COLOR[L] : '#1f2a44');
+  b.textContent = text || (L ? k7Name(L) : '🌈');
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  setTimeout(() => b.classList.remove('pop'), 130);
+}
+function k7Prog(n) {
+  const p = k7El('k7-prog');
+  p.hidden = !k7.key;
+  p.firstElementChild.style.width = (k7.seq.length ? Math.round(n / k7.seq.length * 100) : 0) + '%';
+}
+function k7Clear() { document.querySelectorAll('#k7-keys .k7k').forEach(k => k.classList.remove('target', 'lit', 'nudge')); }
+function k7Stop() {
+  k7.timers.forEach(clearTimeout); k7.timers = [];
+  for (const m of [...activeNotes.keys()]) { try { stopNoteImmediate(m); } catch (e) {} }
+  k7Clear();
+  if (k7.mode === 'listen') k7.mode = null;
+}
+function k7Target() {
+  k7Clear();
+  const n = k7.seq[k7.i]; if (!n) return;
+  const el = k7Key(n.L); if (el) el.classList.add('target');
+  k7Big(n.L);
+  k7Prog(k7.i);
+}
+function k7Follow() {
+  k7Stop();
+  k7.mode = 'follow'; k7.i = 0;
+  k7El('k7-msg').textContent = '반짝이는 건반을 눌러요 👆';
+  k7Target();
+}
+function k7Listen() {
+  if (!k7.seq.length) return;
+  k7Stop(); ensureAudio();
+  k7.mode = 'listen';
+  k7El('k7-msg').textContent = '잘 들어 봐요 👂';
+  const spb = 60 / k7Bpm(), t0 = k7.seq[0].time;
+  k7.seq.forEach((n, idx) => k7Later(() => {
+    const sec = Math.min(1.6, Math.max(0.25, n.dur * spb * 0.95));
+    k7Sound(n.midi, sec);
+    const el = k7Key(n.L);
+    if (el) { el.classList.add('lit'); k7Later(() => el.classList.remove('lit'), Math.max(160, sec * 900)); }
+    k7Big(n.L); k7Prog(idx + 1);
+  }, (n.time - t0) * spb * 1000));
+  const last = k7.seq[k7.seq.length - 1];
+  k7Later(() => { k7Follow(); k7El('k7-msg').textContent = '이제 따라 쳐 볼까요? 👆'; }, ((last.time - t0) + last.dur) * spb * 1000 + 500);
+}
+function k7Done() {
+  k7Clear(); k7.mode = 'done';
+  progress['k7:' + k7.key] = 1; saveProgress();
+  k7Prog(k7.seq.length);
+  k7Big(null, '🎉');
+  k7El('k7-msg').textContent = '다 쳤어요! 정말 잘했어요 ⭐';
+  [60, 64, 67, 72].forEach((m, j) => k7Later(() => k7Sound(m, 0.35, 0.6), 450 + j * 140));
+  k7RenderList();
+}
+function k7Pick(key) {
+  k7Stop();
+  k7.key = key && SONGS[key] ? key : null;
+  k7.seq = k7.key ? k7Melody(SONGS[k7.key]) : [];
+  k7.i = 0; k7.mode = null;
+  k7El('k7-list').hidden = true;
+  document.body.classList.remove('k7list');
+  const m = k7.key ? (SONG_META[k7.key] || {emoji:'🎵'}) : null;
+  k7El('k7-title').textContent = k7.key ? (m.emoji + ' ' + SONGS[k7.key].name) : '🎹 마음대로 치기';
+  k7El('k7-acts').hidden = !k7.key;
+  k7Prog(0);
+  if (k7.key) k7Follow();
+  else { k7Big(null); k7El('k7-msg').textContent = '무지개 건반을 눌러 보세요'; }
+}
+function k7ShowList() {
+  k7Stop(); k7.key = null; k7.seq = []; k7.mode = null;
+  k7RenderList();
+  k7El('k7-list').hidden = false;
+  document.body.classList.add('k7list');
+  k7El('k7-title').textContent = '노래 고르기';
+  k7El('k7-acts').hidden = true;
+  k7El('k7-prog').hidden = true;
+}
+function k7RenderList() {
+  const host = k7El('k7-list'); if (!host) return;
+  const card = k => {
+    const s = SONGS[k], m = SONG_META[k] || {emoji:'🎵'}, done = progress['k7:' + k];
+    return `<button class="k7-card${done ? ' done' : ''}" data-key="${esc(k)}"><span class="k7-ce">${esc(m.emoji)}</span><span class="k7-cn">${esc(s.name)}</span>${done ? '<span>⭐</span>' : ''}</button>`;
+  };
+  const fam = Object.keys(SONGS).filter(isFam);
+  let html = `<button class="k7-card free" data-key=""><span class="k7-ce">🎹</span><span class="k7-cn">마음대로 치기</span></button>`;
+  if (fam.length) html += `<div class="k7-sec">💖 우리집 노래</div>` + fam.map(card).join('');
+  html += `<div class="k7-sec">🎈 동요</div>` + K7_SONGS.filter(k => SONGS[k]).map(card).join('');
+  html += `<button class="k7-card make" data-make="1"><span class="k7-ce">✏️</span><span class="k7-cn">노래 만들기<br><small>어른이 계이름 적기</small></span></button>`;
+  host.innerHTML = html;
+  host.querySelectorAll('.k7-card').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.make) { solfOpen(); return; }
+    ensureAudio(); k7Pick(b.dataset.key || null);
+  }));
+}
+function k7Labels() { document.querySelectorAll('#k7-keys .k7k').forEach(k => { k.firstElementChild.textContent = k7Name(k.dataset.l); }); }
+function k7Press(el) {
+  const L = el.dataset.l;
+  el.classList.add('down');
+  if (k7.mode === 'follow') {
+    const n = k7.seq[k7.i];
+    if (n && n.L === L) {
+      k7Sound(n.midi, Math.min(1.2, Math.max(0.35, n.dur * 60 / k7Bpm())));
+      el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+      setTimeout(() => el.classList.remove('hit'), 600);
+      k7.i++;
+      if (k7.i >= k7.seq.length) k7Done(); else k7Target();
+    } else {
+      k7Sound(K7_BASE[L], 0.3, 0.45);
+      const tg = document.querySelector('#k7-keys .k7k.target');
+      if (tg) { tg.classList.remove('nudge'); void tg.offsetWidth; tg.classList.add('nudge'); setTimeout(() => tg.classList.remove('nudge'), 360); }
+    }
+    return;
+  }
+  clearTimeout(k7Off[K7_BASE[L]]); playNote(K7_BASE[L], 0.8); el._held = K7_BASE[L];
+  if (k7.mode !== 'listen') k7Big(L);
+}
+function k7Release(el) {
+  el.classList.remove('down');
+  if (el._held) { stopNote(el._held); el._held = 0; }
+}
+function k7Set(on) {
+  k7.on = !!on;
+  document.body.classList.toggle('k7on', k7.on);
+  try { localStorage.setItem('piano-v3-k7', k7.on ? '1' : '0'); } catch (e) {}
+  if (k7.on) {
+    try { stopSynthesia(); } catch (e) {}
+    try { stopPlayGames(); } catch (e) {}
+    if (isRecording) { const rs = k7El('btn-rec-stop'); if (rs) rs.click(); }
+    const sp = k7El('settings-panel'); if (sp) sp.hidden = true;
+    k7ShowList();
+  } else k7Stop();
+}
+function k7Boot() {
+  const box = k7El('k7-keys');
+  box.innerHTML = K7_LETTERS.map(L => `<div class="k7k" data-l="${L}" style="--c:${PLAY_COLOR[L]}"><span class="k7n"></span></div>`).join('');
+  k7Labels();
+  box.addEventListener('pointerdown', e => {
+    const el = e.target.closest('.k7k'); if (!el) return;
+    e.preventDefault(); ensureAudio();
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    k7.held.set(e.pointerId, el); k7Press(el);
+  });
+  const up = e => { const el = k7.held.get(e.pointerId); if (!el) return; k7.held.delete(e.pointerId); k7Release(el); };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => box.addEventListener(ev, up));
+  box.addEventListener('contextmenu', e => e.preventDefault());
+  k7El('btn-k7').addEventListener('click', () => { ensureAudio(); k7Set(true); });
+  k7El('k7-exit').addEventListener('click', () => k7Set(false));
+  k7El('k7-songs').addEventListener('click', k7ShowList);
+  k7El('k7-listen').addEventListener('click', k7Listen);
+  k7El('k7-again').addEventListener('click', k7Follow);
+  document.querySelectorAll('#nn-seg button').forEach(b => b.addEventListener('click', () => setTimeout(k7Labels, 0)));
+  let pref = null; try { pref = localStorage.getItem('piano-v3-k7'); } catch (e) {}
+  if (pref === '1') k7Set(true);
+}
+window.addEventListener('load', k7Boot);
+
+// ================ 뒤로가기 한 층씩 (0929) ================
+// 배움퀘스트 첫 화면이 뒤로가기를 받으면 먼저 여기 묻는다. 한 층만 뒤로(연주 중인 곡 → 곡 목록). 더 갈 데가 없으면 false.
+window.lpBack = function () {
+  if (k7El('solf-modal').classList.contains('show')) { solfClose(); return true; }
+  if (k7.on) {
+    if (k7El('k7-list').hidden) { k7ShowList(); return true; }
+    return false;
+  }
+  const rm = k7El('result-modal'); if (rm && rm.classList.contains('show')) { rm.classList.remove('show'); return true; }
+  const opt = k7El('song-opt-modal'); if (opt && opt.classList.contains('show')) { opt.classList.remove('show'); return true; }
+  const sp = k7El('settings-panel'); if (sp && !sp.hidden) { sp.hidden = true; k7El('btn-settings').setAttribute('aria-expanded', 'false'); return true; }
+  const mm = k7El('more-menu'); if (mm && mm.classList.contains('open')) { mm.classList.remove('open'); return true; }
+  const ps = k7El('panel-synth'); if (ps && ps.classList.contains('active') && !ps.classList.contains('browsing')) { stopSynthesia(); showSongBrowser(); return true; }
+  const pv = k7El('play-view'); if (pv && pv.classList.contains('active')) { k7El('btn-back-play').click(); return true; }
+  const lv = k7El('lesson-view'); if (lv && lv.classList.contains('active')) { k7El('btn-back-learn').click(); return true; }
+  return false;
+};
+
+// ================ 치는 동안 화면 켜 두기 (0929) ================
+// 배움퀘스트 밖(원허브·브라우저)에서 바로 열었을 때. 창 안(iframe)일 땐 첫 화면이 맡는다. 15분 손 안 대면 푼다.
+if (window.top === window && 'wakeLock' in navigator) {
+  let wl = null, last = 0, pend = false;
+  const req = () => { last = Date.now(); if (wl || pend || document.hidden) return; pend = true; navigator.wakeLock.request('screen').then(l => { pend = false; if (wl) { l.release().catch(() => {}); return; } wl = l; l.addEventListener('release', () => { if (wl === l) wl = null; }); }).catch(() => { pend = false; }); };
+  document.addEventListener('pointerdown', req, true);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && last) req(); });
+  setInterval(() => { if (wl && Date.now() - last > 900000) { wl.release().catch(() => {}); wl = null; } }, 60000);
+}
+
 window.addEventListener('resize', onViewportChange);
 if (LSCAPE_MQ.addEventListener) LSCAPE_MQ.addEventListener('change', onViewportChange);
 else if (LSCAPE_MQ.addListener) LSCAPE_MQ.addListener(onViewportChange);
 window.addEventListener('load', init);
 </script>
-<script>
-// 새 버전 자동 반영: 대기 중인 새 SW를 즉시 활성화(SKIP_WAITING) → 제어 잡으면 1회 새로고침(옛 캐시 탈출)
-if ('serviceWorker' in navigator) {
-  let _swReloaded = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (_swReloaded) return;
-    _swReloaded = true;
-    location.reload();
-  });
-  navigator.serviceWorker.getRegistration().then(reg => {
-    if (!reg) return;
-    const nudge = w => { if (w) try { w.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {} };
-    if (reg.waiting) nudge(reg.waiting);           // 이미 설치 대기 중인 새 버전 즉시 활성화
-    reg.addEventListener('updatefound', () => {
-      const nw = reg.installing;
-      if (nw) nw.addEventListener('statechange', () => { if (nw.state === 'installed') nudge(reg.waiting); });
-    });
-    reg.update();                                   // 최신 SW 확인
-  }).catch(() => {});
-}
-</script>
+<!-- 0929: 새 판을 받으면 저절로 새로고침하던 칸을 없앴다 — 치다가 처음으로 돌아가던 원인. 새 판은 sw.js 가 늘 네트워크 먼저라 다음에 열 때 나온다. -->
 </body>
 </html>

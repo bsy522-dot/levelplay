@@ -175,7 +175,7 @@
   /* ── 안드로이드/브라우저 뒤로가기 ── */
   window.lpHandleBack = function () {
     var o;
-    o = el('gO'); if (o && o.classList.contains('sh')) { try { cG(); } catch (e) {} return true; }
+    o = el('gO'); if (o && o.classList.contains('sh')) { try { (window.lpGameBack || cG)(); } catch (e) {} return true; }
     o = el('mo'); if (o && o.classList.contains('sh')) { try { cMo(); } catch (e) {} return true; }
     o = el('battleOverlay'); if (o && o.style.display === 'flex') { try { closeBattle(); } catch (e) {} return true; }
     o = el('onboardOverlay'); if (o && o.style.display === 'flex') { o.style.display = 'none'; try { U.onboarded = true; sv(); } catch (e) {} return true; }

@@ -30,7 +30,7 @@
 :root{--bg:#F4F7FF;--c1:#FFFFFF;--c2:#E9EFFB;--p:#6641E8;--cy:#00734F;--gd:#9A5B00;--rd:#D92D45;--gn:#12874A;--tx:#1A2140;--t2:#525C7A;--t3:#5E6884;--g1:linear-gradient(135deg,#6C4AF2,#00845C);--r:16px;--nv:58px}
 :root{--nav-bg:rgba(255,255,255,.97)}
 :root.dark{--bg:#0a0a1a;--c1:#111127;--c2:#181838;--p:#8b5cf6;--cy:#06d6a0;--gd:#fbbf24;--rd:#ef4444;--gn:#22c55e;--tx:#e2e8f0;--t2:#94a3b8;--t3:#c5cdd9;--g1:linear-gradient(135deg,#8b5cf6,#06d6a0);--nav-bg:rgba(17,17,39,.97)}
-html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
 body{display:flex;flex-direction:column}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--p);border-radius:3px}
 #app{flex:1;overflow:hidden;position:relative}
@@ -1288,7 +1288,7 @@ const GMS=[
 {nm:'스도쿠',em:'🔢',u:'games/sudoku.html',th:'sudoku',si:'i-grid',pc:'#1D4ED8',d:'숫자 퍼즐'},
 {nm:'문장 만들기',em:'📝',u:'games/sentence-builder.html',th:'sentence-builder',si:'i-book',pc:'#9F1239',d:'영어 단어 순서 배치'},
 {nm:'주기율표',em:'⚗️',u:'games/periodic-table.html',th:'periodic-table',si:'i-chem',pc:'#0E7490',d:'원소 기호·이름 퀴즈'},
-{nm:'피아노 마스터',em:'🎹',u:'games/piano-v3.html',th:'piano-v3',si:'i-music',pc:'#6D28D9',d:'따라치기 26곡 · 혼자 연주 · 배우기'},
+{nm:'피아노 마스터',em:'🎹',u:'games/piano-v3.html',th:'piano-v3',si:'i-music',pc:'#6D28D9',d:'따라치기 26곡 · 큰 건반 7개 · 혼자 연주 · 배우기'},
 {nm:'바이올린 리듬',em:'🎻',u:'games/ViolinReal-v3.html',th:'ViolinReal-v3',si:'i-note',pc:'#7C3AED',d:'따라 켜기 16곡 · 혼자 연주 · 배우기 · 악기 도구'},
 {nm:'노래방 v4 ✨',em:'🎤',u:'games/noraebang-v4/index.html',th:'noraebang-v4',si:'i-sound',pc:'#C2410C',d:'동요·민요 12곡 따라 부르기'},
 {nm:'색소폰 마스터',em:'🎷',u:'games/saxophone-v2.html',th:'saxophone-v2',si:'i-wave',pc:'#B45309',d:'실물 20키 멀티터치 운지+크로마틱 32음+동요 5곡'},
@@ -1447,8 +1447,35 @@ function playVid(id,t){document.getElementById('moB').innerHTML='<div id="vidSpn
 function sc(s){return'<div class="gc" style="position:relative" onclick="playSim(\''+s.u+'\',\''+s.nm+'\')"><button onclick="tgBm(event,\'sim\',\''+s.nm.replace(/'/g,"\\'")+'\',\''+s.nm.replace(/'/g,"\\'")+'\')" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:14px;cursor:pointer;color:var(--gd);line-height:0">'+(isBm('sim',s.nm)?'<svg class="ico" aria-hidden="true" focusable="false" style="fill:currentColor;font-size:15px"><use href="#i-star"/></svg>':'<svg class="ico" aria-hidden="true" focusable="false" style="font-size:15px"><use href="#i-star"/></svg>')+'</button><div class="gi">'+ico(s.nm,s.ic)+'</div><div class="gn">'+s.nm+'</div><div class="gd">'+s.d+'</div></div>';}
 function playSim(u,n){document.getElementById('moB').innerHTML='<div id="simSpn" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:450px;background:var(--bg);border-radius:8px;gap:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:11px;color:var(--t3)">실험 로딩 중...</div></div><div style="font-size:12px;font-weight:600;margin-top:6px">'+n+'</div>';const ifr=document.createElement('iframe');ifr.src=u;ifr.style.cssText='width:100%;height:450px;border:none;border-radius:8px;display:none';ifr.onload=function(){const sp=document.getElementById('simSpn');if(sp)sp.remove();ifr.style.display='';};document.getElementById('moB').prepend(ifr);document.getElementById('mo').classList.add('sh');xp(10,'실험');}
 const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8b/index.html']);
-function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();var _u=u+(u.indexOf('?')>=0?'&':'?')+'_cb='+Date.now();if(_3D_GAMES.has(u)){window.open(_u,'_blank');return;}document.getElementById('gT').textContent=gameVN(n);document.getElementById('gF').src=_u;document.getElementById('gO').classList.add('sh');}
-function cG(){document.getElementById('gO').classList.remove('sh');document.getElementById('gF').src='';}
+function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();var _u=u+(u.indexOf('?')>=0?'&':'?')+'_cb='+Date.now();if(_3D_GAMES.has(u)){window.open(_u,'_blank');return;}document.getElementById('gT').textContent=gameVN(n);document.getElementById('gF').src=_u;document.getElementById('gO').classList.add('sh');window._gArm=0;lpWake(1);}
+function cG(){document.getElementById('gO').classList.remove('sh');const f=document.getElementById('gF');if(f){const n=f.cloneNode(false);n.removeAttribute('src');f.replaceWith(n);}window._gArm=0;lpWake(0);}
+// 0929: 닫을 때 src='' 로 비우면 방문 기록이 한 칸 쌓여, 다음 게임에서 뒤로가기가 '빈 화면 → 지난 피아노 처음부터'로 새어 나갔다.
+// 새 창(iframe)으로 바꿔 끼우면 다음 oG 의 src 가 빈 창을 대신해 기록이 안 쌓인다.
+// 0929: 게임 중엔 화면이 꺼지지 않게 — 곡을 듣는 동안 화면이 꺼져 '앱이 꺼졌다'고 느끼던 문제. 15분 동안 손을 안 대면 풀어 배터리를 지킨다.
+let _wl=null,_wlTouch=0,_wlPend=false;
+function lpWake(on){
+  window._wlOn=!!on;
+  if(!('wakeLock' in navigator))return;
+  if(!on){if(_wl){_wl.release().catch(()=>{});_wl=null;}return;}
+  _wlTouch=Date.now();
+  if(_wl||_wlPend||document.hidden)return;
+  _wlPend=true;
+  navigator.wakeLock.request('screen').then(l=>{_wlPend=false;if(_wl||!window._wlOn){l.release().catch(()=>{});return;}_wl=l;l.addEventListener('release',()=>{if(_wl===l)_wl=null;});}).catch(()=>{_wlPend=false;});
+}
+(function(){
+  // 게임 창은 닫을 때마다 새것으로 바뀐다 → 문서에서 한 번만 받는다(iframe load 는 버블링 안 해서 capture)
+  document.addEventListener('load',e=>{const f=e.target;if(!f||f.id!=='gF')return;try{f.contentWindow.addEventListener('pointerdown',()=>{_wlTouch=Date.now();if(window._wlOn&&!_wl)lpWake(1);},true);}catch(err){}},true);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&window._wlOn)lpWake(1);});
+  setInterval(()=>{if(_wl&&Date.now()-_wlTouch>900000){_wl.release().catch(()=>{});_wl=null;}},60000);
+})();
+// 0929: 게임이 열린 채 뒤로가기 — 게임 안에서 한 층 먼저(피아노: 곡 → 곡 목록), 더 갈 곳이 없으면 두 번 눌러야 닫힌다.
+// 아이가 화면 가장자리를 쓸다가 게임이 꺼져 처음 화면으로 튕기던 문제. 위쪽 '닫기' 버튼은 그대로 한 번에 닫는다.
+function lpGameBack(){
+  try{const w=document.getElementById('gF').contentWindow;if(w&&typeof w.lpBack==='function'&&w.lpBack()){window._gArm=0;return;}}catch(e){}
+  const now=Date.now();
+  if(window._gArm&&now-window._gArm<2500){window._gArm=0;cG();return;}
+  window._gArm=now;try{toast('한 번 더 누르면 게임이 닫혀요');}catch(e){}
+}
 /* 게임 XP 수신 브릿지: 게임 오버레이 iframe에서 온 {type:'xp',amount,source} 메시지만 인정(위조 source 차단) */
 window.addEventListener('message',function(e){
   try{
@@ -4568,25 +4595,27 @@ function init(){
   setupGlobalShortcuts();
   // PWA 서비스 워커 등록 (오프라인 캐시)
   if('serviceWorker' in navigator){
-    // 첫 방문(미제어 페이지)에서는 SW install+claim으로 인한 자동 새로고침 금지 — 온보딩 입력 유실 방지
-    const hadSW=!!navigator.serviceWorker.controller;
+    // 0929: 새 판을 받아도 그 자리에서 새로고침하지 않는다. 1분마다 새 판을 찾아 곧바로 새로고침하던 탓에
+    // 창 안(iframe)의 게임이 통째로 꺼져 아이가 처음 화면으로 튕겼다(피아노 치다가 리셋).
+    // 코드 파일은 sw.js 가 늘 네트워크 먼저라 새로 열면 새 판이 나온다. 여기서는 10분 넘게 다른 데 갔다 돌아왔고
+    // 첫 화면에 아무 창도 안 열려 있을 때만 조용히 새로고침한다.
+    let swNew=false,hidAt=0;
     navigator.serviceWorker.register('sw.js').then(reg=>{
       reg.update();
       reg.addEventListener('updatefound',()=>{
         const nw=reg.installing;
-        if(!nw)return;
-        nw.addEventListener('statechange',()=>{
-          if(nw.state==='installed' && hadSW){
-            console.log('[SW] 새 버전 감지, 자동 새로고침');
-            nw.postMessage({type:'SKIP_WAITING'});
-            setTimeout(()=>location.reload(),500);
-          }
-        });
+        if(!nw||!navigator.serviceWorker.controller)return;   // 첫 설치는 새 판이 아니다
+        nw.addEventListener('statechange',()=>{if(nw.state==='installed'||nw.state==='activated')swNew=true;});
       });
       setInterval(()=>reg.update(), 60000);
     }).catch(e=>console.warn('SW 등록 실패:',e));
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{
-      if(hadSW && !window._swRel){window._swRel=true;location.reload();}
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden){hidAt=Date.now();return;}
+      const away=hidAt&&Date.now()-hidAt>=600000;hidAt=0;
+      const busy=['gO','mo'].some(id=>{const o=document.getElementById(id);return o&&o.classList.contains('sh');})
+        ||['battleOverlay','onboardOverlay','nkM'].some(id=>{const o=document.getElementById(id);return o&&o.style.display&&o.style.display!=='none';})
+        ||!!document.querySelector('.v7-vidquiz-overlay');
+      if(swNew&&away&&!busy&&(typeof cur==='undefined'||cur===0))location.reload();
     });
   }
 }
@@ -4860,7 +4889,7 @@ document.addEventListener('DOMContentLoaded',init);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){cG();cMo();closeBattle();if(_tutorOpen)toggleTutor();const ob=document.getElementById('onboardOverlay');if(ob&&ob.style.display==='flex'){ob.style.display='none';U.onboarded=true;sv();}}});
 /* ===== 뒤로가기(안드로이드/브라우저): 앱 종료 대신 한 단계 뒤로 ===== */
 function lpHandleBack(){
-  var gO=document.getElementById('gO');if(gO&&gO.classList.contains('sh')){try{cG();}catch(e){}return true;}
+  var gO=document.getElementById('gO');if(gO&&gO.classList.contains('sh')){try{lpGameBack();}catch(e){}return true;}
   var mo=document.getElementById('mo');if(mo&&mo.classList.contains('sh')){try{cMo();}catch(e){}return true;}
   var bt=document.getElementById('battleOverlay');if(bt&&bt.style.display==='flex'){try{closeBattle();}catch(e){}return true;}
   var ob=document.getElementById('onboardOverlay');if(ob&&ob.style.display==='flex'){ob.style.display='none';try{U.onboarded=true;sv();}catch(e){}return true;}
