@@ -6,7 +6,7 @@ import { sfx, music } from '../audio.js';
 import { makeMon } from '../battle/mech.js';
 import { josa, pick } from '../util.js';
 import { W } from './overworld.js';
-import { placementPlan, placementQuestion, placementAnswer, placementDone, onBadge, GRADES } from '../learn/tutor.js';
+import { placementPlan, placementQuestion, placementAnswer, placementDone, onBadge, GRADES, PRACTICE_REWARD } from '../learn/tutor.js';
 import { placementQuiz } from '../learn/quiz.js';
 
 const P = () => G.s.name, R = () => G.s.rival;
@@ -317,7 +317,7 @@ const LINES = {
   'ViridianSchoolHouse:0': () => say(['칠판을 봐! 선생님이 내 공부 기록을 적어 주셨어.', '틀린 문제를 다시 풀면 진짜 실력이 된대!']),
   'ViridianSchoolHouse:1': async () => {
     await say(['트레이너 학교에 온 걸 환영해!'], { who: '선생님', face: 'coolf' });
-    const y = await ask('연습 문제를 3개 풀어 볼래? 한 문제 맞힐 때마다 100원을 줄게!', { who: '선생님', face: 'coolf' });
+    const y = await ask(`연습 문제를 3개 풀어 볼래? 한 문제 맞힐 때마다 ${PRACTICE_REWARD}원을 줄게!`, { who: '선생님', face: 'coolf' });
     if (!y) return say(['언제든 다시 오렴!'], { who: '선생님', face: 'coolf' });
     return W.practice?.(3);
   },

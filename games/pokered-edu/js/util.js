@@ -1,4 +1,25 @@
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * 문제 내용 시그니처 — 요구사항 21.
+ * "2+3" 을 "4+5" 로 바꾼 건 새로운 문제가 아니다. 숫자를 지운 '구조(골격)'만 남겨
+ * 비교하면, 같은 콘셉트의 복제임을 알 수 있다. 같은 주제라도 문장 구조가 다르면
+ * 다른 문제로 인정한다 (요구사항 2: "같은 정답이라도 다른 상황에서 출제").
+ */
+export function signature(text, subject = '') {
+  const coarse = String(text || '')
+    .replace(/\d+(?:\.\d+)?/g, '#')              // 숫자는 지운다 (2+3 과 4+5 는 같은 문제다)
+    .replace(/[\s\u3000.?!,~·:;()"'\-—…]+/g, '') // 공백·구두점 제거
+    .replace(/#+/g, '#')
+    // 문장 끝 조사: 같은 질문인데 조사만 다른 경우를 묶는다
+    .replace(/(?:에서|으로|까지|부터|에게|한테|과|와|은|는|이|가|을|를|의|도|로)$/, '')
+    // 어미: '까' vs '일까' 같은 흔들림을 없앤다 (최대 2자)
+    .replace(/(?:까(?:라|요|지)?|구나|겠다|네|자|어|지|다|라|함)$/u, '')
+    // 남은 조사는 한 번 더 제거 (어미 제거 후 드러나는 것)
+    .replace(/(?:은|는|이|가|을|를|의|와|과|로)$/, '')
+    .trim();
+  return subject + '|' + (coarse.length > 90 ? coarse.slice(0, 90) : coarse);
+}
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 export const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];

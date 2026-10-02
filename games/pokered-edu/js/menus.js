@@ -290,15 +290,20 @@ async function cardScreen() {
 
 /* ── 학교 연습 문제 ── */
 import { moveQuiz } from './learn/quiz.js';
+import { PRACTICE_REWARD } from './learn/tutor.js';
 export async function practice(n) {
   let ok = 0;
   for (let i = 0; i < n; i++) {
     const r = await moveQuiz({ monName: '연습', moveName: `${i + 1}번 문제`, moveType: null });
     if (r.hit) ok++;
   }
-  G.s.money += ok * 100;
+  const prize = ok * PRACTICE_REWARD;
+  G.s.money += prize;
   if (ok) sfx('item');
-  await say([`${n}문제 중 ${ok}문제를 처음에 맞혔어!`, ok ? `상금 ${ok * 100}원을 받았다!` : '괜찮아, 틀린 문제에서 배운 게 제일 커!'], { who: '선생님', face: 'coolf' });
+  await say([
+    `${n}문제 중 ${ok}문제를 처음에 맞혔어!`,
+    ok ? `상금 ${prize}원을 받았다!` : '괜찮아, 틀린 문제에서 배운 게 제일 커!',
+  ], { who: '선생님', face: 'coolf' });
   save();
 }
 

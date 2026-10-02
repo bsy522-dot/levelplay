@@ -215,3 +215,32 @@ body.in-battle .goal, body.in-panel .goal, body.in-quiz .goal { display: none; }
 .explain ol li { margin: .1em 0; }
 .need { margin-top: .45em; padding: .35em .6em; background: #e9f7ee; border-radius: 10px; font-size: .92em; line-height: 1.5; }
 .quiz .need { margin-top: .5em; }
+/* ─────────────────────────────────────────────────────────────
+   세이브 관리 화면 (슬롯 5개)
+   ───────────────────────────────────────────────────────────── */
+.sm-note{font-size:.82em;color:#5a6b85;margin:.2em 0 .7em;line-height:1.5;word-break:keep-all}
+.slot-h{font-family:'Jua';font-size:1em;margin:1em 0 .45em;color:#2f4f7f}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.55em}
+.slot-grid.small{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+.slot-card{background:#fff;border:2px solid #d7e2f2;border-radius:12px;padding:.55em .65em;
+  display:flex;flex-direction:column;gap:.18em}
+.slot-card.empty{background:#f4f6fa;border-style:dashed}
+.slot-card.active{border-color:#f2c94c;box-shadow:0 0 0 2px #f2c94c55}
+.slot-card.backup{background:#f7fbf7;border-color:#cfe4d3}
+.slot-no{font-size:.72em;font-weight:800;color:#4a6fa5}
+.slot-card.active .slot-no{color:#b8860b}
+.slot-name{font-weight:800;font-size:.95em;word-break:keep-all}
+.slot-sum{font-size:.76em;color:#41546f;line-height:1.45;word-break:keep-all}
+.slot-when{font-size:.68em;color:#8a9ab0}
+.slot-empty{font-size:.85em;color:#98a6ba;padding:.5em 0}
+.slot-btns{display:flex;gap:.3em;flex-wrap:wrap;margin-top:.28em}
+.slot-btns button{flex:1 1 auto;min-width:62px;font-size:.74em;padding:.42em .3em;border:0;border-radius:9px;
+  background:#4a90d9;color:#fff;font-weight:700;cursor:pointer}
+.slot-btns button:active{transform:scale(.97)}
+.slot-btns button.danger{background:#e07a7a}
+.slot-btns button[disabled]{background:#c3ccd8;opacity:.7;cursor:not-allowed}
+.slot-lock{font-size:.66em;color:#c0392b;margin-top:.2em;line-height:1.4;word-break:keep-all}
+.slot-acts{margin-top:.9em;display:flex;gap:.5em}
+.slot-acts button{flex:1;padding:.6em;border:0;border-radius:11px;background:#e6ecf5;color:#334;font-weight:700;font-size:.86em}
+.slot-audit{background:#f6f8fc;border-radius:10px;padding:.55em .7em;font-size:.76em;color:#3a4a63;line-height:1.65}
+.slot-audit div{word-break:keep-all}

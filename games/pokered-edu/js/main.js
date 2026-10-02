@@ -10,6 +10,8 @@ import { BattleScene, B, wildBattle, trainerBattle } from './battle/battle.js';
 import { mapMusic, objective } from './world/events.js';
 import { initLearn, GRADES } from './learn/tutor.js';
 import * as MENU from './menus.js';
+/* ★세이브 슬롯 관리(5개) — 병석님 요청으로 되살린 기능 */
+import { startViaSlot } from './savemgr.js';
 import { charSheet, KINDS, CW, CH } from './art/chars.js';
 
 const AI_FACES = ['oak', 'rival', 'brock', 'mom', 'nurse', 'clerk', 'bugcatcher', 'youngster', 'oldman', 'camper', 'player', 'misty', 'rocket', 'hiker', 'surge', 'bill'];
@@ -63,6 +65,8 @@ async function title() {
   const items = [];
   if (hasSave()) items.push(['이어하기', 'cont']);
   items.push(['새로 시작', 'new']);
+  /* ★세이브 관리(슬롯 5개). 병석님 요청으로 되살린 기능. */
+  if (hasSave()) items.push(['🗂 세이브 관리 (5개 슬롯)', 'slots']);
   let sel = 0;
   const btns = items.map(([l, v], i) => el('button', { onclick: () => go(v) }, l));
   opts.append(...btns);
@@ -81,6 +85,12 @@ async function title() {
   sfx('select');
   await fade(true, 250);
   scr.remove();
+  /* ★세이브 관리로 진입. 어느 슬롯이든 골라 불러온다. */
+  if (choice === 'slots') {
+    await fade(false, 250);
+    await startViaSlot();
+    return;
+  }
   if (choice === 'cont' && load()) {
     if (!G.s.learn) initLearn(G.s.grade || 1);
     await W.scene.loadMap(G.s.map, G.s.x, G.s.y, G.s.facing);

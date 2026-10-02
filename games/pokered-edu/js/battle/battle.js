@@ -7,7 +7,7 @@ import { root, portraitUrl, choose, fade, say, toast } from '../ui.js';
 import { sfx, music } from '../audio.js';
 import * as M from './mech.js';
 import { moveQuiz } from '../learn/quiz.js';
-import { expMult } from '../learn/tutor.js';
+import { expMult, PRACTICE_REWARD, EXP_GAIN_BOOST } from '../learn/tutor.js';
 import { fixJosa } from '../learn/math.js';
 import { W } from '../world/overworld.js';
 import { wildPick } from '../world/events.js';
@@ -419,7 +419,7 @@ export async function runBattle(opts) {
         const mult = expMult();
         const gainers = [...participants].filter((m) => m.hp > 0);
         for (const m of gainers) {
-          const gain = Math.max(1, Math.floor((M.expGain(foe.m, trainer) * mult) / gainers.length));
+          const gain = Math.max(1, Math.floor((M.expGain(foe.m, trainer) * mult * EXP_GAIN_BOOST) / gainers.length));
           await hud.msg(`${josa(sp(m.sp).name, '은/는')} 경험치 ${gain}을(를) 얻었다!${mult > 1 ? ` (연속 정답 보너스 ×${+mult.toFixed(2)})` : ''}`, true);
           const ups = M.applyExp(m, gain);
           if (m === me.m) hud.drawMe(me);
@@ -459,8 +459,8 @@ export async function runBattle(opts) {
         await S.showTrainer(opts.face);
         await hud.msg(`${opts.name}에게 이겼다!`, true);
         if (opts.lose) await hud.msg(`“${opts.lose}”`, true);
-        const money = opts.money || 100;
-        G.s.money += money;
+        const money = opts.money != null ? opts.money : PRACTICE_REWARD;
+                G.s.money += money;
         await hud.msg(`${josa(G.s.name, '은/는')} 상금 ${money}원을 받았다!`, true);
       }
     } else if (result === 'lose') {
