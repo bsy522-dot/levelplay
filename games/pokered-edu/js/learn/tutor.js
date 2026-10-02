@@ -16,6 +16,7 @@ const MATH = MATH_ALL, MATH_BY = MATH_ALL_BY;
 export function skillNote(id) { const s = MATH_BY[id] || SCI_BY[id] || {}; const n = NOTES[id] || {}; return { t: s.t || id, idea: s.idea || n.idea || '', need: s.need || n.need || '' }; }
 import { weighted, pick, shuffle, signature } from '../util.js';
 import { prereqs, nexts, GRAPH, CROSS, QTYPES, LEVELS } from './schema.js';
+import { vary } from './variety.js';
 
 /* ── 튜닝 상수 (한 곳에서만 바꾼다) ──
  * PRACTICE_REWARD : 학교 연습 1문제 정답 보상(원)
@@ -201,6 +202,11 @@ function pickIndex(cands, lad) {
 
 export function frontier(subj) {
   const lad = LADDER[subj], st = L()[subj];
+  /* ★구 세이브가 hum 항목을 아직 못 받았거나 잘못된 값이 들어오면 여기서 죽는다.
+   *   인문 정답을 기록할 때 record() → frontier('hum') 로 오는데 st 가 없으면
+   *   "Cannot read properties of undefined" 가 났다. 게임이 통째로 멈췄으므로
+   *   안전하게 0단계로 되돌린다. */
+  if (!lad || !st) return 0;
   for (let i = st.floor; i < lad.length; i++) if (!sk(lad[i].id).mastered) return i;
   return lad.length - 1;
 }
@@ -273,14 +279,19 @@ function makeItem(subj, skill, story) {
  * → 내용 시그니처(숫자 제거한 골격)로 3연속 중복을 막는다. */
 function sealMath(gen, story, subj, skillId) {
   const l = L();
+  /* ★요구사항 21번 — 숫자만 바꾸면 새 문제가 아니다.
+   *   실측: 생성자 56개 중 36개가 '문제문 30종·시그니처 1종' 이었다.
+   *   그래서 아래 signature() 로는 3연속 중복을 못 막았다(8회 시도 후 강제 배출).
+   *   → 생성기를 상황 문장으로 감싼다. 계산값은 원본 그대로, 질문 방식만 달라진다. */
+  const gen2 = vary(gen, skillId);
   let item = null;
   for (let tries = 0; tries < 8 && !item; tries++) {
-    const cand = gen(story);
+    const cand = gen2(story);
     const sig = signature(cand.q, subj || 'math');
     if (!repeatBlocked(sig)) { item = cand; addRepeat(sig); }
   }
   // 8번을 다 돌려도 전부 반복이면 그래도 하나는 낸다 (게임이 멈추면 안 된다)
-  if (!item) { item = gen(story); addRepeat(signature(item.q, subj || 'math')); }
+  if (!item) { item = gen2(story); addRepeat(signature(item.q, subj || 'math')); }
   // ★ 실제 id 를 시그니처로 덮어쓰지 않는다. 덮어쓰면 "2+3" 과 "45+12" 가 같은 id 를
     // 갖게 되어 서로 다른 문제가 반복으로 오인된다(테스트가 이걸 잡았다).
     // 판정용 키는 `_sig` 로 별도 보관하고, id 는 문제은행/생성기의 고유값 그대로 둔다.
@@ -306,15 +317,22 @@ function pickBank(prefix, topic, story, human) {
   const last = l.recent[l.recent.length - 1];
   let cand = pool.filter((q) => q.id !== last);
   if (!cand.length) cand = pool;
-  // ② 3회 연속 이미 냈던 문제는 빼고 — 그래도 없으면 상위 단계로 건너뛴다
+  // ② 3회 연속 이미 냈던 문제는 빼고 — 그래도 없으면 같은 계열 위쪽 주제까지 건너뛴다
   const fresh = cand.filter((q) => !repeatBlocked(q.id));
   if (fresh.length) cand = fresh;
   else {
     // 같은 주제가 소진됐으면 '필요하면 다른 문제로 넘어간다' 를 그대로 지키기 위해
     // 사다리 위쪽 주제까지 물어서라도 새 문제를 찾는다.
-    const near = SCI.filter((x) => Math.abs(x.g - (SCI.find((y) => y.id === topic) || { g: 4 }).g) <= 2);
+    //
+    // ★ 여기를 SCI 로 고정해 둔 것이 '인문 칸에 과학 문제가 199회나 세입된' 원인이다.
+    //   인문(h_) 주제를 찾다가 h_civ 가 소진되면 SCI 목록을 돌아 다녀서 s_animal_homes
+    //   같은 과학 문제를 인문 칸으로 끌고 왔다. → 사다리는 지금 뽑는 계열로 고른다.
+    const LAD_BY_SUBJ = { hum: HUMAN, sci: SCI, math: MATH };
+    const lad = LAD_BY_SUBJ[human ? 'hum' : prefix === 's_' ? 'sci' : 'math'] || SCI;
+    const hereStep = lad.find((y) => y.id === topic) || { g: 4 };
+    const near = lad.filter((x) => Math.abs(x.g - hereStep.g) <= 2);
     for (const alt of near) {
-      const p2 = DB.science.filter((q) => q.topic === alt.id && !repeatBlocked(q.id) && q.id !== last);
+      const p2 = DB.science.filter((q) => q.topic === alt.id && (!prefix || q.id.startsWith(prefix)) && !repeatBlocked(q.id) && q.id !== last);
       if (p2.length) { const it = pick(p2); return seal(it, l); }
     }
     cand = cand.length ? cand : pool;

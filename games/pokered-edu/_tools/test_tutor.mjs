@@ -15,6 +15,32 @@ import { fileURLToPath, pathToFileURL } from 'url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const R = (p) => pathToFileURL(path.join(here, '..', p)).href;
 
+/* ★이 테스트가 게임을 안 고친 이유 (2026-10-03 발견)
+ * loadAll() 을 한 번도 불러지 않았다. 그래서 DB.science 가 빈 배열이었다.
+ * pickBank() 는 DB.science 에서 문제를 찾는데, 비어 있으면 null 을 돌려주고
+ * sealMath() 폴백으로 '항상 수학'만 났다.
+ *   → 인문 0건, 과학 0건, 수학만 반복. 테스트 9건 실패의 진짜 원인.
+ * 브라우저에서 하는 것처럼 상대경로 fetch 와 localStorage 를 채운 뒤 loadAll 을 부른다. */
+const _f = globalThis.fetch;
+globalThis.fetch = async (u, o) => {
+  if (typeof u === 'string' && !/^https?:/.test(u)) {
+    const fp = path.resolve(here, '..', u);
+    return { ok: true, status: 200, json: async () => JSON.parse(fs.readFileSync(fp, 'utf8')) };
+  }
+  return _f(u, o);
+};
+const mem = new Map();
+globalThis.localStorage = {
+  getItem: (k) => (mem.has(k) ? mem.get(k) : null),
+  setItem: (k, v) => mem.set(k, v),
+  removeItem: (k) => mem.delete(k),
+};
+
+const { loadAll, DB } = await import(R('js/data.js'));
+await loadAll();
+console.log(`DB.science ${DB.science.length}건 (h_ ${DB.science.filter((q) => q.id.startsWith('h_')).length} / s_ ${DB.science.filter((q) => q.id.startsWith('s_')).length})`);
+console.log(`DB.species ${DB.species.length} / DB.moves ${Object.keys(DB.moves).length} / DB.maps ${Object.keys(DB.maps).length}\n`);
+
 // 실제 게임 상태(state.js)를 그대로 쓴다 — 흉내내지 않는다.
 const { G, newState } = await import(R('js/state.js'));
 const T = await import(R('js/learn/tutor.js'));

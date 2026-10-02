@@ -7,14 +7,23 @@ import { drawViz } from './viz.js';
 import { nextQuestion, record, expMult, skillTitle, skillNote, isNewSkill, MATH_ALL_BY } from './tutor.js';
 import { G } from '../state.js';
 
-const SUBJ = { math: ['수학', '#3b6cd4'], sci: ['과학', '#3fb950'] };
+/* ★인문(역사·지리·음악·미술·철학)까지 태그가 뜨도록 고쳐야 한다.
+ * 요구사항 17번: 메인은 수학/과학이지만 역사·사회·문화도 자연스럽게 섞는다.
+ * hum 키가 없으면 SUBJ[q.subj] 가 undefined → scol=undefined → el() 이 깨져
+ * 인문 문제가 하나라도 나오면 그 자리에서 예외가 났다. */
+const SUBJ = {
+  math: ['수학', '#3b6cd4'],
+  sci: ['과학', '#3fb950'],
+  hum: ['인문', '#b5651d'],
+};
+const subjTag = (s) => SUBJ[s] || SUBJ.math;
 
 /** 한 문제를 보여주고 답을 받는다. 반환 {ok, pick} */
 function showQuestion(q, opts) {
   return new Promise((resolve) => {
     const it = q.item;
     window.__peQ = { c: it.c, a: it.a, q: it.q, skill: q.skill }; // 자동 점검용
-    const [sname, scol] = SUBJ[q.subj];
+    const [sname, scol] = subjTag(q.subj);
     const box = el('div', { class: 'win quiz' });
     const top = el('div', { class: 'top' },
       el('span', { class: 'tag', style: { background: scol } }, sname),

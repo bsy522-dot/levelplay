@@ -42,15 +42,19 @@ async function j(path) {
 }
 
 export async function loadAll(onProgress) {
-  const [species, moves, trainers, sa, sb] = await Promise.all([
+  const [species, moves, trainers, sa, sb, hum] = await Promise.all([
     j('data/species.json'), j('data/moves.json'), j('data/trainers.json'),
     j('data/science_a.json').catch(() => []), j('data/science_b.json').catch(() => []),
+    /* ★인문 문제은행(요구사항 17번: 역사·지리·음악·미술·문명·철학).
+     * 이게 없으면 HUMAN 사다리 6단계가 질문으로 연결될 자리가 없어
+     * 인문이 한 번도 나오지 않았다. 없으면 조용히 [] 로 둔다(게임은 계속 돌아간다). */
+    j('data/human.json').catch(() => []),
   ]);
   DB.species = species;
   species.forEach((s) => { DB.byKey[s.key] = s; });
   DB.moves = moves;
   DB.trainers = trainers;
-  DB.science = [...sa, ...sb];
+  DB.science = [...sa, ...sb, ...hum];
   onProgress?.(0.5);
   const maps = await Promise.all(MAP_IDS.map((id) => j(`data/maps/${id}.json`)));
   maps.forEach((m) => { DB.maps[m.id] = m; });
