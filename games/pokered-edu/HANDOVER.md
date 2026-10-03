@@ -121,6 +121,7 @@ node _tools/lecture_render.mjs                    # 강의 전부를 폰 화면�
 node _tools/guidetest.mjs                         # 안내만 따라 걷기 (2·3판)
 node _tools/settingstest.mjs                      # ⚙ 설정: 어른 확인·학년부터 다시·학년 멈추기·속도·껐다 켜도 유지 (폰 터치)
 node _tools/numcheck.mjs                          # 숫자 없이 숫자를 구하라는 문제·식-정답 불일치 (예전 판 18종 → 0)
+node _tools/curriculum_html.mjs <저장 경로.html>   # 학년별 공부 지도(수학·과학·인문 단원, 강의·만화·원리 표시, 문제 없는 단원은 회색)
 ```
 
 > 2026-09-28 독립 검증에서 잡은 것: 투명 전환막이 터치를 막던 문제(키보드 테스트만으론 안 보임 → touchtest 추가), 시간·길이 설명 오류, 너무 어려운 단계에 갇히던 난이도(최근 정답률 40% 미만이면 한 단계 내려감), 새로 시작 시 저장 덮어쓰기 확인.
