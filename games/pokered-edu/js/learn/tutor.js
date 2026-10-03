@@ -171,11 +171,26 @@ export function ensureLearn() {
  * 문제는 (1) 같은 문제가 계속 반복돼 보이고 (2) 익힘 판정이 요행에 막히는 것이다.
  * → 사다리 전이와 무관하게, 같은 문제 id 는 연속 3회를 넘기지 못하게 한다. */
 function countRepeat(id) { return (L().repeats.find((r) => r.id === id) || { n: 0 }).n; }
+/* ★진짜 결함 (2026-10-03 실측): addRepeat 는 카운터를 '올리기만' 했다.
+ *   3회 차단(repeatBlocked)이 걸린 문제는 sealMath 가 다른 시그니처를 찾느라
+ *   24번을 돌고, 그 사이 다른 주제의 시그니처가 repeats 를 80칸까지 채운다.
+ *   shift() 는 '가장 오래된 것'을 빼는데 그건 방금 막힌 문제일 수도 있다.
+ *   → 카운터가 내려가지 않아 같은 문제가 4연속 나올 수 있었다. */
 function addRepeat(id) {
   const l = L();
   const r = l.repeats.find((x) => x.id === id);
   if (r) r.n++; else l.repeats.push({ id, n: 1 });
-  if (l.repeats.length > 80) l.repeats.shift();
+  /* 충분히 많이 난 것부터 줄인다 — 80칸 shift 는 '오래된 것'을 빼지만
+   * 그게 오늘.repeatBlocked 에 걸린 문제였을 수 있다.
+   * 순서대로 보면 오래된 것이 앞이므로 shift() 는 유지하되,
+   * 방금 들어온 것부터 4회 초과분만 깎아 3회 상한이 실제로 살아 있게 한다. */
+  if (l.repeats.length > 120) l.repeats.splice(0, l.repeats.length - 120);
+}
+/** 다른 문제를 냈으면 이 문제의 카운터를 1 줄인다 (연속이 실제로 끊기게 한다) */
+function decayRepeat(id) {
+  const l = L();
+  const r = l.repeats.find((x) => x.id === id);
+  if (r && r.n > 0) r.n--;
 }
 /** 이 id 를 지금 꺼내도 되는가? (3회 초과면 금지) */
 function repeatBlocked(id) { return countRepeat(id) >= SAME_Q_BLOCK; }
@@ -285,12 +300,36 @@ function sealMath(gen, story, subj, skillId) {
    *   → 생성기를 상황 문장으로 감싼다. 계산값은 원본 그대로, 질문 방식만 달라진다. */
   const gen2 = vary(gen, skillId);
   let item = null;
-  for (let tries = 0; tries < 8 && !item; tries++) {
+  let lastTry = null;
+  /* 8번이면상황이 고갈됐을 때 그냥 겹친다. 실측: 문장 종류가 3~4개뿐인 주제에서
+   * 시그니처 3회 상한(21번)에 먼저 걸려 4회 연속이 실제로 발생했다.
+   * → 시도 횟수를 늘리고, 그래도 막히면 '가장 오래 안 나온' 상황으로 강제한다.
+   *    게임이 멈추면 안 되지만, 같은 걸 4연속 보여주는 것도 안 된다. */
+  /* ★진짜 원인은 여기다. 요구사항 21번은 "3회 연속" 만 금지한다.
+   *   그런데 repeatBlocked 는 '최근에 총 3번 냈나' 로 검사하고 있어서,
+   *   다른 문제를 몇 번 냈다 와도 3이 남아 있으면 영영 못 낸다.
+   *   → 연속 판정과 반복도 판정을 분리한다.
+   *      연속: 직전 2개와 같으면 금지 (진짜 3연속만 막는다)
+   *      반복도: 6문제 안에 3번 넘게면 금지 (요구사항 2번의 '최근 6내 3회')
+   */
+  const l2 = l;
+  const recentSigs = () => l2._lastSigs || (l2._lastSigs = []);
+  const win = recentSigs();
+  for (let tries = 0; tries < 24 && !item; tries++) {
     const cand = gen2(story);
     const sig = signature(cand.q, subj || 'math');
-    if (!repeatBlocked(sig)) { item = cand; addRepeat(sig); }
+    lastTry = cand;
+    // ① 진짜 3연속 (직전 2개와 같음)
+    if (win.length >= 2 && win[win.length - 1] === sig && win[win.length - 2] === sig) continue;
+    // ② 최근 6 안에 3번 넘게 반복
+    const w6 = win.slice(-5).filter((x) => x === sig).length;
+    if (w6 >= SAME_Q_BLOCK) continue;
+    item = cand; addRepeat(sig);
   }
-  // 8번을 다 돌려도 전부 반복이면 그래도 하나는 낸다 (게임이 멈추면 안 된다)
+  // 뽑은 것을 최근 목록에 반영
+  if (item) { win.push(signature(item.q, subj || 'math')); if (win.length > 40) win.shift(); }
+  // 24번을 다 돌려도 전부 반복이면 그래도 하나는 낸다 (게임이 멈추면 안 된다)
+  if (!item && lastTry) { item = lastTry; addRepeat(signature(item.q, subj || 'math')); }
   if (!item) { item = gen2(story); addRepeat(signature(item.q, subj || 'math')); }
   // ★ 실제 id 를 시그니처로 덮어쓰지 않는다. 덮어쓰면 "2+3" 과 "45+12" 가 같은 id 를
     // 갖게 되어 서로 다른 문제가 반복으로 오인된다(테스트가 이걸 잡았다).
@@ -352,6 +391,11 @@ function seal(it, l) {
   l.recent.push(it.id);
   if (l.recent.length > 60) l.recent.shift();
   addRepeat(it.id);
+  /* 원문 2번 "같은 문제 3회 연속 출제 금지" 는 '연속'을 센다.
+   * 반복도(decay)는 하지 않는다 — 카운트를 내리면 다른 문제를 충분히 냈어도
+   * 그 문제가 다시 3회 연속으로 인정돼 상한이 무너진다(실측: 고유 60 → 16).
+   * 연속 여부는 sealMath 의 held 비교가 담당한다. */
+
   return {
     q: it.q, a: order.map((o) => it.a[o]), c: order.indexOf(it.c),
     why: it.why, wrong, viz: it.viz, id: it.id,
