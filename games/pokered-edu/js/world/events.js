@@ -495,7 +495,8 @@ function objectiveBase() {
   }
   if (!f('billSaved')) {
     if (map === 'CeruleanCity' || /^Cerulean/.test(map)) return { text: '블루시티 북쪽 너겟 브릿지를 건너자', detail: ['블루시티 위쪽(북쪽) 다리로!', '다리 위 트레이너 5명을 이기면 선물이 있대.'], dir: map === 'CeruleanCity' ? '↑ 북쪽' : '' };
-    if (map === 'Route24') return { text: '다리를 건너 동쪽 25번도로로', detail: ['다리 끝까지 간 뒤 오른쪽(동쪽)으로!'], dir: '↑ 그다음 →', targets: [[19, 4, '25번도로 쪽'], [19, 5, ''], [19, 6, '']] };
+    // 목표는 8~9번째 줄 동쪽 끝: 그 위(4~6줄)는 '<' 턱 너머라 다리 쪽에서 올라갈 수 없다(안내가 길을 못 찾던 원인)
+    if (map === 'Route24') return { text: '다리를 건너 동쪽 25번도로로', detail: ['다리 끝까지 간 뒤 오른쪽(동쪽)으로!'], dir: '↑ 그다음 →', targets: [[19, 8, '25번도로 쪽'], [19, 9, '']] };
     if (map === 'Route25') return { text: '길 끝의 이수재 박사님 집으로!', detail: ['동쪽 끝 오두막이 이수재 박사님 집이야.'], dir: '→ 동쪽', targets: [[45, 4, '오두막 문 앞']] };
     if (map === 'BillsHouse') return f('billAsk') ? { text: '왼쪽 PC에서 “분리”를 실행하자', detail: ['방 왼쪽 컴퓨터 앞에서 A 버튼!'], dir: '', targets: [[1, 5, 'PC 앞']] } : { text: '삐삐에게 말을 걸어 보자', detail: ['방 안의 삐삐… 뭔가 이상한데?'], dir: '', targets: [[6, 6, '삐삐 앞']] };
     return { text: '블루시티 북쪽으로 가서 이수재 박사님을 만나자', detail: ['블루시티 → 북쪽 다리(24번도로) → 25번도로 끝 오두막.'], dir: '' };

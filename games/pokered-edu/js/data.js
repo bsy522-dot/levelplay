@@ -1,5 +1,5 @@
 /* 게임 데이터 로드 (포켓몬, 기술, 트레이너, 지도, 과학 문제) */
-export const DB = { species: [], byKey: {}, moves: {}, trainers: {}, maps: {}, science: [] };
+export const DB = { species: [], byKey: {}, moves: {}, trainers: {}, maps: {}, science: [], concept: [], lectures: {} };
 
 export const MAP_IDS = ['PalletTown', 'RedsHouse1F', 'RedsHouse2F', 'BluesHouse', 'OaksLab', 'Route1', 'ViridianCity',
   'ViridianPokecenter', 'ViridianMart', 'ViridianSchoolHouse', 'Route2', 'ViridianForestSouthGate', 'ViridianForest',
@@ -50,6 +50,10 @@ export async function loadAll(onProgress) {
      * 인문이 한 번도 나오지 않았다. 없으면 조용히 [] 로 둔다(게임은 계속 돌아간다). */
     j('data/human.json').catch(() => []),
   ]);
+  // 원리 문제(수학 주제마다 "왜 필요했을까") · 강의(강의 보기 버튼). 없으면 빈 채로 계속 동작한다.
+  const [concept, lectures] = await Promise.all([j('data/concept_math.json').catch(() => []), j('data/lectures.json').catch(() => ({}))]);
+  DB.concept = concept;
+  DB.lectures = lectures;
   DB.species = species;
   species.forEach((s) => { DB.byKey[s.key] = s; });
   DB.moves = moves;

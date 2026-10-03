@@ -16,7 +16,7 @@ const MATH = MATH_ALL, MATH_BY = MATH_ALL_BY;
 export function skillNote(id) { const s = MATH_BY[id] || SCI_BY[id] || {}; const n = NOTES[id] || {}; return { t: s.t || id, idea: s.idea || n.idea || '', need: s.need || n.need || '' }; }
 import { weighted, pick, shuffle, signature } from '../util.js';
 import { prereqs, nexts, GRAPH, CROSS, QTYPES, LEVELS } from './schema.js';
-import { vary } from './variety.js';
+import { familyOf, familyTitle, FAMILIES } from './families.js';
 
 /* ── 튜닝 상수 (한 곳에서만 바꾼다) ──
  * PRACTICE_REWARD : 학교 연습 1문제 정답 보상(원)
@@ -106,6 +106,12 @@ export const HUMAN = [
   ['h_philo', 8, '가치와 생각', '철학'],
 ].map(([id, g, t, f]) => ({ id, g, t, f }));
 const HUMAN_BY = Object.fromEntries(HUMAN.map((s) => [s.id, s]));
+/* 인문은 검증된 문제은행(주제마다 10문제 이상)이 있을 때만 낸다.
+ * 2026-10-03: 예전 13문제에 정답 표시가 틀린 문제가 섞여 있어 새 은행이 들어올 때까지 쉬게 한다. */
+export function humanReady() {
+  const bank = (DB.science || []).filter((q) => q.id && q.id.startsWith('h_') && q.verified);
+  return HUMAN.every((h) => bank.filter((q) => q.topic === h.id).length >= 10);
+}
 const SCI_BY = Object.fromEntries([...SCI, ...HUMAN].map((s) => [s.id, s]));
 
 // 기술 타입 -> 어울리는 과학 주제 (전기 기술을 쓰면 전기 문제가 나오도록)
@@ -149,6 +155,45 @@ export function initLearn(grade) {
 }
 
 const sk = (id) => (L().sk[id] ||= { n: 0, ok: 0, streak: 0, miss: 0, mastered: false, placed: false, wrongRecent: 0, hist: [] });
+
+/* ── 부모 설정: 과목별 [자동 / 이 단계로 고정] + 올라가는 속도 ──
+ * 병석님: "설정으로 과목별 난이도 … 가끔 운좋게 잘 찍으니 너무 가버리는 경우가 있어서" */
+export const SPEEDS = { slow: '천천히', normal: '보통', fast: '빠르게' };
+export function settings() {
+  const s = (G.s.settings ||= {});
+  for (const k of ['math', 'sci', 'hum']) {
+    s[k] ||= { mode: 'auto', g: null, speed: 'normal' };
+    if (!SPEEDS[s[k].speed]) s[k].speed = 'normal';
+  }
+  return s;
+}
+/** 과학·인문은 문제은행에 문제가 있는 주제만 낼 수 있다 (없으면 엉뚱한 덧셈 문제가 나왔다) */
+const _bankHas = {};
+function usable(subj, id) {
+  if (subj === 'math') return true;
+  if (!(id in _bankHas)) _bankHas[id] = DB.science.some((q) => q.topic === id);
+  return _bankHas[id];
+}
+/** 지금 낼 수 있는 사다리 구간 [lo, hi]. 고정이면 그 학년 주제만, 자동이면 floor 부터 끝까지 */
+function range(subj) {
+  const lad = LADDER[subj], st = L()[subj];
+  const set = settings()[subj];
+  let lo = st ? st.floor : 0, hi = lad.length - 1;
+  if (set && set.mode === 'fixed' && set.g != null) {
+    lo = startIndex(subj, set.g);
+    let h = -1;
+    lad.forEach((s, i) => { if (s.g <= set.g) h = i; });
+    hi = Math.max(lo, h);
+  }
+  // 문제가 있는 주제까지만
+  while (hi > 0 && !usable(subj, lad[hi].id)) hi--;
+  if (lo > hi) lo = hi;
+  return { lo: Math.max(0, lo), hi };
+}
+
+/* ── 원리 문제은행 (수학 주제마다 "왜 필요했을까 / 뜻 / 언제 쓰나") ── */
+function conceptsFor(skillId) { return (DB.concept || []).filter((q) => q.skill === skillId); }
+export const hasConcept = (skillId) => conceptsFor(skillId).length > 0;
 
 /* ── 구 세이브 보정 (learn 필드가 없는 옛 기록도 즉시 동작해야 한다) ── */
 export function ensureLearn() {
@@ -222,69 +267,213 @@ export function frontier(subj) {
    *   "Cannot read properties of undefined" 가 났다. 게임이 통째로 멈췄으므로
    *   안전하게 0단계로 되돌린다. */
   if (!lad || !st) return 0;
-  for (let i = st.floor; i < lad.length; i++) if (!sk(lad[i].id).mastered) return i;
-  return lad.length - 1;
+  const { lo, hi } = range(subj);
+  for (let i = lo; i <= hi; i++) if (usable(subj, lad[i].id) && !sk(lad[i].id).mastered) return i;
+  return hi;
 }
 
-/** 이번에 낼 문제 고르기. opts: {moveType, story, subject} */
+/** 이번에 낼 문제 고르기. opts: {moveType, story, subject, lesson}
+ *  lesson(배틀 학습 묶음)이 있으면 첫 문제에서 주제를 정하고, 그 포켓몬과 싸우는 동안은 같은 주제로 이어 간다. */
 export function nextQuestion(opts = {}) {
   ensureLearn();
+  const ls = opts.lesson;
+  if (ls && ls.skill) return lessonQuestion(ls, opts);
   const l = L();
   let subj = opts.subject;
+  // 약한 가족 집중: 수학 문제의 70%를 그 가족에서 (같은 문제가 아니라 같은 가족의 여러 주제)
+  const focus = l.focus && !subj && Math.random() < 0.7 ? l.focus.fam : null;
+  if (focus) subj = 'math';
   if (!subj) {
     const typeTopics = (TYPE_SCI[opts.moveType] || []);
     const pSci = typeTopics.length ? SCI_P + 0.15 : SCI_P; // 어울리는 기술이면 과학을 조금 더
     const r = Math.random();
-    if (r < HUMAN_RATE) subj = 'hum';               // 가끔 인문 (역사·지리·음악·미술)
+    if (r < HUMAN_RATE && humanReady()) subj = 'hum'; // 가끔 인문 (역사·지리·음악·미술)
     else subj = r < HUMAN_RATE + pSci ? 'sci' : 'math';
   }
   const lad = LADDER[subj];
   if (!lad || !lad.length) return { subj: 'math', skill: MATH[0].id, title: MATH[0].t, item: MATH[0].gen(false) };
-  const f = frontier(subj);
-  const cands = [];
-  const hot = l.streak >= 5; // 잘하고 있으면 새 단계 위주로
-  cands.push({ i: f, w: hot ? 9 : 6 });
-  // 한 단계 위 맛보기는 지금 주제를 잘 풀고 있을 때만
-  if (f + 1 < lad.length && (hot || sk(lad[f].id).streak >= 1)) cands.push({ i: f + 1, w: hot ? 3 : 1.2 });
-  for (let i = Math.max(0, l[subj].floor - 3); i < f; i++) {
-    const s = sk(lad[i].id);
-    if (s.wrongRecent > 0) cands.push({ i, w: 3 });
-    else if (s.mastered && !s.placed && (!hot || s.leapt)) cands.push({ i, w: s.leapt ? 1 : 0.4 }); // 건너뛴 주제는 가끔 확인
+  let skill = focus ? pickFamilySkill(focus) : null;
+  if (!skill) {
+    const set = settings()[subj];
+    const f = frontier(subj);
+    const { lo, hi } = range(subj);
+    const cands = [];
+    if (set && set.mode === 'fixed') {
+      // 고정: 그 학년 주제들 안에서만 돌아가며 (못 푼 것·틀린 것 위주, 익힌 것은 가끔)
+      for (let i = lo; i <= hi; i++) {
+        if (!usable(subj, lad[i].id)) continue;
+        const s = sk(lad[i].id);
+        cands.push({ i, w: s.wrongRecent > 0 || !s.mastered ? 3 : 1 });
+      }
+    } else {
+      const hot = l.streak >= 5; // 잘하고 있으면 새 단계 위주로
+      cands.push({ i: f, w: hot ? 9 : 6 });
+      // 한 단계 위 맛보기는 지금 주제를 잘 풀고 있을 때만
+      if (f + 1 <= hi && usable(subj, lad[f + 1].id) && (hot || sk(lad[f].id).streak >= 1)) cands.push({ i: f + 1, w: hot ? 3 : 1.2 });
+      for (let i = Math.max(0, l[subj].floor - 3); i < f; i++) {
+        if (!usable(subj, lad[i].id)) continue;
+        const s = sk(lad[i].id);
+        if (s.wrongRecent > 0) cands.push({ i, w: 3 });
+        else if (s.mastered && !s.placed && (!hot || s.leapt)) cands.push({ i, w: s.leapt ? 1 : 0.4 }); // 건너뛴 주제는 가끔 확인
+      }
+      if (subj === 'sci' && opts.moveType) {
+        const pref = TYPE_SCI[opts.moveType] || [];
+        cands.forEach((c) => { if (pref.includes(lad[c.i].id)) c.w *= 4; });
+        // 사다리 근처에 어울리는 주제가 있으면 하나 더 후보로
+        pref.forEach((id) => { const i = lad.findIndex((s) => s.id === id); if (i >= 0 && i <= Math.min(hi, f + 1) && i >= f - 3 && usable(subj, id) && !cands.some((c) => c.i === i)) cands.push({ i, w: 3 }); });
+      }
+    }
+    const c = pickIndex(cands.length ? cands : [{ i: f, w: 1 }], lad);
+    skill = lad[c.i];
   }
-  if (subj === 'sci' && opts.moveType) {
-    const pref = TYPE_SCI[opts.moveType] || [];
-    cands.forEach((c) => { if (pref.includes(lad[c.i].id)) c.w *= 4; });
-    // 사다리 근처에 어울하는 주제가 있으면 하나 더 후보로
-    pref.forEach((id) => { const i = lad.findIndex((s) => s.id === id); if (i >= 0 && i <= f + 1 && i >= f - 3 && !cands.some((c) => c.i === i)) cands.push({ i, w: 3 }); });
-  }
-  // ★ 사다리를 넘어 볼 단계가 꽤 있으면 한 단계 위를 늘려서 천천히 올라간다
-  //   (병석님: "초등학교 6학년까지만 있는게 아니라 성인도 할수 있는거야")
-  const c = pickIndex(cands, lad);
-  const skill = lad[c.i];
-  const item = makeItem(subj, skill, !!opts.story);
   noteField(skill.f);
-  return { subj, skill: skill.id, title: skill.t, item };
+  if (ls) { ls.subj = subj; ls.skill = skill.id; return lessonQuestion(ls, opts); }
+  const item = makeItem(subj, skill, !!opts.story);
+  return { subj, skill: skill.id, title: skill.t, item, kind: item.kind };
 }
-function makeItem(subj, skill, story) {
+
+/* ── 배틀 학습 묶음 ──
+ * 병석님: "한 방에 죽는 놈도 있고 여러 방에 죽는 놈도 있잖아. 여러 방에 죽는 놈은 그 주제를 엮으라".
+ * 포켓몬 한 마리 = 한 주제. ①원리 ②계산 ③응용(상황) → 이후 계산·응용 번갈아.
+ * 틀리면 다음 문제는 같은 가족의 한 단계 쉬운 주제 + 보기 3개. 맞히면 원래 단계로 돌아간다. */
+export function newLesson() { return { subj: null, skill: null, step: 0, easy: false, n: 0, wrongs: 0, used: [] }; }
+const KIND_ORDER = ['principle', 'calc', 'apply'];
+function lessonQuestion(ls, opts = {}) {
+  const lad = LADDER[ls.subj];
+  const id = ls.easy ? easierSkill(ls.subj, ls.skill) : ls.skill;
+  const skill = lad.find((s) => s.id === id) || lad.find((s) => s.id === ls.skill) || lad[0];
+  let kind = 'bank';
+  if (ls.subj === 'math') {
+    kind = ls.step < 3 ? KIND_ORDER[ls.step] : (ls.step % 2 ? 'calc' : 'apply');
+    // 쉬운 쪽으로 내려왔으면: 원리 문제(왜 이렇게 하는지)가 남아 있으면 그것부터, 아니면 계산.
+    // 바로 앞 문제가 원리였으면 계산으로 — 같은 종류가 연달아 나오지 않게
+    if (ls.easy) kind = ls.lastKind !== 'principle' && conceptsFor(skill.id).some((q) => !ls.used.includes(q.id)) ? 'principle' : 'calc';
+  }
+  let item = makeItem(ls.subj, skill, kind === 'apply', kind, ls);
+  if (ls.easy || opts.three) item = toThree(item);
+  if (item.id) ls.used.push(item.id);
+  ls.lastKind = item.kind || kind;
+  ls.n++;
+  return { subj: ls.subj, skill: skill.id, title: skill.t, item, kind: item.kind || kind, lesson: true, easy: !!ls.easy, step: ls.step };
+}
+/** 결과를 묶음에 반영: 맞히면 다음 단계로, 틀리면 쉬운 쪽으로 (재도전은 단계를 넘기지 않는다) */
+export function lessonResult(ls, ok, retry = false) {
+  if (!ls) return;
+  if (ok) { if (!retry) ls.step++; ls.easy = false; } else { ls.easy = true; ls.wrongs++; }
+}
+/** 같은 가족에서 바로 아래 주제 (나눗셈을 틀리면 → 곱셈구구 쪽으로) */
+function easierSkill(subj, id) {
+  if (subj !== 'math') return id;
+  const fam = familyOf(id);
+  if (!fam) return id;
+  const idx = MATH.findIndex((s) => s.id === id);
+  const lower = FAMILIES[fam].ids.map((x) => MATH.findIndex((s) => s.id === x)).filter((i) => i >= 0 && i < idx);
+  return lower.length ? MATH[Math.max(...lower)].id : id;
+}
+/** 보기 4개 → 3개 (오답 하나를 뺀다. 오답 설명은 남은 보기에 맞게 다시 붙인다) */
+function toThree(it) {
+  if (!it || !Array.isArray(it.a) || it.a.length !== 4) return it;
+  const drop = pick([0, 1, 2, 3].filter((i) => i !== it.c));
+  const keep = [0, 1, 2, 3].filter((i) => i !== drop);
+  const wrong = {};
+  keep.forEach((i, j) => { if (i !== it.c && it.wrong && it.wrong[i] != null) wrong[j] = it.wrong[i]; });
+  return { ...it, a: keep.map((i) => it.a[i]), c: keep.indexOf(it.c), wrong, three: true };
+}
+/** 특정 주제로 문제 하나 (강의 보기 뒤 "같은 주제 새 문제"에 쓴다) */
+export function questionFor(subj, skillId, o = {}) {
+  ensureLearn();
+  const lad = LADDER[subj] || MATH;
+  const skill = lad.find((s) => s.id === skillId) || lad[0];
+  let item = makeItem(subj, skill, o.kind === 'apply', o.kind || (subj === 'math' ? 'calc' : 'bank'));
+  if (o.three) item = toThree(item);
+  return { subj, skill: skill.id, title: skill.t, item, kind: item.kind };
+}
+
+/* ── 약한 가족 집중 ──
+ * 병석님: "딱 봐도 아 얘는 곱하기 나누기 못하는구나 하면 계속 주입시켜 주고, 같은 문제 반복이 아니라
+ *          곱하기 관련된 걸 계속 보여 주면서".
+ * 가족의 최근 첫 시도 8문제(6개 이상) 정답률이 50% 미만이면 집중 모드, 최근 5문제 중 4개 맞히면 해제. */
+const _sum = (a) => a.reduce((x, y) => x + y, 0);
+function familyRecent() {
+  const log = L().log || [];
+  const fams = {};
+  for (let i = log.length - 1; i >= 0; i--) {
+    const fam = familyOf(log[i].k);
+    if (!fam) continue;
+    const a = (fams[fam] ||= []);
+    if (a.length < 8) a.push(log[i].ok);
+  }
+  return fams;
+}
+export function updateFocus() {
   const l = L();
-  if (subj === 'math') return sealMath(MATH_BY[skill.id].gen, story, subj, skill.id);
+  const fams = familyRecent();
+  if (l.focus) {
+    const a = (fams[l.focus.fam] || []).slice(0, 5);
+    if (a.length >= 5 && _sum(a) >= 4) { const fam = l.focus.fam; l.focus = null; return { off: fam, t: familyTitle(fam) }; }
+    return null;
+  }
+  let worst = null;
+  for (const [fam, a] of Object.entries(fams)) {
+    const acc = _sum(a) / a.length;
+    if (a.length >= 6 && acc < 0.5 && (!worst || acc < worst.acc)) worst = { fam, acc };
+  }
+  if (!worst) return null;
+  l.focus = { fam: worst.fam, since: l.total };
+  return { on: worst.fam, t: familyTitle(worst.fam) };
+}
+export function focusInfo() {
+  const l = L();
+  if (!l.focus) return null;
+  const a = familyRecent()[l.focus.fam] || [];
+  return { fam: l.focus.fam, t: familyTitle(l.focus.fam), ok: Math.round(_sum(a)), n: a.length };
+}
+function pickFamilySkill(fam) {
+  const f = frontier('math');
+  const idxs = FAMILIES[fam].ids.map((x) => MATH.findIndex((s) => s.id === x)).filter((i) => i >= 0);
+  let pool = idxs.filter((i) => i <= f || sk(MATH[i].id).n > 0); // 지금 단계 이하 + 이미 풀어 본 주제
+  if (!pool.length) pool = [Math.min(...idxs)];
+  const last = L().focus && L().focus.last;
+  const c = weighted(pool.map((i) => {
+    const s = sk(MATH[i].id);
+    return { i, w: (s.wrongRecent > 0 ? 3 : !s.mastered ? 2 : 1) * (MATH[i].id === last && pool.length > 1 ? 0.2 : 1) };
+  }), (x) => x.w);
+  if (L().focus) L().focus.last = MATH[c.i].id;
+  return MATH[c.i];
+}
+
+function makeItem(subj, skill, story, kind, ls) {
+  const l = L();
+  if (subj === 'math') {
+    if (kind === 'principle') {
+      const used = ls ? ls.used : [];
+      const all = conceptsFor(skill.id).filter((q) => !used.includes(q.id));
+      const fresh = all.filter((q) => !l.recent.includes(q.id));
+      const pool = fresh.length ? fresh : all;
+      if (pool.length) { const it = seal(pick(pool), l); it.kind = 'principle'; it.subj = subj; return it; }
+      story = false; // 원리 문제가 아직 없는 주제 → 계산 문제로
+    }
+    return sealMath(MATH_BY[skill.id].gen, story, subj, skill.id);
+  }
 
   if (subj === 'hum') {
     const it = pickBank('h_', skill.id, story, true);
     if (!it) return sealMath(MATH_BY.m_add10.gen, false, subj, 'm_add10');
+    it.kind = 'bank';
     return it;
   }
   let it = pickBank('s_', skill.id, story, false);
   if (!it) {
     // 그 주제의 문제가 다 떨어지면 → 같은 난이대의 다른 주제에서 (다양성 유지)
-    const near = SCI.filter((x) => Math.abs(x.g - skill.g) <= 1);
-    const pool = near.length ? near : SCI;
+    const near = SCI.filter((x) => Math.abs(x.g - skill.g) <= 1 && usable('sci', x.id));
+    const pool = near.length ? near : SCI.filter((x) => usable('sci', x.id));
     for (let i = 0; i < 8 && !it; i++) {
       const alt = pick(pool);
       it = pickBank('s_', alt.id, story, false);
     }
   }
   if (!it) return sealMath(MATH_BY.m_add10.gen, false, subj, 'm_add10');
+  it.kind = 'bank';
   return it;
 }
 
@@ -298,7 +487,9 @@ function sealMath(gen, story, subj, skillId) {
    *   실측: 생성자 56개 중 36개가 '문제문 30종·시그니처 1종' 이었다.
    *   그래서 아래 signature() 로는 3연속 중복을 못 막았다(8회 시도 후 강제 배출).
    *   → 생성기를 상황 문장으로 감싼다. 계산값은 원본 그대로, 질문 방식만 달라진다. */
-  const gen2 = vary(gen, skillId);
+  // vary(상황 문장 덧씌우기)는 질문과 정답이 어긋나는 문제가 섞여 꺼 둔다 (2026-10-03).
+  // 생성기 원문은 정답과 항상 맞고, 반복은 배틀 학습 묶음(원리·계산·응용)으로 줄인다.
+  const gen2 = gen;
   let item = null;
   let lastTry = null;
   /* 8번이면상황이 고갈됐을 때 그냥 겹친다. 실측: 문장 종류가 3~4개뿐인 주제에서
@@ -316,7 +507,10 @@ function sealMath(gen, story, subj, skillId) {
   const recentSigs = () => l2._lastSigs || (l2._lastSigs = []);
   const win = recentSigs();
   for (let tries = 0; tries < 24 && !item; tries++) {
-    const cand = gen2(story);
+    // 같은 모양이 막히면 계산형 ↔ 상황형을 번갈아 시도한다 (질문 방식 자체를 바꾼다)
+    const st = tries % 2 ? !story : story;
+    const cand = gen2(st);
+    cand.kind = st ? 'apply' : 'calc';
     const sig = signature(cand.q, subj || 'math');
     lastTry = cand;
     // ① 진짜 3연속 (직전 2개와 같음)
@@ -330,7 +524,7 @@ function sealMath(gen, story, subj, skillId) {
   if (item) { win.push(signature(item.q, subj || 'math')); if (win.length > 40) win.shift(); }
   // 24번을 다 돌려도 전부 반복이면 그래도 하나는 낸다 (게임이 멈추면 안 된다)
   if (!item && lastTry) { item = lastTry; addRepeat(signature(item.q, subj || 'math')); }
-  if (!item) { item = gen2(story); addRepeat(signature(item.q, subj || 'math')); }
+  if (!item) { item = gen2(story); item.kind = story ? 'apply' : 'calc'; addRepeat(signature(item.q, subj || 'math')); }
   // ★ 실제 id 를 시그니처로 덮어쓰지 않는다. 덮어쓰면 "2+3" 과 "45+12" 가 같은 id 를
     // 갖게 되어 서로 다른 문제가 반복으로 오인된다(테스트가 이걸 잡았다).
     // 판정용 키는 `_sig` 로 별도 보관하고, id 는 문제은행/생성기의 고유값 그대로 둔다.
@@ -411,30 +605,42 @@ function seal(it, l) {
   };
 }
 
-/** 결과 기록. firstTry=false 면 재도전(설명을 본 뒤)이다. */
-export function record(q, correct, firstTry = true) {
+/** 결과 기록. firstTry=false 면 재도전(설명을 본 뒤)이다.
+ *  opt.lectured: 강의를 보고 푼 문제 → 명중은 되지만 '익힘'에는 반만 반영 (외워서·찍어서 올라가는 것 방지) */
+export function record(q, correct, firstTry = true, opt = {}) {
   const l = L(), s = sk(q.skill);
   const res = { mastered: false, streak: l.streak, stepDown: false };
   if (!firstTry) {
     if (correct) { l.retryOk++; s.wrongRecent = Math.max(0, s.wrongRecent - 1); }
     return res;
   }
+  const speed = (settings()[q.subj] || {}).speed || 'normal';
+  const lect = !!(opt.lectured || q.lectured);
+  const val = correct ? (lect ? 0.5 : 1) : 0;
   l.total++; s.n++;
-  s.hist = [...(s.hist || []), correct ? 1 : 0].slice(-6);
+  s.hist = [...(s.hist || []), val].slice(-6);
+  if (correct && q.kind === 'principle') s.pOk = (s.pOk || 0) + 1;
   if (correct) {
-    l.correct++; s.ok++; s.streak++; s.miss = 0;
-    l.streak++; l.best = Math.max(l.best, l.streak);
+    l.correct++; s.ok++; s.miss = 0;
+    if (!lect) { s.streak++; l.streak++; l.best = Math.max(l.best, l.streak); }
     if (s.wrongRecent > 0) s.wrongRecent--;
-    // 익힘: 최근 5문제 중 4개 이상 + 이번에도 정답 (요행 3연속 방지)
-    const fast = l.streak >= 5 && q.skill === LADDER[q.subj][frontier(q.subj)].id; // 5연속 이상 = 빠른 길
-    if (!s.mastered && fast) {
+    const lad = LADDER[q.subj], fi = frontier(q.subj);
+    const atFront = !!lad[fi] && q.skill === lad[fi].id;
+    // 빠른 길(전체 5연속): '보통'은 이 주제를 이미 2번 이상 맞혔을 때만, '빠르게'는 바로, '천천히'는 없음
+    if (!s.mastered && !lect && atFront && l.streak >= 5 && (speed === 'fast' || (speed === 'normal' && s.ok >= 2))) {
       s.mastered = true; res.mastered = true; res.fast = true;
-      // 8연속 이상 = 도약: 다음 단계 하나는 건너뛴다 (나중에 틀리면 다시 내려올 수 있음)
-      if (l.streak >= 8) { const lad = LADDER[q.subj], f2 = frontier(q.subj); if (f2 < lad.length - 1) { const nx = sk(lad[f2].id); nx.mastered = true; nx.leapt = true; res.leap = lad[f2].t; } }
+      // 도약(다음 단계 건너뛰기)은 '빠르게'에서만
+      const fixed = (settings()[q.subj] || {}).mode === 'fixed';
+      if (speed === 'fast' && !fixed && l.streak >= 8) { const f2 = frontier(q.subj); if (f2 < lad.length - 1) { const nx = sk(lad[f2].id); nx.mastered = true; nx.leapt = true; res.leap = lad[f2].t; } }
     }
-    const last5 = s.hist.slice(-5);
-    const last4 = s.hist.slice(-4);
-    if (!s.mastered && last4.length >= 3 && last4.reduce((a, b) => a + b, 0) >= 3 && s.streak >= 2) { s.mastered = true; res.mastered = true; }
+    // 보통 익힘: 최근 5문제 중 4개 + 2연속 + (원리 문제가 있는 수학 주제면) 원리 1개 이상 정답
+    const h = s.hist;
+    const needP = q.subj === 'math' && speed !== 'fast' && hasConcept(q.skill);
+    const pOK = !needP || (s.pOk || 0) >= 1;
+    const rule = speed === 'slow' ? (h.length >= 6 && _sum(h.slice(-6)) >= 5 && s.streak >= 3)
+      : speed === 'fast' ? (h.length >= 3 && _sum(h.slice(-4)) >= 3 && s.streak >= 2)
+        : (h.length >= 5 && _sum(h.slice(-5)) >= 4 && s.streak >= 2);
+    if (!s.mastered && rule && pOK) { s.mastered = true; res.mastered = true; }
   } else {
     s.streak = 0; s.miss++; s.wrongRecent = 2; l.streak = 0;
     // 지금 배우는 주제가 너무 어려우면 한 단계 쉽게:
@@ -449,8 +655,9 @@ export function record(q, correct, firstTry = true) {
     }
   }
   res.streak = l.streak;
-  l.log.push({ t: Date.now(), k: q.skill, ok: correct ? 1 : 0 });
+  l.log.push({ t: Date.now(), k: q.skill, ok: val });
   if (l.log.length > 400) l.log.shift();
+  res.focus = updateFocus();
   return res;
 }
 
@@ -486,6 +693,7 @@ export function onBadge() {
   for (const subj of ['math', 'sci', 'hum']) {
     const lad = LADDER[subj];
     if (!lad || !lad.length) continue;
+    if ((settings()[subj] || {}).mode === 'fixed') continue; // 부모가 고정한 과목은 배지로 안 올린다
     l[subj].floor = Math.min(lad.length - 1, Math.max(l[subj].floor, frontier(subj)) + 1);
   }
 }
@@ -501,6 +709,7 @@ export function report() {
     acc: l.total ? Math.round((l.correct / l.total) * 100) : 0,
     math: rows('math'), sci: rows('sci'), hum: rows('hum'),
     fMath: frontier('math'), fSci: frontier('sci'), fHum: frontier('hum'),
+    focus: focusInfo(), settings: settings(),
   };
 }
 export const isNewSkill = (id) => !(L().sk[id] && (L().sk[id].n > 0 || L().sk[id].placed));

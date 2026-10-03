@@ -290,11 +290,12 @@ async function cardScreen() {
 
 /* ── 학교 연습 문제 ── */
 import { moveQuiz } from './learn/quiz.js';
-import { PRACTICE_REWARD } from './learn/tutor.js';
+import { PRACTICE_REWARD, newLesson } from './learn/tutor.js';
 export async function practice(n) {
   let ok = 0;
+  const lesson = newLesson(); // 연습 문제도 한 주제로: 원리 → 계산 → 응용
   for (let i = 0; i < n; i++) {
-    const r = await moveQuiz({ monName: '연습', moveName: `${i + 1}번 문제`, moveType: null });
+    const r = await moveQuiz({ monName: '연습', moveName: `${i + 1}번 문제`, moveType: null, lesson });
     if (r.hit) ok++;
   }
   const prize = ok * PRACTICE_REWARD;

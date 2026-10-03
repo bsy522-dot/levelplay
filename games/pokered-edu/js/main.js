@@ -12,6 +12,7 @@ import { initLearn, GRADES } from './learn/tutor.js';
 import * as MENU from './menus.js';
 /* ★세이브 슬롯 관리(5개) — 병석님 요청으로 되살린 기능 */
 import { startViaSlot } from './savemgr.js';
+import { repairMisSaved as SV_REPAIR } from './saves.js';
 import { charSheet, KINDS, CW, CH } from './art/chars.js';
 
 const AI_FACES = ['oak', 'rival', 'brock', 'mom', 'nurse', 'clerk', 'bugcatcher', 'youngster', 'oldman', 'camper', 'player', 'misty', 'rocket', 'hiker', 'surge', 'bill'];
@@ -33,6 +34,8 @@ async function loadFaces() {
 }
 
 async function boot() {
+  // 이미 설치된 기기의 세이브: 예전 버그로 슬롯 1 자리에 들어간 최신 진행을 지금 노는 슬롯에 옮겨 담는다(지우는 것 없음)
+  try { const r = SV_REPAIR(); if (r.changed) console.info('세이브 보정: 슬롯', r.slot, '에 최신 진행을 옮김'); } catch (e) { console.warn('세이브 보정 건너뜀', e); }
   await loadAll();
   await loadFaces();
   let worldReady, battleReady;

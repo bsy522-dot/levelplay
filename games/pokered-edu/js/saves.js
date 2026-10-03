@@ -308,6 +308,27 @@ export function moveSlotOutside(n, mapId, x, y, newName, label) {
   };
 }
 
+/* ── 이미 설치된 기기의 세이브 지키기 (2026-10-03, 병석님: "잡은 포켓몬·레벨·마을 위치는 계속 보존") ──
+ * 예전 버그: 슬롯 2~5를 골라 놀아도 저장은 항상 슬롯 1 자리(v1 키)에 들어갔다.
+ *   → 그런 기기에서는 최신 진행이 v1 키에 있고, 슬롯 n 은 복사했을 때 그대로 멈춰 있다.
+ * 이제 저장은 지금 노는 슬롯에 들어가므로, 켜질 때 한 번 최신 진행을 그 슬롯에 옮겨 담는다.
+ *   조건: 지금 노는 슬롯이 2~5 이고, v1 과 그 슬롯이 같은 모험(started 같음)이며, v1 이 더 오래 놀았을 때.
+ *   v1 은 건드리지 않고, 슬롯 n 의 이전 판은 백업 칸으로 돌린다 → 지워지는 것은 없다. */
+export function repairMisSaved() {
+  const n = activeSlot();
+  if (n < 2) return { ok: true, changed: false };
+  const v1 = read(V1_KEY), sn = read(keyOf(n));
+  if (!v1 || !sn) return { ok: true, changed: false };
+  if (!v1.started || v1.started !== sn.started) return { ok: true, changed: false };
+  if ((v1.playMs || 0) <= (sn.playMs || 0)) return { ok: true, changed: false };
+  rotateBackup(n);
+  const fixed = JSON.parse(JSON.stringify(v1));
+  fixed._slot = n;
+  fixed._repairedAt = Date.now();
+  write(keyOf(n), fixed);
+  return { ok: true, changed: true, slot: n };
+}
+
 export function moveOutsideTo(mapId, x, y, label) {
   const changed = [];
   for (let n = 1; n <= SLOT_COUNT; n++) {

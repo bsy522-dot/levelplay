@@ -52,9 +52,15 @@ for (let i = 0; i < 3000; i++) {
 console.log(`3000회: 수학 ${(math / 30).toFixed(1)}% / 과학 ${(sci / 30).toFixed(1)}% / 인문 ${(hum / 30).toFixed(1)}%`);
 console.log('등장한 인문 문제 종류:', [...humIds].join(', ') || '(없음)');
 
-if (hum === 0) fail('인문 문제가 3000회 중 0회 — 사다리만 있고 문제가 안 나온다');
-if (hum < 3000 * 0.03) fail(`인문 비율 ${(hum / 30).toFixed(1)}% — 너무 낮음`);
-if (humIds.size < 5) fail(`인문 고유 문제 ${humIds.size}종 — 다양성 부족`);
+if (!T.humanReady()) {
+  // 검증된 인문 은행이 없으면 인문은 쉰다 (정답 표시가 틀린 옛 문제를 내지 않기)
+  if (hum) fail(`검증 안 된 인문 문제가 ${hum}회 나옴`);
+  else console.log('인문 쉬는 중(검증된 은행 없음) — 0회가 맞음');
+} else {
+  if (hum === 0) fail('인문 문제가 3000회 중 0회 — 사다리만 있고 문제가 안 나온다');
+  if (hum < 3000 * 0.03) fail(`인문 비율 ${(hum / 30).toFixed(1)}% — 너무 낮음`);
+  if (humIds.size < 5) fail(`인문 고유 문제 ${humIds.size}종 — 다양성 부족`);
+}
 
 /* ── quiz.js:17 크래시 재현 검사 (SUBJ 태그 조회) ── */
 const quizSrc = fs.readFileSync(path.join(here, '..', 'js', 'learn', 'quiz.js'), 'utf8');

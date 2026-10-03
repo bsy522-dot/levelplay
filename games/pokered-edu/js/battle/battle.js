@@ -7,6 +7,7 @@ import { root, portraitUrl, choose, fade, say, toast } from '../ui.js';
 import { sfx, music } from '../audio.js';
 import * as M from './mech.js';
 import { moveQuiz } from '../learn/quiz.js';
+import { newLesson } from '../learn/tutor.js';
 import { expMult, PRACTICE_REWARD, EXP_GAIN_BOOST } from '../learn/tutor.js';
 import { fixJosa } from '../learn/math.js';
 import { W } from '../world/overworld.js';
@@ -326,6 +327,9 @@ export async function runBattle(opts) {
   hud.balls = trainer ? foes.map(() => true) : null;
   let fi = 0;
   let foe = M.battler(foes[0], 'foe');
+  // 배틀 학습 묶음: 상대 포켓몬 한 마리 = 한 주제 (여러 방 맞아야 쓰러지면 같은 주제로 원리→계산→응용)
+  let lesson = newLesson();
+  B.lesson = lesson;
   seen(foe.m.sp);
   const party = G.s.party;
   let me = M.battler(party.find((m) => m.hp > 0), 'me');
@@ -372,7 +376,7 @@ export async function runBattle(opts) {
           }), { moves: true, cancel: -1 });
           if (mvIdx === -1) continue;
           const slot = me.m.moves[mvIdx], d = DB.moves[slot.id];
-          const q = await moveQuiz({ monName: sp(me.m.sp).name, moveName: d.name, moveType: d.type, story: !!opts.story });
+          const q = await moveQuiz({ monName: sp(me.m.sp).name, moveName: d.name, moveType: d.type, story: !!opts.story, lesson });
           myAct = { kind: 'move', slot, move: d, hit: q.hit };
         }
       } else if (cmd === 'bag') {
@@ -433,6 +437,7 @@ export async function runBattle(opts) {
         participants.clear(); participants.add(me.m);
         if (trainer && fi + 1 < foes.length) {
           fi++; foe = M.battler(foes[fi], 'foe'); seen(foe.m.sp);
+          lesson = newLesson(); B.lesson = lesson; // 다음 포켓몬 = 새 주제
           await hud.msg(`${josa(opts.name, '은/는')} ${josa(sp(foe.m.sp).name, '을/를')} 내보냈다!`);
           await S.showMon('foe', foe.m.sp, { from: 'ball' }); hud.drawFoe(foe, hud.balls);
           continue;

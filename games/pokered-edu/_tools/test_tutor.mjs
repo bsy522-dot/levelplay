@@ -49,6 +49,8 @@ const { initLearn, nextQuestion, ensureLearn, report, SCI, HUMAN, SCI_P, SAME_Q_
 
 let bad = 0;
 const fail = (msg) => { bad++; if (bad <= 40) console.log('✗', msg); };
+const HUM_ON = T.humanReady();
+console.log(HUM_ON ? '· 인문: 검증된 은행 있음 → 7% 부근으로 나와야 함' : '· 인문: 검증된 은행 없음 → 0%여야 함');
 
 /* ── 상수 자체가 요구사항과 맞는가 ── */
 if (PRACTICE_REWARD !== 1000) fail(`보상 ${PRACTICE_REWARD} — 1000 이어야 함`);
@@ -127,10 +129,16 @@ if (!sigFail) console.log(`· 21번 생성자 ${T.MATH_ALL.length}개 — 전부
     if (r.item.id.startsWith('h_')) humSeen.set(r.item.id, (humSeen.get(r.item.id) || 0) + 1);
     else wrong++;
   }
-  if (humSlot === 0) fail('인문 칸이 2000회에 0회');
-  if (wrong) fail(`인문 칸에 인문이 아닌 문제 ${wrong}회 세입`);
-  if (humSeen.size < 6) fail(`인문 고유 문제 ${humSeen.size}종 — 사다리 6단계가 다 안 나옴`);
-  if (!wrong) console.log(`· 인문 ${humSlot}회 전부 h_ 문제, 고유 ${humSeen.size}종`);
+  if (!HUM_ON) {
+    // 검증된 인문 은행이 없으면 인문은 쉰다 (2026-10-03: 정답 표시가 틀린 옛 문제를 아이에게 내지 않기)
+    if (humSlot) fail(`검증 안 된 인문 문제가 ${humSlot}회 나옴`);
+    else console.log('· 인문 쉬는 중(검증된 은행 없음) — 2000회 중 0회');
+  } else {
+    if (humSlot === 0) fail('인문 칸이 2000회에 0회');
+    if (wrong) fail(`인문 칸에 인문이 아닌 문제 ${wrong}회 세입`);
+    if (humSeen.size < 6) fail(`인문 고유 문제 ${humSeen.size}종 — 사다리 6단계가 다 안 나옴`);
+    if (!wrong) console.log(`· 인문 ${humSlot}회 전부 h_ 문제, 고유 ${humSeen.size}종`);
+  }
 }
 
 // 연속 3회 같은 id 금지
@@ -162,7 +170,7 @@ for (let i = 0; i < 3000; i++) {
   if (r.subj === 'hum') hum++; else if (r.subj === 'sci') sci++; else math++;
 }
 const hr = hum / 3000, sr = sci / 3000;
-if (hr < HUMAN_RATE * 0.5 || hr > HUMAN_RATE * 1.8) fail(`인문 비율 ${(hr * 100).toFixed(1)}% — 목표 ${(HUMAN_RATE * 100).toFixed(0)}% 부근`);
+if (!HUM_ON ? hr > 0 : hr < HUMAN_RATE * 0.5 || hr > HUMAN_RATE * 1.8) fail(`인문 비율 ${(hr * 100).toFixed(1)}% — 목표 ${(HUMAN_RATE * 100).toFixed(0)}% 부근`);
 if (sr < SCI_P * 0.5 || sr > SCI_P * 1.6) fail(`과학 비율 ${(sr * 100).toFixed(1)}% — 목표 ${(SCI_P * 100).toFixed(0)}% 부근`);
 console.log(`· 3000회抽取: 수학 ${(math / 30).toFixed(1)}% / 과학 ${(sr * 100).toFixed(1)}% / 인문 ${(hr * 100).toFixed(1)}%`);
 
@@ -173,7 +181,7 @@ for (let i = 0; i < 400; i++) {
   const r = nextQuestion({});
   if (r.subj === 'hum' && r.item.id && r.item.id.startsWith('h_')) humReal++;
 }
-if (humReal === 0) fail('인문 문제은행(h_)이 하나도 안 나옴 — 문제은행 작성 필요');
+if (HUM_ON && humReal === 0) fail('인문 문제은행(h_)이 하나도 안 나옴 — 문제은행 작성 필요');
 
 /* ── ⑤ 구 세이브 호환 ── */
 G.s.learn = { grade: 3, math: { floor: 0, pos: 0 }, sci: { floor: 0, pos: 0 }, sk: {}, streak: 0, best: 0, total: 0, correct: 0, retryOk: 0 };
