@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1b2a4a">
+<title>포켓몬 공부 모험</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game"></div>
+<div id="ui"></div>
+<div id="pad" class="pad hidden">
+  <div class="dpad">
+    <button data-k="up" class="d up" aria-label="위">▲</button>
+    <button data-k="left" class="d left" aria-label="왼쪽">◀</button>
+    <button data-k="right" class="d right" aria-label="오른쪽">▶</button>
+    <button data-k="down" class="d down" aria-label="아래">▼</button>
+  </div>
+  <div class="abtn">
+    <button data-k="menu" class="m" aria-label="메뉴">☰</button>
+    <button data-k="b" class="b" aria-label="B">B</button>
+    <button data-k="a" class="a" aria-label="A">A</button>
+  </div>
+</div>
+<div id="boot"><div class="boot-ball"></div><p>모험 준비 중…</p></div>
+<script src="vendor/phaser.min.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
