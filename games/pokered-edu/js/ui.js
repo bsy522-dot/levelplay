@@ -64,7 +64,8 @@ export function choose(items, opts = {}) {
     const btns = items.map((it, i) => el('button', { onclick: (e) => { e.stopPropagation(); sel = i; done(it.value); }, disabled: it.disabled }, it.label));
     box.append(...btns);
     root().append(box);
-    const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel));
+    // 목록이 길면(설정의 학년 고르기) 화면 안에서 스크롤 — 고른 줄이 보이게 따라간다
+    const paint = () => { btns.forEach((b, i) => b.classList.toggle('sel', i === sel)); if (opts.style && opts.style.overflowY) btns[sel]?.scrollIntoView?.({ block: 'nearest' }); };
     paint();
     const done = (v) => { pop(); box.remove(); sfx(v === (opts.cancel ?? null) ? 'cancel' : 'select'); resolve(v); };
     const pop = Input.push((k) => {

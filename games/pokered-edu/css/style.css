@@ -167,6 +167,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .report .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(7em, 1fr)); gap: .5em; }
 .report .kpi div { background: #eef3ff; border-radius: 14px; padding: .5em .7em; }
 .report .kpi b { display: block; font-family: 'Jua'; font-size: 1.5em; color: var(--line); }
+.report .focusline { background: #fff4d6; border: 2px solid #f0a500; border-radius: 12px; padding: .45em .7em; font-weight: 700; }
+.report .setline { background: #f3f6fb; border-radius: 10px; padding: .4em .7em; line-height: 1.5; }
 .skillrow { display: flex; align-items: center; gap: .6em; padding: .35em .5em; border-radius: 10px; background: #f6f8fe; font-size: .9em; }
 .skillrow .dot { width: .8em; height: .8em; border-radius: 50%; background: #cfd6e6; flex: none; }
 .skillrow .dot.m { background: var(--ok); }
@@ -186,6 +188,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .abtn .b { width: 34%; height: 34%; left: 12%; top: 50%; }
 .abtn .m { width: 24%; height: 24%; left: 2%; top: 4%; font-size: calc(var(--pad-size) * .1); border-radius: 12px; }
 body.in-panel .pad .dpad, body.in-quiz .pad, body.in-battle .pad { display: none; }
+/* 전체 화면 창(공부 기록·포켓몬·가방…)에서는 A·B 버튼이 목록을 가렸다 → 패드를 숨긴다 (줄은 손가락으로 누르고, 닫기 ✕ 가 있다) */
+body.in-panel .pad { display: none; }
 /* 터치 패드가 있으면 글 창을 패드 위로 */
 @media (orientation: portrait) {
   body.has-pad:not(.in-battle) .dialog { bottom: calc(var(--pad-size) + 14px); }

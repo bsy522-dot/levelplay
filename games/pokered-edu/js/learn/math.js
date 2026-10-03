@@ -109,7 +109,7 @@ export const MATH = [
       { v: mn, why: `${mn}은(는) 가장 작은 수야. '큰 수'는 수직선에서 오른쪽에 있는 수란다.` },
       { v: second, why: `${second}도 크지만 ${mx}가 더 커. ${second} 다음에 ${second + 1}, … 이렇게 세어 가면 ${mx}가 더 뒤에 나와.` },
       ...ns.filter((x) => x !== mx && x !== mn && x !== second).map((v) => ({ v, why: `${v}보다 ${mx}가 더 커. 셀 때 더 나중에 나오는 수가 더 큰 수야.` })),
-    ], `수직선에서 오른쪽으로 갈수록 커져. 네 수 중 가장 오른쪽은 ${mx}야.`, { q: `가장 큰 수는 무엇일까?`, viz: { type: 'numline', from: 0, to: 10, marks: ns, hi: mx } });
+    ], `수직선에서 오른쪽으로 갈수록 커져. 네 수 중 가장 오른쪽은 ${mx}야.`, { q: `아래 보기 중에서 가장 큰 수는 무엇일까?`, viz: { type: 'numline', from: 0, to: 10, marks: ns, hi: mx } });
   } },
   { id: 'm_add10', g: 0, t: '10까지 더하기', gen: (st) => {
     const a = rand(1, 6), b = rand(1, 10 - a), s = a + b;

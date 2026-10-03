@@ -5,8 +5,9 @@ import { el, josa, typeTag, TYPE_KO } from './util.js';
 import { choose, panel, listNav, say, ask, toast, root } from './ui.js';
 import { sfx, setMuted, isMuted } from './audio.js';
 import * as M from './battle/mech.js';
-import { report } from './learn/tutor.js';
+import { report, settings, SPEEDS, GRADES, restartAt } from './learn/tutor.js';
 import { nextQuestion, record } from './learn/tutor.js';
+import { shuffle } from './util.js';
 import { W } from './world/overworld.js';
 import { fixJosa } from './learn/math.js';
 
@@ -26,6 +27,7 @@ export async function openMenu() {
         { label: '💡 힌트 (다음에 할 일)', value: 'hint' },
         { label: '📒 공부 기록', value: 'report' },
         { label: `👤 ${G.s.name}`, value: 'card' },
+        { label: '⚙ 설정 (어른용)', value: 'settings' },
         { label: '💾 저장', value: 'save' },
         { label: isMuted() ? '🔇 소리 켜기' : '🔊 소리 끄기', value: 'sound' },
         { label: '✖ 닫기', value: null },
@@ -40,6 +42,7 @@ export async function openMenu() {
       else if (v === 'report') await reportScreen();
       else if (v === 'hint') { W.busy = false; await W.showGoalDetail?.(); W.busy = true; }
       else if (v === 'card') await cardScreen();
+      else if (v === 'settings') await settingsScreen();
       else if (v === 'save') { save(); sfx('item'); toast('저장했어요! 💾'); }
       else if (v === 'sound') { setMuted(!isMuted()); }
     }
@@ -266,9 +269,81 @@ export async function reportScreen() {
         el('span', {}, el('span', { class: 'dot m', style: { display: 'inline-block', width: '.8em', height: '.8em', borderRadius: '50%', background: '#2fae5b', marginRight: '.3em' } }), '익힘'),
         el('span', {}, el('span', { style: { display: 'inline-block', width: '.8em', height: '.8em', borderRadius: '50%', background: '#f2b705', marginRight: '.3em' } }), '복습이 필요해요'),
         el('span', {}, el('span', { style: { display: 'inline-block', width: '.8em', height: '.8em', borderRadius: '50%', background: '#cfd6e6', marginRight: '.3em' } }), '아직')),
+      r.focus ? el('div', { class: 'focusline' }, `🎯 지금 집중 중: ${r.focus.t} (최근 ${r.focus.n}문제 중 ${r.focus.ok}개 맞힘) — 같은 문제가 아니라 이 가족의 여러 문제를 더 풀어요`) : null,
+      el('div', { class: 'sub setline' }, '⚙ 설정 — ', ['math', 'sci', 'hum'].map((k) => setLine(k, r)).join(' / ')),
       el('h3', {}, `수학 — 지금 배우는 곳: ${r.math[r.fMath].t}`), ...skillRows(r.math, r.fMath),
       el('h3', {}, `과학 — 지금 배우는 곳: ${r.sci[r.fSci].t}`), ...skillRows(r.sci, r.fSci)));
   });
+}
+
+/* ── ⚙ 설정 (어른용): 과목별 난이도 ──
+ * 병석님: "설정으로 난이도 과목별 난이도 정도 되게 해 줘. 가끔 운 좋게 잘 찍으니 너무 가 버리는 경우가 있어서".
+ *  📌 이 학년에서 멈추기(위로 안 올라감) · 🔁 이 학년부터 다시(시작점을 낮추고 잘하면 다시 올라감) · 🐢 올라가는 속도
+ *  설정은 G.s.settings — 슬롯(아이)마다 따로 저장된다. */
+const SUBJ_KO = { math: '수학', sci: '과학', hum: '인문' };
+const gradeLabel = (g) => (GRADES.find((x) => x.g === g) || {}).label || `${g}단계`;
+function setLine(subj, r) {
+  const s = settings()[subj];
+  const now = { math: r.math[r.fMath], sci: r.sci[r.fSci], hum: r.hum && r.hum[r.fHum] }[subj];
+  const where = s.mode === 'fixed' ? `${gradeLabel(s.g)}에서 멈춤` : `자동${now ? ` (지금: ${now.t})` : ''}`;
+  return `${SUBJ_KO[subj]}: ${where} · ${SPEEDS[s.speed]}`;
+}
+/** 오박사 말 한 줄 + 고르기 (말 상자는 고른 뒤 닫힌다) */
+async function pickWith(line, items, opts = {}) {
+  const box = await say([line], { keep: true, who: '오박사', face: 'oak' });
+  const v = await choose(items, { cancel: null, ...opts });
+  box.remove();
+  return v;
+}
+/** 어른 확인: 두 자리 × 두 자리 곱셈 (아이가 혼자 난이도를 바꾸지 않게) */
+async function parentCheck() {
+  const a = 13 + Math.floor(Math.random() * 27), b = 12 + Math.floor(Math.random() * 18), p = a * b;
+  const wrong = [...new Set([p + 10, p - 10, p + a, p - b, p + b])].filter((x) => x !== p && x > 0).slice(0, 3);
+  const v = await pickWith(`어른 확인이 필요해요. ${a} × ${b} = ?`, shuffle([p, ...wrong]).map((n) => ({ label: String(n), value: n })));
+  if (v === p) return true;
+  if (v != null) await say(['어른에게 부탁해 보세요! 🙂'], { who: '오박사', face: 'oak' });
+  return false;
+}
+export async function settingsScreen() {
+  if (!(await parentCheck())) return;
+  for (;;) {
+    const r = report();
+    const v = await pickWith('⚙ 과목별 난이도예요. 바꿀 과목을 골라 주세요.', [
+      ...['math', 'sci', 'hum'].map((k) => ({ label: setLine(k, r), value: k })),
+      { label: '✖ 닫기', value: null },
+    ]);
+    if (v == null) break;
+    await subjectSettings(v);
+    save();
+  }
+}
+async function subjectSettings(subj) {
+  const s = settings()[subj];
+  const v = await pickWith(`${SUBJ_KO[subj]}을 어떻게 할까요?`, [ // 수학·과학·인문 모두 받침 → '을'
+    { label: '📌 이 학년에서 멈추기 (그 위로 안 올라가요)', value: 'fix' },
+    { label: '🔁 이 학년부터 다시 (잘하면 다시 올라가요)', value: 'restart' },
+    s.mode === 'fixed' ? { label: '📈 멈춤 풀기 (자동으로 올라가요)', value: 'auto' } : null,
+    { label: `🐢 올라가는 속도 (지금: ${SPEEDS[s.speed]})`, value: 'speed' },
+    { label: '↩ 뒤로', value: null },
+  ].filter(Boolean));
+  if (v === 'fix' || v === 'restart') {
+    const g = await pickWith(v === 'fix' ? '어느 학년에서 멈출까요?' : '어느 학년부터 다시 할까요?',
+      [...GRADES.map((x) => ({ label: x.label, value: x.g })), { label: '↩ 뒤로', value: null }],
+      { style: { maxHeight: '55vh', overflowY: 'auto' } });
+    if (g == null) return;
+    if (v === 'fix') { s.mode = 'fixed'; s.g = g; toast(`${SUBJ_KO[subj]}: ${gradeLabel(g)}에서 멈춰요 📌`, 2200); }
+    else { restartAt(subj, g); s.mode = 'auto'; s.g = null; toast(`${SUBJ_KO[subj]}: ${gradeLabel(g)}부터 다시 시작해요 🔁`, 2200); }
+  } else if (v === 'auto') {
+    s.mode = 'auto'; s.g = null; toast(`${SUBJ_KO[subj]}: 다시 자동으로 올라가요 📈`, 2000);
+  } else if (v === 'speed') {
+    const sp = await pickWith('얼마나 빨리 올라갈까요?', [
+      { label: '🐢 천천히 — 최근 6문제 중 5개 + 3연속 정답', value: 'slow' },
+      { label: '🚶 보통 — 최근 5문제 중 4개 + 2연속 (+ 원리 1개)', value: 'normal' },
+      { label: '🐇 빠르게 — 최근 4문제 중 3개, 잘하면 건너뛰기', value: 'fast' },
+      { label: '↩ 뒤로', value: null },
+    ]);
+    if (sp) { s.speed = sp; toast(`${SUBJ_KO[subj]}: ${SPEEDS[sp]} 올라가요`, 2000); }
+  }
 }
 function skillRows(rows, f) {
   const placed = rows.filter((x) => x.placed && !x.n).length;

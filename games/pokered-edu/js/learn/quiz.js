@@ -1,6 +1,6 @@
 /* 문제 창. 기술을 쓸 때마다 뜬다. 틀리면 오박사가 '어디서 헷갈렸는지' 그림과 함께 설명하고 비슷한 문제로 재도전.
  * 배틀 학습 묶음(lesson)이 있으면 그 포켓몬과 싸우는 동안 같은 주제로 원리 → 계산 → 응용.
- * 📺 강의 보기: 최소 2분 강의를 보고 같은 주제의 쉬운 새 문제로 돌아온다. */
+ * 📺 강의 보기: 최소 2분 강의(마지막 장에 이 문제의 정답)를 끝까지 보면 맞힌 것으로 친다 → 명중. */
 import { el, sleep } from '../util.js';
 import { Input } from '../input.js';
 import { root, portraitUrl, toast } from '../ui.js';
@@ -47,6 +47,14 @@ function showQuestion(q, opts) {
     box.append(...[top, lead, qq, pic ? el('div', { class: 'pic' }, pic) : null, ans, lec, result].filter(Boolean));
     root().append(box);
     document.body.classList.add('in-quiz');
+    if (opts.answered) {
+      // 강의를 끝까지 본 뒤: 같은 문제를 정답 표시한 채로 보여 주고 맞힌 것으로 끝낸다
+      btns.forEach((b) => { b.disabled = true; });
+      btns[it.c].classList.add('ok');
+      sfx('ok');
+      resolve({ ok: true, pick: it.c, box, result });
+      return;
+    }
     let sel = -1, done = false;
     const n = it.a.length;
     const paint = () => btns.forEach((b, i) => b.classList.toggle('sel', i === sel));
@@ -88,19 +96,15 @@ function showQuestion(q, opts) {
   });
 }
 
-/** 문제를 내고, 강의 보기를 누르면 강의(2분) → 같은 주제 쉬운 새 문제로 다시 묻는다 */
+/** 문제를 내고, 강의 보기를 누르면 강의(2분, 마지막 장에 이 문제의 정답) → 맞힌 것으로 친다.
+ *  병석님: "강의 들으면 그냥 맞춘 걸로. 답을 알려 주면서 2분이나 기다린 대가는 받아야지".
+ *  (공부 기록에는 반만 — 강의만 보고 단계가 올라가지는 않게. tutor.js record 의 lectured) */
 async function ask(q, opts) {
-  let lectured = false;
-  for (;;) {
-    const r = await showQuestion(q, opts);
-    if (!r.lecture) return { r, q, lectured };
-    await openLecture(q.subj, q.skill);
-    lectured = true;
-    const nq = questionFor(q.subj, q.skill, { three: true, kind: q.subj === 'math' ? 'calc' : 'bank' });
-    nq.lectured = true;
-    q = nq;
-    opts = { ...opts, lead: '강의를 봤으니 이번엔 할 수 있어! 💪', pulse: false };
-  }
+  const r = await showQuestion(q, opts);
+  if (!r.lecture) return { r, q, lectured: false };
+  await openLecture(q.subj, q.skill, { answer: q.item });
+  const r2 = await showQuestion(q, { ...opts, answered: true, noLecture: true, lead: '📺 강의를 끝까지 봤구나! 정답으로 쳐 줄게 👍' });
+  return { r: r2, q, lectured: true };
 }
 
 function button(label, box) {
@@ -152,7 +156,7 @@ export async function moveQuiz({ monName, moveName, moveType, story, lesson }) {
   notifyFocus(rec.focus);
   if (r.ok) {
     r.result.className = 'result ok';
-    r.result.textContent = '정답! ' + (q.item.why || '');
+    r.result.textContent = (lectured ? '명중! 강의에서 본 그대로야. ' : '정답! ') + (q.item.why || '');
     const need = q.item.need || (q.subj === 'math' && skillNote(q.skill).need);
     if (need) r.box.append(el('div', { class: 'need' }, el('b', {}, '💡 어디에 쓰일까? '), need));
     if (rec.mastered) { toast(rec.leap ? `🦘 도약! '${q.title}' 통과, '${rec.leap}'도 건너뛰기 — 나중에 확인 문제가 나와!` : rec.fast ? `🚀 5연속 이상! '${q.title}' 통과 — 바로 다음 단계로!` : `⭐ '${q.title}' 익힘! 다음 단계로!`, 2400); sfx('levelup'); }
@@ -168,12 +172,14 @@ export async function moveQuiz({ monName, moveName, moveType, story, lesson }) {
   close(r.box);
   // 재도전: 묶음이 있으면 같은 가족의 더 쉬운 문제(보기 3개), 없으면 같은 주제 쉬운 문제
   const q2 = lesson ? nextQuestion({ lesson }) : questionFor(q.subj, q.skill, { three: true });
-  const { r: r2, q: q2b } = await ask(q2, { retry: true, lead: '이번엔 할 수 있어!', pulse: true });
-  record(q2b, r2.ok, false);
+  const { r: r2, q: q2b, lectured: lec2 } = await ask(q2, { retry: true, lead: '이번엔 할 수 있어!', pulse: true });
+  record(q2b, r2.ok, false, { lectured: lec2 });
   lessonResult(lesson, r2.ok, true);
   if (r2.ok) {
     r2.result.className = 'result ok';
-    r2.result.textContent = '이해했구나! 👍 ' + (q2b.item.why || '');
+    // 다시 도전에서 강의를 끝까지 봤으면 2분 기다린 대가로 명중
+    r2.result.textContent = (lec2 ? '명중! 강의 끝까지 본 보람이 있지? ' : '이해했구나! 👍 ') + (q2b.item.why || '');
+    if (lec2) { await button('공격! ▶', r2.box); close(r2.box); return { hit: true, mastered: false }; }
   } else {
     r2.result.className = 'result no';
     r2.result.textContent = '괜찮아, 다음에 또 나올 거야. 모르겠으면 다음엔 📺 강의를 봐 봐!';

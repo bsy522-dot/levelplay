@@ -167,6 +167,19 @@ export function settings() {
   }
   return s;
 }
+/** 설정 '이 학년부터 다시': 시작점을 그 학년으로 옮기고, 그 위 주제들의 '익힘' 표시만 푼다.
+ *  (푼 문제 수·맞힌 수 기록은 남긴다. 포켓몬·레벨·위치 같은 세이브는 건드리지 않는다) */
+export function restartAt(subj, g) {
+  ensureLearn();
+  const lad = LADDER[subj], st = L()[subj], i0 = startIndex(subj, g);
+  if (!lad || !st) return;
+  st.floor = st.pos = i0;
+  for (let i = i0; i < lad.length; i++) {
+    const x = L().sk[lad[i].id];
+    if (x) Object.assign(x, { mastered: false, placed: false, leapt: false, streak: 0, hist: [], pOk: 0 });
+  }
+  if (subj === 'math') L().focus = null;
+}
 /** 과학·인문은 문제은행에 문제가 있는 주제만 낼 수 있다 (없으면 엉뚱한 덧셈 문제가 나왔다) */
 const _bankHas = {};
 function usable(subj, id) {
@@ -619,7 +632,7 @@ export function record(q, correct, firstTry = true, opt = {}) {
   const val = correct ? (lect ? 0.5 : 1) : 0;
   l.total++; s.n++;
   s.hist = [...(s.hist || []), val].slice(-6);
-  if (correct && q.kind === 'principle') s.pOk = (s.pOk || 0) + 1;
+  if (correct && !lect && q.kind === 'principle') s.pOk = (s.pOk || 0) + 1; // 원리 조건은 스스로 맞혔을 때만
   if (correct) {
     l.correct++; s.ok++; s.miss = 0;
     if (!lect) { s.streak++; l.streak++; l.best = Math.max(l.best, l.streak); }

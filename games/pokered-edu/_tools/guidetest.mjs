@@ -31,13 +31,15 @@ async function arrive(s) {
 let shots = 0;
 /** 안내만 따라 걷기. stop(s) 가 참이면 끝. onArrive(s, nav) 로 목표 도착 시 행동 */
 async function follow(label, stop, onArrive, maxSteps = 900) {
-  let stuck = 0, lastPos = '';
+  let stuck = 0, lastPos = '', lastMap = '';
+  const trail = []; // 실패하면 지나온 지도를 보여 준다 (어디서 길이 틀어졌는지)
   for (let i = 0; i < maxSteps; i++) {
     await settle();
     const s = await st();
+    if (s.map !== lastMap) { trail.push(`${s.map}(${s.x},${s.y})`); lastMap = s.map; }
     if (await stop(s)) return true;
     const nav = await page.evaluate(() => { const o = window.__pe.W.objective(); return { text: o.text, nav: window.__pe.W.scene.navTo(o.targets) }; });
-    if (!nav.nav) { ok(`${label}: 안내가 길을 찾음 (${s.map} ${s.x},${s.y} — ${nav.text})`, false); await page.screenshot({ path: `${OUT}/stuck_${++shots}.png` }); return false; }
+    if (!nav.nav) { ok(`${label}: 안내가 길을 찾음 (${s.map} ${s.x},${s.y} — ${nav.text})`, false); console.log('    지나온 길:', trail.slice(-8).join(' → ')); await page.screenshot({ path: `${OUT}/stuck_${++shots}.png` }); return false; }
     if (nav.nav.dist === 0) { await onArrive(s, nav.nav); await page.waitForTimeout(300); continue; }
     const pos = `${s.map},${s.x},${s.y}`;
     stuck = pos === lastPos ? stuck + 1 : 0; lastPos = pos;

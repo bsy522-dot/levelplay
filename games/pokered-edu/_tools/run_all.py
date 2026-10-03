@@ -7,7 +7,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 GAME = os.path.dirname(HERE)
 URL = sys.argv[1] if len(sys.argv) > 1 else ''
 SUITES = [
-    ('slottest', {}), ('lessontest', {}), ('lecturetest', {}),
+    ('slottest', {}), ('lessontest', {}), ('lecturetest', {}), ('settingstest', {}),
     ('playtest', {}), ('playtest(폰)', {'VIEW': 'phone'}), ('touchtest', {}),
     ('ch2test', {}), ('ch3test', {}),
 ]

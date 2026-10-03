@@ -54,8 +54,10 @@ function fallbackLecture(subj, skillId) {
   return { title: n.t || skillTitle(skillId), slides, key: n.idea || '' };
 }
 
-/** 강의를 띄우고, 최소 2분 뒤 닫히면 끝난다 */
-export async function openLecture(subj, skillId) {
+/** 강의를 띄우고, 최소 2분 뒤 닫히면 끝난다.
+ *  answer: 지금 풀던 문제 — 병석님: "강의 들으면 그냥 맞춘 걸로, 답을 알려 주면서. 2분 기다린 대가는 받아야지"
+ *  → 마지막 장에 '이 문제의 정답'을 보여 주고, 2분이 끝나면 그 장을 펼친다. */
+export async function openLecture(subj, skillId, { answer } = {}) {
   const lec = (DB.lectures || {})[skillId] || fallbackLecture(subj, skillId);
   const pages = lec.slides.map((s) => ({ type: 'slide', ...s }));
   if (lec.key) pages.push({ type: 'slide', h: '⭐ 한 줄 핵심', text: lec.key, big: true });
@@ -63,6 +65,7 @@ export async function openLecture(subj, skillId) {
   const nComic = ep ? await comicCount(ep) : 0;
   if (nComic) pages.push({ type: 'comic', ep, n: nComic });
   for (const v of YT[skillId] || []) pages.push({ type: 'video', ...v });
+  const ansIdx = answer ? pages.push({ type: 'answer', it: answer }) - 1 : -1;
 
   return new Promise((resolve) => {
     const face = portraitUrl('oak');
@@ -96,6 +99,17 @@ export async function openLecture(subj, skillId) {
       } else if (p.type === 'video') {
         stage.append(el('div', { class: 'lec-slide' }, el('div', { class: 'jua lec-h' }, '🎬 ' + p.t),
           el('div', { class: 'lec-video' }, el('iframe', { src: `https://www.youtube-nocookie.com/embed/${p.id}?rel=0`, allow: 'encrypted-media; picture-in-picture', allowfullscreen: true, title: p.t }))));
+      } else if (p.type === 'answer') {
+        const it = p.it;
+        const card = el('div', { class: 'lec-slide lec-answer' }, el('div', { class: 'jua lec-h' }, '📝 아까 그 문제의 정답'),
+          el('div', { class: 'lec-text' }, it.q));
+        if (it.pic) card.append(drawViz(it.pic));
+        card.append(el('div', { class: 'jua lec-ans' }, '정답: ', el('b', {}, it.a[it.c])),
+          el('div', { class: 'lec-text' }, it.why || ''));
+        if (it.steps && it.steps.length) card.append(el('ol', {}, ...it.steps.map((t) => el('li', {}, t))));
+        const v = it.viz ? drawViz(it.viz) : null;
+        if (v) card.append(v);
+        stage.append(card);
       }
       dots.innerHTML = '';
       pages.forEach((_, i) => dots.append(el('i', { class: i === page ? 'on' : '' })));
@@ -112,10 +126,14 @@ export async function openLecture(subj, skillId) {
       const now = performance.now();
       if (!document.hidden) remain -= now - last;
       last = now;
-      if (remain <= 0 && !over) { over = true; remain = 0; done.disabled = false; done.classList.add('sel'); done.textContent = '알겠어요! 문제 풀러 가기 ▶'; sfx('ok'); }
+      if (remain <= 0 && !over) {
+        over = true; remain = 0; done.disabled = false; done.classList.add('sel');
+        done.textContent = ansIdx >= 0 ? '다 봤어요! 명중시키러 가기 ▶' : '알겠어요! 돌아가기 ▶'; sfx('ok');
+        if (ansIdx >= 0 && page !== ansIdx) { page = ansIdx; render(); } // 2분 끝 → 정답 장을 펼쳐 준다
+      }
       timeEl.textContent = over ? '✅ 다 봤어요' : `⏳ ${fmt(remain)}`;
-      if (!over) done.textContent = `⏳ ${fmt(remain)} 뒤에 문제로 돌아갈 수 있어요`;
-      window.__peLecture = { remain, over, page, pages: pages.length };
+      if (!over) done.textContent = `⏳ ${fmt(remain)} 다 보면 정답으로 쳐 줄게!`;
+      window.__peLecture = { remain, over, page, pages: pages.length, answerPage: ansIdx };
     };
     const onVis = () => { if (document.hidden) tick(); else last = performance.now(); };
     document.addEventListener('visibilitychange', onVis);
