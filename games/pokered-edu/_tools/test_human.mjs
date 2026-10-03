@@ -42,7 +42,7 @@ for (const q of bank) {
 }
 
 /* ── 한국어 문장 속 라틴 오염 문자 (작성 사고를 잡는다) ── */
-const ALLOW = new Set(['CPU', 'O', 'X']);
+const ALLOW = new Set(['CPU', 'O', 'X', 'AI', 'SNS', 'TV', 'cm', 'km']); // 교과서에도 그대로 쓰는 단위·약어 (2026-10-03 인문 확장)
 const scan = (id, f, s) => {
   const re = /[A-Za-z]{2,}/g;
   let m;

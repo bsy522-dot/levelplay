@@ -18,7 +18,7 @@ function check(id, q, label) {
   if (!(q.c >= 0 && q.c < 4)) errs.push('정답 번호');
   const wk = Object.keys(q.wrong || {}).map(Number).sort().join();
   if (wk !== [0, 1, 2, 3].filter((x) => x !== q.c).join()) errs.push('오답 설명 키 ' + wk);
-  if ((q.a || []).some((x) => /NaN|undefined|null|Infinity/.test(x) || /^-\d/.test(x))) errs.push('이상한 값 ' + q.a.join('|'));
+  if ((q.a || []).some((x) => /NaN|undefined|null|Infinity/.test(x) || (!q.topic && /^-\d/.test(x)))) // 음수 금지는 자동 생성 수학에만 (허수 i² = -1 같은 손으로 쓴 문제는 정답이 음수) errs.push('이상한 값 ' + q.a.join('|'));
   if (!q.why) errs.push('정답 설명 없음');
   if (errs.length) { bad++; if (bad < 30) console.log('✗', id, label, errs.join('; '), '|', q.q); }
 }
@@ -34,7 +34,7 @@ for (const s of MATH) {
 }
 console.log(`수학 주제 ${MATH.length}개 × 600문제 검사, 문제 ${bad}건`);
 
-for (const f of ['science_a.json', 'science_b.json']) {
+for (const f of ['science_a.json', 'science_b.json', 'science_c.json', 'human.json', 'arts.json', 'jobs.json'].filter((f) => fs.existsSync(path.join(here, '../data', f)))) { // 모든 문제은행 형식 검사
   const items = JSON.parse(fs.readFileSync(path.join(here, '../data', f), 'utf8'));
   const before = bad;
   items.forEach((it) => check(it.id, it, f));

@@ -53,7 +53,7 @@ ok('블루시티 북쪽 → 24번도로(너겟 브릿지)', s.map === 'Route24',
 await shot('route24');
 await tp('Route24', 10, 15, 'right');
 await key('Space');
-await drive(async () => (await st()).flags.nuggetRocket && !(await vis('.dialog')) && !(await vis('.bbox')), 600);
+await drive(async () => (await st()).flags.nuggetRocket && !(await vis('.dialog')) && !(await vis('.bbox')), 1500); // 구멍파기는 원작처럼 두 턴 (2026-10-03 전투 보강) → 더 길게
 s = await st();
 ok('너겟 브릿지 끝 로켓단 격파 + 금덩이', !!s.flags.nuggetRocket, JSON.stringify(s.flags));
 await tp('BillsHouse', 6, 6, 'up');

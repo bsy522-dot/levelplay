@@ -16,15 +16,21 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else 'pokered_src'
 DEFAULT_MAPS = ('PalletTown,Route1,ViridianCity,Route2,ViridianForest,ViridianForestSouthGate,ViridianForestNorthGate,PewterCity,PewterGym,'
                 'RedsHouse1F,RedsHouse2F,BluesHouse,OaksLab,ViridianPokecenter,ViridianMart,PewterPokecenter,PewterMart,Route2Gate,ViridianSchoolHouse,'
                 'Route3,MtMoon1F,MtMoonB1F,MtMoonB2F,Route4,CeruleanCity,CeruleanPokecenter,CeruleanMart,CeruleanGym,MtMoonPokecenter')
-MAPS = (sys.argv[2] if len(sys.argv) > 2 else DEFAULT_MAPS).split(',')
+MAPS = (sys.argv[2] if len(sys.argv) > 2 else DEFAULT_MAPS).split(',')   # ALL = 지도 전부
 GH = 'https://raw.githubusercontent.com/'
+# 블록셋(칸 모양) — 4판 이후 실내(실프·타워·저택·배·석영고원…)까지 전부
+BLOCKSETS = ['overworld', 'forest', 'reds_house', 'house', 'pokecenter', 'gym', 'gate', 'cavern', 'interior', 'underground',
+             'facility', 'cemetery', 'lobby', 'mansion', 'ship', 'ship_port', 'plateau', 'club', 'lab', 'museum', 'forest_gate']
 
 def get(url, dst):
     if os.path.exists(dst):
         return
     os.makedirs(os.path.dirname(dst), exist_ok=True)
-    with urllib.request.urlopen(url, timeout=60) as r:
-        open(dst, 'wb').write(r.read())
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r:
+            open(dst, 'wb').write(r.read())
+    except Exception as e:  # 원본에 없는 파일(이름이 다른 블록셋 등)은 건너뛰고 알린다
+        print('받기 실패:', url.split('/')[-1], e)
 
 def main():
     # 1) open-pokered
@@ -36,10 +42,10 @@ def main():
             continue
         rel = p[len('crates/pokered-data/'):]
         top = rel.split('/')[0]
-        if top in ('pokemon', 'moves', 'trainers') or (top == 'maps' and rel.split('/')[1] in MAPS):
+        if top in ('pokemon', 'moves', 'trainers') or (top == 'maps' and (MAPS == ['ALL'] or rel.split('/')[1] in MAPS)):
             jobs.append((GH + 'liuyanghejerry/open-pokered/HEAD/' + p, os.path.join(OUT, 'opr', rel)))
     # 2) pret/pokered
-    for name in ['overworld', 'forest', 'reds_house', 'house', 'pokecenter', 'gym', 'gate', 'cavern']:
+    for name in BLOCKSETS:
         for f in (f'gfx/blocksets/{name}.bst', f'gfx/tilesets/{name}.png'):
             jobs.append((GH + 'pret/pokered/master/' + f, os.path.join(OUT, 'pret', f)))
     # 3) PokeAPI CSV

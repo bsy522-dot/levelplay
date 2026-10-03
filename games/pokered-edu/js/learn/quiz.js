@@ -17,6 +17,8 @@ const SUBJ = {
   math: ['수학', '#3b6cd4'],
   sci: ['과학', '#3fb950'],
   hum: ['인문', '#b5651d'],
+  art: ['예체능', '#d81b60'],
+  job: ['직업', '#6d4c41'],
 };
 const subjTag = (s) => SUBJ[s] || SUBJ.math;
 const KIND = { principle: ['🧠 원리', '#7c4dff'], calc: ['✏️ 계산', '#0288d1'], apply: ['🌍 상황', '#00897b'] };

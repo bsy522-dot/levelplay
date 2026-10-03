@@ -21,14 +21,18 @@ import { familyOf, familyTitle, FAMILIES } from './families.js';
 /* ── 튜닝 상수 (한 곳에서만 바꾼다) ──
  * PRACTICE_REWARD : 학교 연습 1문제 정답 보상(원)
  * EXP_GAIN_BOOST  : 원작 대비 경험치 가속 배수 ("조금만" — 1.35배)
- * SCI_P           : 기술 쓸 때 과학 문제 뽑을 확률 (수학 논술 위주 유지)
- * SAME_Q_BLOCK    : 같은 문제를 연속으로 몇 번까지 허용하는지 (병석님: 3)
- * HUMAN_RATE      : 인문(역사·지리·음악·미술) 문제가 섞일 확률 */
+ * SUBJ_MIX        : 과목 비율 (병석님 2026-10-03: 수학 30 · 과학 30 · 인문 25 · 예체능 10 · 직업 5)
+ *                   검증된 문제가 있는 과목끼리만 이 비율로 고른다 (아직 없는 과목 몫은 나머지에 비례해 나뉨)
+ * SAME_Q_BLOCK    : 같은 문제를 연속으로 몇 번까지 허용하는지 (병석님: 3) */
 export const PRACTICE_REWARD = 1000;
 export const EXP_GAIN_BOOST = 1.35;
-export const SCI_P = 0.25;
+export const SUBJ_MIX = { math: 0.30, sci: 0.30, hum: 0.25, art: 0.10, job: 0.05 };
+export const SUBJECTS = Object.keys(SUBJ_MIX);
+export const SCI_P = SUBJ_MIX.sci;      // (예전 이름 — 테스트 호환)
+export const HUMAN_RATE = SUBJ_MIX.hum; // (예전 이름 — 테스트 호환)
 export const SAME_Q_BLOCK = 3;
-export const HUMAN_RATE = 0.07;
+/* 문제은행 과목 → 문제 id 앞글자 */
+const PREFIX = { sci: 's_', hum: 'h_', art: 'a_', job: 'j_' };
 
 /* ── 과학 사다리: [id, 단계, 제목, 분야]
  * 단계 g: 1=초등저 2=초등고 3=중1 4=중2 5=중3 6=고1 7=고2 8=고3 9=대학 기초
@@ -39,17 +43,20 @@ export const SCI = [
   /* ── 1단계: 몸·감각·자연 (초등저) ── */
   ['s_senses', 1, '우리 몸의 감각', '생명'], ['s_seasons', 1, '계절의 변화', '지구'],
   ['s_plants_need', 1, '식물이 자라려면', '생명'], ['s_animal_homes', 2, '동물이 사는 곳', '생명'],
+  ['s_greats1', 2, '과학자 이야기 1 (아르키메데스·갈릴레이·뉴턴·장영실)', '과학사'],
   ['s_day_night', 2, '낮과 밤', '지구'], ['s_weather', 2, '날씨와 생활', '지구'],
   /* ── 2단계: 물질·힘·에너지 (초등고~중1) ── */
   ['s_matter', 3, '물체와 물질', '화학'], ['s_animal_life', 3, '동물의 한살이', '생명'],
   ['s_magnet', 3, '자석의 성질', '물리'], ['s_earth', 3, '지구의 모습', '지구'],
   ['s_sound', 3, '소리의 성질', '물리'], ['s_soil', 3, '흙의 생성과 보존', '생명'],
+  ['s_mathematicians', 4, '수학자 이야기 1 (피타고라스·유클리드·가우스·오일러)', '수학사'],
   ['s_rocks', 4, '지층과 화석', '지구'], ['s_plant_life', 4, '식물의 한살이', '생명'],
   ['s_weight', 4, '물체의 무게', '물리'], ['s_mixture', 4, '혼합물의 분리', '화학'],
   ['s_water_states', 4, '물의 상태 변화', '화학'], ['s_shadow', 4, '그림자와 거울', '물리'],
   ['s_volcano', 4, '화산과 지진', '지구'],
   /* ── 3단계: 에너지·파동·전기 (중~고1) ── */
   ['s_water_cycle', 4, '물의 여행', '지구'], ['s_heat', 5, '온도와 열', '물리'],
+  ['s_greats2', 5, '과학자 이야기 2 (다윈·퀴리·멘델·파스퇴르)', '과학사'],
   ['s_solar', 5, '태양계와 별', '우주'], ['s_electric', 6, '전기의 이용', '물리'],
   ['s_light', 6, '빛과 렌즈', '물리'], ['s_combustion', 6, '연소와 소화', '화학'],
   /* ── 4단계: 역학·전기자기·원자 (고1~고2) ── */
@@ -62,6 +69,7 @@ export const SCI = [
   ['s_wave', 7, '파동·주파수·공진', '물리'],
   ['s_electricity2', 7, '회로·저항·옴의 법칙', '물리'],
   /* ── 5단계: 열역학·전기자기·천체 (고2~고3) ── */
+  ['s_greats3', 8, '과학자 이야기 3 (아인슈타인·보어·왓슨과 크릭·호킹)', '과학사'],
   ['s_thermo', 8, '열역학의 두 법칙', '물리'],
   ['s_em', 8, '전기장과 자기장', '물리'],
   ['s_relativity', 8, '상대성이론', '물리'],
@@ -72,6 +80,7 @@ export const SCI = [
   ['s_evolution', 8, '진화와 생명의 분류', '생명'],
   ['s_ecology', 8, '생태계와 탄소순환', '생명'],
   /* ── 6단계: 대학 기초 (이 공부가 왜 필요한지부터) ── */
+  ['s_mathematicians2', 9, '수학자 이야기 2 (페르마·리만·라마누잔·튜링)', '수학사'],
   ['s_vector', 9, '벡터와 내적·외적', '물리'],
   ['s_trig2', 9, '삼각함수의 미분과 법칙', '물리'],
   ['s_matrix', 9, '행렬과 선형변환', '물리'],
@@ -96,23 +105,55 @@ export const SCI = [
   ['s_renorm', 12, '양자장론과 재정규화', '물리'],
 ].map(([id, g, t, f]) => ({ id, g, t, f }));
 
-/* 인문 큐레이션 — 아주 조금씩 섞인다 (병석님: "가끔") */
+/* 인문 (25%) — 이야기로 배우는 역사·지리·말과 글·경제·법·미디어·철학. 음악·미술은 예체능으로 옮김 (2026-10-03) */
 export const HUMAN = [
-  ['h_history', 3, '세계사 한 장면', '역사'],
-  ['h_geo', 3, '지리와 일상생활', '지리'],
-  ['h_music', 4, '음악의 구조', '음악'],
-  ['h_art', 4, '미술의 감각', '미술'],
-  ['h_civ', 6, '문명과 발명', '역사'],
-  ['h_philo', 8, '가치와 생각', '철학'],
-].map(([id, g, t, f]) => ({ id, g, t, f }));
+  ['h_community', 1, '가족·이웃·우리 마을', '사회'], ['h_kindness', 1, '배려와 예절', '도덕'],
+  ['h_story', 2, '동화·속담·우리말 이야기', '문학'], ['h_korea', 2, '한국사 이야기', '역사'],
+  ['h_history', 3, '세계사 한 장면', '역사'], ['h_geo', 3, '지리와 일상생활', '지리'],
+  ['h_hangul', 3, '말과 글', '언어'], ['h_culture', 3, '세계의 여러 문화', '사회'],
+  ['h_economy', 4, '돈과 경제', '경제'], ['h_myth', 4, '세계의 신화와 전설', '문학'],
+  ['h_law', 5, '규칙·법·민주주의', '사회'], ['h_civ', 6, '문명과 발명', '역사'],
+  ['h_media', 6, '미디어와 정보', '사회'], ['h_philo', 8, '가치와 생각', '철학'],
+  // 위인·고학년 (병석님 2026-10-03: "역사나 할 퀴즈가 얼마나 많은데… 최대한 퀴즈가 많아야")
+  ['h_greats_kr', 2, '우리나라 위인', '역사'], ['h_greats_world', 3, '세계의 위인', '역사'],
+  ['h_ancient', 4, '고대 문명', '역사'], ['h_medieval', 5, '중세와 대항해 시대', '역사'],
+  ['h_modern_kr', 6, '근현대 한국', '역사'], ['h_modern_world', 7, '근현대 세계', '역사'],
+  ['h_psych', 7, '마음과 생각 (심리학)', '사회'], ['h_global', 8, '세계 시민 (환경·인권·협력)', '사회'],
+  ['h_classics', 9, '고전과 사상가', '철학'], ['h_ethics', 10, '윤리학', '철학'],
+  ['h_language_sci', 10, '언어의 과학', '언어'], ['h_bighistory', 11, '큰 역사 (문명의 흥망)', '역사'],
+].map(([id, g, t, f]) => ({ id, g, t, f })).sort((a, b) => a.g - b.g);
+/* 예체능 (10%) — 음악·미술·체육·건강 */
+export const ARTS = [
+  ['a_sound', 1, '소리와 악기', '음악'], ['a_color', 1, '색과 모양', '미술'], ['a_body', 1, '건강한 몸', '건강'],
+  ['a_sports', 2, '운동과 놀이', '체육'], ['a_dance', 3, '몸으로 표현하기', '체육'],
+  ['a_music', 4, '음악의 구조', '음악'], ['a_art', 4, '미술의 감각', '미술'], ['a_olympic', 5, '올림픽과 스포츠 과학', '체육'],
+  // 위인·고학년
+  ['a_composers', 3, '음악가 이야기', '음악'], ['a_painters', 3, '화가 이야기', '미술'], ['a_athletes', 4, '스포츠 영웅', '체육'],
+  ['a_korean_arts', 5, '국악과 우리 춤', '음악'], ['a_music_history', 6, '음악의 역사', '음악'], ['a_art_history', 7, '미술의 역사', '미술'],
+  ['a_architecture', 8, '건축과 디자인', '미술'], ['a_film', 9, '영화·사진·미디어 예술', '미술'],
+].map(([id, g, t, f]) => ({ id, g, t, f })).sort((a, b) => a.g - b.g);
+/* 직업 (5%) — 하는 일·필요한 힘·바뀌는 직업 */
+export const JOBS = [
+  ['j_town', 1, '우리 동네 직업', '직업'], ['j_helpers', 2, '돕는 사람들', '직업'], ['j_makers', 3, '만드는 사람들', '직업'],
+  ['j_science', 4, '과학·기술 직업', '직업'], ['j_future', 5, '미래의 일', '직업'], ['j_ready', 6, '일과 꿈 준비', '직업'],
+  // 위인·고학년
+  ['j_greats', 3, '일로 세상을 바꾼 사람들', '직업'], ['j_company', 7, '회사와 창업', '직업'], ['j_global_work', 8, '세계와 함께 일하기', '직업'],
+  ['j_ethics', 9, '일의 윤리와 책임', '직업'], ['j_career_design', 10, '나의 진로 설계', '직업'],
+].map(([id, g, t, f]) => ({ id, g, t, f })).sort((a, b) => a.g - b.g);
 const HUMAN_BY = Object.fromEntries(HUMAN.map((s) => [s.id, s]));
-/* 인문은 검증된 문제은행(주제마다 10문제 이상)이 있을 때만 낸다.
- * 2026-10-03: 예전 13문제에 정답 표시가 틀린 문제가 섞여 있어 새 은행이 들어올 때까지 쉬게 한다. */
-export function humanReady() {
-  const bank = (DB.science || []).filter((q) => q.id && q.id.startsWith('h_') && q.verified);
-  return HUMAN.every((h) => bank.filter((q) => q.topic === h.id).length >= 10);
+/* 문제은행 과목(인문·예체능·직업)은 '검증 표시(verified)' 문제가 10개 이상인 단원만 낸다.
+ * 2026-10-03: 예전 인문 13문제에 정답 표시가 틀린 문제가 섞여 있었다 → 검증된 것만. 과학 은행은 원래 손으로 다듬은 원본이라 그대로. */
+const BANK_MIN = 10;
+function bankCount(subj, topic) {
+  return (DB.science || []).filter((q) => q.topic === topic && (subj === 'sci' || q.verified)).length;
 }
-const SCI_BY = Object.fromEntries([...SCI, ...HUMAN].map((s) => [s.id, s]));
+/** 그 과목에 낼 수 있는 단원이 하나라도 있나 */
+export function subjectReady(subj) {
+  if (subj === 'math') return true;
+  return (LADDER[subj] || []).some((s) => usable(subj, s.id));
+}
+export function humanReady() { return subjectReady('hum'); }
+const SCI_BY = Object.fromEntries([...SCI, ...HUMAN, ...ARTS, ...JOBS].map((s) => [s.id, s]));
 
 // 기술 타입 -> 어울리는 과학 주제 (전기 기술을 쓰면 전기 문제가 나오도록)
 const TYPE_SCI = {
@@ -122,7 +163,7 @@ const TYPE_SCI = {
   Psychic: ['s_solar', 's_light', 's_senses'], Poison: ['s_mixture', 's_matter'], Normal: [],
 };
 
-const LADDER = { math: MATH, sci: SCI, hum: HUMAN };
+const LADDER = { math: MATH, sci: SCI, hum: HUMAN, art: ARTS, job: JOBS };
 const MASTER_STREAK = 3;
 
 export const GRADES = [
@@ -146,6 +187,8 @@ export function initLearn(grade) {
     math: { floor: startIndex('math', grade), pos: startIndex('math', grade) },
     sci: { floor: startIndex('sci', grade), pos: startIndex('sci', grade) },
     hum: { floor: startIndex('hum', grade), pos: startIndex('hum', grade) },
+    art: { floor: startIndex('art', grade), pos: startIndex('art', grade) },
+    job: { floor: startIndex('job', grade), pos: startIndex('job', grade) },
     sk: {}, // 주제별 {n, ok, streak, miss, mastered, placed, wrongRecent}
     streak: 0, best: 0, total: 0, correct: 0, retryOk: 0,
     recent: [], log: [],
@@ -161,7 +204,7 @@ const sk = (id) => (L().sk[id] ||= { n: 0, ok: 0, streak: 0, miss: 0, mastered: 
 export const SPEEDS = { slow: '천천히', normal: '보통', fast: '빠르게' };
 export function settings() {
   const s = (G.s.settings ||= {});
-  for (const k of ['math', 'sci', 'hum']) {
+  for (const k of SUBJECTS) {
     s[k] ||= { mode: 'auto', g: null, speed: 'normal' };
     if (!SPEEDS[s[k].speed]) s[k].speed = 'normal';
   }
@@ -180,11 +223,12 @@ export function restartAt(subj, g) {
   }
   if (subj === 'math') L().focus = null;
 }
-/** 과학·인문은 문제은행에 문제가 있는 주제만 낼 수 있다 (없으면 엉뚱한 덧셈 문제가 나왔다) */
+/** 과학·인문·예체능·직업은 문제은행에 문제가 있는 단원만 낼 수 있다 (없으면 엉뚱한 덧셈 문제가 나왔다).
+ *  인문·예체능·직업은 검증된 문제 10개 이상 */
 const _bankHas = {};
 function usable(subj, id) {
   if (subj === 'math') return true;
-  if (!(id in _bankHas)) _bankHas[id] = DB.science.some((q) => q.topic === id);
+  if (!(id in _bankHas)) _bankHas[id] = subj === 'sci' ? bankCount(subj, id) > 0 : bankCount(subj, id) >= BANK_MIN;
   return _bankHas[id];
 }
 /** 지금 낼 수 있는 사다리 구간 [lo, hi]. 고정이면 그 학년 주제만, 자동이면 floor 부터 끝까지 */
@@ -204,6 +248,16 @@ function range(subj) {
   return { lo: Math.max(0, lo), hi };
 }
 
+/** 과목 고르기: SUBJ_MIX 비율대로, 낼 문제가 있는 과목끼리만 (없는 과목 몫은 나머지에 비례해 나뉜다).
+ *  약한 가족 집중 중이면 수학 몫을 45%로 올린다 — 비율은 거의 지키면서 약점을 계속 연습 */
+export function pickSubject(focusOn = false) {
+  const w = SUBJECTS.map((k) => [k, subjectReady(k) ? (k === 'math' && focusOn ? Math.max(SUBJ_MIX.math, 0.45) : SUBJ_MIX[k]) : 0]);
+  const sum = w.reduce((a, [, v]) => a + v, 0);
+  let r = Math.random() * sum;
+  for (const [k, v] of w) { if ((r -= v) < 0) return k; }
+  return 'math';
+}
+
 /* ── 원리 문제은행 (수학 주제마다 "왜 필요했을까 / 뜻 / 언제 쓰나") ── */
 function conceptsFor(skillId) { return (DB.concept || []).filter((q) => q.skill === skillId); }
 export const hasConcept = (skillId) => conceptsFor(skillId).length > 0;
@@ -212,7 +266,9 @@ export const hasConcept = (skillId) => conceptsFor(skillId).length > 0;
 export function ensureLearn() {
   const l = L();
   if (!l) return null;
-  if (!l.hum) l.hum = { floor: startIndex('hum', l.grade || 1), pos: startIndex('hum', l.grade || 1) };
+  for (const k of ['hum', 'art', 'job']) if (!l[k]) l[k] = { floor: startIndex(k, l.grade || 1), pos: startIndex(k, l.grade || 1) };
+  // 2026-10-03 인문 사다리가 6 → 14단원으로 바뀜: 예전 floor 가 엉뚱한 단원을 가리키지 않게 학년 기준으로 다시 맞춘다(한 번만)
+  if (!l.humV2) { l.hum = { floor: startIndex('hum', l.grade || 1), pos: startIndex('hum', l.grade || 1) }; l.humV2 = true; }
   if (!l.repeats) l.repeats = [];
   if (l.lastField == null) l.lastField = '';
   if (l.fieldRun == null) l.fieldRun = 0;
@@ -293,16 +349,9 @@ export function nextQuestion(opts = {}) {
   if (ls && ls.skill) return lessonQuestion(ls, opts);
   const l = L();
   let subj = opts.subject;
-  // 약한 가족 집중: 수학 문제의 70%를 그 가족에서 (같은 문제가 아니라 같은 가족의 여러 주제)
-  const focus = l.focus && !subj && Math.random() < 0.7 ? l.focus.fam : null;
-  if (focus) subj = 'math';
-  if (!subj) {
-    const typeTopics = (TYPE_SCI[opts.moveType] || []);
-    const pSci = typeTopics.length ? SCI_P + 0.15 : SCI_P; // 어울리는 기술이면 과학을 조금 더
-    const r = Math.random();
-    if (r < HUMAN_RATE && humanReady()) subj = 'hum'; // 가끔 인문 (역사·지리·음악·미술)
-    else subj = r < HUMAN_RATE + pSci ? 'sci' : 'math';
-  }
+  if (!subj) subj = pickSubject(!!l.focus);
+  // 약한 가족 집중: 수학 문제의 75%를 그 가족에서 (같은 문제가 아니라 같은 가족의 여러 주제)
+  const focus = l.focus && subj === 'math' && !opts.subject && Math.random() < 0.75 ? l.focus.fam : null;
   const lad = LADDER[subj];
   if (!lad || !lad.length) return { subj: 'math', skill: MATH[0].id, title: MATH[0].t, item: MATH[0].gen(false) };
   let skill = focus ? pickFamilySkill(focus) : null;
@@ -469,20 +518,20 @@ function makeItem(subj, skill, story, kind, ls) {
     return sealMath(MATH_BY[skill.id].gen, story, subj, skill.id);
   }
 
-  if (subj === 'hum') {
-    const it = pickBank('h_', skill.id, story, true);
+  if (subj !== 'sci') { // 인문·예체능·직업 문제은행
+    const it = pickBank(subj, skill.id, story);
     if (!it) return sealMath(MATH_BY.m_add10.gen, false, subj, 'm_add10');
     it.kind = 'bank';
     return it;
   }
-  let it = pickBank('s_', skill.id, story, false);
+  let it = pickBank('sci', skill.id, story);
   if (!it) {
     // 그 주제의 문제가 다 떨어지면 → 같은 난이대의 다른 주제에서 (다양성 유지)
     const near = SCI.filter((x) => Math.abs(x.g - skill.g) <= 1 && usable('sci', x.id));
     const pool = near.length ? near : SCI.filter((x) => usable('sci', x.id));
     for (let i = 0; i < 8 && !it; i++) {
       const alt = pick(pool);
-      it = pickBank('s_', alt.id, story, false);
+      it = pickBank('sci', alt.id, story);
     }
   }
   if (!it) return sealMath(MATH_BY.m_add10.gen, false, subj, 'm_add10');
@@ -553,9 +602,12 @@ function sealMath(gen, story, subj, skillId) {
 
 /* ── 문제은행에서 하나 고르기 (3연속 중복 방지 포함) ──
  * 순서: ① 방금 것(연속 1회) 제외 ② 연속 3회 초과 금지 ③ 최근 60개 제외 */
-function pickBank(prefix, topic, story, human) {
+function pickBank(subj, topic, story) {
   const l = L();
-  const all = DB.science.filter((q) => q.topic === topic && (!prefix || q.id.startsWith(prefix)));
+  const prefix = PREFIX[subj];
+  // 인문·예체능·직업은 검증 표시가 있는 문제만
+  const ok = (q) => q.id.startsWith(prefix) && (subj === 'sci' || q.verified);
+  const all = DB.science.filter((q) => q.topic === topic && ok(q));
   if (!all.length) return null;
   let pool = story ? all.filter((q) => q.story) : all;
   if (!pool.length) pool = all;
@@ -573,12 +625,11 @@ function pickBank(prefix, topic, story, human) {
     // ★ 여기를 SCI 로 고정해 둔 것이 '인문 칸에 과학 문제가 199회나 세입된' 원인이다.
     //   인문(h_) 주제를 찾다가 h_civ 가 소진되면 SCI 목록을 돌아 다녀서 s_animal_homes
     //   같은 과학 문제를 인문 칸으로 끌고 왔다. → 사다리는 지금 뽑는 계열로 고른다.
-    const LAD_BY_SUBJ = { hum: HUMAN, sci: SCI, math: MATH };
-    const lad = LAD_BY_SUBJ[human ? 'hum' : prefix === 's_' ? 'sci' : 'math'] || SCI;
+    const lad = LADDER[subj] || SCI;
     const hereStep = lad.find((y) => y.id === topic) || { g: 4 };
     const near = lad.filter((x) => Math.abs(x.g - hereStep.g) <= 2);
     for (const alt of near) {
-      const p2 = DB.science.filter((q) => q.topic === alt.id && (!prefix || q.id.startsWith(prefix)) && !repeatBlocked(q.id) && q.id !== last);
+      const p2 = DB.science.filter((q) => q.topic === alt.id && ok(q) && !repeatBlocked(q.id) && q.id !== last);
       if (p2.length) { const it = pick(p2); return seal(it, l); }
     }
     cand = cand.length ? cand : pool;
@@ -703,7 +754,8 @@ export function placementDone() {
 export function onBadge() {
   ensureLearn();
   const l = L();
-  for (const subj of ['math', 'sci', 'hum']) {
+  // 배지로 한 단계씩 올리는 건 단원이 많은 수학·과학만 (인문·예체능·직업은 단원이 적어 배지 몇 개면 끝에 붙는다)
+  for (const subj of ['math', 'sci']) {
     const lad = LADDER[subj];
     if (!lad || !lad.length) continue;
     if ((settings()[subj] || {}).mode === 'fixed') continue; // 부모가 고정한 과목은 배지로 안 올린다
@@ -720,8 +772,10 @@ export function report() {
   return {
     total: l.total, correct: l.correct, best: l.best, streak: l.streak, retryOk: l.retryOk,
     acc: l.total ? Math.round((l.correct / l.total) * 100) : 0,
-    math: rows('math'), sci: rows('sci'), hum: rows('hum'),
+    math: rows('math'), sci: rows('sci'), hum: rows('hum'), art: rows('art'), job: rows('job'),
     fMath: frontier('math'), fSci: frontier('sci'), fHum: frontier('hum'),
+    front: Object.fromEntries(SUBJECTS.map((k) => [k, frontier(k)])),
+    ready: Object.fromEntries(SUBJECTS.map((k) => [k, subjectReady(k)])),
     focus: focusInfo(), settings: settings(),
   };
 }

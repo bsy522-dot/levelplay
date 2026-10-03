@@ -24,7 +24,20 @@ TS = {  # 원작 타일셋 -> (블록셋 파일, 걸을 수 있는 타일)
     'Cavern': ('cavern', {0x05,0x15,0x18,0x1a,0x20,0x21,0x22,0x2a,0x2d,0x30}),
     'Interior': ('interior', {0x04,0x0f,0x15,0x1f,0x3b,0x45,0x47,0x55,0x56}),
     'Underground': ('underground', {0x0b,0x0c,0x13,0x15,0x18}),
+    # 4판~ (pret data/tilesets/collision_tile_ids.asm 그대로)
+    'Museum': ('gate', {0x01,0x12,0x14,0x1a,0x1c,0x37,0x38,0x3b,0x3c,0x5e}),
+    'Ship': ('ship', {0x04,0x0d,0x17,0x1d,0x1e,0x23,0x34,0x37,0x39,0x4a}),
+    'ShipPort': ('ship_port', {0x0a,0x1a,0x32,0x3b}),
+    'Cemetery': ('cemetery', {0x01,0x10,0x13,0x1b,0x22,0x42,0x52}),
+    'Lobby': ('lobby', {0x14,0x17,0x1a,0x1c,0x20,0x38,0x45}),
+    'Mansion': ('mansion', {0x01,0x05,0x11,0x12,0x14,0x1a,0x1c,0x2c,0x53}),
+    'Lab': ('lab', {0x0c,0x26,0x16,0x1e,0x34,0x37}),
+    'Club': ('club', {0x0f,0x1a,0x1f,0x26,0x28,0x29,0x2c,0x2d,0x2e,0x2f,0x41}),
+    'Facility': ('facility', {0x01,0x10,0x11,0x13,0x1b,0x20,0x21,0x22,0x30,0x31,0x32,0x42,0x43,0x48,0x52,0x55,0x58,0x5e}),
+    'Plateau': ('plateau', {0x1b,0x23,0x2c,0x2d,0x3b,0x45}),
 }
+# 풀베기 나무(원작 CUT_TREE 칸) — 바깥 타일셋의 작은 나무 한 칸. 'C' 로 남겨 풀베기로 벨 수 있게 한다.
+CUT_SIG = {'Overworld': '2d2e3d3e', 'Gym': None}
 
 # 실내 막힌 칸의 가구 종류 (2x2 타일 서명 -> 기호). 눈으로 확인해 붙인 이름.
 # W 벽  K 책장·진열장  P 화분  O 바위  Q 석상  t 탁자  C 카운터  M 기계·컴퓨터  V TV  b 침대  N 칠판·포스터
@@ -94,7 +107,9 @@ def classify(name):
             s = sig[y][x]; bl = s[2]; ok = bl in walk
             if (x, y) in signs:
                 g[y][x] = 'S'; continue
-            if asset == 'overworld':
+            if (asset == 'overworld' and bl == 0x3d) or (asset == 'gym' and bl == 0x50):
+                c = 'Y'  # 풀베기 나무 ('C' 는 실내 카운터라 Y) (원작: 칸 왼쪽 아래 타일이 바깥 $3D / 체육관 $50) — 풀베기로 벤다
+            elif asset == 'overworld':
                 if not ok:
                     if bl in LEDGE_DOWN: c = 'v'
                     elif bl in LEDGE_LEFT: c = '<'
@@ -118,7 +133,9 @@ def classify(name):
                 hx = hexs(s)
                 if ok:
                     c = 'D' if (x, y) in warps and y == H - 1 else INDOOR_WALK.get(hx, '_')
-                    if (x, y) in warps and y < H - 1 and c == '_': c = 'U'
+                    if (x, y) in warps and y < H - 1 and c in ('_', 'm'): c = 'U'  # 문 칸이면 매트라도 계단으로 (석영고원 로비 위 문)
+                elif asset == 'plateau' and (0x14 in s or bl == 0x32):
+                    c = '~'  # 23번도로 물 (고원 타일셋도 바깥과 같은 물 타일) — 파도타기로 건넌다 (9판)
                 else:
                     c = INDOOR.get(asset, {}).get(hx, 'R' if asset == 'cavern' else 'W' if asset == 'underground' else 'f')
             g[y][x] = c
@@ -183,13 +200,24 @@ OVERRIDES = {
     'CeruleanCity': [(16, 29, ',')],
     # 갈색시티 체육관 앞: 원작은 풀베기(HM01)로 베는 작은 나무 → 치움
     'VermilionCity': [(14, 19, ',')],
+    # 로켓단 아지트 지하 4층: 원작은 엘리베이터(열쇠)로만 비주기 쪽에 간다 → 계단 쪽과 벽 한 칸을 열어 잇는다 (5판)
+    'RocketHideoutB4F': [(19, 14, '_')],
+    # 사파리존 가운데: 원작은 북쪽·동쪽 구역을 돌아 턱을 뛰어내려야 서쪽 출입구에 닿는다(그 구역은 이야기 길이 아니라 뺐다) → 입구 쪽과 바로 잇는다 (6판)
+    'SafariZoneCenter': [(2, 16, '.')],
+    # 실프주식회사 7층: 원작 카드키 문 → 엘리베이터 쪽과 라이벌·11층 발판 구역을 잇는다 (7판, 엘리베이터는 1·5·7·11층만)
+    'SilphCo7F': [(6, 7, '_')],
+    # 사천왕 목호의 방: 들어온 통로 끝이 막힌 칸으로 변환됨 → 연다 (9판)
+    'LancesRoom': [(5, 12, '_'), (6, 12, '_')],
 }
 # '마지막 바깥 지도로' 나가는 출구 중, 지하통로처럼 반대편으로 나가야 하는 곳은 목적지를 못박는다
-WARP_FIX = {'UndergroundPathRoute5': 'Route5', 'UndergroundPathRoute6': 'Route6'}
+WARP_FIX = {'UndergroundPathRoute5': 'Route5', 'UndergroundPathRoute6': 'Route6', 'UndergroundPathRoute7': 'Route7', 'UndergroundPathRoute8': 'Route8',
+            # 23번도로·석영고원은 고원 지형이라 '마지막 바깥 지도'로 기억되지 않는다 → 출구를 못박는다 (9판)
+            'VictoryRoad1F': 'Route23', 'VictoryRoad2F': 'Route23', 'IndigoPlateauLobby': 'IndigoPlateau'}
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    names = sorted(os.listdir(os.path.join(SRC, 'opr/maps')))
+    # map.blk 가 없는 '복사본' 지도(…Copy)는 건너뛴다
+    names = sorted(n for n in os.listdir(os.path.join(SRC, 'opr/maps')) if os.path.exists(os.path.join(SRC, 'opr/maps', n, 'map.blk')))
     # 1차: 문 없는 덩어리에서 바위산 칸 모양을 배운다 (건물에도 쓰이는 모양은 뺀다)
     for name in names: classify(name)
     ROCK.update(LEARN_ROCK - LEARN_BLDG)

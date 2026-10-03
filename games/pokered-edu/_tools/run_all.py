@@ -9,20 +9,28 @@ URL = sys.argv[1] if len(sys.argv) > 1 else ''
 SUITES = [
     ('slottest', {}), ('lessontest', {}), ('lecturetest', {}), ('settingstest', {}),
     ('playtest', {}), ('playtest(폰)', {'VIEW': 'phone'}), ('touchtest', {}),
-    ('ch2test', {}), ('ch3test', {}),
+    ('compattest', {}), ('ch2test', {}), ('ch3test', {}),
+    ('ch4test', {}), ('ch5test', {}), ('ch6test', {}), ('ch7test', {}), ('ch8test', {}), ('ch9test', {}),
 ]
 bad = 0
+# compattest 는 예전 판(지금 기기에 깔린 판 = 마지막 커밋) 코드가 필요하다.
+# 준비: git -C <저장소> archive -o head.tar HEAD games/pokered-edu → tar -xf → 그 games/pokered-edu 폴더를 COMPAT_OLD 로
+OLD = os.environ.get('COMPAT_OLD', '')
+def prepare_old():
+    return OLD
 for name, extra in SUITES:
+    if name == 'compattest' and not OLD:
+        print('== compattest: 건너뜀 (COMPAT_OLD 없음)'); continue
     script = name.split('(')[0]
     env = dict(os.environ, **extra)
     if 'VIEW' in extra:
         env['SHOT_DIR'] = env.get('SHOT_DIR', '') or os.path.join(os.environ.get('TEMP', '.'), 'shots_phone')
-    cmd = ['node', os.path.join(HERE, script + '.mjs')] + ([URL] if URL else [])
+    cmd = ['node', os.path.join(HERE, script + '.mjs')] + ([prepare_old()] if script == 'compattest' and OLD else [URL] if URL else [])
     try:
-        r = subprocess.run(cmd, cwd=GAME, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=1200)
+        r = subprocess.run(cmd, cwd=GAME, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=2400)
         out, code = r.stdout + r.stderr, r.returncode
     except subprocess.TimeoutExpired:
-        out, code = '시간 초과(20분)', 1
+        out, code = '시간 초과(40분)', 1
     lines = [l for l in out.splitlines() if '✗' in l or '결과' in l or '시간 초과' in l]
     print(f'== {name}: {"통과" if code == 0 else "실패"}')
     for l in lines:

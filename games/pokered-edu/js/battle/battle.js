@@ -13,7 +13,13 @@ import { fixJosa } from '../learn/math.js';
 import { W } from '../world/overworld.js';
 import { wildPick } from '../world/events.js';
 
-const BG = { ViridianForest: 'bg_forest', PewterGym: 'bg_gym_rock', OaksLab: 'bg_lab', MtMoon1F: 'bg_cave', MtMoonB1F: 'bg_cave', MtMoonB2F: 'bg_cave', CeruleanGym: 'bg_gym_water', VermilionGym: 'bg_gym_electric', VermilionCity: 'bg_harbor' };
+const BG = { ViridianForest: 'bg_forest', PewterGym: 'bg_gym_rock', OaksLab: 'bg_lab', MtMoon1F: 'bg_cave', MtMoonB1F: 'bg_cave', MtMoonB2F: 'bg_cave', CeruleanGym: 'bg_gym_water', VermilionGym: 'bg_gym_electric', VermilionCity: 'bg_harbor',
+  // 4~9판 (2026-10-03 그림)
+  CeladonGym: 'bg_gym_grass', FuchsiaGym: 'bg_gym_poison', SaffronGym: 'bg_gym_psychic', CinnabarGym: 'bg_gym_fire', ViridianGym: 'bg_gym_ground',
+  LoreleisRoom: 'bg_elite', BrunosRoom: 'bg_elite', AgathasRoom: 'bg_elite', LancesRoom: 'bg_elite', ChampionsRoom: 'bg_elite',
+  PokemonTower1F: 'bg_tower', PokemonTower2F: 'bg_tower', PokemonTower6F: 'bg_tower', PokemonTower7F: 'bg_tower',
+  SilphCo1F: 'bg_silph', SilphCo5F: 'bg_silph', SilphCo7F: 'bg_silph', SilphCo11F: 'bg_silph',
+  RockTunnel1F: 'bg_cave', RockTunnelB1F: 'bg_cave', VictoryRoad1F: 'bg_cave', VictoryRoad2F: 'bg_cave', VictoryRoad3F: 'bg_cave', SSAnne2F: 'bg_harbor' };
 
 export class BattleScene extends Phaser.Scene {
   constructor() { super({ key: 'battle', active: true }); }
@@ -337,6 +343,9 @@ export async function runBattle(opts) {
   const leveled = new Set();
   let result = null;
   const nameOf = (b) => (b.side === 'foe' ? (trainer ? '상대 ' : '야생 ') : '') + sp(b.m.sp).name;
+  const boss = trainer && M.isBossTrainer(opts); // 관장·사천왕·챔피언은 똑똑하게 고른다
+  let foeHealUsed = false; // 고급상처약은 배틀당 한 번
+  const askQuiz = async (d) => (await moveQuiz({ monName: sp(me.m.sp).name, moveName: d.name, moveType: d.type, story: !!opts.story, lesson })).hit;
 
   try {
     const backP = S.showPlayerBack();
@@ -360,12 +369,18 @@ export async function runBattle(opts) {
 
     // ── 턴 반복 ──
     while (!result) {
-      hud.msgEl.textContent = `${josa(sp(me.m.sp).name, '은/는')} 무엇을 할까?`;
-      const cmd = await hud.pick([
-        { label: '⚔ 싸운다', value: 'fight' }, { label: '🎒 가방', value: 'bag' },
-        { label: '🔴 포켓몬', value: 'mon' }, { label: '🏃 도망', value: 'run' },
-      ], { cancel: false });
-      let myAct = null;
+      // 반동 중이거나 두 턴 기술을 모으는 중이면 고를 수 없다 (자동으로 이어진다)
+      const chargeMv = me.charge ? DB.moves[me.charge] : null; // 공격 턴에 문제를 낼 땐 charge 가 이미 비워져 있다 → 미리 잡아 둔다
+      let myAct = me.recharge ? { kind: 'recharge' }
+        : chargeMv ? { kind: 'move', slot: null, move: chargeMv, hit: null, ask: () => askQuiz(chargeMv) } : null;
+      let cmd = null;
+      if (!myAct) {
+        hud.msgEl.textContent = `${josa(sp(me.m.sp).name, '은/는')} 무엇을 할까?`;
+        cmd = await hud.pick([
+          { label: '⚔ 싸운다', value: 'fight' }, { label: '🎒 가방', value: 'bag' },
+          { label: '🔴 포켓몬', value: 'mon' }, { label: '🏃 도망', value: 'run' },
+        ], { cancel: false });
+      }
       if (cmd === 'fight') {
         const usable = me.m.moves.filter((mv) => mv.pp > 0);
         if (!usable.length) myAct = { kind: 'move', move: { id: 'Struggle', name: '발버둥', type: 'Normal', power: 50, acc: 100, effect: 'RecoilEffect' }, hit: true };
@@ -376,8 +391,12 @@ export async function runBattle(opts) {
           }), { moves: true, cancel: -1 });
           if (mvIdx === -1) continue;
           const slot = me.m.moves[mvIdx], d = DB.moves[slot.id];
-          const q = await moveQuiz({ monName: sp(me.m.sp).name, moveName: d.name, moveType: d.type, story: !!opts.story, lesson });
-          myAct = { kind: 'move', slot, move: d, hit: q.hit };
+          // 두 턴 기술은 모으는 턴엔 문제를 내지 않고, 공격하는 턴에 한 번 낸다
+          if (M.isChargeMove(d)) myAct = { kind: 'move', slot, move: d, hit: null, ask: () => askQuiz(d) };
+          else {
+            const q = await moveQuiz({ monName: sp(me.m.sp).name, moveName: d.name, moveType: d.type, story: !!opts.story, lesson });
+            myAct = { kind: 'move', slot, move: d, hit: q.hit };
+          }
         }
       } else if (cmd === 'bag') {
         const used = await useBagInBattle(hud, S, me, foe, trainer);
@@ -386,6 +405,7 @@ export async function runBattle(opts) {
         if (used.ran) { result = 'run'; break; }
         myAct = { kind: 'item' };
       } else if (cmd === 'mon') {
+        if (me.trap > 0) { await hud.msg(`${me.trapName}에 걸려서 교체할 수 없다!`, true); continue; }
         const pick2 = await choosePartyMon(me.m, false);
         if (pick2 == null) continue;
         await hud.msg(`돌아와, ${sp(me.m.sp).name}!`);
@@ -396,19 +416,25 @@ export async function runBattle(opts) {
         myAct = { kind: 'switch' };
       } else if (cmd === 'run') {
         if (trainer) { await hud.msg('트레이너와의 승부에서는 도망칠 수 없어!', true); continue; }
+        if (me.trap > 0) { await hud.msg(`${me.trapName}에 걸려서 도망칠 수 없다!`, true); continue; }
         sfx('select'); await hud.msg('무사히 도망쳤다!', true); result = 'run'; break;
       }
 
       if (!myAct) { console.warn('battle: no action for command', cmd); continue; }
       // 상대 행동
-      const foeMove = pickFoeMove(foe, me);
+      // 반동 중이면 움직이지 않고(foeMove 없음), 모으는 중이면 이어서 공격, 보스는 약이 필요하면 약을 쓴다
+      const foeItem = !foe.recharge && !foe.charge && boss && M.bossHeals(opts) && M.aiShouldHeal(foe, foeHealUsed);
+      const foeMove = foe.recharge || foeItem ? null : foe.charge ? DB.moves[foe.charge] : pickFoeMove(foe, me, boss);
       const myFirst = myAct.kind !== 'move' || priority(myAct.move) > priority(foeMove) ||
         (priority(myAct.move) === priority(foeMove) && (M.effSpeed(me) > M.effSpeed(foe) || (M.effSpeed(me) === M.effSpeed(foe) && chance(0.5))));
-      const order = myFirst ? ['me', 'foe'] : ['foe', 'me'];
+      const order = foeItem ? (myAct.kind === 'item' || myAct.kind === 'switch' ? ['me', 'foe'] : ['foe', 'me']) : myFirst ? ['me', 'foe'] : ['foe', 'me'];
       for (const who of order) {
         if (result) break;
         if (me.m.hp <= 0 || foe.m.hp <= 0) break;
-        if (who === 'me') { if (myAct.kind === 'move') await doMove(hud, S, me, foe, myAct.move, myAct.slot, myAct.hit, nameOf); }
+        if (who === 'me') {
+          if (myAct.kind === 'move') await doMove(hud, S, me, foe, myAct.move, myAct.slot, myAct.hit, nameOf, myAct.ask);
+          else if (myAct.kind === 'recharge') await doMove(hud, S, me, foe, null, null, null, nameOf);
+        } else if (foeItem) { foeHealUsed = true; await foeHyperPotion(hud, foe, opts.name); }
         else await doMove(hud, S, foe, me, foeMove, null, null, nameOf);
       }
       // 턴 끝 (독·화상·씨뿌리기)
@@ -416,6 +442,7 @@ export async function runBattle(opts) {
 
       // 쓰러짐 처리
       if (foe.m.hp <= 0) {
+        me.recharge = false; // 상대를 쓰러뜨렸으면 파괴광선 반동 없음
         await S.faint('foe');
         await hud.msg(`${josa(nameOf(foe), '은/는')} 쓰러졌다!`, true);
         if (trainer) hud.balls[fi] = false;
@@ -507,9 +534,10 @@ export async function runBattle(opts) {
 
 function priority(mv) { return mv && mv.id === 'QuickAttack' ? 1 : 0; }
 
-function pickFoeMove(foe, me) {
+function pickFoeMove(foe, me, boss) {
   const ms = foe.m.moves.filter((m) => m.pp > 0);
   if (!ms.length) return { id: 'Struggle', name: '발버둥', type: 'Normal', power: 50, acc: 100, effect: 'RecoilEffect' };
+  if (boss) { const slot = M.aiPickSlot(foe, me); slot.pp--; return DB.moves[slot.id]; }
   // 가끔 상성이 좋은 공격을 고른다
   const good = ms.filter((m) => DB.moves[m.id].power > 0 && M.typeMult(DB.moves[m.id].type, sp(me.m.sp).types) > 1);
   const slot = good.length && chance(0.5) ? pick(good) : pick(ms);
@@ -517,20 +545,19 @@ function pickFoeMove(foe, me) {
   return DB.moves[slot.id];
 }
 
-async function doMove(hud, S, att, def, move, slot, quizHit, nameOf) {
-  const an = nameOf(att), dn = nameOf(def);
-  // 행동 불가 상태
+/** 행동할 수 있는지 (잠듦·얼음·풀죽음·마비·혼란). 못 하면 false (모으던 기술도 취소) */
+async function canMove(hud, S, att, an) {
   if (att.m.status === 'SLP') {
     att.sleep = (att.sleep || rand(1, 4)) - 1;
     if (att.sleep <= 0) { att.m.status = null; await hud.msg(`${josa(an, '은/는')} 잠에서 깨어났다!`); redraw(hud, att); }
-    else { await hud.msg(`${josa(an, '은/는')} 쿨쿨 자고 있다.`); return; }
+    else { await hud.msg(`${josa(an, '은/는')} 쿨쿨 자고 있다.`); return false; }
   }
   if (att.m.status === 'FRZ') {
     if (chance(0.2)) { att.m.status = null; await hud.msg(`${an}의 얼음이 녹았다!`); redraw(hud, att); }
-    else { await hud.msg(`${josa(an, '은/는')} 얼어서 움직일 수 없다!`); return; }
+    else { await hud.msg(`${josa(an, '은/는')} 얼어서 움직일 수 없다!`); return false; }
   }
-  if (att.flinch) { att.flinch = false; await hud.msg(`${josa(an, '은/는')} 풀이 죽어 움직이지 못했다!`); return; }
-  if (att.m.status === 'PAR' && chance(0.25)) { await hud.msg(`${josa(an, '은/는')} 몸이 저려서 움직일 수 없다!`); return; }
+  if (att.flinch) { att.flinch = false; await hud.msg(`${josa(an, '은/는')} 풀이 죽어 움직이지 못했다!`); return false; }
+  if (att.m.status === 'PAR' && chance(0.25)) { await hud.msg(`${josa(an, '은/는')} 몸이 저려서 움직일 수 없다!`); return false; }
   if (att.conf > 0) {
     att.conf--;
     await hud.msg(`${josa(an, '은/는')} 혼란에 빠져 있다!`);
@@ -538,26 +565,47 @@ async function doMove(hud, S, att, def, move, slot, quizHit, nameOf) {
       const dmg = Math.max(1, Math.floor(M.stats(att.m).hp / 12));
       const from = att.m.hp; att.m.hp = Math.max(0, att.m.hp - dmg);
       await S.hit(att.side); await hud.animHp(att.side, att, from);
-      await hud.msg('영문도 모른 채 자신을 공격했다!'); return;
+      await hud.msg('영문도 모른 채 자신을 공격했다!'); return false;
     }
   }
-  if (slot) slot.pp--;
+  return true;
+}
+
+/** askQuiz: 두 턴 기술의 공격하는 턴에 문제를 내는 함수 (플레이어만) */
+async function doMove(hud, S, att, def, move, slot, quizHit, nameOf, askQuiz) {
+  const an = nameOf(att), dn = nameOf(def);
+  // 파괴광선 반동: 이번 턴은 쉰다
+  if (att.recharge) { att.recharge = false; await hud.msg(`${josa(an, '은/는')} 반동으로 움직일 수 없다!`); return; }
+  // 행동 불가 상태
+  if (!(await canMove(hud, S, att, an))) { M.cancelCharge(att); return; }
+  // 두 턴 기술: 첫 턴은 모으기만 하고(PP 소모), 다음 턴에 공격한다
+  const phase = M.chargePhase(att, move);
+  if (phase === 'charge') {
+    if (slot) slot.pp--;
+    await hud.msg(`${josa(an, '은/는')} ${M.CHARGE_TEXT[move.id] || '힘을 모으고 있다!'}`);
+    await S.glow(att.side);
+    return;
+  }
+  if (slot && phase === 'normal') slot.pp--;
   await hud.msg(`${an}의 ${move.name}!`);
-  // 명중: 플레이어는 문제 결과로, 상대는 명중률로
+  // 명중: 플레이어는 문제 결과로, 상대는 명중률로. 숨어 있는 상대(공중날기·구멍파기)에겐 닿지 않는다
   const isPlayer = att.side === 'me';
-  const hitNow = isPlayer ? quizHit : M.hits(att, def, move, false);
+  if (isPlayer && quizHit == null && askQuiz) quizHit = await askQuiz();
+  const hitNow = M.canTarget(def, move) && (isPlayer ? quizHit : M.hits(att, def, move, false));
   if (!hitNow) { sfx('miss'); S.missText(def.side); await hud.msg(isPlayer ? `하지만 ${move.name}은(는) 빗나갔다!` : `${an}의 공격은 빗나갔다!`); return; }
 
   const eff = move.effect;
+  if (eff === 'DreamEaterEffect' && M.dreamEaterBlocked(def)) { await hud.msg(`${josa(dn, '은/는')} 잠들어 있지 않아서 효과가 없다!`); return; }
+  if (eff === 'OhkoEffect' && M.ohkoBlocked(att, def) && M.typeMult(move.type, sp(def.m.sp).types) > 0) { await hud.msg('하지만 실패했다!'); return; }
   if (move.power > 0 || eff === 'SpecialDamageEffect' || eff === 'SuperFangEffect') {
     let times = 1;
     if (eff === 'TwoToFiveAttacksEffect') times = pick([2, 2, 2, 3, 3, 3, 4, 5]);
     if (eff === 'AttackTwiceEffect' || eff === 'TwineedleEffect') times = 2;
-    let total = 0, lastMult = 1, crit = false, n = 0;
+    let total = 0, lastMult = 1, crit = false, n = 0, ko = false;
     await S.attackAnim(att.side, move.type, M.SPECIAL_TYPES.has(move.type));
     for (let i = 0; i < times && def.m.hp > 0; i++) {
       const r = M.damage(att, def, move);
-      lastMult = r.mult; crit = crit || r.crit;
+      lastMult = r.mult; crit = crit || r.crit; ko = ko || !!r.ko;
       if (r.mult === 0) break;
       const from = def.m.hp;
       def.m.hp = Math.max(0, def.m.hp - r.dmg);
@@ -567,6 +615,7 @@ async function doMove(hud, S, att, def, move, slot, quizHit, nameOf) {
     }
     def.lastDmg = total;
     if (lastMult === 0) { await hud.msg(`${dn}에게는 효과가 없는 것 같다…`); return; }
+    if (ko) await hud.msg('일격필살!');
     if (crit) await hud.msg('급소에 맞았다!');
     if (lastMult > 1) await hud.msg('효과가 굉장했다!');
     else if (lastMult < 1) await hud.msg('효과가 별로인 듯하다…');
@@ -574,6 +623,8 @@ async function doMove(hud, S, att, def, move, slot, quizHit, nameOf) {
     if (eff === 'DrainHpEffect' || eff === 'DreamEaterEffect') { const h = Math.max(1, Math.floor(total / 2)); const f = att.m.hp; att.m.hp = Math.min(M.stats(att.m).hp, att.m.hp + h); await hud.animHp(att.side, att, f); await hud.msg(`${dn}의 체력을 흡수했다!`); }
     if (eff === 'RecoilEffect') { const r2 = Math.max(1, Math.floor(total / 4)); const f = att.m.hp; att.m.hp = Math.max(0, att.m.hp - r2); await hud.animHp(att.side, att, f); await hud.msg(`${josa(an, '은/는')} 반동으로 데미지를 입었다!`); }
     if (eff === 'ExplodeEffect') { const f = att.m.hp; att.m.hp = 0; await hud.animHp(att.side, att, f); }
+    if (eff === 'HyperBeamEffect' && M.hyperBeamAfter(att, def)) await hud.msg(`${josa(an, '은/는')} 반동으로 다음 턴엔 움직일 수 없다!`);
+    if (eff === 'TrappingEffect' && def.m.hp > 0 && M.startTrap(def, move)) await hud.msg(`${josa(dn, '은/는')} ${move.name}에 걸려 꼼짝할 수 없다!`);
     // 추가 효과
     if (def.m.hp > 0) {
       const ss = M.SIDE_STATUS[eff];
@@ -587,6 +638,11 @@ async function doMove(hud, S, att, def, move, slot, quizHit, nameOf) {
   }
   // 변화 기술
   await S.effect(eff.includes('Up') || eff === 'HealEffect' ? (att.side === 'me' ? S.me : S.foe) : (att.side === 'me' ? S.foe : S.me), move.type);
+  if (eff === 'ReflectEffect' || eff === 'LightScreenEffect') {
+    const refl = eff === 'ReflectEffect';
+    if (!M.raiseScreen(att, refl ? 'reflect' : 'lscreen')) { await hud.msg('하지만 실패했다!'); return; }
+    await hud.msg(`${josa(an, '은/는')} ${refl ? '물리' : '특수'} 공격에 강해졌다!`); return;
+  }
   const fx = M.STAT_FX[eff];
   if (fx) { const tgt = fx[0] === 'self' ? att : def; await stage(hud, tgt, fx[1], fx[2], fx[0] === 'self' ? an : dn); return; }
   const stt = M.STATUS_MOVE[eff];
@@ -638,6 +694,24 @@ async function endTurn(hud, S, b, other, nameOf) {
     const f2 = other.m.hp; other.m.hp = Math.min(M.stats(other.m).hp, other.m.hp + d); await hud.animHp(other.side, other, f2);
     await hud.msg(`씨뿌리기가 ${n}의 체력을 빼앗았다!`);
   }
+  // 조이기류: 거는 쪽이 쓰러졌으면 풀린다
+  if (b.trap > 0 && b.m.hp > 0) {
+    if (other.m.hp <= 0) b.trap = 0;
+    else {
+      const t = M.trapTick(b); const f = b.m.hp; b.m.hp = Math.max(0, b.m.hp - t.dmg);
+      await hud.animHp(b.side, b, f); await hud.msg(`${josa(n, '은/는')} ${b.trapName}에 조여 데미지를 입었다!`);
+      if (t.ended && b.m.hp > 0) await hud.msg(`${josa(n, '은/는')} ${b.trapName}에서 풀려났다!`);
+    }
+  }
+  for (const name of M.screenTick(b)) await hud.msg(`${n}의 ${name} 효과가 사라졌다!`);
+}
+
+/** 관장·사천왕·챔피언의 고급상처약 (HP 25% 미만일 때 배틀당 한 번) */
+async function foeHyperPotion(hud, foe, trainerName) {
+  await hud.msg(`${josa(trainerName, '은/는')} 고급상처약을 썼다!`);
+  const f = foe.m.hp; foe.m.hp = Math.min(M.stats(foe.m).hp, foe.m.hp + M.HYPER_POTION);
+  sfx('heal'); await hud.animHp('foe', foe, f);
+  await hud.msg(`${sp(foe.m.sp).name}의 HP가 회복되었다!`);
 }
 
 async function learnMove(hud, m, mvId) {
@@ -655,7 +729,7 @@ async function learnMove(hud, m, mvId) {
 
 /* 가방 (전투 중) */
 async function useBagInBattle(hud, S, me, foe, trainer) {
-  const ids = Object.keys(G.s.bag).map(Number).filter((id) => ITEMS[id] && ITEMS[id].kind !== 'key' && G.s.bag[id] > 0);
+  const ids = Object.keys(G.s.bag).map(Number).filter((id) => ITEMS[id] && ['ball', 'heal', 'cure', 'revive', 'full'].includes(ITEMS[id].kind) && G.s.bag[id] > 0);
   if (!ids.length) { await hud.msg('가방에 쓸 수 있는 도구가 없다!', true); return null; }
   const id = await hud.pick([...ids.map((i) => ({ label: `${ITEMS[i].name} ×${G.s.bag[i]}`, value: i })), { label: '돌아가기', value: -1 }], { moves: true, cancel: -1 });
   if (id === -1) return null;
@@ -691,8 +765,22 @@ async function useBagInBattle(hud, S, me, foe, trainer) {
     sfx('heal'); await hud.msg(`${sp(target.sp).name}의 HP가 ${target.hp - f} 회복되었다!`, true);
     return { used: true };
   }
+  if (it.kind === 'revive') {
+    if (target.hp > 0) { await hud.msg('기절한 포켓몬에게만 쓸 수 있어.', true); return null; }
+    addItem(id, -1); target.hp = Math.floor(mx / 2); sfx('heal');
+    await hud.msg(`${josa(sp(target.sp).name, '이/가')} 기운을 되찾았다!`, true);
+    return { used: true };
+  }
+  if (it.kind === 'full') {
+    if (target.hp <= 0 || (target.hp >= mx && !target.status)) { await hud.msg('효과가 없을 것 같다.', true); return null; }
+    addItem(id, -1);
+    const f = target.hp; target.hp = mx; target.status = null;
+    if (target === me.m) { await hud.animHp('me', me, f); hud.drawMe(me); }
+    sfx('heal'); await hud.msg(`${sp(target.sp).name}의 HP와 상태가 모두 회복되었다!`, true);
+    return { used: true };
+  }
   if (it.kind === 'cure') {
-    if (target.status !== it.cure) { await hud.msg('효과가 없을 것 같다.', true); return null; }
+    if (!target.status || (it.cure !== 'ALL' && target.status !== it.cure)) { await hud.msg('효과가 없을 것 같다.', true); return null; }
     addItem(id, -1); target.status = null; if (target === me.m) hud.drawMe(me); sfx('heal');
     await hud.msg(`${josa(sp(target.sp).name, '은/는')} 건강해졌다!`, true);
     return { used: true };
@@ -733,6 +821,10 @@ export function choosePartyMon(current, forced, item) {
 async function maybeEvolve(m) {
   const to = M.evoTarget(m);
   if (!to) return;
+  await playEvolution(m, to);
+}
+/** 진화 연출 + 진화 (레벨 진화·돌 진화 공용) */
+export async function playEvolution(m, to) {
   const from = m.sp;
   await fade(false, 1);
   const box = el('div', { class: 'win panel', style: { alignItems: 'center', justifyContent: 'center', background: '#10204a', color: '#fff' } });

@@ -1,14 +1,15 @@
 /* 메뉴 화면: 시작 메뉴, 포켓몬, 도감, 가방, 상점, 보관함, 공부 기록, 연습 문제, 1차 완료 */
-import { DB, ITEMS, sp, monArt, MAP_NAME } from './data.js';
+import { DB, ITEMS, SHOP, sp, monArt, MAP_NAME } from './data.js';
 import { G, save, addItem, maxHp, healParty } from './state.js';
 import { el, josa, typeTag, TYPE_KO } from './util.js';
 import { choose, panel, listNav, say, ask, toast, root } from './ui.js';
 import { sfx, setMuted, isMuted } from './audio.js';
 import * as M from './battle/mech.js';
-import { report, settings, SPEEDS, GRADES, restartAt } from './learn/tutor.js';
+import { report, settings, SPEEDS, GRADES, restartAt, SUBJECTS } from './learn/tutor.js';
 import { nextQuestion, record } from './learn/tutor.js';
 import { shuffle } from './util.js';
 import { W } from './world/overworld.js';
+import * as F from './world/field.js';
 import { fixJosa } from './learn/math.js';
 
 const caughtN = () => Object.keys(G.s.dex.caught).length;
@@ -24,6 +25,7 @@ export async function openMenu() {
         G.s.party.length ? { label: '🔴 포켓몬', value: 'party' } : null,
         G.s.flags.pokedex ? { label: '📕 도감', value: 'dex' } : null,
         { label: '🎒 가방', value: 'bag' },
+        F.hasHM('fly') ? { label: '🕊 날아가기', value: 'fly' } : null,
         { label: '💡 힌트 (다음에 할 일)', value: 'hint' },
         { label: '📒 공부 기록', value: 'report' },
         { label: `👤 ${G.s.name}`, value: 'card' },
@@ -43,6 +45,7 @@ export async function openMenu() {
       else if (v === 'hint') { W.busy = false; await W.showGoalDetail?.(); W.busy = true; }
       else if (v === 'card') await cardScreen();
       else if (v === 'settings') await settingsScreen();
+      else if (v === 'fly') { if (await flyMenu()) break; }
       else if (v === 'save') { save(); sfx('item'); toast('저장했어요! 💾'); }
       else if (v === 'sound') { setMuted(!isMuted()); }
     }
@@ -68,6 +71,23 @@ function menuPick(box, items, start) {
 }
 import { Input } from './input.js';
 const pushKeys = (fn) => Input.push(fn);
+
+/* ── 🕊 날아가기: 가 본 도시의 포켓몬센터 앞으로 (비전머신02 + 오렌지배지) ── */
+async function flyMenu() {
+  const why = F.whyNot('fly');
+  if (why) { await say([why]); return false; }
+  const map = DB.maps[G.s.map];
+  if (!map || !map.outdoor) { await say(['하늘이 보이는 밖에서만 날 수 있어!']); return false; }
+  const list = F.flyTargets();
+  if (!list.length) { await say(['아직 날아갈 수 있는 도시가 없어. 도시의 포켓몬센터에 먼저 들러 보자!']); return false; }
+  const id = await choose([...list.map((t) => ({ label: t.name, value: t.id })), { label: '취소', value: null }], { style: { maxHeight: '55vh', overflowY: 'auto' } });
+  if (!id) return false;
+  const p = F.flySpot(id);
+  sfx('select');
+  await W.scene.loadMap(id, p.x, p.y, 'down');
+  save();
+  return true;
+}
 
 /* ── 포켓몬 ── */
 function monRow(m, extra) {
@@ -175,16 +195,39 @@ export async function bagScreen() {
           await say([fixJosa(`${sp(m.sp).name}의 레벨이 ${m.lv}(으)로 올랐다!`)]);
           draw(); return;
         }
-        if (it.kind !== 'heal' && it.kind !== 'cure') { await say([it.desc]); return; }
+        if (it.kind === 'repel') { addItem(id, -1); G.s.repel = it.steps; sfx('item'); await say([`${it.name}를 뿌렸다! ${it.steps}걸음 동안 야생 포켓몬이 나오지 않아.`]); draw(); return; }
+        if (it.kind === 'rope') {
+          const map = DB.maps[G.s.map];
+          if (!map || map.outdoor) { await say(['여기는 밖이라 쓸 수 없어. 동굴이나 건물 안에서 써 봐!']); return; }
+          addItem(id, -1); sfx('item'); api.close(null);
+          await say(['동굴탈출로프를 썼다! 마지막으로 들른 포켓몬센터로 돌아간다.']);
+          const r = G.s.respawn; await W.scene.loadMap(r.map, r.x, r.y, 'down'); save(); return;
+        }
+        if (!['heal', 'cure', 'revive', 'full', 'stone'].includes(it.kind)) { await say([it.desc]); return; }
         const m = await pickPartyPanel(fixJosa(`${it.name}을(를) 누구에게 쓸까?`));
         if (!m) return;
+        if (it.kind === 'stone') {
+          const to = M.stoneTarget(m, it.stone);
+          if (!to) { await say(['아무 반응이 없다… 이 포켓몬은 이 돌로 진화하지 않아.']); return; }
+          addItem(id, -1);
+          const { playEvolution } = await import('./battle/battle.js');
+          await playEvolution(m, to); draw(); return;
+        }
+        if (it.kind === 'revive') {
+          if (m.hp > 0) { await say(['기절한 포켓몬에게만 쓸 수 있어.']); return; }
+          m.hp = Math.floor(maxHp(m) / 2); addItem(id, -1); sfx('heal'); await say([fixJosa(`${sp(m.sp).name}이(가) 기운을 되찾았다!`)]); draw(); return;
+        }
+        if (it.kind === 'full') {
+          if (m.hp <= 0 || (m.hp >= maxHp(m) && !m.status)) { await say(['효과가 없을 것 같다.']); return; }
+          m.hp = maxHp(m); m.status = null; addItem(id, -1); sfx('heal'); await say([`${sp(m.sp).name}의 HP와 상태가 모두 회복되었다!`]); draw(); return;
+        }
         if (it.kind === 'heal') {
           const mx = maxHp(m);
           if (m.hp <= 0 || m.hp >= mx) { await say(['효과가 없을 것 같다.']); return; }
           const f = m.hp; m.hp = Math.min(mx, m.hp + it.heal); addItem(id, -1); sfx('heal');
           await say([`${sp(m.sp).name}의 HP가 ${m.hp - f} 회복되었다!`]);
         } else {
-          if (m.status !== it.cure) { await say(['효과가 없을 것 같다.']); return; }
+          if (!m.status || (it.cure !== 'ALL' && m.status !== it.cure)) { await say(['효과가 없을 것 같다.']); return; }
           m.status = null; addItem(id, -1); sfx('heal'); await say([fixJosa(`${sp(m.sp).name}은(는) 건강해졌다!`)]);
         }
         draw();
@@ -202,7 +245,7 @@ function pickPartyPanel(title) {
 
 /* ── 상점 ── */
 export async function openShop() {
-  const stock = [4, 20, 11, 15, 14, 12];
+  const stock = SHOP[G.s.map] || SHOP.default; // 도시마다 다른 물건 (data.js SHOP)
   await say(['어서 오세요! 필요한 게 있으신가요?'], { who: '점원', face: 'clerk' });
   await panel('프렌들리숍', (body, api) => {
     const draw = () => {
@@ -270,7 +313,7 @@ export async function reportScreen() {
         el('span', {}, el('span', { style: { display: 'inline-block', width: '.8em', height: '.8em', borderRadius: '50%', background: '#f2b705', marginRight: '.3em' } }), '복습이 필요해요'),
         el('span', {}, el('span', { style: { display: 'inline-block', width: '.8em', height: '.8em', borderRadius: '50%', background: '#cfd6e6', marginRight: '.3em' } }), '아직')),
       r.focus ? el('div', { class: 'focusline' }, `🎯 지금 집중 중: ${r.focus.t} (최근 ${r.focus.n}문제 중 ${r.focus.ok}개 맞힘) — 같은 문제가 아니라 이 가족의 여러 문제를 더 풀어요`) : null,
-      el('div', { class: 'sub setline' }, '⚙ 설정 — ', ['math', 'sci', 'hum'].map((k) => setLine(k, r)).join(' / ')),
+      el('div', { class: 'sub setline' }, '⚙ 설정 — ', SUBJECTS.map((k) => setLine(k, r)).join(' / ')),
       el('h3', {}, `수학 — 지금 배우는 곳: ${r.math[r.fMath].t}`), ...skillRows(r.math, r.fMath),
       el('h3', {}, `과학 — 지금 배우는 곳: ${r.sci[r.fSci].t}`), ...skillRows(r.sci, r.fSci)));
   });
@@ -280,11 +323,11 @@ export async function reportScreen() {
  * 병석님: "설정으로 난이도 과목별 난이도 정도 되게 해 줘. 가끔 운 좋게 잘 찍으니 너무 가 버리는 경우가 있어서".
  *  📌 이 학년에서 멈추기(위로 안 올라감) · 🔁 이 학년부터 다시(시작점을 낮추고 잘하면 다시 올라감) · 🐢 올라가는 속도
  *  설정은 G.s.settings — 슬롯(아이)마다 따로 저장된다. */
-const SUBJ_KO = { math: '수학', sci: '과학', hum: '인문' };
+const SUBJ_KO = { math: '수학', sci: '과학', hum: '인문', art: '예체능', job: '직업' };
 const gradeLabel = (g) => (GRADES.find((x) => x.g === g) || {}).label || `${g}단계`;
 function setLine(subj, r) {
   const s = settings()[subj];
-  const now = { math: r.math[r.fMath], sci: r.sci[r.fSci], hum: r.hum && r.hum[r.fHum] }[subj];
+  const now = r[subj] && r.front && r.ready[subj] ? r[subj][r.front[subj]] : null;
   const where = s.mode === 'fixed' ? `${gradeLabel(s.g)}에서 멈춤` : `자동${now ? ` (지금: ${now.t})` : ''}`;
   return `${SUBJ_KO[subj]}: ${where} · ${SPEEDS[s.speed]}`;
 }
@@ -309,7 +352,7 @@ export async function settingsScreen() {
   for (;;) {
     const r = report();
     const v = await pickWith('⚙ 과목별 난이도예요. 바꿀 과목을 골라 주세요.', [
-      ...['math', 'sci', 'hum'].map((k) => ({ label: setLine(k, r), value: k })),
+      ...SUBJECTS.map((k) => ({ label: setLine(k, r), value: k })),
       { label: '✖ 닫기', value: null },
     ]);
     if (v == null) break;
@@ -319,7 +362,7 @@ export async function settingsScreen() {
 }
 async function subjectSettings(subj) {
   const s = settings()[subj];
-  const v = await pickWith(`${SUBJ_KO[subj]}을 어떻게 할까요?`, [ // 수학·과학·인문 모두 받침 → '을'
+  const v = await pickWith(`${SUBJ_KO[subj]}을 어떻게 할까요?`, [ // 수학·과학·인문·예체능·직업 모두 받침 → '을'
     { label: '📌 이 학년에서 멈추기 (그 위로 안 올라가요)', value: 'fix' },
     { label: '🔁 이 학년부터 다시 (잘하면 다시 올라가요)', value: 'restart' },
     s.mode === 'fixed' ? { label: '📈 멈춤 풀기 (자동으로 올라가요)', value: 'auto' } : null,
@@ -384,10 +427,17 @@ export async function practice(n) {
 }
 
 /* ── 1차 완료 ── */
-export async function chapterEnd(n = 1) {
+export async function chapterEnd(n = 1, custom = null) { // custom: 배지가 없는 판(5판 등)의 축하 문구
   const r = report();
-  const msg = n === 1 ? ['축하해! 🎉 회색배지를 땄구나!', '다음 모험은 회색시티 동쪽 3번도로에서 시작이야. 달맞이산을 지나 블루시티로 가 보자!']
-    : ['축하해! 🎉 블루배지까지 땄구나!', `${n}판 모험을 모두 마쳤어! 다음 판은 곧 열린단다.`, '그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!'];
+  // 판마다 딴 배지와 다음 모험 (3판에서 '블루배지'라고 잘못 나오던 것 수정)
+  const BADGE = { 1: '회색배지', 2: '블루배지', 3: '오렌지배지', 4: '무지개배지', 5: '핑크배지', 6: '골드배지', 7: '진홍배지', 8: '그린배지' };
+  const NEXT = {
+    1: '다음 모험은 회색시티 동쪽 3번도로에서 시작이야. 달맞이산을 지나 블루시티로 가 보자!',
+    2: '다음 모험은 블루시티 북쪽 너겟 브릿지! 이수재 박사님을 만나러 가자.',
+    3: '다음 모험은 갈색시티 항구! 상트앙느호에 타 보자.',
+    4: '다음 모험은 무지개시티 게임코너 아래에 숨은 로켓단 아지트야!',
+  };
+  const msg = custom || [`축하해! 🎉 ${BADGE[n] || '배지'}를 땄구나!`, NEXT[n] || `${n}판 모험을 모두 마쳤어!`, '그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!'];
   await say(msg, { who: '오박사', face: 'oak' });
   await panel(`🏅 ${n}판 모험 완료!`, (body) => {
     body.append(el('div', { class: 'report' },
@@ -396,5 +446,34 @@ export async function chapterEnd(n = 1) {
         el('div', {}, el('b', {}, r.best), '최고 연속 정답'), el('div', {}, el('b', {}, caughtN() + '/151'), '도감'),
         el('div', {}, el('b', {}, r.math.filter((x) => x.mastered && !x.placed).length + r.sci.filter((x) => x.mastered && !x.placed).length), '새로 익힌 주제')),
       el('p', {}, '계속 여기저기 돌아다니며 포켓몬을 잡고 문제를 풀 수 있어요. 기록은 자동으로 저장돼요.')));
+  });
+}
+
+/* ── 엔딩: 명예의 전당 + 공부 성적표 + 만든 사람 (9판) ── */
+export async function endingScreen() {
+  const r = report();
+  const ms = G.s.playMs || 0, h = Math.floor(ms / 3600000), mi = Math.floor((ms % 3600000) / 60000);
+  const subj = SUBJECTS.filter((k) => (r[k] || []).some((x) => x.n > 0)).map((k) => {
+    const rows = r[k], got = rows.filter((x) => x.mastered).length, now = rows[r.front[k]];
+    return el('div', { class: 'row' }, el('div', { class: 'grow' },
+      el('div', { class: 'jua' }, `${SUBJ_KO[k]} — 익힌 단원 ${got} / ${rows.length}`),
+      el('div', { class: 'sub' }, now ? `지금 배우는 곳: ${now.t}` : '')));
+  });
+  await panel('🏆 명예의 전당', (body) => {
+    body.append(el('div', { class: 'report' },
+      el('div', { class: 'jua', style: { fontSize: '1.2em', textAlign: 'center', margin: '.3em 0 .6em' } }, `${G.s.name}, 포켓몬 리그 챔피언이 된 걸 축하해! 🎉`),
+      el('div', { style: { display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '.6em' } },
+        ...G.s.party.map((m) => el('div', { style: { textAlign: 'center' } },
+          el('img', { src: monArt(m.sp), alt: '', style: { width: '5em', height: '5em', objectFit: 'contain' } }),
+          el('div', { class: 'sub' }, `${sp(m.sp).name} Lv${m.lv}`)))),
+      el('h3', {}, '📒 공부 성적표'),
+      el('div', { class: 'kpi' },
+        el('div', {}, el('b', {}, r.total), '푼 문제'), el('div', {}, el('b', {}, r.acc + '%'), '처음에 맞힌 비율'),
+        el('div', {}, el('b', {}, r.best), '최고 연속 정답'), el('div', {}, el('b', {}, caughtN() + '/151'), '도감'),
+        el('div', {}, el('b', {}, `${h}시간 ${mi}분`), '모험한 시간')),
+      ...subj,
+      el('h3', {}, '🎬 만든 사람'),
+      el('p', {}, '기획·감독: 아빠 · 문제·강의·지도 만들기: 오박사 연구소 · 원작: 포켓몬스터 레드 (집에서 공부용으로만)'),
+      el('p', { class: 'sub' }, '틀린 문제에서 배운 것이 진짜 실력이야. 앞으로도 궁금한 건 끝까지 물어보는 트레이너가 되렴! — 오박사')));
   });
 }

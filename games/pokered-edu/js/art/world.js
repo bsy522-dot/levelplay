@@ -95,6 +95,7 @@ export function paintMap(map) {
     else if (c === '#') fence(g, px, py, at(x - 1, y) === '#', at(x + 1, y) === '#', at(x, y - 1) === '#' || at(x, y + 1) === '#');
     else if (c === 'R') rock(g, px, py, at(x, y - 1) === 'R', at(x, y + 1) === 'R', at(x - 1, y) === 'R', at(x + 1, y) === 'R', rnd);
     else if (c === 'S') sign(g, px, py);
+    else if (c === 'Y') cutTree(g, px, py);
   }
   // 5) 건물
   for (const b of map.buildings || []) building(g, o, b, M);
@@ -144,6 +145,14 @@ function rock(g, px, py, up, down, left, right, rnd) {
   if (!up) { g.fillStyle = PAL.rockHi; g.fillRect(px, py, T, 8); g.fillStyle = '#7fbf5e'; g.fillRect(px, py, T, 4); }
   if (!down) { g.fillStyle = PAL.rock2; g.fillRect(px, py + T - 14, T, 14); g.fillStyle = 'rgba(0,0,0,.15)'; g.fillRect(px, py + T - 4, T, 4); }
   for (let i = 0; i < 3; i++) { g.strokeStyle = PAL.rock2; g.lineWidth = 2; const x = px + 6 + rnd() * 30, y = py + 12 + rnd() * 20; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 8, y + 4); g.stroke(); }
+}
+/** 풀베기로 벨 수 있는 작은 나무 (둥근 덤불 + 가는 줄기 — 큰 나무와 다르게 보이게) */
+function cutTree(g, px, py) {
+  g.fillStyle = 'rgba(0,0,0,.18)'; g.beginPath(); g.ellipse(px + 24, py + 42, 15, 5, 0, 0, Math.PI * 2); g.fill();
+  rr(g, px + 21, py + 28, 6, 14, 2, PAL.trunk);
+  circle(g, px + 24, py + 22, 15, '#2f8f45'); circle(g, px + 17, py + 25, 9, '#3fa556'); circle(g, px + 31, py + 25, 9, '#3fa556');
+  circle(g, px + 20, py + 16, 6, '#7ccf73');
+  g.strokeStyle = '#1f6a32'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 16, py + 22); g.lineTo(px + 22, py + 26); g.moveTo(px + 28, py + 18); g.lineTo(px + 32, py + 24); g.stroke();
 }
 function sign(g, px, py) {
   g.fillStyle = 'rgba(0,0,0,.18)'; g.beginPath(); g.ellipse(px + 24, py + 44, 14, 4, 0, 0, Math.PI * 2); g.fill();
@@ -238,8 +247,13 @@ const FLOOR = {
   RedsHouse1: ['#e2c28f', '#d4b07a', 'wood'], RedsHouse2: ['#e2c28f', '#d4b07a', 'wood'], House: ['#e2c28f', '#d4b07a', 'wood'],
   Dojo: ['#eef1f6', '#dfe4ee', 'tile'], Pokecenter: ['#fdf1f4', '#f3dde4', 'tile'], Mart: ['#eef6ff', '#dde9f7', 'tile'],
   Gym: ['#cfc4b0', '#bcb09a', 'stone'], Cavern: ['#8a7358', '#7c6750', 'cave'], Interior: ['#eef1f6', '#dfe4ee', 'tile'], Underground: ['#d9dde3', '#c9ced6', 'tile'], ForestGate: ['#e8eadf', '#d6d9ca', 'tile'], Gate: ['#e8eadf', '#d6d9ca', 'tile'],
+  // 4판~ (배·항구·포켓몬타워·로비·저택·연구소·게임코너·시설(로켓단·실프)·석영고원·박물관)
+  Ship: ['#d9c39a', '#c8b083', 'wood'], ShipPort: ['#cfd8dc', '#b0bec5', 'tile'], Cemetery: ['#c9c2d6', '#b7aec8', 'tile'],
+  Lobby: ['#f3ede2', '#e6dccb', 'tile'], Mansion: ['#d8c9b0', '#c7b597', 'wood'], Lab: ['#eef4f7', '#dbe6ec', 'tile'],
+  Club: ['#f4d9e8', '#e8c3d8', 'tile'], Facility: ['#dfe3ea', '#cbd1db', 'tile'], Plateau: ['#e9e2f3', '#d6cbe8', 'stone'], Museum: ['#e8eadf', '#d6d9ca', 'tile'],
 };
-const WALLC = { Cavern: '#5a4a3a', Interior: '#e3ecf7', Underground: '#4a5160', RedsHouse1: '#f6e7c8', RedsHouse2: '#dfeefe', House: '#f6e7c8', Dojo: '#e3ecf7', Pokecenter: '#ffe3ea', Mart: '#e0efff', Gym: '#9e9582', ForestGate: '#e2ead7', Gate: '#e2ead7' };
+const WALLC = { Cavern: '#5a4a3a', Interior: '#e3ecf7', Underground: '#4a5160', RedsHouse1: '#f6e7c8', RedsHouse2: '#dfeefe', House: '#f6e7c8', Dojo: '#e3ecf7', Pokecenter: '#ffe3ea', Mart: '#e0efff', Gym: '#9e9582', ForestGate: '#e2ead7', Gate: '#e2ead7',
+  Ship: '#f5efe2', ShipPort: '#b0bec5', Cemetery: '#7e6f96', Lobby: '#efe3cc', Mansion: '#a1887f', Lab: '#e3f2fd', Club: '#f8bbd0', Facility: '#90a4ae', Plateau: '#6a5a8c', Museum: '#e2ead7' };
 
 function comps(map, ch) {
   const seen = new Set(), out = [];
@@ -295,10 +309,10 @@ function paintIndoor(g, map, rnd) {
       g.fillStyle = '#6e5a46'; g.beginPath(); g.ellipse(px + 16 + rnd() * 6, py + 18 + rnd() * 6, 14, 11, 0, 0, Math.PI * 2); g.ellipse(px + 32, py + 30, 12, 10, 0, 0, Math.PI * 2); g.fill();
       g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.ellipse(px + 14, py + 14, 6, 4, 0, 0, Math.PI * 2); g.fill();
       if (dn) { g.fillStyle = '#3e3228'; g.fillRect(px, py + T - 10, T, 10); }
-    } else if (c === 'w') {
+    } else if (c === 'w' || c === '~') { // 실내 물 (동굴 w · 23번도로 ~)
       g.fillStyle = '#4fa9e8'; g.fillRect(px, py, T, T);
       g.strokeStyle = '#8fd0f7'; g.lineWidth = 2; g.beginPath(); g.moveTo(px + 6, py + 18); g.quadraticCurveTo(px + 24, py + 12, px + 42, py + 18); g.moveTo(px + 6, py + 34); g.quadraticCurveTo(px + 24, py + 28, px + 42, py + 34); g.stroke();
-      if (y > 0 && map.grid[y - 1][x] !== 'w') { g.fillStyle = '#e9f6ff'; g.fillRect(px, py, T, 5); }
+      if (y > 0 && map.grid[y - 1][x] !== c) { g.fillStyle = '#e9f6ff'; g.fillRect(px, py, T, 5); }
     }
   }
   for (const ch of Object.keys(draw)) for (const b of comps(map, ch)) draw[ch](b);
@@ -307,6 +321,7 @@ function paintIndoor(g, map, rnd) {
     const c = map.grid[y][x], px = x * T, py = y * T;
     if (c === 'U') { for (let i = 0; i < 4; i++) rr(g, px + 4, py + 4 + i * 10, T - 8, 8, 2, i % 2 ? '#bca27f' : '#d7bf99', '#8d6e63', 1); }
     else if (c === 'm') rr(g, px + 4, py + 8, T - 8, T - 16, 6, '#c96b6b', '#8d3c3c', 2);
+    else if (c === 'Y') cutTree(g, px, py);
     else if (c === 'D') { rr(g, px + 2, py + 10, T - 4, T - 14, 6, '#7e9ed9', '#3b5c9a', 2); g.fillStyle = '#fff'; g.font = '600 12px Jua, sans-serif'; g.textAlign = 'center'; g.fillText('▼', px + T / 2, py + 30); }
   }
 }

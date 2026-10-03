@@ -50,7 +50,7 @@ const { initLearn, nextQuestion, ensureLearn, report, SCI, HUMAN, SCI_P, SAME_Q_
 let bad = 0;
 const fail = (msg) => { bad++; if (bad <= 40) console.log('✗', msg); };
 const HUM_ON = T.humanReady();
-console.log(HUM_ON ? '· 인문: 검증된 은행 있음 → 7% 부근으로 나와야 함' : '· 인문: 검증된 은행 없음 → 0%여야 함');
+console.log(HUM_ON ? '· 인문: 검증된 은행 있음 → 비율표대로 나와야 함' : '· 인문: 검증된 은행 없음 → 0%여야 함');
 
 /* ── 상수 자체가 요구사항과 맞는가 ── */
 if (PRACTICE_REWARD !== 1000) fail(`보상 ${PRACTICE_REWARD} — 1000 이어야 함`);
@@ -173,6 +173,23 @@ const hr = hum / 3000, sr = sci / 3000;
 if (!HUM_ON ? hr > 0 : hr < HUMAN_RATE * 0.5 || hr > HUMAN_RATE * 1.8) fail(`인문 비율 ${(hr * 100).toFixed(1)}% — 목표 ${(HUMAN_RATE * 100).toFixed(0)}% 부근`);
 if (sr < SCI_P * 0.5 || sr > SCI_P * 1.6) fail(`과학 비율 ${(sr * 100).toFixed(1)}% — 목표 ${(SCI_P * 100).toFixed(0)}% 부근`);
 console.log(`· 3000회抽取: 수학 ${(math / 30).toFixed(1)}% / 과학 ${(sr * 100).toFixed(1)}% / 인문 ${(hr * 100).toFixed(1)}%`);
+
+/* ── 과목 비율표 (병석님 2026-10-03: 수학 30 · 과학 30 · 인문 25 · 예체능 10 · 직업 5) ──
+ * 문제가 준비된 과목끼리 비율대로 나뉘어야 한다 (±4%) */
+{
+  initLearn(5);
+  const cnt = Object.fromEntries(T.SUBJECTS.map((k) => [k, 0]));
+  const N = 6000;
+  for (let i = 0; i < N; i++) cnt[nextQuestion({}).subj]++;
+  const ready = T.SUBJECTS.filter((k) => T.subjectReady(k));
+  const tot = ready.reduce((a, k) => a + T.SUBJ_MIX[k], 0);
+  const line = T.SUBJECTS.map((k) => {
+    const want = ready.includes(k) ? T.SUBJ_MIX[k] / tot : 0, got = cnt[k] / N;
+    if (Math.abs(want - got) > 0.04) fail(`비율 ${k}: 목표 ${(want * 100).toFixed(0)}% / 실제 ${(got * 100).toFixed(1)}%`);
+    return `${k} ${(got * 100).toFixed(1)}%(목표 ${(want * 100).toFixed(0)})`;
+  }).join(' · ');
+  console.log(`· 과목 비율 ${N}회: ${line}`);
+}
 
 /* ── 인문에도 문제가 실제 있는가 (fallback 로 수학 문제만 나오는 숨은 실패) ── */
 initLearn(8);

@@ -15,7 +15,7 @@ import { startViaSlot } from './savemgr.js';
 import { repairMisSaved as SV_REPAIR } from './saves.js';
 import { charSheet, KINDS, CW, CH } from './art/chars.js';
 
-const AI_FACES = ['oak', 'rival', 'brock', 'mom', 'nurse', 'clerk', 'bugcatcher', 'youngster', 'oldman', 'camper', 'player', 'misty', 'rocket', 'hiker', 'surge', 'bill'];
+const AI_FACES = ['oak', 'rival', 'brock', 'mom', 'nurse', 'clerk', 'bugcatcher', 'youngster', 'oldman', 'camper', 'player', 'misty', 'rocket', 'hiker', 'surge', 'bill', 'erika', 'koga', 'sabrina', 'blaine', 'giovanni', 'lorelei', 'bruno', 'agatha', 'lance', 'champion'];
 
 function spriteFace(kind) {
   const sheet = charSheet(kind);
@@ -51,7 +51,7 @@ async function boot() {
   B.scene.scene.setVisible(false);
   Object.assign(W, {
     wildBattle, trainerBattle, openMenu: MENU.openMenu, openShop: MENU.openShop, openBox: MENU.openBox,
-    openReport: MENU.reportScreen, practice: MENU.practice, chapterEnd: MENU.chapterEnd,
+    openReport: MENU.reportScreen, practice: MENU.practice, chapterEnd: MENU.chapterEnd, ending: MENU.endingScreen,
     mapMusicNow: () => (W.scene.map ? mapMusic(W.scene.map) : 'town'),
     updateGoal, showGoalDetail, objective,
   });

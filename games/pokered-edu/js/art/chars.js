@@ -27,12 +27,34 @@ export const KINDS = {
   misty: { hair: '#f57c00', hairStyle: 'pony', top: '#fdd835', bottom: '#e53935', shoe: '#e53935', shorts: true },
   swimmer: { hair: '#222', hairStyle: 'short', top: '#4fc3f7', bottom: '#1565c0', shoe: '#f8d5b5', shorts: true },
   guide: { hair: '#333', hairStyle: 'short', top: '#ef5350', bottom: '#37474f', shoe: '#222', glasses: true, shades: true },
+  // ── 4판~ 사람들 (관장·사천왕·새 트레이너 종류) ──
+  captain: { hair: '#eeeeee', hairStyle: 'short', hat: 'cap', hatCol: '#ffffff', hatCol2: '#1565c0', top: '#ffffff', top2: '#d4af37', bottom: '#1a237e', shoe: '#222', beard: true },
+  waiter: { hair: '#333', hairStyle: 'short', top: '#fafafa', top2: '#111', bottom: '#111', shoe: '#222' },
+  beauty: { hair: '#5d4037', hairStyle: 'long', top: '#ab47bc', bottom: '#ab47bc', shoe: '#6a1b9a', skirt: true },
+  erika: { hair: '#1b1b1b', hairStyle: 'short', top: '#7cb342', top2: '#f8bbd0', bottom: '#558b2f', shoe: '#3e2723', skirt: true },
+  koga: { hair: '#222', hairStyle: 'short', top: '#4a148c', top2: '#222', bottom: '#311b92', shoe: '#222' },
+  sabrina: { hair: '#1b1b1b', hairStyle: 'long', top: '#880e4f', bottom: '#212121', shoe: '#212121', skirt: true },
+  blaine: { hair: '#dddddd', hairStyle: 'bald', top: '#fafafa', bottom: '#555', shoe: '#222', shades: true, beard: true },
+  giovanni: { hair: '#3e2723', hairStyle: 'short', top: '#212121', top2: '#c62828', bottom: '#212121', shoe: '#111', coat: true },
+  lorelei: { hair: '#c62828', hairStyle: 'long', top: '#e3f2fd', bottom: '#283593', shoe: '#283593', skirt: true, glasses: true },
+  bruno: { skin: '#c68a5a', hair: '#222', hairStyle: 'bald', top: '#f5f5f5', bottom: '#212121', shoe: '#111' },
+  agatha: { hair: '#9e9e9e', hairStyle: 'pony', top: '#6a1b9a', bottom: '#4a148c', shoe: '#222', skirt: true, cane: true },
+  lance: { hair: '#c62828', hairStyle: 'spiky', top: '#1565c0', bottom: '#212121', shoe: '#111', coat: true },
+  channeler: { hair: '#eeeeee', hairStyle: 'long', top: '#9575cd', bottom: '#9575cd', shoe: '#5e35b1', skirt: true },
+  biker: { hair: '#222', hairStyle: 'spiky', top: '#212121', bottom: '#37474f', shoe: '#111', shades: true },
+  psychic: { hair: '#7e57c2', hairStyle: 'short', top: '#5e35b1', bottom: '#311b92', shoe: '#222' },
+  blackbelt: { skin: '#e0b088', hair: '#111', hairStyle: 'short', top: '#fafafa', top2: '#212121', bottom: '#fafafa', shoe: '#e0b088' },
+  engineer: { hair: '#555', hairStyle: 'short', hat: 'cap', hatCol: '#ffb300', hatCol2: '#ffb300', top: '#ff8f00', bottom: '#455a64', shoe: '#333' },
 };
 export const SPRITE_KIND = {
   Oak: 'oak', Blue: 'rival', Girl: 'girl', Fisher: 'fisher', Youngster: 'youngster', Gambler: 'gambler', GamblerAsleep: 'oldman',
   CooltrainerF: 'coolf', CooltrainerM: 'camper', SuperNerd: 'nerd', GymGuide: 'guide', Scientist: 'scientist', Mom: 'mom',
   Nurse: 'nurse', Clerk: 'clerk', BugCatcher: 'bugcatcher', Brock: 'brock', OldMan: 'oldman',
   Rocket: 'rocket', Hiker: 'hiker', Swimmer: 'swimmer', MiddleAgedMan: 'gambler', Guard: 'clerk',
+  Captain: 'captain', Waiter: 'waiter', Beauty: 'beauty', Gentleman: 'gambler', Erika: 'erika', Koga: 'koga', Sabrina: 'sabrina',
+  Blaine: 'blaine', Giovanni: 'giovanni', Lorelei: 'lorelei', Bruno: 'bruno', Agatha: 'agatha', Lance: 'lance', Channeler: 'channeler',
+  Biker: 'biker', Rocker: 'biker', Psychic: 'psychic', Blackbelt: 'blackbelt', Engineer: 'engineer', SilphWorkerM: 'nerd', SilphWorkerF: 'coolf',
+  Gramps: 'oldman', Granny: 'oldman', Cooltrainer: 'camper', Seel: 'swimmer', LittleBoy: 'youngster', LittleGirl: 'girl', Mom: 'mom',
 };
 
 function rr(g, x, y, w, h, r, fill) { g.beginPath(); g.roundRect ? g.roundRect(x, y, w, h, r) : g.rect(x, y, w, h); g.fillStyle = fill; g.fill(); }
@@ -172,6 +194,18 @@ export function itemBallSheet() {
   g.strokeStyle = '#222'; g.lineWidth = 2; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.moveTo(x - r, y); g.lineTo(x + r, y); g.stroke();
   g.fillStyle = '#fff'; g.beginPath(); g.arc(x, y, 3.5, 0, Math.PI * 2); g.fill(); g.stroke();
   g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(x - 4, y - 5, 2.2, 0, Math.PI * 2); g.fill();
+  return cv;
+}
+/** 괴력으로 미는 큰 바위 */
+export function boulderSheet() {
+  const cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
+  const g = cv.getContext('2d');
+  g.fillStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.ellipse(24, 58, 20, 5, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#8f8270'; g.beginPath(); g.ellipse(24, 42, 21, 17, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#a99c88'; g.beginPath(); g.ellipse(20, 37, 14, 10, -0.3, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = '#6b5f4f'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(12, 44); g.lineTo(20, 48); g.lineTo(26, 44); g.moveTo(30, 34); g.lineTo(36, 40); g.stroke();
+  g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(16, 32, 5, 3, -0.4, 0, Math.PI * 2); g.fill();
   return cv;
 }
 /** 잠든 할아버지 (누워 있음) */

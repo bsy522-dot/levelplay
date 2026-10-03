@@ -1,6 +1,7 @@
 /* 이야기·대사 (1차: 태초마을 ~ 회색시티 체육관). 원작 흐름을 따르되 대사는 아이 눈높이로 새로 썼다. */
 import { G, flag, setFlag, addItem, itemCount, receive, healParty, save, alive, seen, maxHp } from '../state.js';
-import { DB, ITEMS, sp, monArt } from '../data.js';
+import { DB, ITEMS, sp, monArt, MAP_NAME } from '../data.js';
+import * as F from './field.js';
 import { say, ask, choose, toast, fade, PORTRAIT } from '../ui.js';
 import { sfx, music } from '../audio.js';
 import { makeMon } from '../battle/mech.js';
@@ -47,11 +48,15 @@ export function npcVisible(map, n, idx) {
   if (map === 'MtMoonB2F' && (idx === 5 || idx === 6)) return !flag('fossil');
   if (map === 'BillsHouse') return idx === 0 ? !flag('billSaved') : idx === 1 ? flag('billSaved') : false;
   if (n.spriteName === 'PokeBall' && n.itemId && f(`item:${map}:${idx}`)) return false;
+  const late = npcVisibleLate(map, n, idx);
+  if (late != null) return late;
   return true;
 }
 export function npcPos(map, n, idx) { return null; }
 export function npcKind(map, n, idx) {
   const K = { Mom: 'mom', Nurse: 'nurse', Clerk: 'clerk', Daisy: 'coolf', BrunetteGirl: 'girl', LittleGirl: 'girl', Gramps: 'oldman', Gentleman: 'gambler', LinkReceptionist: 'nurse', SuperNerd: 'nerd' };
+  const late = npcKindLate(map, n, idx);
+  if (late) return late;
   if (map === 'PewterGym' && idx === 0) return 'brock';
   if (map === 'ViridianForest' && n.isTrainer) return 'bugcatcher';
   if (map === 'PewterGym' && idx === 1) return 'camper';
@@ -68,11 +73,23 @@ export function npcKind(map, n, idx) {
   if (n.trainerClass === 'Lass' || n.trainerClass === 'JrTrainerF') return 'coolf';
   return K[n.spriteName] || null;
 }
-export function extraBlock(map, x, y) { return false; }
-export const trainerBeaten = (map, o) => flag(`tr:${map}:${o.idx}`);
+export function extraBlock(map, x, y) {
+  if (map === 'CinnabarIsland' && x === 18 && y === 3 && !itemCount(43)) return true; // 홍련마을 체육관: 비밀열쇠 전엔 잠김
+  if (map === 'ViridianCity' && x === 32 && y === 7 && !flag('badge7')) return true; // 상록시티 체육관: 배지 7개 전엔 잠김
+  if (map === 'Route22Gate' && y === 0 && !flag('badge8')) return true; // 리그 관문: 배지 8개
+  const e = E4_BY[map];
+  if (e && !flag(e.f) && e.exit.some(([ex, ey]) => ex === x && ey === y)) return true; // 사천왕: 이겨야 다음 방
+  if (map === 'ChampionsRoom' && y === 0) return true; // 명예의 전당은 챔피언을 이기면 오박사가 데려간다
+  return false;
+}
+/* 관장·보스·사천왕·라이벌은 '시선 승부' 트레이너가 아니다 — 말을 걸면 전용 대사·배지 처리(LINES)로 간다
+ * (원작 데이터에서 초련 등이 isTrainer 로 표시돼 일반 트레이너 승부로 처리되고 배지가 안 나오던 문제) */
+const LEADER_CLS = new Set(['Brock', 'Misty', 'LtSurge', 'Erika', 'Koga', 'Sabrina', 'Blaine', 'Giovanni', 'Lorelei', 'Bruno', 'Agatha', 'Lance', 'Rival1', 'Rival2', 'Rival3']);
+export const trainerBeaten = (map, o) => LEADER_CLS.has(o.n.trainerClass) || flag(`tr:${map}:${o.idx}`);
 
 /* ── 막힌 문 ── */
 export async function lockedDoor(dest) {
+  if (await lockedDoorLate(dest || '')) return;
   if (/Gym/.test(dest || '')) return say(['체육관 문이 잠겨 있다…', '관장이 자리를 비운 것 같아.']);
   if (/Museum/.test(dest || '')) return say(['회색시티 박물관', '“화석과 우주 전시는 다음 모험에서 열려요!”']);
   if (/CeruleanCave/.test(dest || '')) return say(['아주 강한 포켓몬이 산다는 동굴이다…', '지금은 들어갈 수 없어.']);
@@ -100,6 +117,7 @@ export async function stepTrigger(map, x, y, d) {
     return true;
   }
   if (map === 'CeruleanCity' && flag('badge1') && !flag('rival2') && x <= 12) { await rivalCerulean(); return true; }
+  if (await stepTriggerLate(map, x, y, d)) return true;
   if (map === 'PewterCity' && !flag('badge1') && x >= 36 && y >= 15 && y <= 19) {
     W.busy = true;
     await say(['“잠깐! 체육관 관장 웅을 이기지 않으면 이 길로 못 가!”'], { who: '소년', face: 'youngster' });
@@ -111,6 +129,11 @@ export async function stepTrigger(map, x, y, d) {
 }
 export async function bumpTrigger(map, x, y, d) {
   const m = DB.maps[map];
+  if (map === 'ViridianCity' && x === 32 && y === 7 && !flag('badge7')) { W.busy = true; await say(['체육관 문이 잠겨 있다…', '“관장은 아주 오랫동안 자리를 비웠대. 배지를 7개 모으면 돌아온다는 소문이야.”']); W.busy = false; return; }
+  if (map === 'Route22Gate' && y === 0 && !flag('badge8')) { W.busy = true; await say(['여기서부터는 포켓몬 리그! 배지 8개가 있어야 지나갈 수 있다.'], { who: '경비원', face: 'clerk' }); W.busy = false; return; }
+  if (E4_BY[map] && !flag(E4_BY[map].f) && y === 0) { W.busy = true; await say([`문이 굳게 닫혀 있다. 사천왕 ${josa(E4_BY[map].name, '을/를')} 이겨야 열린다!`]); W.busy = false; return; }
+  if (map === 'ChampionsRoom' && y === 0) { W.busy = true; await say(['안쪽 방은 챔피언만 들어갈 수 있다.']); W.busy = false; return; }
+  if (map === 'CinnabarIsland' && x === 18 && y === 3 && !itemCount(43)) { W.busy = true; await say(['체육관 문이 잠겨 있다!', '“열쇠는 저택에 두고 왔다네! 허허!” — 관장 강연', '💡 왼쪽 위 포켓몬 저택 지하에서 비밀열쇠를 찾자.']); W.busy = false; return; }
   if (!m.outdoor) return;
   if (x < 0 || y < 0 || x >= m.w || y >= m.h) {
     W.busy = true;
@@ -119,6 +142,7 @@ export async function bumpTrigger(map, x, y, d) {
   }
 }
 export async function enterMap(id) {
+  await enterMapLate(id);
   if (id === 'CeruleanCity' && flag('badge1') && !flag('rival2')) { await rivalCerulean(); return; }
   if (id === 'VermilionGym' && !flag('gym3Intro')) {
     setFlag('gym3Intro'); W.busy = true;
@@ -240,8 +264,10 @@ export async function talk(map, o) {
     addItem(iid, 1); setFlag(`item:${map}:${i}`); W.scene.removeNpc(o); sfx('item');
     return say([`${josa(P(), '은/는')} ${josa(it.name, '을/를')} 주웠다!`]);
   }
+  if (LEADER_CLS.has(o.n.trainerClass) && typeof LINES[k] === 'function') return LINES[k](o);
   if (o.n.isTrainer && !trainerBeaten(map, o)) return trainerEncounter(map, o);
   if (o.n.isTrainer && TRAINER[k]) return say(TRAINER[k].post.slice(1).length ? TRAINER[k].post.slice(1) : TRAINER[k].post, { who: TRAINER[k].name, face: o.kind });
+  if (o.n.isTrainer) { const t = autoTrainer(map, o); return say(t.post.slice(1), { who: t.name, face: o.kind }); }
   const L = LINES[k];
   if (typeof L === 'function') return L(o);
   if (L) return say(Array.isArray(L) ? L : [L], { who: o.kind === 'nurse' ? '간호순' : undefined, face: o.kind });
@@ -396,6 +422,7 @@ export async function readSign(map, s) {
   if (map === 'ViridianSchoolHouse' && s.textId === 2) return W.openReport?.();
   let L = SIGNS[key];
   if (typeof L === 'function') L = await L();
+  if (!L && DB.maps[map] && DB.maps[map].outdoor) L = [MAP_NAME[map] || '……'];
   if (!L) return say(['……']);
   return say(L);
 }
@@ -444,7 +471,7 @@ const TRAINER = {
 };
 export async function trainerEncounter(map, o) {
   const k = `${map}:${o.idx}`;
-  const t = TRAINER[k] || { name: '트레이너', pre: ['승부다!'], post: ['졌다!'], money: 50 };
+  const t = TRAINER[k] || autoTrainer(map, o);
   await say(t.pre, { who: t.name, face: o.kind });
   const res = await W.trainerBattle({ cls: o.n.trainerClass, set: (o.n.trainerSet || 1) - 1, name: t.name, face: o.kind, intro: `${josa(t.name, '이/가')} 승부를 걸어 왔다!`, lose: t.post[0], money: t.money });
   if (res === 'win') { setFlag(`tr:${map}:${o.idx}`); save(); await say(t.post.slice(1).length ? t.post.slice(1) : ['…'], { who: t.name, face: o.kind }); }
@@ -511,7 +538,7 @@ function objectiveBase() {
     if (map === 'Route6') return { text: '남쪽으로 가면 갈색시티!', detail: ['트레이너들을 이기며 아래쪽으로 쭉!'], dir: '↓ 남쪽' };
     return { text: '갈색시티를 향해!', detail: ['블루시티 남쪽 → 5번도로 → 지하통로 → 6번도로 → 갈색시티.'], dir: '' };
   }
-  return { text: '3판 완료! 도감을 채우며 다음 판을 기다리자', detail: ['여러 곳의 풀숲에서 새로운 포켓몬을 찾아보자!'], dir: '' };
+  return objectiveLate(map);
 }
 
 /* ── 야생 포켓몬: 원작 출현표 + 여러 친구 섞기 ── */
@@ -843,4 +870,957 @@ export function objective() {
     if (exits.length) o.targets = exits;
   }
   return o;
+}
+
+
+/* ════════════════ 4판: 상트앙느호 · 돌산터널 · 보라타운 · 무지개시티 ════════════════
+ * 길: 갈색시티 항구 → 상트앙느호(라이벌, 선장 → 풀베기) → 블루시티 동쪽 9번도로(나무 베기) → 10번도로
+ *     → 돌산터널(오박사 조수의 플래시) → 보라타운 → 8번도로 · 지하통로 · 7번도로 → 무지개시티 → 민화(풀) */
+
+/* ── 이름 없는 트레이너: 직업 이름 + 짧은 말 + 이긴 뒤 상식 하나 (모든 판 공통) ── */
+const CLASS_KO = {
+  Lass: '미니스커트', Youngster: '반바지꼬마', BugCatcher: '곤충채집소년', Hiker: '등산가', Pokemaniac: '포켓몬마니아', JrTrainerM: '주니어트레이너',
+  JrTrainerF: '주니어트레이너', SuperNerd: '괴짜박사', Gambler: '게임왕', Beauty: '아가씨', CooltrainerF: '엘리트트레이너', CooltrainerM: '엘리트트레이너',
+  Rocket: '로켓단 조무래기', Gentleman: '신사', Sailor: '선원', Fisher: '낚시꾼', Swimmer: '수영선수', Biker: '폭주족', Burglar: '도둑', Engineer: '기술자',
+  Juggler: '저글러', Tamer: '조련사', BirdKeeper: '새조련사', Blackbelt: '태권왕', Psychic: '초능력자', Rocker: '로커', Channeler: '무당',
+  Scientist: '과학자', CueBall: '스킨헤드', Camper: '캠프보이', Picnicker: '피크닉걸',
+};
+const PRE_LINES = ['눈이 마주쳤다! 승부다!', '내 포켓몬 실력 좀 볼래?', '여기서 만난 것도 인연! 한판 붙자!', '나를 이기면 지나가도 좋아!', '강해 보이는데? 겨뤄 보자!', '문제도 잘 푼다며? 배틀도 잘하나 볼까!'];
+const LOSE_LINES = ['졌다!', '으윽, 강하다!', '다음엔 꼭 이길 거야!', '대단한걸!', '졌지만 즐거웠어!'];
+const FUN_FACTS = [
+  '지구는 하루에 한 바퀴 스스로 돌아서 낮과 밤이 생겨.', '소리는 공기가 떨리면서 전해져. 그래서 공기가 없는 우주에선 소리가 안 들려!',
+  '식물은 햇빛과 물, 이산화탄소로 양분을 만들어. 이걸 광합성이라고 해.', '번개가 친 뒤 천둥소리가 늦게 들리는 건 빛이 소리보다 훨씬 빠르기 때문이야.',
+  '달은 스스로 빛나지 않아. 햇빛을 반사해서 밝게 보이는 거야.', '곤충은 다리가 6개, 거미는 8개야.', '고래는 물고기가 아니라 새끼에게 젖을 먹이는 포유류야.',
+  '자석의 같은 극끼리는 밀어내고, 다른 극끼리는 끌어당겨.', '무지개는 햇빛이 빗방울 속에서 꺾이고 나뉘어서 생겨.', '뼈는 살아 있어서, 부러져도 다시 붙을 수 있어.',
+  '얼음이 물에 뜨는 건 물이 얼 때 부피가 커져서 같은 부피일 때 더 가볍기 때문이야.', '곱셈은 같은 수를 여러 번 더하는 걸 짧게 쓴 거야.',
+  '세종대왕은 백성이 쉽게 글을 읽고 쓰도록 한글을 만들었어.', '피라미드는 아주 오래전 이집트 사람들이 왕의 무덤으로 지었어.', '운동하기 전에 준비운동을 하면 다치는 걸 막을 수 있어.',
+  '소방관은 불만 끄는 게 아니라 사람을 구하고 안전을 지키는 일도 해.', '공룡은 사람이 나타나기 아주 오래전에 살았어.', '식물의 뿌리는 물을 빨아올리고, 식물이 쓰러지지 않게 붙잡아 줘.',
+  '태양은 스스로 빛을 내는 별이야. 지구에서 가장 가까운 별이지!', '손을 비누로 씻으면 눈에 안 보이는 세균을 씻어 낼 수 있어.',
+];
+function autoTrainer(map, o) {
+  const h = [...`${map}${o.idx}`].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const name = CLASS_KO[o.n.trainerClass] || '트레이너';
+  return { name, pre: [PRE_LINES[h % PRE_LINES.length]], post: [LOSE_LINES[h % LOSE_LINES.length], `💡 ${FUN_FACTS[h % FUN_FACTS.length]}`], money: 200 + 40 * ((o.n.trainerSet || 1) % 10) };
+}
+
+/* ── 상트앙느호 ── */
+async function rivalSSAnne() {
+  const S = W.scene;
+  W.busy = true;
+  try {
+    const rv = S.npcBy?.((x) => x.idx === 1);
+    if (rv) S.faceNpcToPlayer(rv);
+    await sayAs('rival', [`어? ${P()}! 너도 이 배에 탔어?`, '나는 선장님을 만나고 왔지. 너 실력은 좀 늘었냐? 보여 줘 봐!']);
+    const res = await W.trainerBattle({ party: [[17, 19], [20, 16], [64, 18], [133, 20]], name: R(), face: 'rival', intro: `라이벌 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, lose: '뭐야… 또 졌잖아!', win: '헤헤, 내가 한 수 위지!', money: 1200 });
+    setFlag('rival3');
+    if (res !== 'win') return;
+    await sayAs('rival', ['쳇, 많이 강해졌네.', '선장님은 뱃멀미 때문에 힘들어하셔. 등이라도 쓸어 드려 봐. 그럼 난 간다!']);
+    if (rv) S.removeNpc(rv);
+    save();
+  } finally { W.busy = false; }
+}
+async function captainTalk() {
+  if (flag('gotCut')) return say(['덕분에 살았네! 배가 곧 떠나니 서둘러 내리게.', '💡 풀베기는 블루배지가 있으면 작은 나무 앞에서 A 버튼으로 쓸 수 있다네.'], { who: '선장', face: 'captain' });
+  await say(['우욱… 뱃멀미가… 너무 심해…'], { who: '선장', face: 'captain' });
+  const yes = await ask('선장님 등을 쓸어 드릴까?');
+  if (!yes) return say(['우욱…'], { who: '선장', face: 'captain' });
+  await say([`${josa(P(), '은/는')} 선장님 등을 천천히 쓸어 드렸다…`]);
+  await say(['휴우… 이제 좀 살 것 같군! 고맙네, 꼬마 트레이너.', '뱃멀미는 눈으로 보는 것과 몸(귀 속 균형 기관)이 느끼는 흔들림이 서로 달라서 생긴다네.', '고마움의 표시로 이걸 주지!'], { who: '선장', face: 'captain' });
+  addItem(F.HM.cut, 1); setFlag('gotCut'); sfx('item');
+  await say([`${josa(P(), '은/는')} 비전머신01 “풀베기”를 받았다!`, '💡 블루배지가 있으니, 길을 막는 작은 나무 앞에서 A 버튼을 누르면 벨 수 있어!', '블루시티 동쪽 9번도로 입구에 그런 나무가 있대.']);
+  W.updateGoal?.(); save();
+}
+
+/* ── 돌산터널: 오박사 조수의 플래시 ── */
+async function aideFlash() {
+  if (F.hasHM('flash')) return say(['돌산터널은 아주 어둡지만, 플래시가 있으면 환하게 보일 거야!', '터널 안에서는 오른쪽 위 사다리 → 지하 → 왼쪽 위 사다리 순서야.'], { who: '오박사 조수', face: 'scientist' });
+  await say([`아, ${P()}! 오박사님 심부름으로 기다리고 있었어.`, '이 앞 돌산터널은 빛이 하나도 없는 캄캄한 동굴이야.', '이 비전머신을 쓰면 포켓몬이 빛을 내서 길이 보인단다!'], { who: '오박사 조수', face: 'scientist' });
+  addItem(F.HM.flash, 1); sfx('item');
+  await say([`${josa(P(), '은/는')} 비전머신05 “플래시”를 받았다!`, '💡 회색배지가 있으니, 이제 어두운 동굴에 들어가면 저절로 환해져!']);
+  save();
+}
+
+/* ── 무지개시티: 날아가기 선물 ── */
+async function flyGift() {
+  if (F.hasHM('fly')) return say(['메뉴(☰)에서 “날아가기”를 고르면 가 본 도시로 바로 날아갈 수 있어!'], { who: '신사', face: 'gambler' });
+  await say(['오, 오렌지배지를 가진 트레이너로구먼!', '이 비전머신이 있으면 새 포켓몬처럼 하늘을 날아 가 본 도시로 갈 수 있지.', '새는 날개로 공기를 아래로 밀어서 그 반대로 몸이 위로 뜬다네. 선물일세!'], { who: '신사', face: 'gambler' });
+  addItem(F.HM.fly, 1); sfx('item');
+  await say([`${josa(P(), '은/는')} 비전머신02 “날아가기”를 받았다!`, '💡 밖에서 메뉴(☰) → “🕊 날아가기”를 누르면 포켓몬센터가 있는 도시로 날아가!']);
+  save();
+}
+
+/* ── 민화 (풀) ── */
+async function erikaBattle() {
+  if (flag('badge4')) return say(['무지개배지는 식물처럼 꾸준히 자란 네 마음의 증거예요.', '다음 모험도 응원할게요.'], { who: '민화', face: 'erika' });
+  await say(['어머, 손님이 오셨네요. 저는 무지개시티 체육관 관장 민화예요.', '꽃과 나무는 햇빛과 물, 공기만으로 스스로 양분을 만들지요. 광합성이라고 해요.', '식물처럼 차분하게 생각하는 트레이너만 저를 이길 수 있어요. 문제를 잘 읽어 보세요.'], { who: '민화', face: 'erika' });
+  const res = await W.trainerBattle({ cls: 'Erika', set: 0, name: '민화', face: 'erika', intro: '관장 민화가 승부를 걸어 왔다!', story: true, gym: true, lose: '어머… 제가 졌네요. 정말 대단해요.', money: 2900, music: 'gym' });
+  if (res !== 'win') return;
+  await say(['이 무지개배지를 받으세요.'], { who: '민화', face: 'erika' });
+  setFlag('badge4'); G.s.badges.push('rainbow'); onBadge(); sfx('badge');
+  await say([`${josa(P(), '은/는')} 무지개배지를 받았다!`, '(문제가 한 단계 더 어려워진다! 반이나 왔어, 대단해!)']);
+  save();
+  await W.chapterEnd?.(4);
+}
+
+Object.assign(LINES, {
+  'SSAnne1F:0': () => say(['상트앙느호에 오신 걸 환영합니다! 오늘은 트레이너들의 선상 파티가 열려요.', '큰 배가 물에 뜨는 건, 배가 밀어낸 물의 무게만큼 물이 위로 밀어 주기 때문이랍니다.'], { who: '웨이터', face: 'waiter' }),
+  'SSAnne1F:1': () => say(['선장님은 2층 맨 오른쪽 방에 계셔. 그런데 몸이 안 좋으시대.'], { who: '선원', face: 'sailor' }),
+  'SSAnne2F:0': () => say(['배는 바람과 물결을 읽으며 나아가요. 나침반은 늘 북쪽을 가리키죠!'], { who: '웨이터', face: 'waiter' }),
+  'SSAnne2F:1': () => (flag('rival3') ? null : rivalSSAnne()),
+  'SSAnneCaptainsRoom:0': () => captainTalk(),
+  'RockTunnelPokecenter:0': nurse,
+  'RockTunnelPokecenter:1': () => aideFlash(),
+  'RockTunnelPokecenter:2': () => say(['돌산터널은 바위를 뚫어 만든 길이야. 박쥐 포켓몬 주뱃이 많지!', '주뱃은 눈 대신 소리를 내고 메아리로 길을 찾는대.']),
+  'RockTunnelPokecenter:3': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'LavenderTown:0': () => say(['보라타운에는 포켓몬 묘지가 있는 탑이 있어.', '요즘 그 탑에 유령이 나온다는 소문이 돌아…'], { who: '소녀', face: 'girl' }),
+  'LavenderTown:1': () => say(['서쪽 8번도로로 가면 지하통로를 지나 무지개시티에 갈 수 있어!']),
+  'LavenderTown:2': () => say(['유령 포켓몬은 보통 안경으로는 정체가 안 보인대.', '실프 회사에서 만든 특별한 안경이 있다던데…'], { who: '괴짜박사', face: 'nerd' }),
+  'LavenderPokecenter:0': nurse,
+  'LavenderPokecenter:1': () => say(['로켓단이 포켓몬을 괴롭히고 있대. 무지개시티에 아지트가 있다는 소문이야.'], { who: '신사', face: 'gambler' }),
+  'LavenderPokecenter:2': () => say(['우리 탑의 후지 할아버지는 포켓몬을 정말 아끼는 분이야.'], { who: '소녀', face: 'girl' }),
+  'LavenderPokecenter:3': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'LavenderMart:0': clerk,
+  'LavenderMart:1': () => say(['기력의조각은 기절한 포켓몬을 깨워 줘. 비싸지만 든든하지!']),
+  'LavenderMart:2': () => say(['벌레회피스프레이를 뿌리면 한동안 야생 포켓몬이 안 나와!']),
+  'CeladonCity:0': () => say(['무지개시티 백화점은 엄청 커! 1층에서 진화의 돌도 팔아.'], { who: '소녀', face: 'girl' }),
+  'CeladonCity:1': () => say(['허허, 게임코너는 요즘 수상한 사람들이 드나든다네.'], { who: '할아버지', face: 'oldman' }),
+  'CeladonCity:2': () => say(['체육관 관장 민화 언니는 꽃꽂이 선생님이기도 해!'], { who: '소녀', face: 'girl' }),
+  'CeladonCity:3': () => say(['이 연못의 물고기는 아가미로 물속에 녹은 산소를 마신단다.'], { who: '할아버지', face: 'oldman' }),
+  'CeladonCity:4': () => say(['무지개시티는 이름처럼 여러 색의 사람이 어울려 사는 도시지!'], { who: '할아버지', face: 'oldman' }),
+  'CeladonCity:5': () => say(['내 포켓몬 수륙챙이는 물에서도 땅에서도 지낼 수 있어!'], { who: '낚시꾼', face: 'fisher' }),
+  'CeladonCity:6': () => say(['개굴!'], { who: '수륙챙이' }),
+  'CeladonCity:7': () => say(['뭘 봐? 게임코너 근처에서 얼쩡대지 마!'], { who: '로켓단', face: 'rocket' }),
+  'CeladonCity:8': () => say(['우리 보스는 아무도 못 이겨! …아차, 말이 너무 많았네.'], { who: '로켓단', face: 'rocket' }),
+  'CeladonPokecenter:0': nurse,
+  'CeladonPokecenter:1': () => flyGift(),
+  'CeladonPokecenter:2': () => say(['진화의 돌은 어떤 포켓몬에게 쓰면 진화시켜 줘. 피카츄는 천둥의돌로 라이츄가 된대!'], { who: '아가씨', face: 'beauty' }),
+  'CeladonPokecenter:3': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'CeladonMart1F:0': async () => { await say(['무지개시티 백화점에 오신 걸 환영해요! 위층은 공사 중이라 1층에서 모두 팔아요.'], { who: '안내원', face: 'nurse' }); return W.openShop?.(); },
+  'CeladonGym:0': () => erikaBattle(),
+});
+Object.assign(TRAINER, {
+  'CeladonGym:1': T2('미니스커트', '민화 언니께 가려면 나를 이겨야 해!', ['졌다!', '꽃의 향기는 벌과 나비를 불러서 꽃가루를 옮기게 해.'], 600),
+  'CeladonGym:2': T2('아가씨', '꽃처럼 아름다운 승부를 해요!', ['졌어요…', '해바라기는 해를 따라 고개를 돌린대요. 빛을 더 받으려고!'], 700),
+  'CeladonGym:3': T2('주니어트레이너', '풀 포켓몬의 힘을 보여 줄게!', ['졌다!', '나무의 나이테를 세면 나무의 나이를 알 수 있어.'], 500),
+  'CeladonGym:4': T2('아가씨', '정원은 내가 지킨다!', ['졌어요!', '선인장 가시는 사실 잎이 변한 거래요. 물을 아끼려고!'], 700),
+  'CeladonGym:5': T2('미니스커트', '여기까지 오다니 대단한데?', ['졌다!', '씨앗 속에는 아기 식물과 처음 먹을 양분이 들어 있어.'], 600),
+  'CeladonGym:6': T2('아가씨', '마지막 꽃은 쉽게 꺾이지 않아요!', ['졌네요…', '식물도 숨을 쉬어요. 잎 뒷면의 작은 구멍(기공)으로요.'], 700),
+  'CeladonGym:7': T2('엘리트트레이너', '민화 관장님은 정말 강해. 나를 이기면 인정!', ['졌다!', '광합성을 하면 산소가 나와. 우리가 숨 쉬는 산소야!'], 900),
+});
+Object.assign(SIGNS, {
+  'VermilionCity:7': ['갈색시티 항구', '상트앙느호 선착장'],
+  'Route9:1': ['9번도로', '← 블루시티 · 돌산터널 →'],
+  'Route10:1': ['돌산터널', '← 포켓몬센터'], 'Route10:2': ['10번도로', '↑ 9번도로 · 보라타운 ↓'],
+  'RockTunnel1F:1': ['돌산터널', '캄캄하니 플래시를 쓰세요!'],
+  'LavenderTown:1': ['보라타운', '고귀한 보라색의 마을'], 'LavenderTown:2': ['새로운 실프스코프!', '보이지 않는 것을 보여 드립니다 — 실프주식회사'],
+  'LavenderTown:3': ['프렌들리숍'], 'LavenderTown:4': ['포켓몬센터'], 'LavenderTown:5': ['포켓몬타워', '포켓몬의 넋을 기리는 곳'],
+  'Route8:1': ['8번도로', '← 노랑시티 · 보라타운 →'],
+  'CeladonCity:1': ['트레이너 팁', '풀 포켓몬에게는 불꽃·비행·얼음 기술이 잘 들어요!'], 'CeladonCity:2': ['무지개시티', '무지개처럼 다채로운 도시'],
+  'CeladonCity:3': ['무지개시티 체육관', '관장: 민화 — 자연을 사랑하는 공주님'], 'CeladonCity:4': ['무지개시티 맨션'],
+  'CeladonCity:5': ['무지개시티 백화점'], 'CeladonCity:6': ['포켓몬센터'], 'CeladonCity:7': ['게임코너', '어른들의 놀이터 — 어린이는 구경만!'],
+  'CeladonCity:8': ['식당', '무지개 정식'], 'CeladonCity:9': ['무지개 호텔'],
+  'CeladonGym:1': () => [flag('badge4') ? `무지개시티 체육관 — 우승 트레이너: ${P()}` : '무지개시티 체육관 — 우승 트레이너: …'],
+  'CeladonGym:2': () => [flag('badge4') ? `무지개시티 체육관 — 우승 트레이너: ${P()}` : '무지개시티 체육관 — 우승 트레이너: …'],
+});
+Object.assign(EXTRA_WILD, {
+  Route9: [['Rattata', 16], ['Spearow', 16], ['Ekans', 16], ['Sandshrew', 16], ['Mankey', 16]],
+  Route10: [['Voltorb', 16], ['Magnemite', 16], ['Spearow', 16], ['Ekans', 16], ['Sandshrew', 16]],
+  RockTunnel1F: [['Zubat', 16], ['Geodude', 16], ['Machop', 16], ['Onix', 15]],
+  RockTunnelB1F: [['Zubat', 17], ['Geodude', 17], ['Machop', 17], ['Onix', 16]],
+  Route8: [['Growlithe', 18], ['Vulpix', 18], ['Meowth', 18], ['Pidgey', 18], ['Abra', 17], ['Jigglypuff', 18]],
+  Route7: [['Oddish', 19], ['Bellsprout', 19], ['Meowth', 19], ['Growlithe', 19], ['Vulpix', 19], ['Abra', 18]],
+});
+
+/* ── 판별 연결 고리 (공통 함수가 부른다) ── */
+function npcVisibleLate(map, n, idx) {
+  if (map === 'SSAnne2F' && idx === 1) return !flag('rival3');
+  if (map === 'RocketHideoutB4F' && (idx === 0 || idx === 7)) return !flag('scope'); // 보스 · 실프스코프 공(보스를 이기면 바로 받는다)
+  if (map === 'PokemonTower2F' && idx === 0) return !flag('rival4');
+  if (map === 'PokemonTower7F' && idx === 3) return !flag('fujiSaved');
+  if (map === 'Route12' && idx === 0) return !flag('snorlax12');
+  if (map === 'SaffronCity' && (idx === 13 || idx === 14)) return false; // 실프 문 앞을 막던 두 명
+  if (map === 'SaffronCity' && idx <= 6) return !flag('silphFreed'); // 로켓단은 실프를 구하면 떠난다
+  if (map === 'SilphCo7F' && idx === 8) return !flag('rival5');
+  if (map === 'SilphCo11F' && idx === 2) return !flag('silphFreed');
+  if (map === 'Route22' && idx === 0) return false; // 1판 라이벌 자리(쓰지 않음)
+  if (map === 'Route22' && idx === 1) return flag('badge8') && !flag('rival6');
+  if (map === 'VictoryRoad2F' && idx === 5) return !flag('moltres');
+  if (map === 'ChampionsRoom' && idx === 1) return false; // 오박사는 대사로만
+  if (map === 'ViridianGym' && idx === 0) return true;
+  return null;
+}
+function npcKindLate(map, n, idx) {
+  if (map === 'CeladonGym' && idx === 0) return 'erika';
+  if (map === 'ViridianGym' && idx === 9) return 'guide';
+  if (map === 'IndigoPlateauLobby' && idx === 1) return 'guide';
+  if (map === 'Route22' && idx === 1) return 'rival';
+  if (map === 'ChampionsRoom' && idx === 0) return 'rival';
+  if (map === 'VictoryRoad2F' && idx === 5) return 'mon:146';
+  if (map === 'RockTunnelPokecenter' && idx === 1) return 'scientist';
+  if (map === 'SSAnne2F' && idx === 1) return 'rival';
+  if (map === 'PokemonTower2F' && idx === 0) return 'rival';
+  if (map === 'GameCorner' && idx === 6) return 'guide';
+  if (n.spriteName === 'MrFuji') return 'oldman';
+  // 사람이 아닌 포켓몬 NPC (원작 데이터엔 'Monster' 로만 적혀 있다)
+  const MON = { 'MrFujisHouse:2': 54, 'MrFujisHouse:3': 33, 'CeladonCity:6': 61, 'Route12:0': 143, 'FuchsiaCity:4': 35, 'FuchsiaCity:6': 115, 'FuchsiaCity:7': 113, 'FuchsiaCity:8': 86 };
+  if (map === 'FuchsiaGym' && idx === 7) return 'guide';
+  if (n.spriteName === 'Warden') return 'oldman';
+  if (n.spriteName === 'SafariZoneWorker') return 'clerk';
+  if (n.spriteName === 'FishingGuru') return 'fisher';
+  if (map === 'SaffronGym' && idx === 0) return 'sabrina';
+  if (map === 'SaffronGym' && idx === 8) return 'guide';
+  if (map === 'CinnabarGym' && idx === 0) return 'blaine';
+  if (map === 'CinnabarGym' && idx === 8) return 'guide';
+  if (map === 'SilphCo7F' && idx === 8) return 'rival';
+  if (n.spriteName === 'SilphPresident') return 'gambler';
+  if (n.spriteName === 'Bird') return 'mon:16';
+  if (MON[`${map}:${idx}`]) return 'mon:' + MON[`${map}:${idx}`];
+  if (n.spriteName === 'Clerk') return 'clerk';
+  return null;
+}
+async function lockedDoorLate(dest) {
+  if (/GameCornerPrizeRoom/.test(dest)) { await say(['코인 교환소: “코인은 어른만 바꿀 수 있어요!”']); return true; }
+  if (/RocketHideoutElevator/.test(dest)) { await say(['엘리베이터가 멈춰 있다. 계단을 이용하자!']); return true; }
+  if (/CeladonMart[2-5]|CeladonMartRoof|CeladonMartElevator/.test(dest)) { await say(['“위층은 공사 중이에요! 1층에서 모든 물건을 팔아요.”']); return true; }
+  if (/CeladonMansion|CeladonDiner|CeladonChiefHouse|CeladonHotel/.test(dest)) { await say(['문이 잠겨 있다. 다음에 다시 와 보자.']); return true; }
+  if (/SSAnne/.test(dest)) { await say(['선실 문이 잠겨 있다. 손님들이 쉬는 중이래.']); return true; }
+  if (/PokemonMansion[23]F/.test(dest)) { await say(['위층은 바닥이 무너져서 위험하다! 지하로 가 보자.']); return true; }
+  if (/CinnabarLab/.test(dest)) { await say(['포켓몬 연구소: “화석 복원 기계는 점검 중이에요.”']); return true; }
+  if (/^SilphCo|UnusedMap/.test(dest)) { await say(['“그 층은 공사 중이에요! 엘리베이터를 이용해 주세요.”']); return true; }
+  if (/FightingDojo|CopycatsHouse|SaffronPidgeyHouse|MrPsychicsHouse/.test(dest)) { await say(['문이 잠겨 있다. 다음에 다시 와 보자.']); return true; }
+  if (/PowerPlant/.test(dest)) { await say(['버려진 발전소다. 전기 포켓몬이 산다는데… 지금은 문이 잠겨 있다.']); return true; }
+  if (/MrFujisHouse|LavenderCuboneHouse|NameRater/.test(dest)) { await say(['집 안에 아무도 없는 것 같다.']); return true; }
+  if (/SafariZone(North|East)/.test(dest)) { await say(['“이 구역은 공사 중이에요! 서쪽 구역으로 가 보세요.”']); return true; }
+  if (/Fuchsia|Route12SuperRod|Gate2F|SafariZone.*RestHouse/.test(dest)) { await say(['문이 잠겨 있다. 다음에 다시 와 보자.']); return true; }
+  if (/Route1[1-9]|Route2[0-3]|Cycling/.test(dest)) { await say(['이 길은 다음 모험에서 열려!']); return true; }
+  return false;
+}
+async function stepTriggerLate(map, x, y, d) {
+  if (map === 'SSAnne2F' && !flag('rival3') && x >= 33) { await rivalSSAnne(); return true; }
+  if (map === 'PokemonTower2F' && !flag('rival4') && Math.abs(x - 14) <= 2 && Math.abs(y - 5) <= 2) { await rivalTower(); return true; }
+  if (map === 'PokemonTower6F' && !flag('marowak') && y >= 14 && y <= 15 && x >= 9 && x <= 12) { await marowakGhost(); return true; }
+  if (/^Route[5-8]Gate$/.test(map) && !flag('badge5')) { // 노랑시티 관문: 핑크배지 전에는 못 지나간다
+    W.busy = true; await gateGuard(); const back = { up: 'down', down: 'up', left: 'right', right: 'left' }[d]; await W.scene.walkPlayer(back, 1); W.busy = false; return true;
+  }
+  if (map === 'SilphCo7F' && !flag('rival5') && x <= 6 && y >= 5 && y <= 9) { await rivalSilph(); return true; }
+  if (map === 'Route22' && flag('badge8') && !flag('rival6') && x <= 28) { await rivalRoute22(); return true; }
+  const e = E4_BY[map];
+  if (e && !flag(e.f) && y <= e.at[1] && Math.abs(x - e.at[0]) <= 3) { await e4Battle(e); return true; }
+  if (map === 'ChampionsRoom' && !flag('champWin') && y <= 4) { await championBattle(); return true; }
+  return false;
+}
+async function enterMapLate(id) {
+  if (id === 'SilphCoElevator') { await silphElevator(); return; }
+  if (id === 'VermilionDock' && !itemCount(63)) {
+    W.busy = true;
+    await say(['“배표가 있어야 탈 수 있어요!”', '…아, 이수재 박사님이 너에게 주라고 맡긴 게 있네요!'], { who: '선원', face: 'sailor' });
+    addItem(63, 1); sfx('item');
+    await say([`${josa(P(), '은/는')} 배표를 받았다!`]);
+    save(); W.busy = false;
+  }
+  if (id === 'RockTunnel1F' && !flag('rtIntro')) {
+    setFlag('rtIntro'); W.busy = true;
+    await say(F.isDark(id) ? ['캄캄해서 앞이 거의 안 보인다…', '💡 10번도로 포켓몬센터의 오박사 조수에게 “플래시”를 받으면 환해져!'] : ['플래시 덕분에 동굴 안이 환하게 보인다!', '💡 오른쪽 위 사다리 → 지하 → 왼쪽 위 사다리 순서로 가면 출구야.']);
+    W.busy = false;
+  }
+  if (id === 'CeladonGym' && !flag('gym4Intro')) {
+    setFlag('gym4Intro'); W.busy = true;
+    await say(['무지개시티 체육관에 들어왔다! 꽃과 나무 향기가 가득하다.', '관장 민화는 풀 포켓몬을 쓴다. 불꽃·비행·얼음 기술이 효과 굉장!', '💡 길을 막는 작은 나무는 풀베기로!']);
+    W.busy = false;
+  }
+}
+
+/* ── 목표 안내 (3판 다음) ── */
+function objectiveLate(map) {
+  if (!flag('badge4')) return ch4Goal(map);
+  if (!flag('flute')) return ch5Goal(map);
+  const g6 = ch6Goal(map); if (g6) return g6;
+  const g7 = ch7Goal(map); if (g7) return g7;
+  const g8 = ch8Goal(map); if (g8) return g8;
+  const g9 = ch9Goal(map); if (g9) return g9;
+  return { text: '🏆 챔피언 달성! 도감을 채우거나 사천왕에게 다시 도전하자', detail: ['진화의 돌로 포켓몬을 진화시켜 보자!', '메뉴(☰) → 🕊 날아가기로 도시를 오갈 수 있어.'], dir: '' };
+}
+function ch4Goal(map) {
+  const T = (text, detail, targets, dir = '') => ({ text, detail, dir, targets });
+  if (!flag('gotCut')) {
+    if (map === 'VermilionCity') return T('갈색시티 아래쪽 항구에서 상트앙느호를 타자', ['도시 맨 아래(남쪽) 항구 입구로!', '이수재 박사님이 배표를 맡겨 두셨대.'], [[18, 31, '항구 입구']]);
+    if (map === 'VermilionDock') return T('배에 오르자!', ['위쪽 배 입구로 걸어가자.'], [[14, 2, '배 입구']]);
+    if (map === 'SSAnne1F') return T('왼쪽 계단으로 2층에 올라가자', ['선장님은 2층 오른쪽 끝 방에 계셔.'], [[2, 6, '2층 계단']]);
+    if (map === 'SSAnne2F') return flag('rival3') ? T('오른쪽 끝 선장실로!', ['선장님 방 문으로 들어가자.'], [[36, 4, '선장실 문']]) : T('2층 오른쪽 끝으로 가자', ['누군가 기다리고 있는 것 같아…'], [[37, 5, '선장실 앞']]);
+    if (map === 'SSAnneCaptainsRoom') return T('선장님께 말을 걸자', ['선장님이 많이 힘들어 보인다…'], [[4, 3, '선장 앞']]);
+    return T('갈색시티 항구에서 상트앙느호를 타자', ['갈색시티 남쪽 항구 → 배 1층 → 2층 오른쪽 끝 선장실.'], null);
+  }
+  if (map === 'SSAnneCaptainsRoom') return T('배에서 내려 갈색시티로', ['왔던 길로 나가자.'], null);
+  if (map === 'SSAnne2F') return T('배에서 내려 갈색시티로', ['왼쪽 계단으로 1층에 내려가자.'], [[2, 4, '1층 계단']]);
+  if (map === 'SSAnne1F') return T('배에서 내려 갈색시티로', ['위쪽 출구로!'], [[26, 0, '출구'], [27, 0, '']]);
+  if (map === 'VermilionDock') return T('갈색시티로 나가자', ['위쪽 출구로!'], [[14, 0, '갈색시티']]);
+  if (/^Vermilion/.test(map)) return T('블루시티로 돌아가 동쪽 9번도로로!', ['갈색시티 북쪽 6번도로 → 지하통로 → 5번도로 → 블루시티.', '9번도로 입구의 작은 나무는 풀베기로 베자!'], map === 'VermilionCity' ? [[18, 0, '6번도로'], [19, 0, '']] : null);
+  if (map === 'Route6') return T('지하통로 입구 건물로', ['오른쪽 위 작은 건물이 지하통로 입구야.'], [[17, 13, '지하통로 입구']]);
+  if (map === 'UndergroundPathRoute6') return T('계단을 내려가자', [], [[4, 4, '계단']]);
+  if (map === 'UndergroundPathNorthSouth') return T('지하통로를 따라 북쪽으로!', ['긴 통로를 쭉 올라가자.'], [[5, 4, '북쪽 계단']]);
+  if (map === 'UndergroundPathRoute5') return T('밖으로 나가 북쪽 블루시티로', [], [[3, 7, '출구'], [4, 7, '']]);
+  if (map === 'Route5') return T('북쪽으로 가면 블루시티!', [], [[10, 0, '블루시티'], [11, 0, '']]);
+  if (map === 'CeruleanCity') return T('블루시티 동쪽 끝 9번도로로!', ['오른쪽(동쪽) 끝 길로 나가자.', '입구의 작은 나무는 풀베기로!'], [[39, 16, '9번도로'], [39, 17, '']]);
+  if (/^Cerulean/.test(map)) return T('블루시티 동쪽 9번도로로!', [], null);
+  if (map === 'Route9') return F.isCut('Route9', 5, 8) ? T('동쪽으로 쭉 가면 10번도로!', ['트레이너들을 이기며 오른쪽 끝까지!'], [[59, 8, '10번도로'], [59, 9, '']], '→ 동쪽')
+    : T('작은 나무를 풀베기로 베자', ['나무 앞에서 A 버튼 → “예”!'], [[5, 8, '작은 나무 — A로 풀베기']]);
+  if (map === 'Route10') {
+    if (G.s.y >= 40) return T('남쪽으로 가면 보라타운!', ['아래쪽으로 쭉!'], [[6, 71, '보라타운'], [7, 71, ''], [8, 71, ''], [9, 71, '']], '↓ 남쪽');
+    if (!F.hasHM('flash')) return T('포켓몬센터에서 오박사 조수를 만나자', ['돌산터널 옆 포켓몬센터에 오박사님 조수가 기다리고 있대!'], [[11, 19, '포켓몬센터']]);
+    return T('돌산터널로 들어가자', ['포켓몬센터 왼쪽 동굴 입구!'], [[8, 17, '돌산터널 입구']]);
+  }
+  if (map === 'RockTunnelPokecenter') return F.hasHM('flash') ? T('돌산터널로 들어가자', ['센터를 나와 왼쪽 동굴로!'], null) : T('오박사 조수에게 말을 걸자', ['오른쪽 안경 쓴 아저씨야.'], [[7, 4, '오박사 조수 앞']]);
+  if (map === 'RockTunnel1F') {
+    const exitOk = W.scene && W.scene.map && W.scene.map.id === map && W.scene.navTo([[15, 33]]);
+    return exitOk ? T('남쪽 출구로 나가자!', ['조금만 더! 아래쪽 출구야.'], [[15, 33, '남쪽 출구']]) : T('오른쪽 위 사다리로 내려가자', ['오른쪽 위 사다리 → 지하 → 왼쪽 위 사다리 → 다시 1층 → 남쪽 출구.'], [[37, 3, '오른쪽 위 사다리']]);
+  }
+  if (map === 'RockTunnelB1F') return T('왼쪽 위 사다리로 올라가자', ['지하를 가로질러 왼쪽 위 사다리까지!'], [[3, 3, '왼쪽 위 사다리']]);
+  if (map === 'LavenderTown') return T('서쪽 8번도로로 가자', ['보라타운 왼쪽 길 → 8번도로 → 지하통로 → 7번도로 → 무지개시티.', '포켓몬센터에서 쉬어 가자!'], [[0, 9, '8번도로'], [0, 10, '']], '← 서쪽');
+  if (/^Lavender/.test(map)) return T('서쪽 8번도로로 가자', [], null);
+  if (map === 'Route8') return T('지하통로 입구 건물로', ['8번도로 왼쪽 위 작은 건물!'], [[13, 3, '지하통로 입구']]);
+  if (map === 'UndergroundPathRoute8') return T('계단을 내려가자', [], [[4, 4, '계단']]);
+  if (map === 'UndergroundPathWestEast') return T('지하통로를 따라 서쪽으로!', ['긴 통로를 쭉 왼쪽으로!'], [[2, 5, '서쪽 계단']], '← 서쪽');
+  if (map === 'UndergroundPathRoute7') return T('밖으로 나가 서쪽 무지개시티로', [], null);
+  if (map === 'Route7') return T('서쪽으로 가면 무지개시티!', [], [[0, 2, '무지개시티'], [0, 3, '']], '← 서쪽');
+  if (map === 'CeladonCity') {
+    if (!F.isCut('CeladonCity', 35, 32)) return T('체육관 가는 길의 작은 나무를 베자', ['도시 아래쪽, 체육관으로 가는 길을 나무가 막고 있어.', '💡 포켓몬센터의 신사 아저씨가 “날아가기”를 선물로 준대!'], [[35, 32, '작은 나무 — A로 풀베기']]);
+    return T('무지개시티 체육관에서 관장 민화를 이기자', ['왼쪽 아래 체육관!', '풀 포켓몬에게는 불꽃·비행·얼음 기술이 효과 굉장!'], [[12, 27, '체육관 문']]);
+  }
+  if (map === 'CeladonGym') return F.isCut('CeladonGym', 5, 7) ? T('관장 민화에게 말을 걸자', ['맨 위 가운데!'], [[4, 4, '민화 앞']]) : T('작은 나무를 풀베기로 베자', ['나무 앞에서 A 버튼!'], [[5, 7, '작은 나무 — A로 풀베기']]);
+  if (/^Celadon/.test(map)) return T('무지개시티 체육관으로!', [], null);
+  return T('보라타운을 지나 무지개시티로!', ['블루시티 동쪽 9번도로 → 10번도로 → 돌산터널 → 보라타운 → 8번도로 → 지하통로 → 무지개시티.'], null);
+}
+
+
+/* ════════════════ 5판: 로켓단 아지트 · 포켓몬타워 · 후지 노인 · 포켓몬피리 ════════════════ */
+async function giovanniHideout() {
+  if (flag('scope')) return;
+  await say(['…여기까지 쫓아오다니, 대단한 꼬마로군.', '나는 로켓단의 보스, 비주기다.', '포켓몬은 돈을 버는 도구일 뿐이지. 네가 그 생각을 바꿔 보겠다고?'], { who: '비주기', face: 'giovanni' });
+  const res = await W.trainerBattle({ cls: 'Giovanni', set: 0, name: '비주기', face: 'giovanni', intro: '로켓단 보스 비주기가 승부를 걸어 왔다!', story: true, lose: '…이럴 수가. 내가 지다니.', money: 3000 });
+  if (res !== 'win') return;
+  await say(['흥… 오늘은 물러나 주지. 하지만 로켓단은 끝나지 않는다.', '이 안경은 필요 없어졌다. 가져가든 말든!'], { who: '비주기', face: 'giovanni' });
+  addItem(72, 1); setFlag('scope'); sfx('item');
+  await say([`${josa(P(), '은/는')} 실프스코프를 손에 넣었다!`, '💡 보이지 않는 것을 보여 주는 안경이야. 보라타운 포켓몬타워의 “유령”의 정체를 밝힐 수 있어!']);
+  const g = W.scene.npcBy?.((x) => x.idx === 0 && x.kind === 'giovanni'); if (g) W.scene.removeNpc(g);
+  W.updateGoal?.(); save();
+}
+async function rivalTower() {
+  const S = W.scene;
+  W.busy = true;
+  try {
+    const rv = S.npcBy?.((x) => x.idx === 0);
+    if (rv) S.faceNpcToPlayer(rv);
+    await sayAs('rival', [`${P()}! 너도 포켓몬타워에 왔구나.`, '여긴 쓰러진 포켓몬들이 잠든 곳이야. …그런데 넌 포켓몬을 제대로 아끼고 있냐? 보여 줘!']);
+    const res = await W.trainerBattle({ party: [[17, 25], [20, 23], [64, 22], [133, 25]], name: R(), face: 'rival', intro: `라이벌 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, lose: '쳇… 너 진짜 강해졌구나.', win: '헤헤, 아직 내가 위야!', money: 1600 });
+    setFlag('rival4');
+    if (res !== 'win') return;
+    await sayAs('rival', ['위층에 로켓단이 후지 할아버지를 붙잡고 있대.', '유령 때문에 아무도 못 올라간다던데… 너라면 할 수 있겠지. 그럼 난 간다!']);
+    if (rv) S.removeNpc(rv);
+    save();
+  } finally { W.busy = false; }
+}
+async function marowakGhost() {
+  const S = W.scene;
+  W.busy = true;
+  try {
+    if (!itemCount(72)) {
+      await say(['“나가… 나가라…”', '정체를 알 수 없는 유령이 길을 막고 있다! 너무 무서워서 앞으로 갈 수 없다…', '💡 보이지 않는 것을 보여 주는 “실프스코프”가 있으면…']);
+      await S.walkPlayer('up', 1);
+      return;
+    }
+    await say(['“나가… 나가라…”', `${josa(P(), '은/는')} 실프스코프를 썼다!`, '유령의 정체는… 로켓단에게 쓰러진 텅구리의 엄마, 텅구리였다!', '아기를 지키려는 마음 때문에 아직 여기를 떠나지 못하고 있었어.']);
+    const res = await W.trainerBattle({ party: [[105, 30]], name: '텅구리의 영혼', face: null, intro: '텅구리의 영혼이 덤벼든다!', lose: '…', money: 0, noBlackout: true });
+    if (res !== 'win') { await S.walkPlayer('up', 1); return; }
+    setFlag('marowak'); sfx('heal');
+    await say(['텅구리의 영혼은 편안한 얼굴로 하늘로 올라갔다…', '이제 7층으로 갈 수 있어!']);
+    save();
+  } finally { W.busy = false; }
+}
+async function fujiTower() {
+  if (flag('fujiSaved')) return;
+  await say(['오오… 너 같은 아이가 나를 구하러 와 주었구나.', '로켓단은 텅구리를 잡으려다 그 엄마를 쓰러뜨렸단다. 정말 슬픈 일이지.', '자, 함께 내 집으로 가자꾸나.'], { who: '후지 노인', face: 'oldman' });
+  setFlag('fujiSaved');
+  await fade(true, 300);
+  await W.scene.loadMap('MrFujisHouse', 3, 2, 'up', { quiet: true });
+  save();
+  await fade(false, 300);
+  await fujiHouse();
+}
+async function fujiHouse() {
+  if (flag('flute')) return say(['포켓몬도 우리처럼 마음이 있단다. 아껴 주렴.', '피리는 잠든 포켓몬을 깨워 줄 거야.'], { who: '후지 노인', face: 'oldman' });
+  await say(['고맙구나, 정말 고마워.', '나는 주인을 잃은 포켓몬들을 돌보며 살고 있단다.', '이 피리를 받으렴. 잠든 포켓몬도 이 소리를 들으면 깨어난단다.'], { who: '후지 노인', face: 'oldman' });
+  addItem(73, 1); setFlag('flute'); sfx('item');
+  await say([`${josa(P(), '은/는')} 포켓몬피리를 받았다!`, '💡 소리는 공기의 떨림이야. 피리는 공기를 떨게 해서 아름다운 소리를 내지!', '보라타운 남쪽 12번도로에서 길을 막고 자는 잠만보를 깨울 수 있대.']);
+  save();
+  await W.chapterEnd?.(5, ['축하해! 🎉 로켓단을 물리치고 후지 노인을 구했구나!', '포켓몬피리로 잠만보를 깨우면 다음 모험이 시작돼. 연분홍시티로 가 보자!', '그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!']);
+}
+
+Object.assign(LINES, {
+  'GameCorner:0': () => say(['게임코너는 어른들의 놀이터래. 우리는 구경만!'], { who: '아가씨', face: 'beauty' }),
+  'GameCorner:1': () => say(['코인은 어른만 살 수 있어요. 미안해요!'], { who: '점원', face: 'clerk' }),
+  'GameCorner:2': () => say(['확률이 낮은 건 여러 번 해도 잘 안 나와. 운에만 기대면 안 되지!']),
+  'GameCorner:3': () => say(['요즘 검은 옷 입은 사람들이 저 포스터 앞을 자꾸 서성여…'], { who: '아가씨', face: 'beauty' }),
+  'GameCorner:4': () => say(['낚시도 게임도 참을성이 필요하단다.'], { who: '낚시꾼', face: 'fisher' }),
+  'GameCorner:5': () => say(['우리 남편은 하루 종일 여기 있어요… 휴.']),
+  'GameCorner:6': () => say(['어이, 챔피언 지망생!', '저기 오른쪽 위 포스터 뒤에 비밀 계단이 있어. 로켓단 아지트로 가는 길이지!', '로켓단 보스를 이기면 대단한 물건을 얻을 수 있을 거야.'], { who: '가이드', face: 'guide' }),
+  'GameCorner:7': () => say(['허허, 오늘은 운이 없구먼.'], { who: '게임왕', face: 'gambler' }),
+  'GameCorner:8': () => say(['코인 교환소는 옆 건물이에요.'], { who: '점원', face: 'clerk' }),
+  'GameCorner:9': () => say(['나는 공부를 많이 해서 확률을 잘 안다네. 그래서 게임은 안 하지!'], { who: '신사', face: 'gambler' }),
+  'RocketHideoutB4F:0': () => giovanniHideout(),
+  'PokemonTower1F:0': () => say(['포켓몬타워는 세상을 떠난 포켓몬들이 잠든 곳이에요. 조용히 다녀 주세요.'], { who: '안내원', face: 'nurse' }),
+  'PokemonTower1F:1': () => say(['우리 집 강아지 포켓몬이 여기 잠들어 있단다. 매일 꽃을 가져와.']),
+  'PokemonTower1F:2': () => say(['위층에 유령이 나온다는데… 나는 무서워서 못 올라가겠어.']),
+  'PokemonTower1F:3': () => say(['소중한 친구를 기억하는 건 마음을 따뜻하게 해 줘.'], { who: '소녀', face: 'girl' }),
+  'PokemonTower1F:4': () => say(['…위층에서 이상한 기운이 느껴진다.'], { who: '무당', face: 'channeler' }),
+  'PokemonTower2F:1': () => say(['이 탑의 공기는 차갑지만, 마음은 따뜻하게 가지렴.'], { who: '무당', face: 'channeler' }),
+  'PokemonTower5F:0': async () => {
+    await say(['이곳은 깨끗한 기운이 모인 곳이에요. 잠시 쉬어 가세요.'], { who: '무당', face: 'channeler' });
+    sfx('heal'); healParty(); save();
+    return say(['포켓몬들이 기운을 되찾았다!']);
+  },
+  'PokemonTower7F:3': () => fujiTower(),
+  'MrFujisHouse:0': () => say(['후지 할아버지는 주인 없는 포켓몬들을 돌보셔. 정말 좋은 분이야.'], { who: '괴짜박사', face: 'nerd' }),
+  'MrFujisHouse:1': () => say(['이 아이들은 다 할아버지가 돌보는 포켓몬이야!'], { who: '소녀', face: 'girl' }),
+  'MrFujisHouse:2': () => say(['고라파덕: 꽥?']),
+  'MrFujisHouse:3': () => say(['니드리노: 끄응!']),
+  'MrFujisHouse:4': () => fujiHouse(),
+  'MrFujisHouse:5': () => say(['포켓몬 돌봄 일지가 놓여 있다. “오늘도 모두 밥을 잘 먹었다.”']),
+});
+Object.assign(TRAINER, {
+  'GameCorner:10': T2('로켓단 조무래기', '포스터 앞에서 뭘 기웃거려? 썩 꺼져!', ['으윽! 비밀이 들키겠잖아!', '…포스터 뒤 계단? 그, 그런 거 몰라!'], 600),
+});
+Object.assign(EXTRA_WILD, {
+  PokemonTower3F: [['Gastly', 22], ['Gastly', 24], ['Cubone', 22]],
+  PokemonTower4F: [['Gastly', 23], ['Haunter', 24], ['Cubone', 23]],
+  PokemonTower5F: [['Gastly', 24], ['Haunter', 25], ['Cubone', 24]],
+  PokemonTower6F: [['Gastly', 25], ['Haunter', 26], ['Cubone', 25]],
+  PokemonTower7F: [['Gastly', 26], ['Haunter', 27], ['Cubone', 26]],
+});
+
+function ch5Goal(map) {
+  const T = (text, detail, targets, dir = '') => ({ text, detail, dir, targets });
+  if (!flag('scope')) {
+    if (map === 'CeladonCity') return T('게임코너에 숨은 로켓단 아지트를 찾자', ['도시 가운데 아래쪽 “게임코너” 건물!', '안내 가이드에게 말을 걸어 보자.'], [[28, 19, '게임코너 문']]);
+    if (map === 'GameCorner') return T('오른쪽 위 포스터 뒤 계단으로!', ['계단을 지키는 로켓단을 이기고 내려가자.'], [[17, 4, '비밀 계단']]);
+    if (map === 'RocketHideoutB1F') return T('계단으로 지하 2층에 내려가자', [], [[23, 2, '지하 2층 계단']]);
+    if (map === 'RocketHideoutB2F') return T('계단으로 지하 3층에 내려가자', [], [[21, 8, '지하 3층 계단']]);
+    if (map === 'RocketHideoutB3F') return T('계단으로 지하 4층에 내려가자', [], [[19, 18, '지하 4층 계단']]);
+    if (map === 'RocketHideoutB4F') return T('로켓단 보스를 찾아 이기자!', ['오른쪽 위 방에 보스가 있어.'], [[24, 3, '보스 앞']]);
+    if (/^Celadon/.test(map)) return T('무지개시티 게임코너로!', [], null);
+    return T('무지개시티 게임코너의 로켓단을 혼내 주자', ['무지개시티 가운데 아래쪽 게임코너 → 포스터 뒤 계단 → 아지트.'], null);
+  }
+  if (!flag('fujiSaved')) {
+    if (map === 'RocketHideoutB4F') return T('아지트를 나가 보라타운 포켓몬타워로', ['왔던 계단으로 올라가자.'], [[19, 10, '계단']]);
+    if (map === 'RocketHideoutB3F') return T('계단으로 올라가자', [], [[25, 6, '계단']]);
+    if (map === 'RocketHideoutB2F') return T('계단으로 올라가자', [], [[27, 8, '계단']]);
+    if (map === 'RocketHideoutB1F') return T('계단으로 게임코너에 올라가자', [], [[21, 2, '게임코너']]);
+    if (map === 'LavenderTown') return T('포켓몬타워로 들어가자', ['보라타운 오른쪽 위 높은 탑!', '실프스코프가 유령의 정체를 보여 줄 거야.'], [[14, 5, '포켓몬타워 문']]);
+    if (map === 'PokemonTower1F') return T('계단으로 2층에', [], [[18, 9, '계단']]);
+    if (map === 'PokemonTower2F') return flag('rival4') ? T('계단으로 3층에', [], [[3, 9, '계단']]) : T('2층을 둘러보자', ['누군가 있는 것 같아…'], [[14, 6, '사람 앞']]);
+    if (map === 'PokemonTower3F' || map === 'PokemonTower5F') return T('계단으로 위층에', ['무당 트레이너들을 이기며 올라가자.', map === 'PokemonTower5F' ? '가운데 무당 아주머니 옆은 포켓몬을 회복시켜 주는 곳이야!' : ''].filter(Boolean), [[18, 9, '계단']]);
+    if (map === 'PokemonTower4F') return T('계단으로 위층에', ['무당 트레이너들을 이기며 올라가자.'], [[3, 9, '계단']]);
+    if (map === 'PokemonTower6F') return T('아래쪽 7층 계단으로!', [flag('marowak') ? '유령은 편히 잠들었어.' : '계단 앞에 무언가가 있는 것 같아…'], [[9, 16, '7층 계단']]);
+    if (map === 'PokemonTower7F') return T('후지 노인을 구하자!', ['로켓단을 이기고 맨 위로!'], [[10, 4, '후지 노인 앞']]);
+    if (/^Lavender/.test(map)) return T('포켓몬타워로!', [], null);
+    return T('보라타운 포켓몬타워로 가자', [F.hasHM('fly') ? '💡 메뉴(☰) → 🕊 날아가기 → 보라타운이 제일 빨라!' : '무지개시티 동쪽 7번도로 → 지하통로 → 8번도로 → 보라타운.'], null);
+  }
+  if (map === 'MrFujisHouse') return T('후지 노인께 말을 걸자', [], [[3, 2, '후지 노인 앞']]);
+  return T('보라타운 후지 노인의 집으로', [], map === 'LavenderTown' ? [[7, 9, '후지 노인의 집']] : null);
+}
+
+
+/* ════════════════ 6판: 12~15번도로 · 연분홍시티 독수 · 사파리존(파도타기·괴력) ════════════════ */
+/** 지도 가장자리에서 걸을 수 있는 칸들 (도로 끝 → 다음 지도 안내용) */
+function edge(map, side, label) {
+  const m = DB.maps[map]; if (!m) return null;
+  const cells = side === 'north' ? [...Array(m.w).keys()].map((x) => [x, 0]) : side === 'south' ? [...Array(m.w).keys()].map((x) => [x, m.h - 1])
+    : side === 'west' ? [...Array(m.h).keys()].map((y) => [0, y]) : [...Array(m.h).keys()].map((y) => [m.w - 1, y]);
+  return cells.filter(([x, y]) => '.,"*_'.includes(m.grid[y][x])).map(([x, y]) => [x, y, label]);
+}
+async function snorlaxRoute12(o) {
+  if (flag('snorlax12')) return;
+  if (!itemCount(73)) return say(['커다란 포켓몬이 길 한가운데서 쿨쿨 자고 있다…', '아무리 흔들어도 일어나지 않는다!', '💡 보라타운의 후지 노인을 도우면 잠든 포켓몬을 깨우는 피리를 받을 수 있대.']);
+  const yes = await ask('커다란 포켓몬이 자고 있다. 포켓몬피리를 불어 볼까?');
+  if (!yes) return;
+  sfx('item');
+  await say(['♪ 삐리리~ 삐리리리~', '잠만보가 눈을 번쩍 떴다! 잠을 깨워서 화가 난 것 같다!']);
+  await W.wildBattle({ encounterRate: 0, mons: [{ species: 'Snorlax', level: 30 }] });
+  setFlag('snorlax12');
+  if (o) W.scene.removeNpc(o);
+  await say(['잠만보는 어디론가 사라졌다… 이제 길이 열렸어!', '💡 잠만보는 하루에 아주 많이 먹고 많이 자는 포켓몬이래.']);
+  W.updateGoal?.(); save();
+}
+async function kogaBattle() {
+  if (flag('badge5')) return say(['핑크배지는 독처럼 숨은 원리까지 꿰뚫어 본 증거다.', '다음 체육관도 방심하지 마라.'], { who: '독수', face: 'koga' });
+  await say(['후후후… 나는 연분홍시티 체육관 관장, 독수.', '독은 아주 적은 양으로도 몸속 물질의 균형을 깨뜨리지. 그래서 무서운 거다.', '숨은 원리를 읽어 내는 트레이너만 나를 이긴다. 문제를 잘 읽어라!'], { who: '독수', face: 'koga' });
+  const res = await W.trainerBattle({ cls: 'Koga', set: 0, name: '독수', face: 'koga', intro: '관장 독수가 승부를 걸어 왔다!', story: true, gym: true, lose: '…훌륭하다. 내가 졌다.', money: 4000, music: 'gym' });
+  if (res !== 'win') return;
+  await say(['이 핑크배지를 받아라.'], { who: '독수', face: 'koga' });
+  setFlag('badge5'); G.s.badges.push('soul'); onBadge(); sfx('badge');
+  await say([`${josa(P(), '은/는')} 핑크배지를 받았다!`, '(문제가 한 단계 더 어려워진다!)', '💡 이제 “파도타기”를 쓸 수 있어! 사파리존 깊은 곳 비밀의 집에 파도타기 비전머신이 있대.']);
+  save();
+  await maybeEndCh6();
+}
+async function secretHouseSurf() {
+  if (F.hasHM('surf')) return say(['파도타기는 포켓몬 등에 타고 물 위를 가는 기술이야.', '물에 뜨는 건 부력 덕분이지!'], { who: '할아버지', face: 'fisher' });
+  await say(['오오! 사파리존 깊은 곳까지 찾아오다니 대단하구나!', '상으로 이 비전머신을 주마. 물 위를 건너는 “파도타기”란다!'], { who: '할아버지', face: 'fisher' });
+  addItem(F.HM.surf, 1); sfx('item');
+  await say([`${josa(P(), '은/는')} 비전머신03 “파도타기”를 받았다!`, flag('badge5') ? '💡 핑크배지가 있으니 물 앞에서 A 버튼 → “예”로 물 위를 건널 수 있어!' : '💡 연분홍시티 체육관의 핑크배지를 받으면 쓸 수 있어!']);
+  save(); await maybeEndCh6();
+}
+async function wardenStrength() {
+  if (F.hasHM('strength')) return say(['괴력이 있으면 큰 바위도 밀 수 있지. 지렛대처럼 힘을 잘 쓰는 게 요령이란다!'], { who: '관리인', face: 'oldman' });
+  if (!itemCount(64)) return say(['으브브… 브브브…', '(관리인 할아버지가 틀니를 잃어버려서 말을 잘 못 하신다…)', '💡 사파리존 서쪽 구역 어딘가에 금니가 떨어져 있대!'], { who: '관리인', face: 'oldman' });
+  await say(['으브브… 오! 그건 내 금니잖아! 찾아 줘서 고맙구나!', '…이제 말이 잘 나오는구먼! 답례로 이 비전머신을 주마. 바위를 미는 “괴력”이지!'], { who: '관리인', face: 'oldman' });
+  addItem(64, -1); addItem(F.HM.strength, 1); sfx('item');
+  await say([`${josa(P(), '은/는')} 비전머신04 “괴력”을 받았다!`, '💡 무지개배지가 있으니, 바위 앞에서 A → “예” 하고 바위 쪽으로 걸으면 밀 수 있어!']);
+  save(); await maybeEndCh6();
+}
+async function maybeEndCh6() {
+  if (!flag('badge5') || !F.hasHM('surf') || !F.hasHM('strength') || flag('ch6End')) return;
+  setFlag('ch6End'); save();
+  await W.chapterEnd?.(6, ['축하해! 🎉 핑크배지에 파도타기·괴력까지 모았구나!', '다음 모험은 노랑시티! 로켓단이 실프주식회사를 점령했대.', '그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!']);
+}
+
+Object.assign(LINES, {
+  'Route12:0': (o) => snorlaxRoute12(o),
+  'Route12Gate1F:0': () => say(['이 관문 북쪽은 보라타운, 남쪽은 “조용한 다리”야.', '다리 위에서는 낚시꾼들이 조용히 낚시를 한단다.'], { who: '경비원', face: 'clerk' }),
+  'Route15Gate1F:0': () => say(['서쪽으로 가면 연분홍시티야. 사파리존이 유명하지!'], { who: '경비원', face: 'clerk' }),
+  'FuchsiaCity:0': () => say(['사파리존에는 다른 곳에서 못 보는 포켓몬이 많아!']),
+  'FuchsiaCity:1': () => say(['독수 관장님은 닌자의 후예래. 체육관에는 보이지 않는 벽이 있다던데…'], { who: '게임왕', face: 'gambler' }),
+  'FuchsiaCity:2': () => say(['사파리존 관리인 할아버지가 금니를 잃어버려서 말을 못 하신대.'], { who: '낚시꾼', face: 'fisher' }),
+  'FuchsiaCity:3': () => say(['연분홍시티 남쪽은 바다야. 파도타기가 있으면 건널 수 있지!']),
+  'FuchsiaCity:4': () => say(['삐삐!'], { who: '삐삐' }),
+  'FuchsiaCity:6': () => say(['캥카는 새끼를 배 주머니에 넣고 다녀!']),
+  'FuchsiaCity:7': () => say(['럭키는 아주 다정한 포켓몬이야.']),
+  'FuchsiaCity:8': () => say(['쥬쥬는 차가운 바다에서도 잘 지내. 두꺼운 지방층 덕분이지!']),
+  'FuchsiaPokecenter:0': nurse,
+  'FuchsiaPokecenter:1': () => say(['독에 걸리면 걸을 때마다 HP가 줄어! 해독제나 만병통치제를 챙겨.']),
+  'FuchsiaPokecenter:2': () => say(['사파리존 깊숙한 곳에 비밀의 집이 있대!'], { who: '엘리트트레이너', face: 'coolf' }),
+  'FuchsiaPokecenter:3': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'FuchsiaMart:0': clerk,
+  'FuchsiaMart:1': () => say(['하이퍼볼은 정말 잘 잡혀. 비싸지만!']),
+  'FuchsiaMart:2': () => say(['실버스프레이는 200걸음 동안 야생 포켓몬을 막아 줘.'], { who: '엘리트트레이너', face: 'coolf' }),
+  'FuchsiaGym:0': () => kogaBattle(),
+  'FuchsiaGym:7': () => say(['어이, 챔피언 지망생!', '독수 관장은 독 포켓몬을 써. 에스퍼·땅 기술이 효과 굉장하지!', '그리고 이 체육관엔 투명한 벽이 있어… 여기선 잘 보이게 해 뒀으니 걱정 마!'], { who: '가이드', face: 'guide' }),
+  'WardensHouse:0': () => wardenStrength(),
+  'SafariZoneGate:0': () => say(['사파리존에 오신 걸 환영해요! 어린이 트레이너는 입장 무료예요.', '안쪽 서쪽 구역 깊은 곳에 비밀의 집이 있다는 소문이 있어요.'], { who: '사파리 직원', face: 'clerk' }),
+  'SafariZoneGate:1': () => say(['사파리존에서는 평소처럼 몬스터볼로 포켓몬을 잡을 수 있어요!'], { who: '사파리 직원', face: 'clerk' }),
+  'SafariZoneSecretHouse:0': () => secretHouseSurf(),
+  'SafariZoneCenterRestHouse:0': () => say(['서쪽 구역 가는 길은 왼쪽 출입구야!'], { who: '소녀', face: 'girl' }),
+  'SafariZoneCenterRestHouse:1': () => say(['사파리존의 포켓몬은 다른 곳보다 쉽게 도망가니 조심해!'], { who: '과학자', face: 'scientist' }),
+  'SafariZoneWestRestHouse:0': () => say(['비밀의 집은 서쪽 구역 왼쪽 위에 있어!'], { who: '과학자', face: 'scientist' }),
+  'SafariZoneWestRestHouse:1': () => say(['코뿔소처럼 생긴 뿔카노는 땅 타입이야.']),
+  'SafariZoneWestRestHouse:2': () => say(['여기서 쉬었다 가세요!'], { who: '직원', face: 'coolf' }),
+});
+Object.assign(TRAINER, {
+  'FuchsiaGym:1': T2('저글러', '독수 관장님께는 못 간다!', ['졌다!', '저글링은 공을 던지는 높이와 박자를 맞추는 수학이야!'], 900),
+  'FuchsiaGym:2': T2('저글러', '보이지 않는 벽을 찾아봐!', ['졌다…'], 900),
+  'FuchsiaGym:3': T2('저글러', '독 포켓몬의 무서움을 보여 주지!', ['졌다!', '해독제는 몸속 독을 중화시켜 줘.'], 900),
+  'FuchsiaGym:4': T2('조련사', '내 포켓몬은 잘 훈련됐다고!', ['졌다!'], 1000),
+  'FuchsiaGym:5': T2('조련사', '마지막 관문이다!', ['졌다! 독수 관장님은 저 안쪽이야.'], 1000),
+  'FuchsiaGym:6': T2('저글러', '하나, 둘, 셋! 승부!', ['졌다!'], 900),
+});
+Object.assign(SIGNS, {
+  'Route12:1': ['12번도로', '조용한 다리 — 낚시 중이니 조용히!'],
+  'FuchsiaCity:1': ['연분홍시티', '사파리존과 바다의 도시'],
+  'FuchsiaGym:1': () => [flag('badge5') ? `연분홍시티 체육관 — 우승 트레이너: ${P()}` : '연분홍시티 체육관 — 우승 트레이너: …'],
+  'FuchsiaGym:2': () => [flag('badge5') ? `연분홍시티 체육관 — 우승 트레이너: ${P()}` : '연분홍시티 체육관 — 우승 트레이너: …'],
+});
+Object.assign(EXTRA_WILD, { // 12번도로는 섞지 않는다 (피리로 깨운 잠만보가 반드시 나오게)
+  Route13: [['Oddish', 24], ['Bellsprout', 24], ['Venonat', 24], ['Pidgeotto', 25], ['Ditto', 24]],
+  Route14: [['Oddish', 25], ['Bellsprout', 25], ['Venonat', 25], ['Pidgeotto', 26], ['Ditto', 25]],
+  Route15: [['Oddish', 26], ['Bellsprout', 26], ['Venonat', 26], ['Pidgeotto', 27], ['Ditto', 26]],
+  SafariZoneCenter: [['Nidorino', 24], ['Nidorina', 24], ['Exeggcute', 24], ['Rhyhorn', 25], ['Venonat', 23], ['Parasect', 25], ['Scyther', 26], ['Chansey', 26]],
+  SafariZoneWest: [['Nidorino', 25], ['Nidorina', 25], ['Exeggcute', 25], ['Tauros', 26], ['Kangaskhan', 26], ['Pinsir', 26]],
+});
+
+function ch6Goal(map) {
+  const T = (text, detail, targets, dir = '') => ({ text, detail, dir, targets });
+  if (!flag('snorlax12')) {
+    if (map === 'LavenderTown') return T('보라타운 남쪽 12번도로로', ['아래쪽(남쪽) 길로!'], edge(map, 'south', '12번도로'), '↓ 남쪽');
+    if (map === 'Route12Gate1F') return T('관문을 지나 남쪽으로', [], [[4, 7, '남쪽 출구'], [5, 7, '']]);
+    if (map === 'Route12') return T('길을 막고 자는 포켓몬을 깨우자', ['포켓몬 앞에서 A → 포켓몬피리!'], [[10, 61, '잠만보 앞']]);
+    if (/^Lavender|^MrFuji/.test(map)) return T('보라타운 남쪽 12번도로로', [], null);
+    return T('보라타운 남쪽 12번도로의 잠만보를 깨우자', [F.hasHM('fly') ? '💡 메뉴(☰) → 🕊 날아가기 → 보라타운' : '보라타운에서 남쪽으로!'], null);
+  }
+  if (!flag('badge5')) {
+    if (map === 'Route12Gate1F') return T('관문을 지나 남쪽으로', [], [[4, 7, '남쪽 출구'], [5, 7, '']]);
+    if (map === 'LavenderTown') return T('남쪽 12번도로로', [], edge(map, 'south', '12번도로'), '↓ 남쪽');
+    if (map === 'Route12') return T('남쪽으로 쭉! 13번도로로', ['조용한 다리를 지나 아래로!'], edge(map, 'south', '13번도로'), '↓ 남쪽');
+    if (map === 'Route13') return T('서쪽 14번도로로', [], edge(map, 'west', '14번도로'), '← 서쪽');
+    if (map === 'Route14') return T('아래로 내려가 서쪽 15번도로로', [], edge(map, 'west', '15번도로'), '↓ 그다음 ←');
+    if (map === 'Route15') return G.s.x > 14 ? T('서쪽 관문 건물을 지나 연분홍시티로!', ['길 가운데 작은 건물을 통과하자.'], [[14, 8, '관문'], [14, 9, '관문']], '← 서쪽') : T('서쪽으로 가면 연분홍시티!', [], edge(map, 'west', '연분홍시티'), '← 서쪽');
+    if (map === 'Route15Gate1F') return T('관문을 지나 서쪽으로', [], [[0, 4, '서쪽 출구'], [0, 5, '']]);
+    if (map === 'FuchsiaCity') return T('연분홍시티 체육관에서 관장 독수를 이기자', ['왼쪽 아래 체육관!', '독 포켓몬에게는 에스퍼·땅 기술이 효과 굉장!'], [[5, 27, '체육관 문']]);
+    if (map === 'FuchsiaGym') return T('관장 독수에게 말을 걸자', ['트레이너들을 이기며 가운데로!'], [[4, 11, '독수 앞']]);
+    if (/^Fuchsia/.test(map)) return T('연분홍시티 체육관으로!', [], null);
+    return T('남쪽 바닷길을 따라 연분홍시티로', ['12번도로 → 13번도로 → 14번도로 → 15번도로 → 연분홍시티.'], null);
+  }
+  const needSafari = !F.hasHM('surf') || (!F.hasHM('strength') && !itemCount(64));
+  if (needSafari) {
+    if (map === 'FuchsiaCity') return T('위쪽 사파리존으로!', [!F.hasHM('surf') ? '사파리존 서쪽 구역 깊은 곳 비밀의 집에 파도타기가 있대.' : '사파리존 서쪽 구역에서 관리인 할아버지의 금니를 찾자.'], [[18, 3, '사파리존 입구']]);
+    if (map === 'SafariZoneGate') return T('사파리존 안으로!', [], [[3, 0, '사파리존'], [4, 0, '']]);
+    if (map === 'SafariZoneCenter') return T('왼쪽 출입구로 서쪽 구역에', [], [[0, 10, '서쪽 구역'], [0, 11, '']]);
+    if (map === 'SafariZoneWest') return !F.hasHM('surf') ? T('왼쪽 위 비밀의 집으로!', [], [[3, 3, '비밀의 집']]) : T('금니를 찾자!', ['반짝이는 공 안에 들어 있대.'], [[19, 7, '금니']]);
+    if (map === 'SafariZoneSecretHouse') return T('할아버지께 말을 걸자', [], [[3, 4, '할아버지 앞']]);
+    return T('연분홍시티 사파리존으로', [], null);
+  }
+  if (!F.hasHM('strength')) {
+    if (map === 'SafariZoneWest') return T('사파리존을 나가 관리인 할아버지께', [], [[29, 22, '가운데 구역'], [29, 23, '']]);
+    if (map === 'SafariZoneCenter') return T('입구로 나가자', [], [[14, 25, '입구'], [15, 25, '']]);
+    if (map === 'SafariZoneGate') return T('연분홍시티로 나가자', [], [[3, 5, '출구'], [4, 5, '']]);
+    if (map === 'FuchsiaCity') return T('관리인 할아버지께 금니를 돌려드리자', ['아래쪽 가운데 집!'], [[27, 27, '관리인의 집']]);
+    if (map === 'WardensHouse') return T('관리인 할아버지께 말을 걸자', [], [[2, 4, '관리인 앞']]);
+    return T('연분홍시티 관리인의 집으로', [], null);
+  }
+  return null; // 6판 끝 → 7판
+}
+
+
+/* ════════════════ 7판: 노랑시티 · 실프주식회사 · 초련 ════════════════ */
+const SILPH_FLOORS = [['SilphCo1F', 20, '1층 (입구)'], ['SilphCo5F', 20, '5층'], ['SilphCo7F', 18, '7층'], ['SilphCo11F', 13, '11층 (사장실)']];
+async function silphElevator() {
+  W.busy = true;
+  try {
+    const hint = !flag('rival5') ? '💡 7층에 누군가 있대!' : !flag('silphFreed') ? '💡 7층 왼쪽 발판을 타면 11층 사장실로 가!' : '💡 1층으로 내려가서 나가자.';
+    const box = await say(['엘리베이터다. 몇 층으로 갈까?', hint], { keep: true });
+    const fl = await choose(SILPH_FLOORS.map(([id, , label]) => ({ label, value: id })), { cancel: false });
+    box.remove();
+    const [id, x] = SILPH_FLOORS.find((f) => f[0] === fl);
+    sfx('door');
+    await fade(true, 180);
+    await W.scene.loadMap(id, x, 1, 'down', { quiet: true });
+    save();
+    await fade(false, 180);
+  } finally { W.busy = false; }
+}
+async function rivalSilph() {
+  const S = W.scene;
+  W.busy = true;
+  try {
+    const rv = S.npcBy?.((x) => x.idx === 8);
+    if (rv) S.faceNpcToPlayer(rv);
+    await sayAs('rival', [`${P()}! 너도 로켓단을 쫓아왔구나.`, '내 이브이는 물의돌로 샤미드가 됐어! 엄청 강해졌다고. 보여 줄게!']);
+    const res = await W.trainerBattle({ party: [[18, 37], [20, 35], [65, 35], [134, 40]], name: R(), face: 'rival', intro: `라이벌 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, lose: '크윽… 샤미드까지 졌다고?', win: '헤헤, 역시 내가 최고야!', money: 2800 });
+    setFlag('rival5');
+    if (res !== 'win') return;
+    await sayAs('rival', ['쳇… 인정할게. 로켓단 보스는 맨 위 사장실에 있대.', '왼쪽 발판을 타면 바로 갈 수 있을 거야. 난 다음에 더 강해져서 올 거다!']);
+    if (rv) S.removeNpc(rv);
+    save();
+  } finally { W.busy = false; }
+}
+async function laprasGift() {
+  if (flag('lapras')) return say(['라프라스는 사람을 등에 태우고 바다를 건너는 착한 포켓몬이야.', '파도타기를 가르치면 든든한 친구가 될 거야!'], { who: '실프 직원', face: 'nerd' });
+  await say(['로켓단 때문에 숨어 있었어… 와 줘서 고마워!', '이 아이를 데려가 줘. 로켓단이 노리던 라프라스야. 너라면 소중히 해 줄 거야.'], { who: '실프 직원', face: 'nerd' });
+  const where = receive(makeMon(131, 15)); setFlag('lapras'); sfx('item');
+  await say([`${josa(P(), '은/는')} 라프라스를 받았다!${where === 'box' ? ' (보관함으로 보냈다)' : ''}`]);
+  save();
+}
+async function giovanniSilph() {
+  if (flag('silphFreed')) return;
+  await say(['또 너냐! 이번엔 실프주식회사를 손에 넣는 중이었는데…', '마스터볼을 만드는 이 회사만 있으면 세상 포켓몬을 다 가질 수 있지!', '방해하는 꼬마는 이번에야말로 혼내 주겠다!'], { who: '비주기', face: 'giovanni' });
+  const res = await W.trainerBattle({ cls: 'Giovanni', set: 1, name: '비주기', face: 'giovanni', intro: '로켓단 보스 비주기가 승부를 걸어 왔다!', story: true, lose: '…또 지다니. 이번엔 물러나 주지.', money: 4500 });
+  if (res !== 'win') return;
+  await say(['흥… 오늘은 철수다. 하지만 언젠가 다시 만나게 될 거다.'], { who: '비주기', face: 'giovanni' });
+  setFlag('silphFreed');
+  const g = W.scene.npcBy?.((x) => x.kind === 'giovanni'); if (g) W.scene.removeNpc(g);
+  W.updateGoal?.(); save();
+}
+async function silphPresident() {
+  if (!flag('silphFreed')) return say(['으으… 로켓단이…'], { who: '사장님', face: 'gambler' });
+  if (flag('masterBall')) return say(['고맙네, 꼬마 영웅! 우리 회사는 다시 평화를 찾았네.'], { who: '사장님', face: 'gambler' });
+  await say(['자네가 로켓단을 쫓아냈다니! 정말 고맙네.', '감사의 표시로 우리 회사의 최고 발명품을 주지. 무엇이든 반드시 잡히는 공이라네!'], { who: '사장님', face: 'gambler' });
+  addItem(1, 1); setFlag('masterBall'); sfx('item');
+  await say([`${josa(P(), '은/는')} 마스터볼을 받았다!`, '💡 정말 갖고 싶은 포켓몬을 만났을 때 아껴서 쓰자!']);
+  save();
+}
+async function sabrinaBattle() {
+  if (flag('badge6')) return say(['골드배지… 네 마음의 힘을 보았다.', '생각은 뇌 속 신경 세포들이 신호를 주고받으며 만들어진단다.'], { who: '초련', face: 'sabrina' });
+  await say(['…네가 올 것을 알고 있었다. 나는 노랑시티 체육관 관장, 초련.', '에스퍼 포켓몬은 생각의 힘으로 싸우지. 우리의 생각은 뇌 속 신경 세포의 아주 작은 전기 신호란다.', '흔들리지 않는 마음으로 문제를 풀어 보아라.'], { who: '초련', face: 'sabrina' });
+  const res = await W.trainerBattle({ cls: 'Sabrina', set: 0, name: '초련', face: 'sabrina', intro: '관장 초련이 승부를 걸어 왔다!', story: true, gym: true, lose: '…네 힘을 예측하지 못했다. 내가 졌다.', money: 4300, music: 'gym' });
+  if (res !== 'win') return;
+  await say(['이 골드배지를 받아라.'], { who: '초련', face: 'sabrina' });
+  setFlag('badge6'); G.s.badges.push('marsh'); onBadge(); sfx('badge');
+  await say([`${josa(P(), '은/는')} 골드배지를 받았다!`, '(문제가 한 단계 더 어려워진다! 배지 6개, 이제 두 개 남았어!)']);
+  save();
+  await W.chapterEnd?.(7, ['축하해! 🎉 실프주식회사를 구하고 골드배지까지 땄구나!', '다음 모험은 바다 건너 홍련마을! 태초마을 남쪽 바다를 파도타기로 건너 보자.', '그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!']);
+}
+async function gateGuard(map) {
+  if (flag('badge5')) return say(['로켓단이 노랑시티를 점령해서 조심해야 해!', '…하지만 배지를 다섯 개나 가진 트레이너라면 믿을 수 있지. 지나가도 좋아!'], { who: '경비원', face: 'clerk' });
+  return say(['로켓단 때문에 노랑시티는 위험해! 아무도 못 지나가!'], { who: '경비원', face: 'clerk' });
+}
+
+Object.assign(LINES, {
+  'Route5Gate:0': () => gateGuard(), 'Route6Gate:0': () => gateGuard(), 'Route7Gate:0': () => gateGuard(), 'Route8Gate:0': () => gateGuard(),
+  'SaffronCity:0': () => say(['로켓단 말고는 아무도 못 들어가!'], { who: '로켓단', face: 'rocket' }),
+  'SaffronCity:1': () => say(['실프주식회사는 우리 로켓단 차지다!'], { who: '로켓단', face: 'rocket' }),
+  'SaffronCity:2': () => say(['체육관? 관장이 우리 보스를 무서워해서 숨었다지, 크크.'], { who: '로켓단', face: 'rocket' }),
+  'SaffronCity:3': () => say(['시끄러워! 저리 가!'], { who: '로켓단', face: 'rocket' }),
+  'SaffronCity:4': () => say(['우리 보스는 마스터볼을 노리고 있지.'], { who: '로켓단', face: 'rocket' }),
+  'SaffronCity:5': () => say(['…'], { who: '로켓단', face: 'rocket' }),
+  'SaffronCity:6': () => say(['이 도시는 이제 로켓단 거다!'], { who: '로켓단', face: 'rocket' }),
+  'SaffronCity:7': () => say(['실프주식회사는 포켓몬 도구를 만드는 큰 회사야. 몬스터볼도 거기서 만들지!'], { who: '과학자', face: 'scientist' }),
+  'SaffronCity:8': () => say(['로켓단에게 쫓겨났어요… 회사에 동료들이 갇혀 있어요!'], { who: '실프 직원', face: 'nerd' }),
+  'SaffronCity:9': () => say(['노랑시티는 칸토 지방 한가운데에 있는 큰 도시야.'], { who: '실프 직원', face: 'coolf' }),
+  'SaffronCity:10': () => say(['내 피죤은 어디든 편지를 배달해 준단다. 새는 지구의 자기장을 느껴 길을 찾는대!'], { who: '신사', face: 'gambler' }),
+  'SaffronCity:11': () => say(['구구!'], { who: '피죤' }),
+  'SaffronCity:12': () => say(['격투 도장은 체육관 옆에 있어. 다음에 가 볼래?']),
+  'SaffronPokecenter:0': nurse,
+  'SaffronPokecenter:1': () => say(['초련 관장님은 생각만으로 숟가락을 구부린대!'], { who: '아가씨', face: 'beauty' }),
+  'SaffronPokecenter:2': () => say(['에스퍼 포켓몬에게는 벌레·고스트 기술이 잘 들어.'], { who: '신사', face: 'gambler' }),
+  'SaffronPokecenter:3': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'SaffronMart:0': clerk,
+  'SaffronMart:1': () => say(['하이퍼볼과 고급상처약은 후반 모험의 필수품이지!'], { who: '괴짜박사', face: 'nerd' }),
+  'SaffronMart:2': () => say(['만병통치제 하나면 어떤 상태 이상도 낫는대!'], { who: '엘리트트레이너', face: 'coolf' }),
+  'SilphCo1F:0': () => say(flag('silphFreed') ? ['실프주식회사에 오신 걸 환영합니다! 덕분에 회사가 평화를 찾았어요.'] : ['…로켓단이 회사를 점령했어요! 엘리베이터로 위층에 가 보세요.'], { who: '안내원', face: 'nurse' }),
+  'SilphCo5F:0': () => say(['로켓단이 우리 연구실을 뒤졌어요… 마스터볼 설계도를 찾는대요!'], { who: '실프 직원', face: 'nerd' }),
+  'SilphCo7F:0': () => laprasGift(),
+  'SilphCo7F:1': () => say(['살려 줘서 고마워!'], { who: '실프 직원', face: 'nerd' }),
+  'SilphCo7F:2': () => say(['몬스터볼 안에서 포켓몬은 편히 쉰대.'], { who: '실프 직원', face: 'nerd' }),
+  'SilphCo7F:3': () => say(['사장님이 11층에 갇혀 계세요!'], { who: '실프 직원', face: 'coolf' }),
+  'SilphCo7F:8': () => (flag('rival5') ? null : rivalSilph()),
+  'SilphCo11F:0': () => silphPresident(),
+  'SilphCo11F:1': () => say(['사장님을 구해 주세요!'], { who: '비서', face: 'beauty' }),
+  'SilphCo11F:2': () => giovanniSilph(),
+  'SaffronGym:0': () => sabrinaBattle(),
+  'SaffronGym:8': () => say(['어이, 챔피언 지망생!', '초련 관장은 에스퍼 포켓몬을 써. 벌레·고스트 기술이 효과 굉장하지!', '이 체육관은 순간이동 발판으로 된 미로야. 화면 위 안내 화살표를 따라가 봐!'], { who: '가이드', face: 'guide' }),
+});
+Object.assign(SIGNS, {
+  'SaffronCity:1': ['노랑시티', '빛나는 황금빛 대도시'], 'SaffronCity:2': ['실프주식회사', '몬스터볼을 만드는 회사'],
+  'SaffronGym:1': () => [flag('badge6') ? `노랑시티 체육관 — 우승 트레이너: ${P()}` : '노랑시티 체육관 — 우승 트레이너: …'],
+});
+for (const k of ['SaffronGym:1', 'SaffronGym:3', 'SaffronGym:5']) TRAINER[k] = T2('무당', '초련 님의 힘이 느껴지는가…', ['졌다…', '마음이 차분하면 생각도 맑아진단다.'], 1000);
+for (const k of ['SaffronGym:2', 'SaffronGym:4', 'SaffronGym:6', 'SaffronGym:7']) TRAINER[k] = T2('초능력자', '네 다음 수가 보인다!', ['…예측이 틀렸다!', '숟가락이 휘어 보이는 건 물속 빛이 꺾이기 때문이기도 해!'], 1000);
+
+function ch7Goal(map) {
+  const T = (text, detail, targets, dir = '') => ({ text, detail, dir, targets });
+  if (!flag('silphFreed')) {
+    if (map === 'Route7') return G.s.x < 11 ? T('동쪽 관문을 지나 노랑시티로', [], [[11, 9, '관문'], [11, 10, '관문']], '→ 동쪽') : T('동쪽으로 가면 노랑시티!', [], edge(map, 'east', '노랑시티'), '→ 동쪽');
+    if (map === 'Route8') return G.s.x > 8 ? T('서쪽 관문을 지나 노랑시티로', [], [[8, 9, '관문'], [8, 10, '관문']], '← 서쪽') : T('서쪽으로 가면 노랑시티!', [], edge(map, 'west', '노랑시티'), '← 서쪽');
+    if (map === 'Route7Gate') return T('관문을 지나 동쪽으로', ['경비원에게 말을 걸어 보자.'], [[5, 3, '출구'], [5, 4, '']]);
+    if (map === 'Route8Gate') return T('관문을 지나 서쪽으로', ['경비원에게 말을 걸어 보자.'], [[0, 3, '출구'], [0, 4, '']]);
+    if (map === 'Route5Gate') return T('관문을 지나 남쪽으로', [], [[3, 5, '출구'], [4, 5, '']]);
+    if (map === 'Route6Gate') return T('관문을 지나 북쪽으로', [], [[3, 0, '출구'], [4, 0, '']]);
+    if (map === 'SaffronCity') return T('가운데 큰 건물, 실프주식회사로!', ['로켓단이 회사를 점령했대!'], [[18, 21, '실프주식회사']]);
+    if (map === 'SilphCo1F') return T('엘리베이터로 위층에!', ['위쪽 가운데 엘리베이터 → 7층.'], [[20, 0, '엘리베이터']]);
+    if (map === 'SilphCo5F') return T('엘리베이터로 7층에!', [], [[20, 0, '엘리베이터']]);
+    if (map === 'SilphCo7F') return flag('rival5') ? T('왼쪽 발판을 타고 11층 사장실로!', ['💡 라프라스를 주는 직원도 있어!'], [[5, 7, '11층 발판']]) : T('7층 왼쪽 방으로 가 보자', ['누군가 있어…'], [[4, 7, '사람 앞']]);
+    if (map === 'SilphCo11F') return T('로켓단 보스를 이기자!', [], [[6, 10, '보스 앞']]);
+    return T('노랑시티의 실프주식회사를 구하자', ['무지개시티 동쪽 7번도로나 보라타운 서쪽 8번도로의 관문을 지나 노랑시티로!', F.hasHM('fly') ? '💡 날아가기로 무지개시티·보라타운까지 가면 빨라.' : ''].filter(Boolean), null);
+  }
+  if (!flag('badge6')) {
+    if (map === 'SilphCo11F') return T(flag('masterBall') ? '엘리베이터로 1층에 내려가자' : '사장님께 말을 걸자', [], flag('masterBall') ? [[13, 0, '엘리베이터']] : [[7, 6, '사장님 앞']]);
+    if (/^SilphCo/.test(map)) return T('엘리베이터로 1층에 내려가 밖으로', [], map === 'SilphCo1F' ? [[10, 17, '출구'], [11, 17, '']] : map === 'SilphCo7F' ? [[18, 0, '엘리베이터']] : [[20, 0, '엘리베이터']]);
+    if (map === 'SaffronCity') return T('노랑시티 체육관에서 관장 초련을 이기자', ['오른쪽 위 체육관!', '에스퍼 포켓몬에게는 벌레·고스트 기술이 효과 굉장!'], [[34, 3, '체육관 문']]);
+    if (map === 'SaffronGym') return T('순간이동 발판을 타고 초련에게!', ['화살표를 따라 발판을 밟아 보자.'], [[9, 9, '초련 앞']]);
+    return T('노랑시티 체육관으로!', [], null);
+  }
+  return null;
+}
+
+
+/* ════════════════ 8판: 21번 바닷길 · 홍련마을 · 포켓몬 저택(비밀열쇠) · 강연 ════════════════ */
+/** 물가: 땅과 맞닿은 물 칸 (파도타기를 시작할 곳) */
+function shore(map, label, pred = () => true) {
+  const m = DB.maps[map]; if (!m) return null;
+  const out = [];
+  for (let y = 0; y < m.h; y++) for (let x = 0; x < m.w; x++) {
+    if (m.grid[y][x] !== '~' || !pred(x, y)) continue;
+    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => '.,"*_'.includes((m.grid[y + dy] || '')[x + dx] || '#'))) out.push([x, y, label]);
+  }
+  return out;
+}
+const edgeSurf = (map, side, label) => { // 파도타기 중이면 물 칸도 가장자리 목표로
+  const m = DB.maps[map]; if (!m) return null;
+  const cells = side === 'south' ? [...Array(m.w).keys()].map((x) => [x, m.h - 1]) : side === 'north' ? [...Array(m.w).keys()].map((x) => [x, 0]) : [];
+  return cells.filter(([x, y]) => '.,"*~'.includes(m.grid[y][x])).map(([x, y]) => [x, y, label]);
+};
+async function blaineBattle() {
+  if (flag('badge7')) return say(['우오오! 진홍배지는 불꽃처럼 뜨거운 네 열정의 증거다!', '불이 타려면 탈 것·산소·높은 온도 세 가지가 필요하지. 하나만 없애도 불이 꺼진다네!'], { who: '강연', face: 'blaine' });
+  await say(['우오오! 나는 홍련마을 체육관 관장, 불꽃의 강연이다!', '이 섬은 화산이 만든 섬이지. 땅속 뜨거운 마그마가 솟아올라 굳은 거라네.', '불꽃처럼 뜨겁게, 하지만 머리는 차갑게! 퀴즈를 잘 풀어 보게!'], { who: '강연', face: 'blaine' });
+  const res = await W.trainerBattle({ cls: 'Blaine', set: 0, name: '강연', face: 'blaine', intro: '관장 강연이 승부를 걸어 왔다!', story: true, gym: true, lose: '우오오… 내 불꽃이 꺼지다니! 졌다!', money: 4700, music: 'gym' });
+  if (res !== 'win') return;
+  await say(['이 진홍배지를 받게!'], { who: '강연', face: 'blaine' });
+  setFlag('badge7'); G.s.badges.push('volcano'); onBadge(); sfx('badge');
+  await say([`${josa(P(), '은/는')} 진홍배지를 받았다!`, '(문제가 한 단계 더 어려워진다! 배지 7개, 마지막 하나만 남았어!)']);
+  save();
+  await W.chapterEnd?.(8, ['축하해! 🎉 진홍배지까지 7개나 모았구나!', '마지막 배지는 상록시티 체육관에 있어. 오랫동안 닫혀 있던 그곳의 관장은…?', '그동안 도감을 채우고, 문제를 더 풀어서 포켓몬을 키워 보자!']);
+}
+
+Object.assign(LINES, {
+  'Route21:0': () => say(['낚시는 기다림이야. 물고기가 미끼를 무는 순간을 놓치면 안 돼!'], { who: '낚시꾼', face: 'fisher' }),
+  'CinnabarIsland:0': () => say(['홍련마을은 화산섬이야. 그래서 온천이 유명하지!'], { who: '소녀', face: 'girl' }),
+  'CinnabarIsland:1': () => say(['체육관 관장 강연 할아버지는 퀴즈를 좋아해.', '체육관 문은 잠겨 있어. 열쇠는 저택 어딘가에 있다던데…'], { who: '게임왕', face: 'gambler' }),
+  'CinnabarPokecenter:0': nurse,
+  'CinnabarPokecenter:1': () => say(['불꽃 포켓몬에게는 물·땅·바위 기술이 효과 굉장!'], { who: '엘리트트레이너', face: 'coolf' }),
+  'CinnabarPokecenter:2': () => say(['옛날 저택에서 포켓몬 연구를 했대. 일지가 아직 남아 있다던데.'], { who: '신사', face: 'gambler' }),
+  'CinnabarPokecenter:3': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'CinnabarMart:0': clerk,
+  'CinnabarMart:1': () => say(['풀회복약은 HP를 한 번에 다 채워 줘!'], { who: '직원', face: 'coolf' }),
+  'CinnabarMart:2': () => say(['화산 근처 흙은 양분이 많아서 농사가 잘된대.'], { who: '과학자', face: 'scientist' }),
+  'CinnabarGym:0': () => blaineBattle(),
+  'CinnabarGym:8': () => say(['어이, 챔피언 지망생!', '강연 관장은 불꽃 포켓몬을 써. 물·땅·바위 기술이 효과 굉장하지!', '퀴즈를 좋아하는 관장이니 문제를 끝까지 읽어!'], { who: '가이드', face: 'guide' }),
+});
+Object.assign(SIGNS, {
+  'CinnabarIsland:1': ['홍련마을', '불타는 열정의 화산섬'], 'CinnabarIsland:2': ['포켓몬 저택'], 'CinnabarIsland:3': ['홍련마을 체육관', '관장: 강연 — 불꽃의 퀴즈왕'],
+  'CinnabarGym:1': () => [flag('badge7') ? `홍련마을 체육관 — 우승 트레이너: ${P()}` : '홍련마을 체육관 — 우승 트레이너: …'],
+});
+for (let i = 1; i <= 7; i++) TRAINER['CinnabarGym:' + i] = T2(i % 2 ? '괴짜박사' : '도둑', '강연 관장님께 가려면 나부터!', ['졌다!', ['불은 산소가 있어야 타. 그래서 덮으면 꺼지지!', '용암이 식어서 굳으면 현무암이 돼.', '불꽃의 색이 파랄수록 더 뜨거워!', '온천물은 땅속 마그마의 열로 데워진 물이야.'][i % 4]], 1100);
+Object.assign(EXTRA_WILD, {
+  PokemonMansion1F: [['Grimer', 32], ['Koffing', 32], ['Ponyta', 32], ['Growlithe', 32], ['Vulpix', 32]],
+  PokemonMansionB1F: [['Grimer', 34], ['Muk', 35], ['Koffing', 34], ['Weezing', 35], ['Magmar', 34]],
+});
+
+function ch8Goal(map) {
+  const T = (text, detail, targets, dir = '') => ({ text, detail, dir, targets });
+  if (!flag('badge7')) {
+    if (map === 'PalletTown') return G.s.surf ? T('남쪽으로 쭉! 홍련마을까지', [], edgeSurf(map, 'south', '21번 바닷길'), '↓ 남쪽') : T('태초마을 남쪽 바다에서 파도타기!', ['물가에서 A 버튼 → “예”!', '바다 건너 남쪽에 홍련마을이 있어.'], shore(map, '물가 — A로 파도타기', (x, y) => y >= 10), '↓ 남쪽');
+    if (map === 'Route21') return T('남쪽으로 쭉! 홍련마을까지', ['물 위의 수영선수들도 승부를 걸어 와!'], G.s.surf ? edgeSurf(map, 'south', '홍련마을') : edge(map, 'south', '홍련마을'), '↓ 남쪽');
+    if (map === 'CinnabarIsland') return itemCount(43) ? T('체육관에서 관장 강연을 이기자', ['오른쪽 위 체육관!', '불꽃 포켓몬에게는 물·땅·바위 기술이 효과 굉장!'], [[18, 3, '체육관 문']])
+      : T('왼쪽 위 포켓몬 저택에서 체육관 열쇠를 찾자', ['체육관 문이 잠겨 있대. 열쇠는 저택 지하에 있다는 소문이야.'], [[6, 3, '포켓몬 저택']]);
+    if (map === 'PokemonMansion1F') return itemCount(43) ? T('저택을 나가 체육관으로', [], [[4, 27, '출구'], [5, 27, ''], [6, 27, ''], [7, 27, '']]) : T('오른쪽 아래 계단으로 지하에!', [], [[21, 23, '지하 계단']]);
+    if (map === 'PokemonMansionB1F') return itemCount(43) ? T('계단으로 올라가자', [], [[23, 22, '계단']]) : T('비밀열쇠를 찾자!', ['반짝이는 공 안에 열쇠가 들어 있대.'], [[5, 13, '비밀열쇠']]);
+    if (map === 'CinnabarGym') return T('관장 강연에게 말을 걸자', ['트레이너들을 이기며 왼쪽 위로!'], [[3, 4, '강연 앞']]);
+    if (/^Cinnabar/.test(map)) return T('홍련마을 체육관으로!', [], null);
+    return T('바다 건너 홍련마을로!', [F.hasHM('fly') ? '💡 날아가기 → 태초마을, 그다음 남쪽 바다에서 파도타기!' : '태초마을 남쪽 바다를 파도타기로 건너자.'], null);
+  }
+  return null;
+}
+
+
+/* ════════════════ 9판·엔딩: 상록시티 비주기 → 22번도로 라이벌 → 챔피언로드 → 사천왕 → 챔피언 → 명예의 전당 ════════════════ */
+const E4 = [ // 방 · 깃발 · 이름 · 얼굴 · 원작 반 · 주제 대사
+  { map: 'LoreleisRoom', f: 'e4_1', name: '칸나', face: 'lorelei', cls: 'Lorelei', exit: [[4, 0], [5, 0]], at: [5, 3],
+    hi: ['포켓몬 리그에 온 걸 환영해. 나는 사천왕 칸나.', '얼음은 물이 0도 아래에서 얼어 생기지. 얼음은 물보다 가벼워서 물에 뜬단다.', '차갑게 얼려 주겠어!'], lose: '…훌륭하네. 다음 방으로 가렴.' },
+  { map: 'BrunosRoom', f: 'e4_2', name: '시바', face: 'bruno', cls: 'Bruno', exit: [[4, 0], [5, 0]], at: [5, 3],
+    hi: ['나는 사천왕 시바! 몸과 마음을 함께 단련해 왔다!', '근육은 쓰고 쉬기를 되풀이하면서 더 굵고 강해진다. 운동 다음엔 잘 먹고 푹 자야 하지!', '우오오! 덤벼라!'], lose: '…졌다! 네 힘을 인정하마.' },
+  { map: 'AgathasRoom', f: 'e4_3', name: '국화', face: 'agatha', cls: 'Agatha', exit: [[4, 0], [5, 0]], at: [5, 3],
+    hi: ['오호호, 나는 사천왕 국화. 오박사와는 옛날부터 라이벌이었지.', '사람이 무서움을 느끼면 심장이 빨리 뛰고 몸이 굳는단다. 몸이 위험에 대비하는 거지.', '고스트 포켓몬의 무서움을 보여 주마!'], lose: '오호… 오박사가 너를 아끼는 이유를 알겠구나.' },
+  { map: 'LancesRoom', f: 'e4_4', name: '목호', face: 'lance', cls: 'Lance', exit: [[5, 0], [6, 0]], at: [6, 2],
+    hi: ['기다리고 있었다. 나는 사천왕의 대장, 드래곤 조련사 목호.', '드래곤은 전설 속 동물이지만, 공룡은 진짜로 살았던 동물이야. 화석이 그 증거지.', '마지막 사천왕의 힘, 받아 보아라!'], lose: '…내가 졌다. 챔피언이 기다리고 있다. 가라!' },
+];
+const E4_BY = Object.fromEntries(E4.map((e) => [e.map, e]));
+async function e4Battle(e) {
+  if (flag(e.f)) return say(['다음 방으로 가렴. 앞으로!'], { who: e.name, face: e.face });
+  W.busy = true;
+  try {
+    await say(e.hi, { who: e.name, face: e.face });
+    const res = await W.trainerBattle({ cls: e.cls, set: 0, name: e.name, face: e.face, intro: `사천왕 ${josa(e.name, '이/가')} 승부를 걸어 왔다!`, story: true, gym: true, lose: e.lose, money: 6000, music: 'gym' });
+    if (res !== 'win') return;
+    setFlag(e.f); W.updateGoal?.(); save();
+    await say(['(위쪽 문이 열렸다!)']);
+  } finally { W.busy = false; }
+}
+async function giovanniGym() {
+  if (flag('badge8')) return say(['…로켓단은 오늘로 해산이다.', '땅속 지층은 아래에 있을수록 오래전에 쌓인 거다. 너는 그 위에 새 이야기를 쌓아라.'], { who: '비주기', face: 'giovanni' });
+  await say(['…여기까지 왔나. 그래, 이 체육관의 관장은 바로 나, 비주기다!', '내 포켓몬은 땅 타입. 땅은 오랜 세월 흙과 모래가 차곡차곡 쌓여 굳은 지층으로 되어 있지.', '로켓단 보스의 진짜 힘을 보여 주겠다!'], { who: '비주기', face: 'giovanni' });
+  const res = await W.trainerBattle({ cls: 'Giovanni', set: 2, name: '비주기', face: 'giovanni', intro: '관장 비주기가 승부를 걸어 왔다!', story: true, gym: true, lose: '…세 번이나 지다니. 내가 졌다.', money: 5000, music: 'gym' });
+  if (res !== 'win') return;
+  await say(['훌륭하다. 이 그린배지를 가져가라.', '나는 로켓단을 해산하고, 처음부터 다시 수련하겠다. …언젠가 다시 만나자.'], { who: '비주기', face: 'giovanni' });
+  setFlag('badge8'); G.s.badges.push('earth'); onBadge(); sfx('badge');
+  await say([`${josa(P(), '은/는')} 그린배지를 받았다!`, '(배지 8개를 다 모았다! 이제 포켓몬 리그에 도전할 수 있어!)', '💡 상록시티 서쪽 22번도로 → 포켓몬리그 관문 → 23번도로 → 챔피언로드!']);
+  W.updateGoal?.(); save();
+}
+async function rivalRoute22() {
+  W.busy = true;
+  try {
+    await sayAs('rival', [`어, ${P()}! 너도 포켓몬 리그에 가는 거야?`, '나도 배지 8개 다 모았지! 리그 가기 전에 몸풀기 한 판 하자!']);
+    const res = await W.trainerBattle({ party: [[18, 47], [112, 45], [65, 47], [59, 45], [103, 45], [134, 53]], name: R(), face: 'rival', intro: `라이벌 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, story: true, lose: '크윽… 몸풀기라서 봐준 거야!', win: '헤헤, 리그에서 보자!', money: 4000 });
+    setFlag('rival6');
+    if (res !== 'win') return;
+    await sayAs('rival', ['쳇… 좋아, 리그에서 진짜 승부다! 먼저 간다!']);
+    const rv = W.scene.npcBy?.((x) => x.kind === 'rival'); if (rv) W.scene.removeNpc(rv);
+    W.updateGoal?.(); save();
+  } finally { W.busy = false; }
+}
+async function moltresVR(o) {
+  if (flag('moltres')) return;
+  await say(['불꽃처럼 빛나는 커다란 새 포켓몬이 날개를 펼쳤다!', '전설의 포켓몬, 파이어다!']);
+  await W.wildBattle({ encounterRate: 0, mons: [{ species: 'Moltres', level: 50 }] });
+  setFlag('moltres');
+  const b = o || W.scene.npcBy?.((x) => x.idx === 5); if (b) W.scene.removeNpc(b);
+  save();
+}
+async function championBattle() {
+  if (flag('champWin')) return;
+  W.busy = true;
+  try {
+    await sayAs('rival', [`${P()}! 기다렸어. 내가 사천왕을 먼저 이기고 챔피언이 됐다고!`, '오박사 할아버지 손자인 내가 세상에서 제일 강한 트레이너야.', '네가 그동안 공부한 거, 내가 다 받아 주지! 덤벼!']);
+    const res = await W.trainerBattle({ party: [[18, 61], [65, 59], [112, 61], [59, 61], [103, 61], [134, 65]], name: R(), face: 'champion', boss: true, heal: true, intro: `챔피언 ${josa(R(), '이/가')} 승부를 걸어 왔다!`, story: true, gym: true, lose: '말도 안 돼… 내가 지다니!', win: '헤헤, 챔피언은 역시 나야!', money: 9900, music: 'gym' });
+    if (res !== 'win') return;
+    setFlag('champWin'); save();
+    await sayAs('rival', ['…내가 졌어. 챔피언 자리는 겨우 몇 분이었네.', '그래도 인정할게. 넌 정말 강해졌어.']);
+    await say([`${P()}! 정말 축하한다!`, `${R()}, 너는 포켓몬을 믿고 아끼는 마음을 잊었던 것 같구나. 그래서 진 거란다.`, `${P()}, 너는 틀린 문제에서도 배우고, 포켓몬과 함께 끝까지 해냈어.`, '자, 따라오너라. 명예의 전당으로 가자!'], { who: '오박사', face: 'oak' });
+    await hallOfFame();
+  } finally { W.busy = false; }
+}
+async function hallOfFame() {
+  await W.scene.loadMap('HallOfFame', 4, 5, 'up');
+  await say(['여기는 명예의 전당. 포켓몬 리그 챔피언과 그 포켓몬들의 이름이 영원히 남는 곳이란다.', `${P()}와 함께한 포켓몬들을 기록하마!`], { who: '오박사', face: 'oak' });
+  sfx('badge');
+  G.s.hof = [...(G.s.hof || []), { at: Date.now(), party: G.s.party.map((m) => [m.sp, m.lv]) }];
+  setFlag('champion');
+  await W.ending?.();
+  // 엔딩 뒤: 사천왕에 다시 도전할 수 있게 방 깃발을 되돌리고, 집에서 이어 한다
+  for (const k of ['e4_1', 'e4_2', 'e4_3', 'e4_4', 'champWin']) delete G.s.flags[k];
+  G.s.respawn = { map: 'RedsHouse1F', x: 3, y: 5 };
+  healParty?.();
+  save();
+  await W.scene.loadMap('RedsHouse1F', 3, 5, 'down');
+  await say(['…집에 돌아왔다. 엄마가 따뜻한 밥을 차려 두셨다.', '🎉 엔딩까지 모두 마쳤어! 이제 도감을 채우거나, 사천왕에게 다시 도전해 보자!'], {});
+  W.updateGoal?.(); save();
+}
+
+Object.assign(LINES, {
+  'ViridianGym:0': () => giovanniGym(),
+  'ViridianGym:9': () => say(['어이, 챔피언 지망생! 드디어 마지막 체육관이야!', '관장은 땅 포켓몬을 써. 물·풀·얼음 기술이 효과 굉장!', '전기 기술은 땅 포켓몬에게 안 통하니 조심해!'], { who: '가이드', face: 'guide' }),
+  'Route22Gate:0': () => say(flag('badge8') ? ['배지 8개 확인! 포켓몬 리그로 가는 길이다. 행운을 빈다!'] : ['여기서부터는 포켓몬 리그! 배지 8개가 있어야 지나갈 수 있다.'], { who: '경비원', face: 'clerk' }),
+  'Route23:0': () => say(['볼배지 확인! 지나가도 좋다.'], { who: '경비원', face: 'clerk' }),
+  'Route23:1': () => say(['블루배지 확인! 계속 북쪽으로!'], { who: '경비원', face: 'clerk' }),
+  'Route23:2': () => say(['물속에서는 몸이 가볍게 느껴져. 물이 몸을 위로 밀어 주는 힘(부력) 때문이야!'], { who: '수영선수', face: 'swimmer' }),
+  'Route23:3': () => say(['바닷물은 짜서 민물보다 몸이 더 잘 떠!'], { who: '수영선수', face: 'swimmer' }),
+  'Route23:4': () => say(['핑크배지 확인! 이 앞은 물길이야. 파도타기로 건너!'], { who: '경비원', face: 'clerk' }),
+  'Route23:5': () => say(['골드배지 확인! 챔피언로드가 가까워!'], { who: '경비원', face: 'clerk' }),
+  'Route23:6': () => say(['진홍배지와 그린배지까지! 너라면 해낼 수 있어!'], { who: '경비원', face: 'clerk' }),
+  'VictoryRoad2F:5': (o) => moltresVR(o),
+  'IndigoPlateauLobby:0': nurse,
+  'IndigoPlateauLobby:1': () => say(['어이! 드디어 여기까지 왔구나!', '사천왕은 네 명이 차례로 나와. 한 명을 이기면 다음 방 문이 열려.', '💡 들어가기 전에 간호순에게 포켓몬을 회복하고, 상처약을 넉넉히 사 두자!'], { who: '가이드', face: 'guide' }),
+  'IndigoPlateauLobby:2': () => say(['사천왕은 얼음·격투·고스트·드래곤 포켓몬을 써. 타입 상성을 잘 생각해!'], { who: '엘리트트레이너', face: 'coolf' }),
+  'IndigoPlateauLobby:3': clerk,
+  'IndigoPlateauLobby:4': () => say(['통신 교환 서비스는 지금 준비 중이에요.'], { who: '안내원', face: 'nurse' }),
+  'LoreleisRoom:0': () => e4Battle(E4[0]), 'BrunosRoom:0': () => e4Battle(E4[1]), 'AgathasRoom:0': () => e4Battle(E4[2]), 'LancesRoom:0': () => e4Battle(E4[3]),
+  'ChampionsRoom:0': () => championBattle(),
+  'HallOfFame:0': () => say(['명예의 전당에 네 이름이 남았단다. 정말 자랑스럽구나!'], { who: '오박사', face: 'oak' }),
+});
+Object.assign(SIGNS, {
+  'ViridianGym:1': () => [flag('badge8') ? `상록시티 체육관 — 우승 트레이너: ${P()}` : '상록시티 체육관 — 우승 트레이너: …'],
+});
+for (let i = 1; i <= 8; i++) TRAINER['ViridianGym:' + i] = T2(['엘리트트레이너', '태권왕', '조련사'][i % 3], '비주기 님께는 못 간다!', ['졌다!', ['지층은 아래에 있는 층일수록 오래전에 쌓였어.', '지진은 땅속 판이 움직이면서 생겨.', '화석은 지층 속에 남은 옛 생물의 흔적이야.', '모래와 진흙이 쌓여 굳으면 퇴적암이 돼.'][i % 4]], 1500);
+
+function ch9Goal(map) {
+  const T = (text, detail, targets, dir = '') => ({ text, detail, dir, targets });
+  if (!flag('badge8')) {
+    if (map === 'ViridianCity') return T('상록시티 체육관에 도전하자!', ['드디어 문이 열렸대. 관장은 누구일까…?'], [[32, 7, '체육관 문']]);
+    if (map === 'ViridianGym') return T('맨 안쪽의 관장에게 말을 걸자', ['트레이너들을 이기며 왼쪽 위로!', '땅 포켓몬에게는 물·풀·얼음 기술이 효과 굉장!'], [[2, 2, '관장 앞']]);
+    return T('마지막 배지! 상록시티 체육관으로', [F.hasHM('fly') ? '💡 날아가기 → 상록시티!' : '태초마을 북쪽이 상록시티야.'], null);
+  }
+  if (flag('champion')) return null;
+  const e = E4_BY[map];
+  if (e) return flag(e.f) ? T('위쪽 문으로 다음 방에!', [], e.exit.map(([x, y], i) => [x, y, i ? '' : '다음 방'])) : T(`사천왕 ${e.name}에게 도전!`, ['앞으로 가면 승부가 시작돼.', '지면 포켓몬센터로 돌아가지만, 이긴 방은 그대로야!'], [[...e.at, e.name]]);
+  if (map === 'ViridianCity') return T('서쪽 22번도로로! 포켓몬 리그까지', [], edge(map, 'west', '22번도로'), '← 서쪽');
+  if (map === 'Route22') return T('포켓몬리그 관문으로!', ['서쪽 끝 건물이야.'], [[8, 5, '관문']], '← 서쪽');
+  if (map === 'Route22Gate') return T('북쪽 문으로 나가자', [], [[4, 0, '북쪽 문'], [5, 0, '']], '↑ 북쪽');
+  if (map === 'Route23') {
+    if (G.s.y >= 72 && !G.s.surf) return T('물가에서 파도타기!', ['물가에서 A 버튼 → “예”!'], shore(map, '물가 — A로 파도타기', (x, y) => y >= 95), '↑ 북쪽');
+    if (G.s.y < 32 || (G.s.x >= 14 && G.s.y < 38)) return T('북쪽으로 쭉! 석영고원까지', [], edge(map, 'north', '석영고원'), '↑ 북쪽');
+    return T('챔피언로드 입구로!', ['북쪽 왼편 동굴이야.'], [[4, 31, '챔피언로드']], '↑ 북쪽');
+  }
+  if (map === 'VictoryRoad1F') return T('왼쪽 위 사다리로 2층에!', ['💡 바위는 괴력으로 밀 수 있어. 막히면 그냥 밀어 보자!'], [[1, 1, '2층 사다리']]);
+  if (map === 'VictoryRoad2F') return T('출구를 찾자!', ['길이 막혀 있으면 3층으로 돌아가자.'], [[29, 7, '출구'], [29, 8, ''], [1, 1, '3층 사다리']]);
+  if (map === 'VictoryRoad3F') return T('오른쪽 아래 구멍으로 2층에!', ['💡 바위는 괴력으로 밀 수 있어.'], [[26, 8, '2층으로']]);
+  if (map === 'IndigoPlateau') return T('포켓몬 리그 건물로!', [], [[9, 5, '포켓몬 리그'], [10, 5, '']]);
+  if (map === 'IndigoPlateauLobby') return T('회복하고 사천왕의 방으로!', ['간호순에게 회복 → 위쪽 문!'], [[8, 0, '사천왕의 방']]);
+  if (map === 'ChampionsRoom') return T('챔피언과 승부!', [], [[4, 3, '챔피언']]);
+  return T('포켓몬 리그로! 상록시티 서쪽 22번도로', [F.hasHM('fly') ? '💡 날아가기 → 상록시티!' : ''].filter(Boolean), null);
 }
