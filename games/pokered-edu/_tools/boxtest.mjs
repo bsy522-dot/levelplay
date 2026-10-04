@@ -30,7 +30,7 @@ async function advance() { for (let i = 0; i < 40 && (await vis('.dialog') || aw
 const clickBoxRow = (i) => page.locator('.panel .list').nth(1).locator('.row').nth(i).click();
 const clickChoice = (t) => page.locator('.choices button', { hasText: t }).first().click();
 
-await page.goto('http://box.test/index.html');
+await page.goto(process.env.BOX_URL || 'http://box.test/index.html');
 await page.waitForSelector('.title .opts button', { timeout: 30000 });
 await page.evaluate(() => {
   localStorage.clear();
