@@ -1,14 +1,16 @@
 """브라우저 테스트 전체를 차례로 돌린다 (배포 전 확인용).
-실행: python _tools/run_all.py [url]
+실행: python _tools/run_all.py [url | --localfs]
 각 테스트의 실패 줄과 결과 줄만 모아서 보여 준다. 하나라도 실패하면 종료 코드 1."""
 import os, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 GAME = os.path.dirname(HERE)
-URL = sys.argv[1] if len(sys.argv) > 1 else ''
+LOCALFS = '--localfs' in sys.argv  # 서버·네트워크 없이 디스크에서 직접 (_localfs.mjs)
+args = [a for a in sys.argv[1:] if not a.startswith('--')]
+URL = 'http://localfs.test/' if LOCALFS else (args[0] if args else '')
 SUITES = [
     ('slottest', {}), ('lessontest', {}), ('lecturetest', {}), ('settingstest', {}),
-    ('playtest', {}), ('playtest(폰)', {'VIEW': 'phone'}), ('touchtest', {}),
+    ('boxtest', {}), ('playtest', {}), ('playtest(폰)', {'VIEW': 'phone'}), ('touchtest', {}),
     ('compattest', {}), ('ch2test', {}), ('ch3test', {}),
     ('ch4test', {}), ('ch5test', {}), ('ch6test', {}), ('ch7test', {}), ('ch8test', {}), ('ch9test', {}),
 ]
@@ -25,7 +27,7 @@ for name, extra in SUITES:
     env = dict(os.environ, **extra)
     if 'VIEW' in extra:
         env['SHOT_DIR'] = env.get('SHOT_DIR', '') or os.path.join(os.environ.get('TEMP', '.'), 'shots_phone')
-    cmd = ['node', os.path.join(HERE, script + '.mjs')] + ([prepare_old()] if script == 'compattest' and OLD else [URL] if URL else [])
+    cmd = ['node'] + (['--import', __import__('pathlib').Path(HERE, '_localfs.mjs').as_uri()] if LOCALFS else []) + [os.path.join(HERE, script + '.mjs')] + ([prepare_old()] if script == 'compattest' and OLD else [URL] if URL else [])
     try:
         r = subprocess.run(cmd, cwd=GAME, env=env, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=2400)
         out, code = r.stdout + r.stderr, r.returncode

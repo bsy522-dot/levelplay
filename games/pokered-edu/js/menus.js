@@ -276,7 +276,7 @@ export async function openBox() {
   await panel('포켓몬 보관함', (body, api) => {
     const draw = () => {
       body.innerHTML = '';
-      body.append(el('div', { class: 'sub' }, '파티 포켓몬을 누르면 보관함으로, 보관함 포켓몬을 누르면 파티로 옮겨요. (파티는 1~6마리)'));
+      body.append(el('div', { class: 'sub' }, '파티 포켓몬을 누르면 보관함으로 옮겨요. 보관함 포켓몬을 누르면 파티로 옮기거나 자연으로 풀어줄 수 있어요. (파티는 1~6마리)'));
       body.append(el('h3', {}, `파티 (${G.s.party.length}/6)`));
       const l1 = el('div', { class: 'list' }); body.append(l1);
       body.append(el('h3', {}, `보관함 (${G.s.box.length})`));
@@ -286,9 +286,21 @@ export async function openBox() {
         ...G.s.box.map((m, i) => ({ value: ['b', i], node: monRow(m) })),
       ];
       rows.forEach((r, i) => (i < G.s.party.length ? l1 : l2).append(r.node));
-      api.onKey(listNav(el('div'), rows, (v) => {
+      api.onKey(listNav(el('div'), rows, async (v) => {
         if (v[0] === 'p') { if (G.s.party.length <= 1) { toast('파티에 한 마리는 있어야 해요!'); return; } G.s.box.push(...G.s.party.splice(v[1], 1)); }
-        else { if (G.s.party.length >= 6) { toast('파티가 꽉 찼어요!'); return; } G.s.party.push(...G.s.box.splice(v[1], 1)); }
+        else {
+          // 보관함 포켓몬: 파티로 / 풀어주기 (같은 포켓몬이 쌓일 때 정리용. 파티 포켓몬은 풀어줄 수 없다 — 먼저 보관함으로)
+          const m = G.s.box[v[1]]; if (!m) return;
+          const name = sp(m.sp).name;
+          const act = await choose([{ label: '파티로 데려가기', value: 'take' }, { label: '자연으로 풀어주기', value: 'free' }, { label: '취소', value: null }], { cancel: null });
+          if (act === 'take') { if (G.s.party.length >= 6) { toast('파티가 꽉 찼어요!'); return; } G.s.party.push(...G.s.box.splice(v[1], 1)); }
+          else if (act === 'free') {
+            if (!(await ask(`Lv${m.lv} ${josa(name, '을/를')} 자연으로 풀어줄까요? 한 번 보내면 다시 만날 수 없어요.`, { who: '오박사', face: 'oak' }))) return;
+            G.s.box.splice(v[1], 1);
+            save(); sfx('select');
+            await say([`${josa(name, '은/는')} 손을 흔들며 풀숲으로 돌아갔다. 잘 가!`, '(도감 기록은 그대로 남아 있어요)'], { who: '오박사', face: 'oak' });
+          } else return;
+        }
         sfx('select'); draw();
       }));
       // listNav 가 임시 div 에 붙였으니 다시 원래 목록에 붙인다

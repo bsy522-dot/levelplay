@@ -55,7 +55,11 @@ for (let b = 0; b < BATTLES; b++) {
     }
     if (first >= PLAN.length && await vis('.bbox .cmds:not(.hidden)')) {
       await page.click('.bbox .cmds button:nth-child(4)'); // 도망
-      await page.waitForTimeout(300); ran = true; continue;
+      await page.waitForTimeout(300);
+      // 조이기류(김밥말이 등)에 걸리면 원작처럼 도망이 막힌다 → 배틀이 안 끝났으면 문제를 더 풀고 다시 도망 (2026-10-03 전투 보강)
+      for (let k = 0; k < 30 && (await vis('.bbox')) && !(await vis('.quiz')); k++) { await page.keyboard.press('Space'); await page.waitForTimeout(100); }
+      if (!(await vis('.bbox'))) ran = true;
+      continue;
     }
     await page.keyboard.press('Space'); await page.waitForTimeout(90);
   }

@@ -58,8 +58,8 @@ await page.reload();
 await page.waitForSelector('.title .opts button', { timeout: 30000 });
 await key('Space'); await page.waitForTimeout(1500);
 await page.evaluate(() => { window.__pe.G.s.party = [
-  { sp: 25, lv: 85, exp: 614125, iv: { atk: 15, def: 15, spe: 15, spc: 15, hp: 15 }, status: null, moves: [{ id: 'Thunderbolt', pp: 99 }, { id: 'Surf', pp: 99 }], hp: 300 },
-  { sp: 131, lv: 85, exp: 614125, iv: { atk: 15, def: 15, spe: 15, spc: 15, hp: 15 }, status: null, moves: [{ id: 'Surf', pp: 99 }, { id: 'IceBeam', pp: 99 }, { id: 'PsychicM', pp: 99 }], hp: 380 }]; });
+  { sp: 25, lv: 100, exp: 1000000, iv: { atk: 15, def: 15, spe: 15, spc: 15, hp: 15 }, status: null, moves: [{ id: 'Thunderbolt', pp: 99 }, { id: 'Surf', pp: 99 }], hp: 999 },
+  { sp: 131, lv: 100, exp: 1000000, iv: { atk: 15, def: 15, spe: 15, spc: 15, hp: 15 }, status: null, moves: [{ id: 'Surf', pp: 99 }, { id: 'IceBeam', pp: 99 }, { id: 'PsychicM', pp: 99 }], hp: 999 }]; });
 await heal();
 let s, g;
 // ① 상록시티 체육관

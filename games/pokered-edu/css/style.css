@@ -69,6 +69,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* 전체 화면 패널 (가방, 도감 등) */
 .panel { position: absolute; inset: max(10px, env(safe-area-inset-top)) 10px 10px; display: flex; flex-direction: column; z-index: 26; overflow: hidden; }
+/* 패널(보관함 등)이 열려 있는 동안 그 위에서 묻는 말·선택지는 패널 위에 보여야 한다 (풀어주기 확인 등) */
+body.in-panel .dialog { z-index: 27; }
+body.in-panel .choices { z-index: 28; }
 .panel header { display: flex; align-items: center; justify-content: space-between; gap: .5em; padding: .55em .9em; background: var(--line); color: #fff; font-family: 'Jua'; font-size: 1.15em; }
 .panel header .x { background: #fff2; border: 0; color: #fff; border-radius: 10px; padding: .1em .7em; }
 .panel .body { flex: 1; overflow: auto; padding: .7em; touch-action: pan-y; }
