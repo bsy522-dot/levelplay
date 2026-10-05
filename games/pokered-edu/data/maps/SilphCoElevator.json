@@ -1,0 +1,1 @@
+{"id":"SilphCoElevator","outdoor":false,"tileset":"Lobby","w":4,"h":4,"grid":["fffS","____","____","_DD_"],"buildings":[],"connections":{},"warps":[{"x":1,"y":3,"to":"UnusedMapED","toWarp":0},{"x":2,"y":3,"to":"UnusedMapED","toWarp":0}],"npcs":[],"signs":[{"x":3,"y":0,"textId":1}],"wild":null}
