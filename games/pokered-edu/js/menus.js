@@ -9,6 +9,7 @@ import { report, settings, SPEEDS, GRADES, restartAt, SUBJECTS } from './learn/t
 import { nextQuestion, record } from './learn/tutor.js';
 import { shuffle } from './util.js';
 import { W } from './world/overworld.js';
+import * as SV from './saves.js';
 import * as F from './world/field.js';
 import { fixJosa } from './learn/math.js';
 
@@ -46,10 +47,38 @@ export async function openMenu() {
       else if (v === 'card') await cardScreen();
       else if (v === 'settings') await settingsScreen();
       else if (v === 'fly') { if (await flyMenu()) break; }
-      else if (v === 'save') { save(); sfx('item'); toast('저장했어요! 💾'); }
+      else if (v === 'save') await saveScreen();
       else if (v === 'sound') { setMuted(!isMuted()); }
     }
   } finally { W.busy = false; W.scene?.refreshFollower?.(); W.updateGoal?.(); }
+}
+
+/* ── 💾 저장: 어느 슬롯에 저장할지 고른다 (2026-10-17 병석님: "저장할 때도 원하는 슬롯에 저장")
+ * 예전엔 지금 노는 슬롯에만 덮어썼다. 고른 슬롯에 저장하면 그 슬롯이 '지금 노는 슬롯'이 된다.
+ * 다른 모험이 든 슬롯은 한 번 더 확인하고, 덮어쓴 이전 판은 자동 백업에 남는다. */
+async function saveScreen() {
+  const act = SV.activeSlot();
+  const list = SV.listSlots();
+  const opts = list.map((s) => ({
+    label: `슬롯 ${s.n}${s.n === act ? ' ▶지금' : ''} — ${s.exists ? s.summary : '빈 슬롯'}`,
+    value: s.n,
+  }));
+  opts.push({ label: '취소', value: null });
+  const box = await say([`어느 슬롯에 저장할까? (지금 ${act}번)`], { keep: true });
+  const n = await choose(opts, { start: act - 1, style: { maxHeight: '55vh', overflowY: 'auto' } });
+  box.remove();
+  if (!n) return;
+  const cur = list.find((s) => s.n === n);
+  if (cur && cur.exists && n !== act) {
+    const warn = n === 1 ? '슬롯 1 은 처음 모험이에요. 정말 덮어쓸까?' : `슬롯 ${n} 에 있는 기록을 덮어쓸까?`;
+    const b2 = await say([warn + ' (이전 판은 자동 백업에 남아요)'], { keep: true });
+    const yes = await choose([{ label: '덮어쓴다', value: true }, { label: '아니요', value: false }], { cancel: false, start: 1 });   // 연타해도 안 덮어쓰게 '아니요'가 먼저 선택됨
+    b2.remove();
+    if (!yes) return;
+  }
+  const r = SV.saveToSlot(n);
+  sfx(r.ok ? 'item' : 'cancel');
+  toast(r.ok ? `슬롯 ${n} 에 저장했어요! 💾` : r.msg);
 }
 
 function menuPick(box, items, start) {

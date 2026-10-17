@@ -26,6 +26,7 @@
  *     v1 은 '슬롯1 = 처음 게임' 의미로 고정하고, 활성 슬롯은 새 키로 관리한다.
  */
 import { G, newState } from './state.js';
+import { MAP_NAME } from './data.js';
 
 const V1_KEY = 'pokered_edu_save_v1';   /* ★기존 키. 절대 삭제/덮어쓰기 금지 */
 const SLOT_KEY = (n) => 'pokered_edu_slot_' + n;
@@ -107,7 +108,7 @@ function summarize(s) {
   const bits = [];
   const city = { PalletTown: '태초마을', ViridianCity: '상록시티', PewterCity: '회색시티',
     CeruleanCity: '블루시티', VermilionCity: '갈색시티', MtMoon1F: '달맞이산' };
-  bits.push(city[s.map] || s.map);
+  bits.push(city[s.map] || MAP_NAME[s.map] || s.map);
   if ((s.badges || []).length) bits.push('배지 ' + s.badges.length);
   if ((s.party || []).length) bits.push('포켓몬 ' + s.party.length);
   if (s.flags && s.flags.badge1) bits.push('웅 승리');
@@ -124,11 +125,20 @@ export function saveToSlot(n, label) {
   s._savedAt = Date.now();
   s._slot = n;
 
-  /* 자동 백업: 지금 이 슬롯에 저장돼 있던 이전 판을 회전시킨다 */
-  rotateBackup(n);
+  /* 자동 백업: 지금 이 슬롯에 저장돼 있던 이전 판을 회전시킨다.
+   * ★2026-10-17: 같은 모험을 같은 슬롯에 다시 저장할 때는 돌리지 않는다.
+   *   게임 메뉴 '저장'을 몇 번 누르면 5칸 백업이 같은 모험의 사본으로만 가득 차서
+   *   다른 모험을 덮어쓴 직전 판이 밀려나기 때문. 다른 모험을 덮어쓸 때만 보관한다. */
+  const prev = read(keyOf(n));
+  const fork = n !== activeSlot();
+  if (!(prev && prev.started && prev.started === s.started && !fork)) rotateBackup(n);
+  /* ★다른 슬롯에 저장 = 여기서부터 갈라지는 별개 모험. 새 번호(started)를 줘서 repairMisSaved 가
+   *   "같은 모험인데 슬롯 1 이 더 오래 놀았네" 로 착각해 이 체크포인트를 덮어쓰지 않게 한다. */
+  if (fork) { s.started = Date.now(); s._copiedFrom = activeSlot(); }
 
   const ok = write(keyOf(n), s);
   if (!ok) return { ok: false, msg: '저장 공간이 부족합니다. (기기의 저장 용량을 확인하세요)' };
+  if (fork) G.s.started = s.started;   /* 쓰기가 성공한 뒤에만 지금 진행의 번호를 바꾼다 */
 
   const m = meta();
   const found = m.slots.find((x) => x.n === n);
@@ -159,7 +169,9 @@ function rotateBackup(n) {
     const src = read(BK_KEY(i - 1));
     if (src) write(BK_KEY(i), src);
   }
-  write(BK_KEY(1), prev);
+  /* ★백업은 5칸을 모든 슬롯이 같이 쓴다. 어느 슬롯의 이전 판인지 적어 두어야
+   *   복원할 때 엉뚱한 슬롯(지금 노는 슬롯)을 덮어쓰지 않는다. */
+  write(BK_KEY(1), { ...prev, _bkSlot: n });
 }
 
 /* ── 백업 목록 ── */
@@ -167,7 +179,7 @@ export function listBackups(n) {
   const out = [];
   for (let i = 1; i <= MAX_BACKUPS; i++) {
     const b = read(BK_KEY(i));
-    if (b) out.push({ i, at: b._savedAt || 0, map: b.map, x: b.x, y: b.y,
+    if (b) out.push({ i, slot: b._bkSlot || null, at: b._savedAt || 0, map: b.map, x: b.x, y: b.y,
       party: (b.party || []).length, badges: (b.badges || []).length, summary: summarize(b) });
   }
   return out;
@@ -177,8 +189,11 @@ export function listBackups(n) {
 export function restoreBackup(i, toSlot) {
   const b = read(BK_KEY(i));
   if (!b) return { ok: false, msg: '백업 ' + i + ' 이 없습니다.' };
-  const n = toSlot || activeSlot();
-  const ok = write(keyOf(n), b);
+  /* 원래 그 판이 있던 슬롯으로 돌려놓는다(옛 백업은 기록이 없어 지금 슬롯). 덮어쓰기 전 현재 판도 백업. */
+  const n = toSlot || b._bkSlot || activeSlot();
+  const { _bkSlot, ...clean } = b;
+  rotateBackup(n);
+  const ok = write(keyOf(n), clean);
   if (!ok) return { ok: false, msg: '복원 실패(저장 공간 부족)' };
   const m = meta();
   const found = m.slots.find((x) => x.n === n);
@@ -306,6 +321,24 @@ export function moveSlotOutside(n, mapId, x, y, newName, label) {
     ok: true, slot: target, msg:
       `슬롯 ${n} 을 슬롯 ${target} 으로 복사하고, 복사본만 ${label || '길'} 로 보냈습니다. 원본 슬롯 ${n} 은 그대로입니다.`,
   };
+}
+
+/* ── 슬롯 n 의 주인공을 그 자리에서 밖으로 (2026-10-17 병석님: "원하는 저장 슬롯에서 밖으로 보낼 수 있어야")
+ * moveSlotOutside 는 슬롯 1 을 다른 빈 칸에 '복사'하는 방식이라 슬롯을 고를 수 없었다.
+ * 이 함수는 고른 슬롯 n 하나만, 좌표(map/x/y/facing)만 바꾼다. 포켓몬·배지·금화·도감·깃발은 그대로.
+ * 바꾸기 전에 그 슬롯의 이전 판을 백업 칸으로 돌리므로 '↩ 복원'으로 되돌릴 수 있다. */
+export function sendSlotOutside(n, mapId, x, y, label) {
+  const s = read(keyOf(n));
+  if (!s) return { ok: false, msg: '슬롯 ' + n + ' 에 세이브가 없습니다.' };
+  if (s.map === mapId && s.x === x && s.y === y) return { ok: true, slot: n, msg: `슬롯 ${n} 은 이미 ${label || '바깥 길'} 에 있습니다. (변경 없음)` };
+  rotateBackup(n);
+  s.map = mapId; s.x = x; s.y = y; s.facing = 'down';
+  if (label) s._movedLabel = label;
+  if (!write(keyOf(n), s)) return { ok: false, msg: '저장 공간이 부족합니다.' };
+  const m = meta();
+  const found = m.slots.find((v) => v.n === n);
+  if (found) { found.map = mapId; found.x = x; found.y = y; saveMeta(m); }
+  return { ok: true, slot: n, msg: `슬롯 ${n} 의 주인공을 ${label || '바깥 길'} 로 보냈습니다. (이전 판은 자동 백업에 남아 있습니다)` };
 }
 
 /* ── 이미 설치된 기기의 세이브 지키기 (2026-10-03, 병석님: "잡은 포켓몬·레벨·마을 위치는 계속 보존") ──

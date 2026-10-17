@@ -16,8 +16,9 @@
 import { G, save, wipe, newState, load, hasSave } from './state.js';
 import { initLearn } from './learn/tutor.js';
 import * as SV from './saves.js';
-import { DB } from './data.js';   /* ★좌표 계산용 (2026-10-03 추가) */
+import { DB, MAP_NAME } from './data.js';   /* ★좌표 계산용 (2026-10-03 추가) */
 import { W } from './world/overworld.js';
+import { flySpot } from './world/field.js';
 import { toast, root, say, choose, panel } from './ui.js';
 import { el } from './util.js';
 import { sfx } from './audio.js';
@@ -60,8 +61,8 @@ const OUTSIDE_SPOTS = {
   PewterCity: { label: '회색시티 포켓몬센터 앞', x: 13, y: 26 },
   ViridianCity: { label: '상록시티 포켓몬센터 앞', x: 23, y: 26 },
   PalletTown: { label: '태초마을', x: 9, y: 7 },
-  CeruleanCity: { label: '청록시티 포켓몬센터 앞', x: 19, y: 18 },
-  VermilionCity: { label: '버밀리온시티 포켓몬센터 앞', x: 11, y: 4 },
+  CeruleanCity: { label: '블루시티 포켓몬센터 앞', x: 19, y: 18 },
+  VermilionCity: { label: '갈색시티 포켓몬센터 앞', x: 11, y: 4 },
   Route4: { label: '4번도로 포켓몬센터 앞', x: 11, y: 6 },
 };
 
@@ -77,58 +78,47 @@ const INDOOR_TO_CITY = {
   MtMoonPokecenter: 'Route4',
 };
 
-async function doMoveOutside(api, rerender, onPick) {
-  const a = SV.audit();
-  /* 세이브가 들어있는 맵을 먼저 찾는다 */
-  const maps = [...new Set(a.slots.filter((s) => s.exists && s.map).map((s) => s.map))];
-  let target = null;
-  /* ① 그대로 야외 도시 이름이면 바로 쓴다 */
-  for (const m of maps) { if (OUTSIDE_SPOTS[m]) { target = { ...OUTSIDE_SPOTS[m] }; target.map = m; break; } }
-  /* ② 실내 지도면 → 대응 도시로 바꿔 쓴다 */
-  if (!target) {
-    for (const m of maps) {
-      const city = INDOOR_TO_CITY[m];
-      if (city && OUTSIDE_SPOTS[city]) { target = { ...OUTSIDE_SPOTS[city] }; target.map = city; break; }
-    }
+/* ★2026-10-17 병석님: "지우를 밖으로 보내기가 슬롯1만 계속 보낸다. 원하는 저장 슬롯에서 보낼 수 있어야"
+ *   예전: 슬롯 1 고정 + 도시도 모든 슬롯 중 처음 찾은 것 → 슬롯 3 에 갇혀도 슬롯 1 만 복사됐다.
+ *   지금: 카드마다 버튼이 있고, 누른 슬롯 하나만 '자기 지도' 기준으로 그 자리에서 바깥으로 보낸다. */
+function outsideTargetFor(state) {
+  const m = state && state.map;
+  /* ① 야외 도시/도로 그대로 */
+  if (OUTSIDE_SPOTS[m]) return { ...OUTSIDE_SPOTS[m], map: m };
+  /* ② 실내 → 대응 도시 */
+  const city = INDOOR_TO_CITY[m];
+  if (city && OUTSIDE_SPOTS[city]) return { ...OUTSIDE_SPOTS[city], map: city };
+  /* ③ 그 밖의 실내·동굴: 마지막으로 있던 야외 도시의 포켓몬센터 앞(데이터에서 계산) */
+  const lo = state && state.lastOutdoor;
+  if (lo && DB.maps[lo]) {
+    const p = flySpot(lo);
+    return { label: (MAP_NAME[lo] || lo) + ' 포켓몬센터 앞', x: p.x, y: p.y, map: lo };
   }
-  /* ③ 목록에 없으면 세이브1만 다시 확인 (같은 대응 규칙) */
-  if (!target) {
-    const s0 = SV.loadSlot(1);
-    if (s0.ok) {
-      const city = INDOOR_TO_CITY[s0.state.map] || s0.state.map;
-      if (OUTSIDE_SPOTS[city]) { target = { ...OUTSIDE_SPOTS[city] }; target.map = city; }
-    }
-  }
-  if (!target) {
-      toast('어느 도시인지 몰라서 못 보냅니다.', 'bump');
-      return;
-    }
-    /* ★2026-10-03 수정.
-     *   원래는 '패널이 열린 채로' choose() 를 불렀다.
-     *   그런데 패널이 키/포커스를 붙잡고 있어서 선택지가 화면에 뜨지 않았다
-     *   (테스트에서 확인: 클릭해도 반응 없음 = await 가 영원히 안 끝남).
-     *   → 패널을 먼저 닫고, 그다음 묻는다. */
-    api.close(null);
-    await new Promise((res) => setTimeout(res, 260));
+  return null;
+}
 
-    const yes = await choose([
-      { label: `예 — ${target.label}로 보낸다`, value: true },
-      { label: '아니요', value: false },
-    ], { cancel: false });
-    if (!yes) { if (onPick) saveManager(onPick); return; }
-
-    const r = SV.moveSlotOutside(1, target.map, target.x, target.y, null, target.label);
-    toast(r.msg);
-    if (!r.ok) return;
-    await new Promise((res) => setTimeout(res, 500));
-    const box = await say([
-      r.msg,
-      '포켓몬·배지·금화는 슬롯 1 과 똑같이 유지됩니다.',
-      '슬롯 2 의 "불러오기" 를 누르면 밖에서 시작합니다.',
-    ], { keep: true });
-    box.remove();
-    location.reload();
+async function doMoveOutside(n, api, onPick) {
+  const r0 = SV.loadSlot(n);
+  const target = r0.ok ? outsideTargetFor(r0.state) : null;
+  if (!target) {
+    toast('슬롯 ' + n + ' 은 어느 도시인지 몰라서 못 보냅니다.', 'bump');
+    return;
   }
+  /* ★패널이 키/포커스를 붙잡으면 choose() 가 안 뜬다(2026-10-03 확인) → 패널을 먼저 닫고 묻는다. */
+  api.close(null);
+  await new Promise((res) => setTimeout(res, 260));
+
+  const yes = await choose([
+    { label: `예 — 슬롯 ${n} 을 ${target.label}로 보낸다`, value: true },
+    { label: '아니요', value: false },
+  ], { cancel: false });
+  if (yes) {
+    const r = SV.sendSlotOutside(n, target.map, target.x, target.y, target.label);
+    sfx(r.ok ? 'item' : 'bump');
+    toast(r.msg, 3200);
+  }
+  saveManager(onPick);   /* 결과를 보도록 관리 화면을 다시 연다 */
+}
 
 /* ── 세이브 관리 메인 ──
  * onPick: 슬롯을 골랐을 때 호출 (기본 = 그 슬롯으로 전환하고 게임 진입) */
@@ -139,19 +129,12 @@ export async function saveManager(onPick) {
     const rerender = () => { body.innerHTML = ''; draw(body, api, rerender, pick); };
 
     body.append(el('p', { class: 'sm-note' },
-      '슬롯 ' + SV.SLOT_COUNT + '개 중 골라 불러옵니다. 슬롯 1(처음 모험)은 절대 지워지지 않습니다.'));
+      '슬롯 ' + SV.SLOT_COUNT + '개 중 골라 불러옵니다. 슬롯 1(처음 모험)은 절대 지워지지 않습니다. 포켓몬센터 안에 갇혔으면 그 슬롯의 [🚪 밖으로 보내기]를 누르세요.'));
 
     draw(body, api, rerender, pick);
 
     body.append(el('div', { class: 'slot-acts' },
       el('button', { onclick: () => { api.close(null); } }, '← 처음으로'),
-      /* ★2026-10-02 병석님 지시: "지우를 밖으로 보내줘"
-       *   포켓몬센터 안에 갇혀 밖으로 못 나가는 것을 즉시 해결한다.
-       *   좌표(map/x/y)만 바꾸고 포켓몬·배지·금화는 그대로 둔다.
-       *   먼저 자동 백업을 돌리므로 되돌릴 수 있다. */
-      el('button', {
-        onclick: () => doMoveOutside(api, rerender, pick),
-      }, '🚪 지우를 밖으로 보내기'),
     ));
   }, { wide: true });
 }
@@ -184,6 +167,11 @@ function draw(body, api, rerender, pick) {
         title: del.ok ? '' : del.msg,
         onclick: () => doDelete(n, s, api, rerender),
       }, '🗑 지우기'));
+      /* 🚪 이 슬롯의 주인공만 바깥으로(다른 슬롯은 안 건드림). 이전 판은 자동 백업 */
+      acts.append(el('button', {
+        title: '이 슬롯의 주인공을 포켓몬센터 밖으로 보냅니다 (포켓몬·배지·금화는 그대로)',
+        onclick: () => doMoveOutside(n, api, pick),
+      }, '🚪 밖으로 보내기'));
       card.append(acts);
       if (!del.ok && !s.protected) card.append(el('div', { class: 'slot-lock' }, del.msg));
     } else {
@@ -208,7 +196,7 @@ function draw(body, api, rerender, pick) {
       card.append(el('div', { class: 'slot-sum' }, b.summary));
       card.append(el('div', { class: 'slot-when' }, when(b.at)));
       card.append(el('div', { class: 'slot-btns' },
-        el('button', { onclick: () => doRestore(b.i, rerender) }, '↩ 이 판으로 복원')));
+        el('button', { onclick: () => doRestore(b.i, rerender) }, b.slot ? `↩ 슬롯 ${b.slot} 으로 복원` : '↩ 이 판으로 복원')));
       bg.append(card);
     }
     body.append(bg);

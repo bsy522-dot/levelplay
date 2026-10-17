@@ -9,7 +9,7 @@ LOCALFS = '--localfs' in sys.argv  # 서버·네트워크 없이 디스크에서
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
 URL = 'http://localfs.test/' if LOCALFS else (args[0] if args else '')
 SUITES = [
-    ('slottest', {}), ('lessontest', {}), ('lecturetest', {}), ('settingstest', {}),
+    ('slottest', {}), ('savepicktest', {}), ('lessontest', {}), ('lecturetest', {}), ('settingstest', {}),
     ('boxtest', {}), ('playtest', {}), ('playtest(폰)', {'VIEW': 'phone'}), ('touchtest', {}),
     ('compattest', {}), ('ch2test', {}), ('ch3test', {}),
     ('ch4test', {}), ('ch5test', {}), ('ch6test', {}), ('ch7test', {}), ('ch8test', {}), ('ch9test', {}),
