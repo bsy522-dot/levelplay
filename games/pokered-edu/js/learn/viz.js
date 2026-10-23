@@ -307,9 +307,11 @@ const DRAW = {
  * 폭 360 기준으로 크게 그려 폰에서도 글씨가 읽힌다. 움직이는 그림은 처음에 한 번 움직이고 '▶ 다시 보기'로 또 본다. */
 const EMOJI = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji"';
 const col = (k) => C[k] || k || C.ink;
-function tx(g, s, x, y, { c = C.ink, size = 16, align = 'center', base = 'middle', w = 600 } = {}) {
+function tx(g, s, x, y, { c = C.ink, size = 16, align = 'center', base = 'middle', w = 600, halo = false } = {}) {
   g.fillStyle = col(c); g.font = `${w} ${size}px "Jua", "Gowun Dodum", ${EMOJI}, sans-serif`;
-  g.textAlign = align; g.textBaseline = base; g.fillText(String(s), x, y);
+  g.textAlign = align; g.textBaseline = base;
+  if (halo) { g.save(); g.strokeStyle = '#fff'; g.lineWidth = Math.max(3, size / 3.5); g.lineJoin = 'round'; g.strokeText(String(s), x, y); g.restore(); } // 흰 테두리: 선 위에서도 읽히게
+  g.fillText(String(s), x, y);
 }
 /** 글을 폭에 맞춰 줄로 나눈다 (띄어쓰기 단위, 한 낱말이 너무 길면 글자 단위) */
 function wrap(g, s, maxW, size) {
@@ -422,14 +424,14 @@ Object.assign(DRAW, {
       const lab = (v) => String(Math.round(v * 100) / 100).replace('-', '−');
       for (let v = Math.ceil(x0 / sx) * sx; v <= x1 + 1e-9; v += sx) if (Math.abs(v) > 1e-9) tx(g, lab(v), X(v), Y(ay) + 13, { size: 12, c: '#5a6478' });
       for (let v = Math.ceil(y0 / sy) * sy; v <= y1 + 1e-9; v += sy) if (Math.abs(v) > 1e-9) tx(g, lab(v), X(ax) - 6, Y(v), { size: 12, c: '#5a6478', align: 'right' });
-      if (s.xl) tx(g, s.xl, X(x1), Y(ay) - 12, { size: 13, c: '#5a6478', align: 'right' });
-      if (s.yl) tx(g, s.yl, X(ax) + 8, Y(y1) + 4, { size: 13, c: '#5a6478', align: 'left' });
+      if (s.xl) tx(g, s.xl, X(x1), Y(ay) - 12, { size: 13, c: '#5a6478', align: 'right', halo: true });
+      if (s.yl) tx(g, s.yl, X(ax) + 8, Y(y1) + 4, { size: 13, c: '#5a6478', align: 'left', halo: true });
       if (sh && sh.fn) { // 넓이 칠하기 (적분)
         const a = sh.a, b = a + (sh.b - a) * ease(clamp01(t * 1.4));
         g.fillStyle = 'rgba(59,108,212,.25)'; g.beginPath(); g.moveTo(X(a), Y(0));
         for (let i = 0; i <= 60; i++) { const x = a + ((b - a) * i) / 60; g.lineTo(X(x), Y(sh.fn(x))); }
         g.lineTo(X(b), Y(0)); g.closePath(); g.fill();
-        if (sh.label && t > 0.7) tx(g, sh.label, X((sh.a + sh.b) / 2), Y(sh.fn((sh.a + sh.b) / 2) / 2), { c: C.b, size: 15 });
+        if (sh.label && t > 0.7) tx(g, sh.label, X((sh.a + sh.b) / 2), Y(sh.fn((sh.a + sh.b) / 2) / 2), { c: C.b, size: 15, halo: true });
       }
       if (s.circle) { g.strokeStyle = C.grey; g.lineWidth = 2; g.setLineDash([6, 5]); g.beginPath(); g.ellipse(X(0), Y(0), Math.abs(X(s.circle) - X(0)), Math.abs(Y(s.circle) - Y(0)), 0, 0, Math.PI * 2); g.stroke(); g.setLineDash([]); }
       g.save(); g.beginPath(); g.rect(pad - 4, pad - 14, W - pad * 2 + 8, H - pad * 2 + 18); g.clip();
@@ -450,23 +452,23 @@ Object.assign(DRAW, {
       fns.forEach((f, k) => { // 곡선 이름표: 그래프 오른쪽 끝 근처
         if (!f.label || t < 0.75) return;
         const lx = f.lx ?? x0 + (x1 - x0) * 0.82, ly = f.fn(lx);
-        if (Number.isFinite(ly)) tx(g, f.label, X(lx), Math.max(14, Math.min(H - 14, Y(ly) - 14)), { c: f.c || ['a', 'b', 'c'][k % 3], size: 14 });
+        if (Number.isFinite(ly)) tx(g, f.label, X(lx), Math.max(14, Math.min(H - 14, Y(ly) - 14)), { c: f.c || ['a', 'b', 'c'][k % 3], size: 14, halo: true });
       });
       (s.segs || []).forEach((q) => {
         g.strokeStyle = col(q.c || C.grey); g.lineWidth = 2.5; if (q.dash) g.setLineDash([6, 5]);
         g.beginPath(); g.moveTo(X(q.x1), Y(q.y1)); g.lineTo(X(q.x1 + (q.x2 - q.x1) * clamp01(t * 1.5)), Y(q.y1 + (q.y2 - q.y1) * clamp01(t * 1.5))); g.stroke(); g.setLineDash([]);
-        if (q.label && t > 0.6) tx(g, q.label, X((q.x1 + q.x2) / 2) + (q.lx || 0), Y((q.y1 + q.y2) / 2) + (q.ly || 0), { c: q.c || '#5a6478', size: 14 });
+        if (q.label && t > 0.6) tx(g, q.label, X((q.x1 + q.x2) / 2) + (q.lx || 0), Y((q.y1 + q.y2) / 2) + (q.ly || 0), { c: q.c || '#5a6478', size: 14, halo: true });
       });
       (s.vecs || []).forEach((v, k) => {
         const p = ease(clamp01(t * 1.4 - k * 0.2)); if (p <= 0) return;
         const [fx, fy] = v.from || [0, 0];
         arrow(g, X(fx), Y(fy), X(fx + (v.x - fx) * p), Y(fy + (v.y - fy) * p), v.c || ['a', 'b', 'c'][k % 3], 4, 13);
-        if (v.label && p > 0.95) tx(g, v.label, X(v.x) + (v.lx ?? 0), Y(v.y) + (v.ly ?? -16), { c: v.c || ['a', 'b', 'c'][k % 3], size: 15 });
+        if (v.label && p > 0.95) tx(g, v.label, X(v.x) + (v.lx ?? 0), Y(v.y) + (v.ly ?? -16), { c: v.c || ['a', 'b', 'c'][k % 3], size: 15, halo: true });
       });
       (s.pts || []).forEach((q, k) => {
         if (t < 0.35 + k * 0.08) return;
         dot(g, X(q.x), Y(q.y), 6, col(q.c || C.a));
-        if (q.label) tx(g, q.label, X(q.x) + (q.lx ?? 0), Y(q.y) + (q.ly ?? -16), { c: q.c || C.a, size: 14 });
+        if (q.label) tx(g, q.label, X(q.x) + (q.lx ?? 0), Y(q.y) + (q.ly ?? -16), { c: q.c || C.a, size: 14, halo: true });
       });
     };
     return s.anim === false ? (draw(1), cv) : animate(cv, 1800, draw);
