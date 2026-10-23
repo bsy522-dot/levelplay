@@ -683,6 +683,13 @@ function evaluateCombo(){
 // (예전엔 latched 가 있으면 안 멈춰서 '솔'이 끝없이 났다)
 function releaseCheck(){ if(!heldKeys.size && tone) { stopTone(); soundingId=null; } }
 // 소리·음 버튼 고정 키를 모두 끈다(탭 전환·뒤로가기·화면 숨김). 손가락으로 잡고 있는 키는 그대로 — 실제로 누르고 있으니까.
+// 음 버튼 등으로 켜 보여 주던 키(latched)를 비움(손가락이 닿을 때).
+// 1024: 운지표 탭에선 비운 키를 주황 힌트로 남겨 아이가 하나씩 얹을 수 있게 한다(다른 음 버튼·전체 해제·탭 이동 때 지워짐).
+function dropShownKeys(){
+  if(!latched.size) return;
+  if(state.mode==='chart') setHints([...latched]);
+  latched.clear(); latchShow = false;
+}
 function silenceAll(){
   clearTimeout(judgeT); clearTimeout(missT);
   latched.clear(); latchShow = false; stopTone(); soundingId = null;
@@ -700,7 +707,7 @@ $$('.key').forEach(el=>{
     } else {
       try{ el.setPointerCapture(e.pointerId); }catch(err){}
       // 1023: 손가락이 닿는 순간 음 버튼으로 켠 키는 끈다 — 남아 있으면 '라'(1+2)를 잡아도 3번이 켜진 채 '솔'이 났다
-      if(latched.size){ latched.clear(); latchShow = false; }
+      dropShownKeys();
       held.set(e.pointerId, key); heldKeys.add(key); refresh();
     }
   });
@@ -711,7 +718,7 @@ $$('.key').forEach(el=>{
   el.addEventListener('pointerup', up);
   el.addEventListener('pointercancel', up);
 });
-$('#clearBtn').addEventListener('click', ()=>{ clearLatched(); });
+$('#clearBtn').addEventListener('click', ()=>{ clearLatched(); if(state.mode==='chart') setHints(null); });   // 곡 힌트는 그대로
 
 const KBD = {'1':'L1','2':'L2','3':'L3','4':'R1','5':'R2','6':'R3','7':'LC','8':'OCT','9':'EB',
              'q':'PD','w':'PEB','e':'PF','a':'GS','s':'LCS','d':'LB','f':'LBB','z':'SE','x':'SC','c':'SBB','b':'BIS'};
@@ -768,6 +775,7 @@ function showChartNote(id, applyKeys){
   if(now) now.innerHTML = noteCard(id);
   $$('.note-chip').forEach(c=>c.classList.toggle('sel', c.dataset.note===id));
   if(applyKeys){
+    setHints(null);   // 1024: 앞 음 버튼에서 남은 주황 힌트 지움
     if(NOTES[id].open){ setLatched([]); playSax(NOTES[id].freq, 0.9); }
     else setLatched(NOTES[id].keys);
   }
