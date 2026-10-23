@@ -3207,6 +3207,7 @@ document.getElementById('synth-canvas').addEventListener('click', () => { if (sy
 
 // ▶재생 → 곡 옵션 다이얼로그(난이도·플레이 모드) → 시작 (상용 앱식 흐름)
 let optSpd = 100, optMode = 'normal', optHand = 'both';
+const optCarry = {spd: 100, mode: 'normal'}; // 1023 P-07: 사람이 마지막으로 누른 값(초급 미리 고름은 안 섞임) — 중급·고급 첫 열기용
 const songOptModal = document.getElementById('song-opt-modal');
 songOptModal.querySelectorAll('.opt-btn').forEach(b => {
   b.addEventListener('click', () => {
@@ -3216,12 +3217,28 @@ songOptModal.querySelectorAll('.opt-btn').forEach(b => {
                    : '[data-guide]';
     songOptModal.querySelectorAll('.opt-btn' + groupSel).forEach(x => x.classList.remove('sel'));
     b.classList.add('sel');
-    if (b.dataset.spd !== undefined) optSpd = parseInt(b.dataset.spd);
-    else if (b.dataset.mode !== undefined) optMode = b.dataset.mode;
+    if (b.dataset.spd !== undefined) optSpd = optCarry.spd = parseInt(b.dataset.spd);
+    else if (b.dataset.mode !== undefined) optMode = optCarry.mode = b.dataset.mode;
     else if (b.dataset.hand !== undefined) optHand = b.dataset.hand;
     else { guideMode = b.dataset.guide; localStorage.setItem('piano-v3-guide', guideMode); }
   });
 });
+// 1023 P-07: 기본값이 6살에게 가장 어려운 조합(🔥 원래대로 + 🎹 박자 맞춰)이었다.
+//   초급(난이도 1) 곡을 처음 열 때(이 곡을 시작해 본 적 없을 때)는 🌱 천천히 + 🐢 기다리기를 미리 골라 둔다.
+//   시작할 때 고른 값은 곡마다 이 기기에 기억 → 부모가 바꿔 시작한 곡은 다음에도 그 값. 중급·고급 첫 열기는 예전 그대로(사람이 지난번 누른 값).
+const SONG_OPT_KEY = 'piano-v3-songopt';
+function songOptLoad() { try { const o = JSON.parse(localStorage.getItem(SONG_OPT_KEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } }
+function songOptSave(key) { const o = songOptLoad(); o[key] = {spd: optSpd, mode: optMode}; try { localStorage.setItem(SONG_OPT_KEY, JSON.stringify(o)); } catch (e) {} }
+function applySongOpts(key) {
+  const s = songOptLoad()[key];
+  let spd = null, mode = null;
+  if (s && [60, 80, 100].includes(+s.spd) && ['normal', 'wait', 'listen'].includes(s.mode)) { spd = +s.spd; mode = s.mode; }
+  else if (SONGS[key] && songDifficulty(SONGS[key]) === 1) { spd = 60; mode = 'wait'; }
+  else { spd = optCarry.spd; mode = optCarry.mode; } // 예전처럼 사람이 지난번 고른 값
+  optSpd = spd; optMode = mode;
+  songOptModal.querySelectorAll('.opt-btn[data-spd]').forEach(x => x.classList.toggle('sel', +x.dataset.spd === spd));
+  songOptModal.querySelectorAll('.opt-btn[data-mode]').forEach(x => x.classList.toggle('sel', x.dataset.mode === mode));
+}
 // 두 손 곡(왼손 음과 오른손 음이 다 있는 곡)에서만 '손' 줄을 보인다
 function songHasTwoHands(song) { return song.notes.some(n => n.hand === 'L') && song.notes.some(n => n.hand !== 'L'); }
 function syncHandRow(song) { document.getElementById('hand-opt').hidden = !songHasTwoHands(song); }
@@ -3240,6 +3257,7 @@ document.getElementById('btn-play-synth').addEventListener('click', () => {
   document.getElementById('song-opt-title').textContent = '🎵 ' + song.name;
   setSongOptInfo(song);
   syncHandRow(song);
+  applySongOpts(songKey); // 1023 P-07
   songOptModal.classList.add('show');
 });
 document.getElementById('song-opt-cancel').addEventListener('click', () => songOptModal.classList.remove('show'));
@@ -3255,6 +3273,7 @@ document.getElementById('song-opt-start').addEventListener('click', () => {
   document.getElementById('auto-play').checked = (optMode === 'listen');
   synthPracticeMode = false;
   synthWaitMode = (optMode === 'wait');
+  songOptSave(songKey); // 1023 P-07: 이 곡은 다음에도 이 빠르기·방법
   pendingSongKey = songKey; // 완성도 기록 대상
   pendingHand = songHasTwoHands(song) ? optHand : 'both';
   hideSongBrowser();
@@ -3416,6 +3435,7 @@ function openSongOptions(key) {
   document.getElementById('song-opt-title').textContent = '🎵 ' + song.name;
   setSongOptInfo(song);
   syncHandRow(song);
+  applySongOpts(key); // 1023 P-07
   songOptModal.classList.add('show');
 }
 // 곡 옵션 창 정보 줄: 난이도 · 빠르기(BPM) · 음 수 (곡 카드에서 옮겨 옴)
