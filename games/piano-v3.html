@@ -1457,15 +1457,13 @@ document.getElementById('piano-wrap').addEventListener('scroll', () => {
 // ================ SONGS DATA ================
 const SONGS = {};
 function addSong(key, name, bpm, buildFn) { SONGS[key] = {name, bpm, notes: buildFn()}; }
+// 1023: 공개 앱엔 저작권 곡을 싣지 않는다 — '학교종'(김메리 작곡, 2075년까지 보호)·'River Flows in You'(이루마) 뺌.
+//   집에서 치고 싶으면 부모가 💖 우리집 노래(⚙ → 계이름으로 만들기)로 이 기기에만 넣는다. 옛 기록(진행·별)이 이 곡을 가리켜도 쓰는 곳이 없어 무시된다.
 
 // 0926: 셋째 구절 '미'가 하나 많던 것(26음) → 가사 "높이 높이 날아라 우리 비행기"에 맞춰 25음(미레도레미미미 레레미레도)
 addSong('비행기','비행기',120,()=>{
   const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
   return [n('E4',0),n('D4',1),n('C4',2),n('D4',3),n('E4',4),n('E4',5),n('E4',6,2),n('D4',8),n('D4',9),n('D4',10,2),n('E4',12),n('G4',13),n('G4',14,2),n('E4',16),n('D4',17),n('C4',18),n('D4',19),n('E4',20),n('E4',21),n('E4',22,2),n('D4',24),n('D4',25),n('E4',26),n('D4',27),n('C4',28,4)];
-});
-addSong('학교종','학교종',120,()=>{
-  const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
-  return [n('G4',0),n('G4',1),n('A4',2),n('A4',3),n('G4',4),n('G4',5),n('E4',6,2),n('G4',8),n('G4',9),n('E4',10),n('E4',11),n('D4',12,4),n('G4',16),n('G4',17),n('A4',18),n('A4',19),n('G4',20),n('G4',21),n('E4',22,2),n('G4',24),n('E4',25),n('D4',26),n('E4',27),n('C4',28,4)];
 });
 addSong('작은별','반짝반짝 작은별',100,()=>{
   const n=(note,t,d=1)=>({note,time:t,duration:d,hand:'R'});
@@ -1900,44 +1898,6 @@ addSong('moonlight','월광 소나타 (Moonlight Sonata)',56,()=>{
   ];
 });
 
-addSong('river_flows','River Flows in You',68,()=>{
-  const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
-  const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
-  return [
-    // Intro: iconic A5-G#5 oscillation
-    n('A5',0,0.5),n('G#5',0.5,0.5),
-    n('A5',1,0.5),n('G#5',1.5,0.5),n('A5',2,0.5),n('G#5',2.5,0.5),
-    n('F#5',3,0.5),n('E5',3.5,0.5),
-    n('F#5',4,0.5),n('E5',4.5,0.5),n('F#5',5,0.5),n('E5',5.5,0.5),
-    n('D5',6,0.5),n('C#5',6.5,0.5),n('D5',7,0.5),n('E5',7.5,0.5),
-    n('A4',8,1),n('A4',9,0.5),n('B4',9.5,0.5),
-    n('C#5',10,0.5),n('D5',10.5,0.5),n('E5',11,0.5),n('D5',11.5,0.5),
-    l('A2',8,1),l('E3',8.5,0.5),l('A3',9,0.5),l('C#4',9.5,0.5),l('E4',10,2),
-    n('C#5',12,1),n('B4',13,0.5),n('A4',13.5,0.5),
-    n('B4',14,0.5),n('C#5',14.5,0.5),n('A4',15,1),
-    l('F#2',12,1),l('C#3',12.5,0.5),l('F#3',13,0.5),l('A3',13.5,0.5),l('C#4',14,2),
-    n('A4',16,0.5),n('B4',16.5,0.5),n('C#5',17,0.5),n('D5',17.5,0.5),
-    n('E5',18,0.5),n('D5',18.5,0.5),n('C#5',19,0.5),n('B4',19.5,0.5),
-    l('D2',16,1),l('A2',16.5,0.5),l('D3',17,0.5),l('F#3',17.5,0.5),l('A3',18,2),
-    n('C#5',20,1),n('B4',21,0.5),n('A4',21.5,0.5),
-    n('A4',22,2),
-    l('E2',20,1),l('B2',20.5,0.5),l('E3',21,0.5),l('G#3',21.5,0.5),l('B3',22,2),
-    n('A4',24,0.5),n('C#5',24.5,0.5),n('E5',25,0.5),n('F#5',25.5,0.5),
-    n('E5',26,0.5),n('D5',26.5,0.5),n('E5',27,0.5),n('D5',27.5,0.5),
-    l('A2',24,1),l('E3',24.5,0.5),l('A3',25,0.5),l('C#4',25.5,0.5),l('E4',26,2),
-    n('C#5',28,1),n('B4',29,0.5),n('A4',29.5,0.5),
-    n('B4',30,0.5),n('C#5',30.5,0.5),n('A4',31,1),
-    l('F#2',28,1),l('C#3',28.5,0.5),l('F#3',29,0.5),l('A3',29.5,0.5),l('C#4',30,2),
-    n('F#5',32,0.5),n('E5',32.5,0.5),n('D5',33,0.5),n('C#5',33.5,0.5),
-    n('D5',34,0.5),n('E5',34.5,0.5),n('F#5',35,0.5),n('E5',35.5,0.5),
-    l('D2',32,1),l('A2',32.5,0.5),l('D3',33,0.5),l('F#3',33.5,0.5),l('A3',34,2),
-    n('E5',36,0.5),n('D5',36.5,0.5),n('C#5',37,0.5),n('B4',37.5,0.5),
-    n('A4',38,2),
-    l('E2',36,1),l('B2',36.5,0.5),l('E3',37,0.5),l('G#3',37.5,0.5),
-    l('A2',38,1),l('E3',38.5,0.5),l('A3',39,0.5),l('C#4',39.5,0.5),
-  ];
-});
-
 addSong('swan_lake','백조의 호수 (Swan Lake)',72,()=>{
   const n=(note,t,d=1,h='R')=>({note,time:t,duration:d,hand:h});
   const l=(note,t,d=1)=>({note,time:t,duration:d,hand:'L'});
@@ -2156,7 +2116,6 @@ LESSONS.beyer.push({id:'by10',name:'바이엘 No.10',desc:'오른손과 왼손�
 LESSONS.songs.push(
   // 동요/찬송가 (초급)
   {id:'s1',name:'비행기',desc:'동요 "비행기". 초급 오른손.',notes:SONGS['비행기'].notes,bpm:SONGS['비행기'].bpm},
-  {id:'s2',name:'학교종',desc:'동요 "학교종이 땡땡땡". 초급.',notes:SONGS['학교종'].notes,bpm:SONGS['학교종'].bpm},
   {id:'s3',name:'반짝반짝 작은별',desc:'모차르트 작은별 변주곡 테마. 초급.',notes:SONGS['작은별'].notes,bpm:SONGS['작은별'].bpm},
   {id:'s4',name:'곰 세 마리',desc:'동요 "곰 세 마리가 한 집에 있어". 초급.',notes:SONGS['곰세마리'].notes,bpm:SONGS['곰세마리'].bpm},
   {id:'s5',name:'Amazing Grace',desc:'찬송가 Amazing Grace. 양손 초급.',notes:SONGS['AmazingGrace'].notes,bpm:SONGS['AmazingGrace'].bpm},
@@ -2179,7 +2138,6 @@ LESSONS.songs.push(
   {id:'s18',name:'사랑의 꿈',desc:'리스트 - Liebestraum No.3. Ab장조.',notes:SONGS['liebestraum'].notes,bpm:SONGS['liebestraum'].bpm},
   {id:'s19',name:'헝가리 무곡 5번',desc:'브람스 - Hungarian Dance No.5. G단조.',notes:SONGS['hungarian5'].notes,bpm:SONGS['hungarian5'].bpm},
   // 연주곡
-  {id:'s21',name:'River Flows in You',desc:'유루마 - River Flows in You. A장조.',notes:SONGS['river_flows'].notes,bpm:SONGS['river_flows'].bpm},
   {id:'s22',name:'라 캄파넬라',desc:'리스트 - La Campanella. G#단조 상급.',notes:SONGS['la_campanella'].notes,bpm:SONGS['la_campanella'].bpm},
 );
 
@@ -2216,11 +2174,11 @@ function renderLearnList() {
 
   // Songs by category
   const categories = [
-    {title:'🎵 동요/찬송가 (초급)', ids:['s1','s2','s3','s4','s5','s20']},
+    {title:'🎵 동요/찬송가 (초급)', ids:['s1','s3','s4','s5','s20']},
     {title:'🎹 클래식 초급~중급', ids:['s6','s7','s8']},
     {title:'🎼 클래식 중급', ids:['s9','s10','s11','s12','s13']},
     {title:'🔥 클래식 상급', ids:['s14','s15','s16','s17','s18','s19']},
-    {title:'🎶 연주곡', ids:['s21','s22']},
+    {title:'🎶 연주곡', ids:['s22']},
   ];
   categories.forEach(cat => {
     const items = cat.ids.map(id => LESSONS.songs.find(l => l.id === id)).filter(Boolean);
@@ -3297,11 +3255,11 @@ document.getElementById('auto-play').addEventListener('change', e => {
 (function(){
   const sel = document.getElementById('song-select');
   const groups = [
-    {label:'동요/찬송가', keys:['비행기','학교종','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','AmazingGrace','clementine']},
+    {label:'동요/찬송가', keys:['비행기','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','AmazingGrace','clementine']},
     {label:'클래식 초중급', keys:['ode_to_joy','minuet_g','humoresque']},
     {label:'클래식 중급', keys:['엘리제','캐논','air_on_g','traumerei','swan_lake']},
     {label:'클래식 상급', keys:['turkish_march','moonlight','nocturne','spring','liebestraum','hungarian5']},
-    {label:'연주곡', keys:['river_flows','la_campanella']},
+    {label:'연주곡', keys:['la_campanella']},
   ];
   groups.forEach(g => {
     const og = document.createElement('optgroup');
@@ -3319,7 +3277,6 @@ document.getElementById('auto-play').addEventListener('change', e => {
 // ================ SONG BROWSER (카드형 곡 목록) ================
 const SONG_META = {
   '비행기':        {emoji:'🎈', sub:'동요 · 첫 곡으로 딱'},
-  '학교종':        {emoji:'🔔', sub:'동요 · 김메리'},
   '작은별':        {emoji:'✨', sub:'동요 · 프랑스 민요'},
   '곰세마리':      {emoji:'🐻', sub:'동요 · 한국 창작동요'},
   '생일축하':      {emoji:'🎂', sub:'동요 · 생일 노래'},
@@ -3342,12 +3299,11 @@ const SONG_META = {
   'spring':        {emoji:'🌷', sub:'클래식 · 비발디'},
   'liebestraum':   {emoji:'💗', sub:'클래식 · 리스트'},
   'hungarian5':    {emoji:'🎷', sub:'클래식 · 브람스'},
-  'river_flows':   {emoji:'🌊', sub:'뉴에이지 · 이루마'},
   'la_campanella': {emoji:'🛎️', sub:'클래식 · 리스트(초절기교)'},
 };
-const SONG_ORDER = ['비행기','학교종','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','AmazingGrace','clementine',
+const SONG_ORDER = ['비행기','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','AmazingGrace','clementine',
   'ode_to_joy','minuet_g','humoresque','엘리제','캐논','air_on_g','traumerei','swan_lake',
-  'turkish_march','moonlight','nocturne','spring','liebestraum','hungarian5','river_flows','la_campanella'];
+  'turkish_march','moonlight','nocturne','spring','liebestraum','hungarian5','la_campanella'];
 const DIFF_NAME = {1:'초급', 2:'중급', 3:'고급'};
 const DIFF_LABEL = {1:'🌱 초급', 2:'⭐ 중급', 3:'🔥 고급'};
 
@@ -4037,7 +3993,7 @@ function solfSave() {
 // ♯ 음은 같은 글자 건반(파♯ → 파)으로 친다. 기존 따라치기 엔진과 따로 돈다(서로 안 건드림).
 const K7_LETTERS = ['C','D','E','F','G','A','B'];
 const K7_BASE = {C:60, D:62, E:64, F:65, G:67, A:69, B:71};
-const K7_SONGS = ['비행기','학교종','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','ode_to_joy'];
+const K7_SONGS = ['비행기','작은별','곰세마리','생일축하','런던브릿지','맥도널드','젓가락','ode_to_joy'];
 const k7 = {on:false, key:null, seq:[], i:0, mode:null, timers:[], held:new Map()};
 const k7El = id => document.getElementById(id);
 function k7Name(L) { return useKoreanNames() ? KOREAN_NOTE_MAP[L] : L; }
