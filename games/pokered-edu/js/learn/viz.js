@@ -378,7 +378,11 @@ export function mathFn(src) {
   s = s.replace(/log2/g, 'LOGTWO').replace(/[a-z]+/g, (w) => (w === 'x' ? 'x' : MW[w] ? `{${w}}` : '#'));
   s = s.replace(/LOGTWO/g, '{log2}');
   if (s.includes('#')) return null;
-  s = s.replace(/(\d|\)|x|\})(?=\(|x|\{)/g, '$1*').replace(/\^/g, '**').replace(/\{([a-z0-9]+)\}/g, (m, w) => MW[w]);
+  s = s.replace(/(\d|\)|x|\})(?=\(|x|\{)/g, '$1*')
+    .replace(/\{(sin|cos|tan|sqrt|abs|ln|log|log2|exp)\}\*\(/g, '{$1}(') // 함수 이름 뒤 괄호는 곱하기가 아니다 (sin(x))
+    .replace(/\^/g, '**').replace(/\{([a-z0-9]+)\}/g, (m, w) => MW[w])
+    // −x² 처럼 거듭제곱 앞의 빼기: 자바스크립트는 -x**2 를 못 읽는다 → 0−x**2, a*−b → a*(0−1)*b (**− 는 그대로)
+    .replace(/(^|\()-/g, '$10-').replace(/(?<!\*)([*/])-/g, '$1(0-1)$1');
   if (/[^0-9x+\-*/().,M.a-zA-Z]/.test(s) || /[a-zA-Z]/.test(s.replace(/M\.[a-zA-Z0-9]+/g, '').replace(/x/g, ''))) return null;
   try {
     const f = new Function('x', 'M', `return (${s});`);
@@ -851,7 +855,13 @@ export function vizProblems(spec) {
   if (!need) return [`그림 종류 없음: ${spec.type}`];
   const out = need.filter((k) => spec[k] == null).map((k) => `${spec.type}: '${k}' 빠짐`);
   if (spec.type === 'plot') {
-    for (const f of spec.fns || []) if (!mathFn(f.f)) out.push(`plot: 식을 못 읽음 '${f.f}'`);
+    const [a, b] = Array.isArray(spec.x) ? spec.x : [-5, 5];
+    const live = (fn) => { let k = 0; for (let i = 0; i <= 20; i++) if (Number.isFinite(fn(a + ((b - a) * i) / 20))) k++; return k >= 5; };
+    for (const f of spec.fns || []) {
+      const fn = mathFn(f.f);
+      if (!fn) out.push(`plot: 식을 못 읽음 '${f.f}'`);
+      else if (!live(fn)) out.push(`plot: 식 '${f.f}'이 보이는 범위에서 숫자가 안 나옴 (곡선이 안 그려짐)`);
+    }
     if (spec.shade && !mathFn(spec.shade.f)) out.push(`plot: 칠하기 식을 못 읽음 '${spec.shade.f}'`);
     for (const k of ['x', 'y']) if (spec[k] && !(Array.isArray(spec[k]) && spec[k].length === 2 && spec[k][0] < spec[k][1])) out.push(`plot: ${k} 범위가 이상함`);
   }

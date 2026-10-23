@@ -102,7 +102,7 @@ export async function openLecture(subj, skillId, { answer } = {}) {
         stage.append(strip);
       } else if (p.type === 'video') {
         stage.append(el('div', { class: 'lec-slide' }, el('div', { class: 'jua lec-h' }, '🎬 ' + p.t),
-          el('div', { class: 'lec-video' }, el('iframe', { src: `https://www.youtube-nocookie.com/embed/${p.id}?rel=0`, allow: 'encrypted-media; picture-in-picture', allowfullscreen: true, title: p.t }))));
+          el('div', { class: 'lec-video' }, el('iframe', { src: `https://www.youtube-nocookie.com/embed/${p.id}?rel=0`, allow: 'encrypted-media; picture-in-picture', allowfullscreen: true, title: p.t, referrerpolicy: 'strict-origin-when-cross-origin' }))));
       } else if (p.type === 'answer') {
         const it = p.it;
         const card = el('div', { class: 'lec-slide lec-answer' }, el('div', { class: 'jua lec-h' }, '📝 아까 그 문제의 정답'),

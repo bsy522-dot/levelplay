@@ -21,7 +21,7 @@ await page.waitForSelector('.title .opts button', { timeout: 30000 });
 const ids = await page.evaluate(() => Object.keys(window.__pe.DB.lectures || {}));
 console.log('강의', ids.length, '개');
 const probs = [];
-let shot = 0;
+let shot = 0, scrolls = 0, total = 0;
 for (const id of ids) {
   const subj = id.startsWith('m_') ? 'math' : id.startsWith('h_') ? 'hum' : 'sci';
   await page.evaluate(([s, i]) => { window.__lecDone = false; import('./js/learn/lecture.js').then((m) => m.openLecture(s, i)).then(() => { window.__lecDone = true; }); }, [subj, id]);
@@ -29,6 +29,7 @@ for (const id of ids) {
   await page.waitForTimeout(80);
   const n = await page.evaluate(() => window.__peLecture.pages);
   for (let p = 0; p < n; p++) {
+    total++;
     const r = await page.evaluate(() => {
       const over = (e) => e && e.scrollHeight > e.clientHeight + 2;
       const stage = document.querySelector('.lecture .lec-stage');   // 슬라이드가 들어가는 칸 — 넘치면 아이가 스크롤해야 한다
@@ -40,7 +41,10 @@ for (const id of ids) {
       if (cv) { try { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let k = 0; for (let i = 3; i < d.length; i += 40) if (d[i]) k++; painted = k; } catch (e) { painted = -1; } }
       return { overflowCard: !isComic && over(stage), offscreen: pr ? pr.bottom > innerHeight + 1 || pr.right > innerWidth + 1 : false, hasViz: !!cv, painted, page: window.__peLecture.page };
     });
-    if (r.overflowCard || r.offscreen) probs.push(`${id} p${p + 1}: ${r.overflowCard ? '글 넘침' : ''}${r.offscreen ? ' 화면 밖' : ''}`);
+    // 2026-10-23: 설명이 자세해져 폰에서 아래로 내려 읽는 장이 생긴다 → '⬇ 아래로 내리면 더 있어요' 표시가 붙으므로 실패가 아니라 개수만 센다.
+    // 실패는 창이 화면 밖으로 나가는 것뿐.
+    if (r.overflowCard) scrolls++;
+    if (r.offscreen) probs.push(`${id} p${p + 1}: 화면 밖`);
     if (r.hasViz && r.painted === 0) probs.push(`${id} p${p + 1}: 그림이 비어 있음`);
     if (shot < 40 && (p === 2 || r.overflowCard)) { shot++; await page.screenshot({ path: `${SHOTS}/${id}_p${p + 1}.png` }); }
     if (p < n - 1) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(60); }
@@ -52,6 +56,6 @@ for (const id of ids) {
 }
 console.log(probs.length ? probs.join('\n') : '문제 없음');
 console.log('자바스크립트 오류', errs.length, errs.slice(0, 3).join(' | '));
-console.log(`\n강의 화면 결과: ${ids.length}개 중 문제 ${probs.length}건`);
+console.log(`\n강의 화면 결과: ${ids.length}개 중 문제 ${probs.length}건 (전체 ${total}장 중 아래로 내려 읽는 장 ${scrolls}장)`);
 await browser.close();
 process.exit(probs.length || errs.length ? 1 : 0);
