@@ -2370,8 +2370,14 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
   // Auto-scroll(1023 P-01): 곡 음역(최저~최고)이 한 화면에 들어가면 그 가운데로, 넓은 곡은 앞부분이 들어가는 데까지.
   //   예전엔 첫 음만 가운데 둬서 한쪽이 잘렸다(곰 세 마리 높은 도·생일 축하 솔4 가 화면 밖).
   synthOrder = synthNotes.slice().sort((a, b) => a.time - b.time);
+  markBeatReps(); // 1024 PR-01
   followAnim = null; userScrollAt = -1e9;
-  const fitStart = () => { const to = followTarget(myUpcoming()); if (to != null) setAutoScroll(to); };
+  // 1024 PR-01: 박자 맞춰·듣기는 박마다 대표음(선율)이 들어가게 시작 — 양손을 다 넣으려다 선율 윗음이 잘리던 것
+  const fitStart = () => {
+    const up = myUpcoming(), reps = up.filter(n => n.rep);
+    const to = followTarget((synthWaitMode && !synthAutoPlay) || !reps.length ? up : reps);
+    if (to != null) setAutoScroll(to);
+  };
   fitStart();
   // lead-in 도중에 한 번 더 정렬 (canvas resize 후 정확한 매핑) — 그 사이 사람이 직접 옮겼으면 그대로
   setTimeout(() => { if (synthRunning && performance.now() - userScrollAt >= FOLLOW_GRACE_MS) fitStart(); }, 250);
@@ -3116,32 +3122,75 @@ function followTarget(list) {
 }
 // 아이가 칠 남은 음(듣기 모드면 전부), 시간 순
 function myUpcoming() { return synthOrder.filter(n => !n.played && (synthAutoPlay || !n.auto)); }
+// 1024 PR-01: 박마다 아이가 칠 '대표음' — 오른손 중 가장 높은 음(보통 선율), 오른손이 없는 박은 가장 높은 음.
+//   박자 맞춰·듣기 모드의 따라가기는 이 음만 본다(양손을 다 보이려고 가운데를 다시 맞추면 1초에 한 번꼴로 흔들렸다).
+function markBeatReps() {
+  const byT = new Map();
+  synthOrder.forEach(n => { n.rep = false; if (!synthAutoPlay && n.auto) return; if (!byT.has(n.time)) byT.set(n.time, []); byT.get(n.time).push(n); });
+  byT.forEach(g => {
+    const rs = g.filter(n => n.hand !== 'L'), pool = rs.length ? rs : g;
+    pool.reduce((a, n) => nameToMidi(n.note) > nameToMidi(a.note) ? n : a).rep = true;
+  });
+}
+// n 의 건반이 한 칸 여유(안 되면 0)로 들어오고 keepN 건반은 그대로 다 보이는, 지금에서 가장 가까운 scrollLeft (안 되면 null)
+function minShiftTo(sl, n, keepN) {
+  const wrap = document.getElementById('piano-wrap');
+  const view = wrap.clientWidth, maxS = wrap.scrollWidth - view;
+  const b = keyBox(nameToMidi(n.note)), k = keepN ? keyBox(nameToMidi(keepN.note)) : null;
+  if (!b) return null;
+  for (const m of [whiteKeyWidth, 0]) {
+    let lo = b.r - view + m, hi = b.l - m;
+    if (k) { lo = Math.max(lo, k.r - view); hi = Math.min(hi, k.l); }
+    lo = Math.max(lo, 0); hi = Math.min(hi, maxS);
+    if (lo <= hi) return Math.min(Math.max(sl, lo), hi);
+  }
+  return null;
+}
+const FOLLOW_LOOK_SEC = 4.0, FOLLOW_AIM_SEC = 0.45; // 박자·듣기: 앞으로 4초 안의 대표음을 보고, 아이가 칠 음을 눈으로 찾는 시간 0.45초
 // synthLoop 첫머리에서 매 프레임
 function followSong(now, beatToSec) {
   const wrap = document.getElementById('piano-wrap');
   const t = performance.now();
+  // 1024 PR-01: 손가락이 건반에 닿아 있으면 하던 이동도 그 자리에서 멈춘다(예전엔 이미 시작한 0.28초 이동은 끝까지 가서 손가락 밑 건반이 바뀌었다)
+  if (pianoFingers.size || pianoTouches.size) { followAnim = null; return; }
   if (followAnim) {
     const p = Math.min(1, (t - followAnim.t0) / FOLLOW_ANIM_MS), e = 1 - Math.pow(1 - p, 3);
     setAutoScroll(followAnim.from + (followAnim.to - followAnim.from) * e);
     if (p >= 1) followAnim = null;
     return;
   }
-  if (pianoFingers.size || t - userScrollAt < FOLLOW_GRACE_MS) return;
+  if (t - userScrollAt < FOLLOW_GRACE_MS) return;
   const up = myUpcoming(); if (!up.length) return;
   const view = wrap.clientWidth, sl = wrap.scrollLeft;
-  // 기다리기: 지금 칠 음(같은 박)만 본다. 박자 맞춰·듣기: 1.2초 안에 내려올 음까지 미리 본다
-  const t0 = up[0].time * beatToSec;
-  const soon = (synthWaitMode && !synthAutoPlay) ? t0 : Math.max(t0, now + 1.2);
-  let off = false;
-  for (const n of up) {
-    if (n.time * beatToSec > soon + 1e-6) break;
-    const b = keyBox(nameToMidi(n.note));
-    if (b && (b.l < sl - 1 || b.r > sl + view + 1)) { off = true; break; }
+  const vis = (n, pos) => { const b = keyBox(nameToMidi(n.note)); return !b || (b.l >= pos - 1 && b.r <= pos + view + 1); };
+  if (synthWaitMode && !synthAutoPlay) {
+    // 기다리기: 지금 칠 음(같은 박)이 화면 밖이면 앞 음들이 한 화면에 들어가게 가운데로 (1023 그대로 — 4기기×6곡 완주 확인된 규칙)
+    const t0 = up[0].time;
+    if (!up.some(n => n.time === t0 && !vis(n, sl))) return;
+    const to = followTarget(up);
+    if (to != null && Math.abs(to - sl) >= 2) followAnim = {from: sl, to, t0: t};
+    return;
   }
-  if (!off) return;
-  const to = followTarget(up);
-  if (to == null || Math.abs(to - sl) < 2) return;
-  followAnim = {from: sl, to, t0: t};
+  // 박자 맞춰·듣기(1024 PR-01): 옮길지 말지를 '앞으로 4초 안 대표음이 몇 개 보이나'로 정한다.
+  //   옮기면 이동(0.28초)+눈으로 찾는 시간(0.45초) 안에 올 음은 놓치는 것으로 치고, 지금 자리보다 더 많이 보일 때만 최소한으로 옮긴다.
+  //   → 손이 오가는 넓은 곡에서도 한 화면 안 선율은 그대로 두고, 화면 밖 음만 시간이 될 때 한 칸 여유로 들인다.
+  const reps = up.filter(n => n.rep), ups = reps.length ? reps : up;
+  const win = [];
+  for (const n of ups) { if (n.time * beatToSec > now + FOLLOW_LOOK_SEC) break; win.push(n); }
+  if (!win.length) return;
+  const invis = win.filter(n => !vis(n, sl)).slice(0, 4);
+  if (!invis.length) return;
+  const lostT = now + FOLLOW_ANIM_MS / 1000 + FOLLOW_AIM_SEC;
+  const score = (pos, moving) => win.reduce((c, n) => c + (vis(n, pos) && (!moving || n.time * beatToSec >= lostT) ? 1 : 0), 0);
+  const cur = score(sl, false), g0 = win[0], keeps = vis(g0, sl) ? [null, g0] : [null];
+  let best = null;
+  for (const n of invis) for (const keep of keeps) {
+    const c = minShiftTo(sl, n, keep);
+    if (c == null || Math.abs(c - sl) < 2) continue;
+    const sc = score(c, true);
+    if (sc > cur && (!best || sc > best.sc || (sc === best.sc && Math.abs(c - sl) < Math.abs(best.c - sl)))) best = {sc, c};
+  }
+  if (best) followAnim = {from: sl, to: best.c, t0: t};
 }
 // 앱이 옮긴 게 아닌 스크롤(미니맵·끌기·핀치·화살표 키) = 사람이 옮긴 것
 document.getElementById('piano-wrap').addEventListener('scroll', () => {
@@ -3151,6 +3200,16 @@ document.getElementById('piano-wrap').addEventListener('scroll', () => {
 // 손가락을 떼면 — 건반 밖에서 떼도 놓치지 않게 문서 전체에서 받는다
 document.addEventListener('pointerup', e => pianoFingers.delete(e.pointerId), true);
 document.addEventListener('pointercancel', e => pianoFingers.delete(e.pointerId), true);
+// 1024 PR-01: 브라우저가 끌기를 가져가면(pointercancel) 손가락은 아직 화면에 있다 → 터치로 따로 센다(손을 뗄 때 touchend 로 지움)
+const pianoTouches = new Set();
+(function () {
+  const w = document.getElementById('piano-wrap');
+  const prune = e => { const live = new Set([...e.touches].map(x => x.identifier)); [...pianoTouches].forEach(id => { if (!live.has(id)) pianoTouches.delete(id); }); };
+  w.addEventListener('touchstart', e => { for (const x of e.changedTouches) pianoTouches.add(x.identifier); }, {passive:true});
+  ['touchend', 'touchcancel'].forEach(ev => document.addEventListener(ev, e => { for (const x of e.changedTouches) pianoTouches.delete(x.identifier); prune(e); }, {passive:true, capture:true}));
+  document.addEventListener('touchstart', prune, {passive:true, capture:true});
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { pianoTouches.clear(); pianoFingers.clear(); } });
+})();
 // 1023 P-11: 곡을 치는 동안엔 미니맵 띠를 숨겨 음표가 건반 바로 위에 떨어지게 한다(곡 목록·정지·끝나면 다시 보임)
 function setSynthPlaying(on) {
   const p = document.getElementById('panel-synth');
@@ -3724,7 +3783,8 @@ function rescrollAfterLayout() {
   if (synthRunning && synthNotes.length) {
     // 1023 P-01: 다음 칠 음부터 한 화면에 들어가는 데까지 가운데로 (따라가기와 같은 규칙)
     followAnim = null;
-    const to = followTarget(myUpcoming());
+    const up = myUpcoming(), reps = up.filter(n => n.rep); // 1024 PR-01: 박자·듣기는 대표음 기준(시작과 같은 규칙)
+    const to = followTarget((synthWaitMode && !synthAutoPlay) || !reps.length ? up : reps);
     if (to != null) { setAutoScroll(to); return; }
   }
   scrollToMidi(60); // C4
