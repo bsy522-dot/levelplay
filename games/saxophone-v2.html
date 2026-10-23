@@ -631,8 +631,15 @@ function evaluateCombo(){
   else if(state.mode==='quiz' && state.quiz && state.quiz.phase==='play') quizEval(id);
   else if(state.mode==='chart' && id) showChartNote(id, false);
 }
-// 손을 떼면 지속음 정지
-function releaseCheck(){ if(!heldKeys.size && tone && !latched.size) { stopTone(); soundingId=null; } }
+// 손을 떼면 지속음 정지 — 1023: 음 버튼으로 켠 키(latched)가 남아 있어도 손가락이 하나도 없으면 무조건 멈춘다
+// (예전엔 latched 가 있으면 안 멈춰서 '솔'이 끝없이 났다)
+function releaseCheck(){ if(!heldKeys.size && tone) { stopTone(); soundingId=null; } }
+// 소리·음 버튼 고정 키를 모두 끈다(탭 전환·뒤로가기·화면 숨김). 손가락으로 잡고 있는 키는 그대로 — 실제로 누르고 있으니까.
+function silenceAll(){
+  clearTimeout(judgeT); clearTimeout(missT);
+  latched.clear(); stopTone(); soundingId = null;
+  refresh();
+}
 
 $$('.key').forEach(el=>{
   const key = el.dataset.key;
@@ -643,6 +650,8 @@ $$('.key').forEach(el=>{
       refresh();
     } else {
       try{ el.setPointerCapture(e.pointerId); }catch(err){}
+      // 1023: 손가락이 닿는 순간 음 버튼으로 켠 키는 끈다 — 남아 있으면 '라'(1+2)를 잡아도 3번이 켜진 채 '솔'이 났다
+      if(latched.size) latched.clear();
       held.set(e.pointerId, key); heldKeys.add(key); refresh();
     }
   });
@@ -673,6 +682,11 @@ document.addEventListener('keyup', e=>{
   if(k){ heldKeys.delete(k); refresh(); releaseCheck(); }
 });
 window.addEventListener('blur', ()=>{ heldKeys.clear(); held.clear(); refresh(); releaseCheck(); });
+// 1023: 앱을 내리거나 화면이 꺼지면 소리·누른 키·미리듣기를 모두 멈춤(돌아왔을 때 소리가 남아 있지 않게)
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden) return;
+  heldKeys.clear(); held.clear(); stopMelody(); silenceAll();
+});
 
 /* ───────────────── 운지표 ───────────────── */
 function chipHtml(id){
@@ -695,7 +709,7 @@ function renderChart(){
   <div class="card help">🎷 <b>알토 색소폰</b> 악보(기보음) 기준 표준 운지 — 실제 색소폰과 같은 키 배치예요.<br>
   왼손 1·2·3 / 오른손 4·5·6 / <b>비스·팜키·사이드키·새끼손가락 키</b>까지 전부 눌러볼 수 있어요.<br>
   키를 잡고 있는 동안 소리가 나요(여러 손가락 동시에!). 마우스는 클릭으로 켜고 꺼요.</div>`;
-  showChartNote('G4', true);
+  showChartNote('G4', false);   // 1023: 처음·탭 복귀 땐 '솔' 카드만 — 키를 켜거나 소리 내지 않음(묻지도 않은 소리 방지)
 }
 function showChartNote(id, applyKeys){
   const now = $('#chartNow');
@@ -907,7 +921,7 @@ function completeSong(){
 function switchMode(m){
   state.mode = m;
   stopMelody(); clearQuizTimer(); state.quiz = null; state.song = null; setHints(null);
-  clearTimeout(judgeT); clearTimeout(missT);
+  silenceAll();   // 1023: 음 버튼 고정 키·소리를 다음 탭으로 끌고 가지 않음
   $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===m));
   $('#chartView').hidden = m!=='chart';
   $('#quizView').hidden = m!=='quiz';
