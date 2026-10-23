@@ -286,4 +286,25 @@ body.in-battle .goal, body.in-panel .goal, body.in-quiz .goal { display: none; }
 .lec-dots i { width: .6em; height: .6em; border-radius: 50%; background: #c9d6f3; }
 .lec-dots i.on { background: #e3350d; }
 .lec-done:disabled { background: #9aa6c4; }
+
+/* ── 쉬운 설명 개편 (2026-10-23): 움직이는 그림·이야기 장·한 단계씩·낱말 풀이 ── */
+.viz-anim { width: 100%; display: flex; flex-direction: column; align-items: center; margin: .5em auto 0; }
+.viz-anim canvas { margin: 0 auto !important; }
+.viz-replay { align-self: flex-end; margin-top: .25em; border: 0; border-radius: 999px; padding: .15em .7em; font-family: 'Jua'; font-size: .75em; background: rgba(59, 108, 212, .88); color: #fff; }
+.lec-slide canvas, .explain canvas, .quiz .pic canvas { border-radius: 12px; }
+.lec-slide.k-story { background: #fbefd9; border-color: #d9a45b; }
+.lec-slide.k-idea { background: #eef4ff; border-color: #8fb0ef; }
+.lec-slide.k-oops { background: #fff0ee; border-color: #f2a093; }
+.lec-slide.k-now { background: #e9f7ee; border-color: #7cc79a; }
+.lec-steps { list-style: none; margin: .5em 0 0; padding: 0; counter-reset: st; }
+.lec-steps li { counter-increment: st; position: relative; background: #fff; border-radius: 12px; padding: .35em .6em .35em 2.4em; margin: .3em 0; font-family: 'Jua'; line-height: 1.5; word-break: keep-all; }
+.lec-steps li::before { content: counter(st); position: absolute; left: .55em; top: .4em; width: 1.4em; height: 1.4em; border-radius: 50%; background: var(--blue, #3b6cd4); color: #fff; display: grid; place-items: center; font-size: .82em; }
+.lec-tip { margin-top: .55em; padding: .45em .7em; background: #fff; border-left: 5px solid #f0a500; border-radius: 10px; font-size: .97em; word-break: keep-all; }
+.lec-more { position: sticky; bottom: 0; margin-top: .3em; text-align: center; font-family: 'Jua'; font-size: .85em; color: #8a5a00; background: linear-gradient(transparent, #fff 45%); padding-top: .8em; pointer-events: none; animation: bob 1s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(3px); } }
+.quiz .pic canvas { max-height: 30vh; width: auto !important; max-width: 100%; }
+.quiz .pic .viz-anim { margin-top: 0; }
+.quiz .help { margin: -.2em 0 .6em; padding: .4em .65em; background: #eef4ff; border-radius: 10px; font-size: .92em; line-height: 1.5; word-break: keep-all; }
+.quiz .help b { color: #2d55b3; }
+.explain .why2 { margin-top: .45em; padding: .35em .6em; background: #fbefd9; border-radius: 10px; font-size: .92em; line-height: 1.5; }
 body.in-lecture .pad, body.in-lecture .goal { display: none; }

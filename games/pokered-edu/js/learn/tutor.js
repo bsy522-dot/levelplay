@@ -657,6 +657,7 @@ function seal(it, l) {
   return {
     q: it.q, a: order.map((o) => it.a[o]), c: order.indexOf(it.c),
     why: it.why, wrong, viz: it.viz, id: it.id,
+    pic: it.pic, steps: it.steps, help: it.help, // 문제 그림·풀이 순서·낱말 풀이 (쉬운 설명 개편 2026-10-23)
     // ── 새 필드: 서술형 문제·링크·필드·선수 개념 ──
     free: !!it.free,           // 자유 서술형 (삼지선다 반복 방지 → 병석님 요청)
     need: it.need,            // 왜 이 문제가 필요한지 (연출용)

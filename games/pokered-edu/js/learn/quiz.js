@@ -10,6 +10,7 @@ import { nextQuestion, record, expMult, skillTitle, skillNote, isNewSkill, MATH_
 import { openLecture } from './lecture.js';
 import { hasBatchim } from './math.js';
 import { G } from '../state.js';
+import { DB } from '../data.js';
 
 const MATH_BY = MATH_ALL_BY;
 /* 인문(역사·지리·음악·미술·철학)까지 태그가 떠야 한다 (요구사항 17번). */
@@ -21,6 +22,8 @@ const SUBJ = {
   job: ['직업', '#6d4c41'],
 };
 const subjTag = (s) => SUBJ[s] || SUBJ.math;
+/** 이걸 왜 배우지? 문제의 need → 주제 메모 → 강의의 why(옛날 사람들이 겪은 골칫거리와 그래서 만든 것) */
+const whyLearn = (it, skill) => it.need || (skill && skillNote(skill).need) || (skill && (DB.lectures || {})[skill]?.why) || '';
 const KIND = { principle: ['🧠 원리', '#7c4dff'], calc: ['✏️ 계산', '#0288d1'], apply: ['🌍 상황', '#00897b'] };
 
 /** 한 문제를 보여주고 답을 받는다. 반환 {ok, pick, box, result} 또는 {lecture:true} */
@@ -40,13 +43,15 @@ function showQuestion(q, opts) {
       opts.head ? el('span', { class: 'streak' }, opts.head) : null);
     const lead = opts.lead ? el('div', { class: 'jua', style: { color: '#b33', marginBottom: '.3em' } }, opts.lead) : null;
     const qq = el('div', { class: 'q' }, it.q);
+    // 📖 낱말 풀이: 문제 속 처음 보는 말을 그 자리에서 풀어 준다 (병석님 10-23: "질문도 이해를 못하겠어")
+    const help = it.help ? el('div', { class: 'help' }, el('b', {}, '📖 '), it.help) : null;
     const pic = it.pic ? drawViz(it.pic) : null;
     const btns = it.a.map((a, i) => el('button', { onclick: () => choose(i) }, el('span', { class: 'k' }, String(i + 1)), el('span', {}, a)));
     const ans = el('div', { class: 'ans' + (it.a.length === 3 ? ' three' : '') }, ...btns);
     const result = el('div', { class: 'result' });
     const lec = opts.noLecture ? null
       : el('button', { class: 'lec-btn' + (opts.pulse ? ' pulse' : ''), onclick: () => toLecture() }, '📺 모르겠으면 강의 보기 (2분)');
-    box.append(...[top, lead, qq, pic ? el('div', { class: 'pic' }, pic) : null, ans, lec, result].filter(Boolean));
+    box.append(...[top, lead, qq, help, pic ? el('div', { class: 'pic' }, pic) : null, ans, lec, result].filter(Boolean));
     root().append(box);
     document.body.classList.add('in-quiz');
     if (opts.answered) {
@@ -131,10 +136,10 @@ function explainCard(it, pick, title, skill) {
   }
   body.append(el('div', { style: { marginTop: '.3em' } }, el('b', {}, '정답은 '), el('b', { style: { color: '#2fae5b' } }, it.a[it.c]), ' — ', it.why));
   if (it.steps && it.steps.length) body.append(el('div', { class: 'steps' }, el('div', { class: 'lbl' }, '📝 풀이 순서'), el('ol', {}, ...it.steps.map((t) => el('li', {}, t)))));
-  const v = it.viz ? drawViz(it.viz) : null;
+  const v = it.viz ? drawViz(it.viz) : it.pic ? drawViz(it.pic) : null;
   if (v) body.append(v);
-  const need = it.need || (skill && skillNote(skill).need);
-  if (need) body.append(el('div', { class: 'need' }, el('b', {}, '💡 이게 왜 필요할까? '), need));
+  const need = whyLearn(it, skill);
+  if (need) body.append(el('div', { class: 'need' }, el('b', {}, '💡 이걸 왜 배울까? '), need));
   return el('div', { class: 'explain' }, face ? el('div', { class: 'face', style: { backgroundImage: `url(${face})` } }) : null, body);
 }
 
@@ -159,7 +164,7 @@ export async function moveQuiz({ monName, moveName, moveType, story, lesson }) {
   if (r.ok) {
     r.result.className = 'result ok';
     r.result.textContent = (lectured ? '명중! 강의에서 본 그대로야. ' : '정답! ') + (q.item.why || '');
-    const need = q.item.need || (q.subj === 'math' && skillNote(q.skill).need);
+    const need = whyLearn(q.item, q.skill);
     if (need) r.box.append(el('div', { class: 'need' }, el('b', {}, '💡 어디에 쓰일까? '), need));
     if (rec.mastered) { toast(rec.leap ? `🦘 도약! '${q.title}' 통과, '${rec.leap}'도 건너뛰기 — 나중에 확인 문제가 나와!` : rec.fast ? `🚀 5연속 이상! '${q.title}' 통과 — 바로 다음 단계로!` : `⭐ '${q.title}' 익힘! 다음 단계로!`, 2400); sfx('levelup'); }
     await sleep(350);
@@ -195,6 +200,7 @@ export async function moveQuiz({ monName, moveName, moveType, story, lesson }) {
 /** 오박사의 1분 강의: 처음 보는 주제의 핵심 한 줄 + 왜 필요한지 + 예시 풀이(그림) */
 async function lessonCard(q, again) {
   const n = skillNote(q.skill);
+  const lecWhy = (DB.lectures || {})[q.skill]?.why || '';
   const ex = (MATH_BY[q.skill] || {}).gen?.(false);
   const box = el('div', { class: 'win quiz lesson' });
   const face = portraitUrl('oak');
@@ -203,6 +209,7 @@ async function lessonCard(q, again) {
     el('div', { class: 'q' }, n.t),
     el('div', { class: 'explain' }, face ? el('div', { class: 'face', style: { backgroundImage: `url(${face})` } }) : null,
       el('div', { class: 'body2' },
+        lecWhy ? el('div', { class: 'why2' }, el('b', {}, '📜 왜 생겼을까? '), lecWhy) : null,
         n.idea ? el('div', {}, el('b', {}, '🔑 핵심: '), n.idea) : null,
         n.need ? el('div', { class: 'need' }, el('b', {}, '💡 왜 필요할까? '), n.need) : null,
         ex ? el('div', { style: { marginTop: '.5em' } }, el('b', {}, '📌 예시: '), ex.q, el('br'), el('b', { style: { color: '#2fae5b' } }, '→ ' + ex.a[ex.c]), ' — ', ex.why) : null,
@@ -229,3 +236,6 @@ function close(box) {
   box.remove();
   if (!document.querySelector('.quiz') && !document.querySelector('.lecture')) document.body.classList.remove('in-quiz');
 }
+
+/* 화면 시험용 (_tools/lecshots.mjs): 원하는 문제를 띄우고 틀렸을 때 설명 카드를 본다 */
+export const __quizTest = { showQuestion, explainCard };

@@ -64,7 +64,9 @@ export async function openLecture(subj, skillId, { answer } = {}) {
   const ep = subj === 'math' ? COMIC[skillId] : null;
   const nComic = ep ? await comicCount(ep) : 0;
   if (nComic) pages.push({ type: 'comic', ep, n: nComic });
-  for (const v of YT[skillId] || []) pages.push({ type: 'video', ...v });
+  // 영상: 강의 데이터의 video(2026-10-23, 주제마다 찾아서 열리는지 확인한 것) + 예전 목록. 같은 영상은 한 번만
+  const vids = [...(lec.video || []), ...(YT[skillId] || [])].filter((v, i, a) => v && v.id && a.findIndex((w) => w.id === v.id) === i);
+  for (const v of vids.slice(0, 2)) pages.push({ type: 'video', ...v });
   const ansIdx = answer ? pages.push({ type: 'answer', it: answer }) - 1 : -1;
 
   return new Promise((resolve) => {
@@ -87,10 +89,12 @@ export async function openLecture(subj, skillId, { answer } = {}) {
       stage.innerHTML = '';
       const p = pages[page];
       if (p.type === 'slide') {
-        const card = el('div', { class: 'lec-slide' + (p.big ? ' big' : '') }, el('div', { class: 'jua lec-h' }, p.h || ''), el('div', { class: 'lec-text' }, p.text || ''));
-        if (p.steps && p.steps.length) card.append(el('ol', {}, ...p.steps.map((t) => el('li', {}, t))));
+        // kind: story(옛날 사람들의 골칫거리) · idea(생각해 낸 방법) · oops(흔한 실수) · now(지금 쓰이는 곳) → 색만 다르다
+        const card = el('div', { class: 'lec-slide' + (p.big ? ' big' : '') + (p.kind ? ` k-${p.kind}` : '') }, el('div', { class: 'jua lec-h' }, p.h || ''), el('div', { class: 'lec-text' }, p.text || ''));
         const v = p.viz ? drawViz(p.viz) : null;
         if (v) card.append(v);
+        if (p.steps && p.steps.length) card.append(el('ol', { class: 'lec-steps' }, ...p.steps.map((t) => el('li', {}, t))));
+        if (p.tip) card.append(el('div', { class: 'lec-tip' }, '💡 ' + p.tip));
         stage.append(card);
       } else if (p.type === 'comic') {
         const strip = el('div', { class: 'lec-comic' }, el('div', { class: 'jua lec-h' }, `📖 만화 《수학이 태어난 날》 ${EP_NO[p.ep] || ''}화`));
@@ -103,7 +107,9 @@ export async function openLecture(subj, skillId, { answer } = {}) {
         const it = p.it;
         const card = el('div', { class: 'lec-slide lec-answer' }, el('div', { class: 'jua lec-h' }, '📝 아까 그 문제의 정답'),
           el('div', { class: 'lec-text' }, it.q));
-        if (it.pic) card.append(drawViz(it.pic));
+        if (it.help) card.append(el('div', { class: 'lec-tip' }, '📖 ' + it.help));
+        const pv = it.pic ? drawViz(it.pic) : null;
+        if (pv) card.append(pv);
         card.append(el('div', { class: 'jua lec-ans' }, '정답: ', el('b', {}, it.a[it.c])),
           el('div', { class: 'lec-text' }, it.why || ''));
         if (it.steps && it.steps.length) card.append(el('ol', {}, ...it.steps.map((t) => el('li', {}, t))));
@@ -115,6 +121,14 @@ export async function openLecture(subj, skillId, { answer } = {}) {
       pages.forEach((_, i) => dots.append(el('i', { class: i === page ? 'on' : '' })));
       prev.disabled = page === 0; next.disabled = page === pages.length - 1;
       stage.scrollTop = 0;
+      // 글·그림이 칸보다 길면 '아래에 더 있어요' — 끝까지 내리면 사라진다
+      requestAnimationFrame(() => {
+        if (stage.scrollHeight <= stage.clientHeight + 4 || pages[page].type === 'video') return;
+        const more = el('div', { class: 'lec-more' }, '⬇ 아래로 내리면 더 있어요');
+        stage.append(more);
+        const onScroll = () => { if (stage.scrollTop + stage.clientHeight >= stage.scrollHeight - 30) { more.remove(); stage.removeEventListener('scroll', onScroll); } };
+        stage.addEventListener('scroll', onScroll);
+      });
     };
     const go = (d) => { const np = Math.max(0, Math.min(pages.length - 1, page + d)); if (np !== page) { page = np; sfx('select'); render(); } };
     render();
