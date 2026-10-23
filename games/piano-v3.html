@@ -210,6 +210,7 @@ body.lscape #kb-zoom button{width:28px;height:28px;font-size:18px;}
 .rec-item { display:flex; justify-content:space-between; align-items:center; min-height:60px; padding:6px 12px; margin-bottom:6px; background:var(--surface); border-radius:10px; font-size:17px; }
 .rec-item-actions { display:flex; gap:8px; }
 .rec-item-actions button { min-width:56px; }
+.rec-item-actions button.arm { max-width:120px; padding:0 8px; font-size:14px; line-height:1.2; white-space:normal; } /* 1023 P-14: "한 번 더 누르면 지워요" */
 .rec-indicator { display:inline-flex; align-items:center; gap:6px; color:#ff8a8a; font-size:17px; font-weight:700; }
 #panel-record .ctrl-bar .btn { min-height:64px; min-width:120px; font-size:18px; }
 .rec-indicator .dot { width:8px; height:8px; border-radius:50%; background:var(--red); animation:blink 1s infinite; }
@@ -3674,7 +3675,7 @@ function renderRecordings() {
       </label>
       <div class="rec-item-actions">
         <button class="btn btn-primary" onclick="playRecording(${i})">▶</button>
-        <button class="btn btn-secondary" onclick="deleteRecording(${i})" style="color:var(--red)">✕</button>
+        <button class="btn btn-secondary" onclick="deleteRecording(${i}, this)" style="color:var(--red)">✕</button>
       </div>
     </div>
   `).join('');
@@ -3746,7 +3747,15 @@ document.getElementById('btn-rec-synth').addEventListener('click', () => {
   }
 });
 
-window.deleteRecording = function(idx) {
+window.deleteRecording = function(idx, btn) {
+  // 1023 P-14: ✕ 가 ▶ 바로 옆이라 한 번 잘못 눌러도 녹음이 사라졌다 → '모두 빼기'처럼 한 번 더 눌러야 지움(3초 지나면 원래대로)
+  if (btn && !(btn.dataset.arm && Date.now() - btn.dataset.arm < 3000)) {
+    btn.dataset.arm = Date.now(); btn.textContent = '한 번 더 누르면 지워요'; btn.classList.add('arm');
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => { delete btn.dataset.arm; btn.textContent = '✕'; btn.classList.remove('arm'); }, 3000);
+    return;
+  }
+  if (btn) clearTimeout(btn._t);
   recordings.splice(idx, 1);
   if (selectedRecIdx >= recordings.length) selectedRecIdx = -1;
   localStorage.setItem('piano-v3-recordings', JSON.stringify(recordings));
