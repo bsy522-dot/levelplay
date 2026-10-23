@@ -617,7 +617,9 @@ const latched = new Set();     // 마우스 클릭 토글 키 + 음 버튼·퀴�
 // 1024: true = 지금 latched 는 '퀴즈 오답 때 앱이 보여 주는 정답 키' → 주황 힌트 색 유지.
 // 그 밖(마우스로 누른 키·음 버튼)은 누른 키처럼 늘 청록 — 마우스로 누른 힌트 키가 안 누른 키와 같은 주황으로 보이던 것 방지
 let latchShow = false;
-function getPressed(){ return new Set([...heldKeys, ...latched]); }
+// 1024(SR-01): 퀴즈 오답 때 보여 주는 정답 키(latchShow)는 화면 표시만 — 누른 키·소리·판정에 섞지 않는다
+// (섞이면 아이가 잡은 손가락과 다른 '정답' 소리가 계속 났다)
+function getPressed(){ return new Set([...heldKeys, ...(latchShow ? [] : latched)]); }
 function sig(arr){ return [...arr].sort().join('+'); }
 function matchNote(){
   const p = getPressed();
@@ -689,7 +691,9 @@ function evaluateCombo(){
 }
 // 손을 떼면 지속음 정지 — 1023: 음 버튼으로 켠 키(latched)가 남아 있어도 손가락이 하나도 없으면 무조건 멈춘다
 // (예전엔 latched 가 있으면 안 멈춰서 '솔'이 끝없이 났다)
-function releaseCheck(){ if(!heldKeys.size && tone) { stopTone(); soundingId=null; } }
+// 1024(SR-01): 멈춘 뒤 soundingId 를 '지금 켜져 있는 키의 음'으로 둬서, 음 버튼 키가 남아 있어도 뗀 직후 그 음을 한 번 더 울리지 않음
+// (키보드 '음 버튼 + 8' 에서 8 을 떼면 버튼 음이 0.9초 더 나던 것)
+function releaseCheck(){ if(!heldKeys.size && tone) { stopTone(); soundingId = matchNote(); } }
 // 소리·음 버튼 고정 키를 모두 끈다(탭 전환·뒤로가기·화면 숨김). 손가락으로 잡고 있는 키는 그대로 — 실제로 누르고 있으니까.
 // 음 버튼 등으로 켜 보여 주던 키(latched)를 비움(손가락이 닿을 때).
 // 1024: 운지표 탭에선 비운 키를 주황 힌트로 남겨 아이가 하나씩 얹을 수 있게 한다(다른 음 버튼·전체 해제·탭 이동 때 지워짐).
@@ -878,7 +882,8 @@ function judgeQuiz(id){
   } else {
     squeak();
     if(fb){ fb.textContent = '❌ 반짝이는 키를 잡아 봐요!'; fb.className = 'feedback bad'; }   // 1023: 6살은 긴 글을 안 읽음 — 정답 키는 반짝임으로
-    setLatched(NOTES[q.target].keys, true); setHints(NOTES[q.target].keys);   // true: 보여 주는 정답 키 → 주황 깜빡
+    setLatched(NOTES[q.target].keys, true); setHints(NOTES[q.target].keys);   // true: 보여 주는 정답 키 → 주황 깜빡(표시만)
+    playSax(NOTES[q.target].freq, 0.9, 0.25);   // 1024(SR-01): 정답 소리는 '삑' 바로 뒤 한 번만
     quizTimer = setTimeout(nextQuizQ, 2400);
   }
 }
