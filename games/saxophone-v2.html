@@ -459,7 +459,10 @@ function noiseBuf(){
   for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
   noiseB = b; return b;
 }
+// 1023: 소리 높이 — 기본은 악보 음 그대로(×1). 도움말의 '진짜 알토 소리 높이로 듣기'를 켜면 장6도(9반음) 낮게(E♭ 알토 실제 소리).
+function pitchMul(){ return store.realPitch ? Math.pow(2, -9/12) : 1; }
 function buildVoice(freq){
+  freq *= pitchMul();
   const t0 = AC.currentTime;
   const o1 = AC.createOscillator(); o1.type='sawtooth'; o1.frequency.value = freq;
   const o2 = AC.createOscillator(); o2.type='square'; o2.frequency.value = freq; o2.detune.value = 5;
@@ -567,7 +570,7 @@ function confetti(){
 }
 function starsOf(n){ return n ? '⭐'.repeat(n) : '—'; }
 function keysDesc(n){
-  if(n.open) return '아무 키도 누르지 않는 개방음이에요';
+  if(n.open) return '아무 키도 누르지 않고 불어요';
   let d = n.keys.map(k=>KEY_LABEL[k]).join(' + ');
   if(n.altDesc) d += ` (${n.altDesc})`;
   return d;
@@ -735,19 +738,22 @@ function chipHtml(id){
 function renderChart(){
   $('#chartView').innerHTML = `
   <div class="viewhead"><h2>🎼 운지표</h2>
-    <p>음을 누르면 색소폰에 운지가 표시되고 소리가 나요. 실제처럼 키를 <b>꾹 잡으면</b> 바로 소리가 나요!</p></div>
+    <p>음 버튼을 누르면 잡을 키가 보이고 소리가 나요. 키를 <b>꾹 잡으면</b> 바로 소리가 나요!</p></div>
   <div id="chartNow" class="card notecard"></div>
   <div class="grouplabel">기본 음 <span class="nw">(도 ~ 높은 도)</span></div>
   <div class="chip-grid">${BASE8.map(chipHtml).join('')}</div>
   <div class="grouplabel">반음(♯/♭)과 더 낮은 음</div>
   <div class="chip-grid">${LOWACC.map(chipHtml).join('')}</div>
-  <div class="grouplabel">옥타브키(왼손 엄지)를 누르면 한 옥타브 위!</div>
+  <div class="grouplabel">엄지 키(옥타브)를 같이 누르면 높은 소리!</div>
   <div class="chip-grid">${OCT12.map(chipHtml).join('')}</div>
   <div class="grouplabel">팜키(왼손바닥)로 내는 최고음</div>
   <div class="chip-grid">${PALM4.map(chipHtml).join('')}</div>
   <div class="card help">🎷 <b>알토 색소폰</b> 악보(기보음) 기준 표준 운지 — 실제 색소폰과 같은 키 배치예요.<br>
   왼손 1·2·3 / 오른손 4·5·6 / <b>비스·팜키·사이드키·새끼손가락 키</b>까지 전부 눌러볼 수 있어요.<br>
-  키를 잡고 있는 동안 소리가 나요(여러 손가락 동시에!). 마우스는 클릭으로 켜고 꺼요.</div>`;
+  키를 잡고 있는 동안 소리가 나요(여러 손가락 동시에!). 마우스는 클릭으로 켜고 꺼요.<br>
+  높은 도♯은 아무 키도 누르지 않는 <b>개방음</b>이에요. 곡에서 같은 음이 이어지면 손을 뗐다 다시 잡아요(실제 연주의 텅잉처럼).<br>
+  🔊 소리는 <b>악보에 적힌 음 그대로</b>예요. 진짜 알토 색소폰(E♭ 악기)은 악보보다 장6도 낮게 소리 나요(악보 '도' → 실제 E♭).<br>
+  <label class="switch"><input type="checkbox" id="realPitch" ${store.realPitch?'checked':''}> 진짜 알토 소리 높이로 듣기</label></div>`;
   showChartNote('G4', false);   // 1023: 처음·탭 복귀 땐 '솔' 카드만 — 키를 켜거나 소리 내지 않음(묻지도 않은 소리 방지)
 }
 function showChartNote(id, applyKeys){
@@ -768,7 +774,7 @@ function renderQuizStart(){
   state.quiz = null; setHints(null);
   const best = store.quizBest || 0;
   $('#quizView').innerHTML = `
-  <div class="viewhead"><h2>🧩 운지 퀴즈</h2><p>화면의 음을 보고 올바른 운지를 잡아 <b>잠깐 유지</b>하면 자동 판정! 총 10문제예요.</p></div>
+  <div class="viewhead"><h2>🧩 운지 퀴즈</h2><p>음을 보고 키를 <b>꾹 잡고 있으면</b> 맞았는지 알려 줘요! 10문제예요.</p></div>
   <div class="card">
     <p style="margin:0 0 10px;color:var(--sub);font-size:14px;">🏆 최고 점수: <b style="color:var(--gold)">${best}점</b></p>
     <label class="switch"><input type="checkbox" id="quizHigh"> 높은 음(옥타브키) 포함</label>
@@ -803,7 +809,7 @@ function nextQuizQ(){
   <div class="viewhead"><h2>🧩 운지 퀴즈</h2>
     <div class="quizmeta"><span>문제 <b id="quizRound">${q.round}</b>/10</span><span>점수 <b id="quizScore">${q.score}</b></span></div></div>
   <div class="card notecard" id="quizCard" data-note="${t}">
-    ${noteCard(t, '이 음의 운지를 잡고 잠깐 유지하세요!')}
+    ${noteCard(t, '이 음의 키를 꾹 잡아 봐요!')}
   </div>
   <div id="quizFb" class="feedback"></div>
   <button class="ghostbtn" data-act="quiz-exit">그만하기</button>`;
@@ -831,7 +837,7 @@ function judgeQuiz(id){
     quizTimer = setTimeout(nextQuizQ, 950);
   } else {
     squeak();
-    if(fb){ fb.innerHTML = `❌ 아쉬워요! 정답 운지: ${keysDesc(NOTES[q.target])}`; fb.className = 'feedback bad'; }
+    if(fb){ fb.textContent = '❌ 반짝이는 키를 잡아 봐요!'; fb.className = 'feedback bad'; }   // 1023: 6살은 긴 글을 안 읽음 — 정답 키는 반짝임으로
     setLatched(NOTES[q.target].keys); setHints(NOTES[q.target].keys);
     quizTimer = setTimeout(nextQuizQ, 2400);
   }
@@ -861,7 +867,7 @@ function endQuiz(){
 function renderSongList(){
   stopMelody(); state.song = null; setHints(null);
   $('#songView').innerHTML = `
-  <div class="viewhead"><h2>🎵 곡 연주</h2><p>운지를 잡으면 소리가 나면서 다음 음으로! 힌트를 켜면 눌러야 할 키가 반짝여요.</p></div>
+  <div class="viewhead"><h2>🎵 곡 연주</h2><p>키를 잡으면 소리가 나고 다음 음으로 가요! 반짝이는 키를 잡아요.</p></div>
   <div class="song-grid">${SONGS.map(s=>{
     const rec = store.songs[s.id];
     return `<button class="song-card" data-act="song-open" data-id="${s.id}">
@@ -887,13 +893,13 @@ function renderSongPlay(){
     <button class="ghostbtn" id="previewBtn" data-act="song-preview">▶ 미리듣기</button>
   </div>
   <div class="songmeta">
-    <label class="switch"><input type="checkbox" id="hintChk" ${sg.hint?'checked':''}> 운지 힌트</label>
+    <label class="switch"><input type="checkbox" id="hintChk" ${sg.hint?'checked':''}> 반짝 힌트</label>
     <span>진행 <b id="songPos">${sg.idx+1}</b>/${s.notes.length}</span>
     <span>미스 <b id="missCnt">${sg.miss}</b></span>
   </div>
   <div class="seq" id="seq">${s.notes.map((nt,i)=>`<span class="seq-chip${i===sg.idx?' cur':''}" data-i="${i}">${NOTES[nt[0]].ko}</span>`).join('')}</div>
   <div class="card notecard" id="songCard"></div>
-  <p style="color:var(--sub);font-size:12px;margin-top:10px;">💡 같은 음이 이어질 땐 손을 뗐다가 다시 잡아요 (실제 연주의 텅잉처럼!)</p>`;
+  <p style="color:var(--sub);font-size:12px;margin-top:10px;">💡 같은 음이 또 나오면 손을 뗐다가 다시 꾹!</p>`;
   const hintChk = $('#hintChk');
   if(hintChk) hintChk.addEventListener('change', ()=>{ sg.hint = hintChk.checked; applySongHint(); });
   updateSongTarget();
@@ -979,6 +985,9 @@ function switchMode(m){
   if(m==='quiz') renderQuizStart();
   if(m==='song') renderSongList();
 }
+document.addEventListener('change', e=>{
+  if(e.target && e.target.id === 'realPitch'){ store.realPitch = e.target.checked; save(); }
+});
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-act]');
   if(!b) return;
