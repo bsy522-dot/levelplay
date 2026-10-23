@@ -1079,7 +1079,7 @@ function resetFingers(){for(let i=0;i<4;i++){heldF[i]={};semi[i]=0;updFingerUI(i
 function pickNote(si,sm){
   const changed=semi[si]!==sm;
   semi[si]=sm;curN=sm===0?SN[si]:AE.nn(AE.freq(si,sm));
-  if(bow.dn&&bow.str===si){AE.upd(si,sm,bow.spd);if(changed)bowStroke(si);} /* slur: pitch change under the bow sounds → judge it */
+  if(inputMode==='bow'&&bow.dn&&bow.str===si){AE.upd(si,sm,bow.spd);if(changed)bowStroke(si);} /* slur: pitch change under the bow sounds → judge it (활 모드만 — 1024: 터치 연주는 noBowDown 이 따로 판정하므로 몸통에 손이 닿아 있어도 한 번만) */
   updFingerUI(si);
 }
 
@@ -1223,8 +1223,11 @@ function drawFH(ctx,x,y,h,mir){
 const bowCv=document.getElementById('bowCv'),bc=bowCv.getContext('2d');
 let BW=0,BH=0;
 
-/* 1023: 몸통을 누른 자리에서 가장 가까운 줄(몸통을 4칸으로 똑같이 나눈 칸) — 줄 사이를 눌러도 소리가 난다(옛: 36px 밖이면 소리 없음) */
-function sFromX(px){let b=0,bd=1e9;for(let i=0;i<4;i++){const d=Math.abs(px-strX(i));if(d<bd){bd=d;b=i;}}return b;}
+/* 몸통을 누른 자리의 줄.
+   활 모드(1023): 가장 가까운 줄(몸통을 4칸으로 똑같이 나눈 칸) — 줄 사이를 문질러도 소리가 난다.
+   터치 연주(1024): 옛 규칙 그대로 줄 가까이(36px 안)만 — 본 입력은 위쪽 음 버튼이라, 몸통에 손바닥·엄지가
+   닿을 때마다 소리·판정이 나던 문제(몸통 폭 100% 가 소리 남)를 막는다. 없으면 -1 */
+function sFromX(px){let b=0,bd=1e9;for(let i=0;i<4;i++){const d=Math.abs(px-strX(i));if(d<bd){bd=d;b=i;}}return (inputMode==='bow'||bd<36)?b:-1;}
 
 /* ── BOW STROKE = the moment a note is articulated. Sound and judgment are
    coupled here. Fires on: bow touch-down, bow direction reversal (re-stroke
