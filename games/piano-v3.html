@@ -3197,7 +3197,11 @@ function followSong(now, beatToSec) {
   if (!invis.length) return;
   const lostT = now + FOLLOW_ANIM_MS / 1000 + FOLLOW_AIM_SEC;
   const score = (pos, moving) => win.reduce((c, n) => c + (vis(n, pos) && (!moving || n.time * beatToSec >= lostT) ? 1 : 0), 0);
-  const cur = score(sl, false), g0 = win[0], keeps = vis(g0, sl) ? [null, g0] : [null];
+  // 1024 P2V-01: 곧 칠 음(g0)이 지금 보이고 옮기는 사이(lostT)에 칠 음이면, 옮겨도 g0 은 화면에 붙잡아 둔다
+  //   (태블릿 세로 엘리제 60%: 다음 음 0.28초 전에 −410px 옮겨 손가락이 한 옥타브 아래로 떨어지던 것)
+  const g0 = win[0], g0vis = vis(g0, sl), cur = score(sl, false);
+  if (g0vis && g0.time * beatToSec < lostT) return; // 곧 칠 음이 보이면 그 음을 친 뒤에 옮긴다(옮기는 동안 손가락 밑 건반이 바뀌지 않게)
+  const keeps = g0vis ? [null, g0] : [null];
   let best = null;
   for (const n of invis) for (const keep of keeps) {
     const c = minShiftTo(sl, n, keep);
