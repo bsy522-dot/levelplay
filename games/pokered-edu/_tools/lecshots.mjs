@@ -13,6 +13,12 @@ fs.mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
 const page = await ctx.newPage();
+// --lecfile 원고.json : 게임 강의 위에 원고 강의를 덮어 보여 준다 (게임 파일은 안 바꿈)
+const LECFILE = arg('--lecfile', '');
+if (LECFILE) {
+  const merged = { ...JSON.parse(fs.readFileSync(new globalThis.URL('../data/lectures.json', import.meta.url), 'utf8')), ...JSON.parse(fs.readFileSync(LECFILE, 'utf8')) };
+  await page.route('**/data/lectures.json', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(merged) }));
+}
 const errs = [];
 page.on('pageerror', (e) => errs.push(e.message));
 await page.goto(URL);

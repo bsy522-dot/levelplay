@@ -306,5 +306,14 @@ body.in-battle .goal, body.in-panel .goal, body.in-quiz .goal { display: none; }
 .quiz .pic .viz-anim { margin-top: 0; }
 .quiz .help { margin: -.2em 0 .6em; padding: .4em .65em; background: #eef4ff; border-radius: 10px; font-size: .92em; line-height: 1.5; word-break: keep-all; }
 .quiz .help b { color: #2d55b3; }
+/* 폰: 여백을 줄여 그림(폭 360 기준)을 더 크게 → 그림 속 글씨가 읽히게 */
+@media (max-width: 480px) {
+  .lecture { padding-left: 4px; padding-right: 4px; }
+  .lec-win { padding: .55em .45em; }
+  .lec-slide { padding: .75em .55em; }
+  .explain { padding: .55em .45em; gap: .45em; }
+  .explain .face { width: 2.8em; height: 2.8em; }
+  .quiz { width: calc(100% - 8px); padding: .8em .6em .9em; }
+}
 .explain .why2 { margin-top: .45em; padding: .35em .6em; background: #fbefd9; border-radius: 10px; font-size: .92em; line-height: 1.5; }
 body.in-lecture .pad, body.in-lecture .goal { display: none; }
