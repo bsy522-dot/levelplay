@@ -999,6 +999,14 @@ document.addEventListener('click', e=>{
     });
   }
 });
+/* ───────────────── 뒤로가기 한 층씩 (1023) ─────────────────
+   배움퀘스트 첫 화면이 폰 '뒤로'를 받으면 먼저 여기 묻는다(피아노와 같은 방식).
+   곡 연주·결과 → 곡 목록, 퀴즈 중·결과 → 퀴즈 시작 화면. 더 갈 데가 없으면 false(→ 첫 화면이 게임을 닫음). */
+window.lpBack = function(){
+  if(state.mode==='song' && state.song){ renderSongList(); silenceAll(); return true; }
+  if(state.mode==='quiz' && state.quiz){ renderQuizStart(); silenceAll(); return true; }
+  return false;
+};
 /* 시작 */
 renderChart();
 
