@@ -1036,6 +1036,9 @@ function renderStrip() {
   const strip = document.getElementById('kb-strip');
   const wrap = document.getElementById('piano-wrap');
   if (!strip || !wrap) return;
+  // 1023: 따라치기 연주 중엔 띠가 숨어 있다(P-11) — 건반이 움직일 때마다 크기를 재지 않게 바로 끝낸다
+  const ps = document.getElementById('panel-synth');
+  if (ps && ps.classList.contains('active') && ps.classList.contains('playing')) return;
   const win = document.getElementById('kb-strip-win');
   const total = wrap.scrollWidth || 1;
   const view = wrap.clientWidth;
@@ -1085,6 +1088,7 @@ function renderStrip() {
 let whiteKeyWidth = 20;
 let keyZoom = 1; // 건반 전용 확대 배율 (페이지 줌 아님) — 핀치/버튼으로 0.8~7.6 (2026-09-26 병석님: 손가락 폭까지)
 let keyPosCache = []; // 캔버스 레인 가이드용 건반 위치 캐시 (리빌드 시 갱신)
+let keyBoxByMidi = new Map(); // midi → {l, r} (리빌드 시 갱신)
 // 옥타브별 라벨 칩 색 (상용 앱식: 3=노랑 4=초록 5=청록 6=파랑)
 const OCT_CHIP = ['#e0cdb9','#f4c6c6','#f7d59c','#f9e08b','#b7f0c0','#a9e7e2','#b9c9f7','#d3bdf2','#ecbde4'];
 // 2026-09-26(병석님 2차): 폭 대비 높이 상한.
@@ -1177,6 +1181,9 @@ function buildPiano() {
     black: el.classList.contains('key-black'),
     isC: !!el.dataset.note && el.dataset.note[0] === 'C' && el.dataset.note[1] !== '#'
   }));
+  // 1023: 따라치기 자동 이동용 midi → 좌우 위치 (매 프레임 offsetLeft 를 읽으면 강제 레이아웃으로 느려진다)
+  keyBoxByMidi = new Map();
+  piano.querySelectorAll('[data-midi]').forEach((el, i) => keyBoxByMidi.set(+el.dataset.midi, {l: keyPosCache[i].x, r: keyPosCache[i].x + keyPosCache[i].w}));
 
   setupPianoTouch();
   if (typeof renderStrip === 'function') requestAnimationFrame(renderStrip);
@@ -3066,11 +3073,9 @@ let synthOrder = [];                     // synthNotes 를 시간 순으로 (두
 let userScrollAt = -1e9, followAnim = null, autoScrollLeft = null;
 const FOLLOW_GRACE_MS = 2000, FOLLOW_ANIM_MS = 280;
 function markUserScroll() { userScrollAt = performance.now(); followAnim = null; }
-function setAutoScroll(v) { const w = document.getElementById('piano-wrap'); w.scrollLeft = v; autoScrollLeft = w.scrollLeft; }
-function keyBox(midi) {
-  const el = document.querySelector(`#piano [data-midi="${midi}"]`);
-  return el ? {l: el.offsetLeft, r: el.offsetLeft + el.offsetWidth} : null;
-}
+// 값은 followTarget 이 이미 범위 안으로 잘라 준다 → 다시 읽지 않는다(읽으면 강제 레이아웃)
+function setAutoScroll(v) { document.getElementById('piano-wrap').scrollLeft = v; autoScrollLeft = v; }
+function keyBox(midi) { return keyBoxByMidi.get(midi) || null; }
 // 시간 순 음 목록을 앞에서부터 한 화면에 들어가는 데까지 모아, 그 가운데가 화면 가운데 오는 scrollLeft
 function followTarget(list) {
   const wrap = document.getElementById('piano-wrap');
