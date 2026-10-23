@@ -71,7 +71,7 @@ main{flex:1 1 auto; display:flex; min-height:0;}
 .key .kl{fill:#8ea0c6; font-size:8.5px; text-anchor:middle; pointer-events:none;}
 /* 1023: '눌러야 할 키'(힌트)는 주황 점선 + 연주황 채움으로 깜빡 — '누른 키'(청록 채움)와 다른 색.
    힌트 키를 누르면 누름(청록)으로 바뀌어 '이건 됐어'가 보인다. */
-.key.hint:not(.pressed) .cap, .key.hint.latched .cap{fill:#ffe1bf; stroke:#f97316; stroke-width:4; stroke-dasharray:6 3; animation:hintPulse 1s ease-in-out infinite;}
+.key.hint:not(.pressed) .cap, .key.hint.shown .cap{fill:#ffe1bf; stroke:#f97316; stroke-width:4; stroke-dasharray:6 3; animation:hintPulse 1s ease-in-out infinite;}
 @keyframes hintPulse{50%{stroke-opacity:.25; fill-opacity:.8;}}
 #nowNote{font-size:12px; color:var(--sub); margin:2px 0 4px; height:16px;}
 #nowNote b{color:var(--gold); font-size:13px;}
@@ -607,7 +607,10 @@ function noteCard(id, hintText){
 /* ───────────────── 키 입력 (멀티터치 홀드 + 마우스 토글 + 키보드 홀드) ───────────────── */
 const held = new Map();        // pointerId -> key (터치/펜: 꾹 누르는 동안)
 const heldKeys = new Set();    // 터치·키보드로 잡고 있는 키
-const latched = new Set();     // 마우스 클릭 토글 키
+const latched = new Set();     // 마우스 클릭 토글 키 + 음 버튼·퀴즈 오답 때 앱이 켜 보여 주는 키
+// 1024: true = 지금 latched 는 '퀴즈 오답 때 앱이 보여 주는 정답 키' → 주황 힌트 색 유지.
+// 그 밖(마우스로 누른 키·음 버튼)은 누른 키처럼 늘 청록 — 마우스로 누른 힌트 키가 안 누른 키와 같은 주황으로 보이던 것 방지
+let latchShow = false;
 function getPressed(){ return new Set([...heldKeys, ...latched]); }
 function sig(arr){ return [...arr].sort().join('+'); }
 function matchNote(){
@@ -630,13 +633,13 @@ function refresh(){
   $$('.key').forEach(el=>{
     const k = el.dataset.key;
     el.classList.toggle('pressed', p.has(k));
-    el.classList.toggle('latched', latched.has(k) && !heldKeys.has(k));   // 손가락 아닌 앱이 켠 키(퀴즈 오답 때 정답 보여 주기 등)
+    el.classList.toggle('shown', latchShow && latched.has(k) && !heldKeys.has(k));   // 퀴즈 오답 때 앱이 보여 주는 정답 키(손가락으로 안 누른 것)
   });
   updateNowNote();
   onComboChange();
 }
-function setLatched(keys){ latched.clear(); keys.forEach(k=>latched.add(k)); refresh(); }
-function clearLatched(){ latched.clear(); refresh(); }
+function setLatched(keys, show){ latched.clear(); keys.forEach(k=>latched.add(k)); latchShow = !!show; refresh(); }
+function clearLatched(){ latched.clear(); latchShow = false; refresh(); }
 // 1023: 누른 키가 모두 목표 운지(또는 대체 운지) 안에 있으면 '아직 손가락을 놓는 중' — 틀렸다고 하지 않는다.
 // (아이는 손가락을 하나씩 천천히 놓는다. 목표에 없는 키를 하나라도 누르면 지금처럼 오답·미스)
 function placingToward(target){
@@ -679,7 +682,7 @@ function releaseCheck(){ if(!heldKeys.size && tone) { stopTone(); soundingId=nul
 // 소리·음 버튼 고정 키를 모두 끈다(탭 전환·뒤로가기·화면 숨김). 손가락으로 잡고 있는 키는 그대로 — 실제로 누르고 있으니까.
 function silenceAll(){
   clearTimeout(judgeT); clearTimeout(missT);
-  latched.clear(); stopTone(); soundingId = null;
+  latched.clear(); latchShow = false; stopTone(); soundingId = null;
   refresh();
 }
 
@@ -689,11 +692,12 @@ $$('.key').forEach(el=>{
     e.preventDefault(); ensureAudio();
     if(e.pointerType === 'mouse'){
       if(latched.has(key)) latched.delete(key); else latched.add(key);
+      latchShow = false;   // 1024: 마우스로 누르기 시작하면 latched 는 '누른 키'(청록)
       refresh();
     } else {
       try{ el.setPointerCapture(e.pointerId); }catch(err){}
       // 1023: 손가락이 닿는 순간 음 버튼으로 켠 키는 끈다 — 남아 있으면 '라'(1+2)를 잡아도 3번이 켜진 채 '솔'이 났다
-      if(latched.size) latched.clear();
+      if(latched.size){ latched.clear(); latchShow = false; }
       held.set(e.pointerId, key); heldKeys.add(key); refresh();
     }
   });
@@ -838,7 +842,7 @@ function judgeQuiz(id){
   } else {
     squeak();
     if(fb){ fb.textContent = '❌ 반짝이는 키를 잡아 봐요!'; fb.className = 'feedback bad'; }   // 1023: 6살은 긴 글을 안 읽음 — 정답 키는 반짝임으로
-    setLatched(NOTES[q.target].keys); setHints(NOTES[q.target].keys);
+    setLatched(NOTES[q.target].keys, true); setHints(NOTES[q.target].keys);   // true: 보여 주는 정답 키 → 주황 깜빡
     quizTimer = setTimeout(nextQuizQ, 2400);
   }
 }
