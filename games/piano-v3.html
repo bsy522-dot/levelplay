@@ -4262,8 +4262,10 @@ window.lpBack = function () {
   const sp = k7El('settings-panel'); if (sp && !sp.hidden) { sp.hidden = true; k7El('btn-settings').setAttribute('aria-expanded', 'false'); return true; }
   const mm = k7El('more-menu'); if (mm && mm.classList.contains('open')) { mm.classList.remove('open'); return true; }
   const ps = k7El('panel-synth'); if (ps && ps.classList.contains('active') && !ps.classList.contains('browsing')) { stopSynthesia(); showSongBrowser(); return true; }
-  const pv = k7El('play-view'); if (pv && pv.classList.contains('active')) { k7El('btn-back-play').click(); return true; }
-  const lv = k7El('lesson-view'); if (lv && lv.classList.contains('active')) { k7El('btn-back-learn').click(); return true; }
+  // 1024 PR-05: 학습 탭이 켜져 있을 때만 — 레슨을 친 뒤 곡 목록에 있으면 숨은 레슨 화면 때문에 뒤로가기가 한 번 헛돌았다
+  const pl = k7El('panel-learn'), inLearn = pl && pl.classList.contains('active');
+  const pv = k7El('play-view'); if (inLearn && pv && pv.classList.contains('active')) { k7El('btn-back-play').click(); return true; }
+  const lv = k7El('lesson-view'); if (inLearn && lv && lv.classList.contains('active')) { k7El('btn-back-learn').click(); return true; }
   return false;
 };
 
