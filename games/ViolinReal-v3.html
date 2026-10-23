@@ -637,16 +637,18 @@ const AE=(()=>{
    (f 는 지판 칸 = 반음 수. 실제 손가락 번호는 FINGER_OF[f]: 칸 1·2→1번, 3·4→2번, 5·6→3번, 7→4번)
    ═══════════════════════════════════════════════════════════ */
 const SONGS={
-  '학교종':{name:'학교종',category:'동요',difficulty:'easy',bpm:100,
+  /* 1023: '학교종'(김메리 작곡, 저작권 보호 중)을 빼고 같은 음역(도4~라4)의 영국 전래 동요로 바꿈.
+     피아노 '런던 브릿지'(2/4)와 같은 선율을 박을 두 배로 늘려 4/4 로(아이용). 새 이름이라 옛 별·점수와 안 섞임 */
+  '런던브릿지':{name:'런던 브릿지',category:'동요',difficulty:'easy',bpm:100,
     notes:[
-      {note:'G4',dur:1,s:1,f:5},{note:'G4',dur:1,s:1,f:5},{note:'A4',dur:1,s:2,f:0},{note:'A4',dur:1,s:2,f:0},
-      {note:'G4',dur:1,s:1,f:5},{note:'G4',dur:1,s:1,f:5},{note:'E4',dur:2,s:1,f:2},
-      {note:'G4',dur:1,s:1,f:5},{note:'G4',dur:1,s:1,f:5},{note:'E4',dur:1,s:1,f:2},{note:'E4',dur:1,s:1,f:2},
-      {note:'D4',dur:2,s:1,f:0},{note:'R',dur:2,s:-1,f:0},
-      {note:'G4',dur:1,s:1,f:5},{note:'G4',dur:1,s:1,f:5},{note:'A4',dur:1,s:2,f:0},{note:'A4',dur:1,s:2,f:0},
-      {note:'G4',dur:1,s:1,f:5},{note:'G4',dur:1,s:1,f:5},{note:'E4',dur:2,s:1,f:2},
-      {note:'G4',dur:1,s:1,f:5},{note:'E4',dur:1,s:1,f:2},{note:'D4',dur:1,s:1,f:0},{note:'E4',dur:1,s:1,f:2},
-      {note:'C4',dur:2,s:0,f:5},{note:'R',dur:2,s:-1,f:0}
+      {note:'G4',dur:1.5,s:1,f:5},{note:'A4',dur:.5,s:2,f:0},{note:'G4',dur:1,s:1,f:5},{note:'F4',dur:1,s:1,f:3},
+      {note:'E4',dur:1,s:1,f:2},{note:'F4',dur:1,s:1,f:3},{note:'G4',dur:2,s:1,f:5},
+      {note:'D4',dur:1,s:1,f:0},{note:'E4',dur:1,s:1,f:2},{note:'F4',dur:2,s:1,f:3},
+      {note:'E4',dur:1,s:1,f:2},{note:'F4',dur:1,s:1,f:3},{note:'G4',dur:2,s:1,f:5},
+      {note:'G4',dur:1.5,s:1,f:5},{note:'A4',dur:.5,s:2,f:0},{note:'G4',dur:1,s:1,f:5},{note:'F4',dur:1,s:1,f:3},
+      {note:'E4',dur:1,s:1,f:2},{note:'F4',dur:1,s:1,f:3},{note:'G4',dur:2,s:1,f:5},
+      {note:'D4',dur:2,s:1,f:0},{note:'G4',dur:2,s:1,f:5},
+      {note:'E4',dur:1,s:1,f:2},{note:'C4',dur:3,s:0,f:5}
     ]},
   '작은별':{name:'반짝반짝 작은별',category:'동요',difficulty:'easy',bpm:80,
     notes:[
@@ -858,7 +860,8 @@ const SONGS={
 /* Chord progressions for accompaniment (per song) */
 const CHORDS={
   '비행기':[[329.63,392,493.88],[293.66,392,493.88]],
-  '학교종':[[261.63,329.63,392],[293.66,392,493.88]],
+  /* 마디 2부터 4박마다: 도·솔·도·도·도·솔·도 */
+  '런던브릿지':[[261.63,329.63,392],[196,246.94,293.66],[261.63,329.63,392],[261.63,329.63,392],[261.63,329.63,392],[196,246.94,293.66],[261.63,329.63,392]],
   '작은별':[[261.63,329.63,392],[349.23,440,523.25]],
   '캐논':[[293.66,369.99,440],[261.63,329.63,392]],
   '아리랑':[[440,523.25,659.25],[329.63,440,523.25]],
@@ -913,7 +916,7 @@ const LESSONS=[];
   LESSONS.push({lv:24,title:'D 장음계 (하행)',desc:'A-G-F#-E-D를 순서대로',targets:[{s:2,f:0,count:1},{s:1,f:5,count:1},{s:1,f:4,count:1},{s:1,f:2,count:1},{s:1,f:0,count:1}]});
   LESSONS.push({lv:25,title:'음계 연결',desc:'G+D장음계를 이어서',targets:[{s:0,f:0,count:1},{s:0,f:2,count:1},{s:0,f:4,count:1},{s:0,f:5,count:1},{s:1,f:0,count:1},{s:1,f:2,count:1},{s:1,f:4,count:1},{s:1,f:5,count:1},{s:2,f:0,count:1}]});
   LESSONS.push({lv:26,title:'비행기 (처음 4음)',desc:'미-레-도-레를 연주하세요',targets:[{s:3,f:0,count:1},{s:2,f:5,count:1},{s:2,f:3,count:1},{s:2,f:5,count:1}]});
-  LESSONS.push({lv:27,title:'학교종 (처음 4음)',desc:'솔-솔-라-라를 연주하세요',targets:[{s:1,f:5,count:1},{s:1,f:5,count:1},{s:2,f:0,count:1},{s:2,f:0,count:1}]});
+  LESSONS.push({lv:27,title:'런던 브릿지 (처음 4음)',desc:'솔-라-솔-파를 연주하세요',targets:[{s:1,f:5,count:1},{s:2,f:0,count:1},{s:1,f:5,count:1},{s:1,f:3,count:1}]}); /* 1023: 학교종(저작권) 대신 */
   LESSONS.push({lv:28,title:'작은별 (처음 6음)',desc:'도-도-솔-솔-라-라를 연주하세요',targets:[{s:2,f:3,count:1},{s:2,f:3,count:1},{s:3,f:3,count:1},{s:3,f:3,count:1},{s:3,f:5,count:1},{s:3,f:5,count:1}]});
   LESSONS.push({lv:29,title:'나비야 (전반부)',desc:'솔-미-미-파-레-레를 연주하세요',targets:[{s:1,f:5,count:1},{s:1,f:2,count:1},{s:1,f:2,count:1},{s:1,f:3,count:1},{s:1,f:0,count:1},{s:1,f:0,count:1}]});
   LESSONS.push({lv:30,title:'아리랑 (주제)',desc:'미-라-시-도-시-라를 연주하세요',targets:[{s:1,f:2,count:1},{s:2,f:0,count:1},{s:2,f:2,count:1},{s:2,f:3,count:1},{s:2,f:2,count:1},{s:2,f:0,count:1}]});
@@ -1395,7 +1398,7 @@ const rc=rhythmCv.getContext('2d');
 let RW=0,RH=0;
 
 /* Required 8 songs for rhythm game selection */
-const RHYTHM_SONG_ORDER=['학교종','작은별','나비야','봄','캐논','유모레스크','사계여름','차르다시'];
+const RHYTHM_SONG_ORDER=['런던브릿지','작은별','나비야','봄','캐논','유모레스크','사계여름','차르다시'];
 
 function showRhythmSongSelect(){
   const panel=document.getElementById('panel');
