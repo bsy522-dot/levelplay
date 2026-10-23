@@ -300,7 +300,7 @@ body:not(.showInfo) .info{display:none;}
     <!-- 0926: 글자를 감추던 동작을 없애고 '조용히/또렷하게'만 바꾸도록 문구 수정 -->
     <div class="sbtn" data-set="sharps" data-v="0" role="button">조용히</div>
     <div class="sbtn" data-set="sharps" data-v="1" role="button">또렷하게</div></div></div>
-  <div class="sRow"><div class="sLbl">리듬 게임 빠르기</div><div class="sSeg">
+  <div class="sRow"><div class="sLbl">리듬 게임·곡 연주 빠르기</div><div class="sSeg">
     <div class="sbtn" data-set="spd" data-v="1" role="button">⚡ 보통</div>
     <div class="sbtn" data-set="spd" data-v="0.75" role="button">🐢 느리게</div></div></div>
   <div class="sRow"><div class="sLbl">리듬 게임 연습 모드 (틀려도 멈추고 기다려요)</div><div class="sSeg">
@@ -558,19 +558,31 @@ const AE=(()=>{
   }
   function stopAll(){for(let i=0;i<4;i++)stop(i);}
 
+  /* 반주 화음은 울리는 동안 chs 에 둔다 → stopChords() 로 곡 연주를 나갈 때 바로 줄여 끈다
+     (1023: 나간 뒤에도 최대 4박 더 울리던 문제) */
+  let chs=[];
   function playChord(notes, duration){
     if(!c)return;res();
     const t=c.currentTime;
+    chs=chs.filter(h=>h.end>t);
     const g=c.createGain();g.gain.setValueAtTime(0,t);
     g.gain.linearRampToValueAtTime(.08,t+.05);
     g.gain.setValueAtTime(.08,t+duration-.1);
     g.gain.linearRampToValueAtTime(0,t+duration);
     g.connect(m);
+    const os=[];
     notes.forEach(f=>{
       const o=c.createOscillator();o.type='sine';o.frequency.value=f;
       const og=c.createGain();og.gain.value=.3;
-      o.connect(og);og.connect(g);o.start(t);o.stop(t+duration);
+      o.connect(og);og.connect(g);o.start(t);o.stop(t+duration);os.push(o);
     });
+    chs.push({g,os,end:t+duration});
+  }
+  function stopChords(){
+    if(!c)return;const t=c.currentTime;
+    chs.forEach(h=>{try{h.g.gain.cancelScheduledValues(t);h.g.gain.setValueAtTime(h.g.gain.value,t);
+      h.g.gain.linearRampToValueAtTime(0,t+.08);h.os.forEach(o=>{try{o.stop(t+.1);}catch(e){}});}catch(e){}});
+    chs=[];
   }
 
   /* Sound effects */
@@ -592,7 +604,7 @@ const AE=(()=>{
     }
   }
 
-  return{init,res,freq,nn,play,upd,stop,stopAll,playChord,playSfx,getCtx,getMaster,BF,get loaded(){return samplesLoaded},
+  return{init,res,freq,nn,play,upd,stop,stopAll,playChord,stopChords,playSfx,getCtx,getMaster,BF,get loaded(){return samplesLoaded},
     setPizz,get pizz(){return pz},click,drone,droneOff};
 })();
 
@@ -1309,11 +1321,12 @@ function exitMode(){
   document.getElementById('sheetArea').style.display='none';
   document.getElementById('panel').style.display='none';
   document.getElementById('judgeTxt').style.opacity='0';
-  document.getElementById('countdown').style.display='none';
+  stopCountdown(); /* 1023: 3·2·1 도중에 나가면 세기도 멈춤(옛: 나간 뒤 몰래 게임이 시작됨) */
   document.getElementById('gameOver').style.display='none';
   clearHighlights();
   stopTools();
   AE.stopAll();
+  AE.stopChords();
 }
 
 function enterMode(mode){
@@ -1440,23 +1453,26 @@ function showRhythmSongSelect(){
   });
 }
 
+/* 준비 세기(리듬 게임 3·2·1·시작!, 곡 연주 2·1). 하나만 돌고, exitMode 가 멈춘다 */
+let cdIv=null;
+function stopCountdown(){
+  if(cdIv){clearInterval(cdIv);cdIv=null;}
+  document.getElementById('countdown').style.display='none';
+}
+function runCountdown(labels,stepMs,done){
+  stopCountdown();
+  const cd=document.getElementById('countdown'),cdTxt=document.getElementById('countdownTxt');
+  let k=0;cdTxt.textContent=labels[0];cd.style.display='flex';
+  cdIv=setInterval(()=>{
+    k++;
+    if(k<labels.length)cdTxt.textContent=labels[k];
+    else{stopCountdown();if(done)done();}
+  },stepMs);
+}
+
 /* Countdown before game starts */
 function startRhythmCountdown(songKey){
-  const cd=document.getElementById('countdown');
-  const cdTxt=document.getElementById('countdownTxt');
-  cd.style.display='flex';
-  let count=3;
-  cdTxt.textContent=count;
-  const iv=setInterval(()=>{
-    count--;
-    if(count>0){cdTxt.textContent=count;}
-    else if(count===0){cdTxt.textContent='시작!';}
-    else{
-      clearInterval(iv);
-      cd.style.display='none';
-      startRhythmGame(songKey);
-    }
-  },700);
+  runCountdown([3,2,1,'시작!'],700,()=>{if(currentMode==='rhythm')startRhythmGame(songKey);});
 }
 
 function startRhythmGame(songKey){
@@ -2104,7 +2120,12 @@ function showPerformSongSelect(){
   const panel=document.getElementById('panel');
   const progress=loadProgress();
   let html='<h2>🎶 곡 연주</h2>';
-  html+='<div class="pHint">반주에 맞춰 연주해요</div><div class="pList">';
+  html+='<div class="pHint">반주에 맞춰 연주해요</div>';
+  /* 1023: 빠르기 고르기(리듬 게임 빠르기와 같은 값 rhythmSpeed — ⚙ 설정에도 같이 보임) */
+  const spdNow=rhythmSpeed<0.99?'0.75':'1';
+  html+='<div class="diffRow">'+[['1','⚡ 보통'],['0.75','🐢 느리게']].map(([v,l])=>
+    `<div class="diffBtn ${v===spdNow?'active':''}" data-pspd="${v}" role="button">${l}</div>`).join('')+'</div>';
+  html+='<div class="pList">';
 
   Object.keys(SONGS).forEach(key=>{
     const song=SONGS[key];
@@ -2120,6 +2141,13 @@ function showPerformSongSelect(){
   panel.innerHTML=html;
   panel.style.display='block';
 
+  panel.querySelectorAll('.diffBtn[data-pspd]').forEach(btn=>{
+    btn.addEventListener('pointerdown',e=>{
+      e.preventDefault();e.stopPropagation();
+      rhythmSpeed=parseFloat(btn.dataset.pspd)||1;
+      showPerformSongSelect();
+    });
+  });
   panel.querySelectorAll('.pBtn').forEach(btn=>{
     btn.addEventListener('pointerdown',e=>{
       e.preventDefault();panel.style.display='none';
@@ -2136,16 +2164,23 @@ function showPerformSongSelect(){
 }
 
 function startPerformance(songKey){
-  const song=SONGS[songKey];const bpm=song.bpm;const beatMs=60000/bpm;
+  const song=SONGS[songKey];const bpm=Math.round(song.bpm*(rhythmSpeed||1));const beatMs=60000/bpm; /* 🐢 느리게 = 0.75배 */
   const timeline=[];let beatPos=0;
   song.notes.forEach(n=>{
     timeline.push({note:n.note,s:n.s,f:n.f,dur:n.dur,startMs:beatPos*beatMs,endMs:(beatPos+n.dur)*beatMs,hit:false});
     beatPos+=n.dur;
   });
+  /* 1023: 두 박 준비(2·1) 뒤에 첫 음 — 곡을 누르자마자 시작해 첫 음을 늘 놓치던 문제.
+     준비하는 동안 elapsed 는 음수(악보는 오른쪽에서 다가오고, 판정·반주는 아직 안 함) */
+  const lead=2*beatMs;
+  AE.stopChords();
   performState={active:true,songKey,song,bpm,beatMs,timeline,totalMs:beatPos*beatMs,
-    startTime:performance.now(),chordIdx:0,lastChordTime:0,accompaniment:true,noteIdx:0,
+    startTime:performance.now()+lead,chordIdx:0,lastChordTime:0,accompaniment:true,noteIdx:0,
     score:0,correct:0,partial:0,miss:0,combo:0,maxCombo:0,bowStr:-1,bowTime:0};
   resetFingers(); /* song starts from all-open strings */
+  const first=timeline.find(n=>n.note!=='R'&&n.s>=0);
+  if(first)highlightNote(first.s,first.f); /* 첫 음 버튼을 준비하는 동안 미리 반짝 (updatePerform 은 음이 바뀔 때만 반짝임) */
+  runCountdown([2,1],beatMs);
   document.getElementById('sheetArea').style.display='block';
   resizeSheetCv();
   document.getElementById('gameHud').style.display='block';
