@@ -2097,8 +2097,7 @@ function startLesson(lv){
   resetFingers(); /* lesson starts from all-open strings */
   const info=document.getElementById('lessonInfo');
   info.style.display='block';
-  document.getElementById('lessonTitle').textContent=lv+'. '+lessonTxt(lesson.title);
-  document.getElementById('lessonSub').textContent=lessonTxt(lesson.desc);
+  refreshLessonInfo();
   highlightCurrentLearnTarget();
   speak(lessonTxt(lesson.desc).replace(/♯/g,' 샵'));
 }
@@ -2114,7 +2113,14 @@ function lessonTxt(t){
   if(inputMode==='nobow'){
     t=t.replace('누르고 활로 그어보세요','눌러 보세요').replace('활로 그어보세요','눌러 보세요').replace('건너뛰며 켜요','건너뛰며 눌러요');
   }
-  return t;
+  /* 1024: 받침 있는 글자(솔 등, ♯='샵') 뒤 '를' → '을' (옛: '…라-솔를') */
+  return t.replace(/([가-힣♯])를/g,(m,c)=>c+((c==='♯'||(c.charCodeAt(0)-0xAC00)%28)?'을':'를'));
+}
+/* 1024: 레슨 설명 상자 쓰기 — 레슨 시작 때, 그리고 레슨 도중 ⚙ 에서 연주 방식·음이름을 바꿀 때(옛: 옛 방식 글이 남음) */
+function refreshLessonInfo(){
+  if(!learnState||!learnState.active)return;
+  document.getElementById('lessonTitle').textContent=learnState.lv+'. '+lessonTxt(learnState.lesson.title);
+  document.getElementById('lessonSub').textContent=lessonTxt(learnState.lesson.desc);
 }
 
 function highlightCurrentLearnTarget(){
@@ -2720,7 +2726,7 @@ function setInputMode(m){
   inputMode=(m==='bow')?'bow':'nobow';
   try{localStorage.setItem('violin_input_mode',inputMode);}catch(e){}
   document.querySelectorAll('.mcard').forEach(c=>c.classList.toggle('sel',c.dataset.im===inputMode));
-  renderHowto();updInputToggleUI();updFreeHint();
+  renderHowto();updInputToggleUI();updFreeHint();refreshLessonInfo();
 }
 /* 첫 화면 카드: 누르면 그 방식으로 바로 시작 (따로 '시작' 버튼 없음 — 카드 밖을 눌러도 지난번 방식으로 시작) */
 document.querySelectorAll('.mcard').forEach(c=>{
@@ -2741,7 +2747,7 @@ document.querySelectorAll('.sbtn').forEach(b=>{
     e.preventDefault();e.stopPropagation();
     const k=b.dataset.set,val=b.dataset.v;
     if(k==='im')setInputMode(val);
-    else if(k==='names'){uiPrefs.names=val==='abc'?'abc':'doremi';saveUiPrefs();relabelNotes();ndShown='';}
+    else if(k==='names'){uiPrefs.names=val==='abc'?'abc':'doremi';saveUiPrefs();relabelNotes();ndShown='';refreshLessonInfo();}
     else if(k==='sharps'){uiPrefs.sharps=val==='1'?1:0;saveUiPrefs();}
     else if(k==='info'){uiPrefs.info=val==='1'?1:0;saveUiPrefs();}
     else if(k==='spd'){rhythmSpeed=parseFloat(val)||1;}
