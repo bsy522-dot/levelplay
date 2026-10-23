@@ -24,6 +24,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .tabs { display:flex; flex:1; min-width:0; }
 .tab, .tab-more { flex:1; min-height:60px; display:flex; align-items:center; justify-content:center; gap:6px; padding:4px 6px; text-align:center; cursor:pointer; font-size:17px; font-weight:700; color:#aab4c8; transition:background .2s; border-bottom:3px solid transparent; position:relative; white-space:nowrap; }
 .tab.active, .tab-more.active { color:#8fb0ff; border-bottom-color:var(--accent); background:rgba(74,125,255,.10); }
+/* 1023 P-13: 윗줄 "따라치기 ⋯ 더 보기"가 한 덩어리로 읽혔다 → 탭 사이 구분선 */
+.tabs > .tab + .tab, .tabs > .tab-more { border-left:1px solid var(--border); }
 .tab:hover, .tab-more:hover { background:rgba(74,125,255,.06); }
 .tab-icon { font-size:20px; line-height:1; }
 .more-menu { display:none; position:absolute; top:100%; right:68px; min-width:200px; flex-direction:column; background:var(--surface2); border:1px solid #2c3656; border-radius:14px; box-shadow:0 12px 32px rgba(0,0,0,.55); overflow:hidden; z-index:40; }
@@ -148,6 +150,10 @@ body.lscape #kb-zoom button{width:28px;height:28px;font-size:18px;}
 /* Score bar */
 .score-bar { display:flex; gap:14px; padding:6px 12px; font-size:16px; font-weight:700; color:#cbd5e1; background:var(--surface); border-bottom:1px solid var(--border); align-items:center; flex-wrap:wrap; }
 .score-bar span { display:flex; align-items:center; gap:3px; }
+#sc-progress { min-width:110px; }
+/* 1023 P-10: 폰 세로에서 진행 막대가 둘째 줄로 내려가 음표 칸을 45px 먹었다 → 한 줄 */
+@media (max-width:600px) { #sc-progress { min-width:72px; flex:1 1 72px; max-width:160px; } }
+@media (max-width:400px) { #synth-score { font-size:15px; gap:6px; padding:4px 8px; } #sc-progress { min-width:60px; flex-basis:60px; } }
 .s-perfect { color:var(--green); }
 .s-good { color:var(--yellow); }
 .s-miss { color:var(--red); }
@@ -229,7 +235,8 @@ body.lscape #kb-zoom button{width:28px;height:28px;font-size:18px;}
 .modal-overlay.show { display:flex; }
 .opt-h { font-size:16px; font-weight:800; color:#aab4c8; margin-bottom:6px; text-align:left; }
 .opt-row { display:flex; gap:8px; }
-.opt-btn { flex:1; min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 2px; font-size:17px; font-weight:800; color:#e5e7eb; background:#1f2430; border:2px solid #374151; border-radius:12px; cursor:pointer; }
+.opt-btn { flex:1; min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 2px; font-size:17px; font-weight:800; color:#e5e7eb; background:#1f2430; border:2px solid #374151; border-radius:12px; cursor:pointer; word-break:keep-all; /* 1023 P-09: "원래대/로" 같은 낱자 끊김 막기 */ }
+@media (max-width:400px) { .opt-btn { font-size:15px; padding:6px 1px; } .opt-btn small { font-size:13px; } }
 .opt-btn small { font-size:16px; font-weight:500; color:#aab4c8; }
 .opt-btn.sel { border-color:#06b6d4; background:#0e2a33; color:#67e8f9; box-shadow:0 0 10px rgba(6,182,212,.35); }
 .modal { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px; max-width:400px; width:92%; text-align:center; }
@@ -332,6 +339,8 @@ body.lscape .opt-h { font-size:15px; margin-bottom:4px; }
 body.lscape .opt-btn { min-height:50px; padding:4px 3px; font-size:15px; border-radius:10px; }
 body.lscape .opt-btn small { font-size:14px; }
 body.lscape #song-opt-start { min-height:56px; font-size:18px; }
+/* 1023 P-06: 폰 가로에선 창이 내용보다 낮아 '시작 ▶'이 반쯤 잘렸다 → 취소/시작 줄을 창 맨 아래에 붙여 늘 보이게 */
+body.lscape .opt-acts { position:sticky; bottom:-10px; z-index:1; background:var(--surface); margin-top:10px !important; margin-bottom:-10px; padding:6px 0 10px; box-shadow:0 -8px 12px -6px rgba(0,0,0,.5); }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width:5px; height:5px; }
@@ -404,9 +413,13 @@ body.lscape.k7list #k7-keys { height:26vh; }
 #k7-list { position:absolute; inset:0; overflow-y:auto; touch-action:pan-y; background:var(--bg); padding:10px 12px 16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; align-content:start; }
 #k7-list[hidden] { display:none; }
 .k7-sec { grid-column:1/-1; font-size:17px; font-weight:900; color:#8fb0ff; margin-top:6px; }
-.k7-card { min-height:80px; border:2px solid #2c3656; border-radius:16px; background:var(--surface2); color:var(--text); display:flex; align-items:center; gap:10px; padding:8px 12px; font-size:19px; font-weight:800; cursor:pointer; text-align:left; }
+/* 1023 P-08: 글자가 카드 밖으로 넘치고 낱자로 끊기던 것("마음대/로", "반짝반/짝") — 단어 단위 줄바꿈 + 카드가 글 높이만큼 늘어남.
+   ⚠ <button> 은 안의 줄바꿈된 글 높이를 몰라 80px 에 갇혔다(min-height 0 이면 35px) → height:fit-content 로 풀림 */
+.k7-card { min-height:80px; height:fit-content; border:2px solid #2c3656; border-radius:16px; background:var(--surface2); color:var(--text); display:flex; align-items:center; gap:10px; padding:8px 12px; font-size:19px; font-weight:800; cursor:pointer; text-align:left; }
 .k7-card .k7-ce { font-size:34px; line-height:1; flex-shrink:0; }
-.k7-card .k7-cn { flex:1; min-width:0; overflow-wrap:anywhere; }
+.k7-card .k7-cn { flex:1; min-width:0; word-break:keep-all; overflow-wrap:break-word; }
+body.lscape .k7-card { font-size:16px; }
+body.lscape .k7-card .k7-ce { font-size:26px; }
 .k7-card.done { border-color:#facc15; }
 .k7-card.free { border-color:#4a7dff; }
 #k7-keys { flex-shrink:0; height:min(46vh,520px); display:flex; gap:6px; padding:6px 6px calc(8px + env(safe-area-inset-bottom, 0px)); background:#0d1117; border-top:1px solid var(--border); touch-action:none; }
@@ -458,7 +471,7 @@ body.lscape #k7-keys { height:52vh; }
     <div class="tabs" id="tabs">
       <div class="tab active" data-tab="free"><span class="tab-icon">🎹</span>연주</div>
       <div class="tab" data-tab="synth"><span class="tab-icon">🎮</span>따라치기</div>
-      <div class="tab-more" id="tab-more" role="button" aria-haspopup="true" aria-expanded="false"><span class="tab-icon">⋯</span><span id="tab-more-label">더 보기</span></div>
+      <div class="tab-more" id="tab-more" role="button" aria-haspopup="true" aria-expanded="false"><span class="tab-icon">📚</span><span id="tab-more-label">더 보기</span></div>
     </div>
     <div class="more-menu" id="more-menu">
       <div class="tab" data-tab="learn" data-label="학습"><span class="tab-icon">📖</span>학습</div>
@@ -552,7 +565,7 @@ body.lscape #k7-keys { height:52vh; }
       <span class="s-combo">연속 <b id="sc-combo">0</b></span>
       <span><b id="sc-total">0</b>점</span>
       <span style="flex:1"></span>
-      <span id="sc-progress" style="display:flex;align-items:center;gap:6px;min-width:110px">
+      <span id="sc-progress" style="display:flex;align-items:center;gap:6px">
         <span style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><span id="sc-progress-bar" style="display:block;height:100%;width:0%;background:var(--accent);border-radius:4px;transition:width .3s"></span></span>
         <span id="sc-progress-pct">0%</span>
       </span>
@@ -675,7 +688,7 @@ body.lscape #k7-keys { height:52vh; }
       <button class="opt-btn sel" data-guide="waterfall">🌊 막대</button>
       <button class="opt-btn" data-guide="circle">🔵 동그라미</button>
     </div>
-    <div style="display:flex;gap:8px;margin-top:16px;align-items:stretch">
+    <div class="opt-acts" style="display:flex;gap:8px;margin-top:16px;align-items:stretch">
       <button class="btn btn-secondary" id="song-opt-cancel" style="flex:1">취소</button>
       <button class="btn btn-primary" id="song-opt-start" style="flex:2;font-weight:900;background:#2f62e8">시작 ▶</button>
     </div>
@@ -2478,6 +2491,11 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
         const pct = Math.round(played / synthNotes.length * 100);
         document.getElementById('sc-progress-bar').style.width = pct + '%';
         document.getElementById('sc-progress-pct').textContent = pct + '%';
+      } else {
+        // 1023 P-10: 틀린 건반(또는 너무 이른 누름) — 아무 반응이 없었다 → 그 건반만 짧게 빨갛게. 점수는 그대로
+        //   (빛나는 다음 건반(next-up)은 CSS 순서상 그대로 보인다)
+        const el = document.querySelector(`#piano [data-midi="${midi}"]`);
+        if (el) { el.classList.add('hit-miss'); setTimeout(() => el.classList.remove('hit-miss'), 220); }
       }
     };
   }
@@ -2539,10 +2557,12 @@ function drawNoteBar(ctx, n, keyX, keyW, noteBottom, noteHeight, dpr, color, glo
   ctx.shadowBlur = 0;
 
   if (h > 16 * dpr) {
+    // 1023 P-10: 음이름이 9px 고정이라 안 보였다 → 건반 폭에 맞춰 11~16px
+    const fs = Math.max(11, Math.min(16, keyW / dpr * 0.4)) * dpr;
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.font = `bold ${9*dpr}px sans-serif`;
+    ctx.font = `bold ${fs}px sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText(noteLabelOf(n.note), x + w/2, drawY + h/2 + 3*dpr);
+    ctx.fillText(noteLabelOf(n.note), x + w/2, drawY + h/2 + fs * 0.36);
   }
 }
 
@@ -3002,7 +3022,8 @@ function synthLoop() {
     ctx.fillStyle = 'rgba(6,182,212,0.8)';
     ctx.font = `bold ${20*dpr}px sans-serif`;
     ctx.textAlign = 'center';
-    ctx.fillText(synthScore.combo + ' 연속', W/2, infoTop + 40*dpr);
+    // 1023 P-10: 기다리기 안내("⏸ 도 키를 누르세요", +22)와 겹쳤다 → 기다리기에선 한 줄 아래로
+    ctx.fillText(synthScore.combo + ' 연속', W/2, infoTop + (synthWaitMode ? 54 : 40)*dpr);
   }
 
   if ((allDone && now > 2) || (!hasUnplayed && synthNotes.every(n=>n.played))) {
