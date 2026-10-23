@@ -71,7 +71,7 @@ main{flex:1 1 auto; display:flex; min-height:0;}
 .key .kl{fill:#8ea0c6; font-size:8.5px; text-anchor:middle; pointer-events:none;}
 /* 1023: '눌러야 할 키'(힌트)는 주황 점선 + 연주황 채움으로 깜빡 — '누른 키'(청록 채움)와 다른 색.
    힌트 키를 누르면 누름(청록)으로 바뀌어 '이건 됐어'가 보인다. */
-.key.hint:not(.pressed) .cap{fill:#ffe1bf; stroke:#f97316; stroke-width:4; stroke-dasharray:6 3; animation:hintPulse 1s ease-in-out infinite;}
+.key.hint:not(.pressed) .cap, .key.hint.latched .cap{fill:#ffe1bf; stroke:#f97316; stroke-width:4; stroke-dasharray:6 3; animation:hintPulse 1s ease-in-out infinite;}
 @keyframes hintPulse{50%{stroke-opacity:.25; fill-opacity:.8;}}
 #nowNote{font-size:12px; color:var(--sub); margin:2px 0 4px; height:16px;}
 #nowNote b{color:var(--gold); font-size:13px;}
@@ -624,7 +624,11 @@ function updateNowNote(){
 }
 function refresh(){
   const p = getPressed();
-  $$('.key').forEach(el=>el.classList.toggle('pressed', p.has(el.dataset.key)));
+  $$('.key').forEach(el=>{
+    const k = el.dataset.key;
+    el.classList.toggle('pressed', p.has(k));
+    el.classList.toggle('latched', latched.has(k) && !heldKeys.has(k));   // 손가락 아닌 앱이 켠 키(퀴즈 오답 때 정답 보여 주기 등)
+  });
   updateNowNote();
   onComboChange();
 }
