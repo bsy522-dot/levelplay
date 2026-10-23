@@ -433,6 +433,13 @@ Object.assign(DRAW, {
         g.lineTo(X(b), Y(0)); g.closePath(); g.fill();
         if (sh.label && t > 0.7) tx(g, sh.label, X((sh.a + sh.b) / 2), Y(sh.fn((sh.a + sh.b) / 2) / 2), { c: C.b, size: 15, halo: true });
       }
+      if (s.rects) { // 넓이를 막대 n개로 쪼개 더하기 (적분의 생각)
+        const rf = mathFn(s.rects.f), rn = s.rects.n || 5, ra = s.rects.a, rw = (s.rects.b - s.rects.a) / rn;
+        if (rf) for (let k = 0; k < rn && k < Math.ceil(t * rn * 1.3); k++) {
+          const x = ra + k * rw, h = rf(x + rw / 2);
+          rbox(g, X(x), Math.min(Y(h), Y(0)), X(x + rw) - X(x), Math.abs(Y(0) - Y(h)), 0, k % 2 ? 'rgba(255,203,5,.45)' : 'rgba(240,165,0,.4)', '#b7791f');
+        }
+      }
       if (s.circle) { g.strokeStyle = C.grey; g.lineWidth = 2; g.setLineDash([6, 5]); g.beginPath(); g.ellipse(X(0), Y(0), Math.abs(X(s.circle) - X(0)), Math.abs(Y(s.circle) - Y(0)), 0, 0, Math.PI * 2); g.stroke(); g.setLineDash([]); }
       g.save(); g.beginPath(); g.rect(pad - 4, pad - 14, W - pad * 2 + 8, H - pad * 2 + 18); g.clip();
       fns.forEach((f, k) => {
@@ -533,6 +540,42 @@ Object.assign(DRAW, {
       tx(g, (i ? `${i}단계: ` : '') + (cur.say || ''), 180, 36, { size: 16, c: i ? '#1f7a44' : C.b });
     };
     return animate(cv, 2200 * states.length, draw);
+  },
+
+  /** 지레(시소): 받침점에서 몇 칸 떨어졌는지 × 무게 = 돌리는 힘. 양쪽이 같으면 수평, 다르면 무거운 쪽이 내려간다 */
+  lever({ L = [], R = [], n = 4, say }) {
+    const W = 360, H = 250, cx = 180, cy = 150, half = 150;
+    const [cv, g] = canvas2(W, H);
+    const tq = (side) => side.reduce((a, o) => a + (o.w || 1) * (o.at || 1), 0);
+    const tl = tq(L), tr = tq(R);
+    const final = Math.max(-0.2, Math.min(0.2, (tr - tl) * 0.05)); // 오른쪽이 더 크면 시계 방향(오른쪽 내려감)
+    const pos = (at) => (half * at) / n;
+    const draw = (t) => {
+      g.clearRect(0, 0, W, H); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+      g.fillStyle = '#8d6e63'; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx - 22, cy + 40); g.lineTo(cx + 22, cy + 40); g.closePath(); g.fill();
+      g.save(); g.translate(cx, cy); g.rotate(final * ease(clamp01(t * 1.3)));
+      g.strokeStyle = C.ink; g.lineWidth = 6; g.beginPath(); g.moveTo(-half - 6, 0); g.lineTo(half + 6, 0); g.stroke();
+      for (let k = 1; k <= n; k++) for (const sg of [-1, 1]) {
+        g.strokeStyle = C.grey; g.lineWidth = 2; g.beginPath(); g.moveTo(sg * pos(k), -4); g.lineTo(sg * pos(k), 8); g.stroke();
+        tx(g, String(k), sg * pos(k), 20, { size: 12, c: '#5a6478' });
+      }
+      const put = (side, sg) => side.forEach((o) => {
+        const x = sg * pos(o.at || 1), w = o.w || 1;
+        for (let i = 0; i < Math.min(w, 6); i++) { rbox(g, x - 13, -16 - i * 22, 26, 20, 5, sg < 0 ? '#ffd9cf' : '#dbe6ff', C.ink); if (o.e && i === Math.min(w, 6) - 1) tx(g, o.e, x, -27 - i * 22 - 12, { size: 22 }); }
+        if (!o.e) tx(g, String(w), x, -6 - Math.min(w, 6) * 22 - 6, { size: 14, c: sg < 0 ? C.a : C.b });
+        if (o.t) tx(g, o.t, x, -6 - Math.min(w, 6) * 22 - (o.e ? 40 : 22), { size: 13, c: '#5a6478', halo: true });
+      });
+      put(L, -1); put(R, 1);
+      g.restore();
+      const sum = (side) => side.map((o) => `${o.w || 1} × ${o.at || 1}`).join(' + ');
+      if (t > 0.6) {
+        tx(g, `${sum(L)} = ${tl}`, 90, H - 20, { size: 15, c: C.a });
+        tx(g, `${sum(R)} = ${tr}`, 270, H - 20, { size: 15, c: C.b });
+        rbox(g, 30, 8, 300, 34, 12, tl === tr ? '#e9f7ee' : '#fff4d6', null);
+        tx(g, say || (tl === tr ? '양쪽이 같아서 수평!' : tl > tr ? '왼쪽이 더 커서 왼쪽이 내려가요' : '오른쪽이 더 커서 오른쪽이 내려가요'), 180, 25, { size: 15, c: tl === tr ? '#1f7a44' : '#8a5a00' });
+      }
+    };
+    return animate(cv, 2000, draw);
   },
 
   /** 수직선 위에서 뛰기: 더하면 오른쪽, 빼면(음수를 더하면) 왼쪽 */
@@ -854,7 +897,7 @@ export const VIZ_NEED = {
   frac: ['n', 'd'], fraccmp: ['a', 'b'], fracadd: ['a', 'b', 'd'], fracadd2: ['a', 'b'], decimal: ['o', 'k'], angle: ['deg'], tri: ['a', 'b'],
   bars: ['vals', 'avg'], seq: ['items'], compare: ['items'],
   plot: [], turn: [], balance: ['L', 'R'], hops: ['from', 'to', 'start', 'hops'], icons: ['rows'], flow: ['items'], table: ['rows'],
-  chart: ['bars'], wave: [], atom: ['p', 'shells'], forces: ['arrows'], timeline: ['ev'], vs: ['L', 'R'], scene: ['items'],
+  chart: ['bars'], wave: [], lever: ['L', 'R'], atom: ['p', 'shells'], forces: ['arrows'], timeline: ['ev'], vs: ['L', 'R'], scene: ['items'],
 };
 export function vizProblems(spec) {
   if (!spec) return [];
@@ -870,6 +913,7 @@ export function vizProblems(spec) {
       else if (!live(fn)) out.push(`plot: 식 '${f.f}'이 보이는 범위에서 숫자가 안 나옴 (곡선이 안 그려짐)`);
     }
     if (spec.shade && !mathFn(spec.shade.f)) out.push(`plot: 칠하기 식을 못 읽음 '${spec.shade.f}'`);
+    if (spec.rects && !mathFn(spec.rects.f)) out.push(`plot: 막대 식을 못 읽음 '${spec.rects.f}'`);
     for (const k of ['x', 'y']) if (spec[k] && !(Array.isArray(spec[k]) && spec[k].length === 2 && spec[k][0] < spec[k][1])) out.push(`plot: ${k} 범위가 이상함`);
   }
   if (spec.type === 'hops' && !(spec.from < spec.to)) out.push('hops: from < to 이어야 함');

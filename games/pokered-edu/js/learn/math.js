@@ -44,7 +44,7 @@ export function mc(correct, wrongs, why, extra = {}) {
   r.q = fixJosa(r.q); r.why = fixJosa(r.why);
   if (extra.steps) r.steps = extra.steps.map(fixJosa);
   if (extra.need) r.need = fixJosa(extra.need);
-  if (extra.help) r.help = fixJosa(extra.help); // 📖 낱말 풀이 (문제 속 처음 보는 말·기호)
+  if (extra.help) r.help = fixJosa(String(extra.help).replace(/^\s*📖\s*/u, '')); // 📖 낱말 풀이 (화면이 📖를 붙이므로 글에서는 뗀다)
   for (const k of Object.keys(r.wrong)) r.wrong[k] = fixJosa(r.wrong[k]);
   return r;
 }
@@ -112,7 +112,7 @@ export const MATH = [
       q: st ? `${pick(POKE)}이(가) ${thing}을(를) 모았어. 모두 몇 ${unit}일까?` : `그림 속 ${thing}은(는) 모두 몇 ${unit}일까?`,
       pic: ball ? { type: 'count', n } : { type: 'icons', rows: [{ e: THING_E[thing], n }] },
       steps: ['왼쪽 위부터 하나씩 손가락으로 짚어', '짚을 때마다 "하나, 둘, 셋…" 말해', `마지막에 말한 수: ${n}`, `그래서 모두 ${n}${unit}`],
-      need: '옛날 양치기는 저녁마다 양이 모두 돌아왔는지 알아야 했어. 그래서 하나씩 짚으며 세는 방법을 썼단다.',
+      need: '옛날 양치기는 저녁마다 양이 모두 돌아왔는지 알아야 했대. 그래서 하나씩 짚으며 세었다고 전해져.',
       viz: ball ? { type: 'count', n, label: true } : { type: 'icons', rows: [{ e: THING_E[thing], n, per: 5, t: '5개씩 묶어 세면 쉬워' }], total: `모두 ${n}${unit}` } });
   } },
   { id: 'm_compare10', g: 0, t: '수의 크기 비교', gen: () => {
@@ -190,7 +190,7 @@ export const MATH = [
       pic: st ? { type: 'icons', rows: [{ e: POKE_E[p1], n: a, t: `${p1} ${a}마리` }, { e: POKE_E[p2], n: b, t: `${p2} ${b}마리`, c: 'a' }], op: '+', total: '모두 몇 마리?' }
         : { type: 'icons', rows: [{ e: '🔴', n: a, t: `${a}개` }, { e: '🔵', n: b, t: `${b}개`, c: 'b' }], op: '+', total: '모두 몇 개?' },
       steps: [`${a}가 10이 되려면 ${fill}가 더 필요해`, `${b}를 ${fill}와 ${rest}로 갈라`, `${a} + ${fill} = 10 (10 한 묶음!)`, `10 + ${rest} = ${s}`],
-      need: '옛날 양치기는 손가락 10개로는 양을 다 셀 수 없었어. 그래서 10개를 한 묶음으로 묶어 세는 방법을 만들었어.',
+      need: '옛날 양치기는 손가락 10개로는 양을 다 셀 수 없었어. 그래서 10개를 한 묶음으로 묶어 세게 됐다고 해.',
       viz: { type: 'tenframe2', a, b } });
   } },
   { id: 'm_sub_borrow1', g: 1, t: '받아내림 있는 뺄셈 (십몇 − 몇)', gen: (st) => {

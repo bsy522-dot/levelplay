@@ -52,6 +52,7 @@ for (const [id, L] of Object.entries(lectures)) {
 }
 
 let withHelp = 0, withPic = 0, longest = 0;
+const leaks = [];
 for (const q of questions) {
   const w = q.id;
   if (!q.q || !Array.isArray(q.a) || !(q.c >= 0 && q.c < q.a.length)) { errs.push(`${w}: q/a/c 모양이 이상함`); continue; }
@@ -59,6 +60,14 @@ for (const q of questions) {
   if (Object.keys(q.wrong || {}).sort().join() !== need) errs.push(`${w}: 오답 설명 칸 ${Object.keys(q.wrong || {}).join()} (필요 ${need})`);
   if (!q.why) errs.push(`${w}: why 없음`);
   if (q.help) withHelp++;
+  // 정답 흘림 의심: 📖 낱말 풀이가 '정답 보기에만 있는 낱말'을 풀어 준다 (문제 글과 틀린 보기에는 없는 낱말)
+  if (q.help) {
+    const strip = (w) => w.replace(/(으로|에서|이야|이에요|예요|이라|라서|하고|에게|처럼|까지|부터|이랑|랑|이|가|을|를|은|는|의|에|로|와|과|도|만|야|해|돼)$/u, '');
+    const words = (s) => (String(s).match(/[가-힣A-Za-z]{2,}/gu) || []).map(strip).filter((w) => w.length >= 2);
+    const others = q.a.filter((_, i) => i !== q.c).join(' ');
+    const leak = words(q.a[q.c]).find((w) => q.help.includes(w) && !String(q.q).includes(w) && !others.includes(w));
+    if (leak) leaks.push(`${q.id}: 낱말 풀이가 정답에만 있는 '${leak}'을(를) 풀어 줌`);
+  }
   if (q.pic) { withPic++; viz(`${w} pic`, q.pic); }
   if (q.viz) viz(`${w} viz`, q.viz);
   if (!args[0]) continue; // 게임 전체 검사에서는 형식만 (글 길이 경고는 원고 검사 때)
@@ -75,5 +84,7 @@ for (const q of questions) {
 console.log(`강의 ${Object.keys(lectures).length}개 (새 기준 ${newFmt}개) · 문제 ${questions.length}개 (낱말 풀이 ${withHelp}, 문제 그림 ${withPic})`);
 for (const e of errs.slice(0, 80)) console.log('✗', e);
 for (const e of warns.slice(0, 120)) console.log('△', e);
+for (const e of leaks.slice(0, process.argv.includes('--leaks') ? 9999 : 20)) console.log('◇ 정답 흘림 의심', e);
+if (leaks.length) console.log(`정답 흘림 의심 ${leaks.length}건 (--leaks 로 전부 보기)`);
 console.log(`\n오류 ${errs.length}건 · 경고 ${warns.length}건${longest ? ` (정답이 혼자 가장 긴 문제 ${longest}개)` : ''}`);
 process.exit(errs.length || (STRICT && warns.length) ? 1 : 0);
