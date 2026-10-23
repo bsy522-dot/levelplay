@@ -299,7 +299,7 @@ body.lscape #panel-synth.active { display:grid; grid-template-columns:auto minma
 body.lscape #panel-synth .synth-bar { grid-row:1; grid-column:1; border-bottom:1px solid var(--border); }
 body.lscape #panel-synth #synth-score { grid-row:1; grid-column:2; }
 body.lscape #panel-synth #synth-stage { grid-row:2; grid-column:1 / -1; min-height:0; }
-body.lscape .synth-bar .btn { min-width:96px; }
+body.lscape .synth-bar .btn { min-width:96px; min-height:44px; } /* 1023 P-04: 음표 칸 4px 더 */
 body.lscape .score-bar { padding:2px 10px; font-size:16px; gap:10px; }
 body.lscape #kb-bar { margin:2px 8px; }
 body.lscape #kb-strip { height:28px; }
@@ -1120,14 +1120,21 @@ function buildPiano() {
   //  Synthesia 탭은 낙하 캔버스 확보 위해 낮게 유지(기본 105/130, 확대 시만 커짐).
   const baseWhiteH = isMobile ? 105 : 130;
   const synthActive = !!document.getElementById('panel-synth') && document.getElementById('panel-synth').classList.contains('active');
+  const freeActive = !!document.getElementById('panel-free') && document.getElementById('panel-free').classList.contains('active');
   let whiteHeight;
   if (isLandscape) {
     // 2026-09-26(병석님): 가로는 세로보다 얇게 느껴졌던 complaint 가 큰 축이라,
     //   폭이 넓다는 점을 살려 화면 높이의 34%까지 두껍게 허용(저장된 확대값은 그대로 적용).
-    whiteHeight = Math.max(72, Math.min(Math.round(window.innerHeight * 0.34),
+    // 1023 P-04: 따라치기만 28%까지 — 떨어지는 음표 칸이 84px 라 막대·글자가 겹쳤다(칸을 화면 45% 안팎으로)
+    whiteHeight = Math.max(72, Math.min(Math.round(window.innerHeight * (synthActive ? 0.28 : 0.34)),
       Math.round(whiteKeyWidth * ratioCapFor(isLandscape, keyZoom))));
   } else if (synthActive) {
-    whiteHeight = Math.min(Math.round(baseWhiteH * keyZoom), Math.round(window.innerHeight * 0.5));
+    // 1023 P-04: 태블릿 가로(넓은 화면)는 35%까지 — 50% 면 음표 칸이 161px(화면 20%)뿐이었다. 세로는 그대로 50%
+    const wide = window.innerWidth > window.innerHeight;
+    whiteHeight = Math.min(Math.round(baseWhiteH * keyZoom), Math.round(window.innerHeight * (wide ? 0.35 : 0.5)));
+  } else if (!freeActive) {
+    // 1023 P-05: 학습·녹음은 목록이 주인공 → 따라치기처럼 화면 45%까지(키워도 목록이 건반 밑으로 사라지지 않게)
+    whiteHeight = Math.min(Math.round(baseWhiteH * keyZoom), Math.round(window.innerHeight * 0.45));
   } else {
     // 화면의 48%~60%(확대할수록 조금 더 크게) — 얇은 띠+빈 공간 문제(0718) 해소
     // 2026-09-26: 확대할 때 '키만 커지고 높이는 그대로'라 얇아 보이었다.
@@ -2353,10 +2360,13 @@ function getKeyX(noteName) {
 
 function startSynthesia(notes, bpm, autoPlay, testId) {
   // Switch to synth tab
+  const wasSynth = document.getElementById('panel-synth').classList.contains('active');
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelector('[data-tab="synth"]').classList.add('active');
   document.getElementById('panel-synth').classList.add('active');
+  // 1023 P-04·P-05: 학습·녹음에서 바로 넘어오면 건반 높이를 따라치기 높이로 (탭 단추를 거치지 않아 예전엔 그대로 남았다)
+  if (!wasSynth) buildPiano();
 
   stopSynthesia();
   setSynthPlaying(true); // 1023 P-11: 치는 동안 미니맵 띠를 숨긴다(캔버스 크기 재기 전에)
