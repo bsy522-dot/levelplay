@@ -14,6 +14,14 @@ BANKS = ['science_a.json', 'science_b.json', 'science_c.json', 'human.json', 'ar
 TEXT = ['q', 'a', 'why', 'wrong']            # 반드시 있어야 하는 글
 OPT = ['help', 'pic', 'steps', 'viz', 'need']  # 있으면 바꾸고, null 이면 지운다
 
+def strip_mark(t, marks):
+    """화면이 이미 붙이는 그림 글자(📖·💡)를 원고가 또 붙였으면 뗀다 (두 번 보이지 않게)"""
+    if not isinstance(t, str): return t
+    t = t.lstrip()
+    for m in marks:
+        if t.startswith(m): t = t[len(m):].lstrip()
+    return t
+
 def load(p):
     with open(p, encoding='utf-8') as f:
         return json.load(f)
@@ -49,6 +57,8 @@ def main():
                 if k in d:
                     if d[k] in (None, '', []): o.pop(k, None)
                     else: o[k] = d[k]
+            if o.get('help'): o['help'] = strip_mark(o['help'], ['📖'])
+            o.pop('_file', None)
             touched.add(n); nq += 1
 
     for p in sorted(glob.glob(os.path.join(src, 'lectures_*.json'))):
@@ -59,6 +69,8 @@ def main():
                 probs.append(f'{lid}: 슬라이드 없음'); continue
             old_vid = lectures[lid].get('video')
             lectures[lid] = {**lec, 'verified': True}
+            for sl in lectures[lid]['slides']:
+                if sl.get('tip'): sl['tip'] = strip_mark(sl['tip'], ['💡'])
             if old_vid and 'video' not in lec: lectures[lid]['video'] = old_vid
             nl += 1
 

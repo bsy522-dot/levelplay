@@ -45,9 +45,11 @@ for (const q of bank) {
 const ALLOW = new Set(['CPU', 'O', 'X', 'AI', 'SNS', 'TV', 'cm', 'km']); // 교과서에도 그대로 쓰는 단위·약어 (2026-10-03 인문 확장)
 const scan = (id, f, s) => {
   const re = /[A-Za-z]{2,}/g;
+  // 따옴표·괄호 안의 영어는 일부러 보여 주는 예시다 — 코리아(Korea), 'I ate an apple' 어순 비교 (쉬운 설명 개편 2026-10-24)
+  const plain = String(s || '').replace(/'[^']*'|"[^"]*"|‘[^’]*’|“[^”]*”|\([^)]*\)/g, '');
   let m;
-  while ((m = re.exec(String(s || '')))) {
-    if (!ALLOW.has(m[0])) fail(`${id} [${f}] 라틴 오염 '${m[0]}' — "${String(s).slice(Math.max(0, m.index - 18), m.index + 18)}"`);
+  while ((m = re.exec(plain))) {
+    if (!ALLOW.has(m[0])) fail(`${id} [${f}] 라틴 오염 '${m[0]}' — "${plain.slice(Math.max(0, m.index - 18), m.index + 18)}"`);
   }
 };
 for (const q of bank) {
