@@ -921,7 +921,7 @@ function relabelNotes(){
   document.querySelectorAll('.fStr').forEach(b=>{b.textContent=strName(+b.dataset.s);});}
 let audioOn=false,semi=[0,0,0,0],actS=-1,curN='';
 let freeHintDone=false; /* first-play hint: hidden after first bow sound */
-let bow={dn:false,px:0,py:0,lx:0,lt:0,spd:0,dir:1,sdir:0,lastStrokeT:0,str:-1,angle:-Math.PI*.22};
+let bow={dn:false,pid:-1,px:0,py:0,lx:0,lt:0,spd:0,dir:1,sdir:0,lastStrokeT:0,str:-1,angle:-Math.PI*.22};
 let vib=[0,0,0,0],vibP=[0,0,0,0],parts=[];
 let totalW=0,totalH=0,dpr=1,fbTop=0,fbBot=0;
 let osW=0;
@@ -1170,22 +1170,27 @@ function drawFH(ctx,x,y,h,mir){
 const bowCv=document.getElementById('bowCv'),bc=bowCv.getContext('2d');
 let BW=0,BH=0;
 
-function sFromX(px){let b=-1,bd=999;for(let i=0;i<4;i++){const d=Math.abs(px-strX(i));if(d<bd){bd=d;b=i;}}return bd<36?b:-1;}
+/* 1023: 몸통을 누른 자리에서 가장 가까운 줄(몸통을 4칸으로 똑같이 나눈 칸) — 줄 사이를 눌러도 소리가 난다(옛: 36px 밖이면 소리 없음) */
+function sFromX(px){let b=0,bd=1e9;for(let i=0;i<4;i++){const d=Math.abs(px-strX(i));if(d<bd){bd=d;b=i;}}return b;}
 
 /* ── BOW STROKE = the moment a note is articulated. Sound and judgment are
-   coupled here. Fires on: bow touch-down, string crossing while dragging,
-   bow direction reversal (re-stroke for repeated notes), and pitch change
-   under the bow (slur, dispatched from pickNote). */
+   coupled here. Fires on: bow touch-down, bow direction reversal (re-stroke
+   for repeated notes), and pitch change under the bow (slur, dispatched from
+   pickNote). The string is fixed for the whole stroke (no crossing while dragging). */
 function bowStroke(si){
   bow.lastStrokeT=performance.now();
   if(currentMode==='rhythm'&&rhythmState&&rhythmState.active)rhythmBow(si);
   else if(currentMode==='learn'&&learnState&&learnState.active)learnBow(si);
   else if(currentMode==='perform'&&performState&&performState.active)performBow(si);
 }
+/* 1023: 활 = 몸통에 닿은 손가락 하나. 닿을 때 고른 줄을 손을 뗄 때까지 고정한다
+   (옛: 문지르다 x 가 바뀌면 옆 줄로 넘어가거나 끊겨, 아이가 넓게 문지르면 줄을 넘나들었다).
+   몸통에 닿은 두 번째 손가락은 무시 — 옛날엔 첫 손가락을 떼도 처음 줄 소리가 계속 남았다. */
 bowCv.addEventListener('pointerdown',e=>{
   e.preventDefault();ensureA();
+  if(bow.dn)return;
   const r=bowCv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
-  bow.dn=true;bow.px=px;bow.py=py;bow.lx=px;bow.lt=performance.now();bow.sdir=0;
+  bow.dn=true;bow.pid=e.pointerId;bow.px=px;bow.py=py;bow.lx=px;bow.lt=performance.now();bow.sdir=0;
   bow.str=sFromX(px);
   if(bow.str>=0){const n=AE.play(bow.str,semi[bow.str],.25);actS=bow.str;vib[bow.str]=.3;if(n)curN=n;mkP(bow.str,py);
     freeHintDone=true;
@@ -1193,7 +1198,7 @@ bowCv.addEventListener('pointerdown',e=>{
   }
 });
 bowCv.addEventListener('pointermove',e=>{
-  e.preventDefault();if(!bow.dn)return;
+  e.preventDefault();if(!bow.dn||e.pointerId!==bow.pid)return;
   const r=bowCv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
   const now=performance.now(),dx=px-bow.lx,dt=Math.max(1,now-bow.lt)/1000;
   bow.spd=Math.min(1,Math.abs(dx/dt)/(BW*1.1));
@@ -1209,20 +1214,15 @@ bowCv.addEventListener('pointermove',e=>{
   }
   bow.px=px;bow.py=py;
   bow.angle+=((bow.dir>0?-Math.PI*.18:-Math.PI*.28)-bow.angle)*.12;
-  const ns=sFromX(px);
-  if(ns>=0&&ns!==bow.str){
-    if(bow.str>=0){AE.stop(bow.str);vib[bow.str]*=.4;}
-    bow.str=ns;const n=AE.play(ns,semi[ns],bow.spd);actS=ns;vib[ns]=bow.spd;if(n)curN=n;mkP(ns,py);
-    bowStroke(ns); /* crossing onto a string sounds it → judge it */
-  }else if(ns>=0&&Math.abs(dx)>1){
-    const n=AE.upd(ns,semi[ns],bow.spd);vib[ns]=bow.spd;actS=ns;if(n)curN=n;
-  }else if(ns<0&&bow.str>=0){AE.stop(bow.str);actS=-1;bow.str=-1;}
+  if(bow.str>=0&&Math.abs(dx)>1){ /* 줄은 고정 — 움직이는 빠르기만 소리 세기에 반영 */
+    const n=AE.upd(bow.str,semi[bow.str],bow.spd);vib[bow.str]=bow.spd;actS=bow.str;if(n)curN=n;
+  }
   bow.lx=px;bow.lt=now;
 });
-function bowUp(){if(!bow.dn)return;bow.dn=false;bow.spd=0;if(bow.str>=0)AE.stop(bow.str);bow.str=-1;actS=-1;curN='';}
-bowCv.addEventListener('pointerup',e=>{e.preventDefault();bowUp();});
-bowCv.addEventListener('pointercancel',e=>{e.preventDefault();bowUp();});
-bowCv.addEventListener('pointerleave',e=>{e.preventDefault();bowUp();});
+function bowUp(e){if(!bow.dn||(e&&e.pointerId!==bow.pid))return;bow.dn=false;bow.spd=0;if(bow.str>=0)AE.stop(bow.str);bow.str=-1;actS=-1;curN='';}
+bowCv.addEventListener('pointerup',e=>{e.preventDefault();bowUp(e);});
+bowCv.addEventListener('pointercancel',e=>{e.preventDefault();bowUp(e);});
+bowCv.addEventListener('pointerleave',e=>{e.preventDefault();bowUp(e);});
 
 function mkP(si,y){const sx=strX(si);for(let i=0;i<7;i++)parts.push({x:sx,y,vx:(Math.random()-.5)*55,vy:(Math.random()-.5)*35-10,life:1,sz:1.2+Math.random()*2,col:SC[si]});}
 
@@ -2582,9 +2582,10 @@ function renderHowto(){
       +'<div>맨 윗줄 네 칸은 손가락을 떼고 켜는 <b>개방현</b>(솔·레·라·미)이에요.</div>'
       +'<div>🎵 음을 이어 눌러 멜로디를 연주해 보세요.</div>';
   }else{
-    box.innerHTML='<div>🎵 <b>음 버튼</b>을 눌러 연주할 음을 골라요 <span style="color:#ff9d9d">— 아직 소리는 안 나요!</span></div>'
-      +'<div>🎻 아래 <b>갈색 바이올린 몸통</b>을 손가락으로 <b>좌↔우로 문지르면</b> 그때 소리가 나요! (활 긋기)</div>'
-      +'<div>👐 음 버튼을 <b>누른 채</b> 몸통을 문지르면 그 음이 연주돼요. 손을 모두 떼면 개방현으로 돌아가요.</div>';
+    /* 1023: 첫 줄을 실제 동작대로 — 음 버튼에서 손을 떼면 개방현으로 돌아가므로 '고른 뒤'가 아니라 '누른 채' */
+    box.innerHTML='<div>👐 한 손가락으로 <b>음 버튼을 누른 채</b>, 다른 손가락으로 <b>몸통을 문질러요</b></div>'
+      +'<div>🎻 아래 <b>갈색 바이올린 몸통</b>을 <b>좌↔우로 문지르면</b> 그때 소리가 나요! (활 긋기) <span style="color:#ff9d9d">— 음 버튼만 누르면 아직 소리는 안 나요</span></div>'
+      +'<div>✋ 음 버튼에서 손을 떼면 개방현(손가락을 안 짚은 줄)으로 돌아가요. 문지르는 동안에는 처음 닿은 줄이 계속 울려요.</div>';
   }
 }
 function updInputToggleUI(){ /* ⚙ 설정 칸의 연주 방식 버튼 표시 맞추기 (옛 윗줄 '👆 터치/🎻 활' 토글을 옮김) */
@@ -2594,7 +2595,7 @@ function updFreeHint(){
   const h=document.getElementById('freeHint');if(!h)return;
   h.innerHTML=inputMode==='nobow'
     ?'💡 음 버튼을 <b>탭</b>하면 바로 소리가 나요!'
-    :'💡 음 버튼을 고른 뒤, 아래 몸통을 좌↔우로 <b>문지르면</b> 소리가 나요!';
+    :'💡 한 손가락으로 음 버튼을 <b>누른 채</b>, 다른 손가락으로 몸통을 <b>문질러요</b>';
 }
 function setInputMode(m){
   inputMode=(m==='bow')?'bow':'nobow';
