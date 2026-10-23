@@ -308,14 +308,14 @@ const DRAW = {
 const EMOJI = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji"';
 const col = (k) => C[k] || k || C.ink;
 function tx(g, s, x, y, { c = C.ink, size = 16, align = 'center', base = 'middle', w = 600, halo = false } = {}) {
-  g.fillStyle = col(c); g.font = `${w} ${size}px "Jua", "Gowun Dodum", ${EMOJI}, sans-serif`;
+  g.fillStyle = col(c); g.font = `${w} ${size}px "Jua", "Gowun Dodum", sans-serif, ${EMOJI}`;
   g.textAlign = align; g.textBaseline = base;
   if (halo) { g.save(); g.strokeStyle = '#fff'; g.lineWidth = Math.max(3, size / 3.5); g.lineJoin = 'round'; g.strokeText(String(s), x, y); g.restore(); } // 흰 테두리: 선 위에서도 읽히게
   g.fillText(String(s), x, y);
 }
 /** 글을 폭에 맞춰 줄로 나눈다 (띄어쓰기 단위, 한 낱말이 너무 길면 글자 단위) */
 function wrap(g, s, maxW, size) {
-  g.font = `600 ${size}px "Jua", "Gowun Dodum", ${EMOJI}, sans-serif`;
+  g.font = `600 ${size}px "Jua", "Gowun Dodum", sans-serif, ${EMOJI}`;
   const out = [];
   for (const para of String(s ?? '').split('\n')) {
     let line = '';
