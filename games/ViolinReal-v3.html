@@ -186,6 +186,18 @@ body:not(.showInfo) .info{display:none;}
 .mcBadge.alt{color:#2a1a00;background:linear-gradient(135deg,#FFD98A,#E0A94A);}
 #loadTxt{font-size:16px;color:#c9a96e;margin-top:8px;min-height:1em;}
 
+/* 1023: 폰 가로(높이 500px 이하)는 음 버튼이 24px 까지 줄고 리듬 음표가 겹친다 → "세로로 돌리면 더 커요" 안내.
+   '그냥 할래요'를 누르면 이번 방문 동안 안 띄움(body.rotOk). 태블릿 가로(높이 800)는 안 걸림 */
+#rotOv{display:none;position:fixed;inset:0;z-index:99995;background:rgba(10,10,30,.97);
+  flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;text-align:center;}
+@media (orientation:landscape) and (max-height:500px){body:not(.rotOk) #rotOv{display:flex;}}
+.rotIcon{font-size:56px;line-height:1;animation:rotHint 2.4s ease-in-out infinite;}
+@keyframes rotHint{0%,25%{transform:rotate(-90deg);}55%,100%{transform:rotate(0deg);}}
+.rotTxt{font-size:26px;color:#FFD700;font-weight:900;}
+#rotOk{min-height:52px;padding:0 26px;display:flex;align-items:center;border-radius:14px;font-size:18px;font-weight:800;
+  color:#eadcbc;cursor:pointer;background:rgba(255,255,255,.08);border:2px solid rgba(255,215,0,.4);}
+#rotOk:active{transform:scale(.96);}
+
 /* 처음 한 번 안내 한 줄 */
 #freeHint{display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);
   z-index:12;background:rgba(0,0,0,.75);border:1px solid rgba(255,215,0,.4);
@@ -383,6 +395,11 @@ body:not(.showInfo) .info{display:none;}
   </div>
   <div id="loadTxt"></div>
 </div></div>
+<div id="rotOv" role="dialog" aria-label="화면 방향 안내">
+  <div class="rotIcon">📱</div>
+  <div class="rotTxt">세로로 돌리면 더 커요</div>
+  <div id="rotOk" role="button">그냥 할래요</div>
+</div>
 </div>
 
 <script>
@@ -2605,6 +2622,11 @@ let ndShown='';
    ═══════════════════════════════════════════════════════════ */
 function ensureA(){if(!audioOn){AE.init();audioOn=true;document.getElementById('ov').classList.add('H');}AE.res();}
 document.getElementById('ov').addEventListener('pointerdown',e=>{e.preventDefault();ensureA();});
+/* 폰 가로 안내: '그냥 할래요' = 이번 방문(탭) 동안은 다시 안 띄움. 세로로 돌리면 CSS 로 저절로 사라짐 */
+try{if(sessionStorage.getItem('violin_rot_ok'))document.body.classList.add('rotOk');}catch(e){}
+document.getElementById('rotOk').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();
+  document.body.classList.add('rotOk');try{sessionStorage.setItem('violin_rot_ok','1');}catch(e2){}});
+document.getElementById('rotOv').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();});
 buildFB();buildOS();
 
 /* ═══════════════════════════════════════════════════════════
