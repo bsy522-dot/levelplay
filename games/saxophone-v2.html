@@ -725,7 +725,13 @@ const KBD = {'1':'L1','2':'L2','3':'L3','4':'R1','5':'R2','6':'R3','7':'LC','8':
 document.addEventListener('keydown', e=>{
   if(e.repeat) return;
   const k = KBD[e.key.toLowerCase()];
-  if(k && !heldKeys.has(k)){ ensureAudio(); heldKeys.add(k); refresh(); }
+  if(k && !heldKeys.has(k)){
+    ensureAudio();
+    // 1024: 키보드도 터치처럼 보여 주던 키를 먼저 비움(음 버튼 '솔' 뒤 1+2 = 라).
+    // 단 '8'(옥타브)은 비우지 않아 '음 버튼 + 8 = 한 옥타브 위'(PC 어른 사용)를 살린다.
+    if(k !== 'OCT') dropShownKeys();
+    heldKeys.add(k); refresh();
+  }
   else if(e.key===' '){ // 개방음(도♯) 등 한 번 불어보기
     e.preventDefault(); ensureAudio();
     const id = matchNote();
