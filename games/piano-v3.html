@@ -2409,7 +2409,7 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
         if (!unplayed.length) return;
         const minTime = Math.min(...unplayed.map(n => n.time));
         const target = unplayed.find(n => n.time === minTime && n.note === name && !n.auto);
-        if (!target) return; // 틀린 키는 무시 (시간은 고정 상태)
+        if (!target) { flashWrongKey(midi); return; } // 틀린 키: 시간은 고정 상태, 점수·진행 그대로 (1024 PR-04: 빨간 깜빡임만)
         target.played = true;
         target.result = 'perfect';
         synthScore.perfect++; synthScore.combo++;
@@ -2468,15 +2468,19 @@ function startSynthesia(notes, bpm, autoPlay, testId) {
         document.getElementById('sc-progress-bar').style.width = pct + '%';
         document.getElementById('sc-progress-pct').textContent = pct + '%';
       } else {
-        // 1023 P-10: 틀린 건반(또는 너무 이른 누름) — 아무 반응이 없었다 → 그 건반만 짧게 빨갛게. 점수는 그대로
-        //   (빛나는 다음 건반(next-up)은 CSS 순서상 그대로 보인다)
-        const el = document.querySelector(`#piano [data-midi="${midi}"]`);
-        if (el) { el.classList.add('hit-miss'); setTimeout(() => el.classList.remove('hit-miss'), 220); }
+        flashWrongKey(midi); // 1023 P-10: 틀린 건반(또는 너무 이른 누름)
       }
     };
   }
 
   synthAnimId = requestAnimationFrame(synthLoop);
+}
+
+// 1023 P-10 · 1024 PR-04: 틀린 건반 — 아무 반응이 없었다 → 그 건반만 짧게 빨갛게(박자 맞춰·기다리기 공통). 점수·진행은 그대로
+//   (빛나는 다음 건반(next-up)은 CSS 순서상 그대로 보인다)
+function flashWrongKey(midi) {
+  const el = document.querySelector(`#piano [data-midi="${midi}"]`);
+  if (el) { el.classList.add('hit-miss'); setTimeout(() => el.classList.remove('hit-miss'), 220); }
 }
 
 function pauseSynthesia(missedNote) {
