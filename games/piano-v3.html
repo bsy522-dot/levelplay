@@ -67,34 +67,38 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 #piano-wrap { flex-shrink:0; background:#0d1117; padding:2px 0 0; position:relative; overflow-x:auto; overflow-y:hidden; border-top:1px solid var(--border); -webkit-overflow-scrolling:touch; touch-action:pan-x; }
 #piano-wrap::-webkit-scrollbar { height:4px; }
 /* 건반 미니맵 스크롤 스트립 — 드래그/탭으로 좌우 이동 (상용 앱식) */
-#kb-strip { position:relative; height:44px; margin:4px 8px; flex-shrink:0; background:#161b26; border:1px solid var(--border); border-radius:6px; overflow:hidden; touch-action:none; cursor:grab; flex-shrink:0; }
+/* 1023 P-03·P-12: [− % ＋] [미니맵 띠] [↻] 한 줄 */
+#kb-bar { display:flex; align-items:center; gap:6px; margin:4px 8px; flex-shrink:0; }
+#kb-strip { position:relative; flex:1; min-width:0; height:44px; background:#161b26; border:1px solid var(--border); border-radius:6px; overflow:hidden; touch-action:none; cursor:grab; }
 #kb-strip .tick { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,.10); }
 #kb-strip .tick.c { background:rgba(255,255,255,.28); }
 #kb-strip-win { position:absolute; top:1px; bottom:1px; background:rgba(6,182,212,.28); border:2px solid #06b6d4; border-radius:5px; box-shadow:0 0 8px rgba(6,182,212,.5); }
 #kb-strip-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#94a3b8; pointer-events:none; }
-/* 1023 P-11: 따라치기 곡을 치는 동안엔 띠를 숨겨 떨어지는 음표가 건반 바로 위에 닿게(건반은 곡을 따라 저절로 움직인다) */
-#panel-synth.active.playing ~ #kb-strip { display:none; }
+/* 1023 P-11: 따라치기 곡을 치는 동안엔 띠 줄을 숨겨 떨어지는 음표가 건반 바로 위에 닿게(건반은 곡을 따라 저절로 움직인다).
+   ＋/− 와 ↻ 도 이 줄에 있어 치는 동안만 같이 숨는다 — 그동안 크기는 핀치·⚙ 로. 곡 목록·정지·끝나면 다시 보임 */
+#panel-synth.active.playing ~ #kb-bar { display:none; }
 #piano-wrap::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 #piano { display:flex; position:relative; height:130px; margin:0; }
-/* 0926: 건반 위 ＋/− 볼트 — ⚙ 설정 안에서만 키울 수 있던 것을 항상 보이게 */
-#kb-zoom{position:absolute;right:6px;top:4px;z-index:6;display:flex;align-items:center;gap:3px;
+/* 0926: ＋/− 볼트 — ⚙ 설정 안에서만 키울 수 있던 것을 항상 보이게 (1023: 건반 안 → 띠 줄 왼쪽 끝) */
+#kb-zoom{flex:0 0 auto;display:flex;align-items:center;gap:3px;
   background:rgba(13,17,23,.82);border:1px solid rgba(255,255,255,.18);border-radius:999px;
-  padding:2px 5px;backdrop-filter:blur(4px);}
+  padding:2px 5px;}
 #kb-zoom button{width:32px;height:32px;border:none;border-radius:999px;background:rgba(255,255,255,.14);
   color:#fff;font-size:20px;font-weight:900;line-height:1;cursor:pointer;touch-action:manipulation;}
 #kb-zoom button:active{background:var(--accent);}
 #kzb-label{min-width:38px;text-align:center;color:#e2e8f0;font-size:12px;font-weight:800;}
 /* 0926: 가로 전환 버튼 — ⚙ 안에 있던 toggleLandscape() 를 실제로 누를 수 있게 건반 옆에 둔다.
    ⚠ #piano-wrap(가로 스크롤) 안이 아니라 밖(#kb-strip 옆)에 둬야 좌우로 밀려 안 사라진다. */
-#kb-land-wrap{position:relative;flex:0 0 auto;display:flex;align-items:center;
-  padding:0 6px 0 0;}
+#kb-land-wrap{position:relative;flex:0 0 auto;display:flex;align-items:center;}
 #kzb-land{width:38px;height:38px;border:none;border-radius:999px;
   background:rgba(13,17,23,.82);border:1px solid rgba(255,255,255,.18);
   color:#e2e8f0;font-size:20px;font-weight:900;line-height:1;cursor:pointer;touch-action:manipulation;
   backdrop-filter:blur(4px);}
 #kzb-land:active{background:var(--accent);}
-body.lscape #kzb-land{width:34px;height:34px;font-size:18px;}
-body.lscape #kzb-zoom{top:2px;right:4px;}
+/* 폰 가로: 줄 높이를 띠(28px)에 맞춤. (1023: 예전 줄은 #kzb-zoom 철자 오류로 아무것도 안 잡고 있었다) */
+body.lscape #kzb-land{width:30px;height:30px;font-size:17px;}
+body.lscape #kb-zoom{padding:1px 4px;}
+body.lscape #kb-zoom button{width:28px;height:28px;font-size:18px;}
 .key-white { width:20px; height:130px; background:linear-gradient(180deg,#f5f5f5 0%,#e8e8e8 70%,#d8d8d8 100%); border:1px solid #888; border-top:none; border-radius:0 0 4px 4px; cursor:pointer; position:relative; z-index:1; flex-shrink:0; transition:background .06s; }
 .key-white:active, .key-white.pressed { background:linear-gradient(180deg,#ccc,#bbb); box-shadow:inset 0 2px 6px rgba(0,0,0,.3); }
 .key-white.hit-perfect { background:linear-gradient(180deg,#22c55e,#16a34a) !important; }
@@ -211,7 +215,14 @@ body.lscape #kzb-zoom{top:2px;right:4px;}
 .free-note { font-size:min(26vh, 34vw); font-weight:900; line-height:1; color:#f7d59c; text-shadow:0 6px 30px rgba(0,0,0,.45); }
 .free-note:empty { display:none; }
 .free-note small { font-size:.3em; font-weight:800; opacity:.8; margin-left:4px; }
-.free-hint { font-size:20px; font-weight:700; color:#aab4c8; }
+/* 1023 P-12: 첫 화면 '도' + ⬇ — 도4 위(가로 위치는 JS placeFreeCue 가 건반에 맞춤). 7건반 .k7k.target::before 와 같은 색·흔들림 */
+.free-info { position:relative; }
+.free-cue { position:absolute; bottom:4px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none; }
+.free-cue[hidden] { display:none; }
+.fc-do { width:min(30vw,20vh,150px); height:min(30vw,20vh,150px); border-radius:50%; background:#f87171; color:#111827; display:flex; align-items:center; justify-content:center; font-size:min(15vw,10vh,76px); font-weight:900; box-shadow:0 0 0 6px rgba(248,113,113,.18); }
+.fc-arrow { font-size:clamp(34px,8vw,58px); line-height:1; color:#f87171; filter:drop-shadow(0 2px 2px rgba(0,0,0,.5)); animation:fcbob 1s ease-in-out infinite; }
+@keyframes fcbob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(10px); } }
+#panel-free.active ~ #piano-wrap .key-white.cue { background:linear-gradient(180deg,#fff 0%,#fecaca 55%,#f87171 100%); box-shadow:0 0 14px #f87171; animation:pulse-key 1s infinite; }
 
 /* Modal */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:100; align-items:center; justify-content:center; }
@@ -290,7 +301,8 @@ body.lscape #panel-synth #synth-score { grid-row:1; grid-column:2; }
 body.lscape #panel-synth #synth-stage { grid-row:2; grid-column:1 / -1; min-height:0; }
 body.lscape .synth-bar .btn { min-width:96px; }
 body.lscape .score-bar { padding:2px 10px; font-size:16px; gap:10px; }
-body.lscape #kb-strip { height:28px; margin:2px 8px; }
+body.lscape #kb-bar { margin:2px 8px; }
+body.lscape #kb-strip { height:28px; }
 body.lscape .free-info { padding:2px 8px; }
 body.lscape .learn-list { padding:6px 10px; }
 body.lscape .lesson-view { padding:6px 10px; }
@@ -491,7 +503,8 @@ body.lscape #k7-keys { height:52vh; }
   <div class="panel active" id="panel-free">
     <div class="free-info">
       <div class="free-note" id="free-note" aria-live="polite"></div>
-      <div class="free-hint" id="free-hint">건반을 눌러 보세요</div>
+      <!-- 1023 P-12: 처음 누르기 전 안내 = 글 대신 큰 '도' + ⬇ 가 도4 를 가리킨다(7건반 반짝 화살표 모양). 아무 건반이나 누르면 사라짐 -->
+      <div class="free-cue" id="free-cue" aria-label="도를 눌러 보세요"><span class="fc-do">도</span><span class="fc-arrow">⬇</span></div>
     </div>
   </div>
 
@@ -572,22 +585,23 @@ body.lscape #k7-keys { height:52vh; }
 
   <!-- Piano keyboard -->
   <!-- 0926(병석님): 건반 ＋/− 가 ⚙ 설정 안에 숨어 있어서 '어떻게 키우지'를 못 찾았다.
-       건반 위에 항상 보이는 작은 볼트 + ＋/− 를 둔다(설정 안의 것은 그대로 유지). -->
-  <div id="kb-strip"><div id="kb-strip-win"></div><div id="kb-strip-hint">◀ 좌우로 끌어 이동 ▶</div></div>
-  <div id="piano-wrap"><div id="piano"></div>
+       항상 보이는 작은 볼트 + ＋/− 를 둔다(설정 안의 것은 그대로 유지).
+       2026-09-26(병석님 "피아노 가로로 할수 있게는 못해?"): toggleLandscape() 는 함수만 있고 버튼이 없어 죽어 있었다 → ↻.
+       ⚠ 둘 다 건반(#piano-wrap, 가로 스크롤) 안에 두면 좌우 스크롤 때 같이 밀려 화면 밖으로 사라진다
+         (↻ x=-1760, 1023 점검 ＋/− 폰 x=-364·태블릿 가로는 건반 위를 가림).
+       1023(P-03·P-12): ＋/− 와 ↻ 를 미니맵 띠 줄의 양 끝으로 — 스크롤에 안 물리고, 건반을 안 가리고, ↻ 혼자 쓰던 줄 하나가 준다. -->
+  <div id="kb-bar">
     <div id="kb-zoom" role="group" aria-label="건반 크기">
       <button id="kzb-out" aria-label="건반 작게">−</button>
       <span id="kzb-label">100%</span>
       <button id="kzb-in" aria-label="건반 크게">＋</button>
     </div>
+    <div id="kb-strip"><div id="kb-strip-win"></div><div id="kb-strip-hint">◀ 좌우로 끌어 이동 ▶</div></div>
+    <div id="kb-land-wrap">
+      <button id="kzb-land" aria-label="가로로 보기" title="가로로 보기">↻</button>
+    </div>
   </div>
-  <!-- 2026-09-26(병석님 "피아노 가로로 할수 있게는 못해?"): toggleLandscape() 는 원래부터
-       만들어져 있었는데 호출되는 곳이 하나도 없어(함수만 있고 버튼 없음) 항상 죽어 있었다.
-       ⚠ 건반(#piano-wrap) 안에 두면 좌우 스크롤 때 같이 밀려 화면 밖(x=-1760)으로 사라진다 —
-       실제로 그랬다. 그래서 #kb-strip 옆, 스크롤에 안 물리는 자리에 둔다. -->
-  <div id="kb-land-wrap">
-    <button id="kzb-land" aria-label="가로로 보기" title="가로로 보기">↻</button>
-  </div>
+  <div id="piano-wrap"><div id="piano"></div></div>
 </div>
 
 <!-- 🌈 건반 7개 (0929) -->
@@ -1187,6 +1201,7 @@ function buildPiano() {
 
   setupPianoTouch();
   if (typeof renderStrip === 'function') requestAnimationFrame(renderStrip);
+  if (typeof placeFreeCue === 'function') requestAnimationFrame(placeFreeCue); // 1023 P-12: 새 건반에 도4 반짝임·'도'⬇ 위치
 }
 
 function setupPianoTouch() {
@@ -1348,8 +1363,26 @@ function showFreeNote(midi) {
   showFreeNote.last = midi;
   box.innerHTML = (useKoreanNames() ? KOREAN_NOTE_MAP[k.note] : k.note) + '<small>' + k.octave + '</small>';
   box.style.color = OCT_CHIP[k.octave] || '#f7d59c';
-  const hint = document.getElementById('free-hint'); if (hint) hint.style.display = 'none';
+  if (freeCueOn) { freeCueOn = false; placeFreeCue(); } // 1023 P-12: 첫 누름 → '도'⬇ 사라짐
 }
+// 1023 P-12: 처음 누르기 전 '도'⬇ 를 도4 위에 (건반을 옮기거나 키우면 따라간다). 첫 누름 뒤엔 숨기고 도4 반짝임도 끈다
+let freeCueOn = true;
+function placeFreeCue() {
+  const cue = document.getElementById('free-cue'), wrap = document.getElementById('piano-wrap');
+  const k = document.querySelector('#piano [data-midi="60"]');
+  if (!cue || !wrap) return;
+  if (!freeCueOn) { cue.hidden = true; if (k) k.classList.remove('cue'); return; }
+  if (!k) return;
+  k.classList.add('cue');
+  cue.firstElementChild.textContent = useKoreanNames() ? KOREAN_NOTE_MAP.C : 'C';
+  const x = k.offsetLeft + k.offsetWidth / 2 - wrap.scrollLeft, W = wrap.clientWidth, half = (cue.offsetWidth || 120) / 2 + 4;
+  cue.style.left = Math.max(half, Math.min(W - half, x)) + 'px';
+  cue.style.visibility = (x < 0 || x > W) ? 'hidden' : ''; // 도4 가 화면 밖이면 엉뚱한 곳을 가리키지 않게
+}
+// 연주 탭에서만 (따라치기에서 건반이 따라 움직일 때마다 재면 느려진다 — 탭을 바꾸면 buildPiano 가 다시 맞춘다)
+document.getElementById('piano-wrap').addEventListener('scroll', () => {
+  if (freeCueOn && document.getElementById('panel-free').classList.contains('active')) placeFreeCue();
+}, {passive:true});
 (function(){
   const moreBtn = document.getElementById('tab-more');
   const menu = document.getElementById('more-menu');
@@ -1392,6 +1425,7 @@ function showFreeNote(midi) {
     kr.checked = (b.dataset.nn === 'ko');
     document.querySelectorAll('#nn-seg button').forEach(x => x.classList.toggle('sel', x === b));
     relabelKeys();
+    placeFreeCue(); // 1023 P-12: '도' ↔ 'C'
     const box = document.getElementById('free-note');
     if (box && box.textContent && showFreeNote.last !== undefined) showFreeNote(showFreeNote.last);
   }));
@@ -3715,6 +3749,7 @@ function init() {
   setTimeout(() => {
     scrollToMidi(60); // C4
     resizeSynthCanvas();
+    placeFreeCue(); // 1023 P-12
   }, 100);
 }
 
