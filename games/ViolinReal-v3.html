@@ -1247,8 +1247,10 @@ bowCv.addEventListener('pointerdown',e=>{
   e.preventDefault();ensureA();
   if(bow.dn)return;
   const r=bowCv.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
+  const s0=sFromX(px);
+  if(s0<0)return; /* 1024 V2-02: 줄 밖 손바닥(터치 연주)은 몸통 누름으로 치지 않음 — 음 이름 '미4'가 손바닥을 뗄 때까지 남던 것 */
   bow.dn=true;bow.pid=e.pointerId;bow.px=px;bow.py=py;bow.lx=px;bow.lt=performance.now();bow.sdir=0;
-  bow.str=sFromX(px);
+  bow.str=s0;
   if(bow.str>=0){const n=AE.play(bow.str,semi[bow.str],.25);actS=bow.str;vib[bow.str]=.3;if(n)curN=n;mkP(bow.str,py);
     freeHintDone=true;
     bowStroke(bow.str);
@@ -2672,7 +2674,10 @@ function frame(ts){
   const ndV=((bow.dn||(inputMode==='nobow'&&actS>=0))&&curN)?curN:'';
   if(ndV!==ndShown){ndShown=ndV;document.getElementById('nd').innerHTML=ndV?noteHTML(ndV):'';}
   syncMore();
-  document.body.classList.toggle('inGame',!!(cdIv||(rhythmState&&rhythmState.active)||(performState&&performState.active))); /* 가로 안내 덮개 가림 */
+  {const nowIn=!!(cdIv||(rhythmState&&rhythmState.active)||(performState&&performState.active));
+   /* 1024 V2-01: 가로로 돌린 채 게임이 끝나면 결과(★·점수)를 덮개가 바로 가리던 것 → 가로로 계속 하기로 고른 것으로 봄 */
+   if(!nowIn&&document.body.classList.contains('inGame')&&matchMedia('(orientation:landscape) and (max-height:500px)').matches)document.body.classList.add('rotOk');
+   document.body.classList.toggle('inGame',nowIn);} /* 가로 안내 덮개 가림 */
   document.getElementById('freeHint').style.display=(audioOn&&currentMode==='free'&&!freeHintDone)?'block':'none';
 
   if(currentMode==='rhythm'){updateRhythm(ts);renderRhythm(ts);}
