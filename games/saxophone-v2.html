@@ -21,22 +21,32 @@ body{
 }
 header{
   flex:0 0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  padding:10px 14px 8px; border-bottom:1px solid var(--line); background:rgba(12,18,34,.7);
+  padding:5px 14px 5px; border-bottom:1px solid var(--line); background:rgba(12,18,34,.7);
 }
+/* 1023: 탭 높이 36→44px(아이 손가락) — 머리글 위아래 여백을 줄여 전체 높이는 그대로 */
 header h1{font-size:19px; margin:0; letter-spacing:.5px;}
 header h1 small{font-size:11px; color:var(--sub); font-weight:400; margin-left:6px;}
 nav{display:flex; gap:6px; margin-left:auto;}
 .tab{
   border:1px solid var(--line); background:var(--panel); color:var(--sub);
-  padding:8px 14px; border-radius:20px; font-size:14px; font-weight:700; cursor:pointer;
+  padding:8px 14px; border-radius:22px; font-size:14px; font-weight:700; cursor:pointer; min-height:44px;
 }
 .tab.active{background:var(--gold); border-color:var(--gold); color:#3b2a03;}
+#rotHint{display:none; font-size:12px; font-weight:700; color:var(--gold); border:1px dashed var(--gold);
+  border-radius:14px; padding:3px 10px; pointer-events:none; white-space:nowrap;}
 main{flex:1 1 auto; display:flex; min-height:0;}
 
 /* ── 색소폰 패널 ── */
 #saxPanel{
-  flex:0 0 auto; width:min(46vw,225px); display:flex; flex-direction:column; align-items:center;
+  flex:0 0 auto; width:min(50vw,225px); display:flex; flex-direction:column; align-items:center;
   padding:4px 2px 8px; border-right:1px solid var(--line); background:rgba(10,15,28,.45);
+}
+/* 1023: 태블릿·PC 는 색소폰 칸을 넓혀 키를 크게(세로 태블릿 키 약 1.7배). 그림은 세로 210:560 이라
+   화면 높이가 모자라면(가로 태블릿) 그림이 들어갈 만큼만 넓힌다 — 남는 폭은 오른쪽 내용에 양보.
+   170px = 머리글·칸 여백·아래 '현재 운지/전체 해제/안내' 높이. */
+@media (min-width:700px) and (min-height:600px){
+  #saxPanel{width:min(48vw, 460px, calc((100vh - 170px) * .375 + 4px));
+            width:min(48vw, 460px, calc((100dvh - 170px) * .375 + 4px));}
 }
 #saxSvg{width:100%; height:auto; max-height:calc(100% - 76px); flex:1 1 auto; min-height:0; touch-action:none;}
 .key{cursor:pointer;}
@@ -51,6 +61,7 @@ main{flex:1 1 auto; display:flex; min-height:0;}
   transform-box:fill-box; transform-origin:center;}
 .key .hit{fill:transparent;}
 .key.pressed .cap{fill:#d8f6ff; stroke:#22d3ee; stroke-width:4; transform:scale(1.14);}
+#saxSvg > text{pointer-events:none;}
 .key .kn{fill:#3a4664; font-weight:800; text-anchor:middle; pointer-events:none; font-size:13px;}
 .key .kns{fill:#3a4664; font-weight:800; text-anchor:middle; pointer-events:none; font-size:8.5px;}
 .key.pressed .kn,.key.pressed .kns{fill:#075985;}
@@ -58,15 +69,17 @@ main{flex:1 1 auto; display:flex; min-height:0;}
 .key.pressed .halo{opacity:1;}
 .key .halo{fill:none; stroke:#22d3ee; stroke-width:5; opacity:0; transition:opacity .12s; pointer-events:none;}
 .key .kl{fill:#8ea0c6; font-size:8.5px; text-anchor:middle; pointer-events:none;}
-.key.hint .cap{stroke:#22d3ee; stroke-width:4; animation:hintPulse 1s ease-in-out infinite;}
-@keyframes hintPulse{50%{stroke-opacity:.15;}}
+/* 1023: '눌러야 할 키'(힌트)는 주황 점선 + 연주황 채움으로 깜빡 — '누른 키'(청록 채움)와 다른 색.
+   힌트 키를 누르면 누름(청록)으로 바뀌어 '이건 됐어'가 보인다. */
+.key.hint:not(.pressed) .cap{fill:#ffe1bf; stroke:#f97316; stroke-width:4; stroke-dasharray:6 3; animation:hintPulse 1s ease-in-out infinite;}
+@keyframes hintPulse{50%{stroke-opacity:.25; fill-opacity:.8;}}
 #nowNote{font-size:12px; color:var(--sub); margin:2px 0 4px; height:16px;}
 #nowNote b{color:var(--gold); font-size:13px;}
 body.sounding #nowNote b{text-shadow:0 0 10px rgba(246,196,83,.8);}
 #saxCtrls{display:flex; align-items:center; gap:8px;}
 #clearBtn{
   border:1px solid var(--line); background:var(--panel); color:var(--sub);
-  border-radius:12px; padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer;
+  border-radius:12px; padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer; min-height:44px;
 }
 #holdTip{font-size:10.5px; color:#66759a; text-align:center; margin-top:4px; line-height:1.4; padding:0 4px;}
 #kbdHelp{display:none; font-size:9.5px; color:#4d5b7d; margin-top:3px; text-align:center; padding:0 4px;}
@@ -101,7 +114,7 @@ body.sounding #nowNote b{text-shadow:0 0 10px rgba(246,196,83,.8);}
 }
 .ghostbtn{
   border:1px solid var(--line); background:var(--panel); color:var(--text);
-  border-radius:12px; padding:9px 14px; font-size:13px; font-weight:700; cursor:pointer;
+  border-radius:12px; padding:9px 14px; font-size:13px; font-weight:700; cursor:pointer; min-height:44px;
 }
 .quizmeta{display:flex; gap:16px; color:var(--sub); font-size:14px; margin-bottom:10px;}
 .quizmeta b{color:var(--gold); font-size:16px;}
@@ -112,8 +125,8 @@ body.sounding #nowNote b{text-shadow:0 0 10px rgba(246,196,83,.8);}
 .resultcard .score{font-size:30px; font-weight:800; color:var(--gold);}
 .resultcard p{color:var(--sub); font-size:14px;}
 .btnrow{display:flex; gap:10px; justify-content:center; margin-top:16px;}
-label.switch{display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--sub); cursor:pointer; margin-right:12px;}
-label.switch input{width:18px; height:18px; accent-color:var(--gold);}
+label.switch{display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--sub); cursor:pointer; margin-right:12px; min-height:44px;}
+label.switch input{width:22px; height:22px; flex:0 0 auto; accent-color:var(--gold);}
 
 /* 곡 */
 .song-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px;}
@@ -170,9 +183,9 @@ label.switch input{width:18px; height:18px; accent-color:var(--gold);}
   header h1{flex:0 1 auto; min-width:0; white-space:nowrap;}
   nav{flex:0 1 auto; min-width:0; overflow-x:auto; scrollbar-width:none;}
   nav::-webkit-scrollbar{display:none;}
-  .tab{flex:0 0 auto; min-height:40px; white-space:nowrap;}
+  .tab{flex:0 0 auto; min-height:44px; white-space:nowrap;}
   #nowNote{height:auto; min-height:16px; line-height:1.35; text-align:center; margin:2px 0 6px;}
-  #clearBtn{min-height:40px;}
+  #clearBtn{min-height:44px;}
   #holdTip{margin-top:6px;}
   #saxSvg.imglbl text{display:none;}
   #saxSvg.imglbl image.lblimg{display:inline;}
@@ -185,14 +198,22 @@ label.switch input{width:18px; height:18px; accent-color:var(--gold);}
   /* 곡 연주 머리줄: 곡 제목을 한 줄 위로, 버튼 둘은 그 아래(좁은 칸에서 제목이 세로로 한 글자씩 서던 것) */
   .songbar{flex-wrap:wrap; gap:8px;}
   .songbar .stitle2{order:-1; flex:1 0 100%;}
-  .songbar .ghostbtn{flex:1 1 auto; white-space:nowrap; min-height:40px;}
+  .songbar .ghostbtn{flex:1 1 auto; white-space:nowrap; min-height:44px;}
   .btnrow{flex-wrap:wrap;}
+}
+/* 1023: 폰 가로 — 그림 높이가 233px 뿐이라 키가 손가락보다 작다. 그림은 그대로 두고 '세로로 돌리면 더 커요'를
+   머리글(부제 자리)에 살짝 띄움(누름 막지 않음). 같은 안내가 도움말에 있는 아래 '꾹 누르기' 안내는 접어 그림을 조금 키움. */
+@media (orientation:landscape) and (max-height:500px){
+  #rotHint{display:inline-block;}
+  header h1 small{display:none;}
+  #holdTip{display:none;}
 }
 </style>
 </head>
 <body>
 <header>
   <h1>🎷 색소폰 마스터<small>알토 색소폰 운지 배우기</small></h1>
+  <span id="rotHint" aria-hidden="true">📱 세로로 돌리면 더 커요</span>
   <nav>
     <button class="tab active" data-act="tab" data-mode="chart">운지표</button>
     <button class="tab" data-act="tab" data-mode="quiz">운지 퀴즈</button>
@@ -275,17 +296,19 @@ label.switch input{width:18px; height:18px; accent-color:var(--gold);}
       <text x="150" y="152" fill="#7789ad" font-size="10.5" font-weight="700">왼손</text>
       <text x="34" y="392" fill="#7789ad" font-size="10.5" font-weight="700">오른손</text>
       <!-- ══ 왼손 엄지: 옥타브키 ══ -->
-      <g class="key" data-key="OCT" transform="translate(54,106)"><circle r="16" fill="transparent"/><circle class="cap" r="12"/><text class="kns" y="3.5">옥타브</text><text class="kl" y="24">엄지</text></g>
+      <g class="key" data-key="OCT" transform="translate(54,106)"><circle r="20" fill="transparent"/><circle class="cap" r="14"/><text class="kns" y="3.5">옥타브</text><text class="kl" y="24">엄지</text></g>
       <!-- ══ 왼손 팜키 D / Eb / F ══ -->
-      <g class="key" data-key="PD"  transform="translate(58,158)"><circle r="15" fill="transparent"/><rect class="cap" x="-9" y="-12" width="18" height="24" rx="6"/><text class="kns" y="3.5">D</text></g>
-      <g class="key" data-key="PEB" transform="translate(44,190)"><circle r="15" fill="transparent"/><rect class="cap" x="-9" y="-12" width="18" height="24" rx="6"/><text class="kns" y="3.5">E♭</text></g>
+      <g class="key" data-key="PD"  transform="translate(58,158)"><circle r="19" fill="transparent"/><rect class="cap" x="-9" y="-12" width="18" height="24" rx="6"/><text class="kns" y="3.5">D</text></g>
+      <g class="key" data-key="PEB" transform="translate(44,190)"><circle r="17" fill="transparent"/><rect class="cap" x="-9" y="-12" width="18" height="24" rx="6"/><text class="kns" y="3.5">E♭</text></g>
       <g class="key" data-key="PF"  transform="translate(66,196)"><circle r="15" fill="transparent"/><rect class="cap" x="-9" y="-12" width="18" height="24" rx="6"/><text class="kns" y="3.5">F</text></g>
-      <text x="38" y="222" fill="#8ea0c6" font-size="8.5">팜키(왼손바닥)</text>
+      <!-- 1023: 이름표가 3번 키·본체에 걸쳐 있던 것 → 팜키 무리 아래 두 줄 -->
+      <text x="31" y="222" fill="#8ea0c6" font-size="8.5">팜키</text>
+      <text x="31" y="232" fill="#8ea0c6" font-size="8.5">(왼손바닥)</text>
       <!-- ══ 왼손 메인 1·비스·2·3 ══ -->
-      <g class="key" data-key="L1" transform="translate(105,140)"><circle r="19" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">1</text></g>
+      <g class="key" data-key="L1" transform="translate(105,140)"><circle r="22" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">1</text></g>
       <g class="key" data-key="BIS" transform="translate(93,166)"><circle r="12" fill="transparent"/><circle class="cap" r="7.5"/><text class="kns" y="3" font-size="7">bis</text></g>
-      <g class="key" data-key="L2" transform="translate(105,192)"><circle r="19" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">2</text></g>
-      <g class="key" data-key="L3" transform="translate(105,242)"><circle r="19" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">3</text></g>
+      <g class="key" data-key="L2" transform="translate(105,192)"><circle r="21" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">2</text></g>
+      <g class="key" data-key="L3" transform="translate(105,242)"><circle r="22" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">3</text></g>
       <!-- ══ 왼손 새끼 테이블: G# / C# / B / Bb ══ -->
       <g class="key" data-key="GS"  transform="translate(57,278)"><circle r="14" fill="transparent"/><rect class="cap" x="-13" y="-8" width="26" height="16" rx="5"/><text class="kns" y="3.5">G♯</text></g>
       <g class="key" data-key="LCS" transform="translate(43,300)"><circle r="13" fill="transparent"/><rect class="cap" x="-12" y="-8" width="24" height="16" rx="5"/><text class="kns" y="3.5">C♯</text></g>
@@ -293,18 +316,20 @@ label.switch input{width:18px; height:18px; accent-color:var(--gold);}
       <g class="key" data-key="LBB" transform="translate(57,322)"><circle r="14" fill="transparent"/><rect class="cap" x="-13" y="-8" width="26" height="16" rx="5"/><text class="kns" y="3.5">B♭</text></g>
       <text x="30" y="344" fill="#8ea0c6" font-size="8.5">왼손 새끼</text>
       <!-- ══ 오른손 사이드키 E / C / Bb ══ -->
-      <g class="key" data-key="SE"  transform="translate(157,296)"><circle r="14" fill="transparent"/><rect class="cap" x="-8" y="-11" width="16" height="22" rx="6"/><text class="kns" y="3.5">E</text></g>
-      <g class="key" data-key="SC"  transform="translate(157,324)"><circle r="14" fill="transparent"/><rect class="cap" x="-8" y="-11" width="16" height="22" rx="6"/><text class="kns" y="3.5">C</text></g>
-      <g class="key" data-key="SBB" transform="translate(157,352)"><circle r="14" fill="transparent"/><rect class="cap" x="-8" y="-11" width="16" height="22" rx="6"/><text class="kns" y="3.5">B♭</text></g>
+      <g class="key" data-key="SE"  transform="translate(157,296)"><circle r="16" fill="transparent"/><rect class="cap" x="-8" y="-11" width="16" height="22" rx="6"/><text class="kns" y="3.5">E</text></g>
+      <g class="key" data-key="SC"  transform="translate(157,324)"><circle r="16" fill="transparent"/><rect class="cap" x="-8" y="-11" width="16" height="22" rx="6"/><text class="kns" y="3.5">C</text></g>
+      <g class="key" data-key="SBB" transform="translate(157,352)"><circle r="16" fill="transparent"/><rect class="cap" x="-8" y="-11" width="16" height="22" rx="6"/><text class="kns" y="3.5">B♭</text></g>
       <text x="146" y="374" fill="#8ea0c6" font-size="8.5">사이드</text>
       <!-- ══ 오른손 메인 4·5·6 ══ -->
-      <g class="key" data-key="R1" transform="translate(105,322)"><circle r="19" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">4</text></g>
-      <g class="key" data-key="R2" transform="translate(105,372)"><circle r="19" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">5</text></g>
-      <g class="key" data-key="R3" transform="translate(105,422)"><circle r="19" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">6</text></g>
+      <g class="key" data-key="R1" transform="translate(105,322)"><circle r="22" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">4</text></g>
+      <g class="key" data-key="R2" transform="translate(105,372)"><circle r="22" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">5</text></g>
+      <g class="key" data-key="R3" transform="translate(105,422)"><circle r="22" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">6</text></g>
       <!-- ══ 오른손 새끼: Eb / 낮은 C ══ -->
-      <g class="key" data-key="EB" transform="translate(160,400)"><circle r="13" fill="transparent"/><circle class="cap" r="10"/><text class="kns" y="3.5">E♭</text></g>
-      <g class="key" data-key="LC" transform="translate(165,430)"><circle r="14" fill="transparent"/><circle class="cap" r="11"/><text class="kns" y="3.5">도C</text></g>
-      <text x="118" y="468" fill="#8ea0c6" font-size="8.5">오른손 새끼</text>
+      <g class="key" data-key="EB" transform="translate(160,400)"><circle r="15" fill="transparent"/><circle class="cap" r="10"/><text class="kns" y="3.5">E♭</text></g>
+      <g class="key" data-key="LC" transform="translate(165,430)"><circle r="17" fill="transparent"/><circle class="cap" r="11"/><text class="kns" y="3.5">도C</text></g>
+      <!-- 1023: 금색 벨 위(명암 1.6:1)에 있던 것 → 벨 밖, E♭·도C 키 오른쪽 두 줄 -->
+      <text x="182" y="409" fill="#8ea0c6" font-size="8.5">오른손</text>
+      <text x="185" y="420" fill="#8ea0c6" font-size="8.5">새끼</text>
     </svg>
     <div id="nowNote">현재 운지: <b>—</b></div>
     <div id="saxCtrls">
