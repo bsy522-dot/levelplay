@@ -755,18 +755,23 @@ Object.assign(DRAW, {
 
   /** 힘 화살표: 물체에 여러 힘이 걸릴 때 (화살표 길이 = 힘의 크기) */
   forces({ obj = '📦', arrows = [], result }) {
-    const W = 360, H = 260, cx = 180, cy = 115;
-    const [cv, g] = canvas2(W, H);
+    // 가로 화살표는 최대 140px, 세로 화살표는 최대 90px. 위·아래 화살표 길이만큼 그림 높이를 늘려 이름표까지 안에 들어오게 한다
+    const W = 360, cx = 180;
     const mx = Math.max(1, ...arrows.map((a) => a.v || 1));
     const dir = { r: [1, 0], l: [-1, 0], u: [0, -1], d: [0, 1] };
+    const lenOf = (a) => ((a.d === 'u' || a.d === 'd') ? 20 + (70 * (a.v || 1)) / mx : 30 + (110 * (a.v || 1)) / mx);
+    const ext = (d) => Math.max(0, ...arrows.filter((a) => a.d === d).map((a) => lenOf(a) + 14));
+    const up = Math.max(ext('u'), 40), down = Math.max(ext('d'), 40);
+    const cy = 12 + up + 34, H = cy + 34 + down + 12 + (result ? 50 : 0);
+    const [cv, g] = canvas2(W, H);
     const draw = (t) => {
       g.clearRect(0, 0, W, H); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
       arrows.forEach((a, k) => {
-        const [dx, dy] = dir[a.d] || dir.r, len = 30 + (110 * (a.v || 1)) / mx, p = ease(clamp01(t * 1.4 - k * 0.15));
+        const [dx, dy] = dir[a.d] || dir.r, len = lenOf(a), p = ease(clamp01(t * 1.4 - k * 0.15));
         const sx = cx + dx * 34, sy = cy + dy * 34, ex = sx + dx * len * p, ey = sy + dy * len * p;
         if (p > 0.02) arrow(g, sx, sy, ex, ey, a.c || ['a', 'b', 'c', 'y'][k % 4], 6, 16);
-        // 이름표: 가로 화살표는 화살표 가운데 위, 세로 화살표는 끝 옆
-        if (a.t && p > 0.9) tx(g, a.t, dx ? (sx + ex) / 2 : ex + 12, dx ? ey - 20 : ey - dy * 4, { size: 14, c: a.c || ['a', 'b', 'c', '#8a6d00'][k % 4], align: dx ? 'center' : 'left' });
+        // 이름표: 가로 화살표는 화살표 가운데 위, 세로 화살표는 화살표 가운데 오른쪽
+        if (a.t && p > 0.9) tx(g, a.t, dx ? (sx + ex) / 2 : cx + 16, dx ? ey - 20 : (sy + ey) / 2, { size: 14, c: a.c || ['a', 'b', 'c', '#8a6d00'][k % 4], align: dx ? 'center' : 'left' });
       });
       tx(g, obj, cx, cy + 2, { size: 50 });
       if (result && t > 0.85) { rbox(g, 30, H - 50, 300, 38, 12, '#e9f7ee', null); tx(g, result, cx, H - 31, { size: 16, c: '#1f7a44' }); }
