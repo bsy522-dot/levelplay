@@ -804,6 +804,7 @@ function renderChart(){
   🔊 소리는 <b>악보에 적힌 음 그대로</b>예요. 진짜 알토 색소폰(E♭ 악기)은 악보보다 장6도 낮게 소리 나요(악보 '도' → 실제 E♭).<br>
   <label class="switch"><input type="checkbox" id="realPitch" ${store.realPitch?'checked':''}> 진짜 알토 소리 높이로 듣기</label></div>`;
   showChartNote('G4', false);   // 1023: 처음·탭 복귀 땐 '솔' 카드만 — 키를 켜거나 소리 내지 않음(묻지도 않은 소리 방지)
+  setChartHint('G4', NOTES['G4'].keys.slice());   // 1024(SR-05): 솔 키는 소리 없이 주황 힌트로 — 칩·카드와 같은 음, 하나씩 얹어 볼 수 있게
 }
 function showChartNote(id, applyKeys){
   const now = $('#chartNow');
