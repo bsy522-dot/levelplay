@@ -2430,7 +2430,8 @@ function renderSheet(now){
     const isCurrent=elapsed>=n.startMs&&elapsed<n.endMs;
     sctx.save();sctx.globalAlpha=isCurrent?1:.6;sctx.fillStyle=col;
     if(isCurrent){sctx.shadowColor=col;sctx.shadowBlur=8;}
-    const PH=Math.max(8,LS*1.6),noteY=staffY-LS*2+n.s*LS*1.1-PH/2+LS*.4;
+    /* 1024: 칸 위 = 높은 줄(미), 아래 = 낮은 줄(솔) — 음높이·타브 악보와 같은 방향(옛: 솔 줄이 맨 위) */
+    const PH=Math.max(8,LS*1.6),noteY=staffY-LS*2+(3-n.s)*LS*1.1-PH/2+LS*.4;
     rr(sctx,x,noteY,Math.max(noteH,PH*1.6),PH,PH/2);sctx.fill();
     sctx.fillStyle='#000';sctx.font='bold '+Math.round(PH*.8)+'px sans-serif';sctx.textAlign='center';sctx.textBaseline='middle';
     sctx.fillText(noteShort(n.note),x+Math.max(noteH,PH*1.6)/2,noteY+PH/2);sctx.restore();
