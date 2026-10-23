@@ -788,6 +788,7 @@ function showChartNote(id, applyKeys){
   $$('.note-chip').forEach(c=>c.classList.toggle('sel', c.dataset.note===id));
   if(applyKeys){
     setHints(null);   // 1024: 앞 음 버튼에서 남은 주황 힌트 지움
+    soundingId = null; // 1024: 같은 음 버튼을 연달아 눌러도 다시 소리 나게(예전엔 '이미 그 음'이라 두 번째는 조용했음)
     if(NOTES[id].open){ setLatched([]); playSax(NOTES[id].freq, 0.9); }
     else setLatched(NOTES[id].keys);
   }
