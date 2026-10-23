@@ -603,6 +603,14 @@ function refresh(){
 }
 function setLatched(keys){ latched.clear(); keys.forEach(k=>latched.add(k)); refresh(); }
 function clearLatched(){ latched.clear(); refresh(); }
+// 1023: 누른 키가 모두 목표 운지(또는 대체 운지) 안에 있으면 '아직 손가락을 놓는 중' — 틀렸다고 하지 않는다.
+// (아이는 손가락을 하나씩 천천히 놓는다. 목표에 없는 키를 하나라도 누르면 지금처럼 오답·미스)
+function placingToward(target){
+  const p = [...getPressed()];
+  if(!p.length) return false;
+  const n = NOTES[target];
+  return [n.keys, ...(n.alt||[])].some(ks=>p.every(k=>ks.includes(k)));
+}
 function setHints(keys){
   $$('.key').forEach(el=>el.classList.toggle('hint', !!keys && keys.includes(el.dataset.key)));
 }
@@ -756,6 +764,9 @@ function nextQuizQ(){
   let t;
   do { t = q.pool[Math.floor(Math.random()*q.pool.length)]; } while(t === q.target && q.pool.length > 1);
   q.target = t; q.lock = false;
+  // 1023: 앞 문제 운지를 아직 잡고 있으면 그 손으로는 새 문제를 판정하지 않음(예전엔 0.8초 뒤 저절로 오답).
+  // 손을 다 떼거나, 새 손가락을 더 놓거나, 정답이 되면 판정 시작 — 손을 안 떼고 바꾸는 사람도 막히지 않게.
+  q.waitKeys = heldKeys.size ? new Set(heldKeys) : null;
   clearLatched(); setHints(null);
   $('#quizView').innerHTML = `
   <div class="viewhead"><h2>🧩 운지 퀴즈</h2>
@@ -768,7 +779,13 @@ function nextQuizQ(){
 }
 function quizEval(id){
   const q = state.quiz;
+  if(q.waitKeys){
+    const p = [...getPressed()];
+    if(!p.length || p.some(k=>!q.waitKeys.has(k))) q.waitKeys = null;   // 다 뗐거나 새 손가락을 놓음
+    else if(id !== q.target) return;                                     // 앞 문제 운지(또는 그 일부)를 그대로 잡고 있음
+  }
   if(q.lock || !id) return;
+  if(id !== q.target && placingToward(q.target)) return;   // 목표 운지의 일부만 잡음 → 아직 놓는 중
   judgeT = setTimeout(()=>judgeQuiz(id), 800);   // 운지를 800ms 유지하면 판정
 }
 function judgeQuiz(id){
@@ -883,6 +900,7 @@ function songEval(id){
     sg.rearm = (id === curTarget());
     updateSongTarget();
   } else if(id){
+    if(placingToward(target)) return; // 1023: 목표 운지의 일부만 잡음 → 아직 놓는 중(미스 아님)
     missT = setTimeout(()=>{          // 잘못된 운지를 잠시 유지했을 때만 미스
       sg.miss++;
       const mc = $('#missCnt'); if(mc) mc.textContent = sg.miss;
