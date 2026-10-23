@@ -648,20 +648,22 @@ function setLatched(keys, show){ latched.clear(); keys.forEach(k=>latched.add(k)
 function clearLatched(){ latched.clear(); latchShow = false; refresh(); }
 // 1023: 누른 키가 모두 목표 운지(또는 대체 운지) 안에 있으면 '아직 손가락을 놓는 중' — 틀렸다고 하지 않는다.
 // (아이는 손가락을 하나씩 천천히 놓는다. 목표에 없는 키를 하나라도 누르면 지금처럼 오답·미스)
-function placingToward(target){
+// 누른 키를 모두 품는 목표 운지(기본 → 대체 순). 없으면 null — 빠진 키를 보여 줄 때 어느 운지인지 고르는 데도 씀
+function placingFamily(target){
   const p = [...getPressed()];
-  if(!p.length) return false;
+  if(!p.length) return null;
   const n = NOTES[target];
-  return [n.keys, ...(n.alt||[])].some(ks=>p.every(k=>ks.includes(k)));
+  return [n.keys, ...(n.alt||[])].find(ks=>p.every(k=>ks.includes(k))) || null;
 }
+function placingToward(target){ return !!placingFamily(target); }
 function setHints(keys){
   $$('.key').forEach(el=>el.classList.toggle('hint', !!keys && keys.includes(el.dataset.key)));
 }
 
 /* ── 판정 엔진: 운지를 잡으면 자동으로 소리·판정 (불기 버튼 없음) ── */
 let settleT=null, judgeT=null, missT=null, soundingId=null;
-// 1024: 목표 운지의 일부만 잡고 '멈춰' 있을 때 봐주는 시간. 손가락을 더 얹을 때마다 다시 잼(천천히 놓는 아이는 안 걸림).
-// 이 시간이 지나도 그대로면 빠진 키를 알려 준다(퀴즈=오답+정답 키 반짝, 곡=빠진 키 주황+미스 1회). 예전엔 끝없이 아무 반응이 없었다.
+// 1024: 목표 운지의 일부만 잡고 '멈춰' 있을 때 기다리는 시간. 손가락을 더 얹을 때마다 다시 잼.
+// 이 시간이 지나면 빠진 키를 주황으로 보여 주고 계속 기다린다(퀴즈·곡 모두 오답·미스 아님 — 느리지만 맞게 치는 아이를 벌하지 않게).
 const PLACE_GRACE = 1800;
 function onComboChange(){
   clearTimeout(settleT); clearTimeout(judgeT); clearTimeout(missT);
@@ -850,8 +852,16 @@ function quizEval(id){
     else if(id !== q.target) return;                                     // 앞 문제 운지(또는 그 일부)를 그대로 잡고 있음
   }
   if(q.lock) return;
-  // 목표 운지의 일부만 잡음 → 아직 놓는 중. 그대로 PLACE_GRACE 동안 멈춰 있으면 오답(정답 키 반짝) — 더 얹어 정답이 되면 그대로 정답
-  if(id !== q.target && placingToward(q.target)){ judgeT = setTimeout(()=>judgeQuiz(id), PLACE_GRACE); return; }
+  // 목표 운지의 일부만 잡음 → 아직 놓는 중. 그대로 PLACE_GRACE 동안 멈춰 있으면 빠진 키를 주황으로 보여 주고 계속 기다림(오답 아님)
+  if(id !== q.target && placingToward(q.target)){
+    judgeT = setTimeout(()=>{
+      if(state.quiz !== q || q.lock || q.phase !== 'play') return;
+      const fam = placingFamily(q.target); if(!fam) return;
+      setHints(fam);   // 잡은 키는 청록, 빠진 키만 주황
+      const fb = $('#quizFb'); if(fb){ fb.textContent = '🟠 주황 키도 같이 꾹!'; fb.className = 'feedback'; }
+    }, PLACE_GRACE);
+    return;
+  }
   if(!id) return;
   judgeT = setTimeout(()=>judgeQuiz(id), 800);   // 운지를 800ms 유지하면 판정
 }
@@ -968,13 +978,13 @@ function songEval(id){
     updateSongTarget();
   } else if(placingToward(target)){
     // 1023: 목표 운지의 일부만 잡음 → 아직 놓는 중(미스 아님).
-    // 1024: 그대로 PLACE_GRACE 동안 멈춰 있으면 빠진 키를 주황으로 보여 줌(힌트를 꺼 둬도) + 미스는 이 음에서 한 번만
+    // 1024: 그대로 PLACE_GRACE 동안 멈춰 있으면 빠진 키를 주황으로 보여 주고 안내만(힌트를 꺼 둬도). 미스는 세지 않음
     const at = sg.idx;
     missT = setTimeout(()=>{
       if(state.song !== sg || sg.phase !== 'play' || sg.idx !== at) return;
-      setHints(NOTES[target].keys);   // 누른 키는 청록, 빠진 키만 주황 — 다음 음으로 가면 힌트 설정대로 돌아감
-      if(sg.partMiss !== at){ sg.partMiss = at; countMiss(); }
-      toast('🟠 주황 키도 같이 꾹!');
+      const fam = placingFamily(target); if(!fam) return;
+      setHints(fam);   // 누른 키는 청록, 빠진 키만 주황 — 다음 음으로 가면 힌트 설정대로 돌아감
+      if(sg.partTip !== at){ sg.partTip = at; toast('🟠 주황 키도 같이 꾹!'); }   // 안내는 한 음에 한 번
     }, PLACE_GRACE);
   } else if(id){
     missT = setTimeout(()=>{          // 잘못된 운지를 잠시 유지했을 때만 미스
