@@ -168,9 +168,15 @@ label.switch input{width:22px; height:22px; flex:0 0 auto; accent-color:var(--go
 #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 #fx span{position:fixed; top:-34px; animation:fall 2.9s linear forwards; pointer-events:none; z-index:99;}
 @keyframes fall{to{transform:translateY(112vh) rotate(380deg); opacity:.6;}}
-/* 1024: 320~359px 폰 — 음 버튼 칸을 조금 좁혀 두 줄로(오른쪽 칸 안에 들어가게) */
-@media (max-width:359px){
-  .chip-grid{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));}
+/* 1024(SR-04): 세로로 긴 폰(폭 ≤520) — 색소폰 칸 57vw 로 넓혀 그림 위아래 빈칸을 키 크기로.
+   화면 높이가 모자라면(예 320×568) 그림이 들어갈 만큼만(180px = 머리글·여백·아래 '현재 운지/전체 해제/안내').
+   오른쪽 칸이 좁아지므로 음 버튼·곡 카드 칸을 좁히고 점수 줄은 줄바꿈 허용 */
+@media (max-width:520px) and (orientation:portrait){
+  #saxPanel{width:min(57vw, calc((100vh - 180px) * .375 + 4px));
+            width:min(57vw, calc((100dvh - 180px) * .375 + 4px));}
+  .chip-grid{grid-template-columns:repeat(auto-fill,minmax(56px,1fr));}
+  .song-grid{grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));}
+  .quizmeta{flex-wrap:wrap; gap:4px 12px;}
 }
 @media (max-width:520px){
   header h1{font-size:16px;} header h1 small{display:none;}
@@ -332,7 +338,7 @@ label.switch input{width:22px; height:22px; flex:0 0 auto; accent-color:var(--go
       <g class="key" data-key="R3" transform="translate(105,422)"><circle r="22" fill="transparent"/><circle class="cap" r="16"/><text class="kn" y="5">6</text></g>
       <!-- ══ 오른손 새끼: Eb / 낮은 C ══ -->
       <g class="key" data-key="EB" transform="translate(160,400)"><circle r="15" fill="transparent"/><circle class="cap" r="10"/><text class="kns" y="3.5">E♭</text></g>
-      <g class="key" data-key="LC" transform="translate(165,430)"><circle r="17" fill="transparent"/><circle class="cap" r="11"/><text class="kns" y="3.5">도C</text></g>
+      <g class="key" data-key="LC" transform="translate(165,430)"><circle r="19" fill="transparent"/><circle class="cap" r="11"/><text class="kns" y="3.5">도C</text></g>
       <!-- 1023: 금색 벨 위(명암 1.6:1)에 있던 것 → 벨 밖, E♭·도C 키 오른쪽 두 줄 -->
       <text x="182" y="409" fill="#8ea0c6" font-size="8.5">오른손</text>
       <text x="185" y="420" fill="#8ea0c6" font-size="8.5">새끼</text>
