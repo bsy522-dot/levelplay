@@ -621,10 +621,9 @@ let latchShow = false;
 // (섞이면 아이가 잡은 손가락과 다른 '정답' 소리가 계속 났다)
 function getPressed(){ return new Set([...heldKeys, ...(latchShow ? [] : latched)]); }
 function sig(arr){ return [...arr].sort().join('+'); }
-function matchNote(){
-  const p = getPressed();
-  if(!p.size) return null;
-  const s = sig([...p]);
+function noteOf(keys){
+  if(!keys.length) return null;
+  const s = sig(keys);
   for(const id in NOTES){
     const n = NOTES[id];
     if(n.keys.length && sig(n.keys) === s) return id;
@@ -632,6 +631,7 @@ function matchNote(){
   }
   return null;
 }
+function matchNote(){ return noteOf([...getPressed()]); }
 function updateNowNote(){
   const id = matchNote();
   $('#nowNote').innerHTML = '현재 운지: <b>' + (id ? `${NOTES[id].ko} (${NOTES[id].en})` : '—') + '</b>';
@@ -687,21 +687,38 @@ function evaluateCombo(){
   else if(!id){ stopTone(); }
   if(state.mode==='song' && state.song && state.song.phase==='play') songEval(id);
   else if(state.mode==='quiz' && state.quiz && state.quiz.phase==='play') quizEval(id);
-  else if(state.mode==='chart' && id) showChartNote(id, false);
+  else if(state.mode==='chart') chartEval(id);
+}
+// 1024(SR-03): 운지표 주황 힌트(chartHint)가 있을 때 — 잡은 키가 모두 힌트 안이면 카드·칩은 힌트 음 그대로(하나씩 얹는 중).
+// 힌트 음을 완성했다가 다 떼거나, 힌트 밖 키를 누르면 힌트를 지우고 평소처럼 카드가 잡은 음을 따라감.
+let chartHint = null;   // {id, keys, done}
+function setChartHint(id, keys){ chartHint = keys ? {id, keys, done:false} : null; setHints(keys || null); }
+function chartEval(id){
+  const h = chartHint;
+  if(h){
+    const p = [...getPressed()];
+    if(p.every(k=>h.keys.includes(k))){
+      if(id && id === h.id) h.done = true;
+      else if(!p.length && h.done) setChartHint(null);
+      return;
+    }
+    setChartHint(null);
+  }
+  if(id) showChartNote(id, false);
 }
 // 손을 떼면 지속음 정지 — 1023: 음 버튼으로 켠 키(latched)가 남아 있어도 손가락이 하나도 없으면 무조건 멈춘다
 // (예전엔 latched 가 있으면 안 멈춰서 '솔'이 끝없이 났다)
 // 1024(SR-01): 멈춘 뒤 soundingId 를 '지금 켜져 있는 키의 음'으로 둬서, 음 버튼 키가 남아 있어도 뗀 직후 그 음을 한 번 더 울리지 않음
 // (키보드 '음 버튼 + 8' 에서 8 을 떼면 버튼 음이 0.9초 더 나던 것)
 function releaseCheck(){ if(!heldKeys.size && tone) { stopTone(); soundingId = matchNote(); } }
-// 소리·음 버튼 고정 키를 모두 끈다(탭 전환·뒤로가기·화면 숨김). 손가락으로 잡고 있는 키는 그대로 — 실제로 누르고 있으니까.
 // 음 버튼 등으로 켜 보여 주던 키(latched)를 비움(손가락이 닿을 때).
 // 1024: 운지표 탭에선 비운 키를 주황 힌트로 남겨 아이가 하나씩 얹을 수 있게 한다(다른 음 버튼·전체 해제·탭 이동 때 지워짐).
 function dropShownKeys(){
   if(!latched.size) return;
-  if(state.mode==='chart') setHints([...latched]);
+  if(state.mode==='chart') setChartHint(noteOf([...latched]), [...latched]);
   latched.clear(); latchShow = false;
 }
+// 소리·음 버튼 고정 키를 모두 끈다(탭 전환·뒤로가기·화면 숨김). 손가락으로 잡고 있는 키는 그대로 — 실제로 누르고 있으니까.
 function silenceAll(){
   clearTimeout(judgeT); clearTimeout(missT);
   latched.clear(); latchShow = false; stopTone(); soundingId = null;
@@ -730,7 +747,7 @@ $$('.key').forEach(el=>{
   el.addEventListener('pointerup', up);
   el.addEventListener('pointercancel', up);
 });
-$('#clearBtn').addEventListener('click', ()=>{ clearLatched(); if(state.mode==='chart') setHints(null); });   // 곡 힌트는 그대로
+$('#clearBtn').addEventListener('click', ()=>{ clearLatched(); if(state.mode==='chart') setChartHint(null); });   // 곡 힌트는 그대로
 
 const KBD = {'1':'L1','2':'L2','3':'L3','4':'R1','5':'R2','6':'R3','7':'LC','8':'OCT','9':'EB',
              'q':'PD','w':'PEB','e':'PF','a':'GS','s':'LCS','d':'LB','f':'LBB','z':'SE','x':'SC','c':'SBB','b':'BIS'};
@@ -793,7 +810,7 @@ function showChartNote(id, applyKeys){
   if(now) now.innerHTML = noteCard(id);
   $$('.note-chip').forEach(c=>c.classList.toggle('sel', c.dataset.note===id));
   if(applyKeys){
-    setHints(null);   // 1024: 앞 음 버튼에서 남은 주황 힌트 지움
+    setChartHint(null);   // 1024: 앞 음 버튼에서 남은 주황 힌트 지움
     soundingId = null; // 1024: 같은 음 버튼을 연달아 눌러도 다시 소리 나게(예전엔 '이미 그 음'이라 두 번째는 조용했음)
     if(NOTES[id].open){ setLatched([]); playSax(NOTES[id].freq, 0.9); }
     else setLatched(NOTES[id].keys);
@@ -1033,7 +1050,7 @@ function completeSong(){
 /* ───────────────── 모드 전환 / 이벤트 ───────────────── */
 function switchMode(m){
   state.mode = m;
-  stopMelody(); clearQuizTimer(); state.quiz = null; state.song = null; setHints(null);
+  stopMelody(); clearQuizTimer(); state.quiz = null; state.song = null; setHints(null); chartHint = null;
   silenceAll();   // 1023: 음 버튼 고정 키·소리를 다음 탭으로 끌고 가지 않음
   $$('.tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===m));
   $('#chartView').hidden = m!=='chart';
