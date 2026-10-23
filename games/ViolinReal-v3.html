@@ -196,7 +196,8 @@ body:not(.showInfo) .info{display:none;}
    '그냥 할래요'를 누르면 이번 방문 동안 안 띄움(body.rotOk). 태블릿 가로(높이 800)는 안 걸림 */
 #rotOv{display:none;position:fixed;inset:0;z-index:99995;background:rgba(10,10,30,.97);
   flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;text-align:center;}
-@media (orientation:landscape) and (max-height:500px){body:not(.rotOk) #rotOv{display:flex;}}
+/* 1024: 게임(리듬·곡 연주·준비 세기)이 도는 중엔 안 띄움(body.inGame, frame 이 맞춤) — 덮개 뒤에서 게임이 계속 흘러 놓침이 쌓이던 문제 */
+@media (orientation:landscape) and (max-height:500px){body:not(.rotOk):not(.inGame) #rotOv{display:flex;}}
 .rotIcon{font-size:56px;line-height:1;animation:rotHint 2.4s ease-in-out infinite;}
 @keyframes rotHint{0%,25%{transform:rotate(-90deg);}55%,100%{transform:rotate(0deg);}}
 .rotTxt{font-size:26px;color:#FFD700;font-weight:900;}
@@ -2664,6 +2665,7 @@ function frame(ts){
   const ndV=((bow.dn||(inputMode==='nobow'&&actS>=0))&&curN)?curN:'';
   if(ndV!==ndShown){ndShown=ndV;document.getElementById('nd').innerHTML=ndV?noteHTML(ndV):'';}
   syncMore();
+  document.body.classList.toggle('inGame',!!(cdIv||(rhythmState&&rhythmState.active)||(performState&&performState.active))); /* 가로 안내 덮개 가림 */
   document.getElementById('freeHint').style.display=(audioOn&&currentMode==='free'&&!freeHintDone)?'block':'none';
 
   if(currentMode==='rhythm'){updateRhythm(ts);renderRhythm(ts);}
