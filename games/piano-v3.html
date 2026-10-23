@@ -224,9 +224,12 @@ body.lscape #kb-zoom button{width:28px;height:28px;font-size:18px;}
 .free-note small { font-size:.3em; font-weight:800; opacity:.8; margin-left:4px; }
 /* 1023 P-12: 첫 화면 '도' + ⬇ — 도4 위(가로 위치는 JS placeFreeCue 가 건반에 맞춤). 7건반 .k7k.target::before 와 같은 색·흔들림 */
 .free-info { position:relative; }
-.free-cue { position:absolute; bottom:4px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none; }
+/* 1024 PR-02: 화살표 끝이 미니맵이 아니라 건반 윗변(도4)에 닿게 — 화면 기준 자리(JS 가 건반 위치로 top·left 를 정함).
+   첫 누름 전엔 미니맵 띠만 숨김(크기 단추·↻ 는 그대로). 동그라미를 눌러도 도4 소리가 난다 */
+.free-cue { position:fixed; left:50%; top:0; z-index:5; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:2px; pointer-events:none; }
 .free-cue[hidden] { display:none; }
-.fc-do { width:min(30vw,20vh,150px); height:min(30vw,20vh,150px); border-radius:50%; background:#f87171; color:#111827; display:flex; align-items:center; justify-content:center; font-size:min(15vw,10vh,76px); font-weight:900; box-shadow:0 0 0 6px rgba(248,113,113,.18); }
+body.cue-on #panel-free.active ~ #kb-bar #kb-strip { visibility:hidden; }
+.fc-do { width:min(30vw,20vh,150px); height:min(30vw,20vh,150px); border-radius:50%; background:#f87171; color:#111827; display:flex; align-items:center; justify-content:center; font-size:min(15vw,10vh,76px); font-weight:900; box-shadow:0 0 0 6px rgba(248,113,113,.18); pointer-events:auto; cursor:pointer; touch-action:none; }
 .fc-arrow { font-size:clamp(34px,8vw,58px); line-height:1; color:#f87171; filter:drop-shadow(0 2px 2px rgba(0,0,0,.5)); animation:fcbob 1s ease-in-out infinite; }
 @keyframes fcbob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(10px); } }
 #panel-free.active ~ #piano-wrap .key-white.cue { background:linear-gradient(180deg,#fff 0%,#fecaca 55%,#f87171 100%); box-shadow:0 0 14px #f87171; animation:pulse-key 1s infinite; }
@@ -1392,14 +1395,22 @@ function placeFreeCue() {
   const cue = document.getElementById('free-cue'), wrap = document.getElementById('piano-wrap');
   const k = document.querySelector('#piano [data-midi="60"]');
   if (!cue || !wrap) return;
+  document.body.classList.toggle('cue-on', freeCueOn); // 1024 PR-02: 첫 누름 전엔 미니맵 띠 숨김(CSS)
   if (!freeCueOn) { cue.hidden = true; if (k) k.classList.remove('cue'); return; }
   if (!k) return;
   k.classList.add('cue');
   cue.firstElementChild.textContent = useKoreanNames() ? KOREAN_NOTE_MAP.C : 'C';
+  // 1024 PR-02: 화면 기준 자리 — 화살표 끝이 건반 윗변(도4)에 닿게
+  const wr = wrap.getBoundingClientRect();
   const x = k.offsetLeft + k.offsetWidth / 2 - wrap.scrollLeft, W = wrap.clientWidth, half = (cue.offsetWidth || 120) / 2 + 4;
-  cue.style.left = Math.max(half, Math.min(W - half, x)) + 'px';
+  cue.style.left = (wr.left + Math.max(half, Math.min(W - half, x))) + 'px';
+  cue.style.top = Math.round(wr.top - cue.offsetHeight) + 'px';
   cue.style.visibility = (x < 0 || x > W) ? 'hidden' : ''; // 도4 가 화면 밖이면 엉뚱한 곳을 가리키지 않게
 }
+// 1024 PR-02: 큰 '도' 동그라미를 눌러도 도4 소리(첫 누름 = 안내 사라짐). 예전엔 눌러도 아무 일 없었다
+document.querySelector('#free-cue .fc-do').addEventListener('pointerdown', e => {
+  e.preventDefault(); playNote(60); setTimeout(() => stopNote(60), 450);
+});
 // 연주 탭에서만 (따라치기에서 건반이 따라 움직일 때마다 재면 느려진다 — 탭을 바꾸면 buildPiano 가 다시 맞춘다)
 document.getElementById('piano-wrap').addEventListener('scroll', () => {
   if (freeCueOn && document.getElementById('panel-free').classList.contains('active')) placeFreeCue();
