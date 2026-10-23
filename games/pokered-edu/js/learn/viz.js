@@ -544,7 +544,7 @@ Object.assign(DRAW, {
 
   /** 지레(시소): 받침점에서 몇 칸 떨어졌는지 × 무게 = 돌리는 힘. 양쪽이 같으면 수평, 다르면 무거운 쪽이 내려간다 */
   lever({ L = [], R = [], n = 4, say }) {
-    const W = 360, H = 250, cx = 180, cy = 150, half = 150;
+    const W = 360, H = 285, cx = 180, cy = 185, half = 150; // 위에 쌓은 추·이름표가 안내 글 상자에 안 가리게
     const [cv, g] = canvas2(W, H);
     const tq = (side) => side.reduce((a, o) => a + (o.w || 1) * (o.at || 1), 0);
     const tl = tq(L), tr = tq(R);
@@ -576,6 +576,33 @@ Object.assign(DRAW, {
       }
     };
     return animate(cv, 2000, draw);
+  },
+
+  /** 두 자리 × 두 자리 넓이 그림: 두 수를 10묶음과 낱개로 쪼개 네 칸을 곱한다 (구구단과 0 붙이기만으로) */
+  area4({ a, b }) {
+    const W = 360, H = 262;
+    const [cv, g] = canvas2(W, H);
+    const ta = Math.floor(a / 10) * 10, oa = a % 10, tb = Math.floor(b / 10) * 10, ob = b % 10;
+    const x0 = 52, y0 = 40, w = 290, h = 168;
+    // 낱개 칸도 글자가 들어가게 최소 폭 80·높이 52 (실제 비율보다 조금 크게)
+    const cw = oa ? [Math.min(Math.max(w * ta / a, 150), w - 80), 0] : [w, 0]; cw[1] = w - cw[0];
+    const rh = ob ? [Math.min(Math.max(h * tb / b, 90), h - 52), 0] : [h, 0]; rh[1] = h - rh[0];
+    const cols = [[ta, cw[0]], [oa, cw[1]]].filter(([v]) => v), rows = [[tb, rh[0]], [ob, rh[1]]].filter(([v]) => v);
+    const cells = [];
+    let yy = y0;
+    rows.forEach(([rv, rhh], ri) => { let xx = x0; cols.forEach(([cv2, cww], ci) => { cells.push({ x: xx, y: yy, w: cww, h: rhh, v: cv2 * rv, s: `${cv2} × ${rv}`, k: ri * 2 + ci }); xx += cww; }); yy += rhh; });
+    const draw = (t) => {
+      g.clearRect(0, 0, W, H); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+      let xx = x0; cols.forEach(([v, cww]) => { tx(g, String(v), xx + cww / 2, y0 - 14, { size: 15, c: C.b }); xx += cww; });
+      yy = y0; rows.forEach(([v, rhh]) => { tx(g, String(v), x0 - 16, yy + rhh / 2, { size: 15, c: C.a }); yy += rhh; });
+      cells.forEach((c, i) => {
+        const on = t * (cells.length + 0.5) > i;
+        rbox(g, c.x, c.y, c.w, c.h, 0, on ? ['#ffd9cf', '#dbe6ff', '#fff4d6', '#dcf7e5'][c.k] : '#f7f7f7', C.ink);
+        if (on) { const big = c.w > 75 && c.h > 46; tx(g, c.s, c.x + c.w / 2, c.y + c.h / 2 - (big ? 9 : 0), { size: big ? 14 : 11, c: '#5a6478' }); if (big) tx(g, `= ${c.v}`, c.x + c.w / 2, c.y + c.h / 2 + 11, { size: 15 }); else tx(g, String(c.v), c.x + c.w / 2, c.y + c.h / 2 + 12, { size: 12 }); }
+      });
+      if (t > 0.85) tx(g, `${cells.map((c) => c.v).join(' + ')} = ${a * b}`, W / 2, H - 22, { size: 17, c: C.a });
+    };
+    return animate(cv, 600 * cells.length + 600, draw);
   },
 
   /** 수직선 위에서 뛰기: 더하면 오른쪽, 빼면(음수를 더하면) 왼쪽 */
@@ -897,7 +924,7 @@ export const VIZ_NEED = {
   frac: ['n', 'd'], fraccmp: ['a', 'b'], fracadd: ['a', 'b', 'd'], fracadd2: ['a', 'b'], decimal: ['o', 'k'], angle: ['deg'], tri: ['a', 'b'],
   bars: ['vals', 'avg'], seq: ['items'], compare: ['items'],
   plot: [], turn: [], balance: ['L', 'R'], hops: ['from', 'to', 'start', 'hops'], icons: ['rows'], flow: ['items'], table: ['rows'],
-  chart: ['bars'], wave: [], lever: ['L', 'R'], atom: ['p', 'shells'], forces: ['arrows'], timeline: ['ev'], vs: ['L', 'R'], scene: ['items'],
+  chart: ['bars'], wave: [], lever: ['L', 'R'], area4: ['a', 'b'], atom: ['p', 'shells'], forces: ['arrows'], timeline: ['ev'], vs: ['L', 'R'], scene: ['items'],
 };
 export function vizProblems(spec) {
   if (!spec) return [];

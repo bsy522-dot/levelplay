@@ -592,18 +592,22 @@ export const MATH = [
   } },
   { id: 'm_mul_2d2d', g: 4, t: '(두 자리) × (두 자리)', gen: (st) => {
     const a = rand(12, 39), b = rand(12, 29), p = a * b;
-    const ta = tens(a), oa = ones(a), t10 = ta * 10;
+    const ta = tens(a), oa = ones(a), t10 = ta * 10, tb = tens(b) * 10, ob = ones(b);
+    /* 두 수를 모두 10묶음과 낱개로 쪼개 네 칸을 곱한다: 칸마다 구구단과 0 붙이기만으로 (2026-10-24 3차 검토: '30 × 12'는 구구단 밖) */
+    const parts = [[t10, tb], [t10, ob], [oa, tb], [oa, ob]].filter(([x, y]) => x && y);
+    const splits = [oa ? `${a} = ${t10} + ${oa}` : null, ob ? `${b} = ${tb} + ${ob}` : null].filter(Boolean); // 낱개가 0이면 쪼갤 필요 없음
+    const partStr = parts.map(([x, y]) => `${x} × ${y} = ${x * y}`), sumStr = `${parts.map(([x, y]) => x * y).join(' + ')} = ${p}`;
+    const cross = [[t10, ob], [oa, tb]].filter(([x, y]) => x && y).map(([x, y]) => `${x} × ${y}`).join(', ');
     return mc(p, [
       { v: a * ones(b) + a * tens(b), why: `${b}의 십의 자리 ${tens(b)}는 사실 ${tens(b) * 10}이야. ${a} × ${tens(b)}가 아니라 ${a} × ${tens(b) * 10} = ${a * tens(b) * 10}을 더해야 해.` },
-      { v: tens(a) * tens(b) * 100 + ones(a) * ones(b), why: `십의 자리끼리, 일의 자리끼리만 곱했어. 엇갈린 곱(${tens(a) * 10} × ${ones(b)}, ${ones(a)} × ${tens(b) * 10})도 꼭 더해야 해.` },
+      { v: tens(a) * tens(b) * 100 + ones(a) * ones(b), why: `십의 자리끼리, 일의 자리끼리만 곱했어. 엇갈린 곱(${cross})도 꼭 더해야 해.` },
       { v: p + 10, why: `받아올림을 한 번 더 해서 10이 커졌어. 나눠서 곱한 두 수를 천천히 다시 더해 보자.` },
-    ], oa ? `${a}를 ${t10}과 ${oa}로 나눠서 각각 ${b}를 곱해. ${t10} × ${b} = ${t10 * b}, ${oa} × ${b} = ${oa * b}. 둘을 더하면 ${p}!`
-      : `${a}는 10이 ${ta}개야. ${ta} × ${b} = ${ta * b}. 여기에 10을 곱하면 ${p}!`, {
+    ], `${splits.length ? `${splits.join(', ')}로 쪼개 넓이 그림의 칸마다 곱해: ` : '10묶음끼리 곱해: '}${partStr.join(', ')}.${parts.length > 1 ? ` 모두 더하면 ${sumStr}!` : ''}`, {
       q: st ? `버스 한 대에 ${a}명씩 타고, ${b}대가 회색시티로 갔어. 모두 몇 명일까?` : `${a} × ${b} = ?`,
       pic: st ? { type: 'icons', rows: [{ e: '🚌', n: b, t: `한 대에 ${a}명씩` }], total: `${b}대면 모두 몇 명?` } : null,
-      steps: oa ? [`${a} = ${t10} + ${oa}`, `${t10} × ${b} = ${t10 * b}`, `${oa} × ${b} = ${oa * b}`, `${t10 * b} + ${oa * b} = ${p}`] : [`${ta} × ${b} = ${ta * b}`, `${ta * b} × 10 = ${p}`],
-      need: '학교 전체 학생 수나 버스 여러 대의 승객처럼 큰 수끼리 곱할 일이 생겨. 수를 쪼개 곱하면 구구단으로 풀 수 있어.',
-      viz: { type: 'area', a, b } });
+      steps: [...(splits.length ? [splits.join(', ')] : []), ...partStr, ...(parts.length > 1 ? [sumStr] : [])],
+      need: '학교 전체 학생 수나 버스 여러 대의 승객처럼 큰 수끼리 곱할 일이 생겨. 10묶음과 낱개로 쪼개면 구구단과 0 붙이기만으로 풀 수 있어.',
+      viz: { type: 'area4', a, b } });
   } },
   { id: 'm_div_rem', g: 4, t: '나머지가 있는 나눗셈', gen: (st) => {
     const b = rand(3, 8), q = rand(3, 9), r = rand(1, b - 1), a = b * q + r;
