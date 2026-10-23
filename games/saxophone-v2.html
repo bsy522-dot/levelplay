@@ -103,7 +103,9 @@ body.sounding #nowNote b{text-shadow:0 0 10px rgba(246,196,83,.8);}
 .note-chip.sel{background:var(--gold); border-color:var(--gold);}
 .note-chip.sel b, .note-chip.sel span{color:#3b2a03;}
 .notecard{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:4px;}
-.staffwrap{flex:0 0 auto; background:#f8fafc; border-radius:12px; padding:4px 6px;}
+.staffwrap{flex:0 0 auto; background:#f8fafc; border-radius:12px; padding:4px 6px; max-width:100%;}
+/* 1024: 좁은 폰(320~360px)에서 악보 그림(144px 고정)이 카드 밖으로 삐져나오던 것 — 카드 폭에 맞게 줄어들게 */
+.staffwrap svg{max-width:100%; height:auto;}
 .noteinfo{min-width:0;}
 .notename{font-size:24px; font-weight:800; color:var(--gold);}
 .notename small{font-size:14px; color:var(--sub); font-weight:600; margin-left:4px;}
@@ -166,6 +168,10 @@ label.switch input{width:22px; height:22px; flex:0 0 auto; accent-color:var(--go
 #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 #fx span{position:fixed; top:-34px; animation:fall 2.9s linear forwards; pointer-events:none; z-index:99;}
 @keyframes fall{to{transform:translateY(112vh) rotate(380deg); opacity:.6;}}
+/* 1024: 320~359px 폰 — 음 버튼 칸을 조금 좁혀 두 줄로(오른쪽 칸 안에 들어가게) */
+@media (max-width:359px){
+  .chip-grid{grid-template-columns:repeat(auto-fill,minmax(66px,1fr));}
+}
 @media (max-width:520px){
   header h1{font-size:16px;} header h1 small{display:none;}
   .tab{padding:7px 10px; font-size:13px;}
