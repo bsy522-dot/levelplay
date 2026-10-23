@@ -19,6 +19,8 @@ async function tapThrough(until, max = 200, opts = {}) {
     if (await until()) return true;
     if (await vis('.quiz .ans button:not([disabled])')) { const c = await page.evaluate(() => window.__peQ.c); await tap(`.quiz .ans button:nth-child(${c + 1})`); continue; }
     if (await vis('.quiz .go')) { await tap('.quiz .go'); continue; }
+    // 문제 창이 떠 있으면 뒤(대화·전투 메시지)를 누르지 않고 기다린다 — 정답 뒤 '공격!' 단추는 0.35초 뒤에 나오고, 창이 커서 뒤를 가린다 (2026-10-24)
+    if (await vis('.quiz')) { await page.waitForTimeout(120); continue; }
     if (await vis('.dialog')) { await tap('.dialog'); continue; }
     if (await vis('.moves')) { await tap('.moves button:nth-child(1)'); continue; }
     if (await vis('.bbox .cmds:not(.hidden)') && opts.fight) { await tap('.bbox .cmds button:nth-child(1)'); continue; }
