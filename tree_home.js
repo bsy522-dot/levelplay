@@ -46,6 +46,7 @@
     u = String(u || '').replace(/[\u{1F000}-\u{1FFFF}☀-➿️]/gu, '').trim();
     u = u.replace(/\s*\((만화·소설|고조선[^)]*)\)?$/, '').trim();
     u = u.replace(/^(수학|과학|한국사|음악|상식|영어|국어|세계사|체육|미술|코딩|지리)-/, '');
+    u = u.replace(/^[①-⑳]\s*/, '');   /* '① 수와 연산' → '수와 연산' (나이 거르기로 ③이 빠지면 번호가 듬성듬성) */
     return NICE[u] || u || '모음';
   }
   var NICE = { '덧뺄셈': '덧셈·뺄셈', '곱나눗': '곱셈·나눗셈', '분수소수': '분수·소수', '수학': '수학 상식', '과학': '과학 상식', '과학상식': '과학 상식', '역사': '역사 상식', '음악': '음악 상식' };
@@ -105,7 +106,7 @@
   }
   var DATA = [], DATA_STAMP = '', REF = {};   /* REF[i] = 그릴 때의 {kind,t} — 누를 때 같은 항목인지 확인 */
   function data() {
-    var X = window.lpIndex ? window.lpIndex() : null, st = X ? String(X.items.length) : '';
+    var X = window.lpIndex ? window.lpIndex() : null, st = X ? String(X.items.length) + '|' + tierNow() : '';
     if (!DATA.length || st !== DATA_STAMP) { REF = {}; DATA = tree(); DATA_STAMP = st; }
     return DATA;
   }
@@ -316,7 +317,7 @@
     '.lt-ib,.lt-back{width:44px;height:44px;border-radius:12px;border:1px solid var(--c2);background:var(--c1);color:var(--tx);display:grid;place-items:center;font-size:20px;cursor:pointer;flex:none}',
     '.lt-crumb{display:flex;align-items:center;gap:6px;min-width:0;flex:1;font-size:16px;color:var(--t2);white-space:nowrap;overflow:hidden}',
     '.lt-crumb b{color:var(--tx);overflow:hidden;text-overflow:ellipsis}',
-    '.lt-crumb a{color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;min-height:44px;padding:0 6px}',
+    '.lt-crumb a{color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 6px}',
     '.lt-sep{opacity:.5}',
     '.lt-q{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--c2);background:var(--c1);color:var(--tx);padding:0 14px;font:inherit;font-size:16px}',
     '.lt-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(var(--min,160px),1fr))}',
@@ -373,6 +374,8 @@
     t.innerHTML = '<div class="lt-bar" id="lpTreeBar"></div><div class="lt-body" id="lpTreeBody"></div>';
     p0.insertBefore(t, p0.firstChild);
     mountMe(); hookBack(); render();
+    var prevOnGo = window.lpOnGo;   /* 홈으로 돌아올 때(나이를 바꾸고 온 경우 등) 다시 그린다 */
+    window.lpOnGo = function (i) { if (typeof prevOnGo === 'function') { try { prevOnGo(i); } catch (e) {} } if (i === 0) render(); };
     try { fetch('data/comic_thumbs.json').then(function (r) { return r.json(); }).then(function (j) { TH = j || {}; render(); }).catch(function () {}); } catch (e) {}
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
