@@ -45,12 +45,29 @@
   function cleanUnit(u) {
     u = String(u || '').replace(/[\u{1F000}-\u{1FFFF}☀-➿️]/gu, '').trim();
     u = u.replace(/\s*\((만화·소설|고조선[^)]*)\)?$/, '').trim();
-    u = u.replace(/^(수학|과학|한국사|음악|상식|영어|국어|세계사|체육|미술|코딩)-/, '');
+    u = u.replace(/^(수학|과학|한국사|음악|상식|영어|국어|세계사|체육|미술|코딩|지리)-/, '');
     return NICE[u] || u || '모음';
   }
-  var NICE = { '덧뺄셈': '덧셈·뺄셈', '곱나눗': '곱셈·나눗셈', '분수소수': '분수·소수', '수학': '수학 상식', '과학': '과학 상식', '역사': '역사 상식', '음악': '음악 상식' };
+  var NICE = { '덧뺄셈': '덧셈·뺄셈', '곱나눗': '곱셈·나눗셈', '분수소수': '분수·소수', '수학': '수학 상식', '과학': '과학 상식', '과학상식': '과학 상식', '역사': '역사 상식', '음악': '음악 상식' };
   /* 게임은 앱의 표시 이름으로('노래방 v4 ✨' → '노래방') */
   function title(it) { if (it.kind === 'game' && typeof window.gameVN === 'function') { try { return window.gameVN(it.g || it.t); } catch (e) {} } return it.t; }
+
+  /* ---- 나이에 맞는가: 옛 학습·퀴즈 화면과 같은 규칙 ---- */
+  function tierNow() { try { return typeof lpTier === 'function' ? lpTier() : 'elementary'; } catch (e) { return 'elementary'; } }
+  function fitsTier(it) {
+    var t = tierNow();
+    if (it.kind === 'quiz' && it.q) {   /* T-01: 유아 전용 문항·어려운 주제(lpTierQuizPool 과 같은 규칙, 한 문제씩) */
+      if (t !== 'toddler' && it.q.tier === 'toddler') return false;
+      try { if (t === 'elementary' && typeof LP_HARD_TOPICS !== 'undefined' && LP_HARD_TOPICS.test((it.q.q || '') + ' ' + (it.q.cat || ''))) return false; } catch (e) {}
+      return true;
+    }
+    if (it.ck && typeof it.ui === 'number' && typeof lpLessonFitsTier === 'function') {   /* T-04: 초등에 이차함수 등 */
+      try { var L = CURRICULUM[it.ck].units[it.ui].lessons[it.li]; if (L && !lpLessonFitsTier(L)) return false; } catch (e) {}
+    }
+    /* T-05: 초등엔 제목 앞부분('|'·'(' 앞)에 한글이 없는 영상(영어 강의에 한글 꼬리표만 붙은 것) 빼기 */
+    if (it.kind === 'video' && (t === 'elementary' || t === 'toddler') && !/[가-힣]/.test(String(it.t || '').split(/[|(]/)[0])) return false;
+    return true;
+  }
 
   /* ---- 색인 → 과목 › 종류 › 단원 › 항목 ---- */
   function tree() {
@@ -60,6 +77,8 @@
     var by = {};
     X.items.forEach(function (it) {
       if (it.dup || !KB[it.kind]) return;
+      if (it.tile) return;   /* T-02: 커리큘럼 마스터 주제는 늦게 실리고 일부는 안 열린다 → 트리에선 뺀다 */
+      if (!fitsTier(it)) return;
       /* 나이 거르개는 제목용(한글 없는 제목 숨김) — 퀴즈 문제('3 × 7 = ?')엔 쓰지 않는다 */
       if (fits && it.kind !== 'quiz') { try { if (!fits(String(it.t || ''), String(it.d || ''))) return; } catch (e) {} }
       var subs = [it.s].concat(MAIN_ONLY[it.kind] ? [] : (it.also || []));
@@ -67,6 +86,7 @@
         var a = by[s] = by[s] || {}, k = a[it.kind] = a[it.kind] || { n: 0, units: {}, uo: [] };
         var uname = MAIN_ONLY[it.kind] ? '모음' : cleanUnit(it.unit || it.d || '');   /* 게임·실험의 d 는 설명글 → 한 묶음 */
         if (!k.units[uname]) { k.units[uname] = []; k.uo.push(uname); }
+        REF[it.i] = { kind: it.kind, t: it.t };
         k.units[uname].push(it); k.n++;
       });
     });
@@ -83,10 +103,10 @@
       return { k: k, nm: s.nm, ac: s.ac, sym: s.sym, total: total, kinds: kinds };
     });
   }
-  var DATA = [], DATA_STAMP = '';
+  var DATA = [], DATA_STAMP = '', REF = {};   /* REF[i] = 그릴 때의 {kind,t} — 누를 때 같은 항목인지 확인 */
   function data() {
     var X = window.lpIndex ? window.lpIndex() : null, st = X ? String(X.items.length) : '';
-    if (!DATA.length || st !== DATA_STAMP) { DATA = tree(); DATA_STAMP = st; }
+    if (!DATA.length || st !== DATA_STAMP) { REF = {}; DATA = tree(); DATA_STAMP = st; }
     return DATA;
   }
   function S(k) { var d = data(); for (var i = 0; i < d.length; i++) if (d[i].k === k) return d[i]; return null; }
@@ -101,7 +121,9 @@
     }
     return '';
   }
-  function img(src, cls) { return src ? '<img class="' + (cls || '') + '" src="' + esc(src) + '" loading="lazy" alt="" onerror="this.remove()">' : ''; }
+  function img(src, cls) { return src ? '<img class="' + (cls || '') + '" src="' + esc(src) + '" loading="lazy" alt="" onerror="lpTreeImgErr(this)">' : ''; }
+  /* 그림을 못 읽으면(매스 배틀러 썸네일 없음) 같은 자리에 색 칸만 남긴다 */
+  window.lpTreeImgErr = function (im) { var s = document.createElement('span'); s.className = 'lt-noimg'; try { im.replaceWith(s); } catch (e) { im.remove(); } };
 
   function preview(kd) {
     var all = [].concat.apply([], kd.units.map(function (u) { return u.items; }));
@@ -166,7 +188,7 @@
         var kd = kindOf(s, cur.k);
         if (!kd) { T.st = T.st.slice(0, 2); return render(); }
         if (cur.lvl === 2) {
-          var mix = kd.k === 'quiz' ? '<button class="lt-mix"' + tileStyle(s) + ' onclick="lpTree.quiz(-1)">' + ico('i-playarrow') + ' 섞어서 10문제</button>' : '';
+          var mix = kd.k === 'quiz' ? '<button class="lt-mix"' + tileStyle(s) + ' onclick="lpTree.quiz(-1)">' + ico('i-playarrow') + ' 섞어서 ' + QN + '문제</button>' : '';
           h = mix + '<div class="lt-grid lt-g2">' + kd.units.map(function (u, i) {
             var act = kd.k === 'quiz' ? 'lpTree.quiz(' + i + ')' : 'lpTree.unit(' + i + ')';
             return '<button class="lt-tile lt-unit"' + tileStyle(s) + ' onclick="' + act + '">' +
@@ -176,7 +198,7 @@
         } else {
           var u = kd.units[cur.u] || kd.units[0];
           if (kd.k === 'quiz') {
-            h = '<button class="lt-mix"' + tileStyle(s) + ' onclick="lpTree.quiz(' + (cur.u || 0) + ')">' + ico('i-playarrow') + ' 풀기 (' + Math.min(10, u.items.length) + '문제)</button>';
+            h = '<button class="lt-mix"' + tileStyle(s) + ' onclick="lpTree.quiz(' + (cur.u || 0) + ')">' + ico('i-playarrow') + ' 풀기 (' + Math.min(QN, u.items.length) + '문제)</button>';
           } else {
             var pic = { comic: 1, story: 1, video: 1, game: 1 }[kd.k];
             h = '<div class="lt-grid ' + (pic ? 'lt-g3p' : 'lt-g3') + '">' + u.items.map(function (it) {
@@ -215,11 +237,12 @@
   }
 
   /* ---- 퀴즈: 기존 renderQuiz 로 한 판(최대 10문제) ---- */
+  var QN = 5;   /* renderQuiz 가 한 판을 5문제로 자른다(index.html renderQuiz) — 라벨도 같게 */
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function runQuiz(ui) {
     var cur = T.st[T.st.length - 1], s = S(cur.s), kd = s && kindOf(s, 'quiz'); if (!kd) return;
     var pool = ui < 0 ? [].concat.apply([], kd.units.map(function (u) { return u.items; })) : (kd.units[ui] || kd.units[0]).items;
-    var qs = shuffle(pool).slice(0, 10).map(function (it) { return it.q; }).filter(Boolean);
+    var qs = shuffle(pool).slice(0, QN).map(function (it) { return it.q; }).filter(Boolean);
     var b = el('moB'); if (!b || !qs.length || typeof renderQuiz !== 'function') { try { toast('지금은 열 수 없어요'); } catch (e) {} return; }
     var title = s.nm + (ui < 0 ? ' 퀴즈' : ' · ' + kd.units[ui].nm);
     b.innerHTML = '<div style="font-size:15px;font-weight:700;margin-bottom:8px">' + esc(title) + '</div><div id="lpTreeQz"></div>';
@@ -235,7 +258,14 @@
       if (kd.units.length === 1) push({ lvl: 3, s: s.k, k: k, u: 0 }); else push({ lvl: 2, s: s.k, k: k });
     },
     unit: function (i) { var cur = T.st[T.st.length - 1]; push({ lvl: 3, s: cur.s, k: cur.k, u: i }); },
-    item: function (i) { try { window.lpOpenItem(i); } catch (e) { try { toast('지금은 열 수 없어요'); } catch (e2) {} } },
+    item: function (i) {
+      var want = REF[i], X = window.lpIndex ? window.lpIndex() : null, it = X && X.items[i];
+      if (want && (!it || it.kind !== want.kind || it.t !== want.t)) {   /* T-03: 지도 등에 다녀와 색인 번호가 밀린 경우 */
+        i = -1; if (X) for (var j = 0; j < X.items.length; j++) { var o = X.items[j]; if (o.kind === want.kind && o.t === want.t && !o.dup) { i = j; break; } }
+        if (i < 0) { render(); return; }
+      }
+      try { window.lpOpenItem(i); } catch (e) { try { toast('지금은 열 수 없어요'); } catch (e2) {} }
+    },
     quiz: runQuiz,
     back: function () { if (T.st.length > 1) { T.st.pop(); render(); return true; } return false; },
     to: function (i) { T.st = T.st.slice(0, i + 1); render(); },
@@ -276,7 +306,9 @@
     'html.lp-tree #p0>:not(#lpTree){display:none!important}',
     'html.lp-tree .v7-onboard{display:none!important}',   /* 옛 홈용 '관심 과목 3개' 창 — 트리 홈에선 모든 과목이 첫 화면 */
     'html.lp-tree nav button[role=tab]:nth-of-type(2),html.lp-tree nav button[role=tab]:nth-of-type(3){display:none!important}',
-    '#lpTree{display:flex;flex-direction:column;gap:14px;word-break:keep-all}',
+    '#lpTree{display:flex;flex-direction:column;gap:14px;word-break:keep-all;padding-bottom:96px}',
+    '.lt-tile,.lt-mix{--cc:var(--c)}',
+    ':root.dark .lt-tile,:root.dark .lt-mix{--cc:color-mix(in srgb,var(--c) 55%,#fff)}',
     ':where(#lpTree) .ico{width:20px;height:20px}',   /* id 무게를 빼야 아래 칸별 크기가 먹는다 */
     '.lt-bar{display:flex;align-items:center;gap:8px;min-height:44px;position:sticky;top:0;z-index:5;background:var(--bg);padding:4px 0}',
     '.lt-brand{font-size:20px;font-weight:900;background:var(--g1);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}',
@@ -284,7 +316,7 @@
     '.lt-ib,.lt-back{width:44px;height:44px;border-radius:12px;border:1px solid var(--c2);background:var(--c1);color:var(--tx);display:grid;place-items:center;font-size:20px;cursor:pointer;flex:none}',
     '.lt-crumb{display:flex;align-items:center;gap:6px;min-width:0;flex:1;font-size:16px;color:var(--t2);white-space:nowrap;overflow:hidden}',
     '.lt-crumb b{color:var(--tx);overflow:hidden;text-overflow:ellipsis}',
-    '.lt-crumb a{color:var(--t2);cursor:pointer;padding:6px 2px}',
+    '.lt-crumb a{color:var(--t2);cursor:pointer;display:inline-flex;align-items:center;min-height:44px;padding:0 6px}',
     '.lt-sep{opacity:.5}',
     '.lt-q{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--c2);background:var(--c1);color:var(--tx);padding:0 14px;font:inherit;font-size:16px}',
     '.lt-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(var(--min,160px),1fr))}',
@@ -295,16 +327,16 @@
     '.lt-tile:focus-visible{outline:3px solid var(--c,var(--p));outline-offset:2px}',
     '.lt-row{display:flex;align-items:center;gap:10px;min-width:0}',
     '.lt-row>span:last-child{display:flex;flex-direction:column;min-width:0}',
-    '.lt-chip{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 13%,var(--c1));color:var(--c);flex:none}',
+    '.lt-chip{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 13%,var(--c1));color:var(--cc);flex:none}',
     '.lt-chip .ico{width:22px;height:22px}',
     '.lt-nm{font-size:17px;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis}',
     '.lt-n{font-size:12px;color:var(--t2)}',
     '.lt-subj{background:color-mix(in srgb,var(--c) 11%,var(--c1));border-color:color-mix(in srgb,var(--c) 22%,var(--c1));min-height:124px;justify-content:space-between}',
     '.lt-subj .lt-chip{background:var(--c1)}',
-    '.lt-deco{position:absolute;right:-14px;bottom:-18px;width:96px;height:96px;color:var(--c);opacity:.1;pointer-events:none}',
+    '.lt-deco{position:absolute;right:-14px;bottom:-18px;width:96px;height:96px;color:var(--cc);opacity:.1;pointer-events:none}',
     '.lt-deco .ico{width:96px;height:96px}',
     '.lt-kinds{display:flex;flex-wrap:wrap;gap:6px;position:relative}',
-    '.lt-kinds span{width:26px;height:26px;border-radius:8px;background:var(--c1);color:var(--c);display:grid;place-items:center}',
+    '.lt-kinds span{width:26px;height:26px;border-radius:8px;background:var(--c1);color:var(--cc);display:grid;place-items:center}',
     '.lt-kinds .ico{width:15px;height:15px}',
     '.lt-kind{min-height:170px}',
     '.lt-thumbs{display:flex;gap:6px}',
@@ -312,18 +344,19 @@
     '.lt-vid{position:relative;border-radius:12px;overflow:hidden;background:color-mix(in srgb,var(--c) 10%,var(--c1));aspect-ratio:16/8}',
     '.lt-vid img{width:100%;height:100%;object-fit:cover;display:block}',
     '.lt-pl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center}',
-    '.lt-flash{flex:1;min-height:80px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--c) 9%,var(--c1));color:var(--c);font-size:22px;font-weight:800;text-align:center;padding:10px;line-height:1.25}',
+    '.lt-flash{flex:1;min-height:80px;display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--c) 9%,var(--c1));color:var(--cc);font-size:22px;font-weight:800;text-align:center;padding:10px;line-height:1.25}',
     '.lt-chips{display:flex;flex-wrap:wrap;gap:6px}',
     '.lt-chips i{font-style:normal;font-size:13px;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--c) 10%,var(--c1));max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
     '.lt-prev{font-size:13px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
-    '.lt-mix{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;border:0;border-radius:14px;background:var(--c);color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer}',
+    '.lt-mix{margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;border:0;border-radius:14px;background:var(--c);color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer}',
     '.lt-mix .ico{width:22px;height:22px}',
-    '.lt-ep{padding:10px;gap:8px}',
-    '.lt-ep img,.lt-noimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 10%,var(--c1));color:var(--c)}',
+    '.lt-ep{padding:10px;gap:8px;min-height:56px}',
+    '.lt-thumbs .lt-noimg{width:32%;aspect-ratio:3/4;border-radius:8px}',
+    '.lt-ep img,.lt-noimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 10%,var(--c1));color:var(--cc)}',
     '.lt-ep .lt-nm{font-size:14px;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal}',
     '.lt-item{flex-direction:row;align-items:center;gap:10px;padding:12px 14px;min-height:56px}',
     '.lt-item .lt-nm{font-size:15px;font-weight:600;flex:1;white-space:nowrap}',
-    '.lt-dot{width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,var(--c) 13%,var(--c1));color:var(--c);display:grid;place-items:center;flex:none}',
+    '.lt-dot{width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,var(--c) 13%,var(--c1));color:var(--cc);display:grid;place-items:center;flex:none}',
     '.lt-dot .ico{width:16px;height:16px}',
     '.lt-empty{display:grid;place-items:center;min-height:160px;color:var(--t2);font-size:16px}',
     '.lt-empty .ico{width:40px;height:40px}',
@@ -341,8 +374,6 @@
     p0.insertBefore(t, p0.firstChild);
     mountMe(); hookBack(); render();
     try { fetch('data/comic_thumbs.json').then(function (r) { return r.json(); }).then(function (j) { TH = j || {}; render(); }).catch(function () {}); } catch (e) {}
-    /* 커리큘럼 마스터가 늦게 오면 색인이 커진다 → 한 번 더 */
-    setTimeout(function () { var n = DATA_STAMP; data(); if (DATA_STAMP !== n && T.st.length === 1) render(); }, 2500);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
 })();
