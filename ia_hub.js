@@ -423,6 +423,8 @@
     return c;
   }
   window.lpKindCount = kindCount;
+  /* 1024 과목 트리 홈(tree_home.js)이 같은 색인·과목표를 쓰게 내보낸다 — 읽기만 */
+  window.lpIndex = idx; window.lpSubjects = SUBJ; window.lpHomeOrder = HOME_ORDER;
 
   /* ================================================================
      만화 컷 열기 (2026-09-26)
