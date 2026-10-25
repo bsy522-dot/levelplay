@@ -48,3 +48,6 @@ games/mathbattler/_tools/sprite_cache/
 games/mathbattler/_tools/*.csv
 games/mathbattler/_tools/diag*.mjs
 games/mathbattler/data/monsters.json
+
+# 0928: 배포 도구 임시 산출물
+games/pokered-edu/_output/
