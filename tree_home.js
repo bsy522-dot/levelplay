@@ -6,7 +6,8 @@
    시안: https://claude.ai/artifact/PqMwinNmKH2TR2WuLkqSVh
 
    옆에 짓기: 켜졌을 때만 홈(p0) 자리에 트리를 그리고, 옛 홈 내용은 숨기기만 한다(지우지 않음).
-     켜기  = 주소 ?ui=tree (기기에 기억)   끄기 = ?ui=old 또는 '나' 화면의 '예전 화면으로'
+     1025 기본 켜짐(병석님 "똑같은데?" — 설치 앱에선 주소를 칠 수 없어 ?ui=tree 로는 못 켰다).
+     끄기 = '나' 화면의 '예전 화면' 또는 ?ui=old (기기에 기억) · 다시 켜기 = 옛 화면 '나'의 '새 화면' 또는 ?ui=tree
    새 데이터·새 재생기를 만들지 않는다 — 색인은 ia_hub.js 의 lpIndex(), 항목 열기는 lpOpenItem(i),
    퀴즈는 renderQuiz(), 뒤로가기는 nav_route.js 의 lpHandleBack 앞에 트리 한 층만 끼운다.
    ================================================================ */
@@ -17,8 +18,19 @@
     var m = /[?&]ui=(tree|old)\b/.exec(location.search);
     if (m) localStorage.setItem(KEY, m[1]);
   } catch (e) {}
-  function enabled() { try { return localStorage.getItem(KEY) === 'tree'; } catch (e) { return false; } }
-  if (!enabled()) return;   /* 꺼져 있으면 옛 화면 그대로 — 아무것도 안 건드린다 */
+  function enabled() { try { return localStorage.getItem(KEY) !== 'old'; } catch (e) { return true; } }
+  if (!enabled()) {   /* 꺼 둔 기기: 옛 화면 그대로, '나' 맨 위에 '새 화면' 단추 하나만 */
+    var addOn = function () {
+      var p4 = document.getElementById('p4'); if (!p4 || document.getElementById('lpTreeOn')) return;
+      var bt = document.createElement('button'); bt.id = 'lpTreeOn'; bt.type = 'button';
+      bt.style.cssText = 'display:block;width:100%;min-height:52px;margin:0 0 12px;border:0;border-radius:14px;background:var(--p);color:#fff;font:inherit;font-size:16px;font-weight:700;cursor:pointer';
+      bt.textContent = '새 화면으로 (과목부터 고르기)';
+      bt.onclick = function () { try { localStorage.setItem(KEY, 'tree'); } catch (e) {} location.replace(location.pathname); };
+      p4.insertBefore(bt, p4.firstChild);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addOn); else addOn();
+    return;
+  }
 
   /* ---- 종류: 보여 주는 순서 = 아이가 끌리는 순서 ---- */
   var KINDS = [
