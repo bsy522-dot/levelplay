@@ -1478,10 +1478,16 @@ var lpRot=(function(){
   var on=false,side=1,cand=0,candT=0,seq=0,touch=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
   function place(){
     var o=document.getElementById('gO');if(!o)return;
-    var W=window.innerWidth,H=window.innerHeight;
-    if(!on||W>H||!touch){o.classList.remove('rot');o.style.width=o.style.height=o.style.transform='';return;}
-    o.classList.add('rot');o.style.width=H+'px';o.style.height=W+'px';
-    o.style.transform=side>0?'translateX('+W+'px) rotate(90deg)':'translateY('+H+'px) rotate(-90deg)';
+    var W=window.innerWidth,H=window.innerHeight,t=document.getElementById('tst');
+    if(!on||W>H||!touch){o.classList.remove('rot');o.style.width=o.style.height=o.style.transform='';}
+    else{
+      o.classList.add('rot');o.style.width=H+'px';o.style.height=W+'px';
+      o.style.transform=side>0?'translateX('+W+'px) rotate(90deg)':'translateY('+H+'px) rotate(-90deg)';
+    }
+    // 알림 글('한 번 더 누르면…')도 게임과 같이 돌게: 돌린 동안엔 게임 칸 안에 둔다(점검 P3: 옆으로 누워 떴다)
+    if(t){var dst=o.classList.contains('rot')?o:document.body;if(t.parentNode!==dst)dst.appendChild(t);}
+    // 게임에게 알림 — 진짜 가로로 바뀌면 창 크기가 같아 resize 가 안 올 수 있다
+    try{var w=document.getElementById('gF').contentWindow;w&&w.dispatchEvent(new Event('resize'));}catch(e){}
   }
   function motion(e){
     var g=e.accelerationIncludingGravity,x=g&&g.x;if(x==null)return;
@@ -1492,6 +1498,8 @@ var lpRot=(function(){
   }
   function set(want){
     want=!!want;if(want===on)return on;
+    // 이미 가로 화면(태블릿 가로·자동회전)이거나 마우스 기기면 켜지 않는다 — 켜 두면 세로로 돌렸을 때 옆으로 누운 게임이 나왔다(점검 P2)
+    if(want&&(!touch||window.innerWidth>window.innerHeight))return on;
     on=want;var my=++seq;
     if(!on){
       window.removeEventListener('devicemotion',motion);
@@ -1500,7 +1508,6 @@ var lpRot=(function(){
       place();return on;
     }
     window.addEventListener('devicemotion',motion);place();
-    if(window.innerWidth>window.innerHeight)return on;   // 이미 가로(태블릿 가로·PC 창) — 전체 화면·잠금 안 함
     try{
       var el=document.documentElement;
       var p=(el.requestFullscreen&&!document.fullscreenElement)?el.requestFullscreen({navigationUI:'hide'}):Promise.resolve();
@@ -1509,7 +1516,7 @@ var lpRot=(function(){
     return on;
   }
   window.addEventListener('resize',function(){if(on)place();});
-  return {set:set,isOn:function(){return on;}};
+  return {set:set,isOn:function(){return on;},rotated:function(){var o=document.getElementById('gO');return !!(o&&o.classList.contains('rot'));}};
 })();
 // 0929: 게임이 열린 채 뒤로가기 — 게임 안에서 한 층 먼저(피아노: 곡 → 곡 목록), 더 갈 곳이 없으면 두 번 눌러야 닫힌다.
 // 아이가 화면 가장자리를 쓸다가 게임이 꺼져 처음 화면으로 튕기던 문제. 위쪽 '닫기' 버튼은 그대로 한 번에 닫는다.

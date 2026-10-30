@@ -236,6 +236,10 @@ body.lscape #kb-zoom button{width:32px;height:32px;font-size:18px;}
 body.cue-on #panel-free.active ~ #kb-bar #kb-strip { visibility:hidden; }
 .fc-do { width:min(30vw,20vh,150px); height:min(30vw,20vh,150px); border-radius:50%; background:#f87171; color:#111827; display:flex; align-items:center; justify-content:center; font-size:min(15vw,10vh,76px); font-weight:900; box-shadow:0 0 0 6px rgba(248,113,113,.18); pointer-events:auto; cursor:pointer; touch-action:none; }
 .fc-arrow { font-size:clamp(34px,8vw,58px); line-height:1; color:#f87171; filter:drop-shadow(0 2px 2px rgba(0,0,0,.5)); animation:fcbob 1s ease-in-out infinite; }
+/* 1031(점검 P2): 앱이 창을 90° 돌려 세웠을 때(html.rot90) — 브라우저의 손가락 밀기(스크롤·touch-action)가 돌린 방향을 못 따라간다.
+   건반 길이 방향으로 조금만 밀어도 소리가 끊기고, 목록·⚙ 칸은 자리에 따라 안 밀렸다(가로·세로 맞바꿈으로도 안 풀림).
+   → 돌린 동안엔 브라우저 밀기를 다 끄고 직접 민다(건반 = 기존 끌어서 이동, 목록 = 아래 rotScroll) */
+html.rot90 * , html.rot90 { touch-action:none !important; }
 /* 1031: 가로에선 건반이 화면 절반이라 위 칸이 낮다 — '도'·⬇ 를 줄여 윗줄(탭)에 안 걸리게 */
 body.lscape .fc-do { width:min(16vh,80px); height:min(16vh,80px); font-size:min(8vh,40px); }
 body.lscape .fc-arrow { font-size:min(9vh,34px); }
@@ -1005,11 +1009,62 @@ function _lockLandscape() {
 function appRot() {
   try { const p = window.parent; return (p !== window && p.lpRot && typeof p.lpRot.set === 'function') ? p.lpRot : null; } catch (e) { return null; }
 }
+// 앱이 실제로 돌려 세웠는지 → html.rot90(위 touch-action 맞바꿈), 이미 가로인 화면(태블릿 가로·자동회전)·마우스 기기에선 ↻ 숨김
+//   (점검 P2: 이미 가로일 때 ↻ 는 아무 일도 안 하는 것처럼 보이면서 '가로' 를 기억해 세로로 돌리면 옆으로 누운 피아노가 나왔다)
+// 1031: 돌린 동안 목록·⚙·창 안에서 시작한 한 손가락 끌기 → 그 칸을 직접 민다(뗀 뒤 관성, 끌었으면 클릭은 안 눌림)
+(function rotScroll(){
+  let drag = null, vel = 0, lastT = 0, lastY = 0, fling = 0;
+  const scroller = el => {
+    for (; el && el !== document.documentElement; el = el.parentElement) {
+      const cs = getComputedStyle(el);
+      if (/(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 2) return el;
+    }
+    return null;
+  };
+  document.addEventListener('pointerdown', e => {
+    cancelAnimationFrame(fling);
+    if (!document.documentElement.classList.contains('rot90') || e.pointerType === 'mouse' || drag) return;
+    if (e.target.closest('#piano-wrap, #kb-strip, #kzb-h, #k7-keys')) return;
+    const el = scroller(e.target); if (!el) return;
+    drag = {id: e.pointerId, el, y0: e.clientY, top0: el.scrollTop, moved: false};
+    vel = 0; lastT = performance.now(); lastY = e.clientY;
+  }, true);
+  document.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dy = e.clientY - drag.y0;
+    if (!drag.moved && Math.abs(dy) < 8) return;
+    drag.moved = true;
+    drag.el.scrollTop = drag.top0 - dy;
+    const t = performance.now();
+    if (t > lastT) { vel = vel * 0.5 + 0.5 * (e.clientY - lastY) / (t - lastT); lastT = t; lastY = e.clientY; }
+  }, true);
+  const end = e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (!d.moved) return;
+    const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
+    document.addEventListener('click', stop, {capture: true, once: true});
+    setTimeout(() => document.removeEventListener('click', stop, true), 350);
+    if (e.type !== 'pointerup' || performance.now() - lastT > 120) return;
+    let v = vel * 16;
+    const step = () => { if (Math.abs(v) < 0.5) return; d.el.scrollTop -= v; v *= 0.94; fling = requestAnimationFrame(step); };
+    fling = requestAnimationFrame(step);
+  };
+  document.addEventListener('pointerup', end, true);
+  document.addEventListener('pointercancel', end, true);
+})();
+function syncRotUi() {
+  const R = appRot(), b = document.getElementById('kzb-land');
+  const rotated = !!(R && R.rotated && R.rotated());
+  document.documentElement.classList.toggle('rot90', rotated);
+  if (b) b.hidden = !!R && !R.isOn() && (window.innerWidth > window.innerHeight || !(window.matchMedia && matchMedia('(pointer:coarse)').matches));
+}
 function toggleLandscape() {
   const R = appRot();
   if (R) {
     const on = R.set(!R.isOn());
     try { localStorage.setItem('piano-v3-land', on ? '1' : '0'); } catch (e) {}
+    syncRotUi();
     return;
   }
   if (!_forcedLandscape) {
@@ -1096,8 +1151,10 @@ function setKeyZoom(z, anchorX) {
   const bl = document.getElementById('kzb-label');   // 0926: 건반 위 볼트 라벨도 같이 갱신
   if (bl) bl.textContent = Math.round(keyZoom * 100) + '%';
   if (typeof renderStrip === 'function') renderStrip();
-  clearTimeout(setKeyZoom._t); setKeyZoom._t = setTimeout(saveKeyPrefs, 400);
+  clearTimeout(setKeyZoom._t);
+  if (anchorX == null) saveKeyPrefs(); else setKeyZoom._t = setTimeout(saveKeyPrefs, 400);
 }
+window.addEventListener('pagehide', () => saveKeyPrefs());
 // 1031(병석님 "확대도 잘되야"): ＋/− 는 곱하기 1.25 단계 — 예전 +0.5 는 작을 땐 한 번에 60% 씩 튀고 클 땐 11번을 눌러야 했다.
 //   (⚙ 의 zoom-in/out 과 건반 위 kzb-in/out 모두 같은 단계)
 const zoomStep = dir => setKeyZoom(dir > 0 ? keyZoom * 1.25 : keyZoom / 1.25);
@@ -1136,9 +1193,9 @@ let cancelKeyPointers = () => {};
     want = [baseZoom * d / baseDist, mid(a)];
     if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (want) setKeyZoom(want[0], want[1]); want = null; });
   }, {passive:false});
-  const clearPt = e => { pts.delete(e.pointerId); pinchIds.delete(e.pointerId); baseDist = 0; engaged = false; };
-  wrap.addEventListener('pointerup', clearPt);
-  wrap.addEventListener('pointercancel', clearPt);
+  const clearPt = e => { if (!pts.has(e.pointerId)) return; pts.delete(e.pointerId); pinchIds.delete(e.pointerId); baseDist = 0; engaged = false; };
+  document.addEventListener('pointerup', clearPt, true);
+  document.addEventListener('pointercancel', clearPt, true);
 })();
 // ── 페이지 줌 원천 차단 (안드로이드 크롬은 user-scalable=no를 무시한다) ──
 // 두 손가락 touchmove를 preventDefault하면 브라우저 핀치줌 제스처 자체가 취소된다.
@@ -1261,7 +1318,9 @@ function buildPiano() {
   whiteHeight = Math.min(whiteHeight, whiteKeyWidth * ratioCap);
   // 1031: ↕ 로 정한 높이 배수(방향별 기억). 너무 낮거나(56px) 화면을 다 덮지 않게만 막는다
   const kh = keyHFactor[isLandscape ? 'landscape' : 'portrait'] || 1;
-  if (kh !== 1) whiteHeight = Math.max(56, Math.min(whiteHeight * kh, window.innerHeight * (synthActive ? 0.55 : 0.75)));
+  //   (점검 P2: 한 배수를 모든 탭에 쓰니 가로 최대에서 학습 목록 22px·연주 칸 0px) → 탭별 상한
+  const capFrac = synthActive ? (isLandscape ? 0.4 : 0.5) : freeActive ? (isLandscape ? 0.62 : 0.6) : (isLandscape ? 0.42 : 0.45);
+  if (kh !== 1) whiteHeight = Math.max(56, Math.min(whiteHeight * kh, window.innerHeight * capFrac));
   whiteHeight = Math.round(whiteHeight);
   const blackHeight = Math.round(whiteHeight * 0.63); // 105→66, 130→82 (기존과 동일)
 
@@ -1337,7 +1396,9 @@ function setupPianoTouch() {
     pointerNotes.set(e.pointerId, midi);
     dragInfo.set(e.pointerId, { x0: e.clientX, scroll0: wrap.scrollLeft, mode: 'key' });
     playNote(midi);
-    key.setPointerCapture(e.pointerId);
+    // 1031(점검 P1): 손가락을 건반(key)에 붙잡아 두면 확대(buildPiano)로 건반이 새로 그려질 때 그 건반이 떨어져 나가
+    //   손가락 움직임·뗌이 아무 데도 안 닿았다 → 두 번째 핀치부터 먹통·끌어서 이동 먹통. 그대로 남는 #piano 에 붙잡는다.
+    piano.setPointerCapture(e.pointerId);
   });
 
   // 1031: 두 손가락 핀치가 확대로 잡히면 그 손가락 소리를 끈다(확대 처리기가 부름)
@@ -3910,6 +3971,7 @@ function onViewportChange() {
   if (_layoutRaf) return; // 회전 시 resize + mq change 동시 발화 → 1프레임에 1번만 재구성
   _layoutRaf = requestAnimationFrame(() => {
     _layoutRaf = null;
+    syncRotUi();         // 1031: 앱이 돌려 세웠는지(창 크기가 바뀌면 다시 봄)
     applyLayoutMode();   // 세로↔가로 전환 시 body.lscape·건반 배율 갱신
     buildPiano();
     resizeSynthCanvas(); // 낙하 캔버스 높이 재계산 (노트 x는 건반 위치에서 매 프레임 산출됨)
@@ -3920,6 +3982,7 @@ function onViewportChange() {
 function init() {
   // 1031: 지난번에 가로로 썼으면 이번에도 가로로(앱 안에서만 — 앱이 창을 돌려 준다)
   try { if (appRot() && localStorage.getItem('piano-v3-land') === '1') appRot().set(true); } catch (e) {}
+  syncRotUi();
   applyLayoutMode(true); // 건반을 만들기 전에 방향 판정 (가로면 배율·높이가 처음부터 맞게)
   buildPiano();
   buildKeyMap();
