@@ -97,6 +97,11 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
   color:#e2e8f0;font-size:20px;font-weight:900;line-height:1;cursor:pointer;touch-action:manipulation;
   backdrop-filter:blur(4px);}
 #kzb-land:active{background:var(--accent);}
+#kb-land-wrap{gap:6px;}
+#kzb-h{width:42px;height:42px;border-radius:999px;background:rgba(13,17,23,.82);border:1px solid rgba(255,255,255,.18);
+  color:#e2e8f0;font-size:20px;font-weight:900;line-height:1;cursor:ns-resize;touch-action:none;}
+#kzb-h:active,#kzb-h.drag{background:var(--accent);}
+body.lscape #kzb-h{width:32px;height:32px;font-size:18px;}
 /* 폰 가로: 줄 높이를 띠(28px)에 맞춤. (1023: 예전 줄은 #kzb-zoom 철자 오류로 아무것도 안 잡고 있었다) */
 body.lscape #kzb-land{width:32px;height:32px;font-size:18px;} /* 1024 PR-03: 손가락 누르기 세로 42px·가로 32px 이상 */
 body.lscape #kb-zoom{padding:1px 4px;}
@@ -231,6 +236,9 @@ body.lscape #kb-zoom button{width:32px;height:32px;font-size:18px;}
 body.cue-on #panel-free.active ~ #kb-bar #kb-strip { visibility:hidden; }
 .fc-do { width:min(30vw,20vh,150px); height:min(30vw,20vh,150px); border-radius:50%; background:#f87171; color:#111827; display:flex; align-items:center; justify-content:center; font-size:min(15vw,10vh,76px); font-weight:900; box-shadow:0 0 0 6px rgba(248,113,113,.18); pointer-events:auto; cursor:pointer; touch-action:none; }
 .fc-arrow { font-size:clamp(34px,8vw,58px); line-height:1; color:#f87171; filter:drop-shadow(0 2px 2px rgba(0,0,0,.5)); animation:fcbob 1s ease-in-out infinite; }
+/* 1031: 가로에선 건반이 화면 절반이라 위 칸이 낮다 — '도'·⬇ 를 줄여 윗줄(탭)에 안 걸리게 */
+body.lscape .fc-do { width:min(16vh,80px); height:min(16vh,80px); font-size:min(8vh,40px); }
+body.lscape .fc-arrow { font-size:min(9vh,34px); }
 @keyframes fcbob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(10px); } }
 #panel-free.active ~ #piano-wrap .key-white.cue { background:linear-gradient(180deg,#fff 0%,#fecaca 55%,#f87171 100%); box-shadow:0 0 14px #f87171; animation:pulse-key 1s infinite; }
 
@@ -615,6 +623,8 @@ body.lscape #k7-keys { height:52vh; }
     </div>
     <div id="kb-strip"><div id="kb-strip-win"></div><div id="kb-strip-hint">◀ 좌우로 끌어 이동 ▶</div></div>
     <div id="kb-land-wrap">
+      <!-- 1031: 건반 높이 — 누르면 낮게→보통→높게, 위아래로 끌면 그만큼 -->
+      <button id="kzb-h" aria-label="건반 높이 (누르거나 위아래로 끌기)" title="건반 높이 — 누르거나 위아래로 끌기">↕</button>
       <button id="kzb-land" aria-label="가로로 보기" title="가로로 보기">↻</button>
     </div>
   </div>
@@ -918,6 +928,18 @@ function releaseSustain() { sustainedNotes.forEach(m => releaseNote(m)); sustain
 const LSCAPE_MQ = window.matchMedia('(orientation: landscape) and (max-height: 560px)');
 let isLandscape = LSCAPE_MQ.matches;
 const zoomOverride = {portrait: null, landscape: null}; // 사용자가 −/＋·핀치로 정한 값 (방향별로 기억)
+// 1031: 건반 크기·높이를 다음에 열 때도 그대로(예전엔 닫으면 처음 크기로 돌아갔다)
+const keyHFactor = {portrait: 1, landscape: 1};          // ↕ 로 정한 건반 높이 배수 (방향별)
+try {
+  const z = JSON.parse(localStorage.getItem('piano-v3-zoom') || '{}'), h = JSON.parse(localStorage.getItem('piano-v3-kh') || '{}');
+  ['portrait', 'landscape'].forEach(k => {
+    if (z[k] > 0) zoomOverride[k] = z[k];
+    if (h[k] > 0) keyHFactor[k] = h[k];
+  });
+} catch (e) {}
+function saveKeyPrefs() {
+  try { localStorage.setItem('piano-v3-zoom', JSON.stringify(zoomOverride)); localStorage.setItem('piano-v3-kh', JSON.stringify(keyHFactor)); } catch (e) {}
+}
 function baseWhiteWidth() { return window.innerWidth < 600 ? 14 : 20; }
 // 가로 기본 배율: 화면폭 ÷ 흰건반 17개(약 2.5옥타브)가 한눈에 들어오도록 자동 산정
 function autoKeyZoom() {
@@ -977,7 +999,19 @@ function _lockLandscape() {
     return Promise.resolve(fs).then(doLock);
   });
 }
+// 1031(병석님 "가로모드가 안되"): 배움퀘스트 앱 안에서는 피아노가 게임 창(iframe, sandbox) 안이라 아래 잠금이 늘 거절됐다.
+//   → 앱(index.html lpRot)이 피아노 창을 90° 돌려 세운다. 폰 자동회전이 꺼져 있어도 되고, 폰을 눕힌 쪽을 따라간다.
+//   한 번 가로로 쓰면 기억했다가 다음에 열 때도 가로로 연다. 앱 밖(브라우저에서 바로 연 피아노)은 예전 방식 그대로.
+function appRot() {
+  try { const p = window.parent; return (p !== window && p.lpRot && typeof p.lpRot.set === 'function') ? p.lpRot : null; } catch (e) { return null; }
+}
 function toggleLandscape() {
+  const R = appRot();
+  if (R) {
+    const on = R.set(!R.isOn());
+    try { localStorage.setItem('piano-v3-land', on ? '1' : '0'); } catch (e) {}
+    return;
+  }
   if (!_forcedLandscape) {
     _forcedLandscape = true;
     // 2026-09-26(병석님 "안돌아가"): 이 코드가 조용히 실패하고 있었다.
@@ -1003,55 +1037,106 @@ function toggleLandscape() {
 }
 // 2026-09-26: 0926 지적 — 함수는 있었는데 이 바인딩이 없어 아무 데서도 안 눌렸다.
 document.getElementById('kzb-land').addEventListener('click', e => { e.stopPropagation(); toggleLandscape(); });
+// 1031(병석님 "건반높이를 낮춰야할듯"): ↕ 건반 높이 — 누르면 낮게(0.75)→보통(1)→높게(1.3) 차례로, 위아래로 끌면 손 가는 만큼.
+//   방향(세로·가로)마다 따로 기억. 다시 그리기는 화면 한 장(rAF)에 한 번.
+(function(){
+  const b = document.getElementById('kzb-h');
+  const STEPS = [0.75, 1, 1.3];
+  let y0 = 0, f0 = 1, h0 = 1, moved = false, raf = 0, on = false;
+  const key = () => isLandscape ? 'landscape' : 'portrait';
+  const apply = f => {
+    keyHFactor[key()] = Math.max(0.5, Math.min(2, Math.round(f * 100) / 100));
+    if (raf) return;
+    raf = requestAnimationFrame(() => { raf = 0; buildPiano(); if (typeof resizeSynthCanvas === 'function') resizeSynthCanvas(); });
+  };
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault(); e.stopPropagation();
+    on = true; moved = false; y0 = e.clientY; f0 = keyHFactor[key()] || 1;
+    h0 = Math.max(40, document.getElementById('piano').offsetHeight);
+    try { b.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  b.addEventListener('pointermove', e => {
+    if (!on) return;
+    const dy = y0 - e.clientY;                       // 위로 끌면 높게
+    if (!moved && Math.abs(dy) < 8) return;
+    if (!moved) { moved = true; b.classList.add('drag'); }
+    apply(f0 * (h0 + dy) / h0);
+  });
+  const end = e => {
+    if (!on) return; on = false; b.classList.remove('drag');
+    try { b.releasePointerCapture(e.pointerId); } catch (_) {}
+    if (!moved && e.type === 'pointerup') {
+      const cur = keyHFactor[key()] || 1;
+      apply(STEPS.find(s => s > cur + 0.02) || STEPS[0]);
+    }
+    saveKeyPrefs();
+  };
+  b.addEventListener('pointerup', end);
+  b.addEventListener('pointercancel', end);
+})();
 
 // ================ 건반 전용 확대 (핀치 + 버튼) — 페이지 전체 줌 차단 ================
-function setKeyZoom(z) {
+function setKeyZoom(z, anchorX) {
   // 2026-09-26(병석님 2차): 상한을 3.4 → 7.6 으로 올린다.
   //   실측 근거 — 390px 폰에서 1px≈0.182mm, 손가락 폭 19mm 를 덮으려면 건반 폭 104px 가 필요.
   //   7.6배에서 흰건반 폭 14×7.6=106px(19.3mm)로 실제 손가락 크기에 닿는다.
   z = Math.max(0.8, Math.min(7.6, z));
   if (Math.abs(z - keyZoom) < 0.01) return;
   const wrap = document.getElementById('piano-wrap');
-  const centerRatio = (wrap.scrollLeft + wrap.clientWidth / 2) / Math.max(1, wrap.scrollWidth);
+  // 1031: 핀치는 두 손가락 가운데를 기준으로 키운다(그 아래 건반이 제자리) — 버튼은 화면 가운데 기준
+  const ax = anchorX == null ? wrap.clientWidth / 2 : Math.max(0, Math.min(wrap.clientWidth, anchorX));
+  const ratio = (wrap.scrollLeft + ax) / Math.max(1, wrap.scrollWidth);
   keyZoom = z;
   zoomOverride[isLandscape ? 'landscape' : 'portrait'] = keyZoom; // 사용자 조정값은 방향별로 유지
   buildPiano();
   if (typeof resizeSynthCanvas === 'function') resizeSynthCanvas(); // 건반 높이 변화 → 낙하 캔버스 재계산
-  wrap.scrollLeft = centerRatio * wrap.scrollWidth - wrap.clientWidth / 2;
+  wrap.scrollLeft = ratio * wrap.scrollWidth - ax;
   const zl = document.getElementById('zoom-label');
   if (zl) zl.textContent = Math.round(keyZoom * 100) + '%';
   const bl = document.getElementById('kzb-label');   // 0926: 건반 위 볼트 라벨도 같이 갱신
   if (bl) bl.textContent = Math.round(keyZoom * 100) + '%';
   if (typeof renderStrip === 'function') renderStrip();
+  clearTimeout(setKeyZoom._t); setKeyZoom._t = setTimeout(saveKeyPrefs, 400);
 }
-// 2026-09-26(병석님 2차): 한 번에 0.5씩(0.2였을 때 최대 크기까지 37번 눌러야 했다).
-//   ⚠ 아래 예전 0.2 리스너 3줄이 남아 있었으면 한 클릭에 0.2+0.5 가 더해져 steps 가 어긋난다.
-//   → 하나의 리스너만 남긴다(⚙ 의 zoom-in/out 과 건반 위 kzb-in/out 모두 같은 단계).
-document.getElementById('zoom-in').addEventListener('click', () => setKeyZoom(keyZoom + 0.5));
-document.getElementById('zoom-out').addEventListener('click', () => setKeyZoom(keyZoom - 0.5));
-// 0926: 건반 위 ＋/− (⚙ 안의 것과 같은 함수 호출 → 같은 배율·같은 스크롤 유지)
-document.getElementById('kzb-in').addEventListener('click', e => { e.stopPropagation(); setKeyZoom(keyZoom + 0.5); });
-document.getElementById('kzb-out').addEventListener('click', e => { e.stopPropagation(); setKeyZoom(keyZoom - 0.5); });
+// 1031(병석님 "확대도 잘되야"): ＋/− 는 곱하기 1.25 단계 — 예전 +0.5 는 작을 땐 한 번에 60% 씩 튀고 클 땐 11번을 눌러야 했다.
+//   (⚙ 의 zoom-in/out 과 건반 위 kzb-in/out 모두 같은 단계)
+const zoomStep = dir => setKeyZoom(dir > 0 ? keyZoom * 1.25 : keyZoom / 1.25);
+document.getElementById('zoom-in').addEventListener('click', () => zoomStep(1));
+document.getElementById('zoom-out').addEventListener('click', () => zoomStep(-1));
+document.getElementById('kzb-in').addEventListener('click', e => { e.stopPropagation(); zoomStep(1); });
+document.getElementById('kzb-out').addEventListener('click', e => { e.stopPropagation(); zoomStep(-1); });
 // 두 손가락 핀치 = 건반 확대/축소 (건반 영역에서만)
+// 1031: 화음을 누른 두 손가락이 조금만 움직여도 확대가 들썩이고 건반이 다시 그려졌다 →
+//   두 손가락 사이가 18% 넘게 벌어지거나 좁혀질 때만 확대로 보고, 그때 그 두 손가락의 소리를 끈다(pinchIds).
+//   다시 그리기는 화면 한 장(rAF)에 한 번.
+const pinchIds = new Set();
+let cancelKeyPointers = () => {};
 (function(){
   const wrap = document.getElementById('piano-wrap');
-  const pts = new Map(); let baseDist = 0, baseZoom = 1, lastApply = 0;
+  const pts = new Map(); let baseDist = 0, baseZoom = 1, engaged = false, raf = 0, want = null;
+  const mid = a => (a[0][0] + a[1][0]) / 2 - wrap.getBoundingClientRect().left;
   wrap.addEventListener('pointerdown', e => {
     pts.set(e.pointerId, [e.clientX, e.clientY]);
+    engaged = false; baseDist = 0;
     if (pts.size === 2) { const a = [...pts.values()]; baseDist = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]); baseZoom = keyZoom; }
   });
   wrap.addEventListener('pointermove', e => {
     if (!pts.has(e.pointerId)) return;
     pts.set(e.pointerId, [e.clientX, e.clientY]);
-    if (pts.size === 2 && baseDist > 30) {
-      e.preventDefault();
-      const a = [...pts.values()];
-      const d = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]);
-      const now = performance.now();
-      if (now - lastApply > 90) { lastApply = now; setKeyZoom(baseZoom * d / baseDist); }
+    if (pts.size !== 2 || baseDist <= 30) return;
+    const a = [...pts.values()];
+    const d = Math.hypot(a[0][0]-a[1][0], a[0][1]-a[1][1]);
+    if (!engaged) {
+      if (Math.abs(d / baseDist - 1) < 0.18) return;
+      engaged = true; baseDist = d; baseZoom = keyZoom;
+      pts.forEach((_, id) => pinchIds.add(id));
+      cancelKeyPointers([...pts.keys()]);
     }
+    e.preventDefault();
+    want = [baseZoom * d / baseDist, mid(a)];
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (want) setKeyZoom(want[0], want[1]); want = null; });
   }, {passive:false});
-  const clearPt = e => { pts.delete(e.pointerId); baseDist = 0; };
+  const clearPt = e => { pts.delete(e.pointerId); pinchIds.delete(e.pointerId); baseDist = 0; engaged = false; };
   wrap.addEventListener('pointerup', clearPt);
   wrap.addEventListener('pointercancel', clearPt);
 })();
@@ -1124,8 +1209,10 @@ let keyBoxByMidi = new Map(); // midi → {l, r} (리빌드 시 갱신)
 const OCT_CHIP = ['#e0cdb9','#f4c6c6','#f7d59c','#f9e08b','#b7f0c0','#a9e7e2','#b9c9f7','#d3bdf2','#ecbde4'];
 // 2026-09-26(병석님 2차): 폭 대비 높이 상한.
 //   실제 피아노 흰건반 비율은 약 1:6.4(폭 23.5mm × 길이 150mm). 배율이 커질수록 이 비율에 붙인다.
+//   1031(병석님 "건반높이를 낮춰야할듯"): 세로는 1:7 이 너무 길었다(화면 아래 4분의 1을 건반이 차지) →
+//   1:4.6 에서 시작해 크게 할수록 조금씩 낮게(7.6배에서 1:3.8). 더 높게·낮게는 ↕ 로 각자.
 function ratioCapFor(land, z) {
-  return land ? 7 - (z - 1) * 0.16 : 7 - (z - 1) * 0.16;
+  return land ? 7 - (z - 1) * 0.16 : Math.max(3.6, 4.6 - (z - 1) * 0.12);
 }
 function buildPiano() {
   const piano = document.getElementById('piano');
@@ -1143,7 +1230,8 @@ function buildPiano() {
     // 2026-09-26(병석님): 가로는 세로보다 얇게 느껴졌던 complaint 가 큰 축이라,
     //   폭이 넓다는 점을 살려 화면 높이의 34%까지 두껍게 허용(저장된 확대값은 그대로 적용).
     // 1023 P-04: 따라치기만 28%까지 — 떨어지는 음표 칸이 84px 라 막대·글자가 겹쳤다(칸을 화면 45% 안팎으로)
-    whiteHeight = Math.max(72, Math.min(Math.round(window.innerHeight * (synthActive ? 0.28 : 0.34)),
+    // 1031: 가로 연주 탭은 건반이 주인공 — 화면 절반까지(상용 피아노 앱처럼 건반이 큼). 학습·녹음은 목록 때문에 34% 그대로
+    whiteHeight = Math.max(72, Math.min(Math.round(window.innerHeight * (synthActive ? 0.28 : freeActive ? 0.5 : 0.34)),
       Math.round(whiteKeyWidth * ratioCapFor(isLandscape, keyZoom))));
   } else if (synthActive) {
     // 1023 P-04: 태블릿 가로(넓은 화면)는 35%까지 — 50% 면 음표 칸이 161px(화면 20%)뿐이었다. 세로는 그대로 50%
@@ -1171,6 +1259,10 @@ function buildPiano() {
   //   이제 '키가 옆으로만 늘어나는 띠' 구조 자체가 사라진다.
   const ratioCap = ratioCapFor(isLandscape, keyZoom);   // 1.0배→1:7, 3.4배→1:6.2, 7.6배→1:5.4
   whiteHeight = Math.min(whiteHeight, whiteKeyWidth * ratioCap);
+  // 1031: ↕ 로 정한 높이 배수(방향별 기억). 너무 낮거나(56px) 화면을 다 덮지 않게만 막는다
+  const kh = keyHFactor[isLandscape ? 'landscape' : 'portrait'] || 1;
+  if (kh !== 1) whiteHeight = Math.max(56, Math.min(whiteHeight * kh, window.innerHeight * (synthActive ? 0.55 : 0.75)));
+  whiteHeight = Math.round(whiteHeight);
   const blackHeight = Math.round(whiteHeight * 0.63); // 105→66, 130→82 (기존과 동일)
 
   const whiteKeys = ALL_KEYS.filter(k => !isBlack(k.note));
@@ -1248,12 +1340,16 @@ function setupPianoTouch() {
     key.setPointerCapture(e.pointerId);
   });
 
+  // 1031: 두 손가락 핀치가 확대로 잡히면 그 손가락 소리를 끈다(확대 처리기가 부름)
+  cancelKeyPointers = ids => ids.forEach(id => { const m = pointerNotes.get(id); if (m !== undefined) { stopNote(m); pointerNotes.delete(id); } });
   piano.addEventListener('pointermove', e => {
     const d = dragInfo.get(e.pointerId);
     if (!d) return; // 이 포인터로 시작한 접촉이 아님
+    if (pinchIds.has(e.pointerId)) return; // 1031: 확대 중인 손가락은 건반을 안 친다
     // 건반이 화면보다 넓을 때(확대 상태): 좌우로 끌면 스크롤로 전환 — 상용 앱식 이동
     // ※ 스크롤 모드로 바뀌면 pointerNotes에서 빠지므로, 이 분기는 pointerNotes 가드보다 먼저 와야 한다
-    const overflow = wrap.scrollWidth - wrap.clientWidth > 4;
+    // 1031: 손가락 하나일 때만 끌어서 이동 — 두 손가락이면 화음이거나 확대다(서로 반대로 밀어 건반이 흔들렸다)
+    const overflow = wrap.scrollWidth - wrap.clientWidth > 4 && dragInfo.size === 1;
     if (overflow) {
       const dx = e.clientX - d.x0;
       if (d.mode === 'scroll' || Math.abs(dx) > 14) {
@@ -3822,6 +3918,8 @@ function onViewportChange() {
 }
 
 function init() {
+  // 1031: 지난번에 가로로 썼으면 이번에도 가로로(앱 안에서만 — 앱이 창을 돌려 준다)
+  try { if (appRot() && localStorage.getItem('piano-v3-land') === '1') appRot().set(true); } catch (e) {}
   applyLayoutMode(true); // 건반을 만들기 전에 방향 판정 (가로면 배율·높이가 처음부터 맞게)
   buildPiano();
   buildKeyMap();

@@ -151,6 +151,9 @@ html.kid .mh-cta{font-size:16px;min-height:60px}
 .go-b{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;background:var(--bg)}
 .go-b span{font-size:11px;font-weight:700}
 .go iframe{flex:1;border:none;width:100%}
+/* 1031: 게임 가로 돌리기 — 앱이 세로로 잠겨 있거나 폰 자동회전이 꺼져도 게임 창을 90° 돌려 세운다(크기·방향은 lpRot 이 px 로) */
+.go.rot{inset:auto;top:0;left:0;transform-origin:0 0}
+.go.rot .go-b{padding:2px 10px}.go.rot .go-b .bt{min-height:32px;padding:4px 14px}
 .nk{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px}
 .nk-c{background:var(--c1);border:2px solid rgba(139,92,246,.3);border-radius:var(--r);padding:24px;max-width:300px;width:100%;text-align:center}
 .nk-i{width:100%;padding:10px;background:var(--bg);border:2px solid rgba(139,92,246,.3);border-radius:6px;color:var(--tx);font-size:16px;font-family:inherit;text-align:center;margin:12px 0;outline:none}
@@ -1448,7 +1451,7 @@ function sc(s){return'<div class="gc" style="position:relative" onclick="playSim
 function playSim(u,n){document.getElementById('moB').innerHTML='<div id="simSpn" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:450px;background:var(--bg);border-radius:8px;gap:8px"><div style="width:32px;height:32px;border:3px solid var(--t3);border-top-color:var(--cy);border-radius:50%;animation:spin 0.8s linear infinite"></div><div style="font-size:11px;color:var(--t3)">실험 로딩 중...</div></div><div style="font-size:12px;font-weight:600;margin-top:6px">'+n+'</div>';const ifr=document.createElement('iframe');ifr.src=u;ifr.style.cssText='width:100%;height:450px;border:none;border-radius:8px;display:none';ifr.onload=function(){const sp=document.getElementById('simSpn');if(sp)sp.remove();ifr.style.display='';};document.getElementById('moB').prepend(ifr);document.getElementById('mo').classList.add('sh');xp(10,'실험');}
 const _3D_GAMES=new Set(['games/boxing-trainer-v5.html','games/korean-rpg-v8b/index.html']);
 function oG(u,n){U.gameCount++;if(!U.gamesPlayed)U.gamesPlayed={};U.gamesPlayed[n]=true;xp(15,'게임: '+n);trackMission('game');sv();checkBadges();var _u=u+(u.indexOf('?')>=0?'&':'?')+'_cb='+Date.now();if(_3D_GAMES.has(u)){window.open(_u,'_blank');return;}document.getElementById('gT').textContent=gameVN(n);document.getElementById('gF').src=_u;document.getElementById('gO').classList.add('sh');window._gArm=0;lpWake(1);}
-function cG(){document.getElementById('gO').classList.remove('sh');const f=document.getElementById('gF');if(f){const n=f.cloneNode(false);n.removeAttribute('src');f.replaceWith(n);}window._gArm=0;lpWake(0);}
+function cG(){try{lpRot.set(false);}catch(e){}document.getElementById('gO').classList.remove('sh');const f=document.getElementById('gF');if(f){const n=f.cloneNode(false);n.removeAttribute('src');f.replaceWith(n);}window._gArm=0;lpWake(0);}
 // 0929: 닫을 때 src='' 로 비우면 방문 기록이 한 칸 쌓여, 다음 게임에서 뒤로가기가 '빈 화면 → 지난 피아노 처음부터'로 새어 나갔다.
 // 새 창(iframe)으로 바꿔 끼우면 다음 oG 의 src 가 빈 창을 대신해 기록이 안 쌓인다.
 // 0929: 게임 중엔 화면이 꺼지지 않게 — 곡을 듣는 동안 화면이 꺼져 '앱이 꺼졌다'고 느끼던 문제. 15분 동안 손을 안 대면 풀어 배터리를 지킨다.
@@ -1467,6 +1470,46 @@ function lpWake(on){
   document.addEventListener('load',e=>{const f=e.target;if(!f||f.id!=='gF')return;try{f.contentWindow.addEventListener('pointerdown',()=>{_wlTouch=Date.now();if(window._wlOn&&!_wl)lpWake(1);},true);}catch(err){}},true);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&window._wlOn)lpWake(1);});
   setInterval(()=>{if(_wl&&Date.now()-_wlTouch>900000){_wl.release().catch(()=>{});_wl=null;}},60000);
+})();
+// 1031(병석님 "가로모드가 안되"): 게임 창(iframe)은 sandbox 라 기기 가로 잠금이 늘 거절됐다 → 앱이 게임 창을 90° 돌려 세운다.
+// 게임이 window.parent.lpRot.set(true/false) 를 부른다. 진짜 가로 잠금도 함께 시도하고, 되면(화면이 실제로 가로) 돌림은 저절로 풀린다.
+// 폰을 어느 쪽으로 눕혔는지(중력 x)를 따라 90°/-90° 를 고른다. 게임을 닫으면(cG) 원래대로. 돌려 세우기는 터치 기기만(PC 창은 안 돌림).
+var lpRot=(function(){
+  var on=false,side=1,cand=0,candT=0,seq=0,touch=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
+  function place(){
+    var o=document.getElementById('gO');if(!o)return;
+    var W=window.innerWidth,H=window.innerHeight;
+    if(!on||W>H||!touch){o.classList.remove('rot');o.style.width=o.style.height=o.style.transform='';return;}
+    o.classList.add('rot');o.style.width=H+'px';o.style.height=W+'px';
+    o.style.transform=side>0?'translateX('+W+'px) rotate(90deg)':'translateY('+H+'px) rotate(-90deg)';
+  }
+  function motion(e){
+    var g=e.accelerationIncludingGravity,x=g&&g.x;if(x==null)return;
+    var s=x>6?1:x<-6?-1:0,t=Date.now();
+    if(!s||s===side){cand=0;return;}
+    if(cand!==s){cand=s;candT=t;return;}
+    if(t-candT>400){side=s;cand=0;place();}
+  }
+  function set(want){
+    want=!!want;if(want===on)return on;
+    on=want;var my=++seq;
+    if(!on){
+      window.removeEventListener('devicemotion',motion);
+      try{screen.orientation.unlock();}catch(e){}
+      if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(function(){});
+      place();return on;
+    }
+    window.addEventListener('devicemotion',motion);place();
+    if(window.innerWidth>window.innerHeight)return on;   // 이미 가로(태블릿 가로·PC 창) — 전체 화면·잠금 안 함
+    try{
+      var el=document.documentElement;
+      var p=(el.requestFullscreen&&!document.fullscreenElement)?el.requestFullscreen({navigationUI:'hide'}):Promise.resolve();
+      Promise.resolve(p).catch(function(){}).then(function(){if(my===seq&&on&&screen.orientation&&screen.orientation.lock)return screen.orientation.lock('landscape');}).catch(function(){});
+    }catch(e){}
+    return on;
+  }
+  window.addEventListener('resize',function(){if(on)place();});
+  return {set:set,isOn:function(){return on;}};
 })();
 // 0929: 게임이 열린 채 뒤로가기 — 게임 안에서 한 층 먼저(피아노: 곡 → 곡 목록), 더 갈 곳이 없으면 두 번 눌러야 닫힌다.
 // 아이가 화면 가장자리를 쓸다가 게임이 꺼져 처음 화면으로 튕기던 문제. 위쪽 '닫기' 버튼은 그대로 한 번에 닫는다.
