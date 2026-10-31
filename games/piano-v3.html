@@ -308,9 +308,11 @@ body.lscape .fc-arrow { font-size:min(9vh,34px); }
    단일 진실원천 = JS matchMedia('(orientation:landscape) and (max-height:560px)') → body.lscape 토글.
    (데스크톱 창도 orientation=landscape이므로 max-height로 "폰 가로"만 겨냥한다) */
 /* 0926: 윗줄은 탭+⚙ 한 줄뿐이라 가로에서도 숨기지 않고 높이만 줄인다 */
-body.lscape .tab, body.lscape .tab-more { min-height:48px; font-size:16px; padding:2px 4px; gap:4px; }
+body.lscape .tab, body.lscape .tab-more { min-height:42px; font-size:16px; padding:2px 4px; gap:4px; }
 body.lscape .tab-icon { font-size:18px; }
-body.lscape #btn-settings { min-height:48px; width:56px; font-size:24px; }
+body.lscape #btn-settings { min-height:42px; width:56px; font-size:24px; }
+#btn-close-game { flex-shrink:0; width:56px; border:none; border-left:1px solid var(--border); background:transparent; color:#cbd5e1; font-size:22px; font-weight:900; cursor:pointer; }
+#btn-close-game[hidden] { display:none; }
 body.lscape .settings { top:52px; max-height:calc(100% - 60px); }
 body.lscape .more-menu .tab { min-height:52px; }
 body.lscape .ctrl-bar { padding:3px 8px; gap:6px; flex-wrap:nowrap; overflow-x:auto; white-space:nowrap; }
@@ -496,6 +498,8 @@ body.lscape #k7-keys { height:52vh; }
     <span id="midi-badge" hidden>MIDI</span>
     <button id="btn-k7" aria-label="건반 7개로 바꾸기"><span class="k7i">🌈</span>7건반</button>
     <button id="btn-settings" aria-label="설정" aria-expanded="false">⚙</button>
+    <!-- 1031-2(병석님 "너무 가리는데 · 위에가"): 앱 안 폰 가로에선 앱의 '피아노 · 닫기' 줄을 숨기고 닫기를 이 줄 끝에 -->
+    <button id="btn-close-game" aria-label="피아노 닫기" title="닫기" hidden>✕</button>
   </div>
 
   <!-- ⚙ 설정 칸 (0926: 흩어져 있던 조절 장치를 한곳에 모음 — 기본값은 전과 같음) -->
@@ -1058,7 +1062,16 @@ function syncRotUi() {
   const rotated = !!(R && R.rotated && R.rotated());
   document.documentElement.classList.toggle('rot90', rotated);
   if (b) b.hidden = !!R && !R.isOn() && (window.innerWidth > window.innerHeight || !(window.matchMedia && matchMedia('(pointer:coarse)').matches));
+  // 1031-2(병석님 "너무 가리는데 · 위에가"): 폰 가로에선 앱 줄('피아노 · 닫기') + 탭 줄이 화면 위 3분의 1 →
+  //   앱 줄을 숨기고(lpGameBar) 닫기 ✕ 를 탭 줄 끝에. 세로로 돌아오면 원래대로.
+  let bar = null; try { const P = window.parent; if (P !== window && typeof P.lpGameBar === 'function') bar = P.lpGameBar; } catch (e) {}
+  const cb = document.getElementById('btn-close-game');
+  if (bar) { const own = LSCAPE_MQ.matches; bar(!own); if (cb) cb.hidden = !own; }
 }
+document.getElementById('btn-close-game').addEventListener('click', e => {
+  e.stopPropagation();
+  try { if (typeof stopSynthesia === 'function') stopSynthesia(); window.parent.cG(); } catch (err) {}
+});
 function toggleLandscape() {
   const R = appRot();
   if (R) {
@@ -1288,7 +1301,7 @@ function buildPiano() {
     //   폭이 넓다는 점을 살려 화면 높이의 34%까지 두껍게 허용(저장된 확대값은 그대로 적용).
     // 1023 P-04: 따라치기만 28%까지 — 떨어지는 음표 칸이 84px 라 막대·글자가 겹쳤다(칸을 화면 45% 안팎으로)
     // 1031: 가로 연주 탭은 건반이 주인공 — 화면 절반까지(상용 피아노 앱처럼 건반이 큼). 학습·녹음은 목록 때문에 34% 그대로
-    whiteHeight = Math.max(72, Math.min(Math.round(window.innerHeight * (synthActive ? 0.28 : freeActive ? 0.5 : 0.34)),
+    whiteHeight = Math.max(72, Math.min(Math.round(window.innerHeight * (synthActive ? 0.28 : freeActive ? 0.55 : 0.34)),
       Math.round(whiteKeyWidth * ratioCapFor(isLandscape, keyZoom))));
   } else if (synthActive) {
     // 1023 P-04: 태블릿 가로(넓은 화면)는 35%까지 — 50% 면 음표 칸이 161px(화면 20%)뿐이었다. 세로는 그대로 50%
