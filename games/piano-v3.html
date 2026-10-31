@@ -324,6 +324,19 @@ body.lscape #panel-synth.active { display:grid; grid-template-columns:auto minma
 body.lscape #panel-synth .synth-bar { grid-row:1; grid-column:1; border-bottom:1px solid var(--border); }
 body.lscape #panel-synth #synth-score { grid-row:1; grid-column:2; }
 body.lscape #panel-synth #synth-stage { grid-row:2; grid-column:1 / -1; min-height:0; }
+/* 1031-3(병석님 "위에가 숨겨지는 식으로 하고 클릭하거나 스크롤다운하면 보이게"): 폰 가로에선 위 줄(탭)과 따라치기 단추·점수 줄을
+   화면 위에 떠 있게 바꿔 평소엔 숨긴다(그 자리까지 음표·건반 칸). 맨 위 손잡이를 누르거나 위 가장자리에서 아래로 쓸면 나오고,
+   3.5초 손 안 대면 다시 숨음. 숨은 동안 따라치기 점수는 오른쪽 위에 작게. 세로는 그대로 */
+body.lscape #app { position:relative; }
+body.lscape .topbar { position:absolute; top:0; left:0; right:0; transition:transform .22s ease; }
+body.lscape.top-hide .topbar { transform:translateY(-105%); }
+body.lscape #panel-synth.active { grid-template-rows:0 minmax(0,1fr); }
+body.lscape #panel-synth .synth-bar, body.lscape #panel-synth #synth-score { align-self:start; position:relative; z-index:29; background:var(--surface); transform:translateY(var(--topH, 43px)); transition:transform .22s ease; }
+body.lscape.top-hide #panel-synth .synth-bar, body.lscape.top-hide #panel-synth #synth-score { transform:translateY(-110%); }
+#top-handle { display:none; position:fixed; top:0; left:10px; z-index:31; width:60px; height:32px; padding:0; border:none; border-radius:0 0 14px 14px; background:rgba(148,163,184,.34); color:#f1f5f9; font-size:20px; font-weight:900; line-height:1; cursor:pointer; } /* 가운데는 따라치기 안내 글('○ 키를 누르세요')과 겹쳐 왼쪽 위 */
+body.lscape.top-hide #top-handle { display:block; }
+#top-mini { display:none; position:fixed; top:4px; right:8px; z-index:31; padding:3px 10px; border-radius:999px; background:rgba(13,17,23,.72); color:#e2e8f0; font-size:14px; font-weight:800; pointer-events:none; }
+body.lscape.top-hide.synth-on #top-mini { display:block; }
 body.lscape .synth-bar .btn { min-width:96px; min-height:44px; } /* 1023 P-04: 음표 칸 4px 더 */
 body.lscape .score-bar { padding:2px 10px; font-size:16px; gap:10px; }
 body.lscape #kb-bar { margin:2px 8px; }
@@ -3406,7 +3419,55 @@ function setSynthPlaying(on) {
   p.classList.toggle('playing', on);
   resizeSynthCanvas();
   if (!on) renderStrip();
+  if (typeof topBarPlaying === 'function') topBarPlaying(on); // 1031-3: 치기 시작하면 위 줄 숨김, 끝나면 잠깐 보임
 }
+// 1031-3: 폰 가로 위 줄 자동 숨김(위 CSS 설명). body.top-hide = 숨김. 만지는 동안은 계속 보임, 건반·음표 칸을 누르면 바로 숨김.
+let topBarPlaying = null;
+(function topAutoHide(){
+  const b = document.body, top = document.querySelector('.topbar');
+  const handle = document.createElement('button');
+  handle.id = 'top-handle'; handle.setAttribute('aria-label', '위 줄 보이기'); handle.textContent = '☰';
+  const mini = document.createElement('div'); mini.id = 'top-mini';
+  b.appendChild(handle); b.appendChild(mini);
+  let t = 0, y0 = null;
+  const land = () => LSCAPE_MQ.matches;
+  const busy = () => !document.getElementById('settings-panel').hidden || document.getElementById('more-menu').classList.contains('open');
+  const hide = () => {
+    clearTimeout(t);
+    if (!land()) return;
+    if (busy()) { t = setTimeout(hide, 1500); return; }
+    b.classList.add('top-hide');
+  };
+  const show = ms => {
+    clearTimeout(t);
+    document.documentElement.style.setProperty('--topH', (top.offsetHeight || 43) + 'px');
+    b.classList.remove('top-hide');
+    if (land()) t = setTimeout(hide, ms || 3500);
+  };
+  handle.addEventListener('click', e => { e.stopPropagation(); show(); });
+  document.addEventListener('pointerdown', e => {
+    if (!land()) return;
+    if (b.classList.contains('top-hide')) { if (e.clientY < 40) y0 = e.clientY; return; }
+    if (e.target.closest('.topbar, .synth-bar, #synth-score, #settings-panel, #more-menu')) show();
+    else if (e.target.closest('#piano-wrap, #synth-stage')) hide();
+  }, true);
+  // 쓸기는 터치 이벤트로 본다 — 진짜 가로에선 브라우저가 세로 밀기를 가져가 pointercancel 뒤 pointermove 가 끊긴다
+  document.addEventListener('touchmove', e => { const y = e.touches[0] && e.touches[0].clientY; if (y0 != null && y - y0 > 18) { y0 = null; show(); } }, {passive: true, capture: true});
+  document.addEventListener('pointermove', e => { if (y0 != null && e.pointerType === 'mouse' && e.clientY - y0 > 18) { y0 = null; show(); } }, true);
+  document.addEventListener('touchend', () => { y0 = null; }, {passive: true, capture: true});
+  document.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') y0 = null; }, true);
+  // 탭을 바꾸면 새 화면이 보이게 곧 숨김
+  document.querySelectorAll('.tab').forEach(x => x.addEventListener('click', () => show(900))); // 더 보기 안의 학습·녹음 포함
+  topBarPlaying = on => { b.classList.toggle('synth-on', on); if (on) hide(); else show(); };
+  // 숨은 동안 오른쪽 위 작은 점수(점수·진행률 글이 바뀔 때마다)
+  const sync = () => { const a = document.getElementById('sc-total'), c = document.getElementById('sc-progress-pct'); mini.textContent = (a ? a.textContent : 0) + '점 · ' + (c ? c.textContent : ''); };
+  ['sc-total', 'sc-progress-pct'].forEach(id => { const el = document.getElementById(id); if (el) new MutationObserver(sync).observe(el, {childList: true, characterData: true, subtree: true}); });
+  sync();
+  // 가로가 되면 잠깐 보였다가 숨김, 세로면 늘 보임
+  const onMq = () => { if (land()) show(2500); else { clearTimeout(t); b.classList.remove('top-hide'); } };
+  if (LSCAPE_MQ.addEventListener) LSCAPE_MQ.addEventListener('change', onMq); else if (LSCAPE_MQ.addListener) LSCAPE_MQ.addListener(onMq);
+  onMq();
+})();
 
 // Synthesia controls
 // Click canvas to resume from practice-mode pause
